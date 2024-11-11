@@ -1,0 +1,7 @@
+@public
+cls Div[Rhs, Ret] { }
+
+sup [Rhs, Ret] Div[Rhs, Ret] {
+    @abstract_method
+    fun div(self, that: Rhs) -> Ret { }
+}

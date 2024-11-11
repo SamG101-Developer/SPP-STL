@@ -1,0 +1,25 @@
+@public
+cls IterMov[T] { }
+
+
+@public
+cls IterMut[T] { }
+
+
+@public
+cls IterRef[T] { }
+
+
+sup [T] IterMov[T] {
+    cor iter_mov(self) -> GenMov[Gen=T] { }
+}
+
+
+sup [T] IterMut[T] {
+    cor iter_mut(&mut self) -> GenMut[Gen=T] { }
+}
+
+
+sup [T] IterRef[T] {
+    cor iter_ref(&self) -> GenRef[Gen=T] { }
+}

@@ -1,0 +1,7 @@
+@public
+cls And[Rhs] {}
+
+sup [Rhs] And[Rhs] {
+    @abstract_method
+    fun and_(self, that: Rhs) -> Bool { }
+}

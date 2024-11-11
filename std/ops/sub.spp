@@ -1,0 +1,7 @@
+@public
+cls Sub[Rhs, Ret] {}
+
+sup [Rhs, Ret] Sub[Rhs, Ret] {
+    @abstract_method
+    fun sub(self, that: Rhs) -> Ret { }
+}

@@ -1,0 +1,10 @@
+@public
+cls Sortable[T] { }
+
+@public
+cls Comparable[T] { }
+
+sup [T] Sortable[T] {
+    @virtual_method fun sort(&mut self) -> Void { }
+    @virtual_method fun sort_by(&mut self, compare: FunRef[Bool, (T, T)]) -> Void { }
+}

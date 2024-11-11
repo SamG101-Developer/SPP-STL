@@ -1,0 +1,8 @@
+@public
+cls Pass[T] { val: T }
+
+@public
+cls Fail[E] { err: E }
+
+@public
+use Res[T, E] = Pass[T] | Fail[E]

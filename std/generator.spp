@@ -1,0 +1,8 @@
+@public
+cls GenMov[Gen, Send=Void] { }
+
+@public
+cls GenRef[Gen, Send=Void] { }
+
+@public
+cls GenMut[Gen, Send=Void] { }

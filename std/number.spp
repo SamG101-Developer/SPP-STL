@@ -1,0 +1,86 @@
+@public
+cls BigInt { }
+
+@public
+cls BigDec { }
+
+sup BigInt ext std::ops::Sub[Rhs=BigInt, Ret=BigInt] {
+    @no_impl
+    fun sub(self, that: BigInt) -> BigInt { }
+}
+
+sup BigInt ext std::ops::Add[Rhs=BigInt, Ret=BigInt] {
+    @no_impl
+    fun add(self, that: BigInt) -> BigInt { }
+}
+
+sup BigInt ext std::ops::Mul[Rhs=BigInt, Ret=BigInt] {
+    @no_impl
+    fun mul(self, that: BigInt) -> BigInt { }
+}
+
+sup BigInt ext std::ops::Div[Rhs=BigInt, Ret=BigInt] {
+    @no_impl
+    fun div(self, that: BigInt) -> BigInt { }
+}
+
+sup BigInt ext std::ops::Eq[Rhs=BigInt] {
+    @no_impl
+    fun eq(&self, that: BigInt) -> Bool { }
+}
+
+sup BigInt ext Copy { }
+
+@public
+cls U8 { }
+
+@public
+cls I8 { }
+
+@public
+cls F8 { }
+
+@public
+cls U16 { }
+
+@public
+cls I16 { }
+
+@public
+cls F16 { }
+
+@public
+cls U32 { }
+
+@public
+cls I32 { }
+
+@public
+cls F32 { }
+
+@public
+cls U64 { }
+
+@public
+cls I64 { }
+
+@public
+cls F64 { }
+
+@public
+cls U128 { }
+
+@public
+cls I128 { }
+
+@public
+cls F128 { }
+
+@public
+cls U256 { }
+
+@public
+cls I256 { }
+
+@public
+cls F256 { }

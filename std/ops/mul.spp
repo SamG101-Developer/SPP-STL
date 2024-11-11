@@ -1,0 +1,7 @@
+@public
+cls Mul[Rhs, Ret] { }
+
+sup [Rhs, Ret] Mul[Rhs, Ret] {
+    @abstract_method
+    fun mul(self, that: Rhs) -> Ret { }
+}

@@ -1,0 +1,7 @@
+@public
+cls Add[Rhs, Ret] {}
+
+sup [Rhs, Ret] Add[Rhs, Ret] {
+    @abstract_method
+    fun add(self, that: Rhs) -> Ret { }
+}

@@ -1,0 +1,8 @@
+@public
+cls Some[T] { val: T }
+
+@public
+cls None { }
+
+@public
+use Opt[T] = Some[T] | None
