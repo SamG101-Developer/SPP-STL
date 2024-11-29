@@ -1,0 +1,1 @@
+fun print(value: std::Str) -> std::Void { }
