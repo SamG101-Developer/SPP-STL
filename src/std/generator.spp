@@ -2,7 +2,7 @@
 cls GenMov[Gen, Send=Void] { }
 sup [Gen, Send] GenMov[Gen, Send] {
     @hidden
-    @abstract_method
+    @no_impl
     fun next_(self, value: Send) -> Opt[Gen] { }
 }
 
@@ -11,7 +11,7 @@ sup [Gen, Send] GenMov[Gen, Send] {
 cls GenMut[Gen, Send=Void] { }
 sup [Gen, Send] GenMut[Gen, Send] {
     @hidden
-    @abstract_method
+    @no_impl
     fun next_(self, value: Send) -> Opt[Gen] { }
 }
 
@@ -20,7 +20,7 @@ sup [Gen, Send] GenMut[Gen, Send] {
 cls GenRef[Gen, Send=Void] { }
 sup [Gen, Send] GenRef[Gen, Send] {
     @hidden
-    @abstract_method
+    @no_impl
     fun next_(self, value: Send) -> Opt[Gen] { }
 }
 
