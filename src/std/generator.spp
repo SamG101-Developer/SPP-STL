@@ -1,8 +1,24 @@
 @public
 cls GenMov[Gen, Send=Void] { }
+sup [Gen, Send=Void] GenMov[Gen, Send] {
+    @hidden
+    fun next_(self, value: Send) -> Opt[Gen] { }
+}
 
-@public
-cls GenRef[Gen, Send=Void] { }
 
 @public
 cls GenMut[Gen, Send=Void] { }
+sup [Gen, Send=Void] GenMut[Gen, Send] {
+    @hidden
+    fun next_(self, value: Send) -> Opt[Gen] { }
+}
+
+
+@public
+cls GenRef[Gen, Send=Void] { }
+sup [Gen, Send=Void] GenRef[Gen, Send] {
+    @hidden
+    fun next_(self, value: Send) -> Opt[Gen] { }
+}
+
+
