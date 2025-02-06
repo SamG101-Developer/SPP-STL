@@ -23,5 +23,3 @@ sup [Gen, Send] GenRef[Gen, Send] {
     @no_impl
     fun next_(self, value: Send) -> Opt[Gen] { }
 }
-
-

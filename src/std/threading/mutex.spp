@@ -1,0 +1,52 @@
+@public
+cls Mutex[T] {
+    @public unique_id: U64
+    @public native_id: U64
+    value: T
+}
+
+
+sup [T] Mutex[T] {
+    @public
+    fun new(value: T) -> Mutex[T] {
+        let unique_id = ffi::libc::rand()
+        let native_id = ffi::pthread::pthread_create_mutex()
+        ret Mutex(unique_id, native_id, value)
+    }
+
+    @public
+    cor lock_ref(&mut self) -> GenRef[T] {
+        ffi::pthread::pthread_mutex_lock(&mut self.native_id)
+        gen &self.value
+    }
+
+    @public
+    cor lock_mut(&mut self) -> GenMut[T] {
+        ffi::pthread::pthread_mutex_lock(&mut self.native_id)
+        gen &mut self.value
+    }
+
+    @public
+    cor try_lock_ref(&mut self) -> GenRef[T] {
+        ffi::pthread::pthread_mutex_trylock(&mut self.native_id)
+        gen &self.value
+    }
+
+    @public
+    cor try_lock_mut(&mut self) -> GenMut[T] {
+        ffi::pthread::pthread_mutex_trylock(&mut self.native_id)
+        gen &mut self.value
+    }
+
+    @public
+    fun unlock(&mut self) -> Void {
+        ffi::pthread::pthread_mutex_unlock(&mut self.native_id)
+    }
+}
+
+
+sup [T] Mutex[T] ext std::ops::Del {
+    fun del(self) -> Void {
+        ffi::pthread::pthread_mutex_destroy(self.native_identifier)
+    }
+}

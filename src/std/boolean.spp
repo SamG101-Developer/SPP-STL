@@ -3,11 +3,40 @@ cls Bool { }
 
 
 sup Bool ext std::ops::And[Rhs=Bool] {
-    @no_impl
     fun and_(self, that: Bool) -> Bool { }
 }
 
+
+sup Bool ext std::ops::Ior[Rhs=Bool] {
+    fun ior_(self, that: Bool) -> Bool { }
+}
+
+
 sup Bool ext std::ops::Eq[Rhs=Bool] {
-    @no_impl
     fun eq(&self, that: Bool) -> Bool { }
+}
+
+
+sup Bool ext std::ops::Ne[Rhs=Bool] {
+    fun ne(&self, that: Bool) -> Bool { }
+}
+
+
+sup Bool ext std::ops::Gt[Rhs=Bool] {
+    fun gt(&self, that: Bool) -> Bool { }
+}
+
+
+sup Bool ext std::ops::Ge[Rhs=Bool] {
+    fun ge(&self, that: Bool) -> Bool { }
+}
+
+
+sup Bool ext std::ops::Lt[Rhs=Bool] {
+    fun lt(&self, that: Bool) -> Bool { }
+}
+
+
+sup Bool ext std::ops::Le[Rhs=Bool] {
+    fun le(&self, that: Bool) -> Bool { }
 }

@@ -1,2 +1,11 @@
 @public
 cls Copy { }
+
+
+@public
+cls Clone[Out] { }
+
+
+sup Clone[Out] {
+    @public fun clone(&self) -> Out { }
+}

@@ -1,7 +1,7 @@
 @public
 cls Vec[T] {
-    # data: Arr[T]
-    # length: U64
+    data: Arr[T]
+    length: U64
 }
 
 sup [T] Vec[T] {
@@ -45,13 +45,13 @@ sup [T] Vec[T] ext Sortable[T] {
 }
 
 sup [T] Vec[T] ext IterMov[T] {
-    # cor iter_mov(self) -> GenMov[T] { }
+    cor iter_mov(self) -> GenMov[T] { }
 }
 
 sup [T] Vec[T] ext IterRef[T] {
-    # cor iter_ref(&self) -> GenRef[T] { }
+    cor iter_ref(&self) -> GenRef[T] { }
 }
 
 sup [T] Vec[T] ext IterMut[T] {
-    # cor iter_mut(&mut self) -> GenMut[T] { }
+    cor iter_mut(&mut self) -> GenMut[T] { }
 }

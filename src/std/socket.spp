@@ -24,9 +24,3 @@ sup TcpSocket {
     @no_impl fun recv(&self, size: U64) -> Res[Str, SocketError] { }
     @no_impl fun recv_all(&self, eos: Str = "\r\n") -> Res[Str, SocketError] { }
 }
-
-##
-sup std::ops::Del on TcpSocket {
-    fun del(&self) -> Void { }
-}
-##
