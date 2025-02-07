@@ -21,19 +21,19 @@ sup Thread {
     }
 
     @public
-    fun cancel(&self) -> Void {
+    fun cancel(&mut self) -> Void {
         self.alive = false
         # ffi::pthread::pthread_cancel(self.native_id)
     }
 
     @public
-    fun detach(&self) -> Void {
+    fun detach(&mut self) -> Void {
         self.alive = false
         # ffi::pthread::pthread_detach(self.native_id)
     }
 
     @public
-    fun join(&self) -> Void {
+    fun join(&mut self) -> Void {
         self.alive = false
         # ffi::pthread::pthread_join(self.native_id, [I32])
     }
