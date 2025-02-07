@@ -6,6 +6,6 @@ cls Copy { }
 cls Clone[Out] { }
 
 
-sup Clone[Out] {
+sup [Out] Clone[Out] {
     @public fun clone(&self) -> Out { }
 }
