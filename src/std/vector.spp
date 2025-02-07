@@ -1,7 +1,7 @@
 @public
 cls Vec[T] {
     # data: Arr[T]
-    length: U64
+    # length: U64
 }
 
 sup [T] Vec[T] {
