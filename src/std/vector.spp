@@ -1,6 +1,6 @@
 @public
 cls Vec[T] {
-    data: Arr[T]
+    # data: Arr[T]
     length: U64
 }
 
