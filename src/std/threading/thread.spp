@@ -1,0 +1,63 @@
+@public
+cls Thread {
+    @public name: Str
+    @public unique_id: U64
+    @public native_id: U64
+    @public alive: Bool
+}
+
+
+sup Thread {
+    @public
+    fun new(name: Str) -> Thread {
+        let unique_id = 0  # ffi::libc::rand()
+        ret Thread(name, unique_id, native_id=0, alive=False)
+    }
+
+    @public
+    fun start[In, Ret](&mut self, function: FunRef[In, Ret], args: In) -> Void {
+        self.native_id = 0  # ffi::pthread::pthread_create(&mut self.unique_id, attr, function, args)
+        self.alive = True
+    }
+
+    @public
+    fun cancel(&self) -> Void {
+        self.alive = False
+        # ffi::pthread::pthread_cancel(self.native_id)
+    }
+
+    @public
+    fun detach(&self) -> Void {
+        self.alive = False
+        # ffi::pthread::pthread_detach(self.native_id)
+    }
+
+    @public
+    fun join(&self) -> Void {
+        self.alive = False
+        # ffi::pthread::pthread_join(self.native_id, [I32])
+    }
+
+    @public
+    fun kill(&self) -> Void {
+        self.alive = False
+        # ffi::pthread::pthread_kill(self.native_id, 0_u32)
+    }
+}
+
+
+sup Thread ext std::ops::Eq[Rhs=PThread] {
+    @public
+    fun eq(self, that: Thread) -> Bool {
+        ret true  # ffi::pthread::pthread_equal(self.native_id, that.native_id)
+    }
+}
+
+
+sup Thread ext std::ops::Del {
+    fun del(self) -> Void {
+        self.alive = False
+        # ffi::pthread::pthread_join(self.native_identifier)
+        # ffi::pthread::pthread_exit(self.native_identifier)
+    }
+}

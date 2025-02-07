@@ -1,0 +1,7 @@
+@public
+cls CondVar[T] {
+    mutex: Mutex[T]
+}
+
+
+
