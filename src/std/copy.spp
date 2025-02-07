@@ -1,11 +1,8 @@
 @public
 cls Copy { }
 
-
-@public
-cls Clone[Out] { }
-
-
-sup [Out] Clone[Out] {
-    @public fun clone(&self) -> Out { }
+sup Copy {
+    @private
+    @compiler_builtin
+    fun copy(&self) -> Self { }
 }

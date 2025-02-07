@@ -1,0 +1,9 @@
+@public
+cls Clone[Out] { }
+
+
+sup [Out] Clone[Out] {
+    @public
+    @abstract_method
+    fun clone(&self) -> Out { }
+}
