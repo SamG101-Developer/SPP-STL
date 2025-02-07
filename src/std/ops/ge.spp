@@ -1,0 +1,7 @@
+@public
+cls Ge[Rhs] { }
+
+sup [Rhs] Ge[Rhs] {
+    @abstract_method
+    fun ge(&self, that: Rhs) -> Bool { }
+}
