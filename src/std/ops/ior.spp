@@ -1,0 +1,7 @@
+@public
+cls Ior[Rhs] {}
+
+sup [Rhs] Ior[Rhs] {
+    @abstract_method
+    fun ior_(self, that: Rhs) -> Bool { }
+}
