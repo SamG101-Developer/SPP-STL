@@ -55,7 +55,7 @@ sup Thread ext std::ops::Eq[Rhs=Thread] {
 
 
 sup Thread ext std::ops::Del {
-    fun del(self) -> Void {
+    fun del(mut self) -> Void {
         self.alive = false
         # ffi::pthread::pthread_join(self.native_identifier)
         # ffi::pthread::pthread_exit(self.native_identifier)
