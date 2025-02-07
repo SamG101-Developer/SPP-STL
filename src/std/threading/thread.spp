@@ -11,7 +11,7 @@ sup Thread {
     @public
     fun new(name: Str) -> Thread {
         let unique_id = 0  # ffi::libc::rand()
-        ret Thread(name, unique_id, native_id=0, alive=False)
+        ret Thread(name, unique_id, native_id=0, alive=false)
     }
 
     @public
@@ -22,25 +22,25 @@ sup Thread {
 
     @public
     fun cancel(&self) -> Void {
-        self.alive = False
+        self.alive = false
         # ffi::pthread::pthread_cancel(self.native_id)
     }
 
     @public
     fun detach(&self) -> Void {
-        self.alive = False
+        self.alive = false
         # ffi::pthread::pthread_detach(self.native_id)
     }
 
     @public
     fun join(&self) -> Void {
-        self.alive = False
+        self.alive = false
         # ffi::pthread::pthread_join(self.native_id, [I32])
     }
 
     @public
     fun kill(&self) -> Void {
-        self.alive = False
+        self.alive = false
         # ffi::pthread::pthread_kill(self.native_id, 0_u32)
     }
 }
