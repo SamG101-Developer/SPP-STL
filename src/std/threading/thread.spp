@@ -16,7 +16,7 @@ sup Thread {
 
     @public
     fun start[In, Ret](&mut self, function: FunRef[In, Ret], args: In) -> Void {
-        self.native_id = 0  # ffi::pthread::pthread_create(&mut self.unique_id, attr, function, args)
+        self.native_id = 0_u64  # ffi::pthread::pthread_create(&mut self.unique_id, attr, function, args)
         self.alive = True
     }
 
