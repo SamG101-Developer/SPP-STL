@@ -39,7 +39,7 @@ sup Thread {
     }
 
     @public
-    fun kill(&self) -> Void {
+    fun kill(&mut self) -> Void {
         self.alive = false
         # ffi::pthread::pthread_kill(self.native_id, 0_u32)
     }
