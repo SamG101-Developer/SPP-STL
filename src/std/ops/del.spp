@@ -1,0 +1,7 @@
+@public
+cls Del { }
+
+sup Del {
+    @abstract_method
+    fun del(self) -> Void { }
+}
