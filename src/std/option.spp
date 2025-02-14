@@ -5,4 +5,4 @@ cls Some[T] { val: T }
 cls None { }
 
 @public
-use Opt[T] = Some[T] | None
+use Opt[T] = Some[T] or None

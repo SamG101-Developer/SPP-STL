@@ -5,4 +5,4 @@ cls Pass[T] { val: T }
 cls Fail[E] { err: E }
 
 @public
-use Res[T, E] = Pass[T] | Fail[E]
+use Res[T, E] = Pass[T] or Fail[E]
