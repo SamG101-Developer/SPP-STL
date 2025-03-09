@@ -1,6 +1,6 @@
 @public
 cls Gen[Yield, Send=Void] { }
-sup [Yield, Send] GenMov[Yield, Send] {
+sup [Yield, Send] Gen[Yield, Send] {
     @hidden
     @no_impl
     fun next_(self, value: Send) -> Gen or None { }

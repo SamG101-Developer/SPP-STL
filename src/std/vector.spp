@@ -17,15 +17,15 @@ sup [T] Vec[T] {
 }
 
 sup [T] Vec[T] {
-    @no_impl cor get_head_ref(&self) -> GenRef[T] { }
-    @no_impl cor get_tail_ref(&self) -> GenRef[T] { }
-    @no_impl cor get_ref(&self, index: U64) -> GenRef[T] { }
+    @no_impl cor get_head_ref(&self) -> Gen[&T] { }
+    @no_impl cor get_tail_ref(&self) -> Gen[&T] { }
+    @no_impl cor get_ref(&self, index: U64) -> Gen[&T] { }
 }
 
 sup [T] Vec[T] {
-    @no_impl cor get_head_mut(&mut self) -> GenMut[T] { }
-    @no_impl cor get_tail_mut(&mut self) -> GenMut[T] { }
-    @no_impl cor get_mut(&mut self, index: U64) -> GenMut[T] { }
+    @no_impl cor get_head_mut(&mut self) -> Gen[&mut T] { }
+    @no_impl cor get_tail_mut(&mut self) -> Gen[&mut T] { }
+    @no_impl cor get_mut(&mut self, index: U64) -> Gen[&mut T] { }
 }
 
 sup [T] Vec[T] {
@@ -45,13 +45,13 @@ sup [T] Vec[T] ext Sortable[T] {
 }
 
 sup [T] Vec[T] ext IterMov[T] {
-    cor iter_mov(self) -> GenMov[T] { }
+    cor iter_mov(self) -> Gen[T] { }
 }
 
 sup [T] Vec[T] ext IterRef[T] {
-    cor iter_ref(&self) -> GenRef[T] { }
+    cor iter_ref(&self) -> Gen[&T] { }
 }
 
 sup [T] Vec[T] ext IterMut[T] {
-    cor iter_mut(&mut self) -> GenMut[T] { }
+    cor iter_mut(&mut self) -> Gen[&mut T] { }
 }

@@ -2,11 +2,15 @@
 cls Str { }
 
 
-sup Str {
-    @no_impl fun upper(&self) -> Str { }
-    @no_impl fun lower(&self) -> Str { }
-}
+sup Str{
+    @public
+    @no_impl
+    fun upper(&self) -> Str { }
 
+    @public
+    @no_impl
+    fun lower(&self) -> Str { }
+}
 
 sup Str ext std::ops::Eq[Rhs=Str] {
     @no_impl fun eq(&self, that: Str) -> Bool { }
