@@ -48,10 +48,10 @@ sup [T] Vec[T] ext IterMov[T] {
     cor iter_mov(self) -> Gen[T] { }
 }
 
-sup [T] Vec[T] ext IterRef[T] {
-    cor iter_ref(&self) -> Gen[&T] { }
-}
-
 sup [T] Vec[T] ext IterMut[T] {
     cor iter_mut(&mut self) -> Gen[&mut T] { }
+}
+
+sup [T] Vec[T] ext IterRef[T] {
+    cor iter_ref(&self) -> Gen[&T] { }
 }
