@@ -3,5 +3,5 @@ cls Gen[Yield, Send=Void] { }
 sup [Yield, Send] Gen[Yield, Send] {
     @hidden
     @no_impl
-    fun resume(self, value: Send) -> Yield or None { }
+    cor resume(self, value: Send) -> Gen[Yield] { }
 }
