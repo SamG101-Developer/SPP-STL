@@ -28,13 +28,13 @@ sup [T] IterRef[T] {
 }
 
 
-cls Iterator[T] { }
-
-
-sup [T] Iterator[T] {
-    fun filter(self, predicate: FunRef[(T,), Bool]) -> Iterator[T] { }
-
-    fun map[U](self, mapper: FunRef[(T,), U]) -> Iterator[U] { }
-}
-
-sup [T] Iterator[T] ext Gen[T] { }
+# cls Iterator[T] { }
+#
+#
+# sup [T] Iterator[T] {
+#     fun filter(self, predicate: FunRef[(T,), Bool]) -> Iterator[T] { }
+#
+#     fun map[U](self, mapper: FunRef[(T,), U]) -> Iterator[U] { }
+# }
+#
+# sup [T] Iterator[T] ext Gen[T] { }
