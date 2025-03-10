@@ -12,29 +12,29 @@ cls IterRef[T] { }
 
 sup [T] IterMov[T] {
     @virtual_method
-    cor iter_mov(self) -> Gen[T] { }
+    cor iter_mov(self) -> Iterator[T] { }
 }
 
 
 sup [T] IterMut[T] {
     @virtual_method
-    cor iter_mut(&mut self) -> Gen[&mut T] { }
+    cor iter_mut(&mut self) -> Iterator[&mut T] { }
 }
 
 
 sup [T] IterRef[T] {
     @virtual_method
-    cor iter_ref(&self) -> Gen[&T] { }
+    cor iter_ref(&self) -> Iterator[&T] { }
 }
 
 
-# cls Iterator[T] { }
-#
-#
-# sup [T] Iterator[T] {
-#     fun filter(self, predicate: FunRef[(T), Bool]) -> Iterator[T] { }
-#
-#     fun map[U](self, mapper: FunRef[(T), U]) -> Iterator[U] { }
-# }
-#
-# sup [T] Iterator[T] ext Gen[T] { }
+cls Iterator[T] { }
+
+
+sup [T] Iterator[T] {
+    fun filter(self, predicate: FunRef[(T,), Bool]) -> Iterator[T] { }
+
+    fun map[U](self, mapper: FunRef[(T,), U]) -> Iterator[U] { }
+}
+
+sup [T] Iterator[T] ext Gen[T] { }
