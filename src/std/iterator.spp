@@ -16,13 +16,13 @@ sup [T] IterMov[T] {
 }
 
 
-sup [T] IterMut[T] {
+sup [T] IterRef[T] {
     @virtual_method
     cor iter_mut(&mut self) -> Gen[&T] { }
 }
 
 
-sup [T] IterRef[T] {
+sup [T] IterMut[T] {
     @virtual_method
     cor iter_ref(&self) -> Gen[&mut T] { }
 }
