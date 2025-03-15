@@ -1,1 +1,7 @@
 cls Shadow[T] { }
+
+sup [T] Shadow[T] {
+    @public
+    @compiler_builtin
+    fun new(shared: &Shared[T]) -> Shadow[T] { }
+}
