@@ -9,21 +9,8 @@ sup [T] Shared[T] {
     fun new() -> Shared[T] { }
 
     @public
-    fun shadow(&self) -> Shadow[T] {
-        # self.shadow_counter += 1
-        ret Shadow[T]::new(&self)
-    }
-
     @compiler_builtin
-    fun inner_clone(&self) -> Shared[T] { }
-}
-
-sup [T] Shared[T] ext Clone[Shared[T]] {
-    @public
-    fun clone(&self) -> Shared[T] {
-        # self.shared_counter += 1
-        ret self.inner_clone()
-    }
+    fun shadow(&self) -> Shadow[T] { }
 }
 
 sup [T] Shared[T] ext ops::DerefRef[T] {
