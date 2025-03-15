@@ -22,5 +22,5 @@ sup [T] Shared[T] ext ops::DerefRef[T] {
 sup [T] Shared[T] ext ops::DerefMut[T] {
     @public
     @compiler_builtin
-    fun deref_mut(&mut self) -> Gen[&mut T] { }
+    cor deref_mut(&mut self) -> Gen[&mut T] { }
 }
