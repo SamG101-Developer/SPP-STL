@@ -1,0 +1,32 @@
+cls Single[T] { }
+
+sup [T] Single[T] {
+
+    @public
+    @compiler_builtin
+    fun new() -> Single[T] { }
+
+    @public
+    @compiler_builtin
+    fun take(self) -> T { }
+
+    @public
+    @compiler_builtin
+    fun downcast[Derived](self) -> Opt[Single[Derived]] where [Derived: T] { }
+
+    @public
+    @compiler_builtin
+    fun upcast[Base](self) -> Single[Base] where [T: Base] { }
+}
+
+sup [T] Single[T] ext ops::DerefRef[T] {
+    @public
+    @compiler_builtin
+    cor deref_ref(&self) -> Gen[&T] { }
+}
+
+sup [T] Single[T] ext ops::DerefMut[T] {
+    @public
+    @compiler_builtin
+    fun deref_mut(&mut self) -> Gen[&mut T] { }
+}
