@@ -5,6 +5,6 @@ cls Sortable[T] { }
 cls Comparable[T] { }
 
 sup [T] Sortable[T] {
-    @virtual_method fun sort(&mut self) -> Void { }
-    @virtual_method fun sort_by(&mut self, compare: FunRef[Bool, (T, T)]) -> Void { }
+    @virtual_method fun sort(&mut self) -> void::Void { }
+    @virtual_method fun sort_by(&mut self, compare: FunRef[Bool, (T, T)]) -> void::Void { }
 }
