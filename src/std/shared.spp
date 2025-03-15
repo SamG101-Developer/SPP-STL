@@ -10,7 +10,7 @@ sup [T] Shared[T] {
 
     @public
     fun shadow(&self) -> Shadow[T] {
-        self.shadow_counter += 1
+        # self.shadow_counter += 1
         ret Shadow::new(&self)
     }
 
@@ -21,7 +21,7 @@ sup [T] Shared[T] {
 sup [T] Shared[T] ext Clone[Shared[T]] {
     @public
     fun clone(&self) -> Shared[T] {
-        self.shared_counter += 1
+        # self.shared_counter += 1
         ret self.inner_clone()
     }
 }

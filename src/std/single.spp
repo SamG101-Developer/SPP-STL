@@ -1,7 +1,6 @@
 cls Single[T] { }
 
 sup [T] Single[T] {
-
     @public
     @compiler_builtin
     fun new() -> Single[T] { }
