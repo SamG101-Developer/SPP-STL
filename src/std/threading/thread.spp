@@ -1,21 +1,21 @@
 @public
 cls Thread {
-    @public name: Str
-    @public unique_id: U64
-    @public native_id: U64
-    @public alive: Bool
+    @public name: string::Str
+    @public unique_id: number::U64
+    @public native_id: number::U64
+    @public alive: boolean::Bool
 }
 
 
 sup Thread {
     @public
-    fun new(name: Str) -> Thread {
+    fun new(name: string::Str) -> Thread {
         let unique_id = 0_u64  # ffi::libc::rand()
         ret Thread(name, unique_id, native_id=0_u64, alive=false)
     }
 
     @public
-    fun start[In, Ret](&mut self, function: FunRef[In, Ret], args: In) -> void::Void {
+    fun start[In, Ret](&mut self, function: function::FunRef[In, Ret], args: In) -> void::Void {
         self.native_id = 0_u64  # ffi::pthread::pthread_create(&mut self.unique_id, attr, function, args)
         self.alive = true
     }
