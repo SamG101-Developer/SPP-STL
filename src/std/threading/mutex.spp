@@ -1,7 +1,7 @@
 @public
 cls Mutex[T] {
-    @public unique_id: U64
-    @public native_id: U64
+    @public unique_id: number::U64
+    @public native_id: number::U64
     value: T
 }
 
@@ -46,7 +46,7 @@ sup [T] Mutex[T] {
 
 
 sup [T] Mutex[T] ext std::ops::Del {
-    fun del(self) -> Void {
+    fun del(self) -> void::Void {
         # ffi::pthread::pthread_mutex_destroy(self.native_identifier)
     }
 }
