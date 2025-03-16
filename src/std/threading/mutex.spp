@@ -39,7 +39,7 @@ sup [T] Mutex[T] {
     }
 
     @public
-    fun unlock(&mut self) -> Void {
+    fun unlock(&mut self) -> void::Void {
         # ffi::pthread::pthread_mutex_unlock(&mut self.native_id)
     }
 }

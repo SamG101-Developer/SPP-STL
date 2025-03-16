@@ -15,31 +15,31 @@ sup Thread {
     }
 
     @public
-    fun start[In, Ret](&mut self, function: FunRef[In, Ret], args: In) -> Void {
+    fun start[In, Ret](&mut self, function: FunRef[In, Ret], args: In) -> void::Void {
         self.native_id = 0_u64  # ffi::pthread::pthread_create(&mut self.unique_id, attr, function, args)
         self.alive = true
     }
 
     @public
-    fun cancel(&mut self) -> Void {
+    fun cancel(&mut self) -> void::Void {
         self.alive = false
         # ffi::pthread::pthread_cancel(self.native_id)
     }
 
     @public
-    fun detach(&mut self) -> Void {
+    fun detach(&mut self) -> void::Void {
         self.alive = false
         # ffi::pthread::pthread_detach(self.native_id)
     }
 
     @public
-    fun join(&mut self) -> Void {
+    fun join(&mut self) -> void::Void {
         self.alive = false
         # ffi::pthread::pthread_join(self.native_id, [I32])
     }
 
     @public
-    fun kill(&mut self) -> Void {
+    fun kill(&mut self) -> void::Void {
         self.alive = false
         # ffi::pthread::pthread_kill(self.native_id, 0_u32)
     }
@@ -55,7 +55,7 @@ sup Thread ext std::ops::Eq[Rhs=Thread] {
 
 
 sup Thread ext std::ops::Del {
-    fun del(mut self) -> Void {
+    fun del(mut self) -> void::Void {
         self.alive = false
         # ffi::pthread::pthread_join(self.native_identifier)
         # ffi::pthread::pthread_exit(self.native_identifier)
