@@ -39,19 +39,19 @@ sup [T] Vec[T] {
     @no_impl fun shrink_to_fit(&mut self) -> void::Void { }
 }
 
-sup [T] Vec[T] ext Sortable[T] {
+sup [T] Vec[T] ext algorithms::Sortable[T] {
     @no_impl fun sort(&mut self) -> void::Void { }
     @no_impl fun sort_by(&mut self, compare: FunRef[boolean::Bool, (T, T)]) -> void::Void { }
 }
 
-sup [T] Vec[T] ext IterMov[T] {
+sup [T] Vec[T] ext iterator::IterMov[T] {
     cor iter_mov(self) -> generator::Gen[T] { }
 }
 
-sup [T] Vec[T] ext IterMut[T] {
+sup [T] Vec[T] ext iterator::IterMut[T] {
     cor iter_mut(&mut self) -> generator::Gen[&mut T] { }
 }
 
-sup [T] Vec[T] ext IterRef[T] {
+sup [T] Vec[T] ext iterator::IterRef[T] {
     cor iter_ref(&self) -> generator::Gen[&T] { }
 }
