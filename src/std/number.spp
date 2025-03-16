@@ -26,7 +26,7 @@ sup BigInt ext std::ops::div::Div[Rhs=number::BigInt, Ret=number::BigInt] {
 
 sup BigInt ext std::ops::eq::Eq[Rhs=number::BigInt] {
     @no_impl
-    fun eq(&self, that: number::BigInt) -> Bool { }
+    fun eq(&self, that: number::BigInt) -> boolean::Bool { }
 }
 
 sup BigInt ext copy::Copy { }
