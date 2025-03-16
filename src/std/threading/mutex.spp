@@ -45,7 +45,7 @@ sup [T] Mutex[T] {
 }
 
 
-sup [T] Mutex[T] ext std::ops::Del {
+sup [T] Mutex[T] ext std::ops::del::Del {
     fun del(self) -> void::Void {
         # ffi::pthread::pthread_mutex_destroy(self.native_identifier)
     }
