@@ -1,5 +1,5 @@
 @public
-cls Gen[Yield, Send=Void] { }
+cls Gen[Yield, Send=void::Void] { }
 sup [Yield, Send] Gen[Yield, Send] {
     @hidden
     @no_impl

@@ -6,14 +6,14 @@ sup [T] Single[T] {
     fun new() -> Single[T] { }
 }
 
-sup [T] Single[T] ext ops::DerefRef[T] {
+sup [T] Single[T] ext ops::deref_ref::DerefRef[T] {
     @public
     @compiler_builtin
-    cor deref_ref(&self) -> Gen[&T] { }
+    cor deref_ref(&self) -> generator::Gen[&T] { }
 }
 
-sup [T] Single[T] ext ops::DerefMut[T] {
+sup [T] Single[T] ext ops::deref_mut::DerefMut[T] {
     @public
     @compiler_builtin
-    cor deref_mut(&mut self) -> Gen[&mut T] { }
+    cor deref_mut(&mut self) -> generator::Gen[&mut T] { }
 }

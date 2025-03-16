@@ -1,6 +1,6 @@
 cls Shared[T] {
-    shared_counter: U64
-    shadow_counter: U64
+    shared_counter: number::U64
+    shadow_counter: number::U64
 }
 
 sup [T] Shared[T] {
@@ -10,17 +10,17 @@ sup [T] Shared[T] {
 
     @public
     @compiler_builtin
-    fun shadow(&self) -> Shadow[T] { }
+    fun shadow(&self) -> shadow::Shadow[T] { }
 }
 
-sup [T] Shared[T] ext ops::DerefRef[T] {
+sup [T] Shared[T] ext ops::deref_ref::DerefRef[T] {
     @public
     @compiler_builtin
-    cor deref_ref(&self) -> Gen[&T] { }
+    cor deref_ref(&self) -> generator::Gen[&T] { }
 }
 
-sup [T] Shared[T] ext ops::DerefMut[T] {
+sup [T] Shared[T] ext ops::deref_mut::DerefMut[T] {
     @public
     @compiler_builtin
-    cor deref_mut(&mut self) -> Gen[&mut T] { }
+    cor deref_mut(&mut self) -> generator::Gen[&mut T] { }
 }

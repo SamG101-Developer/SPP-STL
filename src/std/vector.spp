@@ -13,19 +13,19 @@ sup [T] Vec[T] {
 sup [T] Vec[T] {
     @no_impl fun take_head(&mut self) -> T { }
     @no_impl fun take_tail(&mut self) -> T { }
-    @no_impl fun take(&mut self, index: U64) -> T { }
+    @no_impl fun take(&mut self, index: number::U64) -> T { }
 }
 
 sup [T] Vec[T] {
     @no_impl cor get_head_ref(&self) -> Gen[&T] { }
     @no_impl cor get_tail_ref(&self) -> Gen[&T] { }
-    @no_impl cor get_ref(&self, index: U64) -> Gen[&T] { }
+    @no_impl cor get_ref(&self, index: number::U64) -> Gen[&T] { }
 }
 
 sup [T] Vec[T] {
     @no_impl cor get_head_mut(&mut self) -> Gen[&mut T] { }
     @no_impl cor get_tail_mut(&mut self) -> Gen[&mut T] { }
-    @no_impl cor get_mut(&mut self, index: U64) -> Gen[&mut T] { }
+    @no_impl cor get_mut(&mut self, index: number::U64) -> Gen[&mut T] { }
 }
 
 sup [T] Vec[T] {
@@ -34,24 +34,24 @@ sup [T] Vec[T] {
 }
 
 sup [T] Vec[T] {
-    @no_impl fun resize(&mut self, new_length: U64) -> Void { }
-    @no_impl fun reserve(&mut self, new_capacity: U64) -> Void { }
+    @no_impl fun resize(&mut self, new_length: number::U64) -> Void { }
+    @no_impl fun reserve(&mut self, new_capacity: number::U64) -> Void { }
     @no_impl fun shrink_to_fit(&mut self) -> Void { }
 }
 
 sup [T] Vec[T] ext Sortable[T] {
     @no_impl fun sort(&mut self) -> Void { }
-    @no_impl fun sort_by(&mut self, compare: FunRef[Bool, (T, T)]) -> Void { }
+    @no_impl fun sort_by(&mut self, compare: FunRef[boolean::Bool, (T, T)]) -> Void { }
 }
 
 sup [T] Vec[T] ext IterMov[T] {
-    cor iter_mov(self) -> Gen[T] { }
+    cor iter_mov(self) -> generator::Gen[T] { }
 }
 
 sup [T] Vec[T] ext IterMut[T] {
-    cor iter_mut(&mut self) -> Gen[&mut T] { }
+    cor iter_mut(&mut self) -> generator::Gen[&mut T] { }
 }
 
 sup [T] Vec[T] ext IterRef[T] {
-    cor iter_ref(&self) -> Gen[&T] { }
+    cor iter_ref(&self) -> generator::Gen[&T] { }
 }

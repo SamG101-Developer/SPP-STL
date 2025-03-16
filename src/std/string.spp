@@ -12,6 +12,6 @@ sup Str{
     fun lower(&self) -> Str { }
 }
 
-sup Str ext std::ops::Eq[Rhs=Str] {
-    @no_impl fun eq(&self, that: Str) -> Bool { }
+sup Str ext std::ops::eq::Eq[Rhs=Str] {
+    @no_impl fun eq(&self, that: Str) -> boolean::Bool { }
 }

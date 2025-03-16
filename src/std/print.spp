@@ -1,1 +1,1 @@
-fun print(value: std::Str) -> std::Void { }
+fun print(value: string::Str) -> void::Void { }

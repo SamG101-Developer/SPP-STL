@@ -2,11 +2,14 @@ cls BoundsError { }
 
 
 @public
-cls Arr[Element, cmp n: BigInt] { }
+cls Arr[Element, cmp n: number::BigInt] { }
 
-sup [Element, cmp n: BigInt] Arr[Element, n] {
-    @no_impl fun get(&self, index: U64) -> Res[Element, BoundsError] { }
-    @no_impl fun set(&mut self, index: U64, value: Element) -> Res[Void, BoundsError] { }
-    @no_impl fun del(&mut self, index: U64) -> Res[Element, BoundsError] { }
-    @no_impl fun has(&self, index: U64) -> Bool { }
+sup [Element, cmp n: number::BigInt] Arr[Element, n] {
+    @no_impl fun get(&self, index: number::U64) -> Res[Element, BoundsError] { }
+
+    @no_impl fun set(&mut self, index: number::U64, value: Element) -> Res[Void, BoundsError] { }
+
+    @no_impl fun del(&mut self, index: number::U64) -> Res[Element, BoundsError] { }
+
+    @no_impl fun has(&self, index: number::U64) -> boolean::Bool { }
 }
