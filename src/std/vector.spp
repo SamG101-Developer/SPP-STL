@@ -41,7 +41,7 @@ sup [T] Vec[T] {
 
 sup [T] Vec[T] ext algorithms::Sortable[T] {
     @no_impl fun sort(&mut self) -> void::Void { }
-    @no_impl fun sort_by(&mut self, compare: FunRef[boolean::Bool, (T, T)]) -> void::Void { }
+    @no_impl fun sort_by(&mut self, compare: function::FunRef[boolean::Bool, (T, T)]) -> void::Void { }
 }
 
 sup [T] Vec[T] ext iterator::IterMov[T] {
