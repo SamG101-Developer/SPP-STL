@@ -4,27 +4,27 @@ cls BigInt { }
 @public
 cls BigDec { }
 
-sup BigInt ext std::ops::Sub[Rhs=number::BigInt, Ret=number::BigInt] {
+sup BigInt ext std::ops::sub::Sub[Rhs=number::BigInt, Ret=number::BigInt] {
     @no_impl
     fun sub(self, that: number::BigInt) -> number::BigInt { }
 }
 
-sup BigInt ext std::ops::Add[Rhs=number::BigInt, Ret=number::BigInt] {
+sup BigInt ext std::ops::add::Add[Rhs=number::BigInt, Ret=number::BigInt] {
     @no_impl
     fun add(self, that: number::BigInt) -> number::BigInt { }
 }
 
-sup BigInt ext std::ops::Mul[Rhs=number::BigInt, Ret=number::BigInt] {
+sup BigInt ext std::ops::mul::Mul[Rhs=number::BigInt, Ret=number::BigInt] {
     @no_impl
     fun mul(self, that: number::BigInt) -> number::BigInt { }
 }
 
-sup BigInt ext std::ops::Div[Rhs=number::BigInt, Ret=number::BigInt] {
+sup BigInt ext std::ops::div::Div[Rhs=number::BigInt, Ret=number::BigInt] {
     @no_impl
     fun div(self, that: number::BigInt) -> number::BigInt { }
 }
 
-sup BigInt ext std::ops::Eq[Rhs=number::BigInt] {
+sup BigInt ext std::ops::eq::Eq[Rhs=number::BigInt] {
     @no_impl
     fun eq(&self, that: number::BigInt) -> Bool { }
 }
