@@ -46,7 +46,7 @@ sup Thread {
 }
 
 
-sup Thread ext std::ops::Eq[Rhs=Thread] {
+sup Thread ext std::ops::eq::Eq[Rhs=Thread] {
     @public
     fun eq(&self, that: Thread) -> Bool {
         ret true  # ffi::pthread::pthread_equal(self.native_id, that.native_id)
