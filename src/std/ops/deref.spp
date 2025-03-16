@@ -2,12 +2,12 @@ cls DerefRef[T] { }
 
 sup [T] DerefRef[T] {
     @abstract_method
-    cor deref_ref(&self) -> Gen[&T] { }
+    cor deref_ref(&self) -> generator::Gen[&T] { }
 }
 
 cls DerefMut[T] { }
 
 sup [T] DerefMut[T] {
     @abstract_method
-    cor deref_mut(&mut self) -> Gen[&mut T] { }
+    cor deref_mut(&mut self) -> generator::Gen[&mut T] { }
 }
