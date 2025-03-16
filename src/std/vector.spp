@@ -7,7 +7,7 @@ cls Vec[T] {
 sup [T] Vec[T] {
     @no_impl fun push_head(&mut self, ..items: T) -> Void { }
     @no_impl fun push_tail(&mut self, ..items: T) -> Void { }
-    @no_impl fun push(&mut self, index: U64, ..items: T) -> Void { }
+    @no_impl fun push(&mut self, index: number::U64, ..items: T) -> Void { }
 }
 
 sup [T] Vec[T] {
