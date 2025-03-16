@@ -1,6 +1,6 @@
 @public
 cls CondVar[T] {
-    mutex: Mutex[T]
+    mutex: mutex::Mutex[T]
 }
 
 
