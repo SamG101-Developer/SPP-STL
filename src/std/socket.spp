@@ -10,7 +10,7 @@ cls TcpSocket {
 sup TcpSocket {
     @no_impl fun new(domain: SocketDomain) -> result::Res[TcpSocket, SocketError] { }
     @no_impl fun connect(&self, host: string::Str, port: number::U16) -> result::Res[void::Void, SocketError] {}
-    @no_impl fun close(&self) -> Void { }
+    @no_impl fun close(&self) -> void::Void { }
 }
 
 sup TcpSocket {
