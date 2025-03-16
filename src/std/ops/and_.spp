@@ -3,5 +3,5 @@ cls And[Rhs] {}
 
 sup [Rhs] And[Rhs] {
     @abstract_method
-    fun and_(self, that: Rhs) -> Bool { }
+    fun and_(self, that: Rhs) -> boolean::Bool { }
 }

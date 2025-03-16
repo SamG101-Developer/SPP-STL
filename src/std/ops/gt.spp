@@ -3,5 +3,5 @@ cls Gt[Rhs] { }
 
 sup [Rhs] Gt[Rhs] {
     @abstract_method
-    fun gt(&self, that: Rhs) -> Bool { }
+    fun gt(&self, that: Rhs) -> boolean::Bool { }
 }
