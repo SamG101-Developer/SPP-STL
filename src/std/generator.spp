@@ -1,7 +1,6 @@
 @public
 cls Gen[Yield, Send=void::Void] { }
 sup [Yield, Send] Gen[Yield, Send] {
-    @hidden
     @no_impl
-    cor resume(self, value: Send) -> generator::Gen[Yield] { }
+    cor resume(self, value: Send) -> Gen[Yield] { }
 }
