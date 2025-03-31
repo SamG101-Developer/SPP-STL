@@ -2,5 +2,5 @@
 cls Gen[Yield, Send=void::Void] { }
 sup [Yield, Send] Gen[Yield, Send] {
     @no_impl
-    cor resume(self, value: Send) -> Gen[Yield] { }
+    cor resume(&self, value: Send) -> Gen[Yield] { }
 }
