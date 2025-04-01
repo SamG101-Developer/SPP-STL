@@ -26,14 +26,14 @@ cls Iterator[T] { }
 sup [T] Iterator[T] {
     @virtual_method
     fun filter(self, predicate: function::FunRef[(T,), boolean::Bool]) -> Iterator[T] {
-        for item in self {
+        loop item in self {
             case predicate(item) { gen item }
         }
     }
 
     @virtual_method
     fun map[U](self, mapper: function::FunRef[(T,), U]) -> Iterator[U] {
-        for item in self {
+        loop item in self {
             gen mapper(item)
         }
     }
