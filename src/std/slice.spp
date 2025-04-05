@@ -1,0 +1,18 @@
+cls Slice[T] {
+    length: number::U64
+}
+
+sup [T] Slice[T] ext iterator::IterMov[T] {
+    @compiler_builtin
+    cor iter_mov(self) -> iterator::Iterator[T] { }
+}
+
+sup [T] Slice[T] ext iterator::IterMut[T] {
+    @compiler_builtin
+    cor iter_mut(&mut self) -> iterator::Iterator[&mut T] { }
+}
+
+sup [T] Slice[T] ext iterator::IterRef[T] {
+    @compiler_builtin
+    cor iter_ref(&self) -> iterator::Iterator[&T] { }
+}

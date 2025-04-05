@@ -1,8 +1,8 @@
 @public
 cls Vec[T] {
-    # data: Arr[T]
-    # length: U64
+    data: slice::Slice[T]
 }
+
 
 sup [T] Vec[T] {
     @no_impl fun push_head(&mut self, ..items: T) -> void::Void { }
@@ -10,11 +10,13 @@ sup [T] Vec[T] {
     @no_impl fun push(&mut self, index: number::U64, ..items: T) -> void::Void { }
 }
 
+
 sup [T] Vec[T] {
     @no_impl fun take_head(&mut self) -> T { }
     @no_impl fun take_tail(&mut self) -> T { }
     @no_impl fun take(&mut self, index: number::U64) -> T { }
 }
+
 
 sup [T] Vec[T] {
     @no_impl cor get_head_ref(&self) -> generator::Gen[&T] { }
@@ -22,16 +24,19 @@ sup [T] Vec[T] {
     @no_impl cor get_ref(&self, index: number::U64) -> generator::Gen[&T] { }
 }
 
+
 sup [T] Vec[T] {
     @no_impl cor get_head_mut(&mut self) -> generator::Gen[&mut T] { }
     @no_impl cor get_tail_mut(&mut self) -> generator::Gen[&mut T] { }
     @no_impl cor get_mut(&mut self, index: number::U64) -> generator::Gen[&mut T] { }
 }
 
+
 sup [T] Vec[T] {
     @no_impl fun clear(&mut self) -> void::Void { }
     @no_impl fun is_empty(&self) -> boolean::Bool { }
 }
+
 
 sup [T] Vec[T] {
     @no_impl fun resize(&mut self, new_length: number::U64) -> void::Void { }
@@ -39,19 +44,29 @@ sup [T] Vec[T] {
     @no_impl fun shrink_to_fit(&mut self) -> void::Void { }
 }
 
+
 sup [T] Vec[T] ext algorithms::Sortable[T] {
     @no_impl fun sort(&mut self) -> void::Void { }
-    @no_impl fun sort_by(&mut self, compare: function::FunRef[boolean::Bool, (T, T)]) -> void::Void { }
+    @no_impl fun sort_by(&mut self, compare: function::FunRef[(T, T), boolean::Bool]) -> void::Void { }
 }
+
 
 sup [T] Vec[T] ext iterator::IterMov[T] {
-    cor iter_mov(self) -> generator::Gen[T] { }
+    cor iter_mov(self) -> iterator::Iterator[T] {
+        gen with self.data.iter_mov()
+    }
 }
+
 
 sup [T] Vec[T] ext iterator::IterMut[T] {
-    cor iter_mut(&mut self) -> generator::Gen[&mut T] { }
+    cor iter_mut(&mut self) -> iterator::Iterator[&mut T] {
+        gen with self.data.iter_mut()
+    }
 }
 
+
 sup [T] Vec[T] ext iterator::IterRef[T] {
-    cor iter_ref(&self) -> generator::Gen[&T] { }
+    cor iter_ref(&self) -> iterator::Iterator[&T] {
+        gen with self.data.iter_ref()
+    }
 }
