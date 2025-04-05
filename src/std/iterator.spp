@@ -30,9 +30,10 @@ sup [T] Iterator[T] {
     @virtual_method
     cor filter(&self, predicate: function::FunRef[(T,), boolean::Bool]) -> Iterator[T] {
         loop item in self {
-            case predicate(item) {
-                # gen item
-            }
+            # case predicate(item) {
+            #     gen item
+            # }
+            gen item
         }
     }
 
