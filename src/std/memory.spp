@@ -1,0 +1,86 @@
+use std::number::usize::USize
+use std::iterator::{IterMov, IterMut, IterRef, Iterator}
+
+
+cls Memory[T, A: Alloc = GlobalAlloc] {
+    @private
+    start: USize
+
+    @private
+    capacity: USize
+}
+
+
+sup [T, A: Alloc] Memory[T, A] {
+    use Element = T
+    use Allocator = A
+
+    @protected
+    fun cap(&self) -> USize {
+        ret self.capacity
+    }
+
+    @protected
+    @no_impl
+    fun shift(&mut self, index: USize, count: USize) -> Void {
+        # ffi::libc::memmove(self.start + index + count, self.start.index, count)
+    }
+
+    fun clear(&mut self) -> Void {
+        # ffi::libc::memset(self.start + self.capacity, 0)
+    }
+
+    fun resize(&mut self, new_capacity: USize) -> Void {
+        Self::Allocator::reallocate(self, new_capacity)
+    }
+}
+
+
+sup [T, A: Alloc] Memory[T, A] ext IterMov[T] {
+    cor iter_mov(self) -> Iterator[T] {
+        loop i in Range::new(0, n) {
+            let elem = self.take(index)
+            gen elem
+        }
+    }
+}
+
+
+sup [T, A: Alloc] Memory[T, A] ext IterMut[T] {
+    cor iter_mut(&mut self) -> Iterator[&mut T] {
+        loop i in Range::new(0, n) {
+            let elem = self.take(index)
+            gen &mut elem
+            self.set(i, elem)
+        }
+    }
+}
+
+
+sup [T, A: Alloc] Memory[T, A] ext IterRef[T] {
+    cor iter_ref(&self) -> Iterator[&T] {
+        loop i in Range::new(0, n) {
+            let elem = self.take(index)
+            gen &elem
+            self.set(i, elem)
+        }
+    }
+}
+
+
+sup [T, A: Alloc] Memory[T, A] ext IndexMut[T] {
+    cor index_mut(&self self, index: USize) -> GenOnce[&mut T] {
+        let elem = self.take(index)
+        gen case self.has(index) { &mut elem } else { None() }
+        self.set(index, elem)
+    }
+}
+
+
+sup [T, A: Alloc] Memory[T, A] ext IndexRef[T] {
+    cor index_ref(&self self, index: USize) -> GenOnce[&T] {
+        let elem = self.take(index)
+        gen case self.has(index) { &elem } else { None() }
+        self.set(index, elem)
+    }
+}

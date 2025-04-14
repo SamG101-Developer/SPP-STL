@@ -1,1 +1,6 @@
-fun print(value: string::Str) -> void::Void { }
+use std::string::Str
+use std::void::Void
+
+fun print(value: Str) -> Void { }
+
+fun input() -> Str { }

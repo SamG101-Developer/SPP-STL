@@ -3,5 +3,5 @@ cls Ior[Rhs] {}
 
 sup [Rhs] Ior[Rhs] {
     @abstract_method
-    fun ior_(self, that: Rhs) -> boolean::Bool { }
+    fun ior(self, that: Rhs) -> boolean::Bool { }
 }

@@ -1,6 +1,9 @@
+use std::threading::mutex::Mutex
+
+
 @public
 cls CondVar[T] {
-    mutex: mutex::Mutex[T]
+    mutex: Mutex[T]
 }
 
 

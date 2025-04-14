@@ -1,15 +1,22 @@
+use std::boolean::Bool
+use std::string::Str
+use std::number::u64::U64
+use std::ops::eq::Eq
+use std::ops::del::Del
+
+
 @public
 cls Thread {
-    @public name: string::Str
-    @public unique_id: number::U64
-    @public native_id: number::U64
-    @public alive: boolean::Bool
+    @public name: Str
+    @public unique_id: U64
+    @public native_id: U64
+    @public alive: Bool
 }
 
 
 sup Thread {
     @public
-    fun new(name: string::Str) -> Thread {
+    fun new(name: Str) -> Thread {
         let unique_id = 0_u64  # ffi::libc::rand()
         ret Thread(name, unique_id, native_id=0_u64, alive=false)
     }
@@ -46,7 +53,7 @@ sup Thread {
 }
 
 
-sup Thread ext std::ops::eq::Eq[Rhs=Thread] {
+sup Thread ext Eq[Rhs=Thread] {
     @public
     fun eq(&self, that: Thread) -> boolean::Bool {
         ret true  # ffi::pthread::pthread_equal(self.native_id, that.native_id)
@@ -54,7 +61,7 @@ sup Thread ext std::ops::eq::Eq[Rhs=Thread] {
 }
 
 
-sup Thread ext std::ops::del::Del {
+sup Thread ext Del {
     fun del(mut self) -> void::Void {
         self.alive = false
         # ffi::pthread::pthread_join(self.native_identifier)

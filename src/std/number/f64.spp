@@ -1,0 +1,86 @@
+@public
+cls F64 { }
+
+
+sup F64 ext abstract::FloatingPoint[64] { }
+
+
+sup F64 ext std::copy::Copy { }
+
+
+sup F64 ext std::ops::add::Add[Rhs=F64, Ret=F64] {
+    @compiler_builtin
+    fun add(self, that: F64) -> F64 { }
+}
+
+
+sup F64 ext std::ops::sub::Sub[Rhs=F64, Ret=F64] {
+    @compiler_builtin
+    fun sub(self, that: F64) -> F64 { }
+}
+
+
+sup F64 ext std::ops::mul::Mul[Rhs=F64, Ret=F64] {
+    @compiler_builtin
+    fun mul(self, that: F64) -> F64 { }
+}
+
+
+sup F64 ext std::ops::div::Div[Rhs=F64, Ret=F64] {
+    @compiler_builtin
+    fun div(self, that: F64) -> F64 { }
+}
+
+
+sup F64 ext std::ops::rem::Rem[Rhs=F64, Ret=F64] {
+    @compiler_builtin
+    fun rem(self, that: F64) -> F64 { }
+}
+
+
+sup F64 ext std::ops::mod::Mod[Rhs=F64, Ret=F64] {
+    @compiler_builtin
+    fun mod(self, that: F64) -> F64 { }
+}
+
+
+sup F64 ext std::ops::rem::Pow[Rhs=F64, Ret=F64] {
+    @compiler_builtin
+    fun pow(self, that: F64) -> F64 { }
+}
+
+
+sup F64 ext std::ops::eq::Eq[Rhs=F64] {
+    @compiler_builtin
+    fun eq(&self, that: F64) -> boolean::Bool { }
+}
+
+
+sup F64 ext std::ops::ne::Ne[Rhs=F64] {
+    @compiler_builtin
+    fun ne(&self, that: F64) -> boolean::Bool { }
+}
+
+
+sup F64 ext std::ops::ge::Ge[Rhs=F64] {
+    @compiler_builtin
+    fun ge(&self, that: F64) -> boolean::Bool { }
+}
+
+
+sup F64 ext std::ops::gt::Gt[Rhs=F64] {
+    @compiler_builtin
+    fun gt(&self, that: F64) -> boolean::Bool { }
+}
+
+
+sup F64 ext std::ops::le::Le[Rhs=F64] {
+    @compiler_builtin
+    fun le(&self, that: F64) -> boolean::Bool { }
+}
+
+
+sup F64 ext std::ops::lt::Lt[Rhs=F64] {
+    @compiler_builtin
+    fun lt(&self, that: F64) -> boolean::Bool { }
+}

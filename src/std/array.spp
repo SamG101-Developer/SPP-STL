@@ -1,15 +1,52 @@
-cls BoundsError { }
+use std::allocator::{Alloc, GlobalAlloc}
+use std::result::Exception
+use std::number::usize::USize
+
+
+cls BoundsException { }
+
+
+sup BoundsException ext Exception { }
 
 
 @public
-cls Arr[Element, cmp n: number::BigInt] { }
+cls Arr[T, cmp n: BigInt, A: Alloc = GlobalAlloc] { }
 
-sup [Element, cmp n: number::BigInt] Arr[Element, n] {
-    @no_impl fun get(&self, index: number::U64) -> result::Res[Element, BoundsError] { }
 
-    @no_impl fun set(&mut self, index: number::U64, value: Element) -> result::Res[void::Void, BoundsError] { }
+sup [T, A: Alloc, cmp n: BigInt] Arr[T, n] ext Memory[T, A]
+    @public
+    fun len(&self) -> USize {
+        ret n
+    }
+}
 
-    @no_impl fun del(&mut self, index: number::U64) -> result::Res[Element, BoundsError] { }
 
-    @no_impl fun has(&self, index: number::U64) -> boolean::Bool { }
+@public
+class ArrDynamic[T] { }
+
+
+sup [T, A: Alloc] ArrDynamic[T] ext Memory[T, A] { }
+
+
+sup [T, A: Alloc] ArrDynamic[T] {
+    @public
+    fun new() -> ArrDynamic[T] {
+        let arr = ArrDynamic[T](
+    }
+
+    @protected
+    fun grow_by_one(&mut self) -> Void {
+        self.capacity += 1
+        case Self::Allocator::reallocate(&mut self, self.capacity) {
+            Err(err) { }
+        }
+    }
+
+    @protected
+    fun grow_double(&mut self) -> Opt[Void] {
+        self.capacity *= 2
+        case Self::Allocator::reallocate(&mut self, self.capacity) {
+            Err(err) { }
+        }
+    }
 }

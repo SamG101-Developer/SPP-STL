@@ -1,2 +1,9 @@
+@protected
+cls TupleLike { }
+
+
 @public
 cls Tup[..Items] { }
+
+
+sup [..Items] Tup[Items] ext TupleLike { }

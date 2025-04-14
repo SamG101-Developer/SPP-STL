@@ -1,17 +1,30 @@
+use std::boolean::Bool
+use std::ops::eq::Eq
+use std::number::u8::U8
+
+
 @public
-cls Str { }
-
-
-sup Str{
-    @public
-    @no_impl
-    fun upper(&self) -> Str { }
-
-    @public
-    @no_impl
-    fun lower(&self) -> Str { }
+cls Str {
+    data: Vec[U8]
 }
 
-sup Str ext std::ops::eq::Eq[Rhs=Str] {
-    @no_impl fun eq(&self, that: Str) -> boolean::Bool { }
+
+sup Str {
+    @public
+    fun to_ascii_uppercase(&self) -> Str {
+        ret self.iter_ref().map(U8::to_uppercase).collect(Str)
+    }
+
+    @public
+    fun to_ascii_lowercase(&self) -> Str {
+        ret self.iter_ref().map(U8::to_lowercase).collect(Str)
+    }
+}
+
+
+sup Str ext Eq[Rhs=Str] {
+    @public
+    fun eq(&self, that: Str) -> Bool {
+        ret self.iter_ref().zip(that.iter_ref()).map(U8::eq).all()
+    }
 }

@@ -1,8 +1,27 @@
+use std::string::Str
+
+
+@public
+cls Exception { message: Str }
+
+
 @public
 cls Pass[T] { val: T }
+
 
 @public
 cls Fail[E] { err: E }
 
+
 @public
-use Res[T, E] = Pass[T] or Fail[E]
+use Res[T, E: Exception] = Pass[T] or Fail[E]
+
+
+sup [T, E: Exception] Res[T, E] {
+    fun ok(self) -> Opt[T] {
+        case self {
+            Pass(val) { Some(val) }
+            Fail(err) { None() }
+        }
+    }
+}

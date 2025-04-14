@@ -1,0 +1,5 @@
+cls From[That] { }
+
+sup [That] From[That] {
+    fun from(that: That) -> Self { }
+}

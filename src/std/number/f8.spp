@@ -1,0 +1,86 @@
+@public
+cls F8 { }
+
+
+sup F8 ext abstract::FloatingPoint[8] { }
+
+
+sup F8 ext std::copy::Copy { }
+
+
+sup F8 ext std::ops::add::Add[Rhs=F8, Ret=F8] {
+    @compiler_builtin
+    fun add(self, that: F8) -> F8 { }
+}
+
+
+sup F8 ext std::ops::sub::Sub[Rhs=F8, Ret=F8] {
+    @compiler_builtin
+    fun sub(self, that: F8) -> F8 { }
+}
+
+
+sup F8 ext std::ops::mul::Mul[Rhs=F8, Ret=F8] {
+    @compiler_builtin
+    fun mul(self, that: F8) -> F8 { }
+}
+
+
+sup F8 ext std::ops::div::Div[Rhs=F8, Ret=F8] {
+    @compiler_builtin
+    fun div(self, that: F8) -> F8 { }
+}
+
+
+sup F8 ext std::ops::rem::Rem[Rhs=F8, Ret=F8] {
+    @compiler_builtin
+    fun rem(self, that: F8) -> F8 { }
+}
+
+
+sup F8 ext std::ops::mod::Mod[Rhs=F8, Ret=F8] {
+    @compiler_builtin
+    fun mod(self, that: F8) -> F8 { }
+}
+
+
+sup F8 ext std::ops::rem::Pow[Rhs=F8, Ret=F8] {
+    @compiler_builtin
+    fun pow(self, that: F8) -> F8 { }
+}
+
+
+sup F8 ext std::ops::eq::Eq[Rhs=F8] {
+    @compiler_builtin
+    fun eq(&self, that: F8) -> boolean::Bool { }
+}
+
+
+sup F8 ext std::ops::ne::Ne[Rhs=F8] {
+    @compiler_builtin
+    fun ne(&self, that: F8) -> boolean::Bool { }
+}
+
+
+sup F8 ext std::ops::ge::Ge[Rhs=F8] {
+    @compiler_builtin
+    fun ge(&self, that: F8) -> boolean::Bool { }
+}
+
+
+sup F8 ext std::ops::gt::Gt[Rhs=F8] {
+    @compiler_builtin
+    fun gt(&self, that: F8) -> boolean::Bool { }
+}
+
+
+sup F8 ext std::ops::le::Le[Rhs=F8] {
+    @compiler_builtin
+    fun le(&self, that: F8) -> boolean::Bool { }
+}
+
+
+sup F8 ext std::ops::lt::Lt[Rhs=F8] {
+    @compiler_builtin
+    fun lt(&self, that: F8) -> boolean::Bool { }
+}

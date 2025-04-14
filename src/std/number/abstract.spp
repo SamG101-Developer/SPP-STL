@@ -1,0 +1,8 @@
+cls Integer[cmp n: u8::U8] { }
+cls FloatingPoint[cmp n: u8::U8] { }
+
+cls UnsignedInteger[cmp n: u8::U8] { }
+sup [cmp n: u8::U8] UnsignedInteger[n] ext Integer[n] { }
+
+cls SignedInteger[cmp n: u8::U8] { }
+sup [cmp n: u8::U8] SignedInteger[n] ext Integer[n] { }

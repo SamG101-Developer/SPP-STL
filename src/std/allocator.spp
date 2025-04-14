@@ -1,0 +1,48 @@
+cls AllocException { }
+
+
+sup AllocException ext Exception { }
+
+
+cls Alloc[T] { }
+
+
+sup [T] Alloc[T] {
+    @public
+    @abstract_method
+    fun allocate(n: USize) -> Res[Slice[T], AllocException] { }
+    
+    @public
+    @abstract_method
+    fun allocate_zeroed(n: USize) -> Res[Slice[T], AllocException] { }
+    
+    @public
+    @abstract_method
+    fun deallocate(memory: Slice[T]) -> Res[Void, AllocException] { }
+    
+    @public
+    @abstract_method
+    fun reallocate(memory: &mut Slice[T], n: USize) -> Res[Void, AllocException] { }
+}
+
+
+cls GlobalAlloc[T] { }
+
+
+sup GlobalAlloc[T] ext Alloc[T] {
+    @public
+    @no_impl
+    fun allocate(n: USize) -> Res[Slice[T], AllocException] { }
+    
+    @public
+    @no_impl
+    fun allocate_zeroed(n: USize) -> Res[Slice[T], AllocException] { }
+    
+    @public
+    @no_impl
+    fun deallocate(memory: Slice[T]) -> Res[Void, AllocException] { }
+    
+    @public
+    @no_impl
+    fun reallocate(memory: &mut Slice[T], n: USize) -> Res[Void, AllocException] { }
+}

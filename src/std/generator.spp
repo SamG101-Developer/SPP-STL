@@ -1,6 +1,26 @@
+use std::option::None
+use std::void::Void
+
+
 @public
-cls Gen[Yield, Send=void::Void] { }
+use GenResult[T] = T or None
+
+
+@public
+cls Gen[Yield, Send=Void] { }
+
+
+@public
+cls GenOnce[Yield] { }
+
+
 sup [Yield, Send] Gen[Yield, Send] {
-    @no_impl
-    cor resume(&self, value: Send) -> Gen[Yield] { }
+    @compiler_builtin
+    cor resume(&self, value: Send) -> Gen[GenResult[Yield]] { }
+}
+
+
+sup [Yield] GenOnce[Yield] {
+    @compiler_builtin
+    cor resume(self) -> Gen[GenResult[Yield]] { }
 }

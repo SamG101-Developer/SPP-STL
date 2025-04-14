@@ -4,5 +4,5 @@ cls Copy { }
 sup Copy {
     @private
     @compiler_builtin
-    fun copy(&self) -> Copy { }
+    fun copy(&self) -> Self { }
 }

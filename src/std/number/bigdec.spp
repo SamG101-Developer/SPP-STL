@@ -1,0 +1,5 @@
+@public
+struct BigDec {
+    int_val: BigInt
+    scale: i64::I64
+}

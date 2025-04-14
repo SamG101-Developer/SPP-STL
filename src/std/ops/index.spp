@@ -1,0 +1,12 @@
+@public
+cls IndexMut[T] { }
+sup [T] IndexMut[T] {
+    cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] { }
+}
+
+
+@public
+cls IndexRef[T]
+sup [T] IndexRef[T] {
+    cor index_ref(&self, index: USize) -> GenOnce[&T] { }
+}

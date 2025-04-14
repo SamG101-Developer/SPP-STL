@@ -1,3 +1,8 @@
+use std::generator::Gen
+use std::boolean::Bool
+use std::function::FunRef
+
+
 @public
 cls IterMov[T] { }
 sup [T] IterMov[T] {
@@ -28,7 +33,7 @@ cls Iterator[T] { }
 
 sup [T] Iterator[T] {
     @virtual_method
-    cor filter(&self, predicate: function::FunRef[(T,), boolean::Bool]) -> Iterator[T] {
+    cor filter(&self, predicate: FunRef[(T,), Bool]) -> Iterator[T] {
         loop item in self {
             # case predicate(item) {
             #     gen item
@@ -38,7 +43,7 @@ sup [T] Iterator[T] {
     }
 
     @virtual_method
-    cor map[U](&self, mapper: function::FunRef[(T,), U]) -> Iterator[U] {
+    cor map[U](&self, mapper: FunRef[(T,), U]) -> Iterator[U] {
         loop item in self {
             # gen mapper(item)
         }
@@ -46,4 +51,4 @@ sup [T] Iterator[T] {
 }
 
 
-sup [T] Iterator[T] ext generator::Gen[T] { }
+sup [T] Iterator[T] ext Gen[T] { }

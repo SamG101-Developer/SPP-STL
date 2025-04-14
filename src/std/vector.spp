@@ -1,72 +1,136 @@
+use std::alloc::{Allocator, GlobalAllocator}
+use std::array::ArrDynamic
+use std::usize::USize
+use std::void::Void
+
+
 @public
-cls Vec[T] {
-    data: slice::Slice[T]
+cls Vec[T, A: Alloc = GlobalAllocator] {
+    buf: ArrDynamic[T]
+    length: USize
+}
+
+
+sup [T, A: Alloc] Vec[T, A] {
+    use Element = T
+    use Allocator = A
+
+    fun new() -> Vec[T, A] {
+        ret Vec[T, A](buffer=ArrDynamic[T]::new_with_cap(1))
+    }
 }
 
 
 sup [T] Vec[T] {
-    @no_impl fun push_head(&mut self, ..items: T) -> void::Void { }
-    @no_impl fun push_tail(&mut self, ..items: T) -> void::Void { }
-    @no_impl fun push(&mut self, index: number::U64, ..items: T) -> void::Void { }
+    @public
+    fun push(&mut self, element: Self::Element) -> Void {
+        case self.length == self.buf.cap() { self.buf.grow_double() }
+        self.buf.set(self.len, element)
+        self.length += 1
+    }
+
+    @public
+    @no_impl fun insert(&mut self, index: USize, element: Self::Element) -> Void {
+        case self.length == self.buf.cap() { self.buf.grow_double() }
+        self.buf.shift(index, 1)
+        self.buf.set(index, element)
+        self.length += 1
+    }
 }
 
 
 sup [T] Vec[T] {
-    @no_impl fun take_head(&mut self) -> T { }
-    @no_impl fun take_tail(&mut self) -> T { }
-    @no_impl fun take(&mut self, index: number::U64) -> T { }
+    cor get_head_ref(&self) -> GenOnce[&T] {
+        gen self.index_ref(0)
+    }
+
+    cor get_tail_ref(&self) -> GenOnce[&T] {
+        gen self.index_ref(self.len() - 1)
+    }
+
+    cor get_ref(&self, index: USize) -> GenOnce[&T] {
+        gen self.index_ref(index)
+    }
 }
 
 
 sup [T] Vec[T] {
-    @no_impl cor get_head_ref(&self) -> generator::Gen[&T] { }
-    @no_impl cor get_tail_ref(&self) -> generator::Gen[&T] { }
-    @no_impl cor get_ref(&self, index: number::U64) -> generator::Gen[&T] { }
+    cor get_head_mut(&mut self) -> GenOnce[&mut T] {
+        gen self.index_mut(0)
+    }
+
+    cor get_tail_mut(&mut self) -> GenOnce[&mut T] {
+        gen self.index_mut(self.len() - 1)
+    }
+
+    cor get_mut(&mut self, index: USize) -> GenOnce[&mut T] {
+        gen self.index_mut(index)
+    }
 }
 
 
 sup [T] Vec[T] {
-    @no_impl cor get_head_mut(&mut self) -> generator::Gen[&mut T] { }
-    @no_impl cor get_tail_mut(&mut self) -> generator::Gen[&mut T] { }
-    @no_impl cor get_mut(&mut self, index: number::U64) -> generator::Gen[&mut T] { }
+    fun clear(&mut self) -> Void {
+        self.buf.clear()
+    }
+
+    @no_impl fun is_empty(&self) -> Bool {
+        ret self.length == 0
+    }
 }
 
 
 sup [T] Vec[T] {
-    @no_impl fun clear(&mut self) -> void::Void { }
-    @no_impl fun is_empty(&self) -> boolean::Bool { }
-}
+    fun resize(&mut self, new_length: USize) -> void::Void {
+        self.buf.resize(new_length)
+        self.length = new_length
+    }
 
-
-sup [T] Vec[T] {
-    @no_impl fun resize(&mut self, new_length: number::U64) -> void::Void { }
-    @no_impl fun reserve(&mut self, new_capacity: number::U64) -> void::Void { }
-    @no_impl fun shrink_to_fit(&mut self) -> void::Void { }
+    fun shrink_to_fit(&mut self) -> Void {
+        self.buf.resize(self.length)
+    }
 }
 
 
 sup [T] Vec[T] ext algorithms::Sortable[T] {
-    @no_impl fun sort(&mut self) -> void::Void { }
-    @no_impl fun sort_by(&mut self, compare: function::FunRef[(T, T), boolean::Bool]) -> void::Void { }
+    @no_impl
+    fun sort(&mut self) -> Void { }
+
+    @no_impl
+    fun sort_by(&mut self, compare: FunRef[(T, T), Bool]) -> Void { }
 }
 
 
 sup [T] Vec[T] ext iterator::IterMov[T] {
     cor iter_mov(self) -> iterator::Iterator[T] {
-        gen with self.data.iter_mov()
+        gen with self.buf.iter_mov()
     }
 }
 
 
 sup [T] Vec[T] ext iterator::IterMut[T] {
     cor iter_mut(&mut self) -> iterator::Iterator[&mut T] {
-        gen with self.data.iter_mut()
+        gen with self.buf.iter_mut()
     }
 }
 
 
 sup [T] Vec[T] ext iterator::IterRef[T] {
     cor iter_ref(&self) -> iterator::Iterator[&T] {
-        gen with self.data.iter_ref()
+        gen with self.buf.iter_ref()
+    }
+}
+
+
+sup [T] Vec[T] ext IterMut[T] {
+    cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] {
+        gen self.buf.index_mut(index)
+    }
+}
+
+
+sup [T] Vec[T] ext IterRef[T] {
+    cor index_ref(&self, index: USize) -> GenOnce[&T] {
+        gen self.buf.index_ref(index)
     }
 }
