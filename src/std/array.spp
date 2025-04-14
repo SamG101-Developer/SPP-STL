@@ -23,7 +23,7 @@ sup [T, A: Alloc, cmp n: BigInt] Arr[T, n] ext Memory[T, A] {
 
 
 @public
-class ArrDynamic[T] { }
+cls ArrDynamic[T] { }
 
 
 sup [T, A: Alloc] ArrDynamic[T] ext Memory[T, A] { }
