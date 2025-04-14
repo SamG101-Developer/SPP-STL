@@ -1,6 +1,10 @@
+use std::boolean::Bool
+use std::number::biguint::BigUInt
+
+
 @public
 cls BigInt {
-    sign: bool
+    sign: Bool
     data: BigUInt
 }
 
