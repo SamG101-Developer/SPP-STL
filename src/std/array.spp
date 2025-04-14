@@ -37,16 +37,14 @@ sup [T, A: Alloc] ArrDynamic[T] {
     @protected
     fun grow_by_one(&mut self) -> Void {
         self.capacity += 1
-        case Self::Allocator::reallocate(&mut self, self.capacity) {
+        case Self::Allocator::reallocate(&mut self, self.capacity) of
             is Err(err) { }
-        }
     }
 
     @protected
     fun grow_double(&mut self) -> Opt[Void] {
         self.capacity *= 2
-        case Self::Allocator::reallocate(&mut self, self.capacity) {
+        case Self::Allocator::reallocate(&mut self, self.capacity) of
             is Err(err) { }
-        }
     }
 }
