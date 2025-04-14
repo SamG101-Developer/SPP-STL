@@ -6,7 +6,7 @@ sup [T] IndexMut[T] {
 
 
 @public
-cls IndexRef[T]
+cls IndexRef[T] { }
 sup [T] IndexRef[T] {
     cor index_ref(&self, index: USize) -> GenOnce[&T] { }
 }
