@@ -1,4 +1,4 @@
-use std::boolean::Boolean
+use std::boolean::Bool
 use std::function::FunRef
 use std::void::Void
 
