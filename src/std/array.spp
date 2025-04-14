@@ -1,4 +1,5 @@
-use std::allocator::{Alloc, GlobalAlloc}
+use std::allocator::Alloc
+use std::allocator::GlobalAlloc
 use std::result::Exception
 use std::number::usize::USize
 

@@ -1,6 +1,7 @@
 use std::generator::Gen
 use std::number::usize::USize
-use std::ops::deref::{DerefRef, DerefMut}
+use std::ops::deref::DerefMut
+use std::ops::deref::DerefRef
 use std::shadow::Shadow
 
 

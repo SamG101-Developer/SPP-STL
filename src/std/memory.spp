@@ -1,5 +1,8 @@
 use std::number::usize::USize
-use std::iterator::{IterMov, IterMut, IterRef, Iterator}
+use std::iterator::IterMov
+use std::iterator::IterMut
+use std::iterator::IterRef
+use std::iterator::Iterator
 
 
 cls Memory[T, A: Alloc = GlobalAlloc] {

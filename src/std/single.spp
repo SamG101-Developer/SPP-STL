@@ -1,5 +1,6 @@
-use std::ops::deref::{DerefRef, DerefMut}
 use std::generator::Gen
+use std::ops::deref::DerefMut
+use std::ops::deref::DerefRef
 
 
 cls Single[T] { }
