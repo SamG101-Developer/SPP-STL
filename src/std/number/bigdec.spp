@@ -1,5 +1,9 @@
+use std::number::bigint::BigInt
+use std::number::i64::I64
+
+
 @public
-struct BigDec {
+cls BigDec {
     int_val: BigInt
-    scale: i64::I64
+    scale: I64
 }
