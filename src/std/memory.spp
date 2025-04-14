@@ -72,7 +72,7 @@ sup [T, A: Alloc] Memory[T, A] ext IterRef[T] {
 
 
 sup [T, A: Alloc] Memory[T, A] ext IndexMut[T] {
-    cor index_mut(&self self, index: USize) -> GenOnce[&mut T] {
+    cor index_mut(&self, index: USize) -> GenOnce[&mut T] {
         let elem = self.take(index)
         gen case self.has(index) { &mut elem } else { None() }
         self.set(index, elem)
@@ -81,7 +81,7 @@ sup [T, A: Alloc] Memory[T, A] ext IndexMut[T] {
 
 
 sup [T, A: Alloc] Memory[T, A] ext IndexRef[T] {
-    cor index_ref(&self self, index: USize) -> GenOnce[&T] {
+    cor index_ref(&self, index: USize) -> GenOnce[&T] {
         let elem = self.take(index)
         gen case self.has(index) { &elem } else { None() }
         self.set(index, elem)
