@@ -14,7 +14,7 @@ sup BoundsException ext Exception { }
 cls Arr[T, cmp n: BigInt, A: Alloc = GlobalAlloc] { }
 
 
-sup [T, A: Alloc, cmp n: BigInt] Arr[T, n] ext Memory[T, A]
+sup [T, A: Alloc, cmp n: BigInt] Arr[T, n] ext Memory[T, A] {
     @public
     fun len(&self) -> USize {
         ret n
