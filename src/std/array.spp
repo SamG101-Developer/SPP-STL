@@ -30,10 +30,9 @@ sup [T, A: Alloc] ArrDynamic[T] ext Memory[T, A] { }
 
 
 sup [T, A: Alloc] ArrDynamic[T] {
+    @no_impl
     @public
-    fun new() -> ArrDynamic[T] {
-        let arr = ArrDynamic[T](
-    }
+    fun new_with_cap(capacity: USize) -> ArrDynamic[T] { }
 
     @protected
     fun grow_by_one(&mut self) -> Void {
