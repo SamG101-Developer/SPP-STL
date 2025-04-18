@@ -1,7 +1,9 @@
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::memory::Memory
+use std::number::bigint::BigInt
 use std::number::usize::USize
+use std::option::Opt
 use std::result::Fail
 use std::result::Exception
 
