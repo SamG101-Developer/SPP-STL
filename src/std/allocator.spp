@@ -1,3 +1,6 @@
+use std::result::Exception
+
+
 cls AllocException { }
 
 
