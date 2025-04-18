@@ -2,7 +2,7 @@ use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::memory::Memory
 use std::number::usize::USize
-use std::result::Err
+use std::result::Fail
 use std::result::Exception
 
 
@@ -40,13 +40,13 @@ sup [T, A: Alloc] ArrDynamic[T] {
     fun grow_by_one(&mut self) -> Void {
         self.capacity += 1
         case Self::Allocator::reallocate(&mut self, self.capacity) of
-            is Err(err) { }
+            is Fail(err) { }
     }
 
     @protected
     fun grow_double(&mut self) -> Opt[Void] {
         self.capacity *= 2
         case Self::Allocator::reallocate(&mut self, self.capacity) of
-            is Err(err) { }
+            is Fail(err) { }
     }
 }
