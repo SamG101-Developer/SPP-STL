@@ -36,7 +36,7 @@ sup [T] Alloc[T] {
 cls GlobalAlloc[T] { }
 
 
-sup GlobalAlloc[T] ext Alloc[T] {
+sup [T] GlobalAlloc[T] ext Alloc[T] {
     @public
     @no_impl
     fun allocate(n: USize) -> Res[ArrDynamic[T], AllocException] { }
