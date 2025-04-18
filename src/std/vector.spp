@@ -1,12 +1,12 @@
-use std::alloc::Allocator
-use std::alloc::GlobalAllocator
+use std::allocator::Alloc
+use std::allocator::GlobalAlloc
 use std::array::ArrDynamic
 use std::number::usize::USize
 use std::void::Void
 
 
 @public
-cls Vec[T, A: Alloc = GlobalAllocator] {
+cls Vec[T, A: Alloc = GlobalAlloc] {
     buf: ArrDynamic[T]
     length: USize
 }
