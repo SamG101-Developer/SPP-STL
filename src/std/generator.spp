@@ -1,5 +1,5 @@
-use std::option::None
-use std::void::Void
+use None = std::option::None
+use Void = std::void::Void
 
 
 @public
