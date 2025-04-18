@@ -1,7 +1,7 @@
 use std::alloc::Allocator
 use std::alloc::GlobalAllocator
 use std::array::ArrDynamic
-use std::usize::USize
+use std::number::usize::USize
 use std::void::Void
 
 
