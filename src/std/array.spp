@@ -6,6 +6,7 @@ use std::number::usize::USize
 use std::option::Opt
 use std::result::Fail
 use std::result::Exception
+use std::void::Void
 
 
 cls BoundsException { }
