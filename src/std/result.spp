@@ -14,10 +14,10 @@ cls Fail[E] { err: E }
 
 
 @public
-use Res[T, E: Exception] = Pass[T] or Fail[E]
+use Res[T, E] = Pass[T] or Fail[E]
 
 
-sup [T, E: Exception] Res[T, E] {
+sup [T, E] Res[T, E] {
     fun ok(self) -> Opt[T] {
         case self of
             is Pass(val) { Some(val) }
