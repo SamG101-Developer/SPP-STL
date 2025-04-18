@@ -1,5 +1,5 @@
 @public
-cls Clone[Out] { }
+cls Clone { }
 
 
 sup Clone {
