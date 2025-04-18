@@ -1,16 +1,16 @@
 @public
-cls FunMov[Args: TupleLike, Out] { }
+cls FunMov[Args, Out] { }
 
 
 @public
-cls FunMut[Args: TupleLike, Out] { }
+cls FunMut[Args, Out] { }
 
 
 @public
-cls FunRef[Args: TupleLike, Out] { }
+cls FunRef[Args, Out] { }
 
 
-sup [Args: TupleLike, Out] FunRef[Args, Out] ext FunMut[Args, Out] { }
+sup [Args, Out] FunRef[Args, Out] ext FunMut[Args, Out] { }
 
 
-sup [Args: TupleLike, Out] FunMut[Args, Out] ext FunMov[Args, Out] { }
+sup [Args, Out] FunMut[Args, Out] ext FunMov[Args, Out] { }
