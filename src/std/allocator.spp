@@ -11,45 +11,45 @@ cls AllocException { }
 sup AllocException ext Exception { }
 
 
-cls Alloc[T] { }
+cls Alloc[E] { }
 
 
-sup [T] Alloc[T] {
+sup [E] Alloc[E] {
     @public
     @abstract_method
-    fun allocate(n: USize) -> Res[ArrDynamic[T], AllocException] { }
+    fun allocate(n: USize) -> Res[ArrDynamic[E], AllocException] { }
     
     @public
     @abstract_method
-    fun allocate_zeroed(n: USize) -> Res[ArrDynamic[T], AllocException] { }
+    fun allocate_zeroed(n: USize) -> Res[ArrDynamic[E], AllocException] { }
     
     @public
     @abstract_method
-    fun deallocate(memory: ArrDynamic[T]) -> Res[Void, AllocException] { }
+    fun deallocate(memory: ArrDynamic[E]) -> Res[Void, AllocException] { }
     
     @public
     @abstract_method
-    fun reallocate(memory: &mut ArrDynamic[T], n: USize) -> Res[Void, AllocException] { }
+    fun reallocate(memory: &mut ArrDynamic[E], n: USize) -> Res[Void, AllocException] { }
 }
 
 
-cls GlobalAlloc[T] { }
+cls GlobalAlloc[E] { }
 
 
-sup [T] GlobalAlloc[T] ext Alloc[T] {
+sup [E] GlobalAlloc[E] ext Alloc[E] {
     @public
     @no_impl
-    fun allocate(n: USize) -> Res[ArrDynamic[T], AllocException] { }
+    fun allocate(n: USize) -> Res[ArrDynamic[E], AllocException] { }
     
     @public
     @no_impl
-    fun allocate_zeroed(n: USize) -> Res[ArrDynamic[T], AllocException] { }
+    fun allocate_zeroed(n: USize) -> Res[ArrDynamic[E], AllocException] { }
     
     @public
     @no_impl
-    fun deallocate(memory: ArrDynamic[T]) -> Res[Void, AllocException] { }
+    fun deallocate(memory: ArrDynamic[E]) -> Res[Void, AllocException] { }
     
     @public
     @no_impl
-    fun reallocate(memory: &mut ArrDynamic[T], n: USize) -> Res[Void, AllocException] { }
+    fun reallocate(memory: &mut ArrDynamic[E], n: USize) -> Res[Void, AllocException] { }
 }
