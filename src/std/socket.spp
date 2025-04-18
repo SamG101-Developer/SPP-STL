@@ -1,8 +1,9 @@
 use std::number::u16::U16
 use std::number::u64::U64
-use std::result::Res
 use std::string::Str
 use std::void::Void
+
+use Res[T, E] = std::result::Res[T, E]
 
 
 cls SocketError { }
