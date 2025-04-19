@@ -1,4 +1,5 @@
 use std::generator::Gen
+use std::generator::GenOnce
 use std::ops::deref::DerefMut
 use std::ops::deref::DerefRef
 
