@@ -5,7 +5,7 @@ use std::iterator::IterRef
 use std::iterator::Iterator
 
 
-cls Memory[T, A = GlobalAlloc] {
+cls Memory[T, A = GlobalAlloc[T] {
     @private
     start: USize
 
