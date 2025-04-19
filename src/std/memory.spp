@@ -1,5 +1,5 @@
 use std::allocator::GlobalAlloc
-use std::generic::GenOnce
+use std::generator::GenOnce
 use std::iterator::IterMov
 use std::iterator::IterMut
 use std::iterator::IterRef
