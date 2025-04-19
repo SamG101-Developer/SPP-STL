@@ -44,7 +44,7 @@ sup U256 ext std::ops::mod::Mod[Rhs=U256, Ret=U256] {
 }
 
 
-sup U256 ext std::ops::rem::Pow[Rhs=U256, Ret=U256] {
+sup U256 ext std::ops::pow::Pow[Rhs=U256, Ret=U256] {
     @compiler_builtin
     fun pow(self, that: U256) -> U256 { }
 }

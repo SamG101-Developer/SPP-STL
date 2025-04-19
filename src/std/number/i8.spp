@@ -44,7 +44,7 @@ sup I8 ext std::ops::mod::Mod[Rhs=I8, Ret=I8] {
 }
 
 
-sup I8 ext std::ops::rem::Pow[Rhs=I8, Ret=I8] {
+sup I8 ext std::ops::pow::Pow[Rhs=I8, Ret=I8] {
     @compiler_builtin
     fun pow(self, that: I8) -> I8 { }
 }

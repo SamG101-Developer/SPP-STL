@@ -44,7 +44,7 @@ sup U16 ext std::ops::mod::Mod[Rhs=U16, Ret=U16] {
 }
 
 
-sup U16 ext std::ops::rem::Pow[Rhs=U16, Ret=U16] {
+sup U16 ext std::ops::pow::Pow[Rhs=U16, Ret=U16] {
     @compiler_builtin
     fun pow(self, that: U16) -> U16 { }
 }

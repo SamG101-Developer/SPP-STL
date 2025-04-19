@@ -44,7 +44,7 @@ sup USize ext std::ops::mod::Mod[Rhs=USize, Ret=USize] {
 }
 
 
-sup USize ext std::ops::rem::Pow[Rhs=USize, Ret=USize] {
+sup USize ext std::ops::pow::Pow[Rhs=USize, Ret=USize] {
     @compiler_builtin
     fun pow(self, that: USize) -> USize { }
 }

@@ -45,7 +45,7 @@ sup BigInt ext std::ops::mod::Mod[Rhs=BigInt, Ret=BigInt] {
 }
 
 
-sup BigInt ext std::ops::rem::Pow[Rhs=BigInt, Ret=BigInt] {
+sup BigInt ext std::ops::pow::Pow[Rhs=BigInt, Ret=BigInt] {
     @no_impl
     fun pow(self, that: BigInt) -> BigInt { }
 }

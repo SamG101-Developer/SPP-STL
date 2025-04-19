@@ -44,7 +44,7 @@ sup F128 ext std::ops::mod::Mod[Rhs=F128, Ret=F128] {
 }
 
 
-sup F128 ext std::ops::rem::Pow[Rhs=F128, Ret=F128] {
+sup F128 ext std::ops::pow::Pow[Rhs=F128, Ret=F128] {
     @compiler_builtin
     fun pow(self, that: F128) -> F128 { }
 }

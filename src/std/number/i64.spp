@@ -44,7 +44,7 @@ sup I64 ext std::ops::mod::Mod[Rhs=I64, Ret=I64] {
 }
 
 
-sup I64 ext std::ops::rem::Pow[Rhs=I64, Ret=I64] {
+sup I64 ext std::ops::pow::Pow[Rhs=I64, Ret=I64] {
     @compiler_builtin
     fun pow(self, that: I64) -> I64 { }
 }

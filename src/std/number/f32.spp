@@ -44,7 +44,7 @@ sup F32 ext std::ops::mod::Mod[Rhs=F32, Ret=F32] {
 }
 
 
-sup F32 ext std::ops::rem::Pow[Rhs=F32, Ret=F32] {
+sup F32 ext std::ops::pow::Pow[Rhs=F32, Ret=F32] {
     @compiler_builtin
     fun pow(self, that: F32) -> F32 { }
 }
