@@ -5,6 +5,8 @@ use std::iterator::IterMut
 use std::iterator::IterRef
 use std::iterator::Iterator
 use std::number::usize::USize
+use std::ops::index::IndexMut
+use std::ops::index::IndexRef
 use std::option::None
 use std::void::Void
 
