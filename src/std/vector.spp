@@ -6,13 +6,13 @@ use std::void::Void
 
 
 @public
-cls Vec[T, A: Alloc = GlobalAlloc] {
+cls Vec[T, A = GlobalAlloc] {
     buf: ArrDynamic[T]
     length: USize
 }
 
 
-sup [T, A: Alloc] Vec[T, A] {
+sup [T, A] Vec[T, A] {
     use Element = T
     use Allocator = A
 

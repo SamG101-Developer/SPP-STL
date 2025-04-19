@@ -5,7 +5,7 @@ use std::iterator::IterRef
 use std::iterator::Iterator
 
 
-cls Memory[T, A: Alloc = GlobalAlloc] {
+cls Memory[T, A = GlobalAlloc] {
     @private
     start: USize
 
@@ -14,7 +14,7 @@ cls Memory[T, A: Alloc = GlobalAlloc] {
 }
 
 
-sup [T, A: Alloc] Memory[T, A] {
+sup [T, A] Memory[T, A] {
     use Element = T
     use Allocator = A
 
@@ -39,7 +39,7 @@ sup [T, A: Alloc] Memory[T, A] {
 }
 
 
-sup [T, A: Alloc] Memory[T, A] ext IterMov[T] {
+sup [T, A] Memory[T, A] ext IterMov[T] {
     cor iter_mov(self) -> Iterator[T] {
         loop i in Range::new(0, n) {
             let elem = self.take(index)
@@ -49,7 +49,7 @@ sup [T, A: Alloc] Memory[T, A] ext IterMov[T] {
 }
 
 
-sup [T, A: Alloc] Memory[T, A] ext IterMut[T] {
+sup [T, A] Memory[T, A] ext IterMut[T] {
     cor iter_mut(&mut self) -> Iterator[&mut T] {
         loop i in Range::new(0, n) {
             let elem = self.take(index)
@@ -60,7 +60,7 @@ sup [T, A: Alloc] Memory[T, A] ext IterMut[T] {
 }
 
 
-sup [T, A: Alloc] Memory[T, A] ext IterRef[T] {
+sup [T, A] Memory[T, A] ext IterRef[T] {
     cor iter_ref(&self) -> Iterator[&T] {
         loop i in Range::new(0, n) {
             let elem = self.take(index)
@@ -71,7 +71,7 @@ sup [T, A: Alloc] Memory[T, A] ext IterRef[T] {
 }
 
 
-sup [T, A: Alloc] Memory[T, A] ext IndexMut[T] {
+sup [T, A] Memory[T, A] ext IndexMut[T] {
     cor index_mut(&self, index: USize) -> GenOnce[&mut T] {
         let elem = self.take(index)
         case self.has(index) { gen &mut elem } else { gen None() }
@@ -80,7 +80,7 @@ sup [T, A: Alloc] Memory[T, A] ext IndexMut[T] {
 }
 
 
-sup [T, A: Alloc] Memory[T, A] ext IndexRef[T] {
+sup [T, A] Memory[T, A] ext IndexRef[T] {
     cor index_ref(&self, index: USize) -> GenOnce[&T] {
         let elem = self.take(index)
         case self.has(index) { gen &elem } else { gen None() }
