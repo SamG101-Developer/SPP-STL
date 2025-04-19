@@ -3,6 +3,7 @@ use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::array::ArrDynamic
 use std::boolean::Bool
+use std::function::FunRef
 use std::generator::GenOnce
 use std::iterator::Iterator
 use std::iterator::IterMov
