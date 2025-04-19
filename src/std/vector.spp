@@ -1,6 +1,12 @@
+use std::algorithms::Sortable
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::array::ArrDynamic
+use std::generator::GenOnce
+use std::iterator::Iterator
+use std::iterator::IterMov
+use std::iterator::IterMut
+use std::iterator::IterRef
 use std::number::usize::USize
 use std::void::Void
 
@@ -93,7 +99,7 @@ sup [T] Vec[T] {
 }
 
 
-sup [T] Vec[T] ext algorithms::Sortable[T] {
+sup [T] Vec[T] ext Sortable[T] {
     @no_impl
     fun sort(&mut self) -> Void { }
 
@@ -102,22 +108,22 @@ sup [T] Vec[T] ext algorithms::Sortable[T] {
 }
 
 
-sup [T] Vec[T] ext iterator::IterMov[T] {
-    cor iter_mov(self) -> iterator::Iterator[T] {
+sup [T] Vec[T] ext IterMov[T] {
+    cor iter_mov(self) -> Iterator[T] {
         gen with self.buf.iter_mov()
     }
 }
 
 
-sup [T] Vec[T] ext iterator::IterMut[T] {
-    cor iter_mut(&mut self) -> iterator::Iterator[&mut T] {
+sup [T] Vec[T] ext IterMut[T] {
+    cor iter_mut(&mut self) -> Iterator[&mut T] {
         gen with self.buf.iter_mut()
     }
 }
 
 
-sup [T] Vec[T] ext iterator::IterRef[T] {
-    cor iter_ref(&self) -> iterator::Iterator[&T] {
+sup [T] Vec[T] ext IterRef[T] {
+    cor iter_ref(&self) -> Iterator[&T] {
         gen with self.buf.iter_ref()
     }
 }
