@@ -3,6 +3,7 @@ use std::iterator::IterMov
 use std::iterator::IterMut
 use std::iterator::IterRef
 use std::iterator::Iterator
+use std::void::Void
 
 
 cls Memory[T, A = GlobalAlloc[T]] {
