@@ -6,7 +6,7 @@ use std::void::Void
 
 
 @public
-cls Vec[T, A = GlobalAlloc] {
+cls Vec[T, A = GlobalAlloc[T]] {
     buf: ArrDynamic[T]
     length: USize
 }

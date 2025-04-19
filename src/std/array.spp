@@ -16,7 +16,7 @@ sup BoundsException ext Exception { }
 
 
 @public
-cls Arr[T, cmp n: BigInt, A = GlobalAlloc] { }
+cls Arr[T, cmp n: BigInt, A = GlobalAlloc[T]] { }
 
 
 sup [T, A, cmp n: BigInt] Arr[T, n] ext Memory[T, A] {
