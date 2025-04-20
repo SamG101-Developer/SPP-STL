@@ -1,4 +1,4 @@
-use std::number:usize::USize
+use std::number::usize::USize
 use std::generator::GenOnce
 
 
