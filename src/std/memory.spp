@@ -29,6 +29,10 @@ sup [T, A] Memory[T, A] {
         ret self.capacity
     }
 
+    @public
+    @abstract_method
+    fun len(&self) -> USize { }
+
     @protected
     @no_impl
     fun shift(&mut self, index: USize, count: USize) -> Void {

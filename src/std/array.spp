@@ -28,10 +28,16 @@ sup [T, A, cmp n: BigInt] Arr[T, n, A] ext Memory[T, A] {
 
 
 @public
-cls ArrDynamic[T, A = GlobalAlloc[T]] { }
+cls ArrDynamic[T, A = GlobalAlloc[T]] {
+    length: USize
+}
 
 
-sup [T, A] ArrDynamic[T, A] ext Memory[T, A] { }
+sup [T, A] ArrDynamic[T, A] ext Memory[T, A] {
+    fun len(&self) -> USize {
+        ret self.length
+    }
+}
 
 
 sup [T, A] ArrDynamic[T, A] {
