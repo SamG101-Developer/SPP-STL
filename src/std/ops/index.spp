@@ -1,3 +1,7 @@
+use std::number:usize::USize
+use std::generator::GenOnce
+
+
 @public
 cls IndexMut[T] { }
 sup [T] IndexMut[T] {
