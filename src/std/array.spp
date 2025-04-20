@@ -19,7 +19,7 @@ sup BoundsException ext Exception { }
 cls Arr[T, cmp n: BigInt, A = GlobalAlloc[T]] { }
 
 
-sup [T, A, cmp n: BigInt] Arr[T, n] ext Memory[T, A] {
+sup [T, A, cmp n: BigInt] Arr[T, n, A] ext Memory[T, A] {
     @public
     fun len(&self) -> USize {
         ret n
@@ -28,13 +28,13 @@ sup [T, A, cmp n: BigInt] Arr[T, n] ext Memory[T, A] {
 
 
 @public
-cls ArrDynamic[T] { }
+cls ArrDynamic[T, A] { }
 
 
-sup [T, A] ArrDynamic[T] ext Memory[T, A] { }
+sup [T, A] ArrDynamic[T, A] ext Memory[T, A] { }
 
 
-sup [T, A] ArrDynamic[T] {
+sup [T, A] ArrDynamic[T, A] {
     @no_impl
     @public
     fun new_with_cap(capacity: USize) -> ArrDynamic[T] { }
