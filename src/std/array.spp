@@ -28,7 +28,7 @@ sup [T, A, cmp n: BigInt] Arr[T, n, A] ext Memory[T, A] {
 
 
 @public
-cls ArrDynamic[T, A] { }
+cls ArrDynamic[T, A = GlobalAlloc[T]] { }
 
 
 sup [T, A] ArrDynamic[T, A] ext Memory[T, A] { }
