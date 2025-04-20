@@ -3,10 +3,6 @@ use Void = std::void::Void
 
 
 @public
-use GenResult[T] = T or None
-
-
-@public
 cls Gen[Yield, Send=Void] { }
 
 
@@ -16,11 +12,11 @@ cls GenOnce[Yield] { }
 
 sup [Yield, Send] Gen[Yield, Send] {
     @compiler_builtin
-    cor resume(&self, value: Send) -> Gen[GenResult[Yield]] { }
+    cor resume(&self, value: Send) -> Gen[Yield] { }
 }
 
 
 sup [Yield] GenOnce[Yield] {
     @compiler_builtin
-    cor resume(self) -> Gen[GenResult[Yield]] { }
+    cor resume(self) -> Gen[Yield] { }
 }
