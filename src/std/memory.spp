@@ -82,7 +82,7 @@ sup [T, A] Memory[T, A] ext IterRef[T] {
 
 
 sup [T, A] Memory[T, A] ext IndexMut[T] {
-    cor index_mut(&self, index: USize) -> GenOnce[&mut T] {
+    cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] {
         let elem = self.take(index)
         case self.has(index) { gen &mut elem } else { gen None() }
         self.set(index, elem)
