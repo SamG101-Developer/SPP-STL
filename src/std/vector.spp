@@ -27,7 +27,7 @@ sup [T, A] Vec[T, A] {
     use Allocator = A
 
     fun new() -> Vec[T, A] {
-        ret Vec[T, A](buffer=ArrDynamic[T]::new_with_cap(1))
+        ret Vec[T, A](buffer=ArrDynamic[T]::new_with_cap(1_uz))
     }
 }
 
@@ -37,22 +37,22 @@ sup [T] Vec[T] {
     fun push(&mut self, element: Self::Element) -> Void {
         case self.length == self.buf.cap() { self.buf.grow_double() }
         self.buf.set(self.len, element)
-        self.length += 1
+        self.length += 1_uz
     }
 
     @public
     @no_impl fun insert(&mut self, index: USize, element: Self::Element) -> Void {
         case self.length == self.buf.cap() { self.buf.grow_double() }
-        self.buf.shift(index, 1)
+        self.buf.shift(index, 1_uz)
         self.buf.set(index, element)
-        self.length += 1
+        self.length += 1_uz
     }
 }
 
 
 sup [T] Vec[T] {
     cor get_head_ref(&self) -> GenOnce[&T] {
-        gen self.index_ref(0)
+        gen self.index_ref(0_uz)
     }
 
     cor get_tail_ref(&self) -> GenOnce[&T] {
@@ -71,7 +71,7 @@ sup [T] Vec[T] {
     }
 
     cor get_tail_mut(&mut self) -> GenOnce[&mut T] {
-        gen self.index_mut(self.len() - 1)
+        gen self.index_mut(self.len() - 1_uz)
     }
 
     cor get_mut(&mut self, index: USize) -> GenOnce[&mut T] {
@@ -86,7 +86,7 @@ sup [T] Vec[T] {
     }
 
     @no_impl fun is_empty(&self) -> Bool {
-        ret self.length == 0
+        ret self.length == 0_uz
     }
 }
 
