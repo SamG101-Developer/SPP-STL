@@ -1,7 +1,6 @@
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::memory::Memory
-use std::number::bigint::BigInt
 use std::number::usize::USize
 use std::option::Opt
 use std::result::Fail
@@ -16,10 +15,10 @@ sup BoundsException ext Exception { }
 
 
 @public
-cls Arr[T, cmp n: BigInt, A = GlobalAlloc[T]] { }
+cls Arr[T, cmp n: USize, A = GlobalAlloc[T]] { }
 
 
-sup [T, A, cmp n: BigInt] Arr[T, n, A] ext Memory[T, A] {
+sup [T, A, cmp n: USize] Arr[T, n, A] ext Memory[T, A] {
     @public
     fun len(&self) -> USize {
         ret n
