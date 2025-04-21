@@ -52,30 +52,30 @@ sup [T, A] Vec[T, A] {
 
 sup [T, A] Vec[T, A] {
     cor get_head_ref(&self) -> GenOnce[&T] {
-        gen self.index_ref(0_uz)
+        gen with self.index_ref(0_uz)
     }
 
     cor get_tail_ref(&self) -> GenOnce[&T] {
-        gen self.index_ref(self.len() - 1)
+        gen with self.index_ref(self.len() - 1)
     }
 
     cor get_ref(&self, index: USize) -> GenOnce[&T] {
-        gen self.index_ref(index)
+        gen with self.index_ref(index)
     }
 }
 
 
 sup [T, A] Vec[T, A] {
     cor get_head_mut(&mut self) -> GenOnce[&mut T] {
-        gen self.index_mut(0)
+        gen with self.index_mut(0)
     }
 
     cor get_tail_mut(&mut self) -> GenOnce[&mut T] {
-        gen self.index_mut(self.len() - 1_uz)
+        gen with self.index_mut(self.len() - 1_uz)
     }
 
     cor get_mut(&mut self, index: USize) -> GenOnce[&mut T] {
-        gen self.index_mut(index)
+        gen with self.index_mut(index)
     }
 }
 
