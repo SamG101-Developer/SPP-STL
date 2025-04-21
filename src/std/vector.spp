@@ -92,7 +92,7 @@ sup [T, A] Vec[T, A] {
 
 
 sup [T, A] Vec[T, A] {
-    fun resize(&mut self, new_length: USize) -> void::Void {
+    fun resize(&mut self, new_length: USize) -> Void {
         self.buffer.resize(new_length)
         self.length = new_length
     }
@@ -135,13 +135,13 @@ sup [T, A] Vec[T, A] ext IterRef[T] {
 
 sup [T, A] Vec[T, A] ext IndexMut[T] {
     cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] {
-        gen self.buffer.index_mut(index)
+        gen with self.buffer.index_mut(index)
     }
 }
 
 
 sup [T, A] Vec[T, A] ext IndexRef[T] {
     cor index_ref(&self, index: USize) -> GenOnce[&T] {
-        gen self.buffer.index_ref(index)
+        gen with self.buffer.index_ref(index)
     }
 }

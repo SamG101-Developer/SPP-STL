@@ -99,7 +99,7 @@ sup [T, A] Memory[T, A] ext IterRef[T] {
 sup [T, A] Memory[T, A] ext IndexMut[T] {
     cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] {
         let mut elem = self.take(index)
-        gen &mut elem
+        gen with &mut elem
         self.place(index, elem)
     }
 }
@@ -108,7 +108,7 @@ sup [T, A] Memory[T, A] ext IndexMut[T] {
 sup [T, A] Memory[T, A] ext IndexRef[T] {
     cor index_ref(&self, index: USize) -> GenOnce[&T] {
         let elem = self.take(index)
-        gen &elem
+        gen with &elem
         self.place(index, elem)
     }
 }
