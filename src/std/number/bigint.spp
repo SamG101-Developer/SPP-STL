@@ -51,6 +51,48 @@ sup BigInt ext std::ops::pow::Pow[Rhs=BigInt, Ret=BigInt] {
 }
 
 
+sup BigInt ext std::ops::add_assign::AddAssign[Rhs=BigInt] {
+    @no_impl
+    fun add_assign(&mut self, that: BigInt) -> Void { }
+}
+
+
+sup BigInt ext std::ops::sub_assign::SubAssign[Rhs=BigInt] {
+    @no_impl
+    fun sub_assign(&mut self, that: BigInt) -> Void { }
+}
+
+
+sup BigInt ext std::ops::mul_assign::MulAssign[Rhs=BigInt] {
+    @no_impl
+    fun mul_assign(&mut self, that: BigInt) -> Void { }
+}
+
+
+sup BigInt ext std::ops::div_assign::DivAssign[Rhs=BigInt] {
+    @no_impl
+    fun div_assign(&mut self, that: BigInt) -> Void { }
+}
+
+
+sup BigInt ext std::ops::rem_assign::RemAssign[Rhs=BigInt] {
+    @no_impl
+    fun rem_assign(&mut self, that: BigInt) -> Void { }
+}
+
+
+sup BigInt ext std::ops::mod_assign::ModAssign[Rhs=BigInt] {
+    @no_impl
+    fun mod_assign(&mut self, that: BigInt) -> Void { }
+}
+
+
+sup BigInt ext std::ops::pow_assign::PowAssign[Rhs=BigInt] {
+    @no_impl
+    fun pow_assign(&mut self, that: BigInt) -> Void { }
+}
+
+
 sup BigInt ext std::ops::eq::Eq[Rhs=BigInt] {
     @no_impl
     fun eq(&self, that: BigInt) -> boolean::Bool { }
