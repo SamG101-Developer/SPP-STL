@@ -79,7 +79,7 @@ sup [T, A] Memory[T, A] ext IterMut[T] {
         loop index in Range(start=0_uz, end=self.capacity) {
             let mut elem = self.take(index)
             gen &mut elem
-            self.place(i, elem)
+            self.place(index, elem)
         }
     }
 }
@@ -90,7 +90,7 @@ sup [T, A] Memory[T, A] ext IterRef[T] {
         loop index in Range(start=0_uz, end=self.capacity) {
             let elem = self.take(index)
             gen &elem
-            self.place(i, elem)
+            self.place(index, elem)
         }
     }
 }
