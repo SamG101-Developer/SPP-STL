@@ -8,6 +8,15 @@ sup U8 ext abstract::UnsignedInteger[8] { }
 sup U8 ext std::copy::Copy { }
 
 
+sup U8 {
+    @no_impl
+    fun to_ascii_lowercase(&self) -> U8 { }
+
+    @no_impl
+    fun to_ascii_uppercase(&self) -> U8 { }
+}
+
+
 sup U8 ext std::ops::add::Add[Rhs=U8, Ret=U8] {
     @compiler_builtin
     fun add(self, that: U8) -> U8 { }

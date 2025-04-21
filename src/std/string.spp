@@ -13,12 +13,12 @@ cls Str {
 sup Str {
     @public
     fun to_ascii_uppercase(&self) -> Str {
-        ret self.iter_ref().map(U8::to_uppercase).collect(Str)
+        ret self.data.iter_ref().map(U8::to_ascii_uppercase).collect(Str)
     }
 
     @public
     fun to_ascii_lowercase(&self) -> Str {
-        ret self.iter_ref().map(U8::to_lowercase).collect(Str)
+        ret self.data.iter_ref().map(U8::to_ascii_lowercase).collect(Str)
     }
 }
 
