@@ -58,7 +58,7 @@ sup [T, A] Memory[T, A] {
 
 sup [T, A] Memory[T, A] ext IterMov[T] {
     cor iter_mov(self) -> Iterator[T] {
-        loop i in Range(start=0_uz, end=self.capacity) {
+        loop index in Range(start=0_uz, end=self.capacity) {
             let elem = self.take(index)
             gen elem
         }
@@ -68,7 +68,7 @@ sup [T, A] Memory[T, A] ext IterMov[T] {
 
 sup [T, A] Memory[T, A] ext IterMut[T] {
     cor iter_mut(&mut self) -> Iterator[&mut T] {
-        loop i in Range(start=0_uz, end=self.capacity) {
+        loop index in Range(start=0_uz, end=self.capacity) {
             let elem = self.take(index)
             gen &mut elem
             self.set(i, elem)
@@ -79,7 +79,7 @@ sup [T, A] Memory[T, A] ext IterMut[T] {
 
 sup [T, A] Memory[T, A] ext IterRef[T] {
     cor iter_ref(&self) -> Iterator[&T] {
-        loop i in Range(start=0_uz, end=self.capacity) {
+        loop index in Range(start=0_uz, end=self.capacity) {
             let elem = self.take(index)
             gen &elem
             self.set(i, elem)
