@@ -29,6 +29,10 @@ sup [T, A] Vec[T, A] {
     fun new() -> Vec[T, A] {
         ret Vec[T, A](buffer=ArrDynamic[T, A]::new_with_cap(1_uz))
     }
+
+    fun len(&self) -> USize {
+        ret self.length
+    }
 }
 
 
@@ -56,7 +60,7 @@ sup [T, A] Vec[T, A] {
     }
 
     cor get_tail_ref(&self) -> GenOnce[&T] {
-        gen with self.index_ref(self.len() - 1)
+        gen with self.index_ref(self.length - 1)
     }
 
     cor get_ref(&self, index: USize) -> GenOnce[&T] {
@@ -71,7 +75,7 @@ sup [T, A] Vec[T, A] {
     }
 
     cor get_tail_mut(&mut self) -> GenOnce[&mut T] {
-        gen with self.index_mut(self.len() - 1_uz)
+        gen with self.index_mut(self.length - 1_uz)
     }
 
     cor get_mut(&mut self, index: USize) -> GenOnce[&mut T] {
