@@ -41,7 +41,7 @@ sup [T, A] ArrDynamic[T, A] ext Memory[T, A] {
 sup [T, A] ArrDynamic[T, A] {
     @no_impl
     @public
-    fun new_with_cap(capacity: USize) -> ArrDynamic[T] { }
+    fun new_with_cap(capacity: USize) -> ArrDynamic[T, A] { }
 
     @protected
     fun grow_by_one(&mut self) -> Void {
