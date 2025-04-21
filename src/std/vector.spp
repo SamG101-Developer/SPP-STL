@@ -60,7 +60,7 @@ sup [T, A] Vec[T, A] {
     }
 
     cor get_tail_ref(&self) -> GenOnce[&T] {
-        gen with self.index_ref(self.length - 1)
+        gen with self.index_ref(self.length - 1_uz)
     }
 
     cor get_ref(&self, index: USize) -> GenOnce[&T] {
