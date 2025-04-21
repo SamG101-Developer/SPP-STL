@@ -14,11 +14,13 @@ sup Str {
     @public
     fun to_ascii_uppercase(&self) -> Str {
         # ret self.data.iter_ref().map(U8::to_ascii_uppercase).collect(Str)
+        ret ""
     }
 
     @public
     fun to_ascii_lowercase(&self) -> Str {
         # ret self.data.iter_ref().map(U8::to_ascii_lowercase).collect(Str)
+        ret ""
     }
 }
 
@@ -27,5 +29,6 @@ sup Str ext Eq[Rhs=Str] {
     @public
     fun eq(&self, that: Str) -> Bool {
         # ret self.data.iter_ref().zip(that.data.iter_ref()).map(U8::eq).all()
+        ret false
     }
 }
