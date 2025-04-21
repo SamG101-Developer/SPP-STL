@@ -11,6 +11,7 @@ cls GenOnce[Yield] { }
 
 
 sup [Yield, Send] Gen[Yield, Send] {
+    @virtual_method
     @compiler_builtin
     cor resume(&self, value: Send) -> Gen[Yield] { }
 }
