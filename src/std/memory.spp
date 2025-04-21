@@ -44,7 +44,7 @@ sup [T, A] Memory[T, A] {
     }
 
     fun resize(&mut self, new_capacity: USize) -> Void {
-        Self::Allocator::reallocate(self, new_capacity)
+        # Self::Allocator::reallocate(self, new_capacity)
     }
 }
 
