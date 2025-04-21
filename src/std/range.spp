@@ -1,0 +1,15 @@
+cls Range[T] {
+    start: T
+    end: T
+    step: T
+}
+
+
+sup [T] Range[T] {
+    fun step_by(self, step: T) -> Range[T] {
+        return Range(start=self.start, end=self.end, step)
+    }
+}
+
+
+sup [T] Range[T] ext Gen[T] { }
