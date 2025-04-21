@@ -6,5 +6,5 @@ cls ModAssign[Rhs] {}
 
 sup [Rhs] ModAssign[Rhs] {
     @abstract_method
-    fun mod_assign(&self, that: Rhs) -> Void { }
+    fun mod_assign(&mut self, that: Rhs) -> Void { }
 }
