@@ -1,6 +1,8 @@
 use std::string::Str
 use std::void::Void
 
+@no_impl
 fun print(value: Str) -> Void { }
 
+@no_impl
 fun input() -> Str { }
