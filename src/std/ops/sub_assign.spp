@@ -2,7 +2,7 @@ use std::void::Void
 
 
 @public
-cls SubAssign[Rhs, Ret] {}
+cls SubAssign[Rhs] {}
 
 sup [Rhs] SubAssign[Rhs] {
     @abstract_method

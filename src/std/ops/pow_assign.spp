@@ -2,7 +2,7 @@ use std::void::Void
 
 
 @public
-cls PowAssign[Rhs, Ret] {}
+cls PowAssign[Rhs] {}
 
 sup [Rhs] PowAssign[Rhs] {
     @abstract_method
