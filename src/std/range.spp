@@ -7,7 +7,7 @@ cls Range[T] {
 
 sup [T] Range[T] {
     fun step_by(self, step: T) -> Range[T] {
-        return Range(start=self.start, end=self.end, step)
+        ret Range(start=self.start, end=self.end, step)
     }
 }
 
