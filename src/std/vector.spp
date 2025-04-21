@@ -71,7 +71,7 @@ sup [T, A] Vec[T, A] {
 
 sup [T, A] Vec[T, A] {
     cor get_head_mut(&mut self) -> GenOnce[&mut T] {
-        gen with self.index_mut(0)
+        gen with self.index_mut(0_uz)
     }
 
     cor get_tail_mut(&mut self) -> GenOnce[&mut T] {
