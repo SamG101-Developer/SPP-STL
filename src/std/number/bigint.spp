@@ -9,6 +9,11 @@ cls BigInt {
 }
 
 
+sup BigInt ext std::clone::Clone {
+    fun clone(&self) -> Self { ret BigInt() }
+}
+
+
 sup BigInt ext std::ops::add::Add[Rhs=BigInt, Ret=BigInt] {
     @no_impl
     fun add(self, that: BigInt) -> BigInt { }
