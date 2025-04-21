@@ -17,7 +17,7 @@ use std::ops::index::IndexRef
 
 @public
 cls Vec[T, A = GlobalAlloc[T]] {
-    buf: ArrDynamic[T]
+    buf: ArrDynamic[T, A]
     length: USize
 }
 
