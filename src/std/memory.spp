@@ -43,7 +43,15 @@ sup [T, A] Memory[T, A] {
     @protected
     @no_impl
     fun take(&self, index: USize) -> T {
-        # Remove an item from this memory chunk.
+        # Remove an item from this memory chunk. Uses an immutable `&self` as its a special function required in mutable
+        iteration.
+    }
+
+    @protected
+    @no_impl
+    fun place(&self, index: USize, elem: T) -> Void {
+        # Place an item in this memory chunk. Uses an immutable `&self` as its a special function required in mutable
+        iteration.
     }
 
     fun clear(&mut self) -> Void {
@@ -71,7 +79,7 @@ sup [T, A] Memory[T, A] ext IterMut[T] {
         loop index in Range(start=0_uz, end=self.capacity) {
             let mut elem = self.take(index)
             gen &mut elem
-            self.set(i, elem)
+            self.place(i, elem)
         }
     }
 }
@@ -82,7 +90,7 @@ sup [T, A] Memory[T, A] ext IterRef[T] {
         loop index in Range(start=0_uz, end=self.capacity) {
             let elem = self.take(index)
             gen &elem
-            self.set(i, elem)
+            self.place(i, elem)
         }
     }
 }
@@ -92,7 +100,7 @@ sup [T, A] Memory[T, A] ext IndexMut[T] {
     cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] {
         let elem = self.take(index)
         case self.has(index) { gen &mut elem } else { gen None() }
-        self.set(index, elem)
+        self.place(index, elem)
     }
 }
 
@@ -101,6 +109,6 @@ sup [T, A] Memory[T, A] ext IndexRef[T] {
     cor index_ref(&self, index: USize) -> GenOnce[&T] {
         let elem = self.take(index)
         case self.has(index) { gen &elem } else { gen None() }
-        self.set(index, elem)
+        self.place(index, elem)
     }
 }
