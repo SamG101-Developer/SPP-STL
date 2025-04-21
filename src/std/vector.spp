@@ -27,7 +27,7 @@ sup [T, A] Vec[T, A] {
     use Allocator = A
 
     fun new() -> Vec[T, A] {
-        ret Vec[T, A](buf=ArrDynamic[T]::new_with_cap(1_uz))
+        ret Vec[T, A](buf=ArrDynamic[T, A]::new_with_cap(1_uz))
     }
 }
 
