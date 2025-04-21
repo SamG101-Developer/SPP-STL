@@ -26,6 +26,6 @@ sup Str {
 sup Str ext Eq[Rhs=Str] {
     @public
     fun eq(&self, that: Str) -> Bool {
-        ret self.iter_ref().zip(that.iter_ref()).map(U8::eq).all()
+        ret self.data.iter_ref().zip(that.data.iter_ref()).map(U8::eq).all()
     }
 }
