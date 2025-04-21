@@ -2,7 +2,7 @@ use std::void::Void
 
 
 @public
-cls ModAssign[Rhs, Ret] {}
+cls ModAssign[Rhs] {}
 
 sup [Rhs] ModAssign[Rhs] {
     @abstract_method
