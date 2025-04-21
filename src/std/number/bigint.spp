@@ -9,8 +9,11 @@ cls BigInt {
 }
 
 
-sup BigInt ext std::clone::Clone {
-    fun clone(&self) -> Self { ret BigInt() }
+sup BigInt {
+    fun clone_number(&self) -> BigInt {
+        # todo: replace with std::clone::Clone when "Self" works properly
+        ret BigInt()
+    }
 }
 
 
