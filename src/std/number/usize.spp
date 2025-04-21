@@ -50,6 +50,48 @@ sup USize ext std::ops::pow::Pow[Rhs=USize, Ret=USize] {
 }
 
 
+sup USize ext std::ops::add_assign::AddAssign[Rhs=USize] {
+    @no_impl
+    fun add_assign(&mut self, that: USize) -> Void { }
+}
+
+
+sup USize ext std::ops::sub_assign::SubAssign[Rhs=USize] {
+    @no_impl
+    fun sub_assign(&mut self, that: USize) -> Void { }
+}
+
+
+sup USize ext std::ops::mul_assign::MulAssign[Rhs=USize] {
+    @no_impl
+    fun mul_assign(&mut self, that: USize) -> Void { }
+}
+
+
+sup USize ext std::ops::div_assign::DivAssign[Rhs=USize] {
+    @no_impl
+    fun div_assign(&mut self, that: USize) -> Void { }
+}
+
+
+sup USize ext std::ops::rem_assign::RemAssign[Rhs=USize] {
+    @no_impl
+    fun rem_assign(&mut self, that: USize) -> Void { }
+}
+
+
+sup USize ext std::ops::mod_assign::ModAssign[Rhs=USize] {
+    @no_impl
+    fun mod_assign(&mut self, that: USize) -> Void { }
+}
+
+
+sup USize ext std::ops::pow_assign::PowAssign[Rhs=USize] {
+    @no_impl
+    fun pow_assign(&mut self, that: USize) -> Void { }
+}
+
+
 sup USize ext std::ops::eq::Eq[Rhs=USize] {
     @compiler_builtin
     fun eq(&self, that: USize) -> boolean::Bool { }
