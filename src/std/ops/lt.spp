@@ -1,7 +1,10 @@
+use std::boolean::Bool
+
+
 @public
 cls Lt[Rhs] { }
 
 sup [Rhs] Lt[Rhs] {
     @abstract_method
-    fun lt(&self, that: Rhs) -> boolean::Bool { }
+    fun lt(&self, that: Rhs) -> Bool { }
 }

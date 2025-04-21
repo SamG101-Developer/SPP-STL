@@ -1,7 +1,10 @@
+use std::boolean::Bool
+
+
 @public
 cls Gt[Rhs] { }
 
 sup [Rhs] Gt[Rhs] {
     @abstract_method
-    fun gt(&self, that: Rhs) -> boolean::Bool { }
+    fun gt(&self, that: Rhs) -> Bool { }
 }

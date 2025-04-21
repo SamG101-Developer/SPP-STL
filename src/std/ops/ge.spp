@@ -1,7 +1,10 @@
+use std::boolean::Bool
+
+
 @public
 cls Ge[Rhs] { }
 
 sup [Rhs] Ge[Rhs] {
     @abstract_method
-    fun ge(&self, that: Rhs) -> boolean::Bool { }
+    fun ge(&self, that: Rhs) -> Bool { }
 }

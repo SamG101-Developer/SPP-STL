@@ -1,7 +1,10 @@
+use std::boolean::Bool
+
+
 @public
 cls Eq[Rhs] { }
 
 sup [Rhs] Eq[Rhs] {
     @abstract_method
-    fun eq(&self, that: Rhs) -> boolean::Bool { }
+    fun eq(&self, that: Rhs) -> Bool { }
 }

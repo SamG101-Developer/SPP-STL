@@ -1,7 +1,10 @@
+use std::boolean::Bool
+
+
 @public
 cls Ne[Rhs] { }
 
 sup [Rhs] Ne[Rhs] {
     @abstract_method
-    fun ne(&self, that: Rhs) -> boolean::Bool { }
+    fun ne(&self, that: Rhs) -> Bool { }
 }

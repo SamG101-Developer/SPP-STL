@@ -1,7 +1,10 @@
+use std::void::Void
+
+
 @public
 cls Del { }
 
 sup Del {
     @abstract_method
-    fun del(self) -> void::Void { }
+    fun del(self) -> Void { }
 }

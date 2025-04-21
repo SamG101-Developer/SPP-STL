@@ -1,7 +1,10 @@
+use std::boolean::Bool
+
+
 @public
 cls Ior[Rhs] {}
 
 sup [Rhs] Ior[Rhs] {
     @abstract_method
-    fun ior(self, that: Rhs) -> boolean::Bool { }
+    fun ior(self, that: Rhs) -> Bool { }
 }
