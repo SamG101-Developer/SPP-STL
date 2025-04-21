@@ -17,7 +17,7 @@ use std::ops::index::IndexRef
 
 @public
 cls Vec[T, A = GlobalAlloc[T]] {
-    buf: ArrDynamic[T, A]
+    buffer: ArrDynamic[T, A]
     length: USize
 }
 
@@ -27,7 +27,7 @@ sup [T, A] Vec[T, A] {
     use Allocator = A
 
     fun new() -> Vec[T, A] {
-        ret Vec[T, A](buf=ArrDynamic[T, A]::new_with_cap(1_uz))
+        ret Vec[T, A](buffer=ArrDynamic[T, A]::new_with_cap(1_uz))
     }
 }
 
@@ -35,16 +35,16 @@ sup [T, A] Vec[T, A] {
 sup [T, A] Vec[T, A] {
     @public
     fun push(&mut self, element: Self::Element) -> Void {
-        case self.length == self.buf.cap() { self.buf.grow_double() }
-        self.buf.place(self.len, element)
+        case self.length == self.buffer.cap() { self.buffer.grow_double() }
+        self.buffer.place(self.length, element)
         self.length += 1_uz
     }
 
     @public
     @no_impl fun insert(&mut self, index: USize, element: Self::Element) -> Void {
-        case self.length == self.buf.cap() { self.buf.grow_double() }
-        self.buf.shift(index, 1_uz)
-        self.buf.place(index, element)
+        case self.length == self.buffer.cap() { self.buffer.grow_double() }
+        self.buffer.shift(index, 1_uz)
+        self.buffer.place(index, element)
         self.length += 1_uz
     }
 }
@@ -82,7 +82,7 @@ sup [T, A] Vec[T, A] {
 
 sup [T, A] Vec[T, A] {
     fun clear(&mut self) -> Void {
-        self.buf.clear()
+        self.buffer.clear()
     }
 
     @no_impl fun is_empty(&self) -> Bool {
@@ -93,12 +93,12 @@ sup [T, A] Vec[T, A] {
 
 sup [T, A] Vec[T, A] {
     fun resize(&mut self, new_length: USize) -> void::Void {
-        self.buf.resize(new_length)
+        self.buffer.resize(new_length)
         self.length = new_length
     }
 
     fun shrink_to_fit(&mut self) -> Void {
-        self.buf.resize(self.length)
+        self.buffer.resize(self.length)
     }
 }
 
@@ -114,34 +114,34 @@ sup [T, A] Vec[T, A] ext Sortable[T] {
 
 sup [T, A] Vec[T, A] ext IterMov[T] {
     cor iter_mov(self) -> Iterator[T] {
-        gen with self.buf.iter_mov()
+        gen with self.buffer.iter_mov()
     }
 }
 
 
 sup [T, A] Vec[T, A] ext IterMut[T] {
     cor iter_mut(&mut self) -> Iterator[&mut T] {
-        gen with self.buf.iter_mut()
+        gen with self.buffer.iter_mut()
     }
 }
 
 
 sup [T, A] Vec[T, A] ext IterRef[T] {
     cor iter_ref(&self) -> Iterator[&T] {
-        gen with self.buf.iter_ref()
+        gen with self.buffer.iter_ref()
     }
 }
 
 
 sup [T, A] Vec[T, A] ext IndexMut[T] {
     cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] {
-        gen self.buf.index_mut(index)
+        gen self.buffer.index_mut(index)
     }
 }
 
 
 sup [T, A] Vec[T, A] ext IndexRef[T] {
     cor index_ref(&self, index: USize) -> GenOnce[&T] {
-        gen self.buf.index_ref(index)
+        gen self.buffer.index_ref(index)
     }
 }
