@@ -42,7 +42,7 @@ sup [T, A] Memory[T, A] {
 
     @protected
     @no_impl
-    fun take(&mut self, index: USize) -> T {
+    fun take(&self, index: USize) -> T {
         # Remove an item from this memory chunk.
     }
 
