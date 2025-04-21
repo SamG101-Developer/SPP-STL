@@ -44,14 +44,14 @@ sup [T, A] Memory[T, A] {
     @no_impl
     fun take(&self, index: USize) -> T {
         # Remove an item from this memory chunk. Uses an immutable `&self` as its a special function required in mutable
-        iteration.
+        # iteration.
     }
 
     @protected
     @no_impl
     fun place(&self, index: USize, elem: T) -> Void {
         # Place an item in this memory chunk. Uses an immutable `&self` as its a special function required in mutable
-        iteration.
+        # iteration.
     }
 
     fun clear(&mut self) -> Void {
