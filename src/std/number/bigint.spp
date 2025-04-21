@@ -1,5 +1,6 @@
 use std::boolean::Bool
 use std::number::biguint::BigUInt
+use std::void::Void
 
 
 @public
