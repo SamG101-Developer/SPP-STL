@@ -1,5 +1,6 @@
 cls From[That] { }
 
 sup [That] From[That] {
+    @abstract_method
     fun from(that: That) -> Self { }
 }
