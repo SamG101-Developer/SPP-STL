@@ -23,7 +23,7 @@ use Res[T, E] = Pass[T] or Fail[E]
 sup [T, E] Res[T, E] {
     fun ok(self) -> Opt[T] {
         case self of
-            is Pass(val) { Some(val) }
-            is Fail(err) { None() }
+            is Pass[T](val) { Some(val) }
+            is Fail[E](err) { None() }
     }
 }
