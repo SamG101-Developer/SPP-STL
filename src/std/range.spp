@@ -1,3 +1,6 @@
+use std::generator::Gen
+
+
 cls Range[T] {
     start: T
     end: T
