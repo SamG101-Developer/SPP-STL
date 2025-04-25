@@ -137,14 +137,14 @@ sup [T, A] Vec[T, A] ext IterRef[T] {
 }
 
 
-sup [T, A] Vec[T, A] ext IndexMut[T] {
+sup [T, A] Vec[T, A] ext IndexMut[T, USize] {
     cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] {
         gen with self.buffer.index_mut(index)
     }
 }
 
 
-sup [T, A] Vec[T, A] ext IndexRef[T] {
+sup [T, A] Vec[T, A] ext IndexRef[T, USize] {
     cor index_ref(&self, index: USize) -> GenOnce[&T] {
         gen with self.buffer.index_ref(index)
     }
