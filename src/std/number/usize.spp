@@ -1,0 +1,131 @@
+use std::void::Void
+
+
+@public
+cls USize { }
+
+
+sup USize ext abstract::UnsignedInteger[64] { }
+
+
+sup USize ext std::copy::Copy { }
+
+
+sup USize ext std::ops::add::Add[Rhs=USize, Ret=USize] {
+    @compiler_builtin
+    fun add(self, that: USize) -> USize { }
+}
+
+
+sup USize ext std::ops::sub::Sub[Rhs=USize, Ret=USize] {
+    @compiler_builtin
+    fun sub(self, that: USize) -> USize { }
+}
+
+
+sup USize ext std::ops::mul::Mul[Rhs=USize, Ret=USize] {
+    @compiler_builtin
+    fun mul(self, that: USize) -> USize { }
+}
+
+
+sup USize ext std::ops::div::Div[Rhs=USize, Ret=USize] {
+    @compiler_builtin
+    fun div(self, that: USize) -> USize { }
+}
+
+
+sup USize ext std::ops::rem::Rem[Rhs=USize, Ret=USize] {
+    @compiler_builtin
+    fun rem(self, that: USize) -> USize { }
+}
+
+
+sup USize ext std::ops::mod::Mod[Rhs=USize, Ret=USize] {
+    @compiler_builtin
+    fun mod(self, that: USize) -> USize { }
+}
+
+
+sup USize ext std::ops::pow::Pow[Rhs=USize, Ret=USize] {
+    @compiler_builtin
+    fun pow(self, that: USize) -> USize { }
+}
+
+
+sup USize ext std::ops::add_assign::AddAssign[Rhs=USize] {
+    @no_impl
+    fun add_assign(&mut self, that: USize) -> Void { }
+}
+
+
+sup USize ext std::ops::sub_assign::SubAssign[Rhs=USize] {
+    @no_impl
+    fun sub_assign(&mut self, that: USize) -> Void { }
+}
+
+
+sup USize ext std::ops::mul_assign::MulAssign[Rhs=USize] {
+    @no_impl
+    fun mul_assign(&mut self, that: USize) -> Void { }
+}
+
+
+sup USize ext std::ops::div_assign::DivAssign[Rhs=USize] {
+    @no_impl
+    fun div_assign(&mut self, that: USize) -> Void { }
+}
+
+
+sup USize ext std::ops::rem_assign::RemAssign[Rhs=USize] {
+    @no_impl
+    fun rem_assign(&mut self, that: USize) -> Void { }
+}
+
+
+sup USize ext std::ops::mod_assign::ModAssign[Rhs=USize] {
+    @no_impl
+    fun mod_assign(&mut self, that: USize) -> Void { }
+}
+
+
+sup USize ext std::ops::pow_assign::PowAssign[Rhs=USize] {
+    @no_impl
+    fun pow_assign(&mut self, that: USize) -> Void { }
+}
+
+
+sup USize ext std::ops::eq::Eq[Rhs=USize] {
+    @compiler_builtin
+    fun eq(&self, that: USize) -> boolean::Bool { }
+}
+
+
+sup USize ext std::ops::ne::Ne[Rhs=USize] {
+    @compiler_builtin
+    fun ne(&self, that: USize) -> boolean::Bool { }
+}
+
+
+sup USize ext std::ops::ge::Ge[Rhs=USize] {
+    @compiler_builtin
+    fun ge(&self, that: USize) -> boolean::Bool { }
+}
+
+
+sup USize ext std::ops::gt::Gt[Rhs=USize] {
+    @compiler_builtin
+    fun gt(&self, that: USize) -> boolean::Bool { }
+}
+
+
+sup USize ext std::ops::le::Le[Rhs=USize] {
+    @compiler_builtin
+    fun le(&self, that: USize) -> boolean::Bool { }
+}
+
+
+sup USize ext std::ops::lt::Lt[Rhs=USize] {
+    @compiler_builtin
+    fun lt(&self, that: USize) -> boolean::Bool { }
+}

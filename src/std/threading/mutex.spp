@@ -1,7 +1,12 @@
+use std::number::u64::U64
+use std::generator::GenOnce
+use std::void::Void
+
+
 @public
 cls Mutex[T] {
-    @public unique_id: number::U64
-    @public native_id: number::U64
+    @public unique_id: U64
+    @public native_id: U64
     value: T
 }
 
@@ -15,38 +20,38 @@ sup [T] Mutex[T] {
     }
 
     @public
-    cor lock_ref(&mut self) -> generator::Gen[&T] {
+    cor lock_ref(&mut self) -> GenOnce[&T] {
         # ffi::pthread::pthread_mutex_lock(&mut self.native_id)
         gen &self.value
     }
 
     @public
-    cor lock_mut(&mut self) -> generator::Gen[&mut T] {
+    cor lock_mut(&mut self) -> GenOnce[&mut T] {
         # ffi::pthread::pthread_mutex_lock(&mut self.native_id)
         gen &mut self.value
     }
 
     @public
-    cor try_lock_ref(&mut self) -> generator::Gen[&T] {
+    cor try_lock_ref(&mut self) -> GenOnce[&T] {
         # ffi::pthread::pthread_mutex_trylock(&mut self.native_id)
         gen &self.value
     }
 
     @public
-    cor try_lock_mut(&mut self) -> generator::Gen[&mut T] {
+    cor try_lock_mut(&mut self) -> GenOnce[&mut T] {
         # ffi::pthread::pthread_mutex_trylock(&mut self.native_id)
         gen &mut self.value
     }
 
     @public
-    fun unlock(&mut self) -> void::Void {
+    fun unlock(&mut self) -> Void {
         # ffi::pthread::pthread_mutex_unlock(&mut self.native_id)
     }
 }
 
 
 sup [T] Mutex[T] ext std::ops::del::Del {
-    fun del(self) -> void::Void {
+    fun del(self) -> Void {
         # ffi::pthread::pthread_mutex_destroy(self.native_identifier)
     }
 }

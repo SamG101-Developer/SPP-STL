@@ -1,0 +1,10 @@
+use std::void::Void
+
+
+@public
+cls PowAssign[Rhs] {}
+
+sup [Rhs] PowAssign[Rhs] {
+    @abstract_method
+    fun pow_assign(&mut self, that: Rhs) -> Void { }
+}

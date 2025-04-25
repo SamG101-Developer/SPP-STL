@@ -1,26 +1,46 @@
+use std::generator::Gen
+use std::generator::GenOnce
+use std::number::usize::USize
+use std::ops::deref::DerefMut
+use std::ops::deref::DerefRef
+use std::shadow::Shadow
+
+
 cls Shared[T] {
-    shared_counter: number::U64
-    shadow_counter: number::U64
+    @private
+    shared_counter: USize
+
+    @private
+    shadow_counter: USize
 }
+
 
 sup [T] Shared[T] {
     @public
     @compiler_builtin
-    fun new() -> Shared[T] { }
+    fun shadow(&self) -> Shadow[T] { }
 
     @public
-    @compiler_builtin
-    fun shadow(&self) -> shadow::Shadow[T] { }
+    fun shares(&self) -> USize {
+        ret self.shared_counter
+    }
+
+    @public
+    fun shadows(&self) -> USize {
+        ret self.shadow_counter
+    }
 }
 
-sup [T] Shared[T] ext ops::deref::DerefRef[T] {
+
+sup [T] Shared[T] ext DerefRef[T] {
     @public
     @compiler_builtin
-    cor deref_ref(&self) -> generator::Gen[&T] { }
+    cor deref_ref(&self) -> GenOnce[&T] { }
 }
 
-sup [T] Shared[T] ext ops::deref::DerefMut[T] {
+
+sup [T] Shared[T] ext DerefMut[T] {
     @public
     @compiler_builtin
-    cor deref_mut(&mut self) -> generator::Gen[&mut T] { }
+    cor deref_mut(&mut self) -> GenOnce[&mut T] { }
 }

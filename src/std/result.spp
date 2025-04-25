@@ -1,8 +1,30 @@
+use std::option::Opt
+use std::option::None
+use std::option::Some
+use std::string::Str
+
+
+@public
+cls Exception { message: Str }
+
+
 @public
 cls Pass[T] { val: T }
+
 
 @public
 cls Fail[E] { err: E }
 
+
 @public
 use Res[T, E] = Pass[T] or Fail[E]
+
+
+sup [T, E] Res[T, E] {
+    @no_impl
+    fun ok(self) -> Opt[T] {
+        # let converted: Opt[T] = case self of
+        #    is Pass[T](val) { Some(val) }
+        #    is Fail[E](err) { None() }
+    }
+}

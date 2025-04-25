@@ -1,0 +1,85 @@
+use BigDigit = u32::U32
+
+
+@protected
+cls BigUInt {
+    data: vector::Vec[BigDigit]
+}
+
+
+sup BigUInt ext std::ops::add::Add[Rhs=BigUInt, Ret=BigUInt] {
+    @no_impl
+    fun add(self, that: BigUInt) -> BigUInt { }
+}
+
+
+sup BigUInt ext std::ops::sub::Sub[Rhs=BigUInt, Ret=BigUInt] {
+    @no_impl
+    fun sub(self, that: BigUInt) -> BigUInt { }
+}
+
+
+sup BigUInt ext std::ops::mul::Mul[Rhs=BigUInt, Ret=BigUInt] {
+    @no_impl
+    fun mul(self, that: BigUInt) -> BigUInt { }
+}
+
+
+sup BigUInt ext std::ops::div::Div[Rhs=BigUInt, Ret=BigUInt] {
+    @no_impl
+    fun div(self, that: BigUInt) -> BigUInt { }
+}
+
+
+sup BigUInt ext std::ops::rem::Rem[Rhs=BigUInt, Ret=BigUInt] {
+    @no_impl
+    fun rem(self, that: BigUInt) -> BigUInt { }
+}
+
+
+sup BigUInt ext std::ops::mod::Mod[Rhs=BigUInt, Ret=BigUInt] {
+    @no_impl
+    fun mod(self, that: BigUInt) -> BigUInt { }
+}
+
+
+sup BigUInt ext std::ops::pow::Pow[Rhs=BigUInt, Ret=BigUInt] {
+    @no_impl
+    fun pow(self, that: BigUInt) -> BigUInt { }
+}
+
+
+sup BigUInt ext std::ops::eq::Eq[Rhs=BigUInt] {
+    @no_impl
+    fun eq(&self, that: BigUInt) -> boolean::Bool { }
+}
+
+
+sup BigUInt ext std::ops::ne::Ne[Rhs=BigUInt] {
+    @no_impl
+    fun ne(&self, that: BigUInt) -> boolean::Bool { }
+}
+
+
+sup BigUInt ext std::ops::ge::Ge[Rhs=BigUInt] {
+    @no_impl
+    fun ge(&self, that: BigUInt) -> boolean::Bool { }
+}
+
+
+sup BigUInt ext std::ops::gt::Gt[Rhs=BigUInt] {
+    @no_impl
+    fun gt(&self, that: BigUInt) -> boolean::Bool { }
+}
+
+
+sup BigUInt ext std::ops::le::Le[Rhs=BigUInt] {
+    @no_impl
+    fun le(&self, that: BigUInt) -> boolean::Bool { }
+}
+
+
+sup BigUInt ext std::ops::lt::Lt[Rhs=BigUInt] {
+    @no_impl
+    fun lt(&self, that: BigUInt) -> boolean::Bool { }
+}

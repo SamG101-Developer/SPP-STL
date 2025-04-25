@@ -1,8 +1,16 @@
 @public
-cls FunRef[In, Ret] { }
+cls FunMov[Args, Out] { }
+
 
 @public
-cls FunMut[In, Ret] { }
+cls FunMut[Args, Out] { }
+
 
 @public
-cls FunMov[In, Ret] { }
+cls FunRef[Args, Out] { }
+
+
+sup [Args, Out] FunRef[Args, Out] ext FunMut[Args, Out] { }
+
+
+sup [Args, Out] FunMut[Args, Out] ext FunMov[Args, Out] { }

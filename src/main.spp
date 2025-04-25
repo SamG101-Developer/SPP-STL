@@ -1,3 +1,3 @@
-fun main() -> std::Void {
+fun main() -> std::void::Void {
     ret
 }

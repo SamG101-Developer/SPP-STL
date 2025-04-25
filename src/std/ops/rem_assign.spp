@@ -1,0 +1,10 @@
+use std::void::Void
+
+
+@public
+cls RemAssign[Rhs] {}
+
+sup [Rhs] RemAssign[Rhs] {
+    @abstract_method
+    fun rem_assign(&mut self, that: Rhs) -> Void { }
+}

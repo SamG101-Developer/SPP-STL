@@ -1,0 +1,18 @@
+use std::number::usize::USize
+use std::generator::GenOnce
+
+
+@public
+cls IndexMut[T] { }
+sup [T] IndexMut[T] {
+    @abstract_method
+    cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] { }
+}
+
+
+@public
+cls IndexRef[T] { }
+sup [T] IndexRef[T] {
+    @abstract_method
+    cor index_ref(&self, index: USize) -> GenOnce[&T] { }
+}

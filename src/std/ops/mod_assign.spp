@@ -1,0 +1,10 @@
+use std::void::Void
+
+
+@public
+cls ModAssign[Rhs] {}
+
+sup [Rhs] ModAssign[Rhs] {
+    @abstract_method
+    fun mod_assign(&mut self, that: Rhs) -> Void { }
+}

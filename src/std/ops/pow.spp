@@ -1,0 +1,7 @@
+@public
+cls Pow[Rhs, Ret] { }
+
+sup [Rhs, Ret] Pow[Rhs, Ret] {
+    @abstract_method
+    fun pow(self, that: Rhs) -> Ret { }
+}

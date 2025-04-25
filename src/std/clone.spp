@@ -1,9 +1,9 @@
 @public
-cls Clone[Out] { }
+cls Clone { }
 
 
-sup [Out] Clone[Out] {
+sup Clone {
     @public
     @abstract_method
-    fun clone(&self) -> Out { }
+    fun clone(&self) -> Self { }
 }

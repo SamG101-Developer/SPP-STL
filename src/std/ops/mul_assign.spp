@@ -1,0 +1,10 @@
+use std::void::Void
+
+
+@public
+cls MulAssign[Rhs] {}
+
+sup [Rhs] MulAssign[Rhs] {
+    @abstract_method
+    fun mul_assign(&mut self, that: Rhs) -> Void { }
+}

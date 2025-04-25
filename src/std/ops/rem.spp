@@ -1,0 +1,7 @@
+@public
+cls Rem[Rhs, Ret] { }
+
+sup [Rhs, Ret] Rem[Rhs, Ret] {
+    @abstract_method
+    fun rem(self, that: Rhs) -> Ret { }
+}

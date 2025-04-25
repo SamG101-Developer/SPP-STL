@@ -1,6 +1,23 @@
+use None = std::option::None
+use Void = std::void::Void
+
+
 @public
-cls Gen[Yield, Send=void::Void] { }
+cls Gen[Yield, Send=Void] { }
+
+
+@public
+cls GenOnce[Yield] { }
+
+
 sup [Yield, Send] Gen[Yield, Send] {
-    @no_impl
+    @virtual_method
+    @compiler_builtin
     cor resume(&self, value: Send) -> Gen[Yield] { }
+}
+
+
+sup [Yield] GenOnce[Yield] ext Gen[Yield, Void] {
+    @compiler_builtin
+    cor resume(&self, value: Void) -> Gen[Yield] { }
 }

@@ -1,7 +1,10 @@
+use std::boolean::Bool
+
+
 @public
 cls And[Rhs] {}
 
 sup [Rhs] And[Rhs] {
     @abstract_method
-    fun and_(self, that: Rhs) -> boolean::Bool { }
+    fun and(self, that: Rhs) -> Bool { }
 }
