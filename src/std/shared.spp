@@ -33,14 +33,12 @@ sup [T] Shared[T] {
 
 
 sup [T] Shared[T] ext DerefRef[T] {
-    @public
     @compiler_builtin
     cor deref_ref(&self) -> GenOnce[&T] { }
 }
 
 
 sup [T] Shared[T] ext DerefMut[T] {
-    @public
     @compiler_builtin
     cor deref_mut(&mut self) -> GenOnce[&mut T] { }
 }
