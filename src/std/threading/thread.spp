@@ -54,7 +54,6 @@ sup Thread {
 
 
 sup Thread ext Eq[Rhs=Thread] {
-    @public
     fun eq(&self, that: Thread) -> boolean::Bool {
         ret true  # ffi::pthread::pthread_equal(self.native_id, that.native_id)
     }
