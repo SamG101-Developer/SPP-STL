@@ -37,19 +37,15 @@ cls GlobalAlloc[E] { }
 
 
 sup [E] GlobalAlloc[E] ext Alloc[E] {
-    @public
     @no_impl
     fun allocate(n: USize) -> Res[ArrDynamic[E], AllocException] { }
-    
-    @public
+
     @no_impl
     fun allocate_zeroed(n: USize) -> Res[ArrDynamic[E], AllocException] { }
-    
-    @public
+
     @no_impl
     fun deallocate(memory: ArrDynamic[E]) -> Res[Void, AllocException] { }
-    
-    @public
+
     @no_impl
     fun reallocate(memory: &mut ArrDynamic[E], n: USize) -> Res[Void, AllocException] { }
 }
