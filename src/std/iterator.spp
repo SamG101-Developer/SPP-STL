@@ -52,10 +52,6 @@ sup [T] Iterator[T] {
         gen with self.slice(count, self.count(), 1_uz)
     }
 
-    cor drop_last_n(self, count: USize) -> Iterator[T] {
-        gen with self.slice(0_uz, self.count() - count, 1_uz)
-    }
-
     cor filter(self, predicate: FunRef[(T,), Bool]) -> Iterator[T] {
         loop item in self {
             case predicate(item) {
@@ -69,28 +65,30 @@ sup [T] Iterator[T] {
         gen with self.slice(0_uz, count, 1_uz)
     }
 
-    cor keep_last_n(self, count: USize) -> Iterator[T] {
-        gen with self.slice(self.count() - count, self.count(), 1_uz)
-    }
-
     cor map[U](self, mapper: FunRef[(T,), U]) -> Iterator[U] {
         loop item in self {
             gen mapper(item)
         }
     }
 
-    cor slice(self, start: USize, end: USize, step: USize) -> Iterator[T] {
+    cor slice(self, start: USize, end: USize) -> Iterator[T] {
         let mut index = 0_uz
         loop item in self {
             case index >= start and index < end {
                 gen item
             }
-            index += step
+            index += 1_uz
         }
     }
 
     cor step_by(self, step: USize) -> Iterator[T] {
-        gen with self.slice(0_uz, self.count(), step)
+        let mut index = 0_uz
+        loop item in self {
+            case index % step == 0_uz {
+                gen item
+            }
+            index += step
+        }
     }
 
     fun count(self) -> USize {
