@@ -3,6 +3,7 @@ use std::function::FunRef
 use std::generator::Gen
 use std::number::usize::USize
 use std::option::Opt
+use std::option::Some
 use std::void::Void
 
 
