@@ -32,20 +32,108 @@ cls Iterator[T] { }
 
 
 sup [T] Iterator[T] {
-    @virtual_method
-    cor filter(&self, predicate: FunRef[(T,), Bool]) -> Iterator[T] {
+    cor concat(self, other: Iterator[T]) -> Iterator[T] {
+        gen with self
+        gen with other
+    }
+
+    cor cycle(self) -> Iterator[T] {
+        loop true {
+            gen with self
+        }
+    }
+
+    cor drop_n(self, count: USize) -> Iterator[T] {
+        gen with self.slice(count, self.count(), 1_uz)
+    }
+
+    cor drop_last_n(self, count: USize) -> Iterator[T] {
+        gen with self.slice(0, self.count() - count, 1_uz)
+    }
+
+    cor filter(self, predicate: FunRef[(T,), Bool]) -> Iterator[T] {
         loop item in self {
-            # case predicate(item) {
-            #     gen item
-            # }
+            case predicate(item) {
+                gen item
+            }
             gen item
         }
     }
 
-    @virtual_method
-    cor map[U](&self, mapper: FunRef[(T,), U]) -> Iterator[U] {
+    cor keep_n(self, count: USize) -> Iterator[T] {
+        gen with self.slice(0_uz, count, 1_uz)
+    }
+
+    cor keep_last_n(self, count: USize) -> Iterator[T] {
+        gen with self.slice(self.count() - count, self.count(), 1_uz)
+    }
+
+    cor map[U](self, mapper: FunRef[(T,), U]) -> Iterator[U] {
         loop item in self {
-            # gen mapper(item)
+            gen mapper(item)
+        }
+    }
+
+    cor slice(self, start: USize, end: USize, step: USize) -> Iterator[T] {
+        var index = 0_uz
+        loop item in self {
+            case index >= start and index < end {
+                gen item
+            }
+            index += step
+        }
+    }
+
+    cor step_by(self, step: USize) -> Iterator[T] {
+        gen with self.slice(0, self.count(), step)
+    }
+
+    fun count(self) -> USize {
+        var count = 0_uz
+        loop _ in self {
+            count += 1_uz
+        }
+        ret count
+    }
+
+    fun fold[U](self, initial: U, reducer: FunRef[(U, T), U]) -> U {
+        var acc = initial
+        loop item in self {
+            acc = reducer(acc, item)
+        }
+        ret acc
+    }
+
+    fun all(self, predicate: FunRef[(T,), Bool]) -> Bool {
+        loop item in self {
+            case predicate(item).not {
+                ret false
+            }
+        }
+        ret true
+    }
+
+    fun any(self, predicate: FunRef[(T,), Bool]) -> Bool {
+        loop item in self {
+            case predicate(item) {
+                ret true
+            }
+        }
+        ret false
+    }
+
+    fun find(self, predicate: FunRef[(T,), Bool]) -> Option[T] {
+        loop item in self {
+            case predicate(item) {
+                ret Some(val=item)
+            }
+        }
+        ret None
+    }
+
+    fun for_each(self, action: FunRef[(T,), Void]) -> Void {
+        loop item in self {
+            action(item)
         }
     }
 }
