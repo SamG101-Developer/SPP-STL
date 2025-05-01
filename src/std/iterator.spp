@@ -49,7 +49,7 @@ sup [T] Iterator[T] {
     }
 
     cor drop_n(self, count: USize) -> Iterator[T] {
-        gen with self.slice(count, self.count(), 1_uz)
+        gen with self.slice(count, self.count())
     }
 
     cor filter(self, predicate: FunRef[(T,), Bool]) -> Iterator[T] {
@@ -62,7 +62,7 @@ sup [T] Iterator[T] {
     }
 
     cor keep_n(self, count: USize) -> Iterator[T] {
-        gen with self.slice(0_uz, count, 1_uz)
+        gen with self.slice(0_uz, count)
     }
 
     cor map[U](self, mapper: FunRef[(T,), U]) -> Iterator[U] {
