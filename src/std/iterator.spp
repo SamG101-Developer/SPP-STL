@@ -52,9 +52,9 @@ sup [T] Iterator[T] {
         gen with self.slice(count, self.count())
     }
 
-    cor filter(self, predicate: FunRef[(T,), Bool]) -> Iterator[T] {
+    cor filter(self, predicate: FunRef[(&T,), Bool]) -> Iterator[T] {
         loop item in self {
-            case predicate(item) {
+            case predicate(&item) {
                 gen item
             }
             gen item
