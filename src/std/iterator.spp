@@ -75,7 +75,7 @@ sup [T] Iterator[T] {
     }
 
     cor slice(self, start: USize, end: USize, step: USize) -> Iterator[T] {
-        var index = 0_uz
+        let mut index = 0_uz
         loop item in self {
             case index >= start and index < end {
                 gen item
@@ -89,7 +89,7 @@ sup [T] Iterator[T] {
     }
 
     fun count(self) -> USize {
-        var count = 0_uz
+        let mut count = 0_uz
         loop _ in self {
             count += 1_uz
         }
@@ -97,7 +97,7 @@ sup [T] Iterator[T] {
     }
 
     fun fold[U](self, initial: U, reducer: FunRef[(U, T), U]) -> U {
-        var acc = initial
+        let mut acc = initial
         loop item in self {
             acc = reducer(acc, item)
         }
