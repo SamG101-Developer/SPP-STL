@@ -1,6 +1,9 @@
-use std::generator::Gen
 use std::boolean::Bool
 use std::function::FunRef
+use std::generator::Gen
+use std::number::usize::USize
+use std::option::Opt
+use std::void::Void
 
 
 @public
@@ -122,7 +125,7 @@ sup [T] Iterator[T] {
         ret false
     }
 
-    fun find(self, predicate: FunRef[(T,), Bool]) -> Option[T] {
+    fun find(self, predicate: FunRef[(T,), Bool]) -> Opt[T] {
         loop item in self {
             case predicate(item) {
                 ret Some(val=item)
