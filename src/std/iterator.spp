@@ -53,7 +53,7 @@ sup [T] Iterator[T] {
     }
 
     cor drop_last_n(self, count: USize) -> Iterator[T] {
-        gen with self.slice(0, self.count() - count, 1_uz)
+        gen with self.slice(0_uz, self.count() - count, 1_uz)
     }
 
     cor filter(self, predicate: FunRef[(T,), Bool]) -> Iterator[T] {
@@ -90,7 +90,7 @@ sup [T] Iterator[T] {
     }
 
     cor step_by(self, step: USize) -> Iterator[T] {
-        gen with self.slice(0, self.count(), step)
+        gen with self.slice(0_uz, self.count(), step)
     }
 
     fun count(self) -> USize {
