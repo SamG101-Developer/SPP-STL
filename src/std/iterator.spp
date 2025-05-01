@@ -90,7 +90,7 @@ sup [T] Iterator[T] {
 
     fun count(self) -> USize {
         let mut count = 0_uz
-        loop _ in self {
+        loop item in self {
             count += 1_uz
         }
         ret count
