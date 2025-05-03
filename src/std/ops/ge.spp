@@ -6,5 +6,5 @@ cls Ge[Rhs] { }
 
 sup [Rhs] Ge[Rhs] {
     @abstract_method
-    fun ge(&self, that: Rhs) -> Bool { }
+    fun ge(&self, that: &Rhs) -> Bool { }
 }

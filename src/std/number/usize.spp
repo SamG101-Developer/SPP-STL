@@ -1,3 +1,4 @@
+use std::boolean::Bool
 use std::void::Void
 
 
@@ -97,35 +98,35 @@ sup USize ext std::ops::pow_assign::PowAssign[Rhs=USize] {
 
 sup USize ext std::ops::eq::Eq[Rhs=USize] {
     @compiler_builtin
-    fun eq(&self, that: USize) -> boolean::Bool { }
+    fun eq(&self, that: &USize) -> Bool { }
 }
 
 
 sup USize ext std::ops::ne::Ne[Rhs=USize] {
     @compiler_builtin
-    fun ne(&self, that: USize) -> boolean::Bool { }
+    fun ne(&self, that: &USize) -> Bool { }
 }
 
 
 sup USize ext std::ops::ge::Ge[Rhs=USize] {
     @compiler_builtin
-    fun ge(&self, that: USize) -> boolean::Bool { }
+    fun ge(&self, that: &USize) -> Bool { }
 }
 
 
 sup USize ext std::ops::gt::Gt[Rhs=USize] {
     @compiler_builtin
-    fun gt(&self, that: USize) -> boolean::Bool { }
+    fun gt(&self, that: &USize) -> Bool { }
 }
 
 
 sup USize ext std::ops::le::Le[Rhs=USize] {
     @compiler_builtin
-    fun le(&self, that: USize) -> boolean::Bool { }
+    fun le(&self, that: &USize) -> Bool { }
 }
 
 
 sup USize ext std::ops::lt::Lt[Rhs=USize] {
     @compiler_builtin
-    fun lt(&self, that: USize) -> boolean::Bool { }
+    fun lt(&self, that: &USize) -> Bool { }
 }

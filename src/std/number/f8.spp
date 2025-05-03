@@ -1,3 +1,6 @@
+use std::boolean::Bool
+
+
 @public
 cls F8 { }
 
@@ -52,35 +55,35 @@ sup F8 ext std::ops::pow::Pow[Rhs=F8, Ret=F8] {
 
 sup F8 ext std::ops::eq::Eq[Rhs=F8] {
     @compiler_builtin
-    fun eq(&self, that: F8) -> boolean::Bool { }
+    fun eq(&self, that: &F8) -> Bool { }
 }
 
 
 sup F8 ext std::ops::ne::Ne[Rhs=F8] {
     @compiler_builtin
-    fun ne(&self, that: F8) -> boolean::Bool { }
+    fun ne(&self, that: &F8) -> Bool { }
 }
 
 
 sup F8 ext std::ops::ge::Ge[Rhs=F8] {
     @compiler_builtin
-    fun ge(&self, that: F8) -> boolean::Bool { }
+    fun ge(&self, that: &F8) -> Bool { }
 }
 
 
 sup F8 ext std::ops::gt::Gt[Rhs=F8] {
     @compiler_builtin
-    fun gt(&self, that: F8) -> boolean::Bool { }
+    fun gt(&self, that: &F8) -> Bool { }
 }
 
 
 sup F8 ext std::ops::le::Le[Rhs=F8] {
     @compiler_builtin
-    fun le(&self, that: F8) -> boolean::Bool { }
+    fun le(&self, that: &F8) -> Bool { }
 }
 
 
 sup F8 ext std::ops::lt::Lt[Rhs=F8] {
     @compiler_builtin
-    fun lt(&self, that: F8) -> boolean::Bool { }
+    fun lt(&self, that: &F8) -> Bool { }
 }

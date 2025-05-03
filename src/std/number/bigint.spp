@@ -96,35 +96,35 @@ sup BigInt ext std::ops::pow_assign::PowAssign[Rhs=BigInt] {
 
 sup BigInt ext std::ops::eq::Eq[Rhs=BigInt] {
     @no_impl
-    fun eq(&self, that: BigInt) -> boolean::Bool { }
+    fun eq(&self, that: &BigInt) -> Bool { }
 }
 
 
 sup BigInt ext std::ops::ne::Ne[Rhs=BigInt] {
     @no_impl
-    fun ne(&self, that: BigInt) -> boolean::Bool { }
+    fun ne(&self, that: &BigInt) -> Bool { }
 }
 
 
 sup BigInt ext std::ops::ge::Ge[Rhs=BigInt] {
     @no_impl
-    fun ge(&self, that: BigInt) -> boolean::Bool { }
+    fun ge(&self, that: &BigInt) -> Bool { }
 }
 
 
 sup BigInt ext std::ops::gt::Gt[Rhs=BigInt] {
     @no_impl
-    fun gt(&self, that: BigInt) -> boolean::Bool { }
+    fun gt(&self, that: &BigInt) -> Bool { }
 }
 
 
 sup BigInt ext std::ops::le::Le[Rhs=BigInt] {
     @no_impl
-    fun le(&self, that: BigInt) -> boolean::Bool { }
+    fun le(&self, that: &BigInt) -> Bool { }
 }
 
 
 sup BigInt ext std::ops::lt::Lt[Rhs=BigInt] {
     @no_impl
-    fun lt(&self, that: BigInt) -> boolean::Bool { }
+    fun lt(&self, that: &BigInt) -> Bool { }
 }
