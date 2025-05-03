@@ -1,3 +1,6 @@
+use std::boolean::Bool
+
+
 @public
 cls U32 { }
 
@@ -52,35 +55,35 @@ sup U32 ext std::ops::pow::Pow[Rhs=U32, Ret=U32] {
 
 sup U32 ext std::ops::eq::Eq[Rhs=U32] {
     @compiler_builtin
-    fun eq(&self, that: U32) -> boolean::Bool { }
+    fun eq(&self, that: &U32) -> Bool { }
 }
 
 
 sup U32 ext std::ops::ne::Ne[Rhs=U32] {
     @compiler_builtin
-    fun ne(&self, that: U32) -> boolean::Bool { }
+    fun ne(&self, that: &U32) -> Bool { }
 }
 
 
 sup U32 ext std::ops::ge::Ge[Rhs=U32] {
     @compiler_builtin
-    fun ge(&self, that: U32) -> boolean::Bool { }
+    fun ge(&self, that: &U32) -> Bool { }
 }
 
 
 sup U32 ext std::ops::gt::Gt[Rhs=U32] {
     @compiler_builtin
-    fun gt(&self, that: U32) -> boolean::Bool { }
+    fun gt(&self, that: &U32) -> Bool { }
 }
 
 
 sup U32 ext std::ops::le::Le[Rhs=U32] {
     @compiler_builtin
-    fun le(&self, that: U32) -> boolean::Bool { }
+    fun le(&self, that: &U32) -> Bool { }
 }
 
 
 sup U32 ext std::ops::lt::Lt[Rhs=U32] {
     @compiler_builtin
-    fun lt(&self, that: U32) -> boolean::Bool { }
+    fun lt(&self, that: &U32) -> Bool { }
 }

@@ -1,3 +1,6 @@
+use std::boolean::Bool
+
+
 @public
 cls F32 { }
 
@@ -52,35 +55,35 @@ sup F32 ext std::ops::pow::Pow[Rhs=F32, Ret=F32] {
 
 sup F32 ext std::ops::eq::Eq[Rhs=F32] {
     @compiler_builtin
-    fun eq(&self, that: F32) -> boolean::Bool { }
+    fun eq(&self, that: &F32) -> Bool { }
 }
 
 
 sup F32 ext std::ops::ne::Ne[Rhs=F32] {
     @compiler_builtin
-    fun ne(&self, that: F32) -> boolean::Bool { }
+    fun ne(&self, that: &F32) -> Bool { }
 }
 
 
 sup F32 ext std::ops::ge::Ge[Rhs=F32] {
     @compiler_builtin
-    fun ge(&self, that: F32) -> boolean::Bool { }
+    fun ge(&self, that: &F32) -> Bool { }
 }
 
 
 sup F32 ext std::ops::gt::Gt[Rhs=F32] {
     @compiler_builtin
-    fun gt(&self, that: F32) -> boolean::Bool { }
+    fun gt(&self, that: &F32) -> Bool { }
 }
 
 
 sup F32 ext std::ops::le::Le[Rhs=F32] {
     @compiler_builtin
-    fun le(&self, that: F32) -> boolean::Bool { }
+    fun le(&self, that: &F32) -> Bool { }
 }
 
 
 sup F32 ext std::ops::lt::Lt[Rhs=F32] {
     @compiler_builtin
-    fun lt(&self, that: F32) -> boolean::Bool { }
+    fun lt(&self, that: &F32) -> Bool { }
 }

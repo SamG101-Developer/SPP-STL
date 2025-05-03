@@ -6,5 +6,5 @@ cls Ne[Rhs] { }
 
 sup [Rhs] Ne[Rhs] {
     @abstract_method
-    fun ne(&self, that: Rhs) -> Bool { }
+    fun ne(&self, that: &Rhs) -> Bool { }
 }

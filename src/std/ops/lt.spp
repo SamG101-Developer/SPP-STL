@@ -6,5 +6,5 @@ cls Lt[Rhs] { }
 
 sup [Rhs] Lt[Rhs] {
     @abstract_method
-    fun lt(&self, that: Rhs) -> Bool { }
+    fun lt(&self, that: &Rhs) -> Bool { }
 }

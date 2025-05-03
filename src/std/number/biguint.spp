@@ -1,3 +1,4 @@
+use std::boolean::Bool
 use BigDigit = u32::U32
 
 
@@ -51,35 +52,35 @@ sup BigUInt ext std::ops::pow::Pow[Rhs=BigUInt, Ret=BigUInt] {
 
 sup BigUInt ext std::ops::eq::Eq[Rhs=BigUInt] {
     @no_impl
-    fun eq(&self, that: BigUInt) -> boolean::Bool { }
+    fun eq(&self, that: &BigUInt) -> Bool { }
 }
 
 
 sup BigUInt ext std::ops::ne::Ne[Rhs=BigUInt] {
     @no_impl
-    fun ne(&self, that: BigUInt) -> boolean::Bool { }
+    fun ne(&self, that: &BigUInt) -> Bool { }
 }
 
 
 sup BigUInt ext std::ops::ge::Ge[Rhs=BigUInt] {
     @no_impl
-    fun ge(&self, that: BigUInt) -> boolean::Bool { }
+    fun ge(&self, that: &BigUInt) -> Bool { }
 }
 
 
 sup BigUInt ext std::ops::gt::Gt[Rhs=BigUInt] {
     @no_impl
-    fun gt(&self, that: BigUInt) -> boolean::Bool { }
+    fun gt(&self, that: &BigUInt) -> Bool { }
 }
 
 
 sup BigUInt ext std::ops::le::Le[Rhs=BigUInt] {
     @no_impl
-    fun le(&self, that: BigUInt) -> boolean::Bool { }
+    fun le(&self, that: &BigUInt) -> Bool { }
 }
 
 
 sup BigUInt ext std::ops::lt::Lt[Rhs=BigUInt] {
     @no_impl
-    fun lt(&self, that: BigUInt) -> boolean::Bool { }
+    fun lt(&self, that: &BigUInt) -> Bool { }
 }
