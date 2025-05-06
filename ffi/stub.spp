@@ -4,7 +4,7 @@ use std::single::Single
 
 
 @ffi
-fun printf(format: Str) -> I32 { }
+fun fputs(str: &Str, stream: &I32) -> I32 { }
 
 @ffi
 fun fgets(buffer: &mut Str, count: I32, stream: &I32) -> Str { }
