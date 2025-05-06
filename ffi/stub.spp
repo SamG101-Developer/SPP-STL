@@ -1,0 +1,22 @@
+use std::number::i32::I32
+use std::string::Str
+use std::single::Single
+
+
+@ffi
+fun printf(format: Str) -> I32 { }
+
+@ffi
+fun fgets(buffer: &mut Str, count: I32, stream: &I32) -> Str { }
+
+@ffi
+fun fopen(filename: &Str, mode: &Str) -> Single[I32] { }
+
+@ffi
+fun fread(buffer: &mut Str, size: I32, count: I32, stream: &I32) -> I32 { }
+
+@ffi
+fun fwrite(buffer: &Str, size: I32, count: I32, stream: &I32) -> I32 { }
+
+@ffi
+fun fclose(stream: &I32) -> I32 { }
