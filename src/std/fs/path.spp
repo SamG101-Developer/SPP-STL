@@ -58,7 +58,7 @@ sup Path {
         let file_name = self.file_name()
         ret file_name.map(|name: Str| {
             let parts = name.split(".")
-            if parts.len() > 1 { Some(parts[parts.len() - 1]) } else { None() }
+            case parts.len() > 1 { Some(parts[parts.len() - 1]) } else { None() }
         })
     }
 
@@ -76,7 +76,7 @@ sup Path {
 
     fun split_ext(&self) -> (Path, Opt[Str]) {
         let parts = self.path.split(".")
-        ret (Path(path=parts[0]), if parts.len() > 1 { Some(parts[1]) } else { None() })
+        ret (Path(path=parts[0]), case parts.len() > 1 { Some(parts[1]) } else { None() })
     }
 }
 
