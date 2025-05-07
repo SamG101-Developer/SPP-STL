@@ -2,6 +2,7 @@ use std::boolean::Bool
 use std::number::u8::U8
 use std::number::usize::USize
 use std::result::Res
+use std::vector::Vec
 
 
 cls StreamWriteException { }
