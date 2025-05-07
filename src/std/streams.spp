@@ -3,6 +3,7 @@ use std::number::u8::U8
 use std::number::usize::USize
 use std::result::Res
 use std::vector::Vec
+use std::void::Void
 
 
 cls StreamWriteException { }
