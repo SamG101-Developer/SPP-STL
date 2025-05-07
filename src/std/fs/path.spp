@@ -1,0 +1,144 @@
+use std::boolean::Bool
+use std::clone::Clone
+use std::iterator::IterRef
+use std::ops::eq::Eq
+use std::ops::div::Div
+use std::ops::ne::Ne
+use std::option::Opt
+use std::string::Str
+
+
+cls Path {
+    path: Str
+}
+
+
+sup Path {
+    @no_impl
+    fun is_absolute(&self) -> Bool { }
+
+    @no_impl
+    fun is_relative(&self) -> Bool { }
+
+    @no_impl
+    fun to_absolute(&self) -> Path { }
+
+    @no_impl
+    fun to_relative(&self) -> Path { }
+
+    @no_impl
+    fun exists(&self) -> Bool { }
+
+    @no_impl
+    fun parent(&self) -> Path { }
+}
+
+
+sup Path {
+    @no_impl
+    fun startswith(&self, prefix: &Str) -> Bool { }
+
+    @no_impl
+    fun endswith(&self, suffix: &Str) -> Bool { }
+}
+
+
+sup Path {
+    @no_impl
+    fun file_name(&self) -> Opt[Str] { }
+
+    @no_impl
+    fun file_stem(&self) -> Opt[Str] { }
+
+    @no_impl
+    fun extension(&self) -> Opt[Str] { }
+
+    @no_impl
+    fun dir_name(&self) -> Str { }
+
+    @no_impl
+    fun split(&self) -> (Opt[Path], Opt[Path]) { }
+
+    @no_impl
+    fun split_ext(&self) -> (Path, Opt[Str]) { }
+}
+
+
+sup Path {
+    @no_impl
+    fun is_file(&self) -> Bool { }
+
+    @no_impl
+    fun is_dir(&self) -> Bool { }
+
+    @no_impl
+    fun is_symlink(&self) -> Bool { }
+}
+
+
+sup Path {
+    @no_impl
+    fun join(&self, other: Str) -> Path { }
+
+    @no_impl
+    fun with_added_extension(&self, ext: Str) -> Path { }
+
+    @no_impl
+    fun with_extension(&self, ext: Str) -> Path { }
+
+    @no_impl
+    fun with_file_name(&self, name: Str) -> Path { }
+}
+
+
+sup Path {
+    @no_impl
+    fun sep_char(&self) -> Str { }
+
+    @no_impl
+    fun cur_dir_char(&self) -> Str { }
+
+    @no_impl
+    fun par_dir_char(&self) -> Str { }
+}
+
+
+sup Path ext IterRef[Str] {
+    @no_impl
+    fun iter_ref(&self) -> Iter[&Str] { }
+}
+
+
+sup Path ext Clone {
+    fun clone(&self) -> Path {
+        ret Path(path=self.path.clone())
+    }
+}
+
+
+sup Path ext Div[Rhs=Str, Ret=Path] {
+    fun div(self, that: Str) -> Path {
+        ret self.join(that)
+    }
+}
+
+
+sup Path ext Div[Rhs=Path, Ret=Path] {
+    fun div(self, that: Path) -> Path {
+        ret self.join(that.path)
+    }
+}
+
+
+sup Path ext Eq[Rhs=Path] {
+    fun eq(&self, that: Path) -> Bool {
+        ret self.path.eq(that.path)
+    }
+}
+
+
+sup Path ext Ne[Rhs=Path] {
+    fun ne(&self, that: Path) -> Bool {
+        ret self.path.ne(that.path)
+    }
+}

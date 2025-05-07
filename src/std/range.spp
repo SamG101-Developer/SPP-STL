@@ -9,6 +9,7 @@ cls Range[T] {
 
 
 sup [T] Range[T] {
+    @public
     fun step_by(self, step: T) -> Range[T] {
         ret Range(start=self.start, end=self.end, step)
     }

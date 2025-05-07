@@ -1,0 +1,18 @@
+cls C { }
+
+sup C {
+    use Bool = std::boolean::Bool
+    use Char = std::number::i8::I8
+    use Short = std::number::i16::I16
+    use Int = std::number::i32::I32
+    use Long = std::number::i64::I64
+    use UInt = std::number::u8::U8
+    use UShort = std::number::u16::U16
+    use UInt = std::number::u32::U32
+    use ULong = std::number::u64::U64
+    use Float = std::number::f32::F32
+    use Double = std::number::f64::F64
+    use SizeT = std::number::usize::USize
+    use Void = std::void::Void
+    use RetPtr[T] = std::single::Single[T]
+}

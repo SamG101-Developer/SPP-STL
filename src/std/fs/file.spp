@@ -1,0 +1,73 @@
+use std::path::Path
+use std::boolean::Bool
+use std::number::u8::U8
+use std::number::usize::USize
+use std::ops::del::Del
+use std::result::Res
+use std::string::Str
+use std::vector::Vec
+use std::void::Void
+
+
+cls FileNotFoundException { }
+
+
+cls File {
+    handle: Single[USize]
+    open: Bool = false
+}
+
+
+sup File {
+    @public
+    fun open(path: &Path, mode: Str) -> Res[File, FileNotFoundException] {
+        let handle = ffi::libc::fopen(&path.path, &mode)
+        ret File(handle, open=true)
+    }
+
+    @public
+    fun close(&mut self) -> Bool {
+        ffi::libc::fclose(self.handle)
+        self.open = false
+    }
+
+    @public
+    fun lock(&self) -> Bool { }
+
+    @public
+    fun unlock(&self) -> Bool { }
+
+    @public
+    fun set_len(&self, len: USize) -> Bool { }
+}
+
+
+sup File ext WritableStream {
+    @no_impl
+    fun write(&mut self, data: &Vec[U8]) -> Res[USize, FileNotFoundException] {
+        ffi::libc::fwrite(data, 8, data.len(), self.handle)
+    }
+
+    @no_impl
+    fun flush(&mut self) -> Res[Void, FileNotFoundException] { }
+}
+
+
+sup File ext ReadableStream {
+    @no_impl
+    fun read(&mut self, len: USize) -> Res[Vec[U8], FileNotFoundException] { }
+}
+
+
+sup File ext SeekableStream {
+    @no_impl
+    fun seek(&mut self, offset: USize) -> Res[Void, FileNotFoundException] { }
+}
+
+
+sup File ext Del {
+    @no_impl
+    fun del(self) -> Void {
+        self.close()
+    }
+}

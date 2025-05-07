@@ -25,6 +25,14 @@ sup Str {
 }
 
 
+sup Str {
+    @public
+    fun chars(&self) -> Iterator[U8] {
+        gen with self.data.clone().iter_mov()
+    }
+}
+
+
 sup Str ext Eq[Rhs=Str] {
     fun eq(&self, that: Str) -> Bool {
         # ret self.data.iter_ref().zip(that.data.iter_ref()).map(U8::eq).all()
