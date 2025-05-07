@@ -1,5 +1,6 @@
 use std::boolean::Bool
 use std::clone::Clone
+use std::iterator::Iterator
 use std::iterator::IterRef
 use std::ops::eq::Eq
 use std::ops::div::Div
@@ -122,7 +123,7 @@ sup Path {
 
 sup Path ext IterRef[Str] {
     @no_impl
-    fun iter_ref(&self) -> Iter[&Str] { }
+    fun iter_ref(&self) -> Iterator[&Str] { }
 }
 
 
