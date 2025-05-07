@@ -44,23 +44,40 @@ sup Path {
 
 
 sup Path {
-    @no_impl
-    fun file_name(&self) -> Opt[Str] { }
+    fun file_name(&self) -> Opt[Str] {
+        let parts = self.path.split(self.sep_char())
+        ret case parts.len() == 0 { None() } else { Some(parts.get_tail().clone()) }
+    }
 
-    @no_impl
-    fun file_stem(&self) -> Opt[Str] { }
+    fun file_stem(&self) -> Opt[Str] {
+        let file_name = self.file_name()
+        ret file_name.map(|name: Str| name.split(".")[0].clone())
+    }
 
-    @no_impl
-    fun extension(&self) -> Opt[Str] { }
+    fun extension(&self) -> Opt[Str] {
+        let file_name = self.file_name()
+        ret file_name.map(|name: Str| {
+            let parts = name.split(".")
+            if parts.len() > 1 { Some(parts[parts.len() - 1]) } else { None() }
+        })
+    }
 
-    @no_impl
-    fun dir_name(&self) -> Str { }
+    fun dir_name(&self) -> Str {
+        let parts = self.path.split(self.sep_char())
+        let parts = parts.iter_mov().take(parts.len() - 1)
+        ret Str::join(parts, self.sep_char())
+    }
 
-    @no_impl
-    fun split(&self) -> (Opt[Path], Opt[Path]) { }
+    fun split(&self) -> (Opt[Path], Opt[Path]) {
+        ret (
+            self.dir_name().map(|dir: Str| Path(path=dir)),
+            self.file_name().map(|file: Str| Path(path=file)))
+    }
 
-    @no_impl
-    fun split_ext(&self) -> (Path, Opt[Str]) { }
+    fun split_ext(&self) -> (Path, Opt[Str]) {
+        let parts = self.path.split(".")
+        ret (Path(path=parts[0]), if parts.len() > 1 { Some(parts[1]) } else { None() })
+    }
 }
 
 
