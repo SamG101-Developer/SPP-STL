@@ -1,3 +1,7 @@
+use std::boolean::Bool
+use std::function::FunRef
+
+
 @public
 cls Some[T] { val: T }
 
@@ -8,3 +12,16 @@ cls None { }
 
 @public
 use Opt[T] = Some[T] or None
+
+
+sup [T] Opt[T] {
+    @public
+    fun is_some(&self) -> Bool {
+        ret self is Some[T](..)
+    }
+
+    @public
+    fun is_none(&self) -> Bool {
+        ret self is None()
+    }
+}

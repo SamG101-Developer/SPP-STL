@@ -1,8 +1,10 @@
 use std::boolean::Bool
 use std::fs::path::Path
+use std::number::i32::I32
 use std::number::u8::U8
 use std::number::usize::USize
 use std::ops::del::Del
+use std::result::Pass
 use std::result::Res
 use std::single::Single
 use std::streams::ReadableStream
@@ -20,7 +22,7 @@ cls FileNotFoundException { }
 
 
 cls File {
-    handle: Single[USize]
+    handle: I32
     open: Bool = false
 }
 
@@ -28,23 +30,27 @@ cls File {
 sup File {
     @public
     fun open(path: &Path, mode: Str) -> Res[File, FileNotFoundException] {
-        let handle = ffi::libc::fopen(&path.path, &mode)
-        ret File(handle, open=true)
+        let handle = libc::fopen(&path.path, &mode)
+        ret Pass(val=File(handle, open=true))
     }
 
     @public
-    fun close(&mut self) -> Bool {
-        ffi::libc::fclose(self.handle)
+    fun close(&mut self) -> Res[Void, FileNotFoundException] {
+        libc::fclose(&mut self.handle)
         self.open = false
+        ret Pass[Void]()
     }
 
     @public
+    @no_impl
     fun lock(&self) -> Bool { }
 
     @public
+    @no_impl
     fun unlock(&self) -> Bool { }
 
     @public
+    @no_impl
     fun set_len(&self, len: USize) -> Bool { }
 }
 
@@ -52,7 +58,7 @@ sup File {
 sup File ext WritableStream {
     @no_impl
     fun write(&mut self, data: &Vec[U8]) -> Res[USize, StreamWriteException] {
-        ffi::libc::fwrite(data, 8, data.len(), self.handle)
+        # libc::fwrite(&mtu data, 8, I32::from(data.len()), &mut self.handle)
     }
 
     @no_impl
@@ -74,7 +80,7 @@ sup File ext SeekableStream {
 
 sup File ext Del {
     @no_impl
-    fun del(self) -> Void {
+    fun del(mut self) -> Void {
         self.close()
     }
 }

@@ -23,6 +23,10 @@ sup Str {
         # ret self.data.iter_ref().map(U8::to_ascii_lowercase).collect(Str)
         ret ""
     }
+
+    @no_impl
+    fun split(&self, sep: &Str) -> Vec[Str] {
+    }
 }
 
 

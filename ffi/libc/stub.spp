@@ -5,10 +5,10 @@ use std::ffi::C
 fun fputs(str: &C::Char, stream: &C::Int) -> C::Int { }
 
 @ffi
-fun fgets(buffer: &mut C::Char, count: C::Int, stream: &C::Int) -> C::RetPtr[C::Char] { }
+fun fgets(buffer: &mut C::Char, count: C::Int, stream: &C::Int) -> C::Char { }
 
 @ffi
-fun fopen(filename: &C::Char, mode: &C::Char) -> C::RetPtr[C::Int] { }
+fun fopen(filename: &C::Char, mode: &C::Char) -> C::Int { }
 
 @ffi
 fun fread(buffer: &mut C::Char, size: C::Int, count: C::Int, stream: &mut C::Int) -> C::Int { }

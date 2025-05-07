@@ -5,7 +5,9 @@ use std::iterator::IterRef
 use std::ops::eq::Eq
 use std::ops::div::Div
 use std::ops::ne::Ne
+use std::option::None
 use std::option::Opt
+use std::option::Some
 use std::string::Str
 
 
@@ -47,37 +49,44 @@ sup Path {
 sup Path {
     fun file_name(&self) -> Opt[Str] {
         let parts = self.path.split(self.sep_char())
-        ret case parts.len() == 0 { None() } else { Some(parts.get_tail().clone()) }
+        ret case parts.len() == 0 { None() } else { Some(val=parts.get_tail().clone()) }
     }
 
     fun file_stem(&self) -> Opt[Str] {
         let file_name = self.file_name()
-        ret file_name.map(|name: Str| name.split(".")[0].clone())
+        # ret file_name.map(|name: Str| name.split(&".")[0].clone())
+        ret None()
     }
 
     fun extension(&self) -> Opt[Str] {
         let file_name = self.file_name()
-        ret file_name.map(|name: Str| {
-            let parts = name.split(".")
-            case parts.len() > 1 { Some(parts[parts.len() - 1]) } else { None() }
-        })
+        ret None()
+        #ret file_name.map(|name: Str| {
+        #    let parts = name.split(&".")
+        #    case parts.len() > 1 { Some(val=parts[parts.len() - 1]) } else { None() }
+        #})
     }
 
     fun dir_name(&self) -> Str {
-        let parts = self.path.split(self.sep_char())
+        let parts = self.path.split(&self.sep_char())
         let parts = parts.iter_mov().take(parts.len() - 1)
         ret Str::join(parts, self.sep_char())
     }
 
     fun split(&self) -> (Opt[Path], Opt[Path]) {
-        ret (
-            self.dir_name().map(|dir: Str| Path(path=dir)),
-            self.file_name().map(|file: Str| Path(path=file)))
+        let temp0: Opt[Path] = None()
+        let temp1: Opt[Path] = None()
+        ret (temp0, temp1)
+        #ret (
+            #self.dir_name().map(|dir: Str| Path(path=dir)),
+            #self.file_name().map(|file: Str| Path(path=file)))
     }
 
     fun split_ext(&self) -> (Path, Opt[Str]) {
-        let parts = self.path.split(".")
-        ret (Path(path=parts[0]), case parts.len() > 1 { Some(parts[1]) } else { None() })
+        let parts = self.path.split(&".")
+        # ret (Path(path=parts[0_uz]), case parts.len() > 1 { Some(val=parts[1]) } else { None() })
+        let dummy: Opt[Str] = Some(val=Str())
+        ret (Path(), dummy)
     }
 }
 

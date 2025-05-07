@@ -3,6 +3,7 @@ use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::array::ArrDynamic
 use std::boolean::Bool
+use std::clone::Clone
 use std::function::FunRef
 use std::generator::GenOnce
 use std::iterator::Iterator
@@ -103,6 +104,13 @@ sup [T, A] Vec[T, A] {
 
     fun shrink_to_fit(&mut self) -> Void {
         self.buffer.resize(self.length)
+    }
+}
+
+
+sup [T, A] Vec[T, A] ext Clone[Vec[T, A]] {
+    fun clone(&self) -> Vec[T, A] {
+        ret Vec[T, A](buffer=self.buffer.clone(), length=self.length)
     }
 }
 
