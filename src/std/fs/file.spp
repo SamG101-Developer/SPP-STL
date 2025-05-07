@@ -8,6 +8,9 @@ use std::single::Single
 use std::streams::ReadableStream
 use std::streams::SeekableStream
 use std::streams::WritableStream
+use std::streams::StreamReadException
+use std::streams::StreamSeekException
+use std::streams::StreamWriteException
 use std::string::Str
 use std::vector::Vec
 use std::void::Void
