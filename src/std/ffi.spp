@@ -2,7 +2,7 @@ cls C { }
 
 sup C {
     use Bool = std::boolean::Bool
-    use Char = std::number::i8::I8
+    use Char = std::string::Str
     use Short = std::number::i16::I16
     use Int = std::number::i32::I32
     use Long = std::number::i64::I64

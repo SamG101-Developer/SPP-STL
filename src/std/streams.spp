@@ -34,6 +34,7 @@ sup WritableStream {
     fun flush(&mut self) -> Res[Void, StreamWriteException] { }
 
     @public
+    @no_impl
     @virtual_method
     fun write_all(&mut self, data: &Vec[U8]) -> Res[Void, StreamWriteException] { }
 }
@@ -45,6 +46,7 @@ sup ReadableStream {
     fun read(&mut self, len: USize) -> Res[Vec[U8], StreamReadException] { }
 
     @public
+    @no_impl
     @virtual_method
     fun read_all(&mut self) -> Res[Vec[U8], StreamReadException] { }
 }
@@ -56,22 +58,27 @@ sup SeekableStream {
     fun seek(&mut self, offset: USize) -> Res[Void, StreamSeekException] { }
 
     @public
+    @no_impl
     @virtual_method
     fun seek_from_start(&mut self, offset: USize) -> Res[Void, StreamSeekException] { }
 
     @public
+    @no_impl
     @virtual_method
     fun seek_from_end(&mut self, offset: USize) -> Res[Void, StreamSeekException] { }
 
     @public
+    @no_impl
     @virtual_method
     fun rewind(&mut self) -> Res[Void, StreamSeekException] { }
 
     @public
+    @no_impl
     @virtual_method
     fun stream_len(&mut self) -> Res[USize, StreamSeekException] { }
 
     @public
+    @no_impl
     @virtual_method
     fun stream_pos(&mut self) -> Res[USize, StreamSeekException] { }
 }

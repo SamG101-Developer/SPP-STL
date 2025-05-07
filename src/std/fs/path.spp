@@ -127,7 +127,7 @@ sup Path ext IterRef[Str] {
 }
 
 
-sup Path ext Clone {
+sup Path ext Clone[Out=Path] {
     fun clone(&self) -> Path {
         ret Path(path=self.path.clone())
     }

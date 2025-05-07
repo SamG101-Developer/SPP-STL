@@ -28,7 +28,7 @@ sup Str {
 
 sup Str {
     @public
-    fun chars(&self) -> Iterator[U8] {
+    cor chars(&self) -> Iterator[U8] {
         gen with self.data.clone().iter_mov()
     }
 }
