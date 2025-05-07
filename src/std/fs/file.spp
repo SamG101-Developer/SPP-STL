@@ -5,6 +5,9 @@ use std::number::usize::USize
 use std::ops::del::Del
 use std::result::Res
 use std::single::Single
+use std::streams::ReadableStream
+use std::streams::SeekableStream
+use std::streams::WritableStream
 use std::string::Str
 use std::vector::Vec
 use std::void::Void
