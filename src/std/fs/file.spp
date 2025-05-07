@@ -48,24 +48,24 @@ sup File {
 
 sup File ext WritableStream {
     @no_impl
-    fun write(&mut self, data: &Vec[U8]) -> Res[USize, FileNotFoundException] {
+    fun write(&mut self, data: &Vec[U8]) -> Res[USize, StreamWriteException] {
         ffi::libc::fwrite(data, 8, data.len(), self.handle)
     }
 
     @no_impl
-    fun flush(&mut self) -> Res[Void, FileNotFoundException] { }
+    fun flush(&mut self) -> Res[Void, StreamWriteException] { }
 }
 
 
 sup File ext ReadableStream {
     @no_impl
-    fun read(&mut self, len: USize) -> Res[Vec[U8], FileNotFoundException] { }
+    fun read(&mut self, len: USize) -> Res[Vec[U8], StreamReadException] { }
 }
 
 
 sup File ext SeekableStream {
     @no_impl
-    fun seek(&mut self, offset: USize) -> Res[Void, FileNotFoundException] { }
+    fun seek(&mut self, offset: USize) -> Res[Void, StreamSeekException] { }
 }
 
 
