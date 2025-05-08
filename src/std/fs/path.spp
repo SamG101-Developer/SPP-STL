@@ -49,7 +49,7 @@ sup Path {
 sup Path {
     fun file_name(&self) -> Opt[Str] {
         let parts = self.path.split(&self.sep_char())
-        ret case parts.len() == 0 { None() } else { Some(val=parts.get_tail().clone()) }
+        ret case parts.len() == 0_uz { None() } else { Some(val=parts.get_tail_ref().clone()) }
     }
 
     fun file_stem(&self) -> Opt[Str] {
