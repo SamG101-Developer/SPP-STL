@@ -48,7 +48,7 @@ sup Path {
 
 sup Path {
     fun file_name(&self) -> Opt[Str] {
-        let parts = self.path.split(self.sep_char())
+        let parts = self.path.split(&self.sep_char())
         ret case parts.len() == 0 { None() } else { Some(val=parts.get_tail().clone()) }
     }
 
@@ -68,9 +68,10 @@ sup Path {
     }
 
     fun dir_name(&self) -> Str {
-        let parts = self.path.split(&self.sep_char())
-        let parts = parts.iter_mov().take(parts.len() - 1)
-        ret Str::join(parts, self.sep_char())
+        # let parts = self.path.split(&self.sep_char())
+        # let parts = parts.iter_mov().take(parts.len() - 1)
+        # ret Str::join(parts, self.sep_char())
+        ret ""
     }
 
     fun split(&self) -> (Opt[Path], Opt[Path]) {
