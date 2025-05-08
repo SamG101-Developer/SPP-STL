@@ -1,7 +1,9 @@
 use std::boolean::Bool
+use std::clone::Clone
 use std::iterator::Iterator
 use std::number::u8::U8
 use std::ops::eq::Eq
+use std::ops::ne::Ne
 use std::vector::Vec
 
 
@@ -42,5 +44,20 @@ sup Str ext Eq[Rhs=Str] {
     fun eq(&self, that: Str) -> Bool {
         # ret self.data.iter_ref().zip(that.data.iter_ref()).map(U8::eq).all()
         ret false
+    }
+}
+
+
+sup Str ext Ne[Rhs=Str] {
+    fun ne(&self, that: Str) -> Bool {
+        # ret self.data.iter_ref().zip(that.data.iter_ref()).map(U8::ne).any()
+        ret false
+    }
+}
+
+
+sup Str ext Clone[Out=Str] {
+    @no_impl
+    fun clone(&self) -> Str {
     }
 }
