@@ -1,0 +1,20 @@
+use std::ffi::C
+
+
+@ffi
+fun fputs(str: &C::Char, stream: &C::Int) -> C::Int { }
+
+@ffi
+fun fgets(buffer: &mut C::Char, count: C::Int, stream: &C::Int) -> C::Char { }
+
+@ffi
+fun fopen(filename: &C::Char, mode: &C::Char) -> C::Int { }
+
+@ffi
+fun fread(buffer: &mut C::Char, size: C::Int, count: C::Int, stream: &mut C::Int) -> C::Int { }
+
+@ffi
+fun fwrite(buffer: &mut C::Char, size: C::Int, count: C::Int, stream: &mut C::Int) -> C::Int { }
+
+@ffi
+fun fclose(stream: &mut C::Int) -> C::Int { }

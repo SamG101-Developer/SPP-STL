@@ -1,0 +1,86 @@
+use std::boolean::Bool
+use std::fs::path::Path
+use std::number::i32::I32
+use std::number::u8::U8
+use std::number::usize::USize
+use std::ops::del::Del
+use std::result::Pass
+use std::result::Res
+use std::single::Single
+use std::streams::ReadableStream
+use std::streams::SeekableStream
+use std::streams::WritableStream
+use std::streams::StreamReadException
+use std::streams::StreamSeekException
+use std::streams::StreamWriteException
+use std::string::Str
+use std::vector::Vec
+use std::void::Void
+
+
+cls FileNotFoundException { }
+
+
+cls File {
+    handle: I32
+    open: Bool = false
+}
+
+
+sup File {
+    @public
+    fun open(path: &Path, mode: Str) -> Res[File, FileNotFoundException] {
+        let handle = libc::fopen(&path.path, &mode)
+        ret Pass(val=File(handle, open=true))
+    }
+
+    @public
+    fun close(&mut self) -> Res[Void, FileNotFoundException] {
+        libc::fclose(&mut self.handle)
+        self.open = false
+        ret Pass[Void]()
+    }
+
+    @public
+    @no_impl
+    fun lock(&self) -> Bool { }
+
+    @public
+    @no_impl
+    fun unlock(&self) -> Bool { }
+
+    @public
+    @no_impl
+    fun set_len(&self, len: USize) -> Bool { }
+}
+
+
+sup File ext WritableStream {
+    @no_impl
+    fun write(&mut self, data: &Vec[U8]) -> Res[USize, StreamWriteException] {
+        # libc::fwrite(&mtu data, 8, I32::from(data.len()), &mut self.handle)
+    }
+
+    @no_impl
+    fun flush(&mut self) -> Res[Void, StreamWriteException] { }
+}
+
+
+sup File ext ReadableStream {
+    @no_impl
+    fun read(&mut self, len: USize) -> Res[Vec[U8], StreamReadException] { }
+}
+
+
+sup File ext SeekableStream {
+    @no_impl
+    fun seek(&mut self, offset: USize) -> Res[Void, StreamSeekException] { }
+}
+
+
+sup File ext Del {
+    @no_impl
+    fun del(mut self) -> Void {
+        self.close()
+    }
+}

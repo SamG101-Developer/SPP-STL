@@ -1,5 +1,6 @@
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
+use std::clone::Clone
 use std::memory::Memory
 use std::number::usize::USize
 use std::result::Fail
@@ -34,6 +35,12 @@ sup [T, A] ArrDynamic[T, A] ext Memory[T, A] {
     fun len(&self) -> USize {
         ret self.length
     }
+}
+
+
+sup [T, A] ArrDynamic[T, A] ext Clone[ArrDynamic[T, A]] {
+    @compiler_builtin
+    fun clone(&self) -> ArrDynamic[T, A] { }
 }
 
 

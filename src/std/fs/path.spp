@@ -1,0 +1,173 @@
+use std::boolean::Bool
+use std::clone::Clone
+use std::iterator::Iterator
+use std::iterator::IterRef
+use std::ops::eq::Eq
+use std::ops::div::Div
+use std::ops::ne::Ne
+use std::option::None
+use std::option::Opt
+use std::option::Some
+use std::string::Str
+
+
+cls Path {
+    path: Str
+}
+
+
+sup Path {
+    @no_impl
+    fun is_absolute(&self) -> Bool { }
+
+    @no_impl
+    fun is_relative(&self) -> Bool { }
+
+    @no_impl
+    fun to_absolute(&self) -> Path { }
+
+    @no_impl
+    fun to_relative(&self) -> Path { }
+
+    @no_impl
+    fun exists(&self) -> Bool { }
+
+    @no_impl
+    fun parent(&self) -> Path { }
+}
+
+
+sup Path {
+    @no_impl
+    fun startswith(&self, prefix: &Str) -> Bool { }
+
+    @no_impl
+    fun endswith(&self, suffix: &Str) -> Bool { }
+}
+
+
+sup Path {
+    fun file_name(&self) -> Opt[Str] {
+        let parts = self.path.split(&self.sep_char())
+        # ret case parts.len() == 0_uz { None() } else { Some(val=parts.get_tail_ref().clone()) }
+        ret None()
+    }
+
+    fun file_stem(&self) -> Opt[Str] {
+        let file_name = self.file_name()
+        # ret file_name.map(|name: Str| name.split(&".")[0].clone())
+        ret None()
+    }
+
+    fun extension(&self) -> Opt[Str] {
+        let file_name = self.file_name()
+        ret None()
+        #ret file_name.map(|name: Str| {
+        #    let parts = name.split(&".")
+        #    case parts.len() > 1 { Some(val=parts[parts.len() - 1]) } else { None() }
+        #})
+    }
+
+    fun dir_name(&self) -> Str {
+        # let parts = self.path.split(&self.sep_char())
+        # let parts = parts.iter_mov().take(parts.len() - 1)
+        # ret Str::join(parts, self.sep_char())
+        ret ""
+    }
+
+    fun split(&self) -> (Opt[Path], Opt[Path]) {
+        let temp0: Opt[Path] = None()
+        let temp1: Opt[Path] = None()
+        ret (temp0, temp1)
+        #ret (
+            #self.dir_name().map(|dir: Str| Path(path=dir)),
+            #self.file_name().map(|file: Str| Path(path=file)))
+    }
+
+    fun split_ext(&self) -> (Path, Opt[Str]) {
+        let parts = self.path.split(&".")
+        # ret (Path(path=parts[0_uz]), case parts.len() > 1 { Some(val=parts[1]) } else { None() })
+        let dummy: Opt[Str] = Some(val=Str())
+        ret (Path(), dummy)
+    }
+}
+
+
+sup Path {
+    @no_impl
+    fun is_file(&self) -> Bool { }
+
+    @no_impl
+    fun is_dir(&self) -> Bool { }
+
+    @no_impl
+    fun is_symlink(&self) -> Bool { }
+}
+
+
+sup Path {
+    @no_impl
+    fun join(&self, other: Str) -> Path { }
+
+    @no_impl
+    fun with_added_extension(&self, ext: Str) -> Path { }
+
+    @no_impl
+    fun with_extension(&self, ext: Str) -> Path { }
+
+    @no_impl
+    fun with_file_name(&self, name: Str) -> Path { }
+}
+
+
+sup Path {
+    @no_impl
+    fun sep_char(&self) -> Str { }
+
+    @no_impl
+    fun cur_dir_char(&self) -> Str { }
+
+    @no_impl
+    fun par_dir_char(&self) -> Str { }
+}
+
+
+sup Path ext IterRef[Str] {
+    @no_impl
+    cor iter_ref(&self) -> Iterator[&Str] { }
+}
+
+
+sup Path ext Clone[Out=Path] {
+    fun clone(&self) -> Path {
+        ret Path(path=self.path.clone())
+    }
+}
+
+
+sup Path ext Div[Rhs=Str, Ret=Path] {
+    fun div(self, that: Str) -> Path {
+        ret self.join(that)
+    }
+}
+
+
+sup Path ext Div[Rhs=Path, Ret=Path] {
+    fun div(self, that: Path) -> Path {
+        ret self.join(that.path)
+    }
+}
+
+
+sup Path ext Eq[Rhs=Path] {
+    fun eq(&self, that: Path) -> Bool {
+        ret self.path.eq(that.path)
+    }
+}
+
+
+sup Path ext Ne[Rhs=Path] {
+    fun ne(&self, that: Path) -> Bool {
+        ret self.path.ne(that.path)
+    }
+}
