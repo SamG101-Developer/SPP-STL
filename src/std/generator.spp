@@ -19,5 +19,5 @@ sup [Yield, Send] Gen[Yield, Send] {
 
 sup [Yield] GenOnce[Yield] ext Gen[Yield, Void] {
     @compiler_builtin
-    cor resume(&self) -> Gen[Yield | None] { }
+    cor resume(&self) -> Gen[Yield or None] { }
 }
