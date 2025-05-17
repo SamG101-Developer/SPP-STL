@@ -1,20 +1,20 @@
-use std::ffi::C
+use std::ffi
 
 
 @ffi
-fun fputs(str: &C::Char, stream: &C::Int) -> C::Int { }
+fun fputs(str: &ffi::Char, stream: &ffi::Int) -> ffi::Int { }
 
 @ffi
-fun fgets(buffer: &mut C::Char, count: C::Int, stream: &C::Int) -> C::Char { }
+fun fgets(buffer: &mut ffi::Char, count: ffi::Int, stream: &ffi::Int) -> ffi::Char { }
 
 @ffi
-fun fopen(filename: &C::Char, mode: &C::Char) -> C::Int { }
+fun fopen(filename: &ffi::Char, mode: &ffi::Char) -> ffi::Int { }
 
 @ffi
-fun fread(buffer: &mut C::Char, size: C::Int, count: C::Int, stream: &mut C::Int) -> C::Int { }
+fun fread(buffer: &mut ffi::Char, size: ffi::Int, count: ffi::Int, stream: &mut ffi::Int) -> ffi::Int { }
 
 @ffi
-fun fwrite(buffer: &mut C::Char, size: C::Int, count: C::Int, stream: &mut C::Int) -> C::Int { }
+fun fwrite(buffer: &mut ffi::Char, size: ffi::Int, count: ffi::Int, stream: &mut ffi::Int) -> ffi::Int { }
 
 @ffi
-fun fclose(stream: &mut C::Int) -> C::Int { }
+fun fclose(stream: &mut ffi::Int) -> ffi::Int { }
