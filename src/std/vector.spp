@@ -39,7 +39,7 @@ sup [T, A] Vec[T, A] {
 
 sup [T, A] Vec[T, A] {
     @public
-    fun push(&mut self, element: T) -> Void {
+    fun push(&mut self, element: Self::Element) -> Void {
         case self.length == self.buffer.cap() { self.buffer.grow_double() }
         self.buffer.place(self.length, element)
         self.length += 1_uz
@@ -47,7 +47,7 @@ sup [T, A] Vec[T, A] {
 
     @public
     @no_impl
-    fun insert(&mut self, index: USize, element: T) -> Void {
+    fun insert(&mut self, index: USize, element: Self::Element) -> Void {
         case self.length == self.buffer.cap() { self.buffer.grow_double() }
         self.buffer.shift(index, 1_uz)
         self.buffer.place(index, element)
