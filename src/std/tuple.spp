@@ -6,4 +6,4 @@ cls TupleLike { }
 cls Tup[..Items] { }
 
 
-sup [..Items] Tup[Items] ext TupleLike { }
+# sup [..Items] Tup[Items] ext TupleLike { }
