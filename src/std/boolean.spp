@@ -22,11 +22,11 @@ sup Bool ext Ior[Rhs=Bool] {
 
 sup Bool ext Eq[Rhs=Bool] {
     @compiler_builtin
-    fun eq(&self, that: Bool) -> Bool { }
+    fun eq(&self, that: &Bool) -> Bool { }
 }
 
 
 sup Bool ext Ne[Rhs=Bool] {
     @compiler_builtin
-    fun ne(&self, that: Bool) -> Bool { }
+    fun ne(&self, that: &Bool) -> Bool { }
 }
