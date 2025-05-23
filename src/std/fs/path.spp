@@ -160,14 +160,14 @@ sup Path ext Div[Rhs=Path, Ret=Path] {
 
 
 sup Path ext Eq[Rhs=Path] {
-    fun eq(&self, that: Path) -> Bool {
-        ret self.path.eq(that.path)
+    fun eq(&self, that: &Path) -> Bool {
+        ret self.path.eq(&that.path)
     }
 }
 
 
 sup Path ext Ne[Rhs=Path] {
-    fun ne(&self, that: Path) -> Bool {
-        ret self.path.ne(that.path)
+    fun ne(&self, that: &Path) -> Bool {
+        ret self.path.ne(&that.path)
     }
 }

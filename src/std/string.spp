@@ -49,7 +49,7 @@ sup Str ext Eq[Rhs=Str] {
 
 
 sup Str ext Ne[Rhs=Str] {
-    fun ne(&self, that: Str) -> Bool {
+    fun ne(&self, that: &Str) -> Bool {
         # ret self.data.iter_ref().zip(that.data.iter_ref()).map(U8::ne).any()
         ret false
     }
