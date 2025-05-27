@@ -22,8 +22,8 @@ cls Memory[T, A = GlobalAlloc[T]] {
 
 
 sup [T, A] Memory[T, A] {
-    use Element = T
-    use Allocator = A
+    type Element = T
+    type Allocator = A
 
     @protected
     fun cap(&self) -> USize {

@@ -1,5 +1,5 @@
 use std::boolean::Bool
-use BigDigit = u32::U32
+type BigDigit = u32::U32
 
 
 @protected
