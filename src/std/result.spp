@@ -17,7 +17,7 @@ cls Fail[E] { err: E }
 
 
 @public
-use Res[T, E] = Pass[T] or Fail[E]
+type Res[T, E] = Pass[T] or Fail[E]
 
 
 sup [T, E] Res[T, E] {

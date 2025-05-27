@@ -1,6 +1,6 @@
-use Bool = std::boolean::Bool
-use FunRef[Args, Out] = std::function::FunRef[Args, Out]
-use Void = std::void::Void
+type Bool = std::boolean::Bool
+type FunRef[Args, Out] = std::function::FunRef[Args, Out]
+type Void = std::void::Void
 
 
 @public
