@@ -24,8 +24,8 @@ cls Vec[T, A = GlobalAlloc[T]] {
 
 
 sup [T, A] Vec[T, A] {
-    use Element = T
-    use Allocator = A
+    type Element = T
+    type Allocator = A
 
     fun new() -> Vec[T, A] {
         ret Vec[T, A](buffer=ArrDynamic[T, A]::new_with_cap(1_uz))
