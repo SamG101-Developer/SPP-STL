@@ -51,7 +51,7 @@ sup [T, I] IndexRef[T, I] {
 
 sup [T, I] IndexRef[T, I] ext FunRef[(I,), GenOnce[&T]] {
     @compiler_builtin
-    fun call_ref(&self, index: I) -> GenOnce[&T] { }
+    fun call_ref(&self, args: (I,)) -> GenOnce[&T] { }
 }
 
 
