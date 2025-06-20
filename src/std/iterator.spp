@@ -1,6 +1,7 @@
 use std::boolean::Bool
 use std::function::FunRef
 use std::generator::Gen
+use std::generator::GenOnce
 use std::number::usize::USize
 use std::option::None
 use std::option::Opt
@@ -29,6 +30,29 @@ cls IterRef[T] { }
 sup [T] IterRef[T] {
     @abstract_method
     cor iter_ref(&self) -> Iterator[&T] { }
+}
+
+
+@public
+cls IndexMut[T, I] { }
+sup [T, I] IndexMut[T, I] {
+    @abstract_method
+    cor index_mut(&mut self, index: I) -> GenOnce[&mut T] { }
+}
+
+
+@public
+cls IndexRef[T, I] { }
+sup [T, I] IndexRef[T, I] {
+    @abstract_method
+    cor index_ref(&self, index: I) -> GenOnce[&T] { }
+}
+
+
+@public
+sup [T, I] IndexRef[T, I] ext FunRef[(I,), GenOnce[&T]] {
+    @compiler_builtin
+    fun call_ref(&self, index: I) -> GenOnce[&T] { }
 }
 
 
