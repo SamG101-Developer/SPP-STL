@@ -13,11 +13,11 @@ cls GenOnce[Yield] { }
 sup [Yield, Send] Gen[Yield, Send] {
     @virtual_method
     @compiler_builtin
-    cor resume(&mut self, value: Send) -> GenOnce[Yield] or None { }
+    cor resume(&mut self, value: Send) -> Gen[Yield] { }
 }
 
 
 sup [Yield] GenOnce[Yield] ext Gen[Yield, Void] {
     @compiler_builtin
-    cor resume(&mut self, value: Void) -> GenOnce[Yield] or None { }
+    cor resume(&mut self, value: Void) -> Gen[Yield] { }
 }
