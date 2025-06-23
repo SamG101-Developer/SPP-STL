@@ -7,7 +7,7 @@ use std::void::Void
 cls Gen[Yield, Send=Void, Err=Void, cmp once: Bool = false, cmp optional: Bool = false, cmp fallible: Bool = false] { }
 
 
-sup [Yield, Send, Err, cmp once: bool, cmp optional: Bool, cmp fallible: Bool] Gen[Yield, Send, Err, once, optional, fallible] {
+sup [Yield, Send, Err, cmp once: Bool, cmp optional: Bool, cmp fallible: Bool] Gen[Yield, Send, Err, once, optional, fallible] {
     @virtual_method
     @compiler_builtin
     cor resume(&mut self, value: Send) -> Gen[Yield] { }
