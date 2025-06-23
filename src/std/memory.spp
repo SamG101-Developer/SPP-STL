@@ -1,5 +1,4 @@
 use std::allocator::GlobalAlloc
-use std::generator::GenOnce
 use std::iterator::IndexMut
 use std::iterator::IndexRef
 use std::iterator::Iterator
@@ -97,7 +96,7 @@ sup [T, A] Memory[T, A] ext IterRef[T] {
 
 
 sup [T, A] Memory[T, A] ext IndexMut[T, USize] {
-    cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] {
+    cor index_mut(&mut self, index: USize) -> Gen[&mut T, once=true] {
         let mut elem = self.take(index)
         gen &mut elem
         self.place(index, elem)
@@ -106,7 +105,7 @@ sup [T, A] Memory[T, A] ext IndexMut[T, USize] {
 
 
 sup [T, A] Memory[T, A] ext IndexRef[T, USize] {
-    cor index_ref(&self, index: USize) -> GenOnce[&T] {
+    cor index_ref(&self, index: USize) -> Gen[&T, once=true] {
         let elem = self.take(index)
         gen &elem
         self.place(index, elem)

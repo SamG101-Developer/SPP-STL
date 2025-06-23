@@ -5,7 +5,6 @@ use std::array::ArrDynamic
 use std::boolean::Bool
 use std::clone::Clone
 use std::function::FunRef
-use std::generator::GenOnce
 use std::iterator::IndexMut
 use std::iterator::IndexRef
 use std::iterator::Iterator
@@ -57,30 +56,30 @@ sup [T, A] Vec[T, A] {
 
 
 sup [T, A] Vec[T, A] {
-    cor get_head_ref(&self) -> GenOnce[&T] {
+    cor get_head_ref(&self) -> Gen[&T, once=true] {
         gen with self.index_ref(0_uz)
     }
 
-    cor get_tail_ref(&self) -> GenOnce[&T] {
+    cor get_tail_ref(&self) -> Gen[&T, once=true] {
         gen with self.index_ref(self.length - 1_uz)
     }
 
-    cor get_ref(&self, index: USize) -> GenOnce[&T] {
+    cor get_ref(&self, index: USize) -> Gen[&T, once=true] {
         gen with self.index_ref(index)
     }
 }
 
 
 sup [T, A] Vec[T, A] {
-    cor get_head_mut(&mut self) -> GenOnce[&mut T] {
+    cor get_head_mut(&mut self) -> Gen[&mut T, once=true] {
         gen with self.index_mut(0_uz)
     }
 
-    cor get_tail_mut(&mut self) -> GenOnce[&mut T] {
+    cor get_tail_mut(&mut self) -> Gen[&mut T, once=true] {
         gen with self.index_mut(self.length - 1_uz)
     }
 
-    cor get_mut(&mut self, index: USize) -> GenOnce[&mut T] {
+    cor get_mut(&mut self, index: USize) -> Gen[&mut T, once=true] {
         gen with self.index_mut(index)
     }
 }
@@ -147,14 +146,14 @@ sup [T, A] Vec[T, A] ext IterRef[T] {
 
 
 sup [T, A] Vec[T, A] ext IndexMut[T, USize] {
-    cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] {
+    cor index_mut(&mut self, index: USize) -> Gen[&mut T, once=true] {
         gen with self.buffer.index_mut(index)
     }
 }
 
 
 sup [T, A] Vec[T, A] ext IndexRef[T, USize] {
-    cor index_ref(&self, index: USize) -> GenOnce[&T] {
+    cor index_ref(&self, index: USize) -> Gen[&T, once=true] {
         gen with self.buffer.index_ref(index)
     }
 }
