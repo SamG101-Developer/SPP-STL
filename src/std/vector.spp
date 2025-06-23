@@ -5,6 +5,7 @@ use std::array::ArrDynamic
 use std::boolean::Bool
 use std::clone::Clone
 use std::function::FunRef
+use std::generator::Gen
 use std::iterator::IndexMut
 use std::iterator::IndexRef
 use std::iterator::Iterator
