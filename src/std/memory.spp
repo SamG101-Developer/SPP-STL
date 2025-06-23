@@ -99,7 +99,7 @@ sup [T, A] Memory[T, A] ext IterRef[T] {
 sup [T, A] Memory[T, A] ext IndexMut[T, USize] {
     cor index_mut(&mut self, index: USize) -> Gen[&mut T, once=true, optional=true] {
         let mut elem = self.take(index)
-        case elem is None { gen } else { gen &mut elem }
+        case elem is None() { gen } else { gen &mut elem }
         self.place(index, elem)
     }
 }
@@ -108,7 +108,7 @@ sup [T, A] Memory[T, A] ext IndexMut[T, USize] {
 sup [T, A] Memory[T, A] ext IndexRef[T, USize] {
     cor index_ref(&self, index: USize) -> Gen[&T, once=true, optional=true] {
         let elem = self.take(index)
-        case elem is None { gen } else { gen &elem }
+        case elem is None() { gen } else { gen &elem }
         self.place(index, elem)
     }
 }
