@@ -1,4 +1,5 @@
 use std::allocator::GlobalAlloc
+use std::generator::Gen
 use std::iterator::IndexMut
 use std::iterator::IndexRef
 use std::iterator::Iterator
