@@ -1,5 +1,5 @@
-use std::ops::and::And
-use std::ops::ior::Ior
+use std::ops::and_::And
+use std::ops::ior_::Ior
 use std::ops::eq::Eq
 use std::ops::ne::Ne
 
