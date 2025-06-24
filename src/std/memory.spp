@@ -69,7 +69,7 @@ sup [T, A] Memory[T, A] ext IterMov[T] {
     cor iter_mov(self) -> Iterator[T] {
         loop index in Range(start=0_uz, end=self.capacity) {
             let elem = self.take(index)
-            gen elem
+            case elem is T() { gen elem }
         }
     }
 }
