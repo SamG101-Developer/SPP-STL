@@ -4,15 +4,39 @@ use std::void::Void
 
 
 @public
-cls Gen[Yield, Send=Void, Err=Void, cmp once: Bool = false, cmp optional: Bool = false, cmp fallible: Bool = false] { }
-
-
-sup [Yield, Send, Err, cmp once: Bool, cmp optional: Bool, cmp fallible: Bool] Gen[Yield, Send, Err, once, optional, fallible] {
+cls Gen[Yield, Send=Void, cmp once: Bool = false] { }
+sup [Yield, Send, cmp once: Bool] Gen[Yield, Send, once] {
     @virtual_method
     @compiler_builtin
     cor resume(&mut self, value: Send) -> Gen[Yield] { }
 }
 
 
+@public
+cls GenOpt[Yield, Send=Void, cmp once: Bool = false] { }
+sup [Yield, Send, cmp once: Bool] GenOpt[Yield, Send, once] {
+    @virtual_method
+    @compiler_builtin
+    cor resume(&mut self, value: Send) -> GenOpt[Yield] { }
+}
+
+
+@public
+cls GenRes[Yield, Err, Send=Void, cmp once: Bool = false] { }
+sup [Yield, Err, Send, cmp once: Bool] GenErr[Yield, Err, Send, once] {
+    @virtual_method
+    @compiler_builtin
+    cor resume(&mut self, value: Send) -> GenRes[Yield, Err] { }
+}
+
+
 @private
-cls Generated[Yield, Err, cmp once: Bool, cmp optional: Bool, cmp fallible: Bool] { }
+cls Generated[Yield, cmp once: Bool] { }
+
+
+@private
+cls GeneratedOpt[Yield, cmp once: Bool] { }
+
+
+@private
+cls GeneratedRes[Yield, Err, cmp once: Bool] { }

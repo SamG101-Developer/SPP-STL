@@ -1,4 +1,5 @@
 use std::generator::Gen
+use std::generator::GenOpt
 use std::number::u64::U64
 use std::void::Void
 
@@ -32,13 +33,13 @@ sup [T] Mutex[T] {
     }
 
     @public
-    cor try_lock_ref(&mut self) -> Gen[&T, once=true] {
+    cor try_lock_ref(&mut self) -> GenOpt[&T, once=true] {
         # ffi::pthread::pthread_mutex_trylock(&mut self.native_id)
         gen &self.value
     }
 
     @public
-    cor try_lock_mut(&mut self) -> Gen[&mut T, once=true] {
+    cor try_lock_mut(&mut self) -> GenOpt[&mut T, once=true] {
         # ffi::pthread::pthread_mutex_trylock(&mut self.native_id)
         gen &mut self.value
     }

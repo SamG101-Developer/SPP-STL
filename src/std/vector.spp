@@ -6,6 +6,7 @@ use std::boolean::Bool
 use std::clone::Clone
 use std::function::FunRef
 use std::generator::Gen
+use std::generator::GenOpt
 use std::iterator::IndexMut
 use std::iterator::IndexRef
 use std::iterator::Iterator
@@ -57,30 +58,30 @@ sup [T, A] Vec[T, A] {
 
 
 sup [T, A] Vec[T, A] {
-    cor get_head_ref(&self) -> Gen[&T, once=true] {
+    cor get_head_ref(&self) -> GenOpt[&T, once=true] {
         gen with self.index_ref(0_uz)
     }
 
-    cor get_tail_ref(&self) -> Gen[&T, once=true] {
+    cor get_tail_ref(&self) -> GenOpt[&T, once=true] {
         gen with self.index_ref(self.length - 1_uz)
     }
 
-    cor get_ref(&self, index: USize) -> Gen[&T, once=true] {
+    cor get_ref(&self, index: USize) -> GenOpt[&T, once=true] {
         gen with self.index_ref(index)
     }
 }
 
 
 sup [T, A] Vec[T, A] {
-    cor get_head_mut(&mut self) -> Gen[&mut T, once=true] {
+    cor get_head_mut(&mut self) -> GenOpt[&mut T, once=true] {
         gen with self.index_mut(0_uz)
     }
 
-    cor get_tail_mut(&mut self) -> Gen[&mut T, once=true] {
+    cor get_tail_mut(&mut self) -> GenOpt[&mut T, once=true] {
         gen with self.index_mut(self.length - 1_uz)
     }
 
-    cor get_mut(&mut self, index: USize) -> Gen[&mut T, once=true] {
+    cor get_mut(&mut self, index: USize) -> GenOpt[&mut T, once=true] {
         gen with self.index_mut(index)
     }
 }
