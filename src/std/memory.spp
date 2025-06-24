@@ -117,7 +117,7 @@ sup [T, A] Memory[T, A] ext IndexRef[T, USize] {
     cor index_ref(&self, index: USize) -> Gen[&T, once=true] {
         let elem = self.take(index)
         case elem is Some[T](val) {
-            gen &mut val
+            gen &val
             self.place(index, val)
         }  # todo: replace with .unwrap()
     }
