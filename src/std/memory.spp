@@ -118,7 +118,7 @@ sup [T, A] Memory[T, A] ext IndexRef[T, USize] {
         let elem = self.take(index)
         case elem is Some[T](val) {
             gen &mut val
-            self.place(index, elem)
+            self.place(index, val)
         }  # todo: replace with .unwrap()
     }
 }
