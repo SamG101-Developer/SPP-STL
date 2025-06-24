@@ -8,6 +8,7 @@ use std::iterator::IterMut
 use std::iterator::IterRef
 use std::number::usize::USize
 use std::option::None
+use std::option::Some
 use std::option::Opt
 use std::range::Range
 use std::void::Void
