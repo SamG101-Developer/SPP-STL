@@ -14,19 +14,19 @@ sup [Yield, Send, cmp once: Bool] Gen[Yield, Send, once] {
 
 @public
 cls GenOpt[Yield, Send=Void, cmp once: Bool = false] { }
-sup [Yield, Send, cmp once: Bool] GenOpt[Yield, Send, once] {
+sup [Yield, Send, cmp once: Bool] GenOpt[Yield, Send, once] ext Gen[Yield, Send, once] {
     @virtual_method
     @compiler_builtin
-    cor resume(&mut self, value: Send) -> GenOpt[Yield] { }
+    cor resume(&mut self, value: Send) -> Gen[Yield] { }
 }
 
 
 @public
 cls GenRes[Yield, Err, Send=Void, cmp once: Bool = false] { }
-sup [Yield, Err, Send, cmp once: Bool] GenRes[Yield, Err, Send, once] {
+sup [Yield, Err, Send, cmp once: Bool] GenRes[Yield, Err, Send, once] ext Gen[Yield, Send, once] {
     @virtual_method
     @compiler_builtin
-    cor resume(&mut self, value: Send) -> GenRes[Yield, Err] { }
+    cor resume(&mut self, value: Send) -> Gen[Yield] { }
 }
 
 
