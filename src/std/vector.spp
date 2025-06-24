@@ -67,7 +67,9 @@ sup [T, A] Vec[T, A] {
     }
 
     cor get_ref(&self, index: USize) -> GenOpt[&T, once=true] {
-        case index < self.length { gen self.index_ref(index).res() } else { gen }
+        case index >= self.length { gen }
+        iter gen self.index_ref(index).res() of
+            val { gen val }
     }
 }
 
