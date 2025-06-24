@@ -59,30 +59,30 @@ sup [T, A] Vec[T, A] {
 
 sup [T, A] Vec[T, A] {
     cor get_head_ref(&self) -> GenOpt[&T, once=true] {
-        gen with self.index_ref(0_uz)
+        gen with self.get_ref(0_uz)
     }
 
     cor get_tail_ref(&self) -> GenOpt[&T, once=true] {
-        gen with self.index_ref(self.length - 1_uz)
+        gen with self.get_ref(self.length - 1_uz)
     }
 
     cor get_ref(&self, index: USize) -> GenOpt[&T, once=true] {
-        gen with self.index_ref(index)
+        case index < self.length { gen self.index_ref(index).res() } else { gen }
     }
 }
 
 
 sup [T, A] Vec[T, A] {
     cor get_head_mut(&mut self) -> GenOpt[&mut T, once=true] {
-        gen with self.index_mut(0_uz)
+        gen with self.get_mut(0_uz)
     }
 
     cor get_tail_mut(&mut self) -> GenOpt[&mut T, once=true] {
-        gen with self.index_mut(self.length - 1_uz)
+        gen with self.get_mut(self.length - 1_uz)
     }
 
     cor get_mut(&mut self, index: USize) -> GenOpt[&mut T, once=true] {
-        gen with self.index_mut(index)
+        case index < self.length { gen self.index_mut(index).res() } else { gen }
     }
 }
 
