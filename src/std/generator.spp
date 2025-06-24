@@ -23,7 +23,7 @@ sup [Yield, Send, cmp once: Bool] GenOpt[Yield, Send, once] {
 
 @public
 cls GenRes[Yield, Err, Send=Void, cmp once: Bool = false] { }
-sup [Yield, Err, Send, cmp once: Bool] GenErr[Yield, Err, Send, once] {
+sup [Yield, Err, Send, cmp once: Bool] GenRes[Yield, Err, Send, once] {
     @virtual_method
     @compiler_builtin
     cor resume(&mut self, value: Send) -> GenRes[Yield, Err] { }
