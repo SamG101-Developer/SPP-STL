@@ -86,7 +86,7 @@ sup [T, A] Vec[T, A] {
     cor get_mut(&mut self, index: USize) -> GenOpt[&mut T, once=true] {
         case index >= self.length { gen }
         iter self.index_mut(index).res() of
-            val { gen val }
+            mut val { gen val }
     }
 }
 
