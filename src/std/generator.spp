@@ -8,7 +8,7 @@ cls Gen[Yield, Send=Void, cmp once: Bool = false] { }
 sup [Yield, Send, cmp once: Bool] Gen[Yield, Send, once] {
     @virtual_method
     @compiler_builtin
-    cor resume(&mut self, value: Send) -> Gen[Yield] { }
+    cor resume(&mut self, value: Send) -> Gen[Yield, Send, once] { }
 }
 
 
