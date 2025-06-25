@@ -1,4 +1,4 @@
-use std::generator::Gen
+use std::generator::GenOnce
 use std::generator::GenOpt
 use std::number::u64::U64
 use std::void::Void

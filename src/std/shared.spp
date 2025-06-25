@@ -1,4 +1,4 @@
-use std::generator::Gen
+use std::generator::GenOnce
 use std::number::usize::USize
 use std::ops::deref::DerefMut
 use std::ops::deref::DerefRef
