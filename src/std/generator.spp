@@ -14,7 +14,7 @@ sup [Yield, Send] Gen[Yield, Send] {
 
 @public
 cls GenOnce[Yield, Send=Void] { }
-sup [Yield, Send] Gen[Yield, Send] {
+sup [Yield, Send] GenOnce[Yield, Send] {
     @private
     @compiler_builtin
     fun send(&mut self, value: Send) -> Void { }
