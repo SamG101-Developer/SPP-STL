@@ -115,7 +115,7 @@ sup [T, A] Memory[T, A] ext IndexMut[T, USize] {
 
 
 sup [T, A] Memory[T, A] ext IndexRef[T, USize] {
-    cor index_ref(&self, index: USize) -> Gen[&T] {
+    cor index_ref(&self, index: USize) -> GenOnce[&T] {
         let elem = self.take(index)
         case elem is Some[T](val) {
             gen &val
