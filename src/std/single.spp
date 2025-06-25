@@ -8,11 +8,11 @@ cls Single[T] { }
 
 sup [T] Single[T] ext DerefRef[T] {
     @compiler_builtin
-    cor deref_ref(&self) -> Gen[&T, once=true] { }
+    cor deref_ref(&self) -> GenOnce[&T] { }
 }
 
 
 sup [T] Single[T] ext DerefMut[T] {
     @compiler_builtin
-    cor deref_mut(&mut self) -> Gen[&mut T, once=true] { }
+    cor deref_mut(&mut self) -> GenOnce[&mut T] { }
 }

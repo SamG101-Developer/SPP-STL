@@ -4,7 +4,7 @@ use std::void::Void
 
 
 @public
-cls Gen[Yield, Send=Void, cmp once: Bool = false] { }
+cls Gen[Yield, Send=Void] { }
 sup [Yield, Send, cmp once: Bool] Gen[Yield, Send, once] {
     @private
     @compiler_builtin
@@ -13,7 +13,16 @@ sup [Yield, Send, cmp once: Bool] Gen[Yield, Send, once] {
 
 
 @public
-cls GenOpt[Yield, Send=Void, cmp once: Bool = false] { }
+cls GenOnce[Yield, Send=Void] { }
+sup [Yield, Send, cmp once: Bool] Gen[Yield, Send, once] {
+    @private
+    @compiler_builtin
+    fun send(&mut self, value: Send) -> Void { }
+}
+
+
+@public
+cls GenOpt[Yield, Send=Void] { }
 sup [Yield, Send, cmp once: Bool] GenOpt[Yield, Send, once] {
     @private
     @compiler_builtin
@@ -22,7 +31,7 @@ sup [Yield, Send, cmp once: Bool] GenOpt[Yield, Send, once] {
 
 
 @public
-cls GenRes[Yield, Err, Send=Void, cmp once: Bool = false] { }
+cls GenRes[Yield, Err, Send=Void] { }
 sup [Yield, Err, Send, cmp once: Bool] GenRes[Yield, Err, Send, once] {
     @private
     @compiler_builtin
@@ -35,8 +44,8 @@ cls Generated[Yield, cmp once: Bool] { }
 
 
 @private
-cls GeneratedOpt[Yield, cmp once: Bool] { }
+cls GeneratedOpt[Yield] { }
 
 
 @private
-cls GeneratedRes[Yield, Err, cmp once: Bool] { }
+cls GeneratedRes[Yield, Err] { }

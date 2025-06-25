@@ -21,25 +21,25 @@ sup [T] Mutex[T] {
     }
 
     @public
-    cor lock_ref(&mut self) -> Gen[&T, once=true] {
+    cor lock_ref(&mut self) -> GenOnce[&T] {
         # ffi::pthread::pthread_mutex_lock(&mut self.native_id)
         gen &self.value
     }
 
     @public
-    cor lock_mut(&mut self) -> Gen[&mut T, once=true] {
+    cor lock_mut(&mut self) -> GenOnce[&mut T] {
         # ffi::pthread::pthread_mutex_lock(&mut self.native_id)
         gen &mut self.value
     }
 
     @public
-    cor try_lock_ref(&mut self) -> GenOpt[&T, once=true] {
+    cor try_lock_ref(&mut self) -> GenOpt[&T] {
         # ffi::pthread::pthread_mutex_trylock(&mut self.native_id)
         gen &self.value
     }
 
     @public
-    cor try_lock_mut(&mut self) -> GenOpt[&mut T, once=true] {
+    cor try_lock_mut(&mut self) -> GenOpt[&mut T] {
         # ffi::pthread::pthread_mutex_trylock(&mut self.native_id)
         gen &mut self.value
     }
