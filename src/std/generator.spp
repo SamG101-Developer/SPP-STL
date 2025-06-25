@@ -8,7 +8,7 @@ cls Gen[Yield, Send=Void, cmp once: Bool = false] { }
 sup [Yield, Send, cmp once: Bool] Gen[Yield, Send, once] {
     @private
     @compiler_builtin
-    fun coro(&mut self, value: Send) -> Void { }
+    fun send(&mut self, value: Send) -> Void { }
 }
 
 
@@ -17,7 +17,7 @@ cls GenOpt[Yield, Send=Void, cmp once: Bool = false] { }
 sup [Yield, Send, cmp once: Bool] GenOpt[Yield, Send, once] {
     @private
     @compiler_builtin
-    fun coro(&mut self, value: Send) -> Void { }
+    fun send(&mut self, value: Send) -> Void { }
 }
 
 
@@ -26,7 +26,7 @@ cls GenRes[Yield, Err, Send=Void, cmp once: Bool = false] { }
 sup [Yield, Err, Send, cmp once: Bool] GenRes[Yield, Err, Send, once] {
     @private
     @compiler_builtin
-    fun coro(&mut self, value: Send) -> Void { }
+    fun send(&mut self, value: Send) -> Void { }
 }
 
 
