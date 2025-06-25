@@ -6,5 +6,5 @@ cls Ior[Rhs] {}
 
 sup [Rhs] Ior[Rhs] {
     @abstract_method
-    fun ior(self, that: Rhs) -> Bool { }
+    fun ior_(self, that: Rhs) -> Bool { }
 }

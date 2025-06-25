@@ -110,10 +110,10 @@ sup Path {
     fun join(&self, other: Str) -> Path { }
 
     @no_impl
-    fun with_added_extension(&self, ext: Str) -> Path { }
+    fun with_added_extension(&self, ex: Str) -> Path { }
 
     @no_impl
-    fun with_extension(&self, ext: Str) -> Path { }
+    fun with_extension(&self, ex: Str) -> Path { }
 
     @no_impl
     fun with_file_name(&self, name: Str) -> Path { }

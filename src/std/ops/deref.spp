@@ -1,16 +1,16 @@
-use std::generator::GenOnce
+use std::generator::Gen
 
 
 cls DerefRef[T] { }
 
 sup [T] DerefRef[T] {
     @abstract_method
-    cor deref_ref(&self) -> GenOnce[&T] { }
+    cor deref_ref(&self) -> Gen[&T, once=true] { }
 }
 
 cls DerefMut[T] { }
 
 sup [T] DerefMut[T] {
     @abstract_method
-    cor deref_mut(&mut self) -> GenOnce[&mut T] { }
+    cor deref_mut(&mut self) -> Gen[&mut T, once=true] { }
 }

@@ -1,5 +1,5 @@
 use std::allocator::GlobalAlloc
-use std::generator::GenOnce
+use std::generator::Gen
 use std::iterator::IndexMut
 use std::iterator::IndexRef
 use std::iterator::Iterator
@@ -8,6 +8,8 @@ use std::iterator::IterMut
 use std::iterator::IterRef
 use std::number::usize::USize
 use std::option::None
+use std::option::Some
+use std::option::Opt
 use std::range::Range
 use std::void::Void
 
@@ -42,7 +44,7 @@ sup [T, A] Memory[T, A] {
 
     @protected
     @no_impl
-    fun take(&self, index: USize) -> T {
+    fun take(&self, index: USize) -> Opt[T] {
         # Remove an item from this memory chunk. Uses an immutable `&self` as its a special function required in mutable
         # iteration.
     }
@@ -68,7 +70,7 @@ sup [T, A] Memory[T, A] ext IterMov[T] {
     cor iter_mov(self) -> Iterator[T] {
         loop index in Range(start=0_uz, end=self.capacity) {
             let elem = self.take(index)
-            gen elem
+            case elem is Some[T](val) { gen val }
         }
     }
 }
@@ -78,8 +80,10 @@ sup [T, A] Memory[T, A] ext IterMut[T] {
     cor iter_mut(&mut self) -> Iterator[&mut T] {
         loop index in Range(start=0_uz, end=self.capacity) {
             let mut elem = self.take(index)
-            gen &mut elem
-            self.place(index, elem)
+            case elem is Some[T](mut val) {
+                gen &mut val
+                self.place(index, val)
+            }
         }
     }
 }
@@ -89,26 +93,32 @@ sup [T, A] Memory[T, A] ext IterRef[T] {
     cor iter_ref(&self) -> Iterator[&T] {
         loop index in Range(start=0_uz, end=self.capacity) {
             let elem = self.take(index)
-            gen &elem
-            self.place(index, elem)
+            case elem is Some[T](val) {
+                gen &val
+                self.place(index, val)
+            }
         }
     }
 }
 
 
 sup [T, A] Memory[T, A] ext IndexMut[T, USize] {
-    cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] {
+    cor index_mut(&mut self, index: USize) -> Gen[&mut T, once=true] {
         let mut elem = self.take(index)
-        gen &mut elem
-        self.place(index, elem)
+        case elem is Some[T](mut val) {
+            gen &mut val
+            self.place(index, val)
+        }  # todo: replace with .unwrap()
     }
 }
 
 
 sup [T, A] Memory[T, A] ext IndexRef[T, USize] {
-    cor index_ref(&self, index: USize) -> GenOnce[&T] {
+    cor index_ref(&self, index: USize) -> Gen[&T, once=true] {
         let elem = self.take(index)
-        gen &elem
-        self.place(index, elem)
+        case elem is Some[T](val) {
+            gen &val
+            self.place(index, val)
+        }  # todo: replace with .unwrap()
     }
 }
