@@ -5,17 +5,29 @@ use std::void::Void
 
 @public
 cls Gen[Yield, Send=Void, cmp once: Bool = false] { }
-sup [Yield, Send, cmp once: Bool] Gen[Yield, Send, once] { }
+sup [Yield, Send, cmp once: Bool] Gen[Yield, Send, once] {
+    @private
+    @compiler_builtin
+    fun coro(&mut self, value: Send) -> Void { }
+}
 
 
 @public
 cls GenOpt[Yield, Send=Void, cmp once: Bool = false] { }
-sup [Yield, Send, cmp once: Bool] GenOpt[Yield, Send, once] { }
+sup [Yield, Send, cmp once: Bool] GenOpt[Yield, Send, once] {
+    @private
+    @compiler_builtin
+    fun coro(&mut self, value: Send) -> Void { }
+}
 
 
 @public
 cls GenRes[Yield, Err, Send=Void, cmp once: Bool = false] { }
-sup [Yield, Err, Send, cmp once: Bool] GenRes[Yield, Err, Send, once] { }
+sup [Yield, Err, Send, cmp once: Bool] GenRes[Yield, Err, Send, once] {
+    @private
+    @compiler_builtin
+    fun coro(&mut self, value: Send) -> Void { }
+}
 
 
 @private
