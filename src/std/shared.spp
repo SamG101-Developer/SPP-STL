@@ -1,4 +1,4 @@
-use std::generator::Gen
+use std::generator::GenOnce
 use std::number::usize::USize
 use std::ops::deref::DerefMut
 use std::ops::deref::DerefRef
@@ -33,11 +33,11 @@ sup [T] Shared[T] {
 
 sup [T] Shared[T] ext DerefRef[T] {
     @compiler_builtin
-    cor deref_ref(&self) -> Gen[&T, once=true] { }
+    cor deref_ref(&self) -> GenOnce[&T] { }
 }
 
 
 sup [T] Shared[T] ext DerefMut[T] {
     @compiler_builtin
-    cor deref_mut(&mut self) -> Gen[&mut T, once=true] { }
+    cor deref_mut(&mut self) -> GenOnce[&mut T] { }
 }

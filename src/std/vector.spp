@@ -6,6 +6,7 @@ use std::boolean::Bool
 use std::clone::Clone
 use std::function::FunRef
 use std::generator::Gen
+use std::generator::GenOnce
 use std::generator::GenOpt
 use std::iterator::IndexMut
 use std::iterator::IndexRef
@@ -58,35 +59,33 @@ sup [T, A] Vec[T, A] {
 
 
 sup [T, A] Vec[T, A] {
-    cor get_head_ref(&self) -> GenOpt[&T, once=true] {
+    cor get_head_ref(&self) -> GenOpt[&T] {
         gen with self.get_ref(0_uz)
     }
 
-    cor get_tail_ref(&self) -> GenOpt[&T, once=true] {
+    cor get_tail_ref(&self) -> GenOpt[&T] {
         gen with self.get_ref(self.length - 1_uz)
     }
 
-    cor get_ref(&self, index: USize) -> GenOpt[&T, once=true] {
+    cor get_ref(&self, index: USize) -> GenOpt[&T] {
         case index >= self.length { gen }
-        iter self.index_ref(index).res() of
-            val { gen val }
+        gen self.index_ref(index)
     }
 }
 
 
 sup [T, A] Vec[T, A] {
-    cor get_head_mut(&mut self) -> GenOpt[&mut T, once=true] {
+    cor get_head_mut(&mut self) -> GenOpt[&mut T] {
         gen with self.get_mut(0_uz)
     }
 
-    cor get_tail_mut(&mut self) -> GenOpt[&mut T, once=true] {
+    cor get_tail_mut(&mut self) -> GenOpt[&mut T] {
         gen with self.get_mut(self.length - 1_uz)
     }
 
-    cor get_mut(&mut self, index: USize) -> GenOpt[&mut T, once=true] {
+    cor get_mut(&mut self, index: USize) -> GenOpt[&mut T] {
         case index >= self.length { gen }
-        iter self.index_mut(index).res() of
-            mut val { gen val }
+        gen self.index_mut(index)
     }
 }
 
@@ -152,14 +151,14 @@ sup [T, A] Vec[T, A] ext IterRef[T] {
 
 
 sup [T, A] Vec[T, A] ext IndexMut[T, USize] {
-    cor index_mut(&mut self, index: USize) -> Gen[&mut T, once=true] {
+    cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] {
         gen with self.buffer.index_mut(index)
     }
 }
 
 
 sup [T, A] Vec[T, A] ext IndexRef[T, USize] {
-    cor index_ref(&self, index: USize) -> Gen[&T, once=true] {
+    cor index_ref(&self, index: USize) -> GenOnce[&T] {
         gen with self.buffer.index_ref(index)
     }
 }

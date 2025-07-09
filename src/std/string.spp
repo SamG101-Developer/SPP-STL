@@ -61,3 +61,10 @@ sup Str ext Clone[Out=Str] {
     fun clone(&self) -> Str {
     }
 }
+
+
+sup Str ext std::ops::add::Add[Rhs=Str, Ret=Str] {
+    @no_impl
+    fun add(self, that: Str) -> Str { }
+}
+
