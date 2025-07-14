@@ -268,7 +268,7 @@ sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] 
 }
 
 
-sup [cmp bit_width: u32::U32, cmp: signed: Bool] SizedInteger[bit_width, signed] {
+sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
     @public
     @inline
     fun shr_checked(self, that: U32) -> Opt[Self] {
@@ -292,7 +292,7 @@ sup [cmp bit_width: u32::U32, cmp: signed: Bool] SizedInteger[bit_width, signed]
 }
 
 
-sup [cmp bit_width: u32::U32, cmp: signed: Bool] SizedInteger[bit_width, signed] {
+sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
     @public
     @inline
     fun zero() -> Self {
