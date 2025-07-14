@@ -1,17 +1,20 @@
-@ffi
-fun fputs(str: &std::ffi::Char, stream: &std::ffi::Int) -> std::ffi::Int { }
+using std::ffi::C
+
 
 @ffi
-fun fgets(buffer: &mut std::ffi::Char, count: std::ffi::Int, stream: &std::ffi::Int) -> std::ffi::Char { }
+fun fputs(str: &C::Char, stream: &C::Int) -> C::Int { }
 
 @ffi
-fun fopen(filename: &std::ffi::Char, mode: &std::ffi::Char) -> std::ffi::Int { }
+fun fgets(buffer: &mut C::Char, count: C::Int, stream: &C::Int) -> C::Char { }
 
 @ffi
-fun fread(buffer: &mut std::ffi::Char, size: std::ffi::Int, count: std::ffi::Int, stream: &mut std::ffi::Int) -> std::ffi::Int { }
+fun fopen(filename: &C::Char, mode: &C::Char) -> C::Int { }
 
 @ffi
-fun fwrite(buffer: &mut std::ffi::Char, size: std::ffi::Int, count: std::ffi::Int, stream: &mut std::ffi::Int) -> std::ffi::Int { }
+fun fread(buffer: &mut C::Char, size: C::Int, count: C::Int, stream: &mut C::Int) -> C::Int { }
 
 @ffi
-fun fclose(stream: &mut std::ffi::Int) -> std::ffi::Int { }
+fun fwrite(buffer: &mut C::Char, size: C::Int, count: C::Int, stream: &mut C::Int) -> C::Int { }
+
+@ffi
+fun fclose(stream: &mut C::Int) -> C::Int { }
