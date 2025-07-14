@@ -1,7 +1,7 @@
 use std::boolean::Bool
 use std::clone::Clone
 use std::copy::Copy
-use std::function::FunRef
+use std::function::FunMov
 use std::ops::try::Try
 
 # todo: superimpose Copy on None
