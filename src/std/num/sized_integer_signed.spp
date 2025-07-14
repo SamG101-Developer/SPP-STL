@@ -1,9 +1,10 @@
 use std::cast::From
+use std::number::U32
+use std::limits::Limits
+
 use std::num::sized_integer::SizedInteger
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 use std::num::sized_floating_point::SizedFloatingPoint
-use std::number::U32
-use std::limits::Limits
 
 
 # Type alias the "signed" version of the the sized integer type.

@@ -4,6 +4,8 @@ use std::number::U32
 use std::option::Opt
 use std::option::Some
 
+use std::num::bases::Integer
+
 
 # A sized integer is an integer type with a provided bit width.
 cls SizedInteger[cmp bit_width: U32, cmp signed: Bool] { }
