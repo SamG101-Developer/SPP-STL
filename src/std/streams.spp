@@ -7,12 +7,15 @@ use std::void::Void
 
 
 cls StreamWriteException { }
+sup StreamWriteException ext Exception { }
 
 
 cls StreamReadException { }
+sup StreamReadException ext Exception { }
 
 
 cls StreamSeekException { }
+sup StreamSeekException ext Exception { }
 
 
 cls WritableStream { }
@@ -36,7 +39,9 @@ sup WritableStream {
     @public
     @no_impl
     @virtual_method
-    fun write_all(&mut self, data: &Vec[U8]) -> Res[Void, StreamWriteException] { }
+    fun write_all(&mut self, data: &Vec[U8]) -> Res[Void, StreamWriteException] {
+        ret Pass()
+    }
 }
 
 
@@ -48,7 +53,9 @@ sup ReadableStream {
     @public
     @no_impl
     @virtual_method
-    fun read_all(&mut self) -> Res[Vec[U8], StreamReadException] { }
+    fun read_all(&mut self) -> Res[Vec[U8], StreamReadException] {
+        ret Pass(val=Vec[U8]())
+    }
 }
 
 
