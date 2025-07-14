@@ -6,6 +6,8 @@ use std::iterator::IterMov
 use std::iterator::IterMut
 use std::iterator::IterRef
 use std::number::USize
+use std::option::Opt
+use std::single::Single
 use std::void::Void
 
 
