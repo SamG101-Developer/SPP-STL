@@ -1,0 +1,59 @@
+use std::number::usize::USize
+
+
+cls MemoryIncompatibleSize {}
+sup MemoryIncompatibleSize ext result::Exception { }
+
+
+@compiler_builtin
+fun size_of[T]() -> USize {
+    # Returns the size of a type at compile time.
+}
+
+
+@compiler_builtin
+fun size_of_value[T](value: T) -> USize {
+    # Handles heap size checking for types that are not known at compile time.
+}
+
+
+fun malloc[T](n: USize) -> Opt[Memory[T]] {
+    # Determine the size and get an allocated pointer.
+    let size = n * size_of[T]()
+    let ptr = ffi::libc::malloc(size)
+
+    # Convert the returned pointer into a safe type.
+    ret case ptr of
+        0 => None()
+        else => Some(Memory[T](ptr, n))
+}
+
+
+fun calloc[T](n: USize) -> Opt[Memory[T]] {
+    # Determine the size and get an allocated pointer.
+    let size = n * size_of[T]()
+    let ptr = ffi::libc::calloc(n, size_of_value(T))
+
+    # Convert the returned pointer into a safe type.
+    ret case ptr of
+        0 => None()
+        else => Some(Memory[T](ptr, n))
+}
+
+
+fun mem_cpy[T: Copy](dest: &mut Memory[T], src: &Memory[T]) -> Void {
+    # Perform the memory copy.
+    ffi::libc::memcpy(dest.ptr, src.ptr, src.len() * size_of[T]())
+}
+
+
+fun mem_move[T: Copy](dest: &mut Memory[T], src: &Memory[T]) -> Void {
+    # Perform the memory move.
+    ffi::libc::memmove(dest.ptr, src.ptr, src.len() * size_of[T]())
+}
+
+
+fun mem_set[T: Copy](dest: &mut Memory[T], value: T) -> Void {
+    # Perform the memory set.
+    ffi::libc::memset(dest.ptr, value, dest.len() * size_of[T]())
+}
