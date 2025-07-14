@@ -51,13 +51,13 @@ sup Bool ext std::ops::bit_not::BitNot[Ret=Bool] {
 }
 
 
-sup Bool ext Eq[Rhs=Bool] {
+sup Bool ext std::ops::eq::Eq[Rhs=Bool] {
     @compiler_builtin
     fun eq(&self, that: &Bool) -> Bool { }
 }
 
 
-sup Bool ext Ne[Rhs=Bool] {
+sup Bool ext std::ops::ne::Ne[Rhs=Bool] {
     @compiler_builtin
     fun ne(&self, that: &Bool) -> Bool { }
 }
