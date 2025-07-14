@@ -18,7 +18,7 @@ sup [T] Slice[T] ext Memory[T] {
 
 
 sup [T, cmp n: USize] Slice[T] ext From[Arr[T, n]] {
-    fun from(that: Array[T, n]) -> Self {
+    fun from(that: Arr[T, n]) -> Self {
         ret Slice[T](ptr=that.ptr, cap=that.cap, len=n)
     }
 }
