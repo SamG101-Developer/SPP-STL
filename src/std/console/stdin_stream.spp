@@ -4,7 +4,9 @@ use std::result::Res
 use std::result::Fail
 use std::result::Pass
 use std::slice::Slice
-use std::streams::WritableStream
+use std::streams::ReadableStream
+use std::streams::StreamReadException
+use std::vector::Vec
 
 
 @public
