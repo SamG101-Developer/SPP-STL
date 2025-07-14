@@ -71,7 +71,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
     fun sub_checked(self, that: Self) -> Opt[Self] {
-        let val, overflowed = intrinsics::ssub_with_overflow(self, that)
+        let (val, overflowed) = intrinsics::ssub_with_overflow(self, that)
         ret case overflowed { None() } else { Some(val) }
     }
 
@@ -99,7 +99,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
     fun mul_checked(self, that: Self) -> Opt[Self] {
-        let val, overflowed = intrinsics::smul_overflow(self, that)
+        let (val, overflowed) = intrinsics::smul_overflow(self, that)
         ret case overflowed { None() } else { Some(val) }
     }
 

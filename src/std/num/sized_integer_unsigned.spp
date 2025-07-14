@@ -94,7 +94,7 @@ sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
     fun mul_checked(self, that: Self) -> Opt[Self] {
-        let val, overflowed = intrinsics::umul_overflow(self, that)
+        let (val, overflowed) = intrinsics::umul_overflow(self, that)
         ret case overflowed { None() } else { Some(val) }
     }
 
