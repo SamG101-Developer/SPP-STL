@@ -3,6 +3,10 @@ use std::cast::From
 use std::clone::Clone
 use std::number::U32
 
+use std::num::sized_integer_signed::SizedIntegerSigned
+use std::num::sized_integer_unsigned::SizedIntegerUnsigned
+use std::num::sized_floating_point::SizedFloatingPoint
+
 
 @public
 cls Bool { }
@@ -64,21 +68,21 @@ sup Bool ext std::ops::ne::Ne[Rhs=Bool] {
 }
 
 
-sup [cmp n: U32] Bool ext From[std::num::sized_integer_signed::SizedIntegerSigned[n]] {
+sup [cmp n: U32] Bool ext From[SizedIntegerSigned[n]] {
     fun from(value: SizedIntegerSigned[n]) -> Bool {
         ret value > SizedIntegerSigned[n]::zero()
     }
 }
 
 
-sup [cmp n: U32] Bool ext From[std::num::sized_integer_unsigned::SizedIntegerUnsigned[n]] {
+sup [cmp n: U32] Bool ext From[SizedIntegerUnsigned[n]] {
     fun from(value: SizedIntegerUnsigned[n]) -> Bool {
         ret value > SizedIntegerUnsigned[n]::zero()
     }
 }
 
 
-sup [cmp n: U32] Bool ext From[std::num::sized_floating_point::SizedFloatingPoint[n]] {
+sup [cmp n: U32] Bool ext From[SizedFloatingPoint[n]] {
     fun from(value: SizedFloatingPoint[n]) -> Bool {
         ret value > SizedFloatingPoint[n]::zero()
     }
