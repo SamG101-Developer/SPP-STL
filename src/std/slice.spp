@@ -1,4 +1,5 @@
 use std::cast::From
+use std::mem::memory::Memory
 use std::number::USize
 
 
