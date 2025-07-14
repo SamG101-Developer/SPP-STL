@@ -1,5 +1,5 @@
 use std::copy::Copy
-use std::memory::Memory
+use std::mem::memory::Memory
 use std::num::bases::FloatingPoint
 use std::num::bases::Integer
 use std::number::S32
