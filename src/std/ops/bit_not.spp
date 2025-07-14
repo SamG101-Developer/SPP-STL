@@ -1,0 +1,7 @@
+cls BitNot[Ret] { }
+
+
+sup [Ret] BitNot[Ret] {
+    @abstract_method
+    fun bit_not(&self) -> Ret { }
+}

@@ -28,7 +28,7 @@ sup BigUInt ext std::ops::bit_xor::BitXor[Rhs=Self, Ret=Self] {
 }
 
 
-sup BigUInt ext std::ops::bit_ior::BitNot[Ret=Self] {
+sup BigUInt ext std::ops::bit_not::BitNot[Ret=Self] {
     @no_impl
     fun bit_not(self) -> Self { }
 }

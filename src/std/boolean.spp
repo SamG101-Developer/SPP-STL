@@ -27,25 +27,25 @@ sup Bool ext std::ops::ior_::Ior[Rhs=Bool] {
 }
 
 
-sup Bool ext std::ops::bit_and::BitAnd[Rhs=Bool] {
+sup Bool ext std::ops::bit_and::BitAnd[Rhs=Bool, Ret=Bool] {
     @compiler_builtin
     fun bit_and(self, that: Bool) -> Bool { }
 }
 
 
-sup Bool ext std::ops::bit_ior::BitIor[Rhs=Bool] {
+sup Bool ext std::ops::bit_ior::BitIor[Rhs=Bool, Ret=Bool] {
     @compiler_builtin
     fun bit_ior(self, that: Bool) -> Bool { }
 }
 
 
-sup Bool ext std::ops::bit_xor::BitXor[Rhs=Bool] {
+sup Bool ext std::ops::bit_xor::BitXor[Rhs=Bool, Ret=Bool] {
     @compiler_builtin
     fun bit_xor(self, that: Bool) -> Bool { }
 }
 
 
-sup Bool ext std::ops::bit_not::BitNot {
+sup Bool ext std::ops::bit_not::BitNot[Ret=Bool] {
     @compiler_builtin
     fun bit_not(&self) -> Bool { }
 }
