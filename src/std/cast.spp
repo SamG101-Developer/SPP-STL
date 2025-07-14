@@ -1,6 +1,16 @@
+use std::option::Opt
+
+
 cls From[That] { }
+
 
 sup [That] From[That] {
     @abstract_method
     fun from(that: That) -> Self { }
+}
+
+
+sup [That] TryFrom[That] {
+    @abstract_method
+    fun try_from(that: That) -> Opt[Self] { }
 }
