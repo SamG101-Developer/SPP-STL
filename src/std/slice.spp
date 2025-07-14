@@ -1,0 +1,29 @@
+use std::cast::From
+use std::number::usize::USize
+
+
+cls Slice[T] {
+    @public
+    len: USize
+}
+
+
+sup [T] Slice[T] ext Memory[T] {
+    fun len(&self) -> USize {
+        ret self.length
+    }
+}
+
+
+sup [T, cmp n: USize] Slice[T] ext From[Array[T, n]] {
+    fun from(that: Array[T, n]) -> Self {
+        ret Slice[T](ptr=that.ptr, cap=that.cap, len=n)
+    }
+}
+
+
+sup [T, cmp n: USize, A] Slice[T] ext From[Vec[T, A]] {
+    fun from(that: Vec[T, A]) -> Self {
+        ret that.buffer
+    }
+}

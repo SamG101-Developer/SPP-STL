@@ -4,62 +4,22 @@ use std::clone::Clone
 use std::memory::Memory
 use std::number::usize::USize
 use std::result::Fail
-use std::result::Exception
 use std::void::Void
 
 
-cls BoundsException { }
-
-
-sup BoundsException ext Exception { }
-
-
 @public
-cls Arr[T, cmp n: USize, A = GlobalAlloc[T]] { }
+cls Arr[T, cmp n: USize] { }
 
 
-sup [T, A, cmp n: USize] Arr[T, n, A] ext Memory[T, A] {
+sup [T, cmp n: USize] Arr[T, n] ext Memory[T] {
     fun len(&self) -> USize {
         ret n
     }
 }
 
 
-@public
-cls ArrDynamic[T, A = GlobalAlloc[T]] {
-    length: USize
-}
-
-
-sup [T, A] ArrDynamic[T, A] ext Memory[T, A] {
-    fun len(&self) -> USize {
-        ret self.length
-    }
-}
-
-
-sup [T, A] ArrDynamic[T, A] ext Clone[ArrDynamic[T, A]] {
-    @compiler_builtin
-    fun clone(&self) -> ArrDynamic[T, A] { }
-}
-
-
-sup [T, A] ArrDynamic[T, A] {
-    @no_impl
-    @public
-    fun new_with_cap(capacity: USize) -> ArrDynamic[T, A] { }
-
-    @protected
-    fun grow_by_one(&mut self) -> Void {
-        self.capacity += 1_uz
-        # case Self::Allocator::reallocate(&mut self, self.capacity) of
-        #    is Fail(err) { }
-    }
-
-    @protected
-    fun grow_double(&mut self) -> Void {
-        self.capacity *= 2_uz
-        # case Self::Allocator::reallocate(&mut self, self.capacity) of
-        #    is Fail(err) { }
+sup [T, cmp n: USize] Arr[T, n] ext From[Slice[T]] {
+    fun from(that: Slice[T]) -> Arr[T, n] {
+        ret Arr(ptr=that.ptr, cap=that.cap)
     }
 }
