@@ -1,0 +1,37 @@
+use std::console::console_stream::ConsoleStream
+ues std::number::U32
+use std::number::USize
+use std::result::Res
+use std::result::Fail
+use std::result::Pass
+use std::slice::Slice
+use std::streams::WritableStream
+
+
+@public
+cmp stderr: StderrStream = StderrStream()
+
+
+@private
+cmp stderr_handle: U32 = 2_u32
+
+
+@private
+cls StderrStream { }
+
+
+sup StderrStream ext WritableStream {
+    fun write(&self, data: &Vec[U8], length: USize) -> Res[S32, StreamWriteException] {
+        let res = libc::fputs(Slice[U8]::from(data), &stderr_handle)
+        ret case res < 0 { Fail(err=StreamWriteException(msg="Failed to write to stderr")) } else { Pass(val=res) }
+    }
+
+    fun flush(&self) -> Res[Void, StreamWriteException] {
+        let res = libc::fflush(&stderr_handle)
+        ret case res < 0 { Fail(err=StreamWriteException(msg="Failed to flush stderr")) } else { Pass() }
+    }
+
+    fun write_all(&mut self, data: &Vec[U8]) -> Res[Void, StreamWriteException] {
+        self.write(data, data.len()).and_then(|_| self.flush())
+    }
+}

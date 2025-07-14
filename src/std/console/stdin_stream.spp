@@ -1,0 +1,48 @@
+use std::console::console_stream::ConsoleStream
+ues std::number::U32
+use std::number::USize
+use std::result::Res
+use std::result::Fail
+use std::result::Pass
+use std::slice::Slice
+use std::streams::WritableStream
+
+
+@public
+cmp stdin: StdinStream = StdinStream()
+
+
+@private
+cmp stdin_handle: U32 = 1_u32
+
+
+@private
+cls StdinStream { }
+
+
+sup StdinStream ext ReadableStream {
+    @public
+    fun read(&mut self, len: USize) -> Res[Vec[U8], StreamReadException] {
+        let mut vec = Vec[U8]()
+        let res libc::fgets(&mut vec.buffer, 1024_s32, &stdin_handle)
+        ret case res < 0 { Fail(err=StreamReadException(msg="Failed to read from stdin")) } else { Pass(val=vec) }
+    }
+
+    @public
+    fun read_all(&mut self) -> Res[Vec[U8], StreamReadException] {
+        let mut vec = Vec[U8]()
+        loop {
+            let res = self.read(1024_u32)
+            case res < 0 {
+                ret Fail(err=StreamReadException(msg="Failed to read from stdin"))
+            }
+            else case res.is_empty() {
+                exit
+            }
+            else {
+                vec += res
+            }
+        }
+        ret Pass(val=vec)
+    }
+}
