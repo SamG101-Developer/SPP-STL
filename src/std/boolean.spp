@@ -1,4 +1,5 @@
 use std::copy::Copy
+use std::cast::From
 use std::clone::Clone
 use std::number::U32
 
