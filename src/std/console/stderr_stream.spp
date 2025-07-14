@@ -32,6 +32,6 @@ sup StderrStream ext WritableStream {
     }
 
     fun write_all(&mut self, data: &Vec[U8]) -> Res[Void, StreamWriteException] {
-        self.write(data, data.len()).and_then(|_| self.flush())
+        self.write(data, data.len()).and_then(|| self.flush())
     }
 }
