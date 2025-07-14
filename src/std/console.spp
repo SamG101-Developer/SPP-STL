@@ -4,8 +4,8 @@ use std::void::Void
 
 
 fun print(value: &Str) -> S32 {
-    let res = std::console::stdout_stream::stdout.write_all(&value.data)
-    ret res
+    let val = std::console::stdout_stream::stdout.write_all(&value.data)
+    ret val
 }
 
 
