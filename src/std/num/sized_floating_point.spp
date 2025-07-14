@@ -24,7 +24,8 @@ sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedFloatingPoint[this_b
     fun from(value: SizedFloatingPoint[n]) -> Self {
         ret case this_bit_width < that_bit_width {
             intrinsics::fptrunc(value, that_bit_width, this_bit_width)
-        } else {
+        }
+        else {
             intrinsics::fpext(value, that_bit_width, this_bit_width)
         }
     }

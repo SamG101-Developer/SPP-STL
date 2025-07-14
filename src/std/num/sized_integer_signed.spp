@@ -27,6 +27,7 @@ sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerSigned[this_b
     fun from(value: SizedIntegerSigned[n]) -> Self {
         ret case this_bit_width < that_bit_width {
             intrinsics::trunc(value, that_bit_width, this_bit_width)
+        }
         else {
             intrinsics::sext(value, that_bit_width, this_bit_width)
         }
@@ -38,6 +39,7 @@ sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerSigned[this_b
     fun from(value: SizedIntegerUnsigned[n]) -> Self {
         ret case this_bit_width < that_bit_width {
             intrinsics::trunc(value, that_bit_width, this_bit_width)
+        }
         else {
             intrinsics::zext(value, that_bit_width, this_bit_width)
         }
