@@ -3,10 +3,12 @@ use std::number::USize
 use std::option::Opt
 use std::option::None
 use std::option::Some
+use std::result::Exception
+use std::void::Void
 
 
 cls MemoryIncompatibleSize {}
-sup MemoryIncompatibleSize ext result::Exception { }
+sup MemoryIncompatibleSize ext Exception { }
 
 
 @compiler_builtin
