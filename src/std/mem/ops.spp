@@ -27,7 +27,7 @@ fun malloc[T](n: USize) -> Opt[Memory[T]] {
 
     # Convert the returned pointer into a safe type.
     ret case ptr of
-        0 { None() }
+        == 0 { None() }
         else { Some(Memory[T](ptr, n)) }
 }
 
@@ -39,7 +39,7 @@ fun calloc[T](n: USize) -> Opt[Memory[T]] {
 
     # Convert the returned pointer into a safe type.
     ret case ptr of
-        0 { None() }
+        == 0 { None() }
         else { Some(Memory[T](ptr, n)) }
 }
 
