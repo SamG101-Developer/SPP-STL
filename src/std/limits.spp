@@ -120,7 +120,7 @@ sup Limits[SSize] {
 }
 
 
-sup Limit[F8] {
+sup Limits[F8] {
     @public
     cmp mantissa_digits: U32 = 2_u32
     cmp digits: U32 = 2_u32
