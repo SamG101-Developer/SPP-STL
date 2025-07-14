@@ -109,7 +109,7 @@ sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
     fun mul_saturating(self, that: Self) -> Self {
-        ret self.mul_checked(that) of
+        ret case self.mul_checked(that) of
             is Some(val) { val }
             is None() { Limits[Self]::max }
     }
