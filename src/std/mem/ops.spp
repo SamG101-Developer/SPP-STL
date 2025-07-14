@@ -1,4 +1,7 @@
 use std::number::usize::USize
+use std::option::Opt
+use std::option::None
+use std::option::Some
 
 
 cls MemoryIncompatibleSize {}
@@ -24,8 +27,8 @@ fun malloc[T](n: USize) -> Opt[Memory[T]] {
 
     # Convert the returned pointer into a safe type.
     ret case ptr of
-        0 => None()
-        else => Some(Memory[T](ptr, n))
+        0 { None() }
+        else { Some(Memory[T](ptr, n)) }
 }
 
 
@@ -36,24 +39,24 @@ fun calloc[T](n: USize) -> Opt[Memory[T]] {
 
     # Convert the returned pointer into a safe type.
     ret case ptr of
-        0 => None()
-        else => Some(Memory[T](ptr, n))
+        0 { None() }
+        else { Some(Memory[T](ptr, n)) }
 }
 
 
 fun mem_cpy[T: Copy](dest: &mut Memory[T], src: &Memory[T]) -> Void {
-    # Perform the memory copy.
+    # Perform the memory copy. Todo: use intrinsic::mem_copy ?
     ffi::libc::memcpy(dest.ptr, src.ptr, src.len() * size_of[T]())
 }
 
 
 fun mem_move[T: Copy](dest: &mut Memory[T], src: &Memory[T]) -> Void {
-    # Perform the memory move.
+    # Perform the memory move. Todo: use intrinsic::mem_move ?
     ffi::libc::memmove(dest.ptr, src.ptr, src.len() * size_of[T]())
 }
 
 
 fun mem_set[T: Copy](dest: &mut Memory[T], value: T) -> Void {
-    # Perform the memory set.
+    # Perform the memory set. Todo: use intrinsic::mem_set ?
     ffi::libc::memset(dest.ptr, value, dest.len() * size_of[T]())
 }
