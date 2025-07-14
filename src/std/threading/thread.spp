@@ -1,6 +1,7 @@
 use std::boolean::Bool
 use std::string::Str
 use std::number::U64
+use std::number::S32
 use std::ops::eq::Eq
 use std::ops::del::Del
 
@@ -42,7 +43,7 @@ sup Thread {
     @public
     fun join(&mut self) -> void::Void {
         self.alive = false
-        # ffi::pthread::pthread_join(self.native_id, [I32])
+        # ffi::pthread::pthread_join(self.native_id, [S32])
     }
 
     @public
