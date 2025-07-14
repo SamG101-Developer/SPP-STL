@@ -1,4 +1,4 @@
-use std::number::bigint::BigInt
+use std::bignum::bigint::BigInt
 use std::number::i64::I64
 
 
