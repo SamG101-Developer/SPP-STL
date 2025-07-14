@@ -3,9 +3,15 @@ use std::copy::Copy
 use std::mem::memory::Memory
 use std::num::bases::FloatingPoint
 use std::num::bases::Integer
-use std::number::S32
-use std::number::USize
 use std::void::Void
+
+use std::number::USize
+use std::number::S32
+use std::number::F8
+use std::number::F16
+use std::number::F32
+use std::number::F64
+use std::number::F128
 
 
 @public
