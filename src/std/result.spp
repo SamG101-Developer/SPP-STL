@@ -1,7 +1,7 @@
+use std::boolean::Bool
 use std::option::Opt
 use std::option::None
 use std::option::Some
-use std::ops::try::Try
 use std::string::Str
 
 
@@ -31,7 +31,7 @@ sup [T, E] Res[T, E] {
 }
 
 
-sup [T, E] Res[T, E] ext Try[T, E] {
+sup [T, E] Res[T, E] ext std::ops::try::Try[T, E] {
     fun op_is_output(&self) -> Bool {
         ret self is Pass[T](..)
     }

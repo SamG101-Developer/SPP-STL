@@ -2,7 +2,6 @@ use std::boolean::Bool
 use std::clone::Clone
 use std::copy::Copy
 use std::function::FunMov
-use std::ops::try::Try
 use std::result::Res
 use std::result::Pass
 use std::result::Fail
@@ -190,7 +189,7 @@ sup[T] Opt[T] {
 }
 
 
-sup [T] Opt[T] ext Try[T, None] {
+sup [T] Opt[T] ext std::ops::try::[T, None] {
     fun op_is_output(&self) -> Bool {
         ret self is Some[T](..)
     }
