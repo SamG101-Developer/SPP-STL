@@ -114,7 +114,7 @@ sup [T, A] Vec[T, A] {
 
 
 sup [T, A] Vec[T, A] {
-    cor view_ref(&self) -> GenOnce[&Memory[T, A]] {
+    cor view_ref(&self) -> GenOnce[&Memory[T]] {
         gen &self.buffer
     }
 }
