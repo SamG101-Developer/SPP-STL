@@ -1,3 +1,8 @@
+use std::cast::From
+use std::number::sized_integer_signed::SizedIntegerSigned
+use std::number::sized_integer_unsigned::SizedIntegerUnsigned
+
+
 # A sized floating point is a floating point type with a provided bit width.
 cls SizedFloatingPoint[cmp bit_width: U32] { }
 
