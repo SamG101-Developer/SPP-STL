@@ -21,7 +21,7 @@ sup Bool ext std::ops::and_::And[Rhs=Bool] {
 }
 
 
-sup Bool ext std::ops::ior::Ior[Rhs=Bool] {
+sup Bool ext std::ops::ior_::Ior[Rhs=Bool] {
     @compiler_builtin
     fun ior_(self, that: Bool) -> Bool { }
 }
