@@ -6,7 +6,7 @@ use std::option::Some
 
 
 # A sized integer is an integer type with a provided bit width.
-cls SizedInteger[cmp bit_width: U8, cmp signed: Bool] { }
+cls SizedInteger[cmp bit_width: U32, cmp signed: Bool] { }
 
 
 # The sized integer type extends the base integer type.
