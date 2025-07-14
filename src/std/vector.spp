@@ -58,12 +58,6 @@ sup [T, A] Vec[T, A] {
 
 
 sup [T, A] Vec[T, A] {
-    @private
-    fun grow
-}
-
-
-sup [T, A] Vec[T, A] {
     cor get_head_ref(&self) -> GenOpt[&T] {
         gen with self.get_ref(0_uz)
     }
