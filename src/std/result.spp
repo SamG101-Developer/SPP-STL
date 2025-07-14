@@ -32,7 +32,6 @@ sup [T, E] Res[T, E] {
 
 
 sup [T, E] Res[T, E] ext Try[T, E] {
-    @public
     fun op_is_output(&self) -> Bool {
         ret self is Pass[T](..)
     }
