@@ -127,7 +127,17 @@ fun umin[T: Integer](this: T, that: T) -> T { }
 @public
 @always_inline
 @compiler_builtin
-fun cmp[T: Integer](this: T, that: T) -> S32 { }
+fun icmp[T: Integer](this: T, that: T) -> S32 { }
+
+@public
+@always_inline
+@compiler_builtin
+fun scmp[T: Integer](this: T, that: T) -> S32 { }
+
+@public
+@always_inline
+@compiler_builtin
+fun fcmp[T: Integer](this: T, that: T) -> S32 { }
 
 
 @public
