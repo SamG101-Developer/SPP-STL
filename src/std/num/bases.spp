@@ -1,3 +1,6 @@
+use std::copy::Copy
+
+
 # The base numeric types in the standard library.
 cls Num { }
 
