@@ -139,14 +139,14 @@ sup Limits[F32] {
     @public
     cmp mantissa_digits: U32 = 24_u32
     cmp digits: U32 = 7_u32
-    cmp epsilon: F32 = 1.1920928955078125e-7_f32
-    cmp min: F32 = 1.1754943508222875e-38_f32
-    cmp min_positive: F32 = 1.401298464324817e-45_f32
-    cmp max: F32 = 3.4028234663852886e38_f32
-    cmp min_exp: S32 = -126_s32
-    cmp max_exp: S32 = 127_s32
-    cmp min_10_exp: S32 = -38_s32
-    cmp max_10_exp: S32 = 38_s32
+    cmp epsilon: F32 = 0.0_f32
+    cmp min: F32 = 0.0_f32
+    cmp min_positive: F32 = 0.0_f32
+    cmp max: F32 = 0.0_f32
+    cmp min_exp: S32 = 0_s32
+    cmp max_exp: S32 = 0_s32
+    cmp min_10_exp: S32 = 0_s32
+    cmp max_10_exp: S32 = 0_s32
     cmp nan: F32 = 0.0_f32
     cmp infinity: F32 = 0.0_f32
     cmp neg_infinity: F32 = 0.0_f32
@@ -157,14 +157,14 @@ sup Limits[F64] {
     @public
     cmp mantissa_digits: U32 = 53_u32
     cmp digits: U32 = 15_u32
-    cmp epsilon: F64 = 2.220446049250313e-16_f64
-    cmp min: F64 = 2.2250738585072014e-308_f64
+    cmp epsilon: F64 = 0.0_f64
+    cmp min: F64 = 0.0_f64
     cmp min_positive: F64 = 5e-324_f64
-    cmp max: F64 = 1.7976931348623157e308_f64
-    cmp min_exp: S32 = -1022_s32
-    cmp max_exp: S32 = 1023_s32
-    cmp min_10_exp: S32 = -308_s32
-    cmp max_10_exp: S32 = 308_s32
+    cmp max: F64 = 0.0_f64
+    cmp min_exp: S32 = 0_s32
+    cmp max_exp: S32 = 0_s32
+    cmp min_10_exp: S32 = 0_s32
+    cmp max_10_exp: S32 = 0_s32
     cmp nan: F64 = 0.0_f64
     cmp infinity: F64 = 0.0_f64
     cmp neg_infinity: F64 = 0.0_f64
@@ -175,14 +175,14 @@ sup Limits[F128] {
     @public
     cmp mantissa_digits: U32 = 113_u32
     cmp digits: U32 = 34_u32
-    cmp epsilon: F128 = 1.92592994438723585305597794258492732e-34_f128
-    cmp min: F128 = 3.36210314311209350626267781732175260e-4932_f128
-    cmp min_positive: F128 = 6.47517511943802511092443895822764655e-4966_f128
-    cmp max: F128 = 1.1897314953572317650212638530309737165e4932_f128
-    cmp min_exp: S32 = -16382_s32
-    cmp max_exp: S32 = 16383_s32
-    cmp min_10_exp: S32 = -4931_s32
-    cmp max_10_exp: S32 = 4932_s32
+    cmp epsilon: F128 = 0.0_f128
+    cmp min: F128 = 0.0_f128
+    cmp min_positive: F128 = 0.0_f128
+    cmp max: F128 = 0.0_f128
+    cmp min_exp: S32 = 0_s32
+    cmp max_exp: S32 = 0_s32
+    cmp min_10_exp: S32 = 0_s32
+    cmp max_10_exp: S32 = 0_s32
     cmp nan: F128 = 0.0_f128
     cmp infinity: F128 = 0.0_f128
     cmp neg_infinity: F128 = 0.0_f128
