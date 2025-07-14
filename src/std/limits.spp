@@ -45,7 +45,7 @@ sup Limits[U256] {
 
 sup Limits[USize] {
     @public
-    cmp max: USize = 18446744073709551615_u64 // Todo: assuming 64-bit architecture
+    cmp max: USize = 18446744073709551615_u64  # Todo: assuming 64-bit architecture
     cmp min: USize = 0_u64
 }
 
@@ -94,7 +94,7 @@ sup Limits[S256] {
 
 sup Limits[SSize] {
     @public
-    cmp max: SSize = 9223372036854775807_s64 // Todo: assuming 64-bit architecture
+    cmp max: SSize = 9223372036854775807_s64  # Todo: assuming 64-bit architecture
     cmp min: SSize = -9223372036854775808_s64
 }
 
