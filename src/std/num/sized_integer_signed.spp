@@ -26,7 +26,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::rem::Rem[Rh
 
 
 sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerSigned[this_bit_width] ext From[SizedIntegerSigned[that_bit_width]] {
-    fun from(value: SizedIntegerSigned[n]) -> Self {
+    fun from(value: SizedIntegerSigned[that_bit_width]) -> Self {
         ret case this_bit_width < that_bit_width {
             intrinsics::trunc(value, that_bit_width, this_bit_width)
         }
@@ -38,7 +38,7 @@ sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerSigned[this_b
 
 
 sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerSigned[this_bit_width] ext From[SizedIntegerUnsigned[that_bit_width]] {
-    fun from(value: SizedIntegerUnsigned[n]) -> Self {
+    fun from(value: SizedIntegerUnsigned[that_bit_width]) -> Self {
         ret case this_bit_width < that_bit_width {
             intrinsics::trunc(value, that_bit_width, this_bit_width)
         }
@@ -50,7 +50,7 @@ sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerSigned[this_b
 
 
 sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerSigned[this_bit_width] ext From[SizedFloatingPoint[that_bit_width]] {
-    fun from(value: SizedFloatingPoint[n]) -> Self {
+    fun from(value: SizedFloatingPoint[that_bit_width]) -> Self {
         ret intrinsics::fptosi(value, that_bit_width, this_bit_width)
     }
 }
