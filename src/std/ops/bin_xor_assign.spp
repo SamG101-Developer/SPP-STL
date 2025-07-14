@@ -1,0 +1,10 @@
+use std::void::Void
+
+
+@public
+cls BinXorAssign[Rhs] {}
+
+sup [Rhs] BinXorAssign[Rhs] {
+    @abstract_method
+    fun bin_xor_assign(&mut self, that: Rhs) -> Void { }
+}

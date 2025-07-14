@@ -1,0 +1,7 @@
+@public
+cls BitOr[Rhs, Ret] {}
+
+sup [Rhs, Ret] BitOr[Rhs, Ret] {
+    @abstract_method
+    fun bin_or(self, that: Rhs) -> Ret { }
+}

@@ -1,0 +1,7 @@
+@public
+cls BitXor[Rhs, Ret] {}
+
+sup [Rhs, Ret] BitXor[Rhs, Ret] {
+    @abstract_method
+    fun bin_xor(self, that: Rhs) -> Ret { }
+}

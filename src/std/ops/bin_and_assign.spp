@@ -1,0 +1,10 @@
+use std::void::Void
+
+
+@public
+cls BinAndAssign[Rhs] {}
+
+sup [Rhs] BinAndAssign[Rhs] {
+    @abstract_method
+    fun bin_and_assign(&mut self, that: Rhs) -> Void { }
+}

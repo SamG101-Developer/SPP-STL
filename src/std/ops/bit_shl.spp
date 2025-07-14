@@ -1,0 +1,7 @@
+@public
+cls BitShl[Rhs, Ret] {}
+
+sup [Rhs, Ret] BitShl[Rhs, Ret] {
+    @abstract_method
+    fun bin_shl(self, that: Rhs) -> Ret { }
+}
