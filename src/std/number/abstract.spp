@@ -1,8 +1,0 @@
-cls Integer[cmp n: bigint::BigInt] { }
-cls FloatingPoint[cmp n: bigint::BigInt] { }
-
-cls UnsignedInteger[cmp n: bigint::BigInt] { }
-sup [cmp n: bigint::BigInt] UnsignedInteger[n] ext Integer[n] { }
-
-cls SignedInteger[cmp n: bigint::BigInt] { }
-sup [cmp n: bigint::BigInt] SignedInteger[n] ext Integer[n] { }
