@@ -1,13 +1,15 @@
+use std::copy::Copy
+use std::clone::Clone
 use std::number::U32
 
 
 @public
 cls Bool { }
 
-sup Bool ext std::copy::Copy { }
+sup Bool ext Copy { }
 
 
-sup Bool ext std::clone::Clone {
+sup Bool ext Clone[Out=Bool] {
     @compiler_builtin
     fun clone(&self) -> Bool { }
 }
