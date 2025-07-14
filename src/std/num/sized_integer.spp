@@ -136,17 +136,17 @@ sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] 
         case that == 0 {
             ret Self::one()
         }
-        let mut res = Self::one()
+        let mut out = Self::one()
         let mut base = self
         let mut exp = that
         loop exp > 0 {
             case exp % 2 == 1 {
-                res = res * base
+                out = out * base
             }
             base = base * base
             exp /= 2
         }
-        ret res
+        ret out
     }
 }
 
@@ -189,17 +189,17 @@ sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] 
         case that == 0 {
             ret Some(Self::one())
         }
-        let mut res = Self::one()
+        let mut out = Self::one()
         let mut base = self
         let mut exp = that
         loop exp > 0 {
             case exp % 2 == 1 {
-                res = res.mul_checked(base)?
+                out = out.mul_checked(base)?
             }
             base = base.mul_checked(base)?
             exp /= 2
         }
-        ret Some(res)
+        ret Some(val=out)
     }
 
     @public
@@ -208,19 +208,19 @@ sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] 
         case that == 0 {
             ret (Self::one(), false)
         }
-        let mut res = Self::one()
+        let mut out = Self::one()
         let mut base = self
         let mut exp = that
         loop exp > 0 {
             case exp % 2 == 1 {
-                res, overflowed = res.mul_overflow(base)
-                case overflowed { ret (res, true) }
+                out, overflowed = out.mul_overflow(base)
+                case overflowed { ret (out, true) }
             }
             base, overflowed = base.mul_overflow(base)
-            case overflowed { ret (res, true) }
+            case overflowed { ret (out, true) }
             exp /= 2
         }
-        ret (res, false)
+        ret (out, false)
     }
 
     @public
@@ -229,17 +229,17 @@ sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] 
         case that == 0 {
             ret Self::one()
         }
-        let mut res = Self::one()
+        let mut out = Self::one()
         let mut base = self
         let mut exp = that
         loop exp > 0 {
             case exp % 2 == 1 {
-                res = res.mul_wrapping(base)
+                out = out.mul_wrapping(base)
             }
             base = base.mul_wrapping(base)
             exp /= 2
         }
-        ret res
+        ret out
     }
 }
 
