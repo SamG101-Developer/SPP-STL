@@ -13,7 +13,7 @@ sup C {
     type ULong = std::number::u64::U64
     type Float = std::number::f32::F32
     type Double = std::number::f64::F64
-    type SizeT = std::number::usize::USize
+    type SizeT = std::number::USize
     type Void = std::void::Void
     type RetPtr[T] = std::single::Single[T]
 }

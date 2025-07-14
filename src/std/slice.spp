@@ -1,5 +1,5 @@
 use std::cast::From
-use std::number::usize::USize
+use std::number::USize
 
 
 cls Slice[T] {

@@ -2,7 +2,7 @@ use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::clone::Clone
 use std::mem::memory::Memory
-use std::number::usize::USize
+use std::number::USize
 use std::result::Fail
 use std::void::Void
 

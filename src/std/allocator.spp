@@ -1,5 +1,5 @@
 use std::mem::memory::Memory
-use std::number::usize::USize
+use std::number::USize
 use std::result::Exception
 use std::result::Res
 use std::void::Void

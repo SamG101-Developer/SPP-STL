@@ -2,7 +2,7 @@ use std::boolean::Bool
 use std::fs::path::Path
 use std::number::i32::I32
 use std::number::u8::U8
-use std::number::usize::USize
+use std::number::USize
 use std::ops::del::Del
 use std::result::Pass
 use std::result::Res
