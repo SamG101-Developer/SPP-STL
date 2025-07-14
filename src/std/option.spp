@@ -3,6 +3,9 @@ use std::clone::Clone
 use std::copy::Copy
 use std::function::FunMov
 use std::ops::try::Try
+use std::result::Res
+use std::result::Pass
+use std::result::Fail
 
 # todo: superimpose Copy on None
 # todo: change None to NoneT
