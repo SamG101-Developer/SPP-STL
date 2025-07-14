@@ -23,8 +23,6 @@ sup [T: Copy] Opt[T] ext Copy { }
 
 
 sup [T: Clone[T]] Opt[T] ext Clone[Opt[T]] {
-    @public
-    @inline
     fun clone(&self) -> Opt[T] {
         ret case self of
             is Some[T](val) { Some[T](val.clone()) }
