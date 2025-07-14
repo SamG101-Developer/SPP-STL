@@ -357,28 +357,28 @@ sup [cmp bit_width: u32::U32] SizedFloatingPoint[bit_width] {
     @public
     @inline
     fun is_normal(self) -> Bool {
-        let bits = self.to_bits();
+        let bits = self.to_bits()
         ret bits & Limits[Self]::MAX_MASK != 0 and bits & Limits[Self]::EXP_MASK != 0
     }
 
     @public
     @inline
     fun is_subnormal(self) -> Bool {
-        let bits = self.to_bits();
+        let bits = self.to_bits()
         ret self != Self::Zero() and bits & Limits[Self]::EXP_MASK == 0
     }
 
     @public
     @inline
     fun is_nan(self) -> Bool {
-        let bits = self.to_bits();
+        let bits = self.to_bits()
         ret bits & Limits[Self]::MAN_MASK != 0 and bits & Limits[Self]::EXP_MASK == Limits[Self]::EXP_MASK
     }
 
     @public
     @inline
     fun is_infinite(self) -> Bool {
-        let bits = self.to_bits();
+        let bits = self.to_bits()
         ret bits & Limits[Self]::MAN_MASK == 0 and bits & Limits[Self]::EXP_MASK == Limits[Self]::EXP_MASK
     }
 
