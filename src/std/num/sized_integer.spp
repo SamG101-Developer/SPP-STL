@@ -13,7 +13,7 @@ cls SizedInteger[cmp bit_width: U8, cmp signed: Bool] { }
 sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext Integer { }
 
 
-cmp LOG_10_LOOKUP_TABLE: [U32, 256] = [
+cmp log_10_lookup_table: [U32, 256] = [
     0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4,
     4, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9,
     9, 10, 10, 10, 10, 11, 11, 11, 12, 12, 12, 13, 13, 13, 13, 14,
@@ -380,7 +380,7 @@ sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] 
     @inline
     fun ilog10_checked(self) -> Opt[u32::U32] {
         case self.ilog2_checked() is Some(val as i) {
-            ret Some(LOG_10_LOOKUP_TABLE[U32::from(i)])
+            ret Some(log_10_lookup_table[U32::from(i)])
         }
         ret None()
     }
