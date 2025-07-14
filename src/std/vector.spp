@@ -119,7 +119,7 @@ sup [T, A] Vec[T, A] {
 }
 
 
-sup [T, A] Vec[T, A] ext Clone[Vec[T, A]] {
+sup [T, A] Vec[T, A] ext Clone[Out=Vec[T, A]] {
     fun clone(&self) -> Vec[T, A] {
         ret Vec[T, A](buffer=self.buffer.clone(), length=self.length)
     }
