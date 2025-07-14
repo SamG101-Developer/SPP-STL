@@ -1,0 +1,22 @@
+# The base numeric types in the standard library.
+cls Num { }
+
+
+# The base integer type that is numeric.
+cls Integer { }
+
+
+# The base floating point type that is numeric.
+cls FloatingPoint { }
+
+
+# All numeric types are copyable.
+sup Num ext Copy { }
+
+
+# The base integer type extends the base numeric type.
+sup Integer ext Num { }
+
+
+# The base floating point type extends the base numeric type.
+sup FloatingPoint ext Num { }
