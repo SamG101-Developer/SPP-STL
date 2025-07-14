@@ -1,5 +1,5 @@
 use std::console::console_stream::ConsoleStream
-ues std::number::U32
+use std::number::U32
 use std::number::USize
 use std::result::Res
 use std::result::Fail
