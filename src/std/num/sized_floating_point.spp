@@ -1,6 +1,7 @@
 use std::cast::From
 use std::num::sized_integer_signed::SizedIntegerSigned
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
+use std::number::U32
 
 
 # A sized floating point is a floating point type with a provided bit width.
