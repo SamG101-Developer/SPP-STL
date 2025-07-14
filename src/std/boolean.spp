@@ -1,22 +1,48 @@
-use std::ops::and_::And
-use std::ops::ior_::Ior
-use std::ops::eq::Eq
-use std::ops::ne::Ne
-
-
 @public
 cls Bool { }
 
+sup Bool ext std::copy::Copy { }
 
-sup Bool ext And[Rhs=Bool] {
+
+sup Bool ext std::clone::Clone {
+    @compiler_builtin
+    fun clone(&self) -> Bool { }
+}
+
+
+sup Bool ext std::ops::and_And[Rhs=Bool] {
     @compiler_builtin
     fun and_(self, that: Bool) -> Bool { }
 }
 
 
-sup Bool ext Ior[Rhs=Bool] {
+sup Bool ext std::ops::ior::Ior[Rhs=Bool] {
     @compiler_builtin
     fun ior_(self, that: Bool) -> Bool { }
+}
+
+
+sup Bool ext std::ops::bit_and::BitAnd[Rhs=Bool] {
+    @compiler_builtin
+    fun bit_and(self, that: Bool) -> Bool { }
+}
+
+
+sup Bool ext std::ops::bit_ior::BitIor[Rhs=Bool] {
+    @compiler_builtin
+    fun bit_ior(self, that: Bool) -> Bool { }
+}
+
+
+sup Bool ext std::ops::bit_xor::BitXor[Rhs=Bool] {
+    @compiler_builtin
+    fun bit_xor(self, that: Bool) -> Bool { }
+}
+
+
+sup Bool ext std::ops::bit_not::BitNot {
+    @compiler_builtin
+    fun bit_not(&self) -> Bool { }
 }
 
 
@@ -29,4 +55,25 @@ sup Bool ext Eq[Rhs=Bool] {
 sup Bool ext Ne[Rhs=Bool] {
     @compiler_builtin
     fun ne(&self, that: &Bool) -> Bool { }
+}
+
+
+sup [cmp n: u32::U32] Bool ext From[std::num::sized_integer_signed::SizedIntegerSigned[n]] {
+    fun from(value: SizedIntegerSigned[n]) -> Bool {
+        ret value > SizedIntegerSigned[n]::zero()
+    }
+}
+
+
+sup [cmp n: u32::U32] Bool ext From[std::num::sized_integer_unsigned::SizedIntegerUnsigned[n]] {
+    fun from(value: SizedIntegerUnsigned[n]) -> Bool {
+        ret value > SizedIntegerUnsigned[n]::zero()
+    }
+}
+
+
+sup [cmp n: u32::U32] Bool ext From[std::num::sized_floating_point::SizedFloatingPoint[n]] {
+    fun from(value: SizedFloatingPoint[n]) -> Bool {
+        ret value > SizedFloatingPoint[n]::zero()
+    }
 }
