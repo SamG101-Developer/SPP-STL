@@ -45,7 +45,7 @@ sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerSigned[this_b
 }
 
 
-sup [cmp this_bit_width: U32, cmp: that_bit_width: U32] SizedIntegerSigned[this_bit_width] ext From[SizedFloatingPoint[that_bit_width]] {
+sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerSigned[this_bit_width] ext From[SizedFloatingPoint[that_bit_width]] {
     fun from(value: SizedFloatingPoint[n]) -> Self {
         ret intrinsics::fptosi(value, that_bit_width, this_bit_width)
     }
