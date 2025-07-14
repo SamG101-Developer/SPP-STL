@@ -507,7 +507,7 @@ fun float_acos(value: F128) -> F128 { }
 @public
 @always_inline
 @compiler_builtin
-fun float_atan(value: F18) -> F8 { }
+fun float_atan(value: F8) -> F8 { }
 
 @public
 @always_inline
