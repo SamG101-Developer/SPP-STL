@@ -19,7 +19,7 @@ use std::void::Void
 
 @public
 cls Vec[T, A = GlobalAlloc[T]] {
-    buffer: Slice[T, A]
+    buffer: Slice[T]
     length: USize
 }
 
