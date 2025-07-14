@@ -137,8 +137,8 @@ sup Limits[F16] {
 
 sup Limits[F32] {
     @public
-    cmp mantissa_digits: U32 = 24_u32
-    cmp digits: U32 = 7_u32
+    cmp mantissa_digits: U32 = 0_u32
+    cmp digits: U32 = 0_u32
     cmp epsilon: F32 = 0.0_f32
     cmp min: F32 = 0.0_f32
     cmp min_positive: F32 = 0.0_f32
@@ -155,11 +155,11 @@ sup Limits[F32] {
 
 sup Limits[F64] {
     @public
-    cmp mantissa_digits: U32 = 53_u32
+    cmp mantissa_digits: U32 = 0_u32
     cmp digits: U32 = 15_u32
     cmp epsilon: F64 = 0.0_f64
     cmp min: F64 = 0.0_f64
-    cmp min_positive: F64 = 5e-324_f64
+    cmp min_positive: F64 = 0.0_f64
     cmp max: F64 = 0.0_f64
     cmp min_exp: S32 = 0_s32
     cmp max_exp: S32 = 0_s32
@@ -173,8 +173,8 @@ sup Limits[F64] {
 
 sup Limits[F128] {
     @public
-    cmp mantissa_digits: U32 = 113_u32
-    cmp digits: U32 = 34_u32
+    cmp mantissa_digits: U32 = 0_u32
+    cmp digits: U32 = 0_u32
     cmp epsilon: F128 = 0.0_f128
     cmp min: F128 = 0.0_f128
     cmp min_positive: F128 = 0.0_f128
