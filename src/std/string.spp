@@ -58,8 +58,7 @@ sup Str ext Ne[Rhs=Str] {
 
 sup Str ext Clone[Out=Str] {
     @no_impl
-    fun clone(&self) -> Str {
-    }
+    fun clone(&self) -> Str { }
 }
 
 
