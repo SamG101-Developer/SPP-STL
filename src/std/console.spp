@@ -1,21 +1,15 @@
-use std::number::i32::I32
+use std::number::S32
 use std::string::Str
 use std::void::Void
 
 
-cmp std_in: I32 = 0_i32
-cmp std_out: I32 = 1_i32
-cmp std_err: I32 = 2_i32
-
-
-fun print(value: &Str) -> I32 {
-    let result = libc::fputs(value, &std_out)
-    ret result
+fun print(value: &Str) -> S32 {
+    let res = std::console::stdout_stream::stdout.write_all(&value.data)
+    ret res
 }
 
 
-fun input(size: I32 = 1024_i32) -> Str {
-    let mut buffer = Str()
-    libc::fgets(&mut buffer, 1024_i32, &std_in)
-    ret buffer
+fun input() -> Opt[Str] {
+    let vec = std::console::stdin_stream::stdin.read_all().ok()?
+    ret Str(data=vec)
 }
