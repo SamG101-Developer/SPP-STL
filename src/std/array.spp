@@ -1,5 +1,6 @@
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
+use std::cast::From
 use std::clone::Clone
 use std::mem::memory::Memory
 use std::number::USize
