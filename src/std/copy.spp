@@ -1,8 +1,2 @@
 @public
 cls Copy { }
-
-sup Copy {
-    @private
-    @compiler_builtin
-    fun copy(&self) -> Self { }
-}
