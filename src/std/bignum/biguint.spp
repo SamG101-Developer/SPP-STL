@@ -1,5 +1,6 @@
 use std::boolean::Bool
 use std::number::U32
+use std::void::Void
 
 type BigDigit = U32
 
