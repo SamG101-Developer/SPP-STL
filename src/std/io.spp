@@ -1,6 +1,9 @@
 use std::number::S32
+use std::option::Opt
+use std::option::Some
 use std::string::Str
 use std::void::Void
+
 
 
 fun print(value: &Str) -> S32 {
@@ -11,5 +14,5 @@ fun print(value: &Str) -> S32 {
 
 fun input() -> Opt[Str] {
     let vec = std::console::stdin_stream::stdin.read_all().ok()?
-    ret Str(data=vec)
+    ret Some(val=Str(data=vec))
 }
