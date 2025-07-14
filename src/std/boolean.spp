@@ -1,4 +1,4 @@
-use std::boolean::Bool
+use std::number::U32
 
 
 @public
