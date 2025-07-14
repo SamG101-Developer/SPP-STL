@@ -5,14 +5,14 @@ use std::num::sized_integer::SizedInteger
 type SizedIntegerUnsigned[cmp bit_width: U32] = SizedInteger[bit_width, false]
 
 
-sup [cmp bit_width: u32::U32] SizedInteger[bit_width, false] ext std::ops::div::Div[Rhs=Self, Ret=Self] {
+sup [cmp bit_width: U32] SizedInteger[bit_width, false] ext std::ops::div::Div[Rhs=Self, Ret=Self] {
     fun div(self, that: Self) -> Self {
         ret intrinsics::udiv(self, that)
     }
 }
 
 
-sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] ext std::ops::rem::Rem[Rhs=Self, Ret=Self] {
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::rem::Rem[Rhs=Self, Ret=Self] {
     fun rem(self, that: Self) -> Self {
         ret intrinsics::urem(self, that)
     }
@@ -50,7 +50,7 @@ sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerUnsigned[this
 }
 
 
-sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
     fun min(self, that: Self) -> Self {
@@ -65,7 +65,7 @@ sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
 }
 
 
-sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
     fun sub_checked(self, that: Self) -> Opt[Self] {
@@ -92,7 +92,7 @@ sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
 }
 
 
-sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
     fun mul_checked(self, that: Self) -> Opt[Self] {
@@ -122,7 +122,7 @@ sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
 }
 
 
-sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
     fun div_checked(self, that: Self) -> Opt[Self] {
@@ -166,7 +166,7 @@ sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
 }
 
 
-sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
     fun rem_checked(self, that: Self) -> Opt[Self] {
@@ -190,7 +190,7 @@ sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
 }
 
 
-sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
     fun pow_saturating(self, that: U32) -> Self {
@@ -201,7 +201,7 @@ sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
 }
 
 
-sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
     fun mod(self, that: Self) -> Self {
@@ -210,7 +210,7 @@ sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
 }
 
 
-sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     # The "isqrt" function computes the integer square root of the sized integer. There is no "checked" version of this
     # function as unsigned numbers cannot be negative, so it is safe to use the "iroot" function with a base of 2.
     @public

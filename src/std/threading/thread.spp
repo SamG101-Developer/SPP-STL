@@ -1,6 +1,6 @@
 use std::boolean::Bool
 use std::string::Str
-use std::number::u64::U64
+use std::number::U64
 use std::ops::eq::Eq
 use std::ops::del::Del
 

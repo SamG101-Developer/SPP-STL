@@ -10,7 +10,7 @@ cls SizedInteger[cmp bit_width: U8, cmp signed: Bool] { }
 
 
 # The sized integer type extends the base integer type.
-sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext Integer { }
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext Integer { }
 
 
 cmp log_10_lookup_table: [U32, 256] = [
@@ -33,105 +33,105 @@ cmp log_10_lookup_table: [U32, 256] = [
 ]
 
 
-sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::eq::Eq[Other=Self] {
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::eq::Eq[Other=Self] {
     fun eq(self, that: Self) -> Bool {
         ret intrinsics::eq(self, that)
     }
 }
 
 
-sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::ne::Ne[Other=Self] {
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::ne::Ne[Other=Self] {
     fun ne(self, that: Self) -> Bool {
         ret intrinsics::ne(self, that)
     }
 }
 
 
-sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::lt::Lt[Other=Self] {
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::lt::Lt[Other=Self] {
     fun lt(self, that: Self) -> Bool {
         ret intrinsics::lt(self, that)
     }
 }
 
 
-sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::le::Le[Other=Self] {
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::le::Le[Other=Self] {
     fun le(self, that: Self) -> Bool {
         ret intrinsics::le(self, that)
     }
 }
 
 
-sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::gt::Gt[Other=Self] {
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::gt::Gt[Other=Self] {
     fun gt(self, that: Self) -> Bool {
         ret intrinsics::gt(self, that)
     }
 }
 
 
-sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::ge::Ge[Other=Self] {
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::ge::Ge[Other=Self] {
     fun ge(self, that: Self) -> Bool {
         ret intrinsics::ge(self, that)
     }
 }
 
 
-sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_and::BitAnd[Rhs=Self, Ret=Self] {
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_and::BitAnd[Rhs=Self, Ret=Self] {
     fun bit_and(self, that: Self) -> Self {
         ret intrinsics::bit_and(self, that)
     }
 }
 
 
-sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_ior::BitOr[Rhs=Self, Ret=Self] {
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_ior::BitOr[Rhs=Self, Ret=Self] {
     fun bit_ior(self, that: Self) -> Self {
         ret intrinsics::bit_ior(self, that)
     }
 }
 
 
-sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_xor::BitXor[Rhs=Self, Ret=Self] {
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_xor::BitXor[Rhs=Self, Ret=Self] {
     fun bit_xor(self, that: Self) -> Self {
         ret intrinsics::bit_xor(self, that)
     }
 }
 
 
-sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_shl::BitShl[Rhs=U32, Ret=Self] {
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_shl::BitShl[Rhs=U32, Ret=Self] {
     fun bit_shl(self, that: U32) -> Self {
         ret intrinsics::bit_shl(self, that)
     }
 }
 
 
-sup [cmp bit_width: u32::U32, cmp bit_width: Bool] SizedInteger[bit_width, bit_width] ext std::ops::bit_shr::BitShr[Rhs=U32, Ret=Self] {
+sup [cmp bit_width: U32, cmp bit_width: Bool] SizedInteger[bit_width, bit_width] ext std::ops::bit_shr::BitShr[Rhs=U32, Ret=Self] {
     fun bit_shr(self, that: U32) -> Self {
         ret intrinsics::bit_shr(self, that)
     }
 }
 
 
-sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::add::Add[Rhs=Self, Ret=Self] {
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::add::Add[Rhs=Self, Ret=Self] {
     fun add(self, that: Self) -> Self {
         ret intrinsics::add(self, that)
     }
 }
 
 
-sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::sub::Sub[Rhs=Self, Ret=Self] {
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::sub::Sub[Rhs=Self, Ret=Self] {
     fun sub(self, that: Self) -> Self {
         ret intrinsics::sub(self, that)
     }
 }
 
 
-sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::mul::Mul[Rhs=Self, Ret=Self] {
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::mul::Mul[Rhs=Self, Ret=Self] {
     fun mul(self, that: Self) -> Self {
         ret intrinsics::mul(self, that)
     }
 }
 
 
-sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext Pow[Rhs=U32, Ret=Self] {
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext Pow[Rhs=U32, Ret=Self] {
     fun pow(self, that: U32) -> Self {
         case that == 0 {
             ret Self::one()
@@ -151,7 +151,7 @@ sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] 
 }
 
 
-sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
     @public
     @inline
     fun add_checked(self, that: Self) -> Opt[Self] {
@@ -182,7 +182,7 @@ sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] 
 }
 
 
-sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
     @public
     @inline
     fun pow_checked(self, that: U32) -> Opt[Self] {
@@ -244,7 +244,7 @@ sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] 
 }
 
 
-sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
     @public
     @inline
     fun shl_checked(self, that: U32) -> Opt[Self] {
@@ -268,7 +268,7 @@ sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] 
 }
 
 
-sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
     @public
     @inline
     fun shr_checked(self, that: U32) -> Opt[Self] {
@@ -292,7 +292,7 @@ sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] 
 }
 
 
-sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
     @public
     @inline
     fun zero() -> Self {
@@ -308,13 +308,13 @@ sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] 
 
 
 
-sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
     # The "ilog" function is an integer logarithm function that wraps the "ilog_checked" function. It checks for a value
     # inside the optional result and returns it if present, or aborts with an error message if the "ilog_checked"
     # function fails.
     @public
     @inline
-    fun ilog(self, base: Self) -> u32::U32 {
+    fun ilog(self, base: Self) -> U32 {
         case self.ilog_checked(base) is Some(val) {
             ret value
         }
@@ -326,7 +326,7 @@ sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] 
     # "ilog2_checked" function fails.
     @public
     @inline
-    fun ilog2(self) -> u32::U32 {
+    fun ilog2(self) -> U32 {
         case self.ilog2_checked() is Some(val) {
             ret value
         }
@@ -338,7 +338,7 @@ sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] 
     # "ilog10_checked" function fails.
     @public
     @inline
-    fun ilog10(self) -> u32::U32 {
+    fun ilog10(self) -> U32 {
         case self.ilog10_checked() is Some(val) {
             ret value
         }
@@ -350,7 +350,7 @@ sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] 
     # value with a given base. If the base is not a positive integer, it returns an empty optional.
     @public
     @inline
-    fun ilog_checked(self, base: Self) -> Opt[u32::U32] {
+    fun ilog_checked(self, base: Self) -> Opt[U32] {
         case self <= 0 or base <= 1 {
             ret None
         }
@@ -362,7 +362,7 @@ sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] 
     # that the general "ilog_checked" function uses, due to the fact that it is able to use LLVM intrinsics.
     @public
     @inline
-    fun ilog2_checked(self) -> Opt[u32::U32] {
+    fun ilog2_checked(self) -> Opt[U32] {
         ret bit_width - 1 - intrinsics::ctlz(self)
     }
 
@@ -371,7 +371,7 @@ sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] 
     # to compute the logarithm of the integer value with a base of 10.
     @public
     @inline
-    fun ilog10_checked(self) -> Opt[u32::U32] {
+    fun ilog10_checked(self) -> Opt[U32] {
         case self.ilog2_checked() is Some(val as i) {
             ret Some(val=log_10_lookup_table.at(U32::from(i)))
         }

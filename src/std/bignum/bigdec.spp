@@ -1,9 +1,9 @@
 use std::bignum::bigint::BigInt
-use std::number::i64::I64
+use std::number::S64
 
 
 @public
 cls BigDec {
     int_val: BigInt
-    scale: I64
+    scale: S64
 }
