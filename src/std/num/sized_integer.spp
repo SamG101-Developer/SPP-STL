@@ -96,13 +96,6 @@ sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] 
 }
 
 
-sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::not::Not[Ret=Self] {
-    fun not(self) -> Self {
-        ret intrinsics::bit_not(self)
-    }
-}
-
-
 sup [cmp bit_width: u32::U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_shl::BitShl[Rhs=U32, Ret=Self] {
     fun bit_shl(self, that: U32) -> Self {
         ret intrinsics::bit_shl(self, that)
