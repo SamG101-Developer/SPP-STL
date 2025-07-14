@@ -1,8 +1,8 @@
 use std::boolean::Bool
 use std::number::U8
 use std::number::U32
-use std::optional::Opt
-use std::optional::Some
+use std::option::Opt
+use std::option::Some
 
 
 # A sized integer is an integer type with a provided bit width.
