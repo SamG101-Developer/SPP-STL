@@ -1,3 +1,24 @@
+use std::number::U8
+use std::number::U16
+use std::number::U32
+use std::number::U64
+use std::number::U128
+use std::number::U256
+use std::number::USize
+use std::number::S8
+use std::number::S16
+use std::number::S32
+use std::number::S64
+use std::number::S128
+use std::number::S256
+use std::number::SSize
+use std::number::F8
+use std::number::F16
+use std::number::F32
+use std::number::F64
+use std::number::F128
+
+
 cls Limits[T] { }
 
 
