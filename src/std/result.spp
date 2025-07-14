@@ -1,6 +1,7 @@
 use std::option::Opt
 use std::option::None
 use std::option::Some
+use std::ops::try::Try
 use std::string::Str
 
 
@@ -26,5 +27,13 @@ sup [T, E] Res[T, E] {
         # let converted: Opt[T] = case self of
         #    is Pass[T](val) { Some(val) }
         #    is Fail[E](err) { None() }
+    }
+}
+
+
+sup [T, E] Res[T, E] ext Try[T, E] {
+    @public
+    fun op_is_output(&self) -> Bool {
+        ret self is Pass[T](..)
     }
 }
