@@ -1,0 +1,247 @@
+use std::num::sized_integer::SizedInteger
+
+
+# Type alias the "unsigned" version of the the sized integer type.
+type SizedIntegerUnsigned[cmp bit_width: U32] = SizedInteger[bit_width, false]
+
+
+sup [cmp bit_width: u32::U32] SizedInteger[bit_width, false] ext std::ops::div::Div[Rhs=Self, Ret=Self] {
+    fun div(self, that: Self) -> Self {
+        ret intrinsics::udiv(self, that)
+    }
+}
+
+
+sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] ext std::ops::rem::Rem[Rhs=Self, Ret=Self] {
+    fun rem(self, that: Self) -> Self {
+        ret intrinsics::urem(self, that)
+    }
+}
+
+
+sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerUnsigned[this_bit_width] ext From[SizedIntegerSigned[that_bit_width]] {
+    fun from(value: SizedIntegerSigned[n]) -> Self {
+        ret case this_bit_width < that_bit_width {
+            intrinsics::trunc(value, that_bit_width, this_bit_width)
+        else {
+            intrinsics::zext(value, that_bit_width, this_bit_width)
+        }
+    }
+}
+
+
+sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerUnsigned[this_bit_width] ext From[SizedIntegerUnsigned[that_bit_width]] {
+    fun from(value: SizedIntegerUnsigned[n]) -> Self {
+        ret case this_bit_width < that_bit_width {
+            intrinsics::trunc(value, that_bit_width, this_bit_width)
+        else {
+            intrinsics::zext(value, that_bit_width, this_bit_width)
+        }
+    }
+}
+
+
+sup [cmp this_bit_width: U32, cmp: that_bit_width: U32] SizedIntegerUnsigned[this_bit_width] ext From[SizedFloatingPoint[that_bit_width]] {
+    fun from(value: SizedFloatingPoint[n]) -> Self {
+        ret intrinsics::fptoui(value, that_bit_width, this_bit_width)
+    }
+}
+
+
+sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
+    @public
+    @inline
+    fun min(self, that: Self) -> Self {
+        ret intrinsics::umin(self, that)
+    }
+
+    @public
+    @inline
+    fun max(self, that: Self) -> Self {
+        ret intrinsics::umax(self, that)
+    }
+}
+
+
+sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
+    @public
+    @inline
+    fun sub_checked(self, that: Self) -> Opt[Self] {
+        ret case self < that { None() } else { intrinsics::sub(self, that) }
+    }
+
+    @public
+    @inline
+    fun sub_overflow(self, that: Self) -> (Self, Bool) {
+        ret intrinsics::usub_overflow(self, that)
+    }
+
+    @public
+    @inline
+    fun sub_saturating(self, that: Self) -> Self {
+        ret intrinsics::usub_saturating(self, that)
+    }
+
+    @public
+    @inline
+    fun sub_wrapping(self, that: Self) -> Self {
+        ret intrinsics::usub_wrapping(self, that)
+    }
+}
+
+
+sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
+    @public
+    @inline
+    fun mul_checked(self, that: Self) -> Opt[Self] {
+        let val, overflowed = intrinsics::umul_overflow(self, that)
+        ret case overflowed { None() } else { Some(val) }
+    }
+
+    @public
+    @inline
+    fun mul_overflow(self, that: Self) -> (Self, Bool) {
+        ret intrinsics::umul_overflow(self, that)
+    }
+
+    @public
+    @inline
+    fun mul_saturating(self, that: Self) -> Self {
+        ret self.mul_checked(that) of
+            is Some(val) { val }
+            is None() { Limits[Self]::max }
+    }
+
+    @public
+    @inline
+    fun mul_wrapping(self, that: Self) -> Self {
+        ret intrinsics::umul_wrapping(self, that)
+    }
+}
+
+
+sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
+    @public
+    @inline
+    fun div_checked(self, that: Self) -> Opt[Self] {
+        case that == 0 {
+            ret None()
+        }
+        ret Some(intrinsics::udiv(self, that))
+    }
+
+    @public
+    @inline
+    fun div_overflow(self, that: Self) -> (Self, Bool) {
+        ret (intrinsics::udiv(self, that))
+    }
+
+    @public
+    @inline
+    fun div_saturating(self, that: Self) -> Self {
+        ret self.div_wrapping(that)
+    }
+
+    @public
+    @inline
+    fun div_wrapping(self, that: Self) -> Self {
+        ret intrinsics::udiv(self, that)
+    }
+
+    @public
+    @inline
+    fun div_floor(self, that: Self) -> Self {
+        ret intrinsics::udiv(self, that)
+    }
+
+    @public
+    @inline
+    fun div_ceil(self, that: Self) -> Self {
+        let d = self / that
+        let r = self % that
+        ret case r > 0 { d + Self::one() } else { d }
+    }
+}
+
+
+sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
+    @public
+    @inline
+    fun rem_checked(self, that: Self) -> Opt[Self] {
+        case that == 0 {
+            ret None()
+        }
+        ret Some(intrinsics::urem(self, that))
+    }
+
+    @public
+    @inline
+    fun rem_overflow(self, that: Self) -> (Self, Bool) {
+        ret (intrinsics::urem(self, that), false)
+    }
+
+    @public
+    @inline
+    fun rem_wrapping(self, that: Self) -> Self {
+        ret self.rem_overflow(that).0
+    }
+}
+
+
+sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
+    @public
+    @inline
+    fun pow_saturating(self, that: U32) -> Self {
+        case self.pow_checked(that) of
+            is Some(val) { val }
+            is None() { Limits[Self]::max }
+    }
+}
+
+
+sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
+    @public
+    @inline
+    fun mod(self, that: Self) -> Self {
+        ret self % that
+    }
+}
+
+
+sup [cmp bit_width: u32::U32] SizedIntegerUnsigned[bit_width] {
+    # The "isqrt" function computes the integer square root of the sized integer. There is no "checked" version of this
+    # function as unsigned numbers cannot be negative, so it is safe to use the "iroot" function with a base of 2.
+    @public
+    @inline
+    fun isqrt(self) -> Self {
+        ret self.iroot(Self::from(2))
+    }
+
+    # The "icbrt" function computes the integer cube root of the sized integer. There is no "checked" version of this
+    # function as unsigned numbers cannot be negative, so it is safe to use the "iroot" function with a base of 3.
+    @public
+    @inline
+    fun icbrt(self) -> Self {
+        ret self.iroot(Self::from(3))
+    }
+
+    # The "iroot_checked" function computes the integer root of the sized integer with a given base and returns an
+    # optional value. It uses the Newton-Raphson method to find the root, iterating until the result stabilizes. Bypass
+    # any negative checks as the numbers are unsigned.
+    @public
+    @inline
+    fun iroot(self, base: Self) -> Opt[Self] {
+        case self <= Self::from(1) {
+            ret Some(self)
+        }
+
+        let mut x = Self::one() << (bit_width / base.ilog2_checked().unwrap_or(1))
+        loop true {
+            let mut y = ((base - 1) * x + self / x.pow(base - 1)) / (base)
+            case y >= x {
+                ret Some(x)
+            }
+            x = y
+        }
+    }
+}
