@@ -4,6 +4,7 @@ use std::num::bases::FloatingPoint
 use std::num::bases::Integer
 use std::number::S32
 use std::number::USize
+use std::void::Void
 
 
 @public
@@ -143,19 +144,19 @@ fun fcmp[T: Integer](this: T, that: T) -> S32 { }
 @public
 @always_inline
 @compiler_builtin
-fun mem_copy[T](dest: &mut Memory[T], src: &Memory[T], size: USize) { }
+fun mem_copy[T](dest: &mut Memory[T], src: &Memory[T], size: USize) -> Void { }
 
 
 @public
 @always_inline
 @compiler_builtin
-fun mem_move[T](dest: &mut Memory[T], src: &Memory[T], size: USize) { }
+fun mem_move[T](dest: &mut Memory[T], src: &Memory[T], size: USize) -> Void { }
 
 
 @public
 @always_inline
 @compiler_builtin
-fun mem_set[T: Copy](dest: &mut Memory[T], value: T, size: USize) { }
+fun mem_set[T: Copy](dest: &mut Memory[T], value: T, size: USize) -> Void { }
 
 
 @public
