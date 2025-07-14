@@ -1,11 +1,9 @@
 use std::algorithms::Sortable
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
-use std::array::ArrDynamic
 use std::boolean::Bool
 use std::clone::Clone
 use std::function::FunRef
-use std::generator::Gen
 use std::generator::GenOnce
 use std::generator::GenOpt
 use std::iterator::IndexMut
@@ -15,12 +13,13 @@ use std::iterator::IterMov
 use std::iterator::IterMut
 use std::iterator::IterRef
 use std::number::usize::USize
+use std::slice::Slice
 use std::void::Void
 
 
 @public
 cls Vec[T, A = GlobalAlloc[T]] {
-    buffer: ArrDynamic[T, A]
+    buffer: Slice[T, A]
     length: USize
 }
 
@@ -30,7 +29,7 @@ sup [T, A] Vec[T, A] {
     type Allocator = A
 
     fun new() -> Vec[T, A] {
-        ret Vec[T, A](buffer=ArrDynamic[T, A]::new_with_cap(1_uz))
+        ret Vec[T, A](buffer=Slice[T, A](cap=1_uz), length=0_uz)
     }
 
     fun len(&self) -> USize {
@@ -42,7 +41,7 @@ sup [T, A] Vec[T, A] {
 sup [T, A] Vec[T, A] {
     @public
     fun push(&mut self, element: T) -> Void {
-        case self.length == self.buffer.cap() { self.buffer.grow_double() }
+        case self.length == self.buffer.cap() { self.grow_double() }
         self.buffer.place(self.length, element)
         self.length += 1_uz
     }
@@ -50,11 +49,17 @@ sup [T, A] Vec[T, A] {
     @public
     @no_impl
     fun insert(&mut self, index: USize, element: T) -> Void {
-        case self.length == self.buffer.cap() { self.buffer.grow_double() }
+        case self.length == self.buffer.cap() { self.grow_double() }
         self.buffer.shift(index, 1_uz)
         self.buffer.place(index, element)
         self.length += 1_uz
     }
+}
+
+
+sup [T, A] Vec[T, A] {
+    @private
+    fun grow
 }
 
 
@@ -109,6 +114,13 @@ sup [T, A] Vec[T, A] {
 
     fun shrink_to_fit(&mut self) -> Void {
         self.buffer.resize(self.length)
+    }
+}
+
+
+sup [T, A] Vec[T, A] {
+    cor view_ref(&self) -> GenOnce[&Memory[T, A]] {
+        gen &self.buffer
     }
 }
 
