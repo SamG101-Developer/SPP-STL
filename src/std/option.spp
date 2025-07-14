@@ -26,10 +26,9 @@ sup [T: Clone[T]] Opt[T] ext Clone[Opt[T]] {
     @public
     @inline
     fun clone(&self) -> Opt[T] {
-        ret case self {
+        ret case self of
             is Some[T](val) { Some[T](val.clone()) }
             is None() { None() }
-        }
     }
 }
 
@@ -44,10 +43,9 @@ sup [T] Opt[T] {
     @public
     @inline
     fun is_some_and(self, pred: FunMov[(T,), Bool]) -> Bool {
-        ret case self {
+        ret case self of
             is Some[T](val) { pred(val) }
             is None() { false }
-        }
     }
 
     @public
@@ -59,10 +57,9 @@ sup [T] Opt[T] {
     @public
     @inline
     fun is_none_or(self, pred: FunMov[(T,), Bool]) -> Bool {
-        ret case self {
+        ret case self of
             is Some[T](val) { pred(val) }
             is None() { true }
-        }
     }
 }
 
@@ -71,19 +68,17 @@ sup [T] Opt[T] {
     @public
     @inline
     fun and_[U](self, that: Opt[U]) -> Opt[U] {
-        ret case self {
+        ret case self of
             is Some[T](..) { that }
             is None() { None() }
-        }
     }
 
     @public
     @inline
     fun and_then[U](self, that: FunMov[(T,), Opt[U]]) -> Opt[U] {
-        ret case self {
+        ret case self of
             is Some[T](val) { that(val) }
             is None() { None() }
-        }
     }
 }
 
@@ -92,19 +87,17 @@ sup [T] Opt[T] {
     @public
     @inline
     fun ior_[U](self, that: Opt[U]) -> Opt[T] {
-        ret case self {
+        ret case self of
             is Some[T](..) { self }
             is None() { that }
-        }
     }
 
     @public
     @inline
     fun ior_else[U](self, that: FunMov[(), Opt[U]]) -> Opt[T] {
-        ret case self {
+        ret case self of
             is Some[T](..) { self }
             is None() { that() }
-        }
     }
 }
 
@@ -125,28 +118,25 @@ sup [T] Opt[T] {
     @public
     @inline
     fun map[U](self, f: FunMov[(T,), U]) -> Opt[U] {
-        ret case self {
+        ret case self of
             is Some[T](val) { Some(val=f(val)) }
             is None() { None() }
-        }
     }
 
     @public
     @inline
     fun map_or[U](self, default: U, f: FunMov[(T,), U]) -> U {
-        ret case self {
+        ret case self of
             is Some[T](val) { f(val) }
             is None() { default }
-        }
     }
 
     @public
     @inline
     fun map_or_else[U](self, default: FunMov[(), U], f: FunMov[(T,), U]) -> U {
-        ret case self {
+        ret case self of
             is Some[T](val) { f(val) }
             is None() { default() }
-        }
     }
 }
 
@@ -155,19 +145,17 @@ sup [T] Opt[T] {
     @public
     @inline
     fun ok_or[U](self, err: U) -> Res[T, U] {
-        ret case self {
+        ret case self of
             is Some[T](val) { Pass(val) }
             is None() { Fail(err) }
-        }
     }
 
     @public
     @inline
     fun ok_or_else[U](self, err: FunMov[(), U]) -> Res[T, U] {
-        ret case self {
+        ret case self of
             is Some[T](val) { Pass(val) }
             is None() { Fail(err()) }
-        }
     }
 }
 
@@ -176,28 +164,25 @@ sup[T] Opt[T] {
     @public
     @inline
     fun unwrap(self) -> T {
-        ret case self {
+        ret case self of
             is Some[T](val) { val }
             is None() { std::abort::abort("called `unwrap` on a `None` value") }
-        }
     }
 
     @public
     @inline
     fun unwrap_or(self, default: T) -> T {
-        ret case self {
+        ret case self of
             is Some[T](val) { val }
             is None() { default }
-        }
     }
 
     @public
     @inline
     fun unwrap_or_else(self, default: FunMov[(), T]) -> T {
-        ret case self {
+        ret case self of
             is Some[T](val) { val }
             is None() { default() }
-        }
     }
 }
 
