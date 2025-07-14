@@ -1,4 +1,5 @@
 use std::boolean::Bool
+use std::clone::Clone
 use std::copy::Copy
 use std::function::FunRef
 use std::ops::try::Try
