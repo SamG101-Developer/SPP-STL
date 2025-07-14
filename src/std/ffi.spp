@@ -4,9 +4,9 @@ cls C { }
 sup C {
     type Bool = std::boolean::Bool
     type Char = std::string::Str
-    type Short = std::number::i16::I16
-    type Int = std::number::i32::I32
-    type Long = std::number::i64::I64
+    type Short = std::number::S16
+    type Int = std::number::S32
+    type Long = std::number::S64
     type UInt = std::number::u8::U8
     type UShort = std::number::u16::U16
     type UInt = std::number::u32::U32
