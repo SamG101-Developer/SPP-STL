@@ -189,7 +189,7 @@ sup[T] Opt[T] {
 }
 
 
-sup [T] Opt[T] ext std::ops::try::[T, None] {
+sup [T] Opt[T] ext std::ops::try::Try[T, None] {
     fun op_is_output(&self) -> Bool {
         ret self is Some[T](..)
     }
