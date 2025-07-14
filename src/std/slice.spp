@@ -2,7 +2,7 @@ use std::array::Arr
 use std::cast::From
 use std::mem::memory::Memory
 use std::number::USize
-use std::vec::Vec
+use std::vector::Vec
 
 
 cls Slice[T] {
