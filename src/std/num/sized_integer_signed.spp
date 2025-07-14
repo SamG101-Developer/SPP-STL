@@ -330,7 +330,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
     fun iroot_checked(self, base: Self) -> Opt[Self] {
-        case self < 0 || base <= 0 {
+        case self < 0 or base <= 0 {
             ret None
         }
         else case self <= Self::from(1) {
