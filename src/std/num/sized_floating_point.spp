@@ -114,15 +114,15 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::bit_not::Bi
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::bit_shl::BitShl[Rhs=U32, Ret=Self] {
-    fun bit_shl(self, shift: U32) -> Self {
-        ret intrinsics::float_bit_shl(self, shift)
+    fun bit_shl(self, that: U32) -> Self {
+        ret intrinsics::float_bit_shl(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::bit_shr::BitShr[Rhs=U32, Ret=Self] {
-    fun bit_shr(self, shift: U32) -> Self {
-        ret intrinsics::float_bit_shr(self, shift)
+    fun bit_shr(self, that: U32) -> Self {
+        ret intrinsics::float_bit_shr(self, that)
     }
 }
 
