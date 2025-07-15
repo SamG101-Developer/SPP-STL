@@ -25,12 +25,12 @@ cls StderrStream { }
 
 
 sup StderrStream ext WritableStream {
-    fun write(&self, data: &Vec[U8], length: USize) -> Res[S32, StreamWriteException] {
+    fun write(&mut self, data: &Vec[U8], length: USize) -> Res[S32, StreamWriteException] {
         let val = libc::fputs(Slice[U8]::from(data), &stderr_handle)
         ret case val < 0 { Fail(err=StreamWriteException(msg="Failed to write to stderr")) } else { Pass(val) }
     }
 
-    fun flush(&self) -> Res[Void, StreamWriteException] {
+    fun flush(&mut self) -> Res[Void, StreamWriteException] {
         let val = libc::fflush(&stderr_handle)
         ret case val < 0 { Fail(err=StreamWriteException(msg="Failed to flush stderr")) } else { Pass() }
     }
