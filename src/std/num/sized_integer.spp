@@ -133,7 +133,7 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext s
 }
 
 
-sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext Pow[Rhs=U32, Ret=Self] {
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::pow::Pow[Rhs=U32, Ret=Self] {
     fun pow(self, that: U32) -> Self {
         case that == 0 {
             ret Self::one()
