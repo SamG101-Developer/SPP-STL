@@ -1,6 +1,8 @@
 use std::boolean::Bool
 use std::cast::From
 use std::number::U32
+use std::number::S32
+use std::limits::Limits
 
 use std::num::sized_integer_signed::SizedIntegerSigned
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
