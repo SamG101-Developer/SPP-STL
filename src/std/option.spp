@@ -23,16 +23,16 @@ cls None { }
 type Opt[T] = Some[T] or None
 
 
-sup [T: Copy] Opt[T] ext Copy { }
+#sup [T: Copy] Opt[T] ext Copy { }
 
 
-sup [T: Clone[Out=T]] Opt[T] ext Clone[Out=Opt[T]] {
-    fun clone(&self) -> Opt[T] {
-        ret case self of
-            is Some[T](val) { Some[T](val.clone()) }
-            is None() { None() }
-    }
-}
+#sup [T: Clone[Out=T]] Opt[T] ext Clone[Out=Opt[T]] {
+#    fun clone(&self) -> Opt[T] {
+#        ret case self of
+#            is Some[T](val) { Some[T](val.clone()) }
+#            is None() { None() }
+#    }
+#}
 
 
 sup [T] Opt[T] {
