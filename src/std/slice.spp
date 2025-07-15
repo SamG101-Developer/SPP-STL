@@ -18,15 +18,15 @@ sup [E] Slice[E] ext Memory[E] {
 }
 
 
-sup [E, cmp n: USize] Slice[E] ext From[Arr[T, n]] {
-    fun from(that: Arr[T, n]) -> Self {
+sup [E, cmp n: USize] Slice[E] ext From[Arr[E, n]] {
+    fun from(that: Arr[E, n]) -> Self {
         ret Slice[E](ptr=that.ptr, cap=that.cap, len=n)
     }
 }
 
 
-sup [E, A] Slice[E] ext From[Vec[T, A]] {
-    fun from(that: Vec[T, A]) -> Self {
+sup [E, A] Slice[E] ext From[Vec[E, A]] {
+    fun from(that: Vec[E, A]) -> Self {
         ret that.buffer
     }
 }
