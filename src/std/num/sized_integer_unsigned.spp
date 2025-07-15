@@ -1,9 +1,9 @@
 use std::boolean::Bool
 use std::cast::From
 use std::number::U32
-use std::opt::Opt
-use std::opt::None
-use std::opt::Some
+use std::option::Opt
+use std::option::None
+use std::option::Some
 
 use std::num::sized_integer::SizedInteger
 use std::num::sized_integer_unsigned::SizedIntegerSigned
