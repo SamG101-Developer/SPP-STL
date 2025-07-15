@@ -105,7 +105,7 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext s
 }
 
 
-sup [cmp bit_width: U32, cmp bit_width: Bool] SizedInteger[bit_width, bit_width] ext std::ops::bit_shr::BitShr[Rhs=U32, Ret=Self] {
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_shr::BitShr[Rhs=U32, Ret=Self] {
     fun bit_shr(self, that: U32) -> Self {
         ret intrinsics::bit_shr(self, that)
     }
