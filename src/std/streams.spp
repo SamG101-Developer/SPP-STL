@@ -31,16 +31,16 @@ cls SeekableStream { }
 sup WritableStream {
     @public
     @abstract_method
-    fun write(&mut self, data: &Vec[U8]) -> Res[USize, StreamWriteException] { }
+    fun write(&self, data: &Vec[U8]) -> Res[USize, StreamWriteException] { }
 
     @public
     @abstract_method
-    fun flush(&mut self) -> Res[Void, StreamWriteException] { }
+    fun flush(&self) -> Res[Void, StreamWriteException] { }
 
     @public
     @no_impl
     @virtual_method
-    fun write_all(&mut self, data: &Vec[U8]) -> Res[Void, StreamWriteException] {
+    fun write_all(&self, data: &Vec[U8]) -> Res[Void, StreamWriteException] {
         ret Pass()
     }
 }
