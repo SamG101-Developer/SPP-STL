@@ -272,6 +272,31 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
 
 
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
+    @public
+    @inline
+    fun neg(self) -> Self {
+        ret intrinsics::sneg(self)
+    }
+
+    @public
+    @inline
+    fun neg_checked(self) -> Opt[Self] {
+        let (val, overflowed) = self.neg_overflow(self)
+        ret case overflowed { None() } else { Some(val) }
+    }
+
+    @public
+    @inline
+    fun neg_overflow(self) -> (Self, Bool) {
+        case self == Limits[Self]::min {
+            ret (Limits[Self]::min, true)
+        }
+        ret (intrinsics::sneg(self), false)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     # The "isqrt" function computes the integer square root of the sized integer. It uses the "isqrt_checked" function,
     # which returns an optional value. If the optional value is present, it returns it; otherwise, it aborts with an
     # error message (negative input etc).
