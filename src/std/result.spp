@@ -6,7 +6,7 @@ use std::string::Str
 
 
 @public
-cls Exception { message: Str }
+cls Exception { msg: Str }
 
 
 @public
