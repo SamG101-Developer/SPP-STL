@@ -1,19 +1,14 @@
-cls C { }
-
-
-sup C {
-    type Bool = std::boolean::Bool
-    type Char = std::string::Str
-    type Short = std::number::S16
-    type Int = std::number::S32
-    type Long = std::number::S64
-    type UInt = std::number::U8
-    type UShort = std::number::U16
-    type UInt = std::number::U32
-    type ULong = std::number::U64
-    type Float = std::number::F32
-    type Double = std::number::F64
-    type SizeT = std::number::USize
-    type Void = std::void::Void
-    type RetPtr[T] = std::single::Single[T]
-}
+type CBool = std::boolean::Bool
+type CChar = std::string::Str
+type CShort = std::number::S16
+type CInt = std::number::S32
+type CLong = std::number::S64
+type CUInt = std::number::U8
+type CUShort = std::number::U16
+type CUInt = std::number::U32
+type CULong = std::number::U64
+type CFloat = std::number::F32
+type CDouble = std::number::F64
+type CSizeT = std::number::USize
+type CVoid = std::void::Void
+type CRetPtr[T] = std::single::Single[T]

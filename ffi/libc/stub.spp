@@ -1,20 +1,21 @@
-use std::ffi::C
+use std::ffi::CChar
+use std::ffi::CInt
 
 
 @ffi
-fun fputs(str: &C::Char, stream: &C::Int) -> C::Int { }
+fun fputs(str: &CChar, stream: &CInt) -> CInt { }
 
 @ffi
-fun fgets(buffer: &mut C::Char, count: C::Int, stream: &C::Int) -> C::Char { }
+fun fgets(buffer: &mut CChar, count: CInt, stream: &CInt) -> CChar { }
 
 @ffi
-fun fopen(filename: &C::Char, mode: &C::Char) -> C::Int { }
+fun fopen(filename: &CChar, mode: &CChar) -> CInt { }
 
 @ffi
-fun fread(buffer: &mut C::Char, size: C::Int, count: C::Int, stream: &mut C::Int) -> C::Int { }
+fun fread(buffer: &mut CChar, size: CInt, count: CInt, stream: &mut CInt) -> CInt { }
 
 @ffi
-fun fwrite(buffer: &mut C::Char, size: C::Int, count: C::Int, stream: &mut C::Int) -> C::Int { }
+fun fwrite(buffer: &mut CChar, size: CInt, count: CInt, stream: &mut CInt) -> CInt { }
 
 @ffi
-fun fclose(stream: &mut C::Int) -> C::Int { }
+fun fclose(stream: &mut CInt) -> CInt { }
