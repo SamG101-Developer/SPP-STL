@@ -5,14 +5,14 @@ use std::option::Some
 cls From[That] { }
 
 
-sup [That] From[That] {
+sup [That] From[This, That] {
     @public
     @abstract_method
-    fun from(that: That) -> Self { }
+    fun from(that: That) -> This { }
 
     @public
     @virtual_method
-    fun try_from(that: That) -> Opt[Self] {
+    fun try_from(that: That) -> Opt[This] {
         ret Some(Self::from(that))
     }
 }
