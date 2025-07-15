@@ -36,42 +36,42 @@ cmp log_10_lookup_table: [U32, 256] = [
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::eq::Eq[Rhs=Self] {
-    fun eq(self, that: Self) -> Bool {
+    fun eq(&self, that: Self) -> Bool {
         ret intrinsics::eq(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::ne::Ne[Rhs=Self] {
-    fun ne(self, that: Self) -> Bool {
+    fun ne(&self, that: Self) -> Bool {
         ret intrinsics::ne(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::lt::Lt[Rhs=Self] {
-    fun lt(self, that: Self) -> Bool {
+    fun lt(&self, that: Self) -> Bool {
         ret intrinsics::lt(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::le::Le[Rhs=Self] {
-    fun le(self, that: Self) -> Bool {
+    fun le(&self, that: Self) -> Bool {
         ret intrinsics::le(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::gt::Gt[Rhs=Self] {
-    fun gt(self, that: Self) -> Bool {
+    fun gt(&self, that: Self) -> Bool {
         ret intrinsics::gt(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::ge::Ge[Rhs=Self] {
-    fun ge(self, that: Self) -> Bool {
+    fun ge(&self, that: Self) -> Bool {
         ret intrinsics::ge(self, that)
     }
 }
