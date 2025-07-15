@@ -37,21 +37,21 @@ cls GlobalAlloc[E] { }
 sup [E] GlobalAlloc[E] ext Alloc[E] {
     @no_impl
     fun allocate(n: USize) -> Res[Memory[E], AllocException] {
-        std::mem::ops::malloc[T](n).ok_or(AllocException(msg="Failed to allocate memory"))
+        std::mem::ops::malloc[E](n).ok_or(AllocException(msg="Failed to allocate memory"))
     }
 
     @no_impl
     fun allocate_zeroed(n: USize) -> Res[Memory[E], AllocException] {
-        std::mem::ops::calloc[T](n).ok_or(AllocException(msg="Failed to allocate zeroed memory"))
+        std::mem::ops::calloc[E](n).ok_or(AllocException(msg="Failed to allocate zeroed memory"))
     }
 
     @no_impl
     fun deallocate(memory: Memory[E]) -> Res[Void, AllocException] {
-        std::mem::ops::free[T](memory).ok_or(AllocException(msg="Failed to deallocate memory"))
+        std::mem::ops::free[E](memory).ok_or(AllocException(msg="Failed to deallocate memory"))
     }
 
     @no_impl
     fun reallocate(memory: &mut Memory[E], n: USize) -> Res[Void, AllocException] {
-        std::mem::ops::realloc[T](memory, n).ok_or(AllocException(msg="Failed to reallocate memory"))
+        std::mem::ops::realloc[E](memory, n).ok_or(AllocException(msg="Failed to reallocate memory"))
     }
 }
