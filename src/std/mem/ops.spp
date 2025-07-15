@@ -47,6 +47,24 @@ fun calloc[T](n: USize) -> Opt[Memory[T]] {
 }
 
 
+fun realloc[T](memory: &mut Memory[T], n: USize) -> Opt[Memory[T]] {
+    # Determine the size and get a reallocated pointer.
+    let size = n * size_of[T]()
+    let ptr = ffi::libc::realloc(memory.ptr, size)
+
+    # Convert the returned pointer into a safe type.
+    ret case ptr of
+        == 0 { None() }
+        else { Some(Memory[T](ptr, n)) }
+}
+
+
+fun free[T](memory: Memory[T]) -> Void {
+    # Free the memory pointed to by the pointer.
+    ffi::libc::free(memory.ptr)
+}
+
+
 fun mem_cpy[T: Copy](dest: &mut Memory[T], src: &Memory[T]) -> Void {
     # Perform the memory copy. Todo: use intrinsic::mem_copy ?
     ffi::libc::memcpy(dest.ptr, src.ptr, src.len() * size_of[T]())
