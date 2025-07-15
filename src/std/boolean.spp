@@ -69,21 +69,21 @@ sup Bool ext std::ops::ne::Ne[Rhs=Bool] {
 
 
 sup [cmp n: U32] Bool ext From[Self, SizedIntegerSigned[n]] {
-    fun from(value: SizedIntegerSigned[n]) -> Bool {
-        ret value > SizedIntegerSigned[n]::zero()
+    fun from(that: SizedIntegerSigned[n]) -> Bool {
+        ret that > SizedIntegerSigned[n]::zero()
     }
 }
 
 
 sup [cmp n: U32] Bool ext From[Self, SizedIntegerUnsigned[n]] {
-    fun from(value: SizedIntegerUnsigned[n]) -> Bool {
-        ret value > SizedIntegerUnsigned[n]::zero()
+    fun from(that: SizedIntegerUnsigned[n]) -> Bool {
+        ret that > SizedIntegerUnsigned[n]::zero()
     }
 }
 
 
 sup [cmp n: U32] Bool ext From[Self, SizedFloatingPoint[n]] {
-    fun from(value: SizedFloatingPoint[n]) -> Bool {
-        ret value > SizedFloatingPoint[n]::zero()
+    fun from(that: SizedFloatingPoint[n]) -> Bool {
+        ret that > SizedFloatingPoint[n]::zero()
     }
 }
