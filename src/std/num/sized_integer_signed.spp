@@ -1,7 +1,10 @@
 use std::boolean::Bool
 use std::cast::From
-use std::number::U32
 use std::limits::Limits
+use std::number::U32
+use std::opt::Opt
+use std::opt::None
+use std::opt::Some
 
 use std::num::sized_integer::SizedInteger
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
