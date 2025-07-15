@@ -2,7 +2,7 @@ use std::option::Opt
 use std::option::Some
 
 
-cls From[That] { }
+cls From[This, That] { }
 
 
 sup [This, That] From[This, That] {
