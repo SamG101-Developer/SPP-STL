@@ -5,7 +5,7 @@ use std::option::Some
 cls From[That] { }
 
 
-sup [That] From[This, That] {
+sup [This, That] From[This, That] {
     @public
     @abstract_method
     fun from(that: That) -> This { }
