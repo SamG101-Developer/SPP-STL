@@ -176,7 +176,7 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::pow::Pow[Rh
 }
 
 
-sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::neg::Neg[Ret=Self] {
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
     fun neg(self) -> Self {
         ret intrinsics::float_neg(self)
     }
