@@ -3,5 +3,5 @@ cls BitAnd[Rhs, Ret] {}
 
 sup [Rhs, Ret] BitAnd[Rhs, Ret] {
     @abstract_method
-    fun bin_and(self, that: Rhs) -> Ret { }
+    fun bit_and(self, that: Rhs) -> Ret { }
 }

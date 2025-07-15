@@ -3,5 +3,5 @@ cls BitIor[Rhs, Ret] {}
 
 sup [Rhs, Ret] BitIor[Rhs, Ret] {
     @abstract_method
-    fun bin_or(self, that: Rhs) -> Ret { }
+    fun bit_or(self, that: Rhs) -> Ret { }
 }
