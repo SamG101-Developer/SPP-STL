@@ -1,5 +1,6 @@
 use std::boolean::Bool
 use std::number::U8
+use std::number::S32
 use std::number::USize
 use std::result::Exception
 use std::result::Res
@@ -31,7 +32,7 @@ cls SeekableStream { }
 sup WritableStream {
     @public
     @abstract_method
-    fun write(&mut self, data: &Vec[U8]) -> Res[USize, StreamWriteException] { }
+    fun write(&mut self, data: &Vec[U8]) -> Res[S32, StreamWriteException] { }
 
     @public
     @abstract_method
