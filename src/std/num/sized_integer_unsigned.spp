@@ -14,7 +14,7 @@ use std::num::sized_floating_point::SizedFloatingPoint
 type SizedIntegerUnsigned[cmp bit_width: U32] = SizedInteger[bit_width, false]
 
 
-sup [cmp bit_width: U32] SizedInteger[bit_width, false] ext std::ops::div::Div[Rhs=Self, Ret=Self] {
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::div::Div[Rhs=Self, Ret=Self] {
     fun div(self, that: Self) -> Self {
         ret intrinsics::udiv(self, that)
     }
