@@ -59,7 +59,7 @@ fun realloc[T](memory: &mut Memory[T], n: USize) -> Opt[Memory[T]] {
 }
 
 
-fun free[T](memory: Memory[T]) -> Void {
+fun free[T](memory: Memory[T]) -> Opt[Void] {
     # Free the memory pointed to by the pointer.
     ffi::libc::free(memory.ptr)
 }
