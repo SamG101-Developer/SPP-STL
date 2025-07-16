@@ -542,10 +542,12 @@ fun float_atan2(y: F16, x: F16) -> F16 { }
 
 @public
 @always_inline
+@compiler_builtin
 fun float_atan2(y: F32, x: F32) -> F32 { }
 
 @public
 @always_inline
+@compiler_builtin
 fun float_atan2(y: F64, x: F64) -> F64 { }
 
 @public
