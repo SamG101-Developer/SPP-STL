@@ -298,13 +298,13 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
     @public
     @inline
     fun zero() -> Self {
-        ret Self::from(0)
+        ret Self::from(0_uz)
     }
 
     @public
     @inline
     fun one() -> Self {
-        ret Self::from(1)
+        ret Self::from(1_uz)
     }
 }
 

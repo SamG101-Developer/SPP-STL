@@ -412,3 +412,19 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
         ret self.to_bits() & (1 << (bit_width - 1)) != 0
     }
 }
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
+    @public
+    @inline
+    fun zero() -> Self {
+        ret Self::from(0.0_f64)
+    }
+
+    @public
+    @inline
+    fun one() -> Self {
+        ret Self::from(1.0_f64)
+    }
+}
+
