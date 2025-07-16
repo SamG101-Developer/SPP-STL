@@ -18,7 +18,7 @@ cls Memory[T] {
     ptr: Single[T]
 
     @private
-    capacity: USize
+    cap: USize
 }
 
 
@@ -27,7 +27,7 @@ sup [T] Memory[T] {
 
     @public
     fun cap(&self) -> USize {
-        ret self.capacity
+        ret self.cap
     }
 
     @public
