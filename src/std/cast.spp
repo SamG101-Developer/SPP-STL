@@ -5,14 +5,18 @@ use std::option::Some
 cls From[This, That] { }
 
 
+cls TryFrom[This, That] { }
+
+
 sup [This, That] From[This, That] {
     @public
     @abstract_method
     fun from(that: That) -> This { }
+}
 
+
+sup [This, That] TryFrom[This, That] {
     @public
-    @virtual_method
-    fun try_from(that: That) -> Opt[This] {
-        ret Some(val=From[This, That]::from(that))  # todo: Self::from(that) should work
-    }
+    @abstract_method
+    fun try_from(that: That) -> Opt[This] { }
 }
