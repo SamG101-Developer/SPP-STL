@@ -13,6 +13,6 @@ sup [This, That] From[This, That] {
     @public
     @virtual_method
     fun try_from(that: That) -> Opt[This] {
-        ret Some(val=self.from(that))
+        ret Some(val=From[This, That]::from(that))  # todo: Self::from(that) should work
     }
 }
