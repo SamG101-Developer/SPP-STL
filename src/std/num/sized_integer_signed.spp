@@ -141,7 +141,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
         case that == 0 or (self == Limits[Self]::min & that == Self::neg_one()) {
             ret None()
         }
-        ret Some(intrinsics::sdiv(self, that))
+        ret Some(val=intrinsics::sdiv(self, that))
     }
 
     @public
@@ -196,7 +196,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
         case that == 0 or (self == Limits[Self]::min & that == Self::neg_one()) {
             ret None()
         }
-        ret Some(intrinsics::srem(self, that))
+        ret Some(val=intrinsics::srem(self, that))
     }
 
     @public
@@ -365,14 +365,14 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
             ret None
         }
         else case self <= Self::from(1) {
-            ret Some(self)
+            ret Some(val=self)
         }
 
         let mut x = Self::one() << (bit_width / base.ilog2_checked().unwrap_or(1))
         loop true {
             let mut y = ((base - 1) * x + self / x.pow(base - 1)) / (base)
             case y >= x {
-                ret Some(x)
+                ret Some(val=x)
             }
             x = y
         }

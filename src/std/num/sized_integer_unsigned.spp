@@ -138,7 +138,7 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
         case that == 0 {
             ret None()
         }
-        ret Some(intrinsics::udiv(self, that))
+        ret Some(val=intrinsics::udiv(self, that))
     }
 
     @public
@@ -182,7 +182,7 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
         case that == 0 {
             ret None()
         }
-        ret Some(intrinsics::urem(self, that))
+        ret Some(val=intrinsics::urem(self, that))
     }
 
     @public
@@ -243,14 +243,14 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @inline
     fun iroot(self, base: Self) -> Opt[Self] {
         case self <= Self::from(1) {
-            ret Some(self)
+            ret Some(val=self)
         }
 
         let mut x = Self::one() << (bit_width / base.ilog2_checked().unwrap_or(1))
         loop true {
             let mut y = ((base - 1) * x + self / x.pow(base - 1)) / (base)
             case y >= x {
-                ret Some(x)
+                ret Some(val=x)
             }
             x = y
         }
