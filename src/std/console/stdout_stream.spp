@@ -37,6 +37,6 @@ sup StdoutStream ext WritableStream {
 
     fun write_all(&mut self, data: &Vec[U8]) -> Res[S32, StreamWriteException] {
         # ret self.write(data, data.len()).and_then(|| self.flush())
-        ret 0_s32
+        ret Pass(val=0_s32)
     }
 }
