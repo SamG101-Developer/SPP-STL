@@ -1,8 +1,6 @@
 use std::boolean::Bool
 use std::copy::Copy
 use std::mem::memory::Memory
-use std::num::bases::FloatingPoint
-use std::num::bases::Integer
 use std::void::Void
 
 use std::number::USize
@@ -12,6 +10,9 @@ use std::number::F16
 use std::number::F32
 use std::number::F64
 use std::number::F128
+
+use std::num::bases::Num
+use std::num::bases::Integer
 
 
 @public
