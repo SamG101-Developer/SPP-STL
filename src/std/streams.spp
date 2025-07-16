@@ -41,8 +41,8 @@ sup WritableStream {
     @public
     @no_impl
     @virtual_method
-    fun write_all(&mut self, data: &Vec[U8]) -> Res[Void, StreamWriteException] {
-        ret Pass()
+    fun write_all(&mut self, data: &Vec[U8]) -> Res[S32, StreamWriteException] {
+        ret Pass(val=0_s32)
     }
 }
 

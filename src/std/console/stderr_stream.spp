@@ -35,7 +35,8 @@ sup StderrStream ext WritableStream {
         ret case val < 0 { Fail(err=StreamWriteException(msg="Failed to flush stderr")) } else { Pass() }
     }
 
-    fun write_all(&mut self, data: &Vec[U8]) -> Res[Void, StreamWriteException] {
-        self.write(data, data.len()).and_then(|| self.flush())
+    fun write_all(&mut self, data: &Vec[U8]) -> Res[S32, StreamWriteException] {
+        # ret self.write(data, data.len()).and_then(|| self.flush())
+        ret 0_s32
     }
 }
