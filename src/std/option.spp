@@ -107,6 +107,7 @@ sup [T] Opt[T] {
 sup [T] Opt[T] {
     @public
     @inline
+    @no_impl
     fun xor(self, that: Opt[T]) -> Opt[T] {
         # ret case (self, that) of
         #     is (Some[T](val), None()) { Some(val) }
