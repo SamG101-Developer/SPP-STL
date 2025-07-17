@@ -23,7 +23,7 @@ fun add[T: Integer](this: T, that: T) -> T { }
 @public
 @always_inline
 @compiler_builtin
-fun add_assign[T: Integer](this: &mut T, that: T) -> Void;
+fun add_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 @public
 @always_inline
@@ -33,7 +33,7 @@ fun sub[T: Integer](this: T, that: T) -> T { }
 @public
 @always_inline
 @compiler_builtin
-fun sub_assign[T: Integer](this: &mut T, that: T) -> Void;
+fun sub_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 @public
 @always_inline
@@ -43,7 +43,7 @@ fun mul[T: Integer](this: T, that: T) -> T { }
 @public
 @always_inline
 @compiler_builtin
-fun mul_assign[T: Integer](this: &mut T, that: T) -> Void;
+fun mul_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 @public
 @always_inline
@@ -53,7 +53,7 @@ fun sdiv[T: Integer](this: T, that: T) -> T { }
 @public
 @always_inline
 @compiler_builtin
-fun udiv_assign[T: Integer](this: &mut T, that: T) -> Void;
+fun udiv_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 @public
 @always_inline
@@ -63,7 +63,7 @@ fun udiv[T: Integer](this: T, that: T) -> T { }
 @public
 @always_inline
 @compiler_builtin
-fun srem_assign[T: Integer](this: &mut T, that: T) -> Void;
+fun srem_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 @public
 @always_inline
@@ -73,7 +73,7 @@ fun srem[T: Integer](this: T, that: T) -> T { }
 @public
 @always_inline
 @compiler_builtin
-fun urem_assign[T: Integer](this: &mut T, that: T) -> Void;
+fun urem_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 @public
 @always_inline
@@ -83,7 +83,7 @@ fun urem[T: Integer](this: T, that: T) -> T { }
 @public
 @always_inline
 @compiler_builtin
-fun sdiv_assign[T: Integer](this: &mut T, that: T) -> Void;
+fun sdiv_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 @public
 @always_inline
@@ -93,7 +93,7 @@ fun shl[T: Integer](this: T, by: T) -> T { }
 @public
 @always_inline
 @compiler_builtin
-fun shl_assign[T: Integer](this: &mut T, by: T) -> Void;
+fun shl_assign[T: Integer](this: &mut T, by: T) -> Void { }
 
 @public
 @always_inline
@@ -103,7 +103,7 @@ fun shr[T: Integer](this: T, by: T) -> T { }
 @public
 @always_inline
 @compiler_builtin
-fun shr_assign[T: Integer](this: &mut T, by: T) -> Void;
+fun shr_assign[T: Integer](this: &mut T, by: T) -> Void { }
 
 @public
 @always_inline
@@ -113,7 +113,7 @@ fun bit_ior[T: Integer](this: T, that: T) -> T { }
 @public
 @always_inline
 @compiler_builtin
-fun bit_ior_assign[T: Integer](this: &mut T, that: T) -> Void;
+fun bit_ior_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 @public
 @always_inline
@@ -123,7 +123,7 @@ fun bit_and[T: Integer](this: T, that: T) -> T { }
 @public
 @always_inline
 @compiler_builtin
-fun bit_and_assign[T: Integer](this: &mut T, that: T) -> Void;
+fun bit_and_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 @public
 @always_inline
@@ -133,7 +133,7 @@ fun bit_xor[T: Integer](this: T, that: T) -> T { }
 @public
 @always_inline
 @compiler_builtin
-fun bit_xor_assign[T: Integer](this: &mut T, that: T) -> Void;
+fun bit_xor_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 @public
 @always_inline
