@@ -138,7 +138,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
         ret case self.mul_checked(that) of
             is Some(val) { val }
             is None() and (self < 0) == (that < 0) { Limits[Self]::max }
-            is None() { Limits[Self]::min }
+            else { Limits[Self]::min }
     }
 
     @public
@@ -239,7 +239,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
         case self.pow_checked(that) of
             is Some(val) { val }
             is None() and (self < 0) and (that % 2 == 1) { Limits[Self]::min }
-            is None() { Limits[Self]::max }
+            else { Limits[Self]::max }
     }
 }
 
