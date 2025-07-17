@@ -99,7 +99,7 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext s
 }
 
 
-sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_ior::BitOrAssign[Rhs=Self] {
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_ior::BitIorAssign[Rhs=Self] {
     fun bit_ior_assign(&mut self, that: Self) -> Void {
         ret intrinsics::bit_ior_assign(self, that)
     }
