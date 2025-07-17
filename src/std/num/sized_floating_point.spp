@@ -92,7 +92,7 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::add::Add[Rh
 }
 
 
-sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::sub::AddAssign[Rhs=Self] {
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::add::AddAssign[Rhs=Self] {
     fun add(&mut self, that: Self) -> Void {
         ret intrinsics::bit_add_assign(self, that)
     }
