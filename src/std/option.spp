@@ -108,10 +108,10 @@ sup [T] Opt[T] {
     @public
     @inline
     fun xor(self, that: Opt[T]) -> Opt[T] {
-        ret case (self, that) of
-            is (Some[T](val), None()) { Some(val) }
-            is (None(), Some[T](val)) { Some(val) }
-            else { None() }
+        # ret case (self, that) of
+        #     is (Some[T](val), None()) { Some(val) }
+        #     is (None(), Some[T](val)) { Some(val) }
+        #     else { None() }
     }
 }
 
