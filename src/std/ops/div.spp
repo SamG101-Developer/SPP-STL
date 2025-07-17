@@ -1,7 +1,21 @@
+use std::void::Void
+
+
 @public
 cls Div[Rhs, Ret] { }
+
+
+@public
+cls DivAssign[Rhs] {}
+
 
 sup [Rhs, Ret] Div[Rhs, Ret] {
     @abstract_method
     fun div(self, that: Rhs) -> Ret { }
+}
+
+
+sup [Rhs] DivAssign[Rhs] {
+    @abstract_method
+    fun div_assign(&mut self, that: Rhs) -> Void { }
 }

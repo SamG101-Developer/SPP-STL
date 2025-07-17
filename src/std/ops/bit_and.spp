@@ -1,7 +1,21 @@
+use std::void::Void
+
+
 @public
 cls BitAnd[Rhs, Ret] {}
+
+
+@public
+cls BitAndAssign[Rhs] {}
+
 
 sup [Rhs, Ret] BitAnd[Rhs, Ret] {
     @abstract_method
     fun bit_and(self, that: Rhs) -> Ret { }
+}
+
+
+sup [Rhs] BitAndAssign[Rhs] {
+    @abstract_method
+    fun bit_and_assign(&mut self, that: Rhs) -> Void { }
 }

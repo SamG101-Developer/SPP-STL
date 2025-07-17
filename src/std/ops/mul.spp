@@ -1,7 +1,21 @@
+use std::void::Void
+
+
 @public
 cls Mul[Rhs, Ret] { }
+
+
+@public
+cls MulAssign[Rhs] {}
+
 
 sup [Rhs, Ret] Mul[Rhs, Ret] {
     @abstract_method
     fun mul(self, that: Rhs) -> Ret { }
+}
+
+
+sup [Rhs] MulAssign[Rhs] {
+    @abstract_method
+    fun mul_assign(&mut self, that: Rhs) -> Void { }
 }

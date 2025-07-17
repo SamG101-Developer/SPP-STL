@@ -83,37 +83,37 @@ sup BigUInt ext std::ops::pow::Pow[Rhs=Self, Ret=Self] {
 }
 
 
-sup BigUInt ext std::ops::add_assign::AddAssign[Rhs=Self] {
+sup BigUInt ext std::ops::add::AddAssign[Rhs=Self] {
     @no_impl
     fun add_assign(&mut self, that: Self) -> Void { }
 }
 
 
-sup BigUInt ext std::ops::sub_assign::SubAssign[Rhs=Self] {
+sup BigUInt ext std::ops::sub::SubAssign[Rhs=Self] {
     @no_impl
     fun sub_assign(&mut self, that: Self) -> Void { }
 }
 
 
-sup BigUInt ext std::ops::mul_assign::MulAssign[Rhs=Self] {
+sup BigUInt ext std::ops::mul::MulAssign[Rhs=Self] {
     @no_impl
     fun mul_assign(&mut self, that: Self) -> Void { }
 }
 
 
-sup BigUInt ext std::ops::div_assign::DivAssign[Rhs=Self] {
+sup BigUInt ext std::ops::div::DivAssign[Rhs=Self] {
     @no_impl
     fun div_assign(&mut self, that: Self) -> Void { }
 }
 
 
-sup BigUInt ext std::ops::rem_assign::RemAssign[Rhs=Self] {
+sup BigUInt ext std::ops::rem::RemAssign[Rhs=Self] {
     @no_impl
     fun rem_assign(&mut self, that: Self) -> Void { }
 }
 
 
-sup BigUInt ext std::ops::pow_assign::PowAssign[Rhs=Self] {
+sup BigUInt ext std::ops::pow::PowAssign[Rhs=Self] {
     @no_impl
     fun pow_assign(&mut self, that: Self) -> Void { }
 }

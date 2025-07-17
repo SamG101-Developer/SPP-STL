@@ -1,7 +1,21 @@
+use std::void::Void
+
+
 @public
 cls BitXor[Rhs, Ret] {}
+
+
+@public
+cls BitXorAssign[Rhs] {}
+
 
 sup [Rhs, Ret] BitXor[Rhs, Ret] {
     @abstract_method
     fun bit_xor(self, that: Rhs) -> Ret { }
+}
+
+
+sup [Rhs] BitXorAssign[Rhs] {
+    @abstract_method
+    fun bit_xor_assign(&mut self, that: Rhs) -> Void { }
 }

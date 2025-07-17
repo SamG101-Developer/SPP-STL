@@ -1,7 +1,21 @@
+use std::void::Void
+
+
 @public
 cls Sub[Rhs, Ret] {}
+
+
+@public
+cls SubAssign[Rhs] {}
+
 
 sup [Rhs, Ret] Sub[Rhs, Ret] {
     @abstract_method
     fun sub(self, that: Rhs) -> Ret { }
+}
+
+
+sup [Rhs] SubAssign[Rhs] {
+    @abstract_method
+    fun sub_assign(&mut self, that: Rhs) -> Void { }
 }

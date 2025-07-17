@@ -1,7 +1,21 @@
+use std::void::Void
+
+
 @public
 cls BitShl[Rhs, Ret] {}
+
+
+@public
+cls BitShlAssign[Rhs] {}
+
 
 sup [Rhs, Ret] BitShl[Rhs, Ret] {
     @abstract_method
     fun bit_shl(self, that: Rhs) -> Ret { }
+}
+
+
+sup [Rhs] BitShlAssign[Rhs] {
+    @abstract_method
+    fun bit_shl_assign(&mut self, that: Rhs) -> Void { }
 }

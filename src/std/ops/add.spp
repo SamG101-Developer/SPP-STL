@@ -1,7 +1,22 @@
+use std::void::Void
+
+
 @public
 cls Add[Rhs, Ret] {}
+
+
+@public
+cls AddAssign[Rhs] {}
+
 
 sup [Rhs, Ret] Add[Rhs, Ret] {
     @abstract_method
     fun add(self, that: Rhs) -> Ret { }
 }
+
+
+sup [Rhs] AddAssign[Rhs] {
+    @abstract_method
+    fun add_assign(&mut self, that: Rhs) -> Void { }
+}
+
