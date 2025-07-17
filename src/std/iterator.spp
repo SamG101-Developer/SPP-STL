@@ -155,7 +155,7 @@ sup [T] Iterator[T] {
         ret false
     }
 
-    fun find(self, predicate: FunRef[(&T,), Bool]) -> Opt[T] {
+    fun find(self, predicate: FunRef[(&T,), Bool]) -> Opt[T] {  # todo: this should fail (could be Opt[&T] i think)
         loop item in self {
             case predicate(&item) {
                 ret Some(val=item)
