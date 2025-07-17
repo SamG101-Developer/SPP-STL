@@ -36,7 +36,7 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::rem::Rem[
 }
 
 
-sup [cmp bit_width: U32] SizedInteger[bit_width] ext std::ops::rem::RemAssign[Rhs=Self] {
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::rem::RemAssign[Rhs=Self] {
     fun rem_assign(&mut self, that: Self) -> Void {
         ret intrinsics::urem_assign(self, that)
     }
