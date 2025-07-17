@@ -23,7 +23,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::div::Div[Rh
 }
 
 
-sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::div::DivAssign[Rhs=Self] {
+sup [cmp bit_width: U32] SizedInteger[bit_width] ext std::ops::div::DivAssign[Rhs=Self] {
     fun div_assign(&mut self, that: Self) -> Void {
         ret intrinsics::sdiv_assign(self, that)
     }
@@ -37,7 +37,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::rem::Rem[Rh
 }
 
 
-sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::rem::RemAssign[Rhs=Self] {
+sup [cmp bit_width: U32] SizedInteger[bit_width] ext std::ops::rem::RemAssign[Rhs=Self] {
     fun rem_assign(&mut self, that: Self) -> Void {
         ret intrinsics::srem_assign(self, that)
     }
