@@ -77,9 +77,9 @@ sup [T] Opt[T] {
 
     @public
     @inline
-    fun and_then[U](self, that: FunMov[(T,), Opt[U]]) -> Opt[U] {
+    fun and_then[U](self, pred: FunMov[(T,), Opt[U]]) -> Opt[U] {
         ret case self of
-            is Some[T](val) { that(val) }
+            is Some[T](val) { pred(val) }
             else { None() }
     }
 }
@@ -88,7 +88,7 @@ sup [T] Opt[T] {
 sup [T] Opt[T] {
     @public
     @inline
-    fun ior_[U](self, that: Opt[U]) -> Opt[T] {
+    fun ior_(self, that: Opt[T]) -> Opt[T] {
         ret case self of
             is Some[T](..) { self }
             else { that }
@@ -96,7 +96,7 @@ sup [T] Opt[T] {
 
     @public
     @inline
-    fun ior_else[U](self, that: FunMov[(), Opt[U]]) -> Opt[T] {
+    fun ior_else(self, that: FunMov[(), Opt[T]]) -> Opt[T] {
         ret case self of
             is Some[T](..) { self }
             else { that() }
@@ -146,7 +146,7 @@ sup [T] Opt[T] {
 sup [T] Opt[T] {
     @public
     @inline
-    fun ok_or[U](self, err: U) -> Res[T, U] {
+    fun ok_or[E](self, err: E) -> Res[T, E] {
         ret case self of
             is Some[T](val) { Pass(val) }
             else { Fail(err) }
@@ -154,7 +154,7 @@ sup [T] Opt[T] {
 
     @public
     @inline
-    fun ok_or_else[U](self, err: FunMov[(), U]) -> Res[T, U] {
+    fun ok_or_else[E](self, err: FunMov[(), E]) -> Res[T, E] {
         ret case self of
             is Some[T](val) { Pass(val) }
             else { Fail(err()) }
