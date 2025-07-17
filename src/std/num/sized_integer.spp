@@ -3,6 +3,7 @@ use std::number::U8
 use std::number::U32
 use std::option::Opt
 use std::option::Some
+use std::void::Void
 
 use std::num::bases::Integer
 

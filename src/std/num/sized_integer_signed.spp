@@ -5,6 +5,7 @@ use std::number::U32
 use std::option::Opt
 use std::option::None
 use std::option::Some
+use std::void::Void
 
 use std::num::sized_integer::SizedInteger
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
