@@ -30,7 +30,7 @@ sup [T, A] Vec[T, A] {
     type Allocator = A
 
     fun new() -> Vec[T, A] {
-        ret Vec[T, A](buffer=Slice[T, A](cap=1_uz), length=0_uz)
+        ret Vec[T, A](buffer=Slice[T](cap=1_uz), length=0_uz)
     }
 
     fun len(&self) -> USize {
