@@ -19,3 +19,6 @@ fun fwrite(buffer: &mut CChar, size: CInt, count: CInt, stream: &mut CInt) -> CI
 
 @ffi
 fun fclose(stream: &mut CInt) -> CInt { }
+
+@ffi
+fun fflush(stream: &CInt) -> CInt { }
