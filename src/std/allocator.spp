@@ -1,6 +1,7 @@
 use std::slice::Slice
 use std::number::USize
 use std::result::Exception
+use std::result::Pass
 use std::result::Res
 use std::void::Void
 
