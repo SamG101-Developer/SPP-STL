@@ -5,6 +5,7 @@ use std::cast::From
 use std::clone::Clone
 use std::mem::memory::Memory
 use std::mem::view::View
+use std::number::U32
 use std::number::USize
 use std::string::Str
 use std::vector::Vec
@@ -53,9 +54,9 @@ sup [E, A, cmp n: USize] Slice[E, A] ext From[Self, Arr[E, n]] {
 }
 
 
-sup [E, A] Slice[E, A] ext From[Self, Str] {
+sup [A] Slice[U32, A] ext From[Self, Str] {
     fun from(that: Str) -> Self {
-        ret Slice[E, A](mem=Memory(ptr=that.data.buf.mem.ptr, cap=that.data.buf.mem.cap), len=that.data.buf.len)
+        ret Slice[U32, A](mem=Memory(ptr=that.data.buf.mem.ptr, cap=that.data.buf.mem.cap), len=that.data.buf.len)
     }
 }
 
