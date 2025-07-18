@@ -23,11 +23,11 @@ sup [E] Alloc[E] {
 
     @public
     @abstract_method
-    fun deallocate(memory: Slice[E]) -> Res[Void, AllocException] { }
+    fun deallocate(slice: Slice[E]) -> Res[Void, AllocException] { }
 
     @public
     @abstract_method
-    fun reallocate(memory: &mut Slice[E], n: USize) -> Res[Void, AllocException] { }
+    fun reallocate(slice: &mut Slice[E], n: USize) -> Res[Void, AllocException] { }
 }
 
 
