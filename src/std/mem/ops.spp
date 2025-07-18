@@ -47,15 +47,19 @@ fun calloc[T](n: USize) -> Opt[Memory[T]] {
 }
 
 
-fun realloc[T](memory: &mut Memory[T], n: USize) -> Opt[Memory[T]] {
+fun realloc[T](memory: &mut Memory[T], n: USize) -> Opt[Void] {
     # Determine the size and get a reallocated pointer.
     let size = n * size_of[T]()
     let ptr = ffi::libc::realloc(memory.ptr, size)
 
-    # Convert the returned pointer into a safe type.
-    ret case ptr of
-        == 0 { None() }
-        else { Some(Memory[T](ptr, n)) }
+    # If the new pointer is null, return None (failed reallocation).
+    case ptr == 0 { ret None() }
+
+    # Otherwise, assign the new pointer and update the length.
+    memory.ptr = ptr
+    memory.len = n
+
+    ret Some()
 }
 
 
