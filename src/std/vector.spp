@@ -115,8 +115,8 @@ sup [T, A] Vec[T, A] {
 }
 
 
-sup [T, A] Vec[T, A] ext Clone[Out=Vec[T, A]] {
-    fun clone(&self) -> Vec[T, A] {
+sup [T, A] Vec[T, A] ext Clone[Out=Self] {
+    fun clone(&self) -> Self {
         ret Vec[T, A](buf=self.buf.clone())
     }
 }
