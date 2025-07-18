@@ -33,7 +33,7 @@ sup [E, A] Slice[E, A] ext View[E] {
 
 sup [E, A, cmp n: USize] Slice[E, A] ext From[Self, Arr[E, n]] {
     fun from(that: Arr[E, n]) -> Self {
-        ret Slice[E](ptr=that.ptr, cap=that.cap, len=n)
+        ret Slice[E](mem=Memory(ptr=that.mem.ptr, cap=n), len=n)
     }
 }
 
