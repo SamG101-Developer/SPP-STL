@@ -159,7 +159,7 @@ sup [T] Opt[T] {
     fun ok_or_else[E](self, err: FunMov[(), E]) -> Res[T, E] {
         ret case self of
             is Some[T](val) { Pass(val) }
-            else { Fail(err()) }
+            else { Fail(err=err()) }
     }
 }
 
