@@ -55,14 +55,14 @@ sup [E, A, cmp n: USize] Slice[E, A] ext From[Self, Arr[E, n]] {
 
 sup [E, A] Slice[E, A] ext From[Self, Str] {
     fun from(that: Str) -> Self {
-        ret Slice(mem=Memory(ptr=that.buf.mem.ptr, cap=that.buf.mem.cap), len=that.buf.len)
+        ret Slice(mem=Memory(ptr=that.data.buf.mem.ptr, cap=that.data.buf.mem.cap), len=that.buf.len)
     }
 }
 
 
 sup [E, A] Slice[E, A] ext From[Self, Vec[E, A]] {
     fun from(that: Vec[E, A]) -> Self {
-        ret that.buf
+        ret Slice(mem=Memory(ptr=that.buf.mem.ptr, cap=that.buf.mem.cap), len=that.buf.len)
     }
 }
 
