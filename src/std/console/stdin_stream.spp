@@ -27,18 +27,15 @@ sup StdinStream ext ReadableStream {
         let mut vec = Vec[U8]()
         let val = libc::fgets(&mut vec.buffer, 1024_s32, &stdin_handle)
         # TODO
-        # ret case val < 0 { Fail(err=StreamReadException(msg="Failed to read from stdin")) } else { Pass(val=vec) }
+        # ret case val < 0_s32 { Fail(err=StreamReadException(msg="Failed to read from stdin")) } else { Pass(val=vec) }
         ret Pass(val=vec)
     }
 
     fun read_all(&mut self) -> Res[Vec[U8], StreamReadException] {
         let mut vec = Vec[U8]()
         loop true {
-            let val = self.read(1024_uz)
-            case val < 0 {
-                ret Fail(err=StreamReadException(msg="Failed to read from stdin"))
-            }
-            else case val.is_empty() {
+            let val = self.read(1024_uz)?
+            case val.is_empty() {
                 exit
             }
             else {
