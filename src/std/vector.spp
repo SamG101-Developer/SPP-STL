@@ -167,7 +167,7 @@ sup [T, A] Vec[T, A] ext IndexRef[T, USize] {
 }
 
 
-sup [T, A] Vec[T, A] ext std::ops::add::Add[Self, Out=Self] {
+sup [T, A] Vec[T, A] ext std::ops::add::Add[Self, Ret=Self] {
     fun add(self, that: Self) -> Self {
         let mut result = self
         # todo
