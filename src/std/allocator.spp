@@ -1,4 +1,4 @@
-use std::mem::memory::Memory
+use std::slice::Slice
 use std::number::USize
 use std::result::Exception
 use std::result::Res
@@ -15,19 +15,19 @@ cls Alloc[E] { }
 sup [E] Alloc[E] {
     @public
     @abstract_method
-    fun allocate(n: USize) -> Res[Memory[E], AllocException] { }
+    fun allocate(n: USize) -> Res[Slice[E], AllocException] { }
 
     @public
     @abstract_method
-    fun allocate_zeroed(n: USize) -> Res[Memory[E], AllocException] { }
+    fun allocate_zeroed(n: USize) -> Res[Slice[E], AllocException] { }
 
     @public
     @abstract_method
-    fun deallocate(memory: Memory[E]) -> Res[Void, AllocException] { }
+    fun deallocate(memory: Slice[E]) -> Res[Void, AllocException] { }
 
     @public
     @abstract_method
-    fun reallocate(memory: &mut Memory[E], n: USize) -> Res[Void, AllocException] { }
+    fun reallocate(memory: &mut Slice[E], n: USize) -> Res[Void, AllocException] { }
 }
 
 
@@ -35,23 +35,19 @@ cls GlobalAlloc[E] { }
 
 
 sup [E] GlobalAlloc[E] ext Alloc[E] {
-    @no_impl
-    fun allocate(n: USize) -> Res[Memory[E], AllocException] {
+    fun allocate(n: USize) -> Res[Slice[E], AllocException] {
         std::mem::ops::malloc[E](n).ok_or(AllocException(msg="Failed to allocate memory"))
     }
 
-    @no_impl
-    fun allocate_zeroed(n: USize) -> Res[Memory[E], AllocException] {
+    fun allocate_zeroed(n: USize) -> Res[Slice[E], AllocException] {
         std::mem::ops::calloc[E](n).ok_or(AllocException(msg="Failed to allocate zeroed memory"))
     }
 
-    @no_impl
-    fun deallocate(memory: Memory[E]) -> Res[Void, AllocException] {
+    fun deallocate(memory: Slice[E]) -> Res[Void, AllocException] {
         std::mem::ops::free[E](memory).ok_or(AllocException(msg="Failed to deallocate memory"))
     }
 
-    @no_impl
-    fun reallocate(memory: &mut Memory[E], n: USize) -> Res[Void, AllocException] {
+    fun reallocate(memory: &mut Slice[E], n: USize) -> Res[Void, AllocException] {
         std::mem::ops::realloc[T=E](memory, n).ok_or(AllocException(msg="Failed to reallocate memory"))
     }
 }

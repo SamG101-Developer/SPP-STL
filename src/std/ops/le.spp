@@ -5,6 +5,7 @@ use std::boolean::Bool
 cls Le[Rhs] { }
 
 sup [Rhs] Le[Rhs] {
+    @public
     @abstract_method
     fun le(&self, that: &Rhs) -> Bool { }
 }
