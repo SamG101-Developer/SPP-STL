@@ -1,0 +1,8 @@
+use std::string::Str
+use std::void::Void
+
+
+@public
+@inline
+@compiler_builtin
+fun abort(msg: Str) -> Void { }
