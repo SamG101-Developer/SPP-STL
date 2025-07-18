@@ -30,7 +30,7 @@ cls File {
 sup File {
     @public
     fun open(path: &Path, mode: Str) -> Res[File, FileNotFoundException] {
-        let handle = libc::fopen(&path.path.data.buf, &mode)
+        let handle = libc::fopen(&path.path.data.buf, &mode.buf)
         ret Pass(val=File(handle, open=true))
     }
 
@@ -58,7 +58,7 @@ sup File {
 sup File ext WritableStream {
     @no_impl
     fun write(&mut self, data: &Vec[U8], length: USize) -> Res[S32, StreamWriteException] {
-        # libc::fwrite(&mtu data, 8, S32::from(data.len()), &mut self.handle)
+        # libc::fwrite(&mut data, 8, S32::from(data.len()), &mut self.handle)
     }
 
     @no_impl
