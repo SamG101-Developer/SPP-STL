@@ -1,5 +1,4 @@
 use std::number::U8
-use std::number::U32
 use std::number::USize
 use std::number::S32
 use std::result::Res
@@ -17,7 +16,7 @@ cmp stderr: StderrStream = StderrStream()
 
 
 @private
-cmp stderr_handle: U32 = 2_u32
+cmp stderr_handle: S32 = 2_s32
 
 
 @private

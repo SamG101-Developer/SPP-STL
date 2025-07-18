@@ -1,5 +1,4 @@
 use std::number::U8
-use std::number::U32
 use std::number::USize
 use std::result::Res
 use std::result::Fail
@@ -15,7 +14,7 @@ cmp stdin: StdinStream = StdinStream()
 
 
 @private
-cmp stdin_handle: U32 = 1_u32
+cmp stdin_handle: S32 = 1_s32
 
 
 @private
