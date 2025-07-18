@@ -45,13 +45,13 @@ sup [E] GlobalAlloc[E] ext Alloc[E] {
         ret Slice(mem)
     }
 
-    fun deallocate(memory: Slice[E]) -> Res[Void, AllocException] {
-        let out = std::mem::ops::free[E](memory).ok_or(AllocException(msg="Failed to deallocate memory"))
+    fun deallocate(slice: Slice[E]) -> Res[Void, AllocException] {
+        let out = std::mem::ops::free[E](slice.mem).ok_or(AllocException(msg="Failed to deallocate memory"))
         ret out
     }
 
-    fun reallocate(memory: &mut Slice[E], n: USize) -> Res[Void, AllocException] {
-        let out = std::mem::ops::realloc[T=E](memory, n).ok_or(AllocException(msg="Failed to reallocate memory"))
+    fun reallocate(slice: &mut Slice[E], n: USize) -> Res[Void, AllocException] {
+        let out = std::mem::ops::realloc[T=E](&mut slice.mem, n).ok_or(AllocException(msg="Failed to reallocate memory"))
         ret out
     }
 }
