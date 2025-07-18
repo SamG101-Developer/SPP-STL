@@ -2,6 +2,7 @@ use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::array::Arr
 use std::cast::From
+use std::clone::Clone
 use std::mem::memory::Memory
 use std::mem::view::View
 use std::number::USize
