@@ -20,6 +20,6 @@ sup [T, cmp n: USize] Arr[T, n] ext View[T] {
 
 sup [T, A, cmp n: USize] Arr[T, n] ext From[Self, Slice[T, A]] {
     fun from(that: Slice[T, A]) -> Self {
-        ret Arr[T, n](memory=Memory(ptr=that.memory.ptr, cap=n))
+        ret Arr[T, n](memory=Memory(ptr=that.mem.ptr, cap=n))
     }
 }
