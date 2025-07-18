@@ -19,9 +19,8 @@ use std::void::Void
 
 
 @public
-cls Vec[T, A = GlobalAlloc[T]] {
-    buffer: Slice[T]
-    length: USize
+cls Vec[T, A: Alloc[T] = GlobalAlloc[T]] {
+    buf: Slice[T, A]
 }
 
 
@@ -30,11 +29,7 @@ sup [T, A] Vec[T, A] {
     type Allocator = A
 
     fun new() -> Vec[T, A] {
-        ret Vec[T, A](buffer=Slice[T](cap=1_uz), length=0_uz)
-    }
-
-    fun len(&self) -> USize {
-        ret self.length
+        ret Vec[T, A](buf=A::alloc(1_uz))
     }
 }
 
@@ -42,18 +37,23 @@ sup [T, A] Vec[T, A] {
 sup [T, A] Vec[T, A] {
     @public
     fun push(&mut self, element: T) -> Void {
-        case self.length == self.buffer.cap() { self.grow_double() }
-        self.buffer.place(self.length, element)
-        self.length += 1_uz
+        case self.buf.len == self.buf.cap { self.grow_double() }
+        self.buf.place(self.buf.len, element)
+        self.buf.len += 1_uz
     }
 
     @public
-    @no_impl
     fun insert(&mut self, index: USize, element: T) -> Void {
-        case self.length == self.buffer.cap() { self.grow_double() }
-        self.buffer.shift(index, 1_uz)
-        self.buffer.place(index, element)
-        self.length += 1_uz
+        case self.buf.len == self.buf.cap { self.grow_double() }
+        self.buf.shift(index, 1_uz)
+        self.buf.place(index, element)
+        self.buf.len += 1_uz
+    }
+
+    @private
+    fun grow_double(&mut self) -> Void {
+        let new_cap = self.buf.cap * 2_uz
+        A::realloc(&mut self.buf, new_cap)
     }
 }
 
@@ -92,37 +92,30 @@ sup [T, A] Vec[T, A] {
 
 sup [T, A] Vec[T, A] {
     fun clear(&mut self) -> Void {
-        self.buffer.clear()
+        self.buf.clear()
     }
 
     @no_impl fun is_empty(&self) -> Bool {
-        ret self.length == 0_uz
+        ret self.buf.len == 0_uz
     }
 }
 
 
 sup [T, A] Vec[T, A] {
     fun resize(&mut self, new_length: USize) -> Void {
-        self.buffer.resize(new_length)
-        self.length = new_length
+        self.buf.resize(new_length)
+        self.buf.len = new_length
     }
 
     fun shrink_to_fit(&mut self) -> Void {
-        self.buffer.resize(self.length)
+        self.buf.resize(self.buf.len)
     }
 }
 
 
-sup [T, A] Vec[T, A] {
-    cor view_ref(&self) -> GenOnce[&Memory[T]] {
-        gen &self.buffer
-    }
-}
-
-
-sup [T, A] Vec[T, A] ext Clone[Out=Vec[T, A]] {
+sup [T: Clone, A] Vec[T, A] ext Clone[Out=Vec[T, A]] {
     fun clone(&self) -> Vec[T, A] {
-        ret Vec[T, A](buffer=self.buffer.clone(), length=self.length)
+        ret Vec[T, A](buf=self.buf.clone())
     }
 }
 
@@ -138,34 +131,34 @@ sup [T, A] Vec[T, A] ext Sortable[T] {
 
 sup [T, A] Vec[T, A] ext IterMov[T] {
     cor iter_mov(self) -> Iterator[T] {
-        gen with self.buffer.iter_mov()
+        gen with self.buf.iter_mov()
     }
 }
 
 
 sup [T, A] Vec[T, A] ext IterMut[T] {
     cor iter_mut(&mut self) -> Iterator[&mut T] {
-        gen with self.buffer.iter_mut()
+        gen with self.buf.iter_mut()
     }
 }
 
 
 sup [T, A] Vec[T, A] ext IterRef[T] {
     cor iter_ref(&self) -> Iterator[&T] {
-        gen with self.buffer.iter_ref()
+        gen with self.buf.iter_ref()
     }
 }
 
 
 sup [T, A] Vec[T, A] ext IndexMut[T, USize] {
     cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] {
-        gen with self.buffer.index_mut(index)
+        gen with self.buf.index_mut(index)
     }
 }
 
 
 sup [T, A] Vec[T, A] ext IndexRef[T, USize] {
     cor index_ref(&self, index: USize) -> GenOnce[&T] {
-        gen with self.buffer.index_ref(index)
+        gen with self.buf.index_ref(index)
     }
 }

@@ -1,31 +1,43 @@
+use std::allocator::Alloc
+use std::allocator::GlobalAlloc
 use std::array::Arr
 use std::cast::From
 use std::mem::memory::Memory
+use std::mem::view::View
 use std::number::USize
 use std::vector::Vec
 
 
-cls Slice[E] {
-    @public
+cls Slice[E, A: Alloc[E] = GlobalAlloc[E]] {
+    @private
+    mem: Memory[E]
+
+    @private
     len: USize
 }
 
 
-sup [E] Slice[E] ext Memory[E] {
-    fun len(&self) -> USize {
+sup [E, A] Slice[E, A] {
+    type Element = E
+    type Allocator = A
+}
+
+
+sup [E, A] Slice[E, A] ext View[E] {
+    fun length(&self) -> USize {
         ret self.len
     }
 }
 
 
-sup [E, cmp n: USize] Slice[E] ext From[Self, Arr[E, n]] {
+sup [E, A, cmp n: USize] Slice[E, A] ext From[Self, Arr[E, n]] {
     fun from(that: Arr[E, n]) -> Self {
         ret Slice[E](ptr=that.ptr, cap=that.cap, len=n)
     }
 }
 
 
-sup [E, A] Slice[E] ext From[Self, Vec[E, A]] {
+sup [E, A] Slice[E, A] ext From[Self, Vec[E, A]] {
     fun from(that: Vec[E, A]) -> Self {
         ret that.buffer
     }

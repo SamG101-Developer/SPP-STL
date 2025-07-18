@@ -1,12 +1,5 @@
 use std::clone::Clone
 use std::copy::Copy
-use std::generator::GenOnce
-use std::iterator::IndexMut
-use std::iterator::IndexRef
-use std::iterator::Iterator
-use std::iterator::IterMov
-use std::iterator::IterMut
-use std::iterator::IterRef
 use std::number::USize
 use std::option::Opt
 use std::single::Single
@@ -26,13 +19,9 @@ sup [T] Memory[T] {
     type Element = T
 
     @public
-    fun cap(&self) -> USize {
+    fun capacity(&self) -> USize {
         ret self.cap
     }
-
-    @public
-    @abstract_method
-    fun len(&self) -> USize { }
 
     @public
     @compiler_builtin
@@ -49,38 +38,9 @@ sup [T] Memory[T] {
 
 
 sup [T: Clone[T]] Memory[T] ext Clone[Out=Self] {
+    @no_impl
     fun clone(&self) -> Memory[T] { }
 }
 
 
 sup [T: Copy] Memory[T] ext Copy { }
-
-
-sup [T] Memory[T] ext IterMov[T] {
-    @compiler_builtin
-    cor iter_mov(self) -> Iterator[T] { }
-}
-
-
-sup [T] Memory[T] ext IterMut[T] {
-    @compiler_builtin
-    cor iter_mut(&mut self) -> Iterator[&mut T] { }
-}
-
-
-sup [T] Memory[T] ext IterRef[T] {
-    @compiler_builtin
-    cor iter_ref(&self) -> Iterator[&T] { }
-}
-
-
-sup [T] Memory[T] ext IndexMut[T, USize] {
-    @compiler_builtin
-    cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] { }
-}
-
-
-sup [T] Memory[T] ext IndexRef[T, USize] {
-    @compiler_builtin
-    cor index_ref(&self, index: USize) -> GenOnce[&T] { }
-}

@@ -1,27 +1,25 @@
-use std::allocator::Alloc
-use std::allocator::GlobalAlloc
 use std::cast::From
-use std::clone::Clone
 use std::mem::memory::Memory
+use std::mem::view::View
 use std::number::USize
-use std::result::Fail
 use std::slice::Slice
-use std::void::Void
 
 
 @public
-cls Arr[T, cmp n: USize] { }
+cls Arr[T, cmp n: USize] {
+    memory: Memory[T]
+}
 
 
-sup [T, cmp n: USize] Arr[T, n] ext Memory[T] {
+sup [T, cmp n: USize] Arr[T, n] ext View[T] {
     fun len(&self) -> USize {
         ret n
     }
 }
 
 
-sup [T, cmp n: USize] Arr[T, n] ext From[Self, Slice[T]] {
-    fun from(that: Slice[T]) -> Self {
-        ret Arr[T, n](ptr=that.ptr, cap=that.cap)
+sup [T, A, cmp n: USize] Arr[T, n] ext From[Self, Slice[T, A]] {
+    fun from(that: Slice[T, A]) -> Self {
+        ret Arr[T, n](memory=Memory(ptr=that.memory.ptr, cap=n))
     }
 }
