@@ -66,11 +66,11 @@ sup [T, A] Vec[T, A] {
     }
 
     cor get_tail_ref(&self) -> GenOpt[&T] {
-        gen with self.get_ref(self.length - 1_uz)
+        gen with self.get_ref(self.buf.len - 1_uz)
     }
 
     cor get_ref(&self, index: USize) -> GenOpt[&T] {
-        case index >= self.length { gen }
+        case index >= self.buf.len { gen }
         gen self.index_ref(index)
     }
 }
@@ -82,11 +82,11 @@ sup [T, A] Vec[T, A] {
     }
 
     cor get_tail_mut(&mut self) -> GenOpt[&mut T] {
-        gen with self.get_mut(self.length - 1_uz)
+        gen with self.get_mut(self.buf.len - 1_uz)
     }
 
     cor get_mut(&mut self, index: USize) -> GenOpt[&mut T] {
-        case index >= self.length { gen }
+        case index >= self.buf.len { gen }
         gen self.index_mut(index)
     }
 }
