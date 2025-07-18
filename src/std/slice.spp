@@ -40,7 +40,7 @@ sup [E, A, cmp n: USize] Slice[E, A] ext From[Self, Arr[E, n]] {
 
 sup [E, A] Slice[E, A] ext From[Self, Vec[E, A]] {
     fun from(that: Vec[E, A]) -> Self {
-        ret that.buffer
+        ret that.buf
     }
 }
 
