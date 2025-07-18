@@ -94,7 +94,7 @@ sup [T, A] Vec[T, A] {
 
 sup [T, A] Vec[T, A] {
     fun clear(&mut self) -> Void {
-        self.buf.clear()
+        self.buf.mem.clear()
     }
 
     @no_impl fun is_empty(&self) -> Bool {
