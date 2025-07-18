@@ -39,8 +39,8 @@ sup [E, A] Slice[E, A] ext View[E] {
 
 
 sup [E, A] Slice[E, A] ext Clone[Out=Self] {
+    @no_impl
     fun clone(&self) -> Self {
-        ret Slice[E, A](mem=self.mem.clone(), len=self.len)
     }
 }
 
