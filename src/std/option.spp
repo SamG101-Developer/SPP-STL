@@ -148,6 +148,7 @@ sup [T] Opt[T] {
 sup [T] Opt[T] {
     @public
     @inline
+    @no_impl
     fun ok_or[E](self, err: E) -> Res[T, E] {
         # ret case self of
         #     is Some[T](val) { Pass(val) }
@@ -156,6 +157,7 @@ sup [T] Opt[T] {
 
     @public
     @inline
+    @no_impl
     fun ok_or_else[E](self, err: FunMov[(), E]) -> Res[T, E] {
         # case self of
         #     is Some[T](val) { Pass(val) }
