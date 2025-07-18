@@ -37,12 +37,12 @@ cls GlobalAlloc[E] { }
 sup [E] GlobalAlloc[E] ext Alloc[E] {
     fun allocate(n: USize) -> Res[Slice[E], AllocException] {
         let mem = std::mem::ops::malloc[E](n).ok_or(AllocException(msg="Failed to allocate memory"))?
-        ret Slice(mem)
+        ret Pass(val=Slice(mem))
     }
 
     fun allocate_zeroed(n: USize) -> Res[Slice[E], AllocException] {
         let mem = std::mem::ops::calloc[E](n).ok_or(AllocException(msg="Failed to allocate zeroed memory"))?
-        ret Slice(mem)
+        ret Pass(val=Slice(mem))
     }
 
     fun deallocate(slice: Slice[E]) -> Res[Void, AllocException] {
