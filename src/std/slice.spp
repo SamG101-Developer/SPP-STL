@@ -21,6 +21,12 @@ cls Slice[E, A: Alloc[E] = GlobalAlloc[E]] {
 sup [E, A] Slice[E, A] {
     type Element = E
     type Allocator = A
+
+    @public
+    @no_impl
+    fun resize(&mut self, new_len: USize) -> Void {
+        # A::reallocate(&mut self.mem, new_len)  # .expect("Failed to resize slice")
+    }
 }
 
 
