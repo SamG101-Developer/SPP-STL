@@ -31,7 +31,7 @@ sup StdoutStream ext WritableStream {
 
     fun flush(&mut self) -> Res[Void, StreamWriteException] {
         let val = libc::fflush(&stdout_handle)
-        ret case val < 0_s32 { Fail(err=StreamWriteException(msg="Failed to flush stdout")) } else { Pass() }
+        ret case val < 0_s32 { Fail(err=StreamWriteException(msg="Failed to flush stdout")) } else { Pass[Void]() }
     }
 
     fun write_all(&mut self, data: &Vec[U8]) -> Res[S32, StreamWriteException] {
