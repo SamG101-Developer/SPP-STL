@@ -14,7 +14,7 @@ cls View[T] { }
 sup [T] View[T] {
     @public
     @abstract_method
-    fun len(&self) -> USize { }
+    fun length(&self) -> USize { }
 }
 
 

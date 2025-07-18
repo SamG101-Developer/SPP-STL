@@ -12,7 +12,7 @@ cls Arr[T, cmp n: USize] {
 
 
 sup [T, cmp n: USize] Arr[T, n] ext View[T] {
-    fun len(&self) -> USize {
+    fun length(&self) -> USize {
         ret n
     }
 }
