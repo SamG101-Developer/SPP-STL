@@ -165,3 +165,20 @@ sup [T, A] Vec[T, A] ext IndexRef[T, USize] {
         gen with self.buf.index_ref(index)
     }
 }
+
+
+sup [T, A] Vec[T, A] ext std::ops::add::Add[Self, Out=Self] {
+    fun add(self, that: Self) -> Self {
+        let mut result = self.clone()
+        # todo
+        ret result
+    }
+}
+
+
+sup [T, A] Vec[T, A] ext std::ops::add::AddAssign[Self] {
+    fun add_assign(&mut self, that: Self) -> Void {
+        # todo
+        # self.buf.extend(that.buf)
+    }
+}
