@@ -34,7 +34,7 @@ sup StdinStream ext ReadableStream {
     fun read_all(&mut self) -> Res[Vec[U8], StreamReadException] {
         let mut vec = Vec[U8]()
         loop true {
-            let val = self.read(1024_u32)
+            let val = self.read(1024_uz)
             case val < 0 {
                 ret Fail(err=StreamReadException(msg="Failed to read from stdin"))
             }
