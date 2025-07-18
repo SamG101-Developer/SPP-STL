@@ -33,7 +33,7 @@ sup [T, E] Res[T, E] {
 }
 
 
-sup [T, E] Res[T, E] ext std::ops::try::Try[Pass[T], Fail[E]] {
+sup [T, E] Res[T, E] ext std::ops::try::Try[T, Fail[E]] {
     fun op_is_output(&self) -> Bool {
         ret self is Pass[T](..)
     }
