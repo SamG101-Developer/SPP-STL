@@ -169,6 +169,7 @@ sup [T] Opt[T] {
 sup[T] Opt[T] {
     @public
     @inline
+    @no_impl
     fun unwrap(self) -> T {
         # ret case self of
         #     is Some[T](val) { val }
