@@ -13,7 +13,7 @@ cls Slice[E] {
 
 sup [E] Slice[E] ext Memory[E] {
     fun len(&self) -> USize {
-        ret self.length
+        ret self.len
     }
 }
 
