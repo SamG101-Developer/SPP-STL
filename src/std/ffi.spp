@@ -1,5 +1,5 @@
 type CBool = std::boolean::Bool
-type CChar = std::string::Str
+type CChar = std::number::U8
 type CShort = std::number::S16
 type CInt = std::number::S32
 type CLong = std::number::S64
