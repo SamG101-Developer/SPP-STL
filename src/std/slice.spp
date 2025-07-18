@@ -6,6 +6,7 @@ use std::mem::memory::Memory
 use std::mem::view::View
 use std::number::USize
 use std::vector::Vec
+use std::void::Void
 
 
 cls Slice[E, A: Alloc[E] = GlobalAlloc[E]] {
