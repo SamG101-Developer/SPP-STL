@@ -170,9 +170,9 @@ sup[T] Opt[T] {
     @public
     @inline
     fun unwrap(self) -> T {
-        ret case self of
-            is Some[T](val) { val }
-            else { std::abort::abort("called `unwrap` on a `None` value") }
+        # ret case self of
+        #     is Some[T](val) { val }
+        #     else { std::abort::abort("called `unwrap` on a `None` value") }
     }
 
     @public
