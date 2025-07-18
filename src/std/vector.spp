@@ -28,8 +28,10 @@ sup [T, A] Vec[T, A] {
     type Element = T
     type Allocator = A
 
+    @public
+    @no_impl
     fun new() -> Vec[T, A] {
-        ret Vec[T, A](buf=A::alloc(1_uz))
+        # ret Vec[T, A](buf=A::alloc(1_uz))
     }
 }
 
@@ -53,7 +55,7 @@ sup [T, A] Vec[T, A] {
     @private
     fun grow_double(&mut self) -> Void {
         let new_cap = self.buf.cap * 2_uz
-        A::realloc(&mut self.buf, new_cap)
+        # A::realloc(&mut self.buf, new_cap) TODO
     }
 }
 
