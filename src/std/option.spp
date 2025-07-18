@@ -120,6 +120,7 @@ sup [T] Opt[T] {
 sup [T] Opt[T] {
     @public
     @inline
+    @no_impl
     fun map[U](self, f: FunMov[(T,), U]) -> Opt[U] {
         # ret case self of
         #     is Some[T](val) { Some(val=f(val)) }
