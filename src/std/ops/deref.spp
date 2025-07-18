@@ -3,14 +3,19 @@ use std::generator::GenOnce
 
 cls DerefRef[T] { }
 
+
+cls DerefMut[T] { }
+
+
 sup [T] DerefRef[T] {
+    @public
     @abstract_method
     cor deref_ref(&self) -> GenOnce[&T] { }
 }
 
-cls DerefMut[T] { }
 
 sup [T] DerefMut[T] {
+    @public
     @abstract_method
     cor deref_mut(&mut self) -> GenOnce[&mut T] { }
 }

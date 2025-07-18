@@ -10,12 +10,14 @@ cls AddAssign[Rhs] {}
 
 
 sup [Rhs, Ret] Add[Rhs, Ret] {
+    @public
     @abstract_method
     fun add(self, that: Rhs) -> Ret { }
 }
 
 
 sup [Rhs] AddAssign[Rhs] {
+    @public
     @abstract_method
     fun add_assign(&mut self, that: Rhs) -> Void { }
 }
