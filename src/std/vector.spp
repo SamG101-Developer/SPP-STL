@@ -39,14 +39,14 @@ sup [T, A] Vec[T, A] {
 sup [T, A] Vec[T, A] {
     @public
     fun push(&mut self, element: T) -> Void {
-        case self.buf.len == self.buf.cap { self.grow_double() }
+        case self.buf.len == self.buf.mem.cap { self.grow_double() }
         self.buf.place(self.buf.len, element)
         self.buf.len += 1_uz
     }
 
     @public
     fun insert(&mut self, index: USize, element: T) -> Void {
-        case self.buf.len == self.buf.cap { self.grow_double() }
+        case self.buf.len == self.buf.mem.cap { self.grow_double() }
         self.buf.shift(index, 1_uz)
         self.buf.place(index, element)
         self.buf.len += 1_uz
@@ -54,7 +54,7 @@ sup [T, A] Vec[T, A] {
 
     @private
     fun grow_double(&mut self) -> Void {
-        let new_cap = self.buf.cap * 2_uz
+        let new_cap = self.buf.mem.cap * 2_uz
         # A::realloc(&mut self.buf, new_cap) TODO
     }
 }
