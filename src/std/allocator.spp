@@ -36,18 +36,22 @@ cls GlobalAlloc[E] { }
 
 sup [E] GlobalAlloc[E] ext Alloc[E] {
     fun allocate(n: USize) -> Res[Slice[E], AllocException] {
-        std::mem::ops::malloc[E](n).ok_or(AllocException(msg="Failed to allocate memory"))
+        let mem = std::mem::ops::malloc[E](n).ok_or(AllocException(msg="Failed to allocate memory"))?
+        ret Slice(mem)
     }
 
     fun allocate_zeroed(n: USize) -> Res[Slice[E], AllocException] {
-        std::mem::ops::calloc[E](n).ok_or(AllocException(msg="Failed to allocate zeroed memory"))
+        let mem = std::mem::ops::calloc[E](n).ok_or(AllocException(msg="Failed to allocate zeroed memory"))?
+        ret Slice(mem)
     }
 
     fun deallocate(memory: Slice[E]) -> Res[Void, AllocException] {
-        std::mem::ops::free[E](memory).ok_or(AllocException(msg="Failed to deallocate memory"))
+        let out = std::mem::ops::free[E](memory).ok_or(AllocException(msg="Failed to deallocate memory"))
+        ret out
     }
 
     fun reallocate(memory: &mut Slice[E], n: USize) -> Res[Void, AllocException] {
-        std::mem::ops::realloc[T=E](memory, n).ok_or(AllocException(msg="Failed to reallocate memory"))
+        let out = std::mem::ops::realloc[T=E](memory, n).ok_or(AllocException(msg="Failed to reallocate memory"))
+        ret out
     }
 }
