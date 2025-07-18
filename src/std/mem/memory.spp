@@ -37,7 +37,7 @@ sup [T] Memory[T] {
 }
 
 
-sup [T: Clone[T]] Memory[T] ext Clone[Out=Self] {
+sup [T] Memory[T] ext Clone[Out=Memory[T]] {
     @no_impl
     fun clone(&self) -> Memory[T] { }
 }
