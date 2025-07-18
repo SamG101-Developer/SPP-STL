@@ -1,21 +1,22 @@
 use std::ffi::CChar
 use std::ffi::CInt
+use std::ffi::CPtr
 
 
 @ffi
-fun fputs(str: &CChar, stream: &CInt) -> CInt { }
+fun fputs(str: &CPtr[CChar], stream: &CInt) -> CInt { }
 
 @ffi
-fun fgets(buffer: &mut CChar, count: CInt, stream: &CInt) -> CChar { }
+fun fgets(buffer: &mut CPtr[CChar], count: CInt, stream: &CInt) -> CChar { }
 
 @ffi
-fun fopen(filename: &CChar, mode: &CChar) -> CInt { }
+fun fopen(filename: &CPtr[CChar], mode: &CPtr[CChar]) -> CInt { }
 
 @ffi
-fun fread(buffer: &mut CChar, size: CInt, count: CInt, stream: &mut CInt) -> CInt { }
+fun fread(buffer: &mut CPtr[CChar], size: CInt, count: CInt, stream: &mut CInt) -> CInt { }
 
 @ffi
-fun fwrite(buffer: &mut CChar, size: CInt, count: CInt, stream: &mut CInt) -> CInt { }
+fun fwrite(buffer: &mut CPtr[CChar], size: CInt, count: CInt, stream: &mut CInt) -> CInt { }
 
 @ffi
 fun fclose(stream: &mut CInt) -> CInt { }

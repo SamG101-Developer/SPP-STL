@@ -6,6 +6,7 @@ use std::clone::Clone
 use std::mem::memory::Memory
 use std::mem::view::View
 use std::number::USize
+use std::string::Str
 use std::vector::Vec
 use std::void::Void
 
@@ -48,6 +49,13 @@ sup [E, A] Slice[E, A] ext Clone[Out=Self] {
 sup [E, A, cmp n: USize] Slice[E, A] ext From[Self, Arr[E, n]] {
     fun from(that: Arr[E, n]) -> Self {
         ret Slice[E, A](mem=Memory(ptr=that.mem.ptr, cap=n), len=n)
+    }
+}
+
+
+sup [E, A] Slice[E, A] ext From[Self, Str] {
+    fun from(that: Str) -> Self {
+        ret that.data.buf
     }
 }
 

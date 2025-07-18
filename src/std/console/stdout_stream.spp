@@ -4,7 +4,6 @@ use std::number::S32
 use std::result::Res
 use std::result::Fail
 use std::result::Pass
-use std::slice::Slice
 use std::streams::WritableStream
 use std::streams::StreamWriteException
 use std::vector::Vec
@@ -25,7 +24,7 @@ cls StdoutStream { }
 
 sup StdoutStream ext WritableStream {
     fun write(&mut self, data: &Vec[U8], length: USize) -> Res[S32, StreamWriteException] {
-        let val = libc::fputs(Slice[U8]::from(data.clone()), &stdout_handle)
+        let val = libc::fputs(&data.buf, &stdout_handle)
         # TODO
         # ret case val < 0_s32 { Fail(err=StreamWriteException(msg="Failed to write to stdout")) } else { Pass(val) }
         ret Pass(val)
