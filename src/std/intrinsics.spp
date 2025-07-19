@@ -209,22 +209,22 @@ fun scmp[T: Integer](this: T, that: T) -> S32 { }
 fun fcmp[T: Integer](this: T, that: T) -> S32 { }
 
 
-@public
-@always_inline
-@compiler_builtin
-fun mem_copy[T](dest: &mut Memory[T], src: &Memory[T], size: USize) -> Void { }
+# @public
+# @always_inline
+# @compiler_builtin
+# fun mem_copy[T](dest: &mut Memory[T], src: &Memory[T], size: USize) -> Void { }
 
 
-@public
-@always_inline
-@compiler_builtin
-fun mem_move[T](dest: &mut Memory[T], src: &Memory[T], size: USize) -> Void { }
+# @public
+# @always_inline
+# @compiler_builtin
+# fun mem_move[T](dest: &mut Memory[T], src: &Memory[T], size: USize) -> Void { }
 
 
-@public
-@always_inline
-@compiler_builtin
-fun mem_set[T: Copy](dest: &mut Memory[T], value: T, size: USize) -> Void { }
+# @public
+# @always_inline
+# @compiler_builtin
+# fun mem_set[T: Copy](dest: &mut Memory[T], value: T, size: USize) -> Void { }
 
 
 @public

@@ -68,21 +68,3 @@ fun free[T](memory: Memory[T]) -> Opt[Void] {
     # Free the memory pointed to by the pointer.
     libc::free(memory.ptr)
 }
-
-
-fun mem_cpy[T: Copy](dest: &mut Memory[T], src: &Memory[T]) -> Void {
-    # Perform the memory copy. Todo: use intrinsic::mem_copy ?
-    libc::memcpy(dest.ptr, src.ptr, src.len() * size_of[T]())
-}
-
-
-fun mem_move[T: Copy](dest: &mut Memory[T], src: &Memory[T]) -> Void {
-    # Perform the memory move. Todo: use intrinsic::mem_move ?
-    libc::memmove(dest.ptr, src.ptr, src.len() * size_of[T]())
-}
-
-
-fun mem_set[T: Copy](dest: &mut Memory[T], value: T) -> Void {
-    # Perform the memory set. Todo: use intrinsic::mem_set ?
-    libc::memset(dest.ptr, value, dest.len() * size_of[T]())
-}

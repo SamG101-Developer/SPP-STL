@@ -35,3 +35,6 @@ fun realloc[T](ptr: &mut CPtr[T], size: CInt) -> CPtr[T] { }
 
 @ffi
 fun free[T](ptr: CPtr[T]) -> CInt { }
+
+@ffi
+fun memset[T](ptr: &mut CPtr[T], value: CInt, num: CInt) -> CPtr[T] { }
