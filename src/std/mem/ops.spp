@@ -57,7 +57,7 @@ fun realloc[T](memory: &mut Memory[T], n: USize) -> Opt[Void] {
     case out == 0_s32 { ret None() }
 
     # Otherwise, assign the new pointer and update the length.
-    memory.len = n
+    memory.cap = n
 
     ret Some[Void]()
 }
