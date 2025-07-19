@@ -411,22 +411,22 @@ fun float_copysign[T: FloatingPoint](value: T, sign: T) -> T { }
 @public
 @always_inline
 @compiler_builtin
-fun floor[T: FloatingPoint](value: T) -> T { }
+fun float_floor[T: FloatingPoint](value: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun ceil[T: FloatingPoint](value: T) -> T { }
+fun float_ceil[T: FloatingPoint](value: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun trunc[T: FloatingPoint](value: T) -> T { }
+fun float_trunc[T: FloatingPoint](value: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun round[T: FloatingPoint](value: T) -> T { }
+fun float_round[T: FloatingPoint](value: T) -> T { }
 
 
 @public
