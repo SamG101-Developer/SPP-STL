@@ -59,7 +59,7 @@ fun realloc[T](memory: &mut Memory[T], n: USize) -> Opt[Void] {
     # Otherwise, assign the new pointer and update the length.
     memory.len = n
 
-    ret Some()
+    ret Some[Void]()
 }
 
 
