@@ -42,7 +42,7 @@ fun calloc[T](n: USize) -> Opt[Memory[T]] {
     # Convert the returned pointer into a safe type.
     ret case mem.ptr.pos of
         == 0_uz { None() }
-        else { Some(val=ptr.mem) }
+        else { Some(val=mem) }
 }
 
 
