@@ -51,13 +51,12 @@ fun calloc[T](n: USize) -> Opt[Memory[T]] {
 fun realloc[T](memory: &mut Memory[T], n: USize) -> Opt[Void] {
     # Determine the size and get a reallocated pointer.
     let size = n * size_of[T]()
-    let ptr = libc::realloc(&mut memory.ptr, size)
+    let out = libc::realloc(&mut memory, size)
 
     # If the new pointer is null, return None (failed reallocation).
-    case ptr == 0 { ret None() }
+    case out == 0 { ret None() }
 
     # Otherwise, assign the new pointer and update the length.
-    memory.ptr = ptr
     memory.len = n
 
     ret Some()
@@ -66,5 +65,5 @@ fun realloc[T](memory: &mut Memory[T], n: USize) -> Opt[Void] {
 
 fun free[T](memory: Memory[T]) -> Opt[Void] {
     # Free the memory pointed to by the pointer.
-    libc::free(memory.ptr)
+    libc::free(memory)
 }

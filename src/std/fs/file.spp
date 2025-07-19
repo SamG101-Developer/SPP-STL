@@ -30,7 +30,7 @@ cls File {
 sup File {
     @public
     fun open(path: &Path, mode: Str) -> Res[File, FileNotFoundException] {
-        let handle = libc::fopen(&path.path.data.buf, &mode.data.buf)
+        let handle = libc::fopen(&path.path.data.buf.mem, &mode.data.buf.mem)
         ret Pass(val=File(handle, open=true))
     }
 

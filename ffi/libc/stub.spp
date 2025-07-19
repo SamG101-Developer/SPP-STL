@@ -31,10 +31,7 @@ fun malloc[T](size: CInt) -> CPtr[T] { }
 fun calloc[T](count: CInt, size: CInt) -> CPtr[T] { }
 
 @ffi
-fun realloc[T](ptr: &mut CPtr[T], size: CInt) -> CPtr[T] { }
+fun realloc[T](ptr: &mut CPtr[T], size: CInt) -> CInt { }
 
 @ffi
 fun free[T](ptr: CPtr[T]) -> CInt { }
-
-@ffi
-fun memset[T](ptr: &mut CPtr[T], value: CInt, num: CInt) -> CPtr[T] { }

@@ -24,7 +24,7 @@ cls StdoutStream { }
 
 sup StdoutStream ext WritableStream {
     fun write(&mut self, data: &Vec[U8], length: USize) -> Res[S32, StreamWriteException] {
-        let val = libc::fputs(&data.buf, &stdout_handle)
+        let val = libc::fputs(&data.buf.mem, &stdout_handle)
         # TODO
         # ret case val < 0_s32 { Fail(err=StreamWriteException(msg="Failed to write to stdout")) } else { Pass(val) }
         ret Pass(val)
