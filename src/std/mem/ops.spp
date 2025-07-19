@@ -27,22 +27,21 @@ fun size_of_value[T](value: T) -> USize {
 fun malloc[T](n: USize) -> Opt[Memory[T]] {
     # Determine the size and get an allocated pointer.
     let size = n * size_of[T]()
-    let ptr = libc::malloc[T](size)
-
-    # Convert the returned pointer into a safe type.
-    ret case ptr of
+    let mem = libc::malloc[T](size)
+    ret case mem.ptr.pos of {
         == 0 { None() }
-        else { Some(val=ptr.mem) }
+        else { Some(val=mem) }
+    }
 }
 
 
 fun calloc[T](n: USize) -> Opt[Memory[T]] {
     # Determine the size and get an allocated pointer.
     let size = n * size_of[T]()
-    let ptr = libc::calloc[T](n, size_of[T]())
+    let mem = libc::calloc[T](n, size_of[T]())
 
     # Convert the returned pointer into a safe type.
-    ret case ptr of
+    ret case mem.ptr.pos of
         == 0 { None() }
         else { Some(val=ptr.mem) }
 }
