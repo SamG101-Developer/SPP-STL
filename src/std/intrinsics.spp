@@ -560,4 +560,4 @@ fun fptoui[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedFloatin
 @public
 @always_inline
 @compiler_builtin
-fun fpclass[cmp this_bit_width: U32](value: SizedFloatingPoint[this_bit_width], flag: S32) -> Bool { }
+fun fpclass[T: FloatingPoint](value: T, flag: S32) -> Bool { }
