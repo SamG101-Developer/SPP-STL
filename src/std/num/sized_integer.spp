@@ -198,7 +198,7 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext s
         let mut base = self
         let mut exp = that
         loop exp > 0_u32 {
-            case exp % 2 == 1 {
+            case exp % 2_u32 == 1_u32 {
                 out = out * base
             }
             base = base * base
