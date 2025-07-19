@@ -403,7 +403,9 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
     @public
     @inline
     fun is_negative(self) -> Bool {
-        ret self.to_bits() & Self::from(1_u32 << (bit_width - 1_u32)) != Self::zero()
+        # Bit level checking for negative numbers.
+        # ret self.to_bits() >> (bit_width - 1_u32) != Self::zero()
+        ret false  # todo
     }
 }
 
