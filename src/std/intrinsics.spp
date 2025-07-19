@@ -88,6 +88,11 @@ fun sdiv_assign[T: Integer](this: &mut T, that: T) -> Void { }
 @public
 @always_inline
 @compiler_builtin
+fun sneg[T: Integer](value: T) -> T { }
+
+@public
+@always_inline
+@compiler_builtin
 fun shl[T: Integer](this: T, by: T) -> T { }
 
 @public
@@ -276,6 +281,11 @@ fun float_rem[T: FloatingPoint](this: T, that: T) -> T { }
 @always_inline
 @compiler_builtin
 fun float_rem_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
+
+@public
+@always_inline
+@compiler_builtin
+fun float_neg[T: FloatingPoint](value: T) -> T { }
 
 
 @public
