@@ -1135,3 +1135,54 @@ fun sshl_saturating[T: Integer](this: T, that: T) -> T { }
 @always_inline
 @compiler_builtin
 fun ushl_saturating[T: Integer](this: T, that: T) -> T { }
+
+
+@public
+@always_inline
+@compiler_builtin
+fun sitofp[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerSigned[this_bit_width]) -> SizedFloatingPoint[that_bit_width] { }
+
+@public
+@always_inline
+@compiler_builtin
+fun uitofp[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerUnsigned[this_bit_width]) -> SizedFloatingPoint[that_bit_width] { }
+
+@public
+@always_inline
+@compiler_builtin
+fun fptrunc[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedFloatingPoint[this_bit_width]) -> SizedFloatingPoint[that_bit_width] { }
+
+@public
+@always_inline
+@compiler_builtin
+fun strunc[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerSigned[this_bit_width]) -> SizedIntegerSigned[that_bit_width] { }
+
+@public
+@always_inline
+@compiler_builtin
+fun utrunc[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerUnsigned[this_bit_width]) -> SizedIntegerUnsigned[that_bit_width] { }
+
+@public
+@always_inline
+@compiler_builtin
+fun zext[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerUnsigned[this_bit_width]) -> SizedIntegerSigned[that_bit_width] { }
+
+@public
+@always_inline
+@compiler_builtin
+fun sext[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerSigned[this_bit_width]) -> SizedIntegerSigned[that_bit_width] { }
+
+@public
+@always_inline
+@compiler_builtin
+fun fpext[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedFloatingPoint[this_bit_width]) -> SizedFloatingPoint[that_bit_width] { }
+
+@public
+@always_inline
+@compiler_builtin
+fun fptosi[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedFloatingPoint[this_bit_width]) -> SizedIntegerSigned[that_bit_width] { }
+
+@public
+@always_inline
+@compiler_builtin
+fun fptoui[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedFloatingPoint[this_bit_width]) -> SizedIntegerUnsigned[that_bit_width] { }

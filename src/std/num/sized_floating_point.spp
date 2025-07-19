@@ -20,14 +20,14 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext FloatingPoint { }
 
 sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedFloatingPoint[this_bit_width] ext From[Self, SizedIntegerSigned[that_bit_width]] {
     fun from(that: SizedIntegerSigned[that_bit_width]) -> Self {
-        ret intrinsics::sitofp(that, that_bit_width, this_bit_width)
+        ret intrinsics::sitofp[this_bit_width, that_bit_width](that)
     }
 }
 
 
 sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedFloatingPoint[this_bit_width] ext From[Self, SizedIntegerUnsigned[that_bit_width]] {
     fun from(that: SizedIntegerUnsigned[that_bit_width]) -> Self {
-        ret intrinsics::uitofp(that, that_bit_width, this_bit_width)
+        ret intrinsics::uitofp[this_bit_width, that_bit_width](that)
     }
 }
 
@@ -35,10 +35,10 @@ sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedFloatingPoint[this_b
 sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedFloatingPoint[this_bit_width] ext From[Self, SizedFloatingPoint[that_bit_width]] {
     fun from(that: SizedFloatingPoint[that_bit_width]) -> Self {
         ret case this_bit_width < that_bit_width {
-            intrinsics::fptrunc(that, that_bit_width, this_bit_width)
+            intrinsics::fptrunc[this_bit_width, that_bit_width](that)
         }
         else {
-            intrinsics::fpext(that, that_bit_width, this_bit_width)
+            intrinsics::fpext[this_bit_width, that_bit_width](that)
         }
     }
 }
