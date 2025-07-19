@@ -391,7 +391,7 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
     @public
     @inline
     fun is_finite(self) -> Bool {
-        ret self.abs() < Limits[Self]::infinity
+        ret self.abs() < Limits[SizedFloatingPoint[bit_width]]::infinity
     }
 
     @public
