@@ -119,7 +119,7 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
     fun div_checked(self, that: Self) -> Opt[Self] {
-        case that == 0 {
+        case that == Self::zero() {
             ret None()
         }
         ret Some(val=intrinsics::udiv(self, that))
@@ -163,7 +163,7 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
     fun rem_checked(self, that: Self) -> Opt[Self] {
-        case that == 0 {
+        case that == Self::zero() {
             ret None()
         }
         ret Some(val=intrinsics::urem(self, that))

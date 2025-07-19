@@ -122,7 +122,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
     fun div_checked(self, that: Self) -> Opt[Self] {
-        case that == 0 or (self == Limits[Self]::min & that == Self::neg_one()) {
+        case that == Self::zero() or (self == Limits[Self]::min & that == Self::neg_one()) {
             ret None()
         }
         ret Some(val=intrinsics::sdiv(self, that))
@@ -177,7 +177,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
     fun rem_checked(self, that: Self) -> Opt[Self] {
-        case that == 0 or (self == Limits[Self]::min & that == Self::neg_one()) {
+        case that == Self::zero() or (self == Limits[Self]::min & that == Self::neg_one()) {
             ret None()
         }
         ret Some(val=intrinsics::srem(self, that))

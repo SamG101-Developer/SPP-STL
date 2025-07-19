@@ -191,7 +191,7 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext s
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::pow::Pow[Rhs=U32, Ret=Self] {
     fun pow(self, that: U32) -> Self {
-        case that == 0 {
+        case that == Self::zero() {
             ret Self::one()
         }
         let mut out = Self::one()
@@ -244,7 +244,7 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
     @public
     @inline
     fun pow_checked(self, that: U32) -> Opt[Self] {
-        case that == 0 {
+        case that == Self::zero() {
             ret Some(val=Self::one())
         }
         let mut out = Self::one()
@@ -263,7 +263,7 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
     @public
     @inline
     fun pow_overflow(self, that: U32) -> (Self, Bool) {
-        case that == 0 {
+        case that == Self::zero() {
             ret (Self::one(), false)
         }
         let mut out = Self::one()
@@ -284,7 +284,7 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
     @public
     @inline
     fun pow_wrapping(self, that: U32) -> Self {
-        case that == 0 {
+        case that == Self::zero() {
             ret Self::one()
         }
         let mut out = Self::one()
