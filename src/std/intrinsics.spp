@@ -93,22 +93,22 @@ fun sneg[T: Integer](value: T) -> T { }
 @public
 @always_inline
 @compiler_builtin
-fun shl[T: Integer](this: T, by: T) -> T { }
+fun bit_shl[T: Integer](this: T, by: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun shl_assign[T: Integer](this: &mut T, by: T) -> Void { }
+fun bit_shl_assign[T: Integer](this: &mut T, by: T) -> Void { }
 
 @public
 @always_inline
 @compiler_builtin
-fun shr[T: Integer](this: T, by: T) -> T { }
+fun bit_shr[T: Integer](this: T, by: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun shr_assign[T: Integer](this: &mut T, by: T) -> Void { }
+fun bit_shr_assign[T: Integer](this: &mut T, by: T) -> Void { }
 
 @public
 @always_inline
