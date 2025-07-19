@@ -322,7 +322,7 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
     @public
     @inline
     fun shl_wrapping(self, that: U32) -> Self {
-        ret intrinsics::shl(self, that & (bit_width - 1))
+        ret intrinsics::shl(self, that & (bit_width - 1_u32))
     }
 }
 
@@ -346,7 +346,7 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
     @public
     @inline
     fun shr_wrapping(self, that: U32) -> Self {
-        ret intrinsics::shr(self, that & (bit_width - 1))
+        ret intrinsics::shr(self, that & (bit_width - 1_u32))
     }
 }
 
