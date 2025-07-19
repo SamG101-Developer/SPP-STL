@@ -24,7 +24,7 @@ sup [E] Alloc[E] {
 
     @public
     @abstract_method
-    fun deallocate(slice: Slice[E]) -> Res[Void, AllocException] { }
+    fun deallocate(slice: Slice[E]) -> Void { }
 
     @public
     @abstract_method
@@ -46,7 +46,7 @@ sup [E] GlobalAlloc[E] ext Alloc[E] {
         ret Pass(val=Slice(mem))
     }
 
-    fun deallocate(slice: Slice[E]) -> Res[Void, AllocException] {
+    fun deallocate(slice: Slice[E]) -> Void {
         let out = std::mem::ops::free[E](slice.mem).ok_or(AllocException(msg="Failed to deallocate memory"))
         ret out
     }

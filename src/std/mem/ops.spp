@@ -63,7 +63,8 @@ fun realloc[T](memory: &mut Memory[T], n: USize) -> Opt[Void] {
 }
 
 
-fun free[T](memory: Memory[T]) -> Opt[Void] {
+fun free[T](memory: Memory[T]) -> Void {
     # Free the memory pointed to by the pointer.
     libc::free(memory)
+    ret Some()
 }
