@@ -362,36 +362,62 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
     @public
     @inline
-    fun is_normal(self) -> Bool {
-        let bits = self.to_bits()
-        ret bits & Limits[Self]::man_mask != 0 and bits & Limits[Self]::exp_mask != 0
+    fun is_signaling_nan(self) -> Bool {
+        ret intrinsics::fpclass(that, 0_s32)
     }
 
     @public
     @inline
-    fun is_subnormal(self) -> Bool {
-        let bits = self.to_bits()
-        ret self != Self::Zero() and bits & Limits[Self]::exp_mask == 0
+    fun is_quiet_nan(self) -> Bool {
+        ret intrinsics::fpclass(that, 1_s32)
     }
 
     @public
     @inline
-    fun is_nan(self) -> Bool {
-        let bits = self.to_bits()
-        ret bits & Limits[Self]::man_mask != 0 and bits & Limits[Self]::exp_mask == Limits[Self]::exp_mask
+    fun is_negative_infinity(self) -> Bool {
+        ret intrinsics::fpclass(that, 2_s32)
     }
 
     @public
     @inline
-    fun is_infinite(self) -> Bool {
-        let bits = self.to_bits()
-        ret bits & Limits[Self]::man_mask == 0 and bits & Limits[Self]::exp_mask == Limits[Self]::exp_mask
+    fun is_negative_normal(self) -> Bool {
+        ret intrinsics::fpclass(that, 3_s32)
     }
 
     @public
     @inline
-    fun is_finite(self) -> Bool {
-        ret self.abs() < Limits[SizedFloatingPoint[bit_width]]::infinity
+    fun is_negative_subnormal(self) -> Bool {
+        ret intrinsics::fpclass(that, 4_s32)
+    }
+
+    @public
+    @inline
+    fun is_negative_zero(self) -> Bool {
+        ret intrinsics::fpclass(that, 5_s32)
+    }
+
+    @public
+    @inline
+    fun is_positive_zero(self) -> Bool {
+        ret intrinsics::fpclass(that, 6_s32)
+    }
+
+    @public
+    @inline
+    fun is_positive_subnormal(self) -> Bool {
+        ret intrinsics::fpclass(that, 7_s32)
+    }
+
+    @public
+    @inline
+    fun is_positive_normal(self) -> Bool {
+        ret intrinsics::fpclass(that, 8_s32)
+    }
+
+    @public
+    @inline
+    fun is_positive_infinity(self) -> Bool {
+        ret intrinsics::fpclass(that, 9_s32)
     }
 
     @public

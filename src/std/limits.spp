@@ -23,84 +23,107 @@ cls Limits[T] { }
 
 
 sup Limits[U8] {
-    @public
+    type SInt = S8
+    type FP = F8
+
     cmp max: U8 = 255_u8
     cmp min: U8 = 0_u8
 }
 
 
 sup Limits[U16] {
-    @public
+    type SInt = S16
+    type FP = F16
+
     cmp max: U16 = 65535_u16
     cmp min: U16 = 0_u16
 }
 
 
 sup Limits[U32] {
-    @public
+    type SInt = S32
+    type FP = F32
+
     cmp max: U32 = 4294967295_u32
     cmp min: U32 = 0_u32
 }
 
 
 sup Limits[U64] {
-    @public
+    type SInt = S64
+    type FP = F64
+
     cmp max: U64 = 18446744073709551615_u64
     cmp min: U64 = 0_u64
 }
 
 
 sup Limits[U128] {
-    @public
+    type SInt = S128
+    type FP = F128
+
     cmp max: U128 = 340282366920938463463374607431768211455_u128
     cmp min: U128 = 0_u128
 }
 
 
 sup Limits[U256] {
-    @public
+    type SInt = S256
+    type FP = F256
+
     cmp max: U256 = 115792089237316195423570985008687907853269984665640564039457584007913129639935_u256
     cmp min: U256 = 0_u256
 }
 
 
 sup Limits[S8] {
-    @public
+    type UInt = U8
+    type FP = F8
+
     cmp max: S8 = 127_s8
     cmp min: S8 = -128_s8
 }
 
 
 sup Limits[S16] {
-    @public
+    type UInt = U16
+    type FP = F16
+
     cmp max: S16 = 32767_s16
     cmp min: S16 = -32768_s16
 }
 
 
 sup Limits[S32] {
-    @public
+    type UInt = U32
+    type FP = F32
+
     cmp max: S32 = 2147483647_s32
     cmp min: S32 = -2147483648_s32
 }
 
 
 sup Limits[S64] {
-    @public
+    type UInt = U64
+    type SInt = S64
+
     cmp max: S64 = 9223372036854775807_s64
     cmp min: S64 = -9223372036854775808_s64
 }
 
 
 sup Limits[S128] {
-    @public
+    type UInt = U128
+    type FP = F128
+
     cmp max: S128 = 170141183460469231731687303715884105727_s128
     cmp min: S128 = -170141183460469231731687303715884105728_s128
 }
 
 
 sup Limits[S256] {
-    @public
+    type UInt = U256
+
     cmp max: S256 = 57896044618658097711785492504343953926634992332820282019728792003956564819967_s256
     cmp min: S256 = -57896044618658097711785492504343953926634992332820282019728792003956564819968_s256
 }

@@ -555,3 +555,9 @@ fun fptosi[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedFloatin
 @always_inline
 @compiler_builtin
 fun fptoui[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedFloatingPoint[that_bit_width]) -> SizedIntegerUnsigned[this_bit_width] { }
+
+
+@public
+@always_inline
+@compiler_builtin
+fun fpclass[cmp this_bit_width: U32](value: SizedFloatingPoint[this_bit_width], flag: S32) -> Bool { }
