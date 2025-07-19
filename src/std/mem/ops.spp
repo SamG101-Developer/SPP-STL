@@ -39,7 +39,7 @@ fun malloc[T](n: USize) -> Opt[Memory[T]] {
 fun calloc[T](n: USize) -> Opt[Memory[T]] {
     # Determine the size and get an allocated pointer.
     let size = n * size_of[T]()
-    let ptr = libc::calloc(n, size_of_value(T))
+    let ptr = libc::calloc(n, size_of[T]())
 
     # Convert the returned pointer into a safe type.
     ret case ptr of
