@@ -3,6 +3,7 @@ use std::copy::Copy
 use std::mem::memory::Memory
 use std::void::Void
 
+use std::number::U32
 use std::number::USize
 use std::number::S32
 use std::number::F8
@@ -13,6 +14,9 @@ use std::number::F128
 
 use std::num::bases::Num
 use std::num::bases::Integer
+use std::num::sized_floating_point::SizedFloatingPoint
+use std::num::sized_integer_signed::SizedIntegerSigned
+use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 
 
 @public
