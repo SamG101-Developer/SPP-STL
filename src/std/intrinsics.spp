@@ -147,32 +147,32 @@ fun abs[T: Integer](this: T, that: T) -> T { }
 @public
 @always_inline
 @compiler_builtin
-fun eq[T: Num](this: T, that: T) -> Bool { }
+fun eq[T: Num](this: &T, that: &T) -> Bool { }
 
 @public
 @always_inline
 @compiler_builtin
-fun ne[T: Num](this: T, that: T) -> Bool { }
+fun ne[T: Num](this: &T, that: &T) -> Bool { }
 
 @public
 @always_inline
 @compiler_builtin
-fun lt[T: Num](this: T, that: T) -> Bool { }
+fun lt[T: Num](this: &T, that: &T) -> Bool { }
 
 @public
 @always_inline
 @compiler_builtin
-fun le[T: Num](this: T, that: T) -> Bool { }
+fun le[T: Num](this: &T, that: &T) -> Bool { }
 
 @public
 @always_inline
 @compiler_builtin
-fun gt[T: Num](this: T, that: T) -> Bool { }
+fun gt[T: Num](this: &T, that: &T) -> Bool { }
 
 @public
 @always_inline
 @compiler_builtin
-fun ge[T: Num](this: T, that: T) -> Bool { }
+fun ge[T: Num](this: &T, that: &T) -> Bool { }
 
 
 @public
