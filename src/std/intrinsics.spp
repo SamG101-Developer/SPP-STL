@@ -235,7 +235,17 @@ fun float_add[T: FloatingPoint](this: T, that: T) -> T { }
 @public
 @always_inline
 @compiler_builtin
+fun float_add_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
+
+@public
+@always_inline
+@compiler_builtin
 fun float_sub[T: FloatingPoint](this: T, that: T) -> T { }
+
+@public
+@always_inline
+@compiler_builtin
+fun float_sub_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
 
 @public
 @always_inline
@@ -245,12 +255,27 @@ fun float_mul[T: FloatingPoint](this: T, that: T) -> T { }
 @public
 @always_inline
 @compiler_builtin
+fun float_mul_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
+
+@public
+@always_inline
+@compiler_builtin
 fun float_div[T: FloatingPoint](this: T, that: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
+fun float_div_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
+
+@public
+@always_inline
+@compiler_builtin
 fun float_rem[T: FloatingPoint](this: T, that: T) -> T { }
+
+@public
+@always_inline
+@compiler_builtin
+fun float_rem_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
 
 
 @public
