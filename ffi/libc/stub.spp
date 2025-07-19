@@ -1,6 +1,6 @@
-use std::ffi::CChar
-use std::ffi::CInt
-use std::ffi::CPtr
+use std::cffi::CChar
+use std::cffi::CInt
+use std::cffi::CPtr
 
 
 @ffi
