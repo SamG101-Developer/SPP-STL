@@ -191,18 +191,18 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext s
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::pow::Pow[Rhs=U32, Ret=Self] {
     fun pow(self, that: U32) -> Self {
-        case that == Self::zero() {
+        case that == 0_u32 {
             ret Self::one()
         }
         let mut out = Self::one()
         let mut base = self
         let mut exp = that
-        loop exp > 0 {
+        loop exp > 0_u32 {
             case exp % 2 == 1 {
                 out = out * base
             }
             base = base * base
-            exp /= 2
+            exp /= 2_u32
         }
         ret out
     }
