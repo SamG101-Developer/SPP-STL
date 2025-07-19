@@ -189,7 +189,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     fun div_floor(self, that: Self) -> Self {
         let d = self / that
         let r = self % that
-        let c = (self ^ that) >> (bit_width - 1)
+        let c = (self ^ that) >> (bit_width - Self::one())
         ret case r != 0 { d + c } else { d }
     }
 
@@ -198,7 +198,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     fun div_ceil(self, that: Self) -> Self {
         let d = self / that
         let r = self % that
-        let c = 1 + (self ^ that) >> (bit_width - 1)
+        let c = 1 + (self ^ that) >> (bit_width - Self::one())
         ret case r != 0 { d + c } else { d }
     }
 }
@@ -238,7 +238,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     fun pow_saturating(self, that: U32) -> Self {
         case self.pow_checked(that) of
             is Some(val) { val }
-            is None() and (self < 0) and (that % 2 == 1) { Limits[Self]::min }
+            is None() and (self < Self::zero()) and (that % 2_u32 == 1_u32) { Limits[Self]::min }
             else { Limits[Self]::max }
     }
 }
@@ -258,7 +258,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
     fun neg_one() -> Self {
-        ret Self::from(-1)
+        ret Self::from(-1_s32)
     }
 }
 
@@ -383,9 +383,9 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
             ret Some(val=self)
         }
 
-        let mut x = Self::one() << (bit_width / base.ilog2_checked().unwrap_or(1))
+        let mut x = Self::one() << (bit_width / base.ilog2_checked().unwrap_or(Self::one()))
         loop true {
-            let mut y = ((base - 1) * x + self / x.pow(base - 1)) / (base)
+            let mut y = ((base - Self::one()) * x + self / x.pow(base - Self::one())) / (base)
             case y >= x {
                 ret Some(val=x)
             }
