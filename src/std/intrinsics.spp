@@ -175,6 +175,16 @@ fun gt[T: Num](this: &T, that: &T) -> Bool { }
 @compiler_builtin
 fun ge[T: Num](this: &T, that: &T) -> Bool { }
 
+@public
+@always_inline
+@compiler_builtin
+fun max_val[T: Integer]() -> T { }
+
+@public
+@always_inline
+@compiler_builtin
+fun min_val[T: Integer]() -> T { }
+
 
 @public
 @always_inline

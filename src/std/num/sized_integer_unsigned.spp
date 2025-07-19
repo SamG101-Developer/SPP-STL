@@ -104,7 +104,7 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     fun mul_saturating(self, that: Self) -> Self {
         ret case self.mul_checked(that) of
             is Some(val) { val }
-            else { Limits[Self]::max }
+            else { intrinsics::max_val[Self]() }
     }
 
     @public
@@ -189,7 +189,7 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     fun pow_saturating(self, that: U32) -> Self {
         case self.pow_checked(that) of
             is Some(val) { val }
-            else { Limits[Self]::max }
+            else { intrinsics::max_val[Self]() }
     }
 }
 

@@ -106,8 +106,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     fun mul_saturating(self, that: Self) -> Self {
         ret case self.mul_checked(that) of
             is Some(val) { val }
-            is None() and (self < 0) == (that < 0) { Limits[Self]::max }
-            else { Limits[Self]::min }
+            is None() and (self < 0) == (that < 0) { intrinsics::max_val[Self]() }
+            else { intrinsics::min_val[Self]() }
     }
 
     @public
@@ -122,7 +122,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
     fun div_checked(self, that: Self) -> Opt[Self] {
-        case that == Self::zero() or (self == Limits[Self]::min & that == Self::neg_one()) {
+        case that == Self::zero() or (self == intrinsics::min_val[Self]() & that == Self::neg_one()) {
             ret None()
         }
         ret Some(val=intrinsics::sdiv(self, that))
@@ -131,7 +131,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
     fun div_overflow(self, that: Self) -> (Self, Bool) {
-        ret case self == Limits[Self]::min & that == Self::neg_one() {
+        ret case self == intrinsics::min_val[Self]() & that == Self::neg_one() {
             (self, true)
         }
         else {
@@ -143,7 +143,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @inline
     fun div_saturating(self, that: Self) -> Self {
         ret case self.div_overflow(that) of
-            is (val, true) { Limits[Self]::max }
+            is (val, true) { intrinsics::max_val[Self]() }
             is (val, false) { val }
     }
 
@@ -177,7 +177,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
     fun rem_checked(self, that: Self) -> Opt[Self] {
-        case that == Self::zero() or (self == Limits[Self]::min & that == Self::neg_one()) {
+        case that == Self::zero() or (self == intrinsics::min_val[Self]() & that == Self::neg_one()) {
             ret None()
         }
         ret Some(val=intrinsics::srem(self, that))
@@ -187,7 +187,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @inline
     fun rem_overflow(self, that: Self) -> (Self, Bool) {
         case that == Self::neg_one() {
-            ret (self, self == Limits[Self]::min)
+            ret (self, self == intrinsics::min_val[Self]())
         }
         ret (intrinsics::srem(self, that), false)
     }
@@ -207,8 +207,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     fun pow_saturating(self, that: U32) -> Self {
         case self.pow_checked(that) of
             is Some(val) { val }
-            is None() and (self < Self::zero()) and (that % 2_u32 == 1_u32) { Limits[Self]::min }
-            else { Limits[Self]::max }
+            is None() and (self < Self::zero()) and (that % 2_u32 == 1_u32) { intrinsics::min_val[Self]() }
+            else { intrinsics::max_val[Self]() }
     }
 }
 
@@ -275,8 +275,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
     fun neg_overflow(self) -> (Self, Bool) {
-        case self == Limits[Self]::min {
-            ret (Limits[Self]::min, true)
+        case self == intrinsics::min_val[Self]() {
+            ret (intrinsics::min_val[Self](), true)
         }
         ret (intrinsics::sneg(self), false)
     }
