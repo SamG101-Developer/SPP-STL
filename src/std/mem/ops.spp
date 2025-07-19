@@ -27,12 +27,12 @@ fun size_of_value[T](value: T) -> USize {
 fun malloc[T](n: USize) -> Opt[Memory[T]] {
     # Determine the size and get an allocated pointer.
     let size = n * size_of[T]()
-    let ptr = libc::malloc(size)
+    let ptr = libc::malloc[T](size)
 
     # Convert the returned pointer into a safe type.
     ret case ptr of
         == 0 { None() }
-        else { Some(Memory[T](ptr, n)) }
+        else { Some(val=ptr.mem) }
 }
 
 
@@ -44,14 +44,14 @@ fun calloc[T](n: USize) -> Opt[Memory[T]] {
     # Convert the returned pointer into a safe type.
     ret case ptr of
         == 0 { None() }
-        else { Some(Memory[T](ptr, n)) }
+        else { Some(val=ptr.mem) }
 }
 
 
 fun realloc[T](memory: &mut Memory[T], n: USize) -> Opt[Void] {
     # Determine the size and get a reallocated pointer.
     let size = n * size_of[T]()
-    let ptr = libc::realloc(memory.ptr, size)
+    let ptr = libc::realloc(&mut memory.ptr, size)
 
     # If the new pointer is null, return None (failed reallocation).
     case ptr == 0 { ret None() }
