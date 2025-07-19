@@ -6,11 +6,6 @@ use std::void::Void
 use std::number::U32
 use std::number::USize
 use std::number::S32
-use std::number::F8
-use std::number::F16
-use std::number::F32
-use std::number::F64
-use std::number::F128
 
 use std::num::bases::Num
 use std::num::bases::Integer
@@ -234,834 +229,163 @@ fun fcmp[T: Integer](this: T, that: T) -> S32 { }
 @public
 @always_inline
 @compiler_builtin
-fun float_add(this: F8, that: F8) -> F8 { }
+fun float_add[T: FloatingPoint](this: T, that: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun float_add(this: F16, that: F16) -> F16 { }
+fun float_sub[T: FloatingPoint](this: T, that: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun float_add(this: F32, that: F32) -> F32 { }
+fun float_mul[T: FloatingPoint](this: T, that: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun float_add(this: F64, that: F64) -> F64 { }
+fun float_div[T: FloatingPoint](this: T, that: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun float_add(this: F128, that: F128) -> F128 { }
+fun float_rem[T: FloatingPoint](this: T, that: T) -> T { }
 
 
 @public
 @always_inline
 @compiler_builtin
-fun float_sub(this: F8, that: F8) -> F8 { }
+fun float_sqrt[T: FloatingPoint](value: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun float_sub(this: F16, that: F16) -> F16 { }
+fun float_powi[T: FloatingPoint](base: T, exponent: S32) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun float_sub(this: F32, that: F32) -> F32 { }
+fun float_powf[T: FloatingPoint](base: T, exponent: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun float_sub(this: F64, that: F64) -> F64 { }
+fun float_sin[T: FloatingPoint](value: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun float_sub(this: F128, that: F128) -> F128 { }
+fun float_cos[T: FloatingPoint](value: T) -> T { }
 
-
-@public
-@always_inline
-@compiler_builtin
-fun float_mul(this: F8, that: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_mul(this: F16, that: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_mul(this: F32, that: F32) -> F32 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_mul(this: F64, that: F64) -> F64 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_mul(this: F128, that: F128) -> F128 { }
-
-
-@public
-@always_inline
-@compiler_builtin
-fun float_div(this: F8, that: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_div(this: F16, that: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_div(this: F32, that: F32) -> F32 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_div(this: F64, that: F64) -> F64 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_div(this: F128, that: F128) -> F128 { }
-
-
-@public
-@always_inline
-@compiler_builtin
-fun float_rem(this: F8, that: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_rem(this: F16, that: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_rem(this: F32, that: F32) -> F32 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_rem(this: F64, that: F64) -> F64 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_rem(this: F128, that: F128) -> F128 { }
-
-
-@public
-@always_inline
-@compiler_builtin
-fun float_sqrt(value: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_sqrt(value: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_sqrt(value: F32) -> F32 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_sqrt(value: F64) -> F64 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_sqrt(value: F128) -> F128 { }
-
-
-@public
-@always_inline
-@compiler_builtin
-fun float_powi(base: F8, exponent: S32) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_powi(base: F16, exponent: S32) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_powi(base: F32, exponent: S32) -> F32 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_powi(base: F64, exponent: S32) -> F64 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_powi(base: F128, exponent: S32) -> F128 { }
-
-
-@public
-@always_inline
-@compiler_builtin
-fun float_powf(base: F8, exponent: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_powf(base: F16, exponent: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_powf(base: F32, exponent: F32) -> F32 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_powf(base: F64, exponent: F64) -> F64 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_powf(base: F128, exponent: F128) -> F128 { }
-
-
-@public
-@always_inline
-@compiler_builtin
-fun float_sin(value: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_sin(value: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_sin(value: F32) -> F32 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_sin(value: F64) -> F64 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_sin(value: F128) -> F128 { }
-
-
-@public
-@always_inline
-@compiler_builtin
-fun float_cos(value: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_cos(value: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_cos(value: F32) -> F32 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_cos(value: F64) -> F64 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_cos(value: F128) -> F128 { }
-
-
-@public
-@always_inline
-@compiler_builtin
-fun float_tan(value: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_tan(value: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_tan(value: F32) -> F32 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_tan(value: F64) -> F64 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_tan(value: F128) -> F128 { }
-
-
-@public
-@always_inline
-@compiler_builtin
-fun float_asin(value: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_asin(value: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_asin(value: F32) -> F32 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_asin(value: F64) -> F64 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_asin(value: F128) -> F128 { }
-
-
-@public
-@always_inline
-@compiler_builtin
-fun float_acos(value: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_acos(value: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_acos(value: F32) -> F32 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_acos(value: F64) -> F64 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_acos(value: F128) -> F128 { }
-
-
-@public
-@always_inline
-@compiler_builtin
-fun float_atan(value: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_atan(value: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_atan(value: F32) -> F32 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_atan(value: F64) -> F64 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_atan(value: F128) -> F128 { }
-
-
-@public
-@always_inline
-@compiler_builtin
-fun float_atan2(y: F8, x: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_atan2(y: F16, x: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_atan2(y: F32, x: F32) -> F32 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_atan2(y: F64, x: F64) -> F64 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_atan2(y: F128, x: F128) -> F128 { }
-
-
-@public
-@always_inline
-@compiler_builtin
-fun float_sinh(value: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_sinh(value: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_sinh(value: F32) -> F32 { }
-
 @public
 @always_inline
 @compiler_builtin
-fun float_sinh(value: F64) -> F64 { }
+fun float_tan[T: FloatingPoint](value: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun float_sinh(value: F128) -> F128 { }
+fun float_asin[T: FloatingPoint](value: T) -> T { }
 
-
-@public
-@always_inline
-@compiler_builtin
-fun float_cosh(value: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_cosh(value: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_cosh(value: F32) -> F32 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_cosh(value: F64) -> F64 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_cosh(value: F128) -> F128 { }
-
-
-@public
-@always_inline
-@compiler_builtin
-fun float_tanh(value: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_tanh(value: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_tanh(value: F32) -> F32 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_tanh(value: F64) -> F64 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_tanh(value: F128) -> F128 { }
-
-
-@public
-@always_inline
-@compiler_builtin
-fun float_exp(value: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_exp(value: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_exp(value: F32) -> F32 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_exp(value: F64) -> F64 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_exp(value: F128) -> F128 { }
-
-
-@public
-@always_inline
-@compiler_builtin
-fun float_exp2(value: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_exp2(value: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_exp2(value: F32) -> F32 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_exp2(value: F64) -> F64 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_exp2(value: F128) -> F128 { }
-
-
-@public
-@always_inline
-@compiler_builtin
-fun float_exp10(value: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_exp10(value: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_exp10(value: F32) -> F32 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_exp10(value: F64) -> F64 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_exp10(value: F128) -> F128 { }
-
-
-@public
-@always_inline
-@compiler_builtin
-fun float_log(value: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_log(value: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_log(value: F32) -> F32 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_log(value: F64) -> F64 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_log(value: F128) -> F128 { }
-
-
-@public
-@always_inline
-@compiler_builtin
-fun float_log2(value: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_log2(value: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_log2(value: F32) -> F32 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_log2(value: F64) -> F64 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_log2(value: F128) -> F128 { }
-
-
-@public
-@always_inline
-@compiler_builtin
-fun float_log10(value: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_log10(value: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_log10(value: F32) -> F32 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_log10(value: F64) -> F64 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_log10(value: F128) -> F128 { }
-
-
-@public
-@always_inline
-@compiler_builtin
-fun float_abs(value: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_abs(value: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_abs(value: F32) -> F32 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_abs(value: F64) -> F64 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_abs(value: F128) -> F128 { }
-
-
-@public
-@always_inline
-@compiler_builtin
-fun float_max(this: F8, that: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_max(this: F16, that: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_max(this: F32, that: F32) -> F32 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_max(this: F64, that: F64) -> F64 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_max(this: F128, that: F128) -> F128 { }
-
-
-@public
-@always_inline
-@compiler_builtin
-fun float_min(this: F8, that: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_min(this: F16, that: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_min(this: F32, that: F32) -> F32 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_min(this: F64, that: F64) -> F64 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun float_min(this: F128, that: F128) -> F128 { }
-
-
-@public
-@always_inline
-@compiler_builtin
-fun copysign(value: F8, sign: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun copysign(value: F16, sign: F16) -> F16 { }
-
 @public
 @always_inline
 @compiler_builtin
-fun copysign(value: F32, sign: F32) -> F32 { }
+fun float_acos[T: FloatingPoint](value: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun copysign(value: F64, sign: F64) -> F64 { }
+fun float_atan[T: FloatingPoint](value: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun copysign(value: F128, sign: F128) -> F128 { }
+fun float_atan2[T: FloatingPoint](y: T, x: T) -> T { }
 
-
-@public
-@always_inline
-@compiler_builtin
-fun floor(value: F8) -> F8 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun floor(value: F16) -> F16 { }
-
-@public
-@always_inline
-@compiler_builtin
-fun floor(value: F32) -> F32 { }
-
 @public
 @always_inline
 @compiler_builtin
-fun floor(value: F64) -> F64 { }
+fun float_sinh[T: FloatingPoint](value: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun floor(value: F128) -> F128 { }
-
+fun float_cosh[T: FloatingPoint](value: T) -> T { }
 
-
 @public
 @always_inline
 @compiler_builtin
-fun ceil(value: F8) -> F8 { }
+fun float_tanh[T: FloatingPoint](value: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun ceil(value: F16) -> F16 { }
+fun float_exp[T: FloatingPoint](value: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun ceil(value: F32) -> F32 { }
+fun float_exp2[T: FloatingPoint](value: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun ceil(value: F64) -> F64 { }
+fun float_exp10[T: FloatingPoint](value: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun ceil(value: F128) -> F128 { }
+fun float_log[T: FloatingPoint](value: T) -> T { }
 
-
 @public
 @always_inline
 @compiler_builtin
-fun trunc(value: F8) -> F8 { }
+fun float_log2[T: FloatingPoint](value: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun trunc(value: F16) -> F16 { }
+fun float_log10[T: FloatingPoint](value: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun trunc(value: F32) -> F32 { }
+fun float_abs[T: FloatingPoint](value: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun trunc(value: F64) -> F64 { }
+fun float_max[T: FloatingPoint](this: T, that: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun trunc(value: F128) -> F128 { }
-
+fun float_min[T: FloatingPoint](this: T, that: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun round(value: F8) -> F8 { }
+fun float_copysign[T: FloatingPoint](value: T, sign: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun round(value: F16) -> F16 { }
+fun floor[T: FloatingPoint](value: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun round(value: F32) -> F32 { }
+fun ceil[T: FloatingPoint](value: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun round(value: F64) -> F64 { }
+fun trunc[T: FloatingPoint](value: T) -> T { }
 
 @public
 @always_inline
 @compiler_builtin
-fun round(value: F128) -> F128 { }
+fun round[T: FloatingPoint](value: T) -> T { }
 
 
 @public
