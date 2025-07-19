@@ -9,6 +9,7 @@ use std::number::S32
 
 use std::num::bases::Num
 use std::num::bases::Integer
+use std::num::bases::FloatingPoint
 use std::num::sized_floating_point::SizedFloatingPoint
 use std::num::sized_integer_signed::SizedIntegerSigned
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
