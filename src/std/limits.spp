@@ -107,7 +107,9 @@ sup Limits[S256] {
 
 
 sup Limits[F8] {
-    @public
+    type UInt = U8
+    type SInt = S8
+
     cmp mantissa_digits: U32 = 2_u32
     cmp digits: U32 = 2_u32
     cmp epsilon: F8 = 0.0_f8
@@ -125,7 +127,9 @@ sup Limits[F8] {
 
 
 sup Limits[F16] {
-    @public
+    type UInt = U16
+    type SInt = S16
+
     cmp mantissa_digits: U32 = 0_u32
     cmp digits: U32 = 0_u32
     cmp epsilon: F16 = 0.0_f16
@@ -143,7 +147,9 @@ sup Limits[F16] {
 
 
 sup Limits[F32] {
-    @public
+    type UInt = U32
+    type SInt = S32
+
     cmp mantissa_digits: U32 = 0_u32
     cmp digits: U32 = 0_u32
     cmp epsilon: F32 = 0.0_f32
@@ -161,7 +167,9 @@ sup Limits[F32] {
 
 
 sup Limits[F64] {
-    @public
+    type UInt = U64
+    type SInt = S64
+
     cmp mantissa_digits: U32 = 0_u32
     cmp digits: U32 = 15_u32
     cmp epsilon: F64 = 0.0_f64
@@ -179,7 +187,9 @@ sup Limits[F64] {
 
 
 sup Limits[F128] {
-    @public
+    type UInt = U128
+    type SInt = S128
+
     cmp mantissa_digits: U32 = 0_u32
     cmp digits: U32 = 0_u32
     cmp epsilon: F128 = 0.0_f128

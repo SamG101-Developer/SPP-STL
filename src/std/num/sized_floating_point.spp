@@ -363,25 +363,29 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
     @public
     @inline
     fun is_normal(self) -> Bool {
-        ret self & Limits[Self]::man_mask != 0 and bits & Limits[Self]::exp_mask != 0
+        let bits = self.to_bits()
+        ret bits & Limits[Self]::man_mask != 0 and bits & Limits[Self]::exp_mask != 0
     }
 
     @public
     @inline
     fun is_subnormal(self) -> Bool {
-        ret self != Self::Zero() and self & Limits[Self]::exp_mask == 0
+        let bits = self.to_bits()
+        ret self != Self::Zero() and bits & Limits[Self]::exp_mask == 0
     }
 
     @public
     @inline
     fun is_nan(self) -> Bool {
-        ret self & Limits[Self]::man_mask != 0 and self & Limits[Self]::exp_mask == Limits[Self]::exp_mask
+        let bits = self.to_bits()
+        ret bits & Limits[Self]::man_mask != 0 and bits & Limits[Self]::exp_mask == Limits[Self]::exp_mask
     }
 
     @public
     @inline
     fun is_infinite(self) -> Bool {
-        ret self & Limits[Self]::man_mask == 0 and self & Limits[Self]::exp_mask == Limits[Self]::exp_mask
+        let bits = self.to_bits()
+        ret bits & Limits[Self]::man_mask == 0 and bits & Limits[Self]::exp_mask == Limits[Self]::exp_mask
     }
 
     @public
@@ -399,7 +403,7 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
     @public
     @inline
     fun is_negative(self) -> Bool {
-        ret self & (1_u32 << (bit_width - 1_u32)) != 0
+        ret self.to_bits() & (1_u32 << (bit_width - 1_u32)) != 0
     }
 }
 
@@ -415,6 +419,12 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
     @inline
     fun one() -> Self {
         ret Self::from(1.0_f64)
+    }
+
+    @public
+    @inline
+    fun to_bits(self) -> Limits[Self]::UInt {
+        ret Limits[Self]::UInt::from(self)
     }
 }
 
