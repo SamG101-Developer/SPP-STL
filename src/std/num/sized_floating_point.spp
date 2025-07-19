@@ -440,13 +440,13 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
     @public
     @inline
     fun zero() -> Self {
-        ret Self::from(0.0_f64)
+        ret SizedFloatingPoint[bit_width]::from(0.0_f64)
     }
 
     @public
     @inline
     fun one() -> Self {
-        ret Self::from(1.0_f64)
+        ret SizedFloatingPoint[bit_width]::from(1.0_f64)
     }
 
     # @public
