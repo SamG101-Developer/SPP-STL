@@ -28,10 +28,9 @@ fun malloc[T](n: USize) -> Opt[Memory[T]] {
     # Determine the size and get an allocated pointer.
     let size = n * size_of[T]()
     let mem = libc::malloc[T](size)
-    ret case mem.ptr.pos of {
+    ret case mem.ptr.pos of
         == 0 { None() }
         else { Some(val=mem) }
-    }
 }
 
 
