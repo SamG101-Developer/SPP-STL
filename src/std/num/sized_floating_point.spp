@@ -18,9 +18,6 @@ cls SizedFloatingPoint[cmp bit_width: U32] { }
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext FloatingPoint { }
 
 
-sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedFloatingPoint[this_bit_width] ext From[Self, SizedIntegerSigned[that_bit_width]] {
-
-
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::eq::Eq[Rhs=Self] {
     fun eq(&self, that: &Self) -> Bool {
         ret intrinsics::eq(self, that)
