@@ -296,6 +296,11 @@ fun float_sqrt[T: FloatingPoint](value: T) -> T { }
 @public
 @always_inline
 @compiler_builtin
+fun float_cbrt[T: FloatingPoint](value: T) -> T { }
+
+@public
+@always_inline
+@compiler_builtin
 fun float_powi[T: FloatingPoint](base: T, exponent: S32) -> T { }
 
 @public
