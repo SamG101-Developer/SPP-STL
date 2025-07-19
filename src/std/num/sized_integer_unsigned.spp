@@ -43,37 +43,6 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::rem::RemA
 }
 
 
-sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerUnsigned[this_bit_width] ext From[Self, SizedIntegerSigned[that_bit_width]] {
-    fun from(that: SizedIntegerSigned[that_bit_width]) -> Self {
-        ret case this_bit_width < that_bit_width {
-            intrinsics::utrunc[this_bit_width, that_bit_width](that)
-        }
-        else {
-            intrinsics::zext[this_bit_width, that_bit_width](that)
-        }
-    }
-}
-
-
-sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerUnsigned[this_bit_width] ext From[Self, SizedIntegerUnsigned[that_bit_width]] {
-    fun from(that: SizedIntegerUnsigned[that_bit_width]) -> Self {
-        ret case this_bit_width < that_bit_width {
-            intrinsics::utrunc[this_bit_width, that_bit_width](that)
-        }
-        else {
-            intrinsics::zext[this_bit_width, that_bit_width](that)
-        }
-    }
-}
-
-
-sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerUnsigned[this_bit_width] ext From[Self, SizedFloatingPoint[that_bit_width]] {
-    fun from(that: SizedFloatingPoint[that_bit_width]) -> Self {
-        ret intrinsics::fptoui[this_bit_width, that_bit_width](that)
-    }
-}
-
-
 sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
@@ -235,29 +204,13 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
 
 
 sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
-    # The "isqrt" function computes the integer square root of the sized integer. There is no "checked" version of this
-    # function as unsigned numbers cannot be negative, so it is safe to use the "iroot" function with a base of 2.
-    @public
-    @inline
-    fun isqrt(self) -> Self {
-        ret self.iroot(Self::from(2))
-    }
-
-    # The "icbrt" function computes the integer cube root of the sized integer. There is no "checked" version of this
-    # function as unsigned numbers cannot be negative, so it is safe to use the "iroot" function with a base of 3.
-    @public
-    @inline
-    fun icbrt(self) -> Self {
-        ret self.iroot(Self::from(3))
-    }
-
     # The "iroot_checked" function computes the integer root of the sized integer with a given base and returns an
     # optional value. It uses the Newton-Raphson method to find the root, iterating until the result stabilizes. Bypass
     # any negative checks as the numbers are unsigned.
     @public
     @inline
     fun iroot(self, base: Self) -> Opt[Self] {
-        case self <= Self::from(1) {
+        case self <= Self::one() {
             ret Some(val=self)
         }
 

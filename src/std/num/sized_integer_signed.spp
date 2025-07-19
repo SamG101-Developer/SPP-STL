@@ -44,37 +44,6 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::rem::RemAss
 }
 
 
-sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerSigned[this_bit_width] ext From[Self, SizedIntegerSigned[that_bit_width]] {
-    fun from(that: SizedIntegerSigned[that_bit_width]) -> Self {
-        ret case this_bit_width < that_bit_width {
-            intrinsics::strunc[this_bit_width, that_bit_width](that)
-        }
-        else {
-            intrinsics::sext[this_bit_width, that_bit_width](that)
-        }
-    }
-}
-
-
-sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerSigned[this_bit_width] ext From[Self, SizedIntegerUnsigned[that_bit_width]] {
-    fun from(that: SizedIntegerUnsigned[that_bit_width]) -> Self {
-        ret case this_bit_width < that_bit_width {
-            intrinsics::utrunc[this_bit_width, that_bit_width](that)
-        }
-        else {
-            intrinsics::zext[this_bit_width, that_bit_width](that)
-        }
-    }
-}
-
-
-sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerSigned[this_bit_width] ext From[Self, SizedFloatingPoint[that_bit_width]] {
-    fun from(that: SizedFloatingPoint[that_bit_width]) -> Self {
-        ret intrinsics::fptosi[this_bit_width, that_bit_width](that)
-    }
-}
-
-
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
@@ -257,9 +226,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
-    fun neg_one() -> Self {
-        ret Self::from(-1_s32)
-    }
+    @compiler_builtin
+    fun neg_one() -> Self { }
 }
 
 
@@ -316,48 +284,6 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
 
 
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
-    # The "isqrt" function computes the integer square root of the sized integer. It uses the "isqrt_checked" function,
-    # which returns an optional value. If the optional value is present, it returns it; otherwise, it aborts with an
-    # error message (negative input etc).
-    @public
-    @inline
-    fun isqrt(self) -> Self {
-        case self.isqrt_checked() is Some(val) {
-            ret value
-        }
-        std::abort::abort("isqrt: input must be a non-negative integer")
-    }
-
-    # The "isqrt_checked" function computes the integer square root of the sized integer and returns an optional value.
-    # It uses the Newton-Raphson method to find the square root, iterating until the result stabilizes. If the input is
-    # negative, it returns a None optional value.
-    @public
-    @inline
-    fun isqrt_checked(self) -> Opt[Self] {
-        ret iroot_checked(self, Self::from(2))
-    }
-
-    # The "icbrt" function computes the integer cube root of the sized integer. It uses the "icbrt_checked" function,
-    # which returns an optional value. If the optional value is present, it returns it; otherwise, it aborts with an
-    # error message (negative input etc).
-    @public
-    @inline
-    fun icbrt(self) -> Self {
-        case self.icbrt_checked() is Some(val) {
-            ret value
-        }
-        std::abort::abort("icbrt: input must be a non-negative integer")
-    }
-
-    # The "icbrt_checked" function computes the integer cube root of the sized integer and returns an optional value.
-    # It uses the Newton-Raphson method to find the cube root, iterating until the result stabilizes. If the input is
-    # negative, it returns a None optional value.
-    @public
-    @inline
-    fun icbrt_checked(self) -> Opt[Self] {
-        ret iroot_checked(self, Self::from(3))
-    }
-
     # The "iroot" function computes the integer root of the sized integer with a given base. It uses the "iroot_checked"
     # function, which returns an optional value. If the optional value is present, it returns it; otherwise, it
     # aborts with an error message (negative input, base not positive etc).
@@ -376,10 +302,10 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
     fun iroot_checked(self, base: Self) -> Opt[Self] {
-        case self < 0 or base <= 0 {
+        case self < Self::zero() or base <= Self::zero() {
             ret None
         }
-        else case self <= Self::from(1) {
+        else case self <= Self::one() {
             ret Some(val=self)
         }
 
