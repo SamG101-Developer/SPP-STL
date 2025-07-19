@@ -342,19 +342,19 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
     @public
     @inline
     fun asinh(self) -> Self {
-        ret intrinsics::float_asinh(self)
+        ret self  # todo
     }
 
     @public
     @inline
     fun acosh(self) -> Self {
-        ret intrinsics::float_acosh(self)
+        ret self  # todo
     }
 
     @public
     @inline
     fun atanh(self) -> Self {
-        ret intrinsics::float_atanh(self)
+        ret self  # todo
     }
 }
 
