@@ -204,7 +204,7 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
     @public
     @inline
     fun log(self, base: Self) -> Self {
-        ret intrinsics::float_log(self, base)
+        ret intrinsics::float_log2(self) / intrinsics::float_log2(base)
     }
 }
 

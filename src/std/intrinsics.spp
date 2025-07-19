@@ -371,7 +371,7 @@ fun float_exp10[T: FloatingPoint](value: T) -> T { }
 @public
 @always_inline
 @compiler_builtin
-fun float_log[T: FloatingPoint](value: T) -> T { }
+fun float_ln[T: FloatingPoint](value: T) -> T { }
 
 @public
 @always_inline
