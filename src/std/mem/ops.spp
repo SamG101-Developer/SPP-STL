@@ -27,7 +27,7 @@ fun size_of_value[T](value: T) -> USize {
 fun malloc[T](n: USize) -> Opt[Memory[T]] {
     # Determine the size and get an allocated pointer.
     let size = n * size_of[T]()
-    let ptr = ffi::libc::malloc(size)
+    let ptr = libc::malloc(size)
 
     # Convert the returned pointer into a safe type.
     ret case ptr of
@@ -39,7 +39,7 @@ fun malloc[T](n: USize) -> Opt[Memory[T]] {
 fun calloc[T](n: USize) -> Opt[Memory[T]] {
     # Determine the size and get an allocated pointer.
     let size = n * size_of[T]()
-    let ptr = ffi::libc::calloc(n, size_of_value(T))
+    let ptr = libc::calloc(n, size_of_value(T))
 
     # Convert the returned pointer into a safe type.
     ret case ptr of
@@ -51,7 +51,7 @@ fun calloc[T](n: USize) -> Opt[Memory[T]] {
 fun realloc[T](memory: &mut Memory[T], n: USize) -> Opt[Void] {
     # Determine the size and get a reallocated pointer.
     let size = n * size_of[T]()
-    let ptr = ffi::libc::realloc(memory.ptr, size)
+    let ptr = libc::realloc(memory.ptr, size)
 
     # If the new pointer is null, return None (failed reallocation).
     case ptr == 0 { ret None() }
@@ -66,23 +66,23 @@ fun realloc[T](memory: &mut Memory[T], n: USize) -> Opt[Void] {
 
 fun free[T](memory: Memory[T]) -> Opt[Void] {
     # Free the memory pointed to by the pointer.
-    ffi::libc::free(memory.ptr)
+    libc::free(memory.ptr)
 }
 
 
 fun mem_cpy[T: Copy](dest: &mut Memory[T], src: &Memory[T]) -> Void {
     # Perform the memory copy. Todo: use intrinsic::mem_copy ?
-    ffi::libc::memcpy(dest.ptr, src.ptr, src.len() * size_of[T]())
+    libc::memcpy(dest.ptr, src.ptr, src.len() * size_of[T]())
 }
 
 
 fun mem_move[T: Copy](dest: &mut Memory[T], src: &Memory[T]) -> Void {
     # Perform the memory move. Todo: use intrinsic::mem_move ?
-    ffi::libc::memmove(dest.ptr, src.ptr, src.len() * size_of[T]())
+    libc::memmove(dest.ptr, src.ptr, src.len() * size_of[T]())
 }
 
 
 fun mem_set[T: Copy](dest: &mut Memory[T], value: T) -> Void {
     # Perform the memory set. Todo: use intrinsic::mem_set ?
-    ffi::libc::memset(dest.ptr, value, dest.len() * size_of[T]())
+    libc::memset(dest.ptr, value, dest.len() * size_of[T]())
 }

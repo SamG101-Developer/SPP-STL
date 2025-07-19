@@ -18,7 +18,7 @@ cls Thread {
 sup Thread {
     @public
     fun new(name: Str) -> Thread {
-        let unique_id = 0_u64  # ffi::libc::rand()
+        let unique_id = 0_u64  # libc::rand()
         ret Thread(name, unique_id, native_id=0_u64, alive=false)
     }
 
