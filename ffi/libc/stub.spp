@@ -25,13 +25,13 @@ fun fclose(stream: &mut CInt) -> CInt { }
 fun fflush(stream: &CInt) -> CInt { }
 
 @ffi
-fun malloc[T](size: CUSize) -> CPtr[T] { }
+fun malloc[T](size: CSizeT) -> CPtr[T] { }
 
 @ffi
-fun calloc[T](count: CUSize, size: CUSize) -> CPtr[T] { }
+fun calloc[T](count: CSizeT, size: CSizeT) -> CPtr[T] { }
 
 @ffi
-fun realloc[T](ptr: &mut CPtr[T], size: CUSize) -> CInt { }
+fun realloc[T](ptr: &mut CPtr[T], size: CSizeT) -> CInt { }
 
 @ffi
 fun free[T](ptr: CPtr[T]) -> CInt { }
