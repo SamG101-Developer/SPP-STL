@@ -120,28 +120,28 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext s
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_shl::BitShl[Rhs=U32, Ret=Self] {
-    fun bit_shl(self, that: U32) -> Self {
+    fun bit_shl(self, that: Self) -> Self {
         ret intrinsics::bit_shl(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_shl::BitShlAssign[Rhs=U32] {
-    fun bit_shl_assign(&mut self, that: U32) -> Void {
+    fun bit_shl_assign(&mut self, that: Self) -> Void {
         ret intrinsics::bit_shl_assign(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_shr::BitShr[Rhs=U32, Ret=Self] {
-    fun bit_shr(self, that: U32) -> Self {
+    fun bit_shr(self, that: Self) -> Self {
         ret intrinsics::bit_shr(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_shr::BitShrAssign[Rhs=U32] {
-    fun bit_shr_assign(&mut self, that: U32) -> Void {
+    fun bit_shr_assign(&mut self, that: Self) -> Void {
         ret intrinsics::bit_shr_assign(self, that)
     }
 }
