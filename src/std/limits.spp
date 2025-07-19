@@ -22,12 +22,6 @@ use std::number::F128
 cls Limits[T] { }
 
 
-sup [T] Limits[T] {
-    type UInt = USize
-    type SInt = SSize
-}
-
-
 sup Limits[U8] {
     @public
     cmp max: U8 = 255_u8

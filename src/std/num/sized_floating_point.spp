@@ -423,8 +423,8 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
 
     @public
     @inline
-    fun to_bits(self) -> Limits[Self]::UInt {
-        ret Limits[Self]::UInt::from(self)
+    fun to_bits(self) -> SizedIntegerUnsigned[bit_width] {
+        ret SizedIntegerUnsigned[bit_width]::from(self)
     }
 }
 
