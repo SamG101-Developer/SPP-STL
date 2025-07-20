@@ -215,7 +215,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     fun div_ceil(self, that: Self) -> Self {
         let d = self / that
         let r = self % that
-        let c = 1 + (self ^ that) >> (bit_width - 1_u32)
+        let c = Self::one() + (self ^ that) >> (bit_width - 1_u32)
         ret case r != 0 { d + c } else { d }
     }
 }
