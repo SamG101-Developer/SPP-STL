@@ -157,7 +157,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     fun mul_saturating(self, that: Self) -> Self {
         ret case self.mul_checked(that) of
             is Some(val) { val }
-            is None() and (self < 0) == (that < 0) { intrinsics::max_val[Self]() }
+            is None() and (self < Self::zero()) == (that < Self::zero()) { intrinsics::max_val[Self]() }
             else { intrinsics::min_val[Self]() }
     }
 
