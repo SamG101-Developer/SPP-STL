@@ -293,8 +293,8 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
     fun pow_saturating(self, that: U32) -> Self {
-        case self.pow_checked(that) of
-            is Some(val) { val }
+        ret case self.pow_checked(that) of
+            is Some[Self](val) { val }
             else { intrinsics::max_val[Self]() }
     }
 }
@@ -336,7 +336,7 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
     fun ilog(self, base: Self) -> U32 {
-        case self.ilog_checked(base) is Some(val) {
+        case self.ilog_checked(base) is Some[Self](val) {
             ret value
         }
         std::abort::abort("ilog: base must be a positive integer")
@@ -345,7 +345,7 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
     fun ilog2(self) -> U32 {
-        case self.ilog2_checked() is Some(val) {
+        case self.ilog2_checked() is Some[Self](val) {
             ret value
         }
         std::abort::abort("ilog2: base must be a positive integer")
@@ -354,7 +354,7 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
     fun ilog10(self) -> U32 {
-        case self.ilog10_checked() is Some(val) {
+        case self.ilog10_checked() is Some[Self](val) {
             ret value
         }
         std::abort::abort("ilog10: base must be a positive integer")
