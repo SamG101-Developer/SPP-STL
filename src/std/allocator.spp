@@ -28,7 +28,7 @@ sup [E] Alloc[E] {
 
     @public
     @abstract_method
-    fun reallocate(slice: &mut Slice[E], n: USize) -> Res[Void, AllocException] { }
+    fun reallocate(mut slice: &mut Slice[E], n: USize) -> Res[Void, AllocException] { }
 }
 
 
@@ -50,7 +50,7 @@ sup [E] GlobalAlloc[E] ext Alloc[E] {
         std::mem::ops::free[E](slice.mem)
     }
 
-    fun reallocate(slice: &mut Slice[E], n: USize) -> Res[Void, AllocException] {
+    fun reallocate(mut slice: &mut Slice[E], n: USize) -> Res[Void, AllocException] {
         ret std::mem::ops::realloc[T=E](&mut slice.mem, n).ok_or(AllocException(msg="Failed to reallocate memory"))
     }
 }
