@@ -178,7 +178,7 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
     fun div_overflow(self, that: Self) -> (Self, Bool) {
-        ret (intrinsics::udiv(self, that))
+        ret intrinsics::udiv(self, that)
     }
 
     @public
