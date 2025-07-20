@@ -266,7 +266,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
                 out = out.mul_checked(base)?
             }
             base = base.mul_checked(base)?
-            exp /= 2
+            exp /= 2_u32
         }
         ret Some(val=out)
     }
@@ -287,7 +287,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
             }
             base, overflowed = base.mul_overflow(base)
             case overflowed { ret (out, true) }
-            exp /= 2
+            exp /= 2_u32
         }
         ret (out, false)
     }
@@ -306,7 +306,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
                 out = out.mul_wrapping(base)
             }
             base = base.mul_wrapping(base)
-            exp /= 2
+            exp /= 2_u32
         }
         ret out
     }
