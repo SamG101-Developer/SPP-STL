@@ -1,10 +1,10 @@
 use std::cast::From
-use std::iter::Iterator
-use std::iter::IterMov
-use std::iter::IterMut
-use std::iter::IterRef
-use std::iter::IndexMut
-use std::iter::IndexRef
+use std::iterator::Iterator
+use std::iterator::IterMov
+use std::iterator::IterMut
+use std::iterator::IterRef
+use std::iterator::IndexMut
+use std::iterator::IndexRef
 use std::generator::GenOnce
 use std::mem::memory::Memory
 use std::mem::view::View
