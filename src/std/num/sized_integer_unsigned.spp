@@ -111,7 +111,9 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
     fun sub_checked(self, that: Self) -> Opt[Self] {
-        ret case self < that { None() } else { intrinsics::sub(self, that) }
+        ret case self of
+            < that { None() }
+            else { Some(val=intrinsics::sub(self, that)) }
     }
 
     @public
