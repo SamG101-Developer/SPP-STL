@@ -410,10 +410,10 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
     fun isqrt(self) -> Self {
-        case self.isqrt_checked(base) is Some[Self](val) {
+        case self.isqrt_checked() is Some[Self](val) {
             ret value
         }
-        std::abort::abort("iroot: input must be a non-negative integer and base must be a positive integer")
+        std::abort::abort("iroot: input must be a non-negative integer")
     }
 
     @public
