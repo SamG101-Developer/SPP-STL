@@ -409,7 +409,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
-    fun isqrt(self, base: U32) -> Self {
+    fun isqrt(self) -> Self {
         case self.isqrt_checked(base) is Some[Self](val) {
             ret value
         }
@@ -418,7 +418,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
 
     @public
     @inline
-    fun isqrt_checked(self, base: U32) -> Opt[Self] {
+    fun isqrt_checked(self) -> Opt[Self] {
         case self < Self::zero() {
             ret None
         }
