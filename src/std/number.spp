@@ -1,3 +1,6 @@
+use std::cast::From
+
+
 # Unsigned integers.
 type U8 = std::num::sized_integer::SizedInteger[8_u32, false]
 type U16 = std::num::sized_integer::SizedInteger[16_u32, false]
