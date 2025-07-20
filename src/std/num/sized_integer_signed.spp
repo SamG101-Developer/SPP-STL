@@ -364,7 +364,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
     fun abs_checked(self) -> Opt[Self] {
-        ret case self.is_negative() { self.neg_checked() } else { Some(self) }
+        ret case self.is_negative() { self.neg_checked() } else { Some(val=self) }
     }
 
     @public
