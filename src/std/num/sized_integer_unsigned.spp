@@ -95,7 +95,7 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
     fun add_saturating(self, that: Self) -> Self {
-        ret intrinsics::uadd_sat(self, that)
+        ret intrinsics::uadd_saturating(self, that)
     }
 
     @public
