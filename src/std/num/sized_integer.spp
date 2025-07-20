@@ -220,8 +220,8 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
         let mut out = Self::one()
         let mut base = self
         let mut exp = that
-        loop exp > 0 {
-            case exp % 2 == 1 {
+        loop exp > 0_u32 {
+            case exp % 2_u32 == 1_u32 {
                 out = out.mul_checked(base)?
             }
             base = base.mul_checked(base)?
@@ -239,8 +239,8 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
         let mut out = Self::one()
         let mut base = self
         let mut exp = that
-        loop exp > 0 {
-            case exp % 2 == 1 {
+        loop exp > 0_u32 {
+            case exp % 2_u32 == 1_u32 {
                 out, overflowed = out.mul_overflow(base)
                 case overflowed { ret (out, true) }
             }
@@ -260,8 +260,8 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
         let mut out = Self::one()
         let mut base = self
         let mut exp = that
-        loop exp > 0 {
-            case exp % 2 == 1 {
+        loop exp > 0_u32 {
+            case exp % 2_u32 == 1_u32 {
                 out = out.mul_wrapping(base)
             }
             base = base.mul_wrapping(base)
