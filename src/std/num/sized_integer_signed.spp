@@ -190,9 +190,10 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
     fun div_saturating(self, that: Self) -> Self {
-        ret case self.div_overflow(that) of
+        let out = self.div_overflow(that)
+        ret case out of
             is (val, true) { intrinsics::max_val[Self]() }
-            is (val, false) { val }
+            else { out.0 }
     }
 
     @public
