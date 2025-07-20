@@ -84,7 +84,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @inline
     fun add_checked(self, that: Self) -> Opt[Self] {
         let (val, overflowed) = intrinsics::uadd_overflow(self, that)
-        ret case overflowed { None() } else { Some(val) }
+        let out: Opt[Self] = case overflowed { None() } else { Some(val) }
+        ret out
     }
 
     @public
