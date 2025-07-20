@@ -309,7 +309,7 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
     @public
     @inline
     fun ilog2_checked(self) -> Opt[U32] {
-        ret bit_width - 1_u32 - intrinsics::ctlz(self)
+        ret Some(val=bit_width - 1_u32 - intrinsics::ctlz(self))
     }
 
     # The "ilog10_checked" function is a specific case of the "ilog_checked" function that uses 10 as the base for the
