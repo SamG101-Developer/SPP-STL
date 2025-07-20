@@ -151,7 +151,7 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @inline
     fun mul_saturating(self, that: Self) -> Self {
         ret case self.mul_checked(that) of
-            is Some(val) { val }
+            is Some[Self](val) { val }
             else { intrinsics::max_val[Self]() }
     }
 
@@ -167,10 +167,9 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
     fun div_checked(self, that: Self) -> Opt[Self] {
-        case that == Self::zero() {
-            ret None()
-        }
-        ret Some(val=intrinsics::udiv(self, that))
+        ret case that of
+            == Self::zero() { None() }
+            else { Some(val=intrinsics::udiv(self, that)) }
     }
 
     @public
