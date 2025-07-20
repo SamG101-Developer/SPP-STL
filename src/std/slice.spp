@@ -73,3 +73,34 @@ sup [E, A] Slice[E, A] ext std::ops::del::Del {
         # A::deallocate(self.mem)  TODO: constraints
     }
 }
+
+
+sup [E, A] Slice[E, A] ext IterMov[E] {
+    @compiler_builtin
+    cor iter_mov(self) -> Iterator[E] { }
+}
+
+
+sup [E, A] Slice[E, A] ext IterMut[E] {
+    @compiler_builtin
+    cor iter_mut(&mut self) -> Iterator[&mut E] { }
+}
+
+
+sup [E, A] Slice[E, A] ext IterRef[E] {
+    @compiler_builtin
+    cor iter_ref(&self) -> Iterator[&E] { }
+}
+
+
+sup [E, A] Slice[E, A] ext IndexMut[E, USize] {
+    @compiler_builtin
+    cor index_mut(&mut self, index: USize) -> GenOnce[&mut E] { }
+}
+
+
+sup [E, A] Slice[E, A] ext IndexRef[E, USize] {
+    @compiler_builtin
+    cor index_ref(&self, index: USize) -> GenOnce[&E] { }
+}
+

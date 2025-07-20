@@ -23,3 +23,34 @@ sup [T, A, cmp n: USize] Arr[T, n] ext From[Self, Slice[T, A]] {
         ret Arr[T, n](mem=Memory(ptr=that.mem.ptr, cap=n))
     }
 }
+
+
+sup [T, cmp n: USize] Array[T, n] ext IterMov[T] {
+    @compiler_builtin
+    cor iter_mov(self) -> Iterator[T] { }
+}
+
+
+sup [T, cmp n: USize] Array[T, n] ext IterMut[T] {
+    @compiler_builtin
+    cor iter_mut(&mut self) -> Iterator[&mut T] { }
+}
+
+
+sup [T, cmp n: USize] Array[T, n] ext IterRef[T] {
+    @compiler_builtin
+    cor iter_ref(&self) -> Iterator[&T] { }
+}
+
+
+sup [T, cmp n: USize] Array[T, n] ext IndexMut[T, USize] {
+    @compiler_builtin
+    cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] { }
+}
+
+
+sup [T, cmp n: USize] Array[T, n] ext IndexRef[T, USize] {
+    @compiler_builtin
+    cor index_ref(&self, index: USize) -> GenOnce[&T] { }
+}
+
