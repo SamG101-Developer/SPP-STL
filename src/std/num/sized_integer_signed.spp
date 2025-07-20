@@ -421,7 +421,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @inline
     fun isqrt_checked(self) -> Opt[Self] {
         case self < Self::zero() {
-            ret None
+            ret None()
         }
         else case self <= Self::one() {
             ret Some(val=self)
