@@ -361,7 +361,7 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @inline
     fun ilog_checked(self, base: Self) -> Opt[U32] {
         case self <= Self::zero() or base <= Self::one() {
-            ret None
+            ret None()
         }
         ret Some(val=self.ilog2_checked()? / base.ilog2_checked()?)
     }
