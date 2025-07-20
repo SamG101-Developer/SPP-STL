@@ -426,7 +426,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
             ret Some(val=self)
         }
 
-        let small_cand = (self >> Self::two()).isqrt()? >> Self::one()
+        let small_cand = (self >> Self::two()).isqrt_checked()? >> Self::one()
         let large_cand = small_cand + Self::one()
         ret case large_cand * large_cand of
             <= self { Some(val=large_cand) }
