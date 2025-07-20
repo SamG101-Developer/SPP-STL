@@ -255,7 +255,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
     fun pow_checked(self, that: U32) -> Opt[Self] {
-        case that == Self::zero() {
+        case that == 0_u32 {
             ret Some(val=Self::one())
         }
         let mut out = Self::one()
@@ -274,7 +274,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
     fun pow_overflow(self, that: U32) -> (Self, Bool) {
-        case that == Self::zero() {
+        case that == 0_u32 {
             ret (Self::one(), false)
         }
         let mut out = Self::one()
