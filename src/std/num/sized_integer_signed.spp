@@ -426,7 +426,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
             ret Some(val=self)
         }
 
-        let mut x = Self::one() << (bit_width / base.ilog2_checked().unwrap_or(Self::one()))
+        let mut x = intrinsic::bit_shl(Self::one(), bit_width / base.ilog2_checked().unwrap_or(1_u32))
         loop true {
             let mut y = ((base - Self::one()) * x + self / x.pow(base - Self::one())) / (base)
             case y >= x {
