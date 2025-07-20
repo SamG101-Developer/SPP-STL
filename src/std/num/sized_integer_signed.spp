@@ -83,31 +83,26 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
     fun add_checked(self, that: Self) -> Opt[Self] {
-        let (val, overflowed) = intrinsics::uadd_overflow(self, that)
-        let out: Opt[Self] = case overflowed { None() } else { Some(val) }
-        ret out
+        let (val, overflowed) = intrinsics::sadd_overflow(self, that)
+        ret case overflowed { None() } else { Some(val) }
     }
 
     @public
     @inline
     fun add_overflow(self, that: Self) -> (Self, Bool) {
-        ret intrinsics::uadd_overflow(self, that)
+        ret intrinsics::sadd_overflow(self, that)
     }
 
     @public
     @inline
     fun add_saturating(self, that: Self) -> Self {
-        ret intrinsics::uadd_saturating(self, that)
+        ret intrinsics::sadd_saturating(self, that)
     }
 
     @public
     @inline
     fun add_wrapping(self, that: Self) -> Self {
-        that %= intrinsics::max_val[Self]()
-        let out = intrinsics::uadd_overflow(self, that)
-        ret case out of
-            is (_, true) { that - (intrinsics::max_val[Self]() - self) }
-            else { out.0 }
+        ret intrinsics::sadd_wrapping(self, that)
     }
 }
 

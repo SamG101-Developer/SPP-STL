@@ -508,6 +508,39 @@ fun usub_saturating[T: Integer](this: T, that: T) -> T { }
 @public
 @always_inline
 @compiler_builtin
+fun uadd_wrapping[T: Integer](this: T, that: T) -> T { }
+
+@public
+@always_inline
+@compiler_builtin
+fun sadd_wrapping[T: Integer](this: T, that: T) -> T { }
+
+
+@public
+@always_inline
+@compiler_builtin
+fun usub_wrapping[T: Integer](this: T, that: T) -> T { }
+
+@public
+@always_inline
+@compiler_builtin
+fun ssub_wrapping[T: Integer](this: T, that: T) -> T { }
+
+
+@public
+@always_inline
+@compiler_builtin
+fun umul_wrapping[T: Integer](this: T, that: T) -> T { }
+
+@public
+@always_inline
+@compiler_builtin
+fun smul_wrapping[T: Integer](this: T, that: T) -> T { }
+
+
+@public
+@always_inline
+@compiler_builtin
 fun sshl_saturating[T: Integer](this: T, that: T) -> T { }
 
 @public
