@@ -409,7 +409,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
-    fun iroot(self, base: Self) -> Self {
+    fun iroot(self, base: U32) -> Self {
         case self.iroot_checked(base) is Some[Self](val) {
             ret value
         }
@@ -418,7 +418,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
 
     @public
     @inline
-    fun iroot_checked(self, base: Self) -> Opt[Self] {
+    fun iroot_checked(self, base: U32) -> Opt[Self] {
         case self < Self::zero() or base <= Self::zero() {
             ret None
         }
@@ -428,7 +428,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
 
         let mut x = intrinsics::bit_shl(Self::one(), bit_width / base.ilog2_checked().unwrap_or(1_u32))
         loop true {
-            let mut y = ((base - Self::one()) * x + self / x.pow(base - Self::one())) / (base)
+            let mut y = ((base - Self::one()) * x + self / x.pow(base - 1_u32)) / base
             case y >= x {
                 ret Some(val=x)
             }
