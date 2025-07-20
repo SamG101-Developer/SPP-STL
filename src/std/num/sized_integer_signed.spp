@@ -409,8 +409,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
-    fun iroot(self, base: U32) -> Self {
-        case self.iroot_checked(base) is Some[Self](val) {
+    fun isqrt(self, base: U32) -> Self {
+        case self.isqrt_checked(base) is Some[Self](val) {
             ret value
         }
         std::abort::abort("iroot: input must be a non-negative integer and base must be a positive integer")
@@ -418,22 +418,19 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
 
     @public
     @inline
-    fun iroot_checked(self, base: U32) -> Opt[Self] {
-        case self < Self::zero() or base <= 0_u32 {
+    fun isqrt_checked(self, base: U32) -> Opt[Self] {
+        case self < Self::zero() {
             ret None
         }
         else case self <= Self::one() {
             ret Some(val=self)
         }
 
-        let mut x = intrinsics::bit_shl(Self::one(), bit_width / base.ilog2_checked().unwrap_or(1_u32))
-        loop true {
-            let mut y = ((base - Self::one()) * x + self / x.pow(base - 1_u32)) / base
-            case y >= x {
-                ret Some(val=x)
-            }
-            x = y
-        }
+        let small_cand = (self >> Self::two()).isqrt()? >> Self::one()
+        let large_cand = small_cand + Self::one()
+        ret case large_cand * large_cand of
+            <= self { Some(val=large_cand) }
+            else { Some(val=small_cand) }
     }
 }
 

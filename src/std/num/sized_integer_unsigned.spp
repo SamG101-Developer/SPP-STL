@@ -312,24 +312,18 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
 
 
 sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
-    # The "iroot_checked" function computes the integer root of the sized integer with a given base and returns an
-    # optional value. It uses the Newton-Raphson method to find the root, iterating until the result stabilizes. Bypass
-    # any negative checks as the numbers are unsigned.
     @public
     @inline
-    fun iroot(self, base: U32) -> Opt[Self] {
+    fun isqrt(self) -> Opt[Self] {
         case self <= Self::one() {
             ret Some(val=self)
         }
 
-        let mut x = intrinsics::bit_shl(Self::one(), bit_width / base.ilog2_checked().unwrap_or(1_u32))
-        loop true {
-            let mut y = ((base - Self::one()) * x + self / x.pow(base - 1_u32)) / base
-            case y >= x {
-                ret Some(val=x)
-            }
-            x = y
-        }
+        let small_cand = (self >> Self::two()).isqrt()? >> Self::one()
+        let large_cand = small_cand + Self::one()
+        ret case large_cand * large_cand of
+            <= self { Some(val=large_cand) }
+            else { Some(val=small_cand) }
     }
 }
 
