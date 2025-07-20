@@ -103,9 +103,10 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @inline
     fun add_wrapping(self, that: Self) -> Self {
         that %= intrinsics::max_val[Self]()
-        ret case intrinsics::uadd_overflow(self, that) of
+        let out = intrinsics::uadd_overflow(self, that)
+        ret case out of
             is (_, true) { that - (intrinsics::max_val[Self]() - self) }
-            is (val, false) { val }
+            else { out.0 }
     }
 }
 
