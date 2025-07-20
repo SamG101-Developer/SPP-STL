@@ -411,7 +411,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @inline
     fun isqrt(self) -> Self {
         case self.isqrt_checked() is Some[Self](val) {
-            ret value
+            ret val
         }
         std::abort::abort("iroot: input must be a non-negative integer")
     }
@@ -440,7 +440,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @inline
     fun ilog(self, base: Self) -> U32 {
         case self.ilog_checked(base) is Some[Self](val) {
-            ret value
+            ret val
         }
         std::abort::abort("ilog: base must be a positive integer")
     }
@@ -449,7 +449,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @inline
     fun ilog2(self) -> U32 {
         case self.ilog2_checked() is Some[Self](val) {
-            ret value
+            ret val
         }
         std::abort::abort("ilog2: base must be a positive integer")
     }
@@ -458,7 +458,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @inline
     fun ilog10(self) -> U32 {
         case self.ilog10_checked() is Some[Self](val) {
-            ret value
+            ret val
         }
         std::abort::abort("ilog10: base must be a positive integer")
     }
