@@ -193,23 +193,23 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext s
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
     @public
     @inline
-    fun shl_checked(self, that: U32) -> Opt[Self] {
+    fun bit_shl_checked(self, that: U32) -> Opt[Self] {
         case that >= bit_width {
             ret None()
         }
-        ret Some(val=intrinsics::shl(self, that))
+        ret Some(val=intrinsics::bit_shl(self, that))
     }
 
     @public
     @inline
-    fun shl_overflow(self, that: U32) -> (Self, Bool) {
-        ret (self.shl_wrapping(that), that >= bit_width)
+    fun bit_shl_overflow(self, that: U32) -> (Self, Bool) {
+        ret (self.bit_shl_wrapping(that), that >= bit_width)
     }
 
     @public
     @inline
-    fun shl_wrapping(self, that: U32) -> Self {
-        ret intrinsics::shl(self, that & (bit_width - 1_u32))
+    fun bit_shl_wrapping(self, that: U32) -> Self {
+        ret intrinsics::bit_shl(self, that & (bit_width - 1_u32))
     }
 }
 
@@ -217,23 +217,23 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
     @public
     @inline
-    fun shr_checked(self, that: U32) -> Opt[Self] {
+    fun bit_shr_checked(self, that: U32) -> Opt[Self] {
         case that >= bit_width {
             ret None()
         }
-        ret Some(val=intrinsics::shr(self, that))
+        ret Some(val=intrinsics::bit_shr(self, that))
     }
 
     @public
     @inline
-    fun shr_overflow(self, that: U32) -> (Self, Bool) {
-        ret (self.shr_wrapping(that), that >= bit_width)
+    fun bit_shr_overflow(self, that: U32) -> (Self, Bool) {
+        ret (self.bit_shr_wrapping(that), that >= bit_width)
     }
 
     @public
     @inline
-    fun shr_wrapping(self, that: U32) -> Self {
-        ret intrinsics::shr(self, that & (bit_width - 1_u32))
+    fun bit_shr_wrapping(self, that: U32) -> Self {
+        ret intrinsics::bit_shr(self, that & (bit_width - 1_u32))
     }
 }
 
