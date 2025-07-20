@@ -2,6 +2,7 @@ use std::boolean::Bool
 use std::limits::Limits
 use std::number::U8
 use std::number::U32
+use std::number::U64
 use std::option::Opt
 use std::option::Some
 use std::option::None
