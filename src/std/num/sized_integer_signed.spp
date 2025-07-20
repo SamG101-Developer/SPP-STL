@@ -395,9 +395,6 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
 
 
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
-    # The "iroot" function computes the integer root of the sized integer with a given base. It uses the "iroot_checked"
-    # function, which returns an optional value. If the optional value is present, it returns it; otherwise, it
-    # aborts with an error message (negative input, base not positive etc).
     @public
     @inline
     fun iroot(self, base: Self) -> Self {
@@ -407,9 +404,6 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
         std::abort::abort("iroot: input must be a non-negative integer and base must be a positive integer")
     }
 
-    # The "iroot_checked" function computes the integer root of the sized integer with a given base and returns an
-    # optional value. It uses the Newton-Raphson method to find the root, iterating until the result stabilizes. If the
-    # input is negative or the base is not positive, it returns a None optional value.
     @public
     @inline
     fun iroot_checked(self, base: Self) -> Opt[Self] {
@@ -428,5 +422,58 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
             }
             x = y
         }
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
+    @public
+    @inline
+    fun ilog(self, base: Self) -> U32 {
+        case self.ilog_checked(base) is Some(val) {
+            ret value
+        }
+        std::abort::abort("ilog: base must be a positive integer")
+    }
+
+    @public
+    @inline
+    fun ilog2(self) -> U32 {
+        case self.ilog2_checked() is Some(val) {
+            ret value
+        }
+        std::abort::abort("ilog2: base must be a positive integer")
+    }
+
+    @public
+    @inline
+    fun ilog10(self) -> U32 {
+        case self.ilog10_checked() is Some(val) {
+            ret value
+        }
+        std::abort::abort("ilog10: base must be a positive integer")
+    }
+
+    @public
+    @inline
+    fun ilog_checked(self, base: Self) -> Opt[U32] {
+        case self <= Self::zero() or base <= Self::one() {
+            ret None
+        }
+        ret Some(val=self.ilog2_checked() / base.ilog2_checked())
+    }
+
+    @public
+    @inline
+    fun ilog2_checked(self) -> Opt[U32] {
+        ret Some(val=bit_width - 1_u32 - intrinsics::ctlz(self))
+    }
+
+    @public
+    @inline
+    fun ilog10_checked(self) -> Opt[U32] {
+        case self.ilog2_checked() of
+            is Some[U32](val as i) { ret Some(val=*sized_integer::log_10_lookup_table.index_ref(U64::from(i))) }
+        ret None()
     }
 }
