@@ -317,9 +317,8 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
     @public
     @inline
     fun ilog10_checked(self) -> Opt[U32] {
-        case self.ilog2_checked() is Some[U32](val as i) {
-            ret Some(val=log_10_lookup_table.at(i))
-        }
+        case self.ilog2_checked() of
+            is Some[U32](val as i) { ret Some(val=log_10_lookup_table.at(i)) }
         ret None()
     }
 }
