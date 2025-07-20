@@ -447,7 +447,7 @@ fun bitreverse[T: Integer](value: T) -> T { }
 @public
 @always_inline
 @compiler_builtin
-fun ctlz[T: Integer](value: T) -> S32 { }
+fun ctlz[T: Integer](value: T) -> U32 { }
 
 
 @public
