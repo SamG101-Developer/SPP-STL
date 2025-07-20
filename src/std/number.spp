@@ -28,3 +28,10 @@ type F128 = std::num::sized_floating_point::SizedFloatingPoint[128_u32]
 
 # Can't add the FP256 until LLVM adds intrinsic support for them.
 # type F256 = std::num::sized_floating_point::SizedFloatingPoint[256_u32]
+
+
+sup U64 ext From[Self, U32] {
+    fun from(that: U32) -> Self {
+        ret intrinsic::zext[64_u32](that)
+    }
+}
