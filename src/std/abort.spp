@@ -5,4 +5,4 @@ use std::void::Void
 @public
 @inline
 @compiler_builtin
-fun abort(msg: Str) -> Void { }
+fun abort(msg: Str) -> ! { }
