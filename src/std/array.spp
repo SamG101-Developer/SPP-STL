@@ -1,4 +1,11 @@
 use std::cast::From
+use std::iter::Iterator
+use std::iter::IterMov
+use std::iter::IterMut
+use std::iter::IterRef
+use std::iter::IndexMut
+use std::iter::IndexRef
+use std::generator::GenOnce
 use std::mem::memory::Memory
 use std::mem::view::View
 use std::number::USize
