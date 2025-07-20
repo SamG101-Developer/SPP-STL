@@ -250,4 +250,9 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
     @inline
     @compiler_builtin
     fun one() -> Self { }
+
+    @public
+    @inline
+    @compiler_builtin
+    fun two() -> Self { }
 }
