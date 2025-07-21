@@ -50,7 +50,7 @@ fun calloc[T](n: USize) -> Opt[Memory[T]] {
 }
 
 
-fun realloc[T](memory: &mut Memory[T], n: USize) -> Opt[Void] {
+fun realloc[T](mut memory: &mut Memory[T], n: USize) -> Opt[Void] {
     # Determine the size and get a reallocated pointer.
     let size = n * size_of[T]()
     let out = libc::realloc(&mut memory, size)
