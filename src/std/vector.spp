@@ -97,8 +97,12 @@ sup [T, A] Vec[T, A] {
         self.buf.mem.clear()
     }
 
-    @no_impl fun is_empty(&self) -> Bool {
+    fun is_empty(&self) -> Bool {
         ret self.buf.len == 0_uz
+    }
+
+    fun length(&self) -> USize {
+        ret self.buf.len
     }
 }
 
