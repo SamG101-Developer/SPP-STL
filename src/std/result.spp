@@ -21,6 +21,10 @@ cls Fail[E] { err: E }
 type Res[T, E] = Pass[T] or Fail[E]
 
 
+# Todo: "T: Copy, E: Copy"
+sup [T. E] Res[T, E] ext Copy { }
+
+
 sup [T, E] Res[T, E] {
     @public
     @inline
@@ -35,6 +39,6 @@ sup [T, E] Res[T, E] {
 
 sup [T, E] Res[T, E] ext std::ops::try::Try[T, Fail[E]] {
     fun op_is_output(&self) -> Bool {
-        ret self is Pass[T](..)
+        ret *self is Pass[T](..)
     }
 }

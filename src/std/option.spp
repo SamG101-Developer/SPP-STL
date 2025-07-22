@@ -23,7 +23,8 @@ cls None { }
 type Opt[T] = Some[T] or None
 
 
-#sup [T: Copy] Opt[T] ext Copy { }
+# Todo: "T: Copy"
+sup [T] Opt[T] ext Copy { }
 
 
 #sup [T: Clone[Out=T]] Opt[T] ext Clone[Out=Opt[T]] {
@@ -39,7 +40,7 @@ sup [T] Opt[T] {
     @public
     @inline
     fun is_some(&self) -> Bool {
-        ret self is Some[T](..)
+        ret *self is Some[T](..)
     }
 
     @public
@@ -53,7 +54,7 @@ sup [T] Opt[T] {
     @public
     @inline
     fun is_none(&self) -> Bool {
-        ret self is None()
+        ret *self is None()
     }
 
     @public
@@ -196,6 +197,6 @@ sup[T] Opt[T] {
 
 sup [T] Opt[T] ext std::ops::try::Try[T, None] {
     fun op_is_output(&self) -> Bool {
-        ret self is Some[T](..)
+        ret *self is Some[T](..)
     }
 }
