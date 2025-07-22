@@ -1,4 +1,5 @@
 use std::boolean::Bool
+use std::copy::Copy
 use std::option::Opt
 use std::option::None
 use std::option::Some
