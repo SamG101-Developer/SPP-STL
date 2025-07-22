@@ -59,11 +59,12 @@ sup [T] Iterator[T] {
         gen with other
     }
 
-    cor cycle(self) -> Iterator[T] {
-        loop true {
-            gen with self
-        }
-    }
+    # todo: can only cycle clonable objects, so move to "sup[T: Clone] Iterator[T]" when constraints are supported, and also sup [T: Clone] Iterator[T] ext Clone[Out=Self] {
+    # cor cycle(self) -> Iterator[T] {
+    #     loop true {
+    #         gen with self
+    #     }
+    # }
 
     cor drop(self, count: USize) -> Iterator[T] {
         let mut index = 0_uz
