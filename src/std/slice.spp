@@ -1,0 +1,113 @@
+use std::allocator::Alloc
+use std::allocator::GlobalAlloc
+use std::array::Arr
+use std::cast::From
+use std::clone::Clone
+use std::iterator::Iterator
+use std::iterator::IterMov
+use std::iterator::IterMut
+use std::iterator::IterRef
+use std::iterator::IndexMut
+use std::iterator::IndexRef
+use std::generator::GenOnce
+use std::mem::memory::Memory
+use std::mem::view::View
+use std::number::U8
+use std::number::USize
+use std::string::Str
+use std::vector::Vec
+use std::void::Void
+
+
+cls Slice[E, A: Alloc[E] = GlobalAlloc[E]] {
+    @private
+    mem: Memory[E]
+
+    @private
+    len: USize
+}
+
+
+sup [E, A] Slice[E, A] {
+    type Element = E
+    type Allocator = A
+
+    @public
+    @no_impl
+    fun resize(&mut self, new_len: USize) -> Void {
+        # A::reallocate(&mut self.mem, new_len)  # .expect("Failed to resize slice")
+    }
+}
+
+
+sup [E, A] Slice[E, A] ext View[E] {
+    fun length(&self) -> USize {
+        ret self.len
+    }
+}
+
+
+sup [E, A] Slice[E, A] ext Clone[Out=Self] {
+    @no_impl
+    fun clone(&self) -> Self {
+    }
+}
+
+
+sup [E, A, cmp n: USize] Slice[E, A] ext From[Self, Arr[E, n]] {
+    fun from(that: Arr[E, n]) -> Self {
+        ret Slice[E, A](mem=Memory(ptr=that.mem.ptr, cap=n), len=n)
+    }
+}
+
+
+sup [A] Slice[U8, A] ext From[Self, Str] {
+    fun from(that: Str) -> Self {
+        ret Slice[U8, A](mem=Memory(ptr=that.data.buf.mem.ptr, cap=that.data.buf.mem.cap), len=that.data.buf.len)
+    }
+}
+
+
+sup [E, A] Slice[E, A] ext From[Self, Vec[E, A]] {
+    fun from(that: Vec[E, A]) -> Self {
+        ret Slice[E, A](mem=Memory(ptr=that.buf.mem.ptr, cap=that.buf.mem.cap), len=that.buf.len)
+    }
+}
+
+
+sup [E, A] Slice[E, A] ext std::ops::del::Del {
+    fun del(self) -> Void {
+        # A::deallocate(self.mem)  TODO: constraints
+    }
+}
+
+
+sup [E, A] Slice[E, A] ext IterMov[E] {
+    @compiler_builtin
+    cor iter_mov(self) -> Iterator[E] { }
+}
+
+
+sup [E, A] Slice[E, A] ext IterMut[E] {
+    @compiler_builtin
+    cor iter_mut(&mut self) -> Iterator[&mut E] { }
+}
+
+
+sup [E, A] Slice[E, A] ext IterRef[E] {
+    @compiler_builtin
+    cor iter_ref(&self) -> Iterator[&E] { }
+}
+
+
+sup [E, A] Slice[E, A] ext IndexMut[E, USize] {
+    @compiler_builtin
+    cor index_mut(&mut self, index: USize) -> GenOnce[&mut E] { }
+}
+
+
+sup [E, A] Slice[E, A] ext IndexRef[E, USize] {
+    @compiler_builtin
+    cor index_ref(&self, index: USize) -> GenOnce[&E] { }
+}
+

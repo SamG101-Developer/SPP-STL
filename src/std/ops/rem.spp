@@ -1,7 +1,23 @@
+use std::void::Void
+
+
 @public
 cls Rem[Rhs, Ret] { }
 
+
+@public
+cls RemAssign[Rhs] {}
+
+
 sup [Rhs, Ret] Rem[Rhs, Ret] {
+    @public
     @abstract_method
     fun rem(self, that: Rhs) -> Ret { }
+}
+
+
+sup [Rhs] RemAssign[Rhs] {
+    @public
+    @abstract_method
+    fun rem_assign(&mut self, that: Rhs) -> Void { }
 }

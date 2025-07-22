@@ -1,65 +1,63 @@
-use std::allocator::Alloc
-use std::allocator::GlobalAlloc
-use std::clone::Clone
-use std::memory::Memory
-use std::number::usize::USize
-use std::result::Fail
-use std::result::Exception
-use std::void::Void
-
-
-cls BoundsException { }
-
-
-sup BoundsException ext Exception { }
+use std::cast::From
+use std::iterator::Iterator
+use std::iterator::IterMov
+use std::iterator::IterMut
+use std::iterator::IterRef
+use std::iterator::IndexMut
+use std::iterator::IndexRef
+use std::generator::GenOnce
+use std::mem::memory::Memory
+use std::mem::view::View
+use std::number::USize
+use std::slice::Slice
 
 
 @public
-cls Arr[T, cmp n: USize, A = GlobalAlloc[T]] { }
+cls Arr[T, cmp n: USize] {
+    mem: Memory[T]
+}
 
 
-sup [T, A, cmp n: USize] Arr[T, n, A] ext Memory[T, A] {
-    fun len(&self) -> USize {
+sup [T, cmp n: USize] Arr[T, n] ext View[T] {
+    fun length(&self) -> USize {
         ret n
     }
 }
 
 
-@public
-cls ArrDynamic[T, A = GlobalAlloc[T]] {
-    length: USize
-}
-
-
-sup [T, A] ArrDynamic[T, A] ext Memory[T, A] {
-    fun len(&self) -> USize {
-        ret self.length
+sup [T, A, cmp n: USize] Arr[T, n] ext From[Self, Slice[T, A]] {
+    fun from(that: Slice[T, A]) -> Self {
+        ret Arr[T, n](mem=Memory(ptr=that.mem.ptr, cap=n))
     }
 }
 
 
-sup [T, A] ArrDynamic[T, A] ext Clone[ArrDynamic[T, A]] {
+sup [T, cmp n: USize] Arr[T, n] ext IterMov[T] {
     @compiler_builtin
-    fun clone(&self) -> ArrDynamic[T, A] { }
+    cor iter_mov(self) -> Iterator[T] { }
 }
 
 
-sup [T, A] ArrDynamic[T, A] {
-    @no_impl
-    @public
-    fun new_with_cap(capacity: USize) -> ArrDynamic[T, A] { }
-
-    @protected
-    fun grow_by_one(&mut self) -> Void {
-        self.capacity += 1_uz
-        # case Self::Allocator::reallocate(&mut self, self.capacity) of
-        #    is Fail(err) { }
-    }
-
-    @protected
-    fun grow_double(&mut self) -> Void {
-        self.capacity *= 2_uz
-        # case Self::Allocator::reallocate(&mut self, self.capacity) of
-        #    is Fail(err) { }
-    }
+sup [T, cmp n: USize] Arr[T, n] ext IterMut[T] {
+    @compiler_builtin
+    cor iter_mut(&mut self) -> Iterator[&mut T] { }
 }
+
+
+sup [T, cmp n: USize] Arr[T, n] ext IterRef[T] {
+    @compiler_builtin
+    cor iter_ref(&self) -> Iterator[&T] { }
+}
+
+
+sup [T, cmp n: USize] Arr[T, n] ext IndexMut[T, USize] {
+    @compiler_builtin
+    cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] { }
+}
+
+
+sup [T, cmp n: USize] Arr[T, n] ext IndexRef[T, USize] {
+    @compiler_builtin
+    cor index_ref(&self, index: USize) -> GenOnce[&T] { }
+}
+

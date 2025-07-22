@@ -1,17 +1,38 @@
-@ffi
-fun fputs(str: &std::ffi::Char, stream: &std::ffi::Int) -> std::ffi::Int { }
+use std::cffi::CChar
+use std::cffi::CInt
+use std::cffi::CPtr
+use std::cffi::CSizeT
+
 
 @ffi
-fun fgets(buffer: &mut std::ffi::Char, count: std::ffi::Int, stream: &std::ffi::Int) -> std::ffi::Char { }
+fun fputs(str: &CPtr[CChar], stream: &CInt) -> CInt { }
 
 @ffi
-fun fopen(filename: &std::ffi::Char, mode: &std::ffi::Char) -> std::ffi::Int { }
+fun fgets(buffer: &mut CPtr[CChar], count: CInt, stream: &CInt) -> CChar { }
 
 @ffi
-fun fread(buffer: &mut std::ffi::Char, size: std::ffi::Int, count: std::ffi::Int, stream: &mut std::ffi::Int) -> std::ffi::Int { }
+fun fopen(filename: &CPtr[CChar], mode: &CPtr[CChar]) -> CInt { }
 
 @ffi
-fun fwrite(buffer: &mut std::ffi::Char, size: std::ffi::Int, count: std::ffi::Int, stream: &mut std::ffi::Int) -> std::ffi::Int { }
+fun fread(buffer: &mut CPtr[CChar], size: CInt, count: CInt, stream: &mut CInt) -> CInt { }
 
 @ffi
-fun fclose(stream: &mut std::ffi::Int) -> std::ffi::Int { }
+fun fwrite(buffer: &mut CPtr[CChar], size: CInt, count: CInt, stream: &mut CInt) -> CInt { }
+
+@ffi
+fun fclose(stream: &mut CInt) -> CInt { }
+
+@ffi
+fun fflush(stream: &CInt) -> CInt { }
+
+@ffi
+fun malloc[T](size: CSizeT) -> CPtr[T] { }
+
+@ffi
+fun calloc[T](count: CSizeT, size: CSizeT) -> CPtr[T] { }
+
+@ffi
+fun realloc[T](ptr: &mut CPtr[T], size: CSizeT) -> CInt { }
+
+@ffi
+fun free[T](ptr: CPtr[T]) -> CInt { }

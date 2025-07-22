@@ -86,7 +86,7 @@ sup Path {
 
     fun split_ext(&self) -> (Path, Opt[Str]) {
         let parts = self.path.split(&".")
-        # ret (Path(path=parts[0_uz]), case parts.len() > 1 { Some(val=parts[1]) } else { None() })
+        # ret (Path(path=parts[0_uz]), case parts.len() > 1 { Some(val=parts.index_ref(1).clone()) } else { None() })
         let dummy: Opt[Str] = Some(val=Str())
         ret (Path(), dummy)
     }

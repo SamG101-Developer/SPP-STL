@@ -1,0 +1,17 @@
+use std::number::S32
+use std::option::Opt
+use std::option::Some
+use std::string::Str
+
+
+
+fun print(value: &Str) -> Opt[S32] {
+    let val = std::console::stdout_stream::stdout.write_all(&value.data).ok()
+    ret val
+}
+
+
+fun input() -> Opt[Str] {
+    let vec = std::console::stdin_stream::stdin.read_all().ok()?
+    ret Some(val=Str(data=vec))
+}

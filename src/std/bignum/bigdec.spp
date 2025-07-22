@@ -1,0 +1,10 @@
+use std::bignum::bigint::BigInt
+use std::number::S64
+use std::void::Void
+
+
+@public
+cls BigDec {
+    int_val: BigInt
+    scale: S64
+}

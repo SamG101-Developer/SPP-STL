@@ -1,0 +1,154 @@
+use std::bignum::biguint::BigUInt
+use std::boolean::Bool
+use std::void::Void
+
+
+@public
+cls BigInt {
+    sign: Bool
+    data: BigUInt
+}
+
+
+sup BigInt ext std::ops::bit_and::BitAnd[Rhs=Self, Ret=Self] {
+    @no_impl
+    fun bit_and(self, that: Self) -> Self { }
+}
+
+
+sup BigInt ext std::ops::bit_ior::BitIor[Rhs=Self, Ret=Self] {
+    @no_impl
+    fun bit_ior(self, that: Self) -> Self { }
+}
+
+
+sup BigInt ext std::ops::bit_xor::BitXor[Rhs=Self, Ret=Self] {
+    @no_impl
+    fun bit_xor(self, that: Self) -> Self { }
+}
+
+
+sup BigInt ext std::ops::bit_not::BitNot[Ret=Self] {
+    @no_impl
+    fun bit_not(self) -> Self { }
+}
+
+
+sup BigInt ext std::ops::bit_shl::BitShl[Rhs=Self, Ret=Self] {
+    @no_impl
+    fun bit_shl(self, that: Self) -> Self { }
+}
+
+
+sup BigInt ext std::ops::bit_shr::BitShr[Rhs=Self, Ret=Self] {
+    @no_impl
+    fun bit_shr(self, that: Self) -> Self { }
+}
+
+
+sup BigInt ext std::ops::add::Add[Rhs=Self, Ret=Self] {
+    @no_impl
+    fun add(self, that: Self) -> Self { }
+}
+
+
+sup BigInt ext std::ops::sub::Sub[Rhs=Self, Ret=Self] {
+    @no_impl
+    fun sub(self, that: Self) -> Self { }
+}
+
+
+sup BigInt ext std::ops::mul::Mul[Rhs=Self, Ret=Self] {
+    @no_impl
+    fun mul(self, that: Self) -> Self { }
+}
+
+
+sup BigInt ext std::ops::div::Div[Rhs=Self, Ret=Self] {
+    @no_impl
+    fun div(self, that: Self) -> Self { }
+}
+
+
+sup BigInt ext std::ops::rem::Rem[Rhs=Self, Ret=Self] {
+    @no_impl
+    fun rem(self, that: Self) -> Self { }
+}
+
+
+sup BigInt ext std::ops::pow::Pow[Rhs=Self, Ret=Self] {
+    @no_impl
+    fun pow(self, that: Self) -> Self { }
+}
+
+
+sup BigInt ext std::ops::add::AddAssign[Rhs=Self] {
+    @no_impl
+    fun add_assign(&mut self, that: Self) -> Void { }
+}
+
+
+sup BigInt ext std::ops::sub::SubAssign[Rhs=Self] {
+    @no_impl
+    fun sub_assign(&mut self, that: Self) -> Void { }
+}
+
+
+sup BigInt ext std::ops::mul::MulAssign[Rhs=Self] {
+    @no_impl
+    fun mul_assign(&mut self, that: Self) -> Void { }
+}
+
+
+sup BigInt ext std::ops::div::DivAssign[Rhs=Self] {
+    @no_impl
+    fun div_assign(&mut self, that: Self) -> Void { }
+}
+
+
+sup BigInt ext std::ops::rem::RemAssign[Rhs=Self] {
+    @no_impl
+    fun rem_assign(&mut self, that: Self) -> Void { }
+}
+
+
+sup BigInt ext std::ops::pow::PowAssign[Rhs=Self] {
+    @no_impl
+    fun pow_assign(&mut self, that: Self) -> Void { }
+}
+
+
+sup BigInt ext std::ops::eq::Eq[Rhs=Self] {
+    @no_impl
+    fun eq(&self, that: &BigInt) -> Bool { }
+}
+
+
+sup BigInt ext std::ops::ne::Ne[Rhs=Self] {
+    @no_impl
+    fun ne(&self, that: &BigInt) -> Bool { }
+}
+
+
+sup BigInt ext std::ops::ge::Ge[Rhs=Self] {
+    @no_impl
+    fun ge(&self, that: &BigInt) -> Bool { }
+}
+
+
+sup BigInt ext std::ops::gt::Gt[Rhs=Self] {
+    @no_impl
+    fun gt(&self, that: &BigInt) -> Bool { }
+}
+
+
+sup BigInt ext std::ops::le::Le[Rhs=Self] {
+    @no_impl
+    fun le(&self, that: &BigInt) -> Bool { }
+}
+
+
+sup BigInt ext std::ops::lt::Lt[Rhs=Self] {
+    @no_impl
+    fun lt(&self, that: &BigInt) -> Bool { }
+}

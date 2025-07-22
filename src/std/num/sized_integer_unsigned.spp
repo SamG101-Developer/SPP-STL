@@ -1,0 +1,385 @@
+use std::boolean::Bool
+use std::cast::From
+use std::number::U32
+use std::number::U64
+use std::option::Opt
+use std::option::None
+use std::option::Some
+use std::void::Void
+
+use std::num::sized_integer::SizedInteger
+use std::num::sized_integer_signed::SizedIntegerSigned
+use std::num::sized_floating_point::SizedFloatingPoint
+
+
+# Type alias the "unsigned" version of the the sized integer type.
+type SizedIntegerUnsigned[cmp bit_width: U32] = SizedInteger[bit_width, false]
+
+
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::div::Div[Rhs=Self, Ret=Self] {
+    fun div(self, that: Self) -> Self {
+        ret intrinsics::udiv(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::div::DivAssign[Rhs=Self] {
+    fun div_assign(&mut self, that: Self) -> Void {
+        ret intrinsics::udiv_assign(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::rem::Rem[Rhs=Self, Ret=Self] {
+    fun rem(self, that: Self) -> Self {
+        ret intrinsics::urem(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::rem::RemAssign[Rhs=Self] {
+    fun rem_assign(&mut self, that: Self) -> Void {
+        ret intrinsics::urem_assign(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::pow::Pow[Rhs=U32, Ret=Self] {
+    fun pow(self, that: U32) -> Self {
+        case that == 0_u32 {
+            ret Self::one()
+        }
+        let mut out = Self::one()
+        let mut base = self
+        let mut exp = that
+        loop exp > 0_u32 {
+            case exp % 2_u32 == 1_u32 {
+                out = out * base
+            }
+            base = base * base
+            exp /= 2_u32
+        }
+        ret out
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
+    @public
+    @inline
+    fun min(self, that: Self) -> Self {
+        ret intrinsics::umin(self, that)
+    }
+
+    @public
+    @inline
+    fun max(self, that: Self) -> Self {
+        ret intrinsics::umax(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
+    @public
+    @inline
+    fun add_checked(self, that: Self) -> Opt[Self] {
+        let (val, overflowed) = intrinsics::uadd_overflow(self, that)
+        ret case overflowed { None() } else { Some(val) }
+    }
+
+    @public
+    @inline
+    fun add_overflow(self, that: Self) -> (Self, Bool) {
+        ret intrinsics::uadd_overflow(self, that)
+    }
+
+    @public
+    @inline
+    fun add_saturating(self, that: Self) -> Self {
+        ret intrinsics::uadd_saturating(self, that)
+    }
+
+    @public
+    @inline
+    fun add_wrapping(self, that: Self) -> Self {
+        ret intrinsics::uadd_wrapping(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
+    @public
+    @inline
+    fun sub_checked(self, that: Self) -> Opt[Self] {
+        ret case self of
+            < that { None() }
+            else { Some(val=intrinsics::sub(self, that)) }
+    }
+
+    @public
+    @inline
+    fun sub_overflow(self, that: Self) -> (Self, Bool) {
+        ret intrinsics::usub_overflow(self, that)
+    }
+
+    @public
+    @inline
+    fun sub_saturating(self, that: Self) -> Self {
+        ret intrinsics::usub_saturating(self, that)
+    }
+
+    @public
+    @inline
+    fun sub_wrapping(self, that: Self) -> Self {
+        ret intrinsics::usub_wrapping(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
+    @public
+    @inline
+    fun mul_checked(self, that: Self) -> Opt[Self] {
+        let (val, overflowed) = intrinsics::umul_overflow(self, that)
+        ret case overflowed { None() } else { Some(val) }
+    }
+
+    @public
+    @inline
+    fun mul_overflow(self, that: Self) -> (Self, Bool) {
+        ret intrinsics::umul_overflow(self, that)
+    }
+
+    @public
+    @inline
+    fun mul_saturating(self, that: Self) -> Self {
+        ret case self.mul_checked(that) of
+            is Some[Self](val) { val }
+            else { intrinsics::max_val[Self]() }
+    }
+
+    @public
+    @inline
+    fun mul_wrapping(self, that: Self) -> Self {
+        ret intrinsics::umul_wrapping(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
+    @public
+    @inline
+    fun div_checked(self, that: Self) -> Opt[Self] {
+        ret case that of
+            == Self::zero() { None() }
+            else { Some(val=intrinsics::udiv(self, that)) }
+    }
+
+    @public
+    @inline
+    fun div_overflow(self, that: Self) -> (Self, Bool) {
+        ret (intrinsics::udiv(self, that), false)
+    }
+
+    @public
+    @inline
+    fun div_saturating(self, that: Self) -> Self {
+        ret self.div_wrapping(that)
+    }
+
+    @public
+    @inline
+    fun div_wrapping(self, that: Self) -> Self {
+        ret intrinsics::udiv(self, that)
+    }
+
+    @public
+    @inline
+    fun div_floor(self, that: Self) -> Self {
+        ret intrinsics::udiv(self, that)
+    }
+
+    @public
+    @inline
+    fun div_ceil(self, that: Self) -> Self {
+        let d = self / that
+        let r = self % that
+        ret case r > Self::zero() { d + Self::one() } else { d }
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
+    @public
+    @inline
+    fun rem_checked(self, that: Self) -> Opt[Self] {
+        case that == Self::zero() {
+            ret None()
+        }
+        ret Some(val=intrinsics::urem(self, that))
+    }
+
+    @public
+    @inline
+    fun rem_overflow(self, that: Self) -> (Self, Bool) {
+        ret (intrinsics::urem(self, that), false)
+    }
+
+    @public
+    @inline
+    fun rem_wrapping(self, that: Self) -> Self {
+        ret self.rem_overflow(that).0
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
+    @public
+    @inline
+    fun pow_checked(self, that: U32) -> Opt[Self] {
+        case that == 0_u32 {
+            ret Some(val=Self::one())
+        }
+        let mut out = Self::one()
+        let mut base = self
+        let mut exp = that
+        loop exp > 0_u32 {
+            case exp % 2_u32 == 1_u32 {
+                out = out.mul_checked(base)?
+            }
+            base = base.mul_checked(base)?
+            exp /= 2_u32
+        }
+        ret Some(val=out)
+    }
+
+    @public
+    @inline
+    fun pow_overflow(self, that: U32) -> (Self, Bool) {
+        case that == 0_u32 {
+            ret (Self::one(), false)
+        }
+        let mut out = Self::one()
+        let mut base = self
+        let mut exp = that
+        loop exp > 0_u32 {
+            case exp % 2_u32 == 1_u32 {
+                let r = out.mul_overflow(base)
+                case r.1 { ret (out, true) }
+                out = r.0
+            }
+            let r = base.mul_overflow(base)
+            case r.1 { ret (out, true) }
+            base = r.0
+            exp /= 2_u32
+        }
+        ret (out, false)
+    }
+
+    @public
+    @inline
+    fun pow_wrapping(self, that: U32) -> Self {
+        case that == 0_u32 {
+            ret Self::one()
+        }
+        let mut out = Self::one()
+        let mut base = self
+        let mut exp = that
+        loop exp > 0_u32 {
+            case exp % 2_u32 == 1_u32 {
+                out = out.mul_wrapping(base)
+            }
+            base = base.mul_wrapping(base)
+            exp /= 2_u32
+        }
+        ret out
+    }
+
+    @public
+    @inline
+    fun pow_saturating(self, that: U32) -> Self {
+        ret case self.pow_checked(that) of
+            is Some[Self](val) { val }
+            else { intrinsics::max_val[Self]() }
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
+    @public
+    @inline
+    fun mod(self, that: Self) -> Self {
+        ret self % that
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
+    @public
+    @inline
+    fun isqrt(self) -> Opt[Self] {
+        case self <= Self::one() {
+            ret Some(val=self)
+        }
+
+        let small_cand = (self >> Self::two()).isqrt()? >> Self::one()
+        let large_cand = small_cand + Self::one()
+        ret case large_cand * large_cand of
+            <= self { Some(val=large_cand) }
+            else { Some(val=small_cand) }
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
+    @public
+    @inline
+    fun ilog(self, base: Self) -> U32 {
+        case self.ilog_checked(base) is Some[U32](val) {
+            ret val
+        }
+        std::abort::abort("ilog: base must be a positive integer")
+    }
+
+    @public
+    @inline
+    fun ilog2(self) -> U32 {
+        case self.ilog2_checked() is Some[U32](val) {
+            ret val
+        }
+        std::abort::abort("ilog2: base must be a positive integer")
+    }
+
+    @public
+    @inline
+    fun ilog10(self) -> U32 {
+        case self.ilog10_checked() is Some[U32](val) {
+            ret val
+        }
+        std::abort::abort("ilog10: base must be a positive integer")
+    }
+
+    @public
+    @inline
+    fun ilog_checked(self, base: Self) -> Opt[U32] {
+        case self <= Self::zero() or base <= Self::one() {
+            ret None()
+        }
+        ret Some(val=self.ilog2_checked()? / base.ilog2_checked()?)
+    }
+
+    @public
+    @inline
+    fun ilog2_checked(self) -> Opt[U32] {
+        ret Some(val=bit_width - 1_u32 - intrinsics::ctlz(self))
+    }
+
+    @public
+    @inline
+    fun ilog10_checked(self) -> Opt[U32] {
+        case self.ilog2_checked() of
+            is Some[U32](val as i) { ret Some(val=*sized_integer::log_10_lookup_table.index_ref(U64::from(i))) }
+        ret None()
+    }
+}
+

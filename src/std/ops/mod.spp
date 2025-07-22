@@ -1,7 +1,0 @@
-@public
-cls Mod[Rhs, Ret] { }
-
-sup [Rhs, Ret] Mod[Rhs, Ret] {
-    @abstract_method
-    fun mod(self, that: Rhs) -> Ret { }
-}

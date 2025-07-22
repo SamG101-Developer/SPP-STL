@@ -1,0 +1,23 @@
+use std::void::Void
+
+
+@public
+cls BitIor[Rhs, Ret] {}
+
+
+@public
+cls BitIorAssign[Rhs] {}
+
+
+sup [Rhs, Ret] BitIor[Rhs, Ret] {
+    @public
+    @abstract_method
+    fun bit_ior(self, that: Rhs) -> Ret { }
+}
+
+
+sup [Rhs] BitIorAssign[Rhs] {
+    @public
+    @abstract_method
+    fun bit_ior_assign(&mut self, that: Rhs) -> Void { }
+}

@@ -1,0 +1,12 @@
+use std::boolean::Bool
+
+
+cls Try[Output, Residual] {}
+
+
+sup [Output, Residual] Try[Output, Residual] {
+    @private
+    @inline
+    @abstract_method
+    fun op_is_output(&self) -> Bool { }
+}

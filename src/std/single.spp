@@ -1,9 +1,22 @@
 use std::generator::GenOnce
+use std::number::USize
 use std::ops::deref::DerefMut
 use std::ops::deref::DerefRef
 
 
-cls Single[T] { }
+cls Single[T] {
+    @private
+    pos: USize
+}
+
+
+sup [T] Single[T] {
+    type Element = T
+
+    @public
+    @compiler_builtin
+    fun new(item: T) -> Single[T] { }
+}
 
 
 sup [T] Single[T] ext DerefRef[T] {

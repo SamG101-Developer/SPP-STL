@@ -1,0 +1,430 @@
+use std::boolean::Bool
+use std::cast::From
+use std::number::U32
+use std::number::S32
+use std::limits::Limits
+use std::void::Void
+
+use std::num::sized_integer_signed::SizedIntegerSigned
+use std::num::sized_integer_unsigned::SizedIntegerUnsigned
+use std::num::bases::FloatingPoint
+
+
+# A sized floating point is a floating point type with a provided bit width.
+cls SizedFloatingPoint[cmp bit_width: U32] { }
+
+
+# The sized floating point type extends the base floating point type.
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext FloatingPoint { }
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::eq::Eq[Rhs=Self] {
+    fun eq(&self, that: &Self) -> Bool {
+        ret intrinsics::eq(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::ne::Ne[Rhs=Self] {
+    fun ne(&self, that: &Self) -> Bool {
+        ret intrinsics::ne(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::lt::Lt[Rhs=Self] {
+    fun lt(&self, that: &Self) -> Bool {
+        ret intrinsics::lt(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::le::Le[Rhs=Self] {
+    fun le(&self, that: &Self) -> Bool {
+        ret intrinsics::le(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::gt::Gt[Rhs=Self] {
+    fun gt(&self, that: &Self) -> Bool {
+        ret intrinsics::gt(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::ge::Ge[Rhs=Self] {
+    fun ge(&self, that: &Self) -> Bool {
+        ret intrinsics::ge(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::add::Add[Rhs=Self, Ret=Self] {
+    fun add(self, that: Self) -> Self {
+        ret intrinsics::float_add(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::add::AddAssign[Rhs=Self] {
+    fun add_assign(&mut self, that: Self) -> Void {
+        ret intrinsics::float_add_assign(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::sub::Sub[Rhs=Self, Ret=Self] {
+    fun sub(self, that: Self) -> Self {
+        ret intrinsics::float_sub(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::sub::SubAssign[Rhs=Self] {
+    fun sub_assign(&mut self, that: Self) -> Void {
+        ret intrinsics::float_sub_assign(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::mul::Mul[Rhs=Self, Ret=Self] {
+    fun mul(self, that: Self) -> Self {
+        ret intrinsics::float_mul(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::mul::MulAssign[Rhs=Self] {
+    fun mul_assign(&mut self, that: Self) -> Void {
+        ret intrinsics::float_mul_assign(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::div::Div[Rhs=Self, Ret=Self] {
+    fun div(self, that: Self) -> Self {
+        ret intrinsics::float_div(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::div::DivAssign[Rhs=Self] {
+    fun div_assign(&mut self, that: Self) -> Void {
+        ret intrinsics::float_div_assign(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::rem::Rem[Rhs=Self, Ret=Self] {
+    fun rem(self, that: Self) -> Self {
+        ret intrinsics::float_rem(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::rem::RemAssign[Rhs=Self] {
+    fun rem_assign(&mut self, that: Self) -> Void {
+        ret intrinsics::float_rem_assign(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::pow::Pow[Rhs=Self, Ret=Self] {
+    fun pow(self, that: Self) -> Self {
+        ret intrinsics::float_powf(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::pow::Pow[Rhs=S32, Ret=Self] {
+    fun pow(self, that: S32) -> Self {
+        ret intrinsics::float_powi(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
+    fun neg(self) -> Self {
+        ret intrinsics::float_neg(self)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
+    fun min(self, that: Self) -> Self {
+        ret intrinsics::float_min(self, that)
+    }
+
+    fun max(self, that: Self) -> Self {
+        ret intrinsics::float_max(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
+    @public
+    @inline
+    fun log2(self) -> Self {
+        ret intrinsics::float_log2(self)
+    }
+
+    @public
+    @inline
+    fun log10(self) -> Self {
+        ret intrinsics::float_log10(self)
+    }
+
+    @public
+    @inline
+    fun log(self, base: Self) -> Self {
+        ret intrinsics::float_log2(self) / intrinsics::float_log2(base)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
+    @public
+    @inline
+    fun exp(self) -> Self {
+        ret intrinsics::float_exp(self)
+    }
+
+    @public
+    @inline
+    fun exp2(self) -> Self {
+        ret intrinsics::float_exp2(self)
+    }
+
+    @public
+    @inline
+    fun exp10(self) -> Self {
+        ret intrinsics::float_exp10(self)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
+    @public
+    @inline
+    fun sqrt(self) -> Self {
+        ret intrinsics::float_sqrt(self)
+    }
+
+    @public
+    @inline
+    fun cbrt(self) -> Self {
+        ret intrinsics::float_cbrt(self)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
+    @public
+    @inline
+    fun abs(self) -> Self {
+        ret intrinsics::float_abs(self)
+    }
+
+    @public
+    @inline
+    fun ceil(self) -> Self {
+        ret intrinsics::float_ceil(self)
+    }
+
+    @public
+    @inline
+    fun floor(self) -> Self {
+        ret intrinsics::float_floor(self)
+    }
+
+    @public
+    @inline
+    fun round(self) -> Self {
+        ret intrinsics::float_round(self)
+    }
+
+    @public
+    @inline
+    fun trunc(self) -> Self {
+        ret intrinsics::float_trunc(self)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
+    @public
+    @inline
+    fun sin(self) -> Self {
+        ret intrinsics::float_sin(self)
+    }
+
+    @public
+    @inline
+    fun cos(self) -> Self {
+        ret intrinsics::float_cos(self)
+    }
+
+    @public
+    @inline
+    fun tan(self) -> Self {
+        ret intrinsics::float_tan(self)
+    }
+
+    @public
+    @inline
+    fun asin(self) -> Self {
+        ret intrinsics::float_asin(self)
+    }
+
+    @public
+    @inline
+    fun acos(self) -> Self {
+        ret intrinsics::float_acos(self)
+    }
+
+    @public
+    @inline
+    fun atan(self) -> Self {
+        ret intrinsics::float_atan(self)
+    }
+
+    @public
+    @inline
+    fun atan2(self, other: Self) -> Self {
+        ret intrinsics::float_atan2(self, other)
+    }
+
+    @public
+    @inline
+    fun sinh(self) -> Self {
+        ret intrinsics::float_sinh(self)
+    }
+
+    @public
+    @inline
+    fun cosh(self) -> Self {
+        ret intrinsics::float_cosh(self)
+    }
+
+    @public
+    @inline
+    fun tanh(self) -> Self {
+        ret intrinsics::float_tanh(self)
+    }
+
+    @public
+    @inline
+    fun asinh(self) -> Self {
+        ret self  # todo
+    }
+
+    @public
+    @inline
+    fun acosh(self) -> Self {
+        ret self  # todo
+    }
+
+    @public
+    @inline
+    fun atanh(self) -> Self {
+        ret self  # todo
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
+    @public
+    @inline
+    fun is_signaling_nan(self) -> Bool {
+        ret intrinsics::fpclass(self, 0_s32)
+    }
+
+    @public
+    @inline
+    fun is_quiet_nan(self) -> Bool {
+        ret intrinsics::fpclass(self, 1_s32)
+    }
+
+    @public
+    @inline
+    fun is_negative_infinity(self) -> Bool {
+        ret intrinsics::fpclass(self, 2_s32)
+    }
+
+    @public
+    @inline
+    fun is_negative_normal(self) -> Bool {
+        ret intrinsics::fpclass(self, 3_s32)
+    }
+
+    @public
+    @inline
+    fun is_negative_subnormal(self) -> Bool {
+        ret intrinsics::fpclass(self, 4_s32)
+    }
+
+    @public
+    @inline
+    fun is_negative_zero(self) -> Bool {
+        ret intrinsics::fpclass(self, 5_s32)
+    }
+
+    @public
+    @inline
+    fun is_positive_zero(self) -> Bool {
+        ret intrinsics::fpclass(self, 6_s32)
+    }
+
+    @public
+    @inline
+    fun is_positive_subnormal(self) -> Bool {
+        ret intrinsics::fpclass(self, 7_s32)
+    }
+
+    @public
+    @inline
+    fun is_positive_normal(self) -> Bool {
+        ret intrinsics::fpclass(self, 8_s32)
+    }
+
+    @public
+    @inline
+    fun is_positive_infinity(self) -> Bool {
+        ret intrinsics::fpclass(self, 9_s32)
+    }
+
+    @public
+    @inline
+    fun is_positive(self) -> Bool {
+        ret self.is_negative().not
+    }
+
+    @public
+    @inline
+    fun is_negative(self) -> Bool {
+        # Bit level checking for negative numbers.
+        # ret self.to_bits() >> (bit_width - 1_u32) != Self::zero()
+        ret false  # todo
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
+    @public
+    @inline
+    @compiler_builtin
+    fun zero() -> Self { }
+
+    @public
+    @inline
+    @compiler_builtin
+    fun one() -> Self { }
+
+    # @public
+    # @inline
+    # fun to_bits(self) -> SizedIntegerUnsigned[bit_width] {
+    #     ret SizedIntegerUnsigned[bit_width]::from(self)
+    # }
+}
+

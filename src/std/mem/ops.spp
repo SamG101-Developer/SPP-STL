@@ -1,0 +1,71 @@
+use std::copy::Copy
+use std::mem::memory::Memory
+use std::number::USize
+use std::option::Opt
+use std::option::None
+use std::option::Some
+use std::result::Exception
+use std::void::Void
+
+
+cls MemoryIncompatibleSize {}
+sup MemoryIncompatibleSize ext Exception { }
+
+
+@compiler_builtin
+fun size_of[T]() -> USize {
+    # Returns the size of a type at compile time.
+}
+
+
+@compiler_builtin
+fun size_of_value[T](value: T) -> USize {
+    # Handles heap size checking for types that are not known at compile time.
+}
+
+
+fun malloc[T](n: USize) -> Opt[Memory[T]] {
+    # Determine the size and get an allocated pointer.
+    let size = n * size_of[T]()
+    let mem = libc::malloc[T](size)
+    # TODO
+    # ret case mem.ptr.pos of
+    #     == 0_uz { None() }
+    #     else { Some(val=mem) }
+    ret None()
+}
+
+
+fun calloc[T](n: USize) -> Opt[Memory[T]] {
+    # Determine the size and get an allocated pointer.
+    let size = n * size_of[T]()
+    let mem = libc::calloc[T](n, size_of[T]())
+
+    # Convert the returned pointer into a safe type.
+    # TODO
+    # ret case mem.ptr.pos of
+    #     == 0_uz { None() }
+    #     else { Some(val=mem) }
+    ret None()
+}
+
+
+fun realloc[T](mut memory: &mut Memory[T], n: USize) -> Opt[Void] {
+    # Determine the size and get a reallocated pointer.
+    let size = n * size_of[T]()
+    let out = libc::realloc(&mut memory, size)
+
+    # If the new pointer is null, return None (failed reallocation).
+    case out == 0_s32 { ret None() }
+
+    # Otherwise, assign the new pointer and update the length.
+    memory.cap = n
+
+    ret Some[Void]()
+}
+
+
+fun free[T](memory: Memory[T]) -> Void {
+    # Free the memory pointed to by the pointer.
+    libc::free(memory)
+}

@@ -1,7 +1,23 @@
+use std::void::Void
+
+
 @public
 cls Pow[Rhs, Ret] { }
 
+
+@public
+cls PowAssign[Rhs] {}
+
+
 sup [Rhs, Ret] Pow[Rhs, Ret] {
+    @public
     @abstract_method
     fun pow(self, that: Rhs) -> Ret { }
+}
+
+
+sup [Rhs] PowAssign[Rhs] {
+    @public
+    @abstract_method
+    fun pow_assign(&mut self, that: Rhs) -> Void { }
 }

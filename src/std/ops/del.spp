@@ -4,7 +4,9 @@ use std::void::Void
 @public
 cls Del { }
 
+
 sup Del {
+    @public
     @abstract_method
     fun del(self) -> Void { }
 }

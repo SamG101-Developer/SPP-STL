@@ -2,7 +2,7 @@ use std::boolean::Bool
 use std::function::FunRef
 use std::generator::Gen
 use std::generator::GenOnce
-use std::number::usize::USize
+use std::number::USize
 use std::option::None
 use std::option::Opt
 use std::option::Some
@@ -59,11 +59,12 @@ sup [T] Iterator[T] {
         gen with other
     }
 
-    cor cycle(self) -> Iterator[T] {
-        loop true {
-            gen with self
-        }
-    }
+    # todo: can only cycle clonable objects, so move to "sup[T: Clone] Iterator[T]" when constraints are supported, and also sup [T: Clone] Iterator[T] ext Clone[Out=Self] {
+    # cor cycle(self) -> Iterator[T] {
+    #     loop true {
+    #         gen with self
+    #     }
+    # }
 
     cor drop(self, count: USize) -> Iterator[T] {
         let mut index = 0_uz
@@ -155,7 +156,7 @@ sup [T] Iterator[T] {
         ret false
     }
 
-    fun find(self, predicate: FunRef[(&T,), Bool]) -> Opt[T] {
+    fun find(self, predicate: FunRef[(&T,), Bool]) -> Opt[T] {  # todo: this should fail (could be Opt[&T] i think)
         loop item in self {
             case predicate(&item) {
                 ret Some(val=item)

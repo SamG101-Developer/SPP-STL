@@ -1,18 +1,24 @@
 use std::boolean::Bool
-use std::number::u8::U8
-use std::number::usize::USize
+use std::number::U8
+use std::number::S32
+use std::number::USize
+use std::result::Exception
 use std::result::Res
+use std::result::Pass
 use std::vector::Vec
 use std::void::Void
 
 
 cls StreamWriteException { }
+sup StreamWriteException ext Exception { }
 
 
 cls StreamReadException { }
+sup StreamReadException ext Exception { }
 
 
 cls StreamSeekException { }
+sup StreamSeekException ext Exception { }
 
 
 cls WritableStream { }
@@ -27,7 +33,7 @@ cls SeekableStream { }
 sup WritableStream {
     @public
     @abstract_method
-    fun write(&mut self, data: &Vec[U8]) -> Res[USize, StreamWriteException] { }
+    fun write(&mut self, data: &Vec[U8], length: USize) -> Res[S32, StreamWriteException] { }
 
     @public
     @abstract_method
@@ -36,7 +42,9 @@ sup WritableStream {
     @public
     @no_impl
     @virtual_method
-    fun write_all(&mut self, data: &Vec[U8]) -> Res[Void, StreamWriteException] { }
+    fun write_all(&mut self, data: &Vec[U8]) -> Res[S32, StreamWriteException] {
+        ret Pass(val=0_s32)
+    }
 }
 
 
@@ -48,7 +56,9 @@ sup ReadableStream {
     @public
     @no_impl
     @virtual_method
-    fun read_all(&mut self) -> Res[Vec[U8], StreamReadException] { }
+    fun read_all(&mut self) -> Res[Vec[U8], StreamReadException] {
+        ret Pass(val=Vec[U8]())
+    }
 }
 
 

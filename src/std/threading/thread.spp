@@ -1,6 +1,7 @@
 use std::boolean::Bool
 use std::string::Str
-use std::number::u64::U64
+use std::number::U64
+use std::number::S32
 use std::ops::eq::Eq
 use std::ops::del::Del
 
@@ -17,7 +18,7 @@ cls Thread {
 sup Thread {
     @public
     fun new(name: Str) -> Thread {
-        let unique_id = 0_u64  # ffi::libc::rand()
+        let unique_id = 0_u64  # libc::rand()
         ret Thread(name, unique_id, native_id=0_u64, alive=false)
     }
 
@@ -42,7 +43,7 @@ sup Thread {
     @public
     fun join(&mut self) -> void::Void {
         self.alive = false
-        # ffi::pthread::pthread_join(self.native_id, [I32])
+        # ffi::pthread::pthread_join(self.native_id, [S32])
     }
 
     @public

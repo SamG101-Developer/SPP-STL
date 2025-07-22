@@ -1,6 +1,66 @@
-cls From[That] { }
+use std::option::Opt
+use std::option::Some
+use std::generator::GenOnce
+use std::generator::GenOpt
 
-sup [That] From[That] {
+
+cls From[This, That] { }
+
+
+cls TryFrom[This, That] { }
+
+
+sup [This, That] From[This, That] {
+    @public
     @abstract_method
-    fun from(that: That) -> Self { }
+    fun from(that: That) -> This { }
+}
+
+
+sup [This, That] TryFrom[This, That] {
+    @public
+    @abstract_method
+    fun try_from(that: That) -> Opt[This] { }
+}
+
+
+# The `upcast_mov` method slices an object of type `Derived` to its base type `Base` by moving it. Fields that don't
+# belong to the type `Base` are discarded, and the resulting object is of type `Base`. This is useful for converting
+# derived types to their base types when ownership is transferred.
+@public
+@compiler_builtin
+fun upcast_mov[Base, Derived: Base](derived: Derived) -> Base {
+}
+
+
+# The `upcast_mut` method does not slice an object, but borrows part of it mutably from memory. The part it borrows
+# represents the fields over the `Base` type. This is useful for working with derived types when you need to modify the
+# base part of the object, or a method only accepts a borrow to the base type.
+@public
+@compiler_builtin
+cor upcast_mut[Base, Derived: Base](derived: &mut Derived) -> GenOnce[&mut Base] {
+}
+
+
+@public
+@compiler_builtin
+cor upcast_ref[Base, Derived: Base](derived: &Derived) -> GenOnce[&Base] {
+}
+
+
+@public
+@compiler_builtin
+fun downcast_mov[Base, Derived: Base](base: Base) -> Derived {
+}
+
+
+@public
+@compiler_builtin
+cor downcast_mut[Base, Derived: Base](base: &mut Base) -> GenOpt[&mut Derived] {
+}
+
+
+@public
+@compiler_builtin
+cor downcast_ref[Base, Derived: Base](base: &Base) -> GenOpt[&Derived] {
 }

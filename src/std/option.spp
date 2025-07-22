@@ -1,5 +1,14 @@
 use std::boolean::Bool
-use std::function::FunRef
+use std::clone::Clone
+use std::copy::Copy
+use std::function::FunMov
+use std::result::Res
+use std::result::Pass
+use std::result::Fail
+
+# todo: superimpose Copy on None
+# todo: change None to NoneT
+# todo: declare a cmp constant None for NoneT (prevents having to use None() everywhere)
 
 
 @public
@@ -14,14 +23,180 @@ cls None { }
 type Opt[T] = Some[T] or None
 
 
+# Todo: "T: Copy"
+sup [T] Opt[T] ext Copy { }
+
+
+#sup [T: Clone[Out=T]] Opt[T] ext Clone[Out=Opt[T]] {
+#    fun clone(&self) -> Opt[T] {
+#        ret case self of
+#            is Some[T](val) { Some[T](val.clone()) }
+#            else { None() }
+#    }
+#}
+
+
 sup [T] Opt[T] {
     @public
+    @inline
     fun is_some(&self) -> Bool {
-        ret self is Some[T](..)
+        ret *self is Some[T](..)
     }
 
     @public
+    @inline
+    fun is_some_and(self, pred: FunMov[(T,), Bool]) -> Bool {
+        ret case self of
+            is Some[T](val) { pred(val) }
+            else { false }
+    }
+
+    @public
+    @inline
     fun is_none(&self) -> Bool {
-        ret self is None()
+        ret *self is None()
+    }
+
+    @public
+    @inline
+    fun is_none_or(self, pred: FunMov[(T,), Bool]) -> Bool {
+        ret case self of
+            is Some[T](val) { pred(val) }
+            else { true }
+    }
+}
+
+
+sup [T] Opt[T] {
+    @public
+    @inline
+    fun and_[U](self, that: Opt[U]) -> Opt[U] {
+        ret case self of
+            is Some[T](..) { that }
+            else { None() }
+    }
+
+    @public
+    @inline
+    fun and_then[U](self, pred: FunMov[(T,), Opt[U]]) -> Opt[U] {
+        ret case self of
+            is Some[T](val) { pred(val) }
+            else { None() }
+    }
+}
+
+
+sup [T] Opt[T] {
+    @public
+    @inline
+    fun ior_(self, that: Opt[T]) -> Opt[T] {
+        ret case self of
+            is Some[T](..) { self }
+            else { that }
+    }
+
+    @public
+    @inline
+    fun ior_else(self, that: FunMov[(), Opt[T]]) -> Opt[T] {
+        ret case self of
+            is Some[T](..) { self }
+            else { that() }
+    }
+}
+
+
+sup [T] Opt[T] {
+    @public
+    @inline
+    @no_impl
+    fun xor(self, that: Opt[T]) -> Opt[T] {
+        # ret case (self, that) of
+        #     is (Some[T](val), None()) { Some(val) }
+        #     is (None(), Some[T](val)) { Some(val) }
+        #     else { None() }
+    }
+}
+
+
+sup [T] Opt[T] {
+    @public
+    @inline
+    @no_impl
+    fun map[U](self, f: FunMov[(T,), U]) -> Opt[U] {
+        # ret case self of
+        #     is Some[T](val) { Some(val=f(val)) }
+        #     else { None() }
+    }
+
+    @public
+    @inline
+    fun map_or[U](self, default: U, f: FunMov[(T,), U]) -> U {
+        ret case self of
+            is Some[T](val) { f(val) }
+            else { default }
+    }
+
+    @public
+    @inline
+    fun map_or_else[U](self, default: FunMov[(), U], f: FunMov[(T,), U]) -> U {
+        ret case self of
+            is Some[T](val) { f(val) }
+            else { default() }
+    }
+}
+
+
+sup [T] Opt[T] {
+    @public
+    @inline
+    @no_impl
+    fun ok_or[E](self, err: E) -> Res[T, E] {
+        # ret case self of
+        #     is Some[T](val) { Pass(val) }
+        #     else { Fail(err) }
+    }
+
+    @public
+    @inline
+    @no_impl
+    fun ok_or_else[E](self, err: FunMov[(), E]) -> Res[T, E] {
+        # case self of
+        #     is Some[T](val) { Pass(val) }
+        #     else { Fail(err=err()) }
+    }
+}
+
+
+sup[T] Opt[T] {
+    @public
+    @inline
+    @no_impl
+    fun unwrap(self) -> T {
+        # ret case self of
+        #     is Some[T](val) { val }
+        #     else { std::abort::abort("called `unwrap` on a `None` value") }
+    }
+
+    @public
+    @inline
+    fun unwrap_or(self, default: T) -> T {
+        ret case self of
+            is Some[T](val) { val }
+            else { default }
+    }
+
+    @public
+    @inline
+    fun unwrap_or_else(self, default: FunMov[(), T]) -> T {
+        ret case self of
+            is Some[T](val) { val }
+            else { default() }
+    }
+}
+
+
+sup [T] Opt[T] ext std::ops::try::Try[T, None] {
+    fun op_is_output(&self) -> Bool {
+        ret *self is Some[T](..)
     }
 }

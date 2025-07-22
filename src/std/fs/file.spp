@@ -1,8 +1,8 @@
 use std::boolean::Bool
 use std::fs::path::Path
-use std::number::i32::I32
-use std::number::u8::U8
-use std::number::usize::USize
+use std::number::U8
+use std::number::USize
+use std::number::S32
 use std::ops::del::Del
 use std::result::Pass
 use std::result::Res
@@ -22,7 +22,7 @@ cls FileNotFoundException { }
 
 
 cls File {
-    handle: I32
+    handle: S32
     open: Bool = false
 }
 
@@ -30,7 +30,7 @@ cls File {
 sup File {
     @public
     fun open(path: &Path, mode: Str) -> Res[File, FileNotFoundException] {
-        let handle = libc::fopen(&path.path, &mode)
+        let handle = libc::fopen(&path.path.data.buf.mem, &mode.data.buf.mem)
         ret Pass(val=File(handle, open=true))
     }
 
@@ -57,8 +57,8 @@ sup File {
 
 sup File ext WritableStream {
     @no_impl
-    fun write(&mut self, data: &Vec[U8]) -> Res[USize, StreamWriteException] {
-        # libc::fwrite(&mtu data, 8, I32::from(data.len()), &mut self.handle)
+    fun write(&mut self, data: &Vec[U8], length: USize) -> Res[S32, StreamWriteException] {
+        # libc::fwrite(&mut data, 8, S32::from(data.len()), &mut self.handle)
     }
 
     @no_impl

@@ -1,32 +1,89 @@
-use std::ops::and_::And
-use std::ops::ior_::Ior
-use std::ops::eq::Eq
-use std::ops::ne::Ne
+use std::copy::Copy
+use std::cast::From
+use std::clone::Clone
+use std::number::U32
+
+use std::num::sized_integer_signed::SizedIntegerSigned
+use std::num::sized_integer_unsigned::SizedIntegerUnsigned
+use std::num::sized_floating_point::SizedFloatingPoint
 
 
 @public
 cls Bool { }
 
+sup Bool ext Copy { }
 
-sup Bool ext And[Rhs=Bool] {
+
+sup Bool ext Clone[Out=Bool] {
+    @compiler_builtin
+    fun clone(&self) -> Bool { }
+}
+
+
+sup Bool ext std::ops::and_::And[Rhs=Bool] {
     @compiler_builtin
     fun and_(self, that: Bool) -> Bool { }
 }
 
 
-sup Bool ext Ior[Rhs=Bool] {
+sup Bool ext std::ops::ior_::Ior[Rhs=Bool] {
     @compiler_builtin
     fun ior_(self, that: Bool) -> Bool { }
 }
 
 
-sup Bool ext Eq[Rhs=Bool] {
+sup Bool ext std::ops::bit_and::BitAnd[Rhs=Bool, Ret=Bool] {
+    @compiler_builtin
+    fun bit_and(self, that: Bool) -> Bool { }
+}
+
+
+sup Bool ext std::ops::bit_ior::BitIor[Rhs=Bool, Ret=Bool] {
+    @compiler_builtin
+    fun bit_ior(self, that: Bool) -> Bool { }
+}
+
+
+sup Bool ext std::ops::bit_xor::BitXor[Rhs=Bool, Ret=Bool] {
+    @compiler_builtin
+    fun bit_xor(self, that: Bool) -> Bool { }
+}
+
+
+sup Bool ext std::ops::bit_not::BitNot[Ret=Bool] {
+    @compiler_builtin
+    fun bit_not(self) -> Bool { }
+}
+
+
+sup Bool ext std::ops::eq::Eq[Rhs=Bool] {
     @compiler_builtin
     fun eq(&self, that: &Bool) -> Bool { }
 }
 
 
-sup Bool ext Ne[Rhs=Bool] {
+sup Bool ext std::ops::ne::Ne[Rhs=Bool] {
     @compiler_builtin
     fun ne(&self, that: &Bool) -> Bool { }
+}
+
+
+sup [cmp n: U32] Bool ext From[Self, SizedIntegerSigned[n]] {
+    fun from(that: SizedIntegerSigned[n]) -> Bool {
+        ret that > SizedIntegerSigned[n]::zero()
+    }
+}
+
+
+sup [cmp n: U32] Bool ext From[Self, SizedIntegerUnsigned[n]] {
+    fun from(that: SizedIntegerUnsigned[n]) -> Bool {
+        ret that > SizedIntegerUnsigned[n]::zero()
+    }
+}
+
+
+sup [cmp n: U32] Bool ext From[Self, SizedFloatingPoint[n]] {
+    fun from(that: SizedFloatingPoint[n]) -> Bool {
+        ret that > SizedFloatingPoint[n]::zero()
+    }
 }

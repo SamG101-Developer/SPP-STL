@@ -1,6 +1,6 @@
 use std::generator::GenOnce
 use std::generator::GenOpt
-use std::number::u64::U64
+use std::number::U64
 use std::void::Void
 
 
@@ -15,44 +15,44 @@ cls Mutex[T] {
 sup [T] Mutex[T] {
     @public
     fun new(value: T) -> Mutex[T] {
-        let unique_id = 0_u64  # ffi::libc::rand()
-        let native_id = 0_u64  # ffi::pthread::pthread_create_mutex()
+        let unique_id = 0_u64  # libc::rand()
+        let native_id = 0_u64  # pthread::pthread_create_mutex()
         ret Mutex(unique_id, native_id, value)
     }
 
     @public
     cor lock_ref(&mut self) -> GenOnce[&T] {
-        # ffi::pthread::pthread_mutex_lock(&mut self.native_id)
+        # pthread::pthread_mutex_lock(&mut self.native_id)
         gen &self.value
     }
 
     @public
     cor lock_mut(&mut self) -> GenOnce[&mut T] {
-        # ffi::pthread::pthread_mutex_lock(&mut self.native_id)
+        # pthread::pthread_mutex_lock(&mut self.native_id)
         gen &mut self.value
     }
 
     @public
     cor try_lock_ref(&mut self) -> GenOpt[&T] {
-        # ffi::pthread::pthread_mutex_trylock(&mut self.native_id)
+        # pthread::pthread_mutex_trylock(&mut self.native_id)
         gen &self.value
     }
 
     @public
     cor try_lock_mut(&mut self) -> GenOpt[&mut T] {
-        # ffi::pthread::pthread_mutex_trylock(&mut self.native_id)
+        # pthread::pthread_mutex_trylock(&mut self.native_id)
         gen &mut self.value
     }
 
     @public
     fun unlock(&mut self) -> Void {
-        # ffi::pthread::pthread_mutex_unlock(&mut self.native_id)
+        # pthread::pthread_mutex_unlock(&mut self.native_id)
     }
 }
 
 
 sup [T] Mutex[T] ext std::ops::del::Del {
     fun del(self) -> Void {
-        # ffi::pthread::pthread_mutex_destroy(self.native_identifier)
+        # pthread::pthread_mutex_destroy(self.native_identifier)
     }
 }

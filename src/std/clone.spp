@@ -4,6 +4,7 @@ cls Clone[Out] { }
 
 sup [Out] Clone[Out] {
     @public
+    @inline
     @abstract_method
     fun clone(&self) -> Out { }
 }
