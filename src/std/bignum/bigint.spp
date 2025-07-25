@@ -1,5 +1,7 @@
 use std::bignum::biguint::BigUInt
 use std::boolean::Bool
+use std::cast::From
+use std::number::S32
 use std::void::Void
 
 
@@ -7,6 +9,12 @@ use std::void::Void
 cls BigInt {
     sign: Bool
     data: BigUInt
+}
+
+
+sup BigInt ext From[Self, S32] {
+    @no_impl
+    fun from(that: S32) -> Self { }
 }
 
 
