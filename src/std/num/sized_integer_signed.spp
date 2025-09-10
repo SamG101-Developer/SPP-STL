@@ -153,10 +153,11 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
     fun mul_saturating(self, that: Self) -> Self {
-        ret case self.mul_checked(that) of
+        ret case self.mul_checked(that) of {
             is Some[Self](val) { val }
             is None() and (self < Self::zero()) == (that < Self::zero()) { intrinsics::max_val[Self]() }
             else { intrinsics::min_val[Self]() }
+        }
     }
 
     @public
@@ -192,9 +193,10 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @inline
     fun div_saturating(self, that: Self) -> Self {
         let out = self.div_overflow(that)
-        ret case out of
+        ret case out of {
             is (val, true) { intrinsics::max_val[Self]() }
             else { out.0 }
+        }
     }
 
     @public
@@ -317,10 +319,11 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
     fun pow_saturating(self, that: U32) -> Self {
-        ret case self.pow_checked(that) of
+        ret case self.pow_checked(that) of {
             is Some[Self](val) { val }
             is None() and (self < Self::zero()) and (that % 2_u32 == 1_u32) { intrinsics::min_val[Self]() }
             else { intrinsics::max_val[Self]() }
+        }
     }
 }
 
@@ -429,9 +432,10 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
 
         let small_cand = (self >> Self::two()).isqrt_checked()? >> Self::one()
         let large_cand = small_cand + Self::one()
-        ret case large_cand * large_cand of
+        ret case large_cand * large_cand of {
             <= self { Some(val=large_cand) }
             else { Some(val=small_cand) }
+        }
     }
 }
 
@@ -482,8 +486,9 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline
     fun ilog10_checked(self) -> Opt[U32] {
-        case self.ilog2_checked() of
+        case self.ilog2_checked() of {
             is Some[U32](val as i) { ret Some(val=*sized_integer::log_10_lookup_table.index_ref(U64::from(i))) }
+        }
         ret None()
     }
 }

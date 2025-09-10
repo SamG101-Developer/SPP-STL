@@ -12,6 +12,7 @@ sup [Yield, Send] Gen[Yield, Send] {
 }
 
 
+# todo: remove "send" param?
 @public
 cls GenOnce[Yield, Send=Void] { }
 sup [Yield, Send] GenOnce[Yield, Send] {
