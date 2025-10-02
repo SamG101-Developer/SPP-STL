@@ -111,9 +111,10 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
     fun sub_checked(self, that: Self) -> Opt[Self] {
-        ret case self of
+        ret case self of {
             < that { None() }
             else { Some(val=intrinsics::sub(self, that)) }
+        }
     }
 
     @public
@@ -153,9 +154,10 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
     fun mul_saturating(self, that: Self) -> Self {
-        ret case self.mul_checked(that) of
+        ret case self.mul_checked(that) of {
             is Some[Self](val) { val }
             else { intrinsics::max_val[Self]() }
+        }
     }
 
     @public
@@ -170,9 +172,10 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
     fun div_checked(self, that: Self) -> Opt[Self] {
-        ret case that of
+        ret case that of {
             == Self::zero() { None() }
             else { Some(val=intrinsics::udiv(self, that)) }
+        }
     }
 
     @public
@@ -298,9 +301,10 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
     fun pow_saturating(self, that: U32) -> Self {
-        ret case self.pow_checked(that) of
+        ret case self.pow_checked(that) of {
             is Some[Self](val) { val }
             else { intrinsics::max_val[Self]() }
+        }
     }
 }
 
@@ -324,9 +328,10 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
 
         let small_cand = (self >> Self::two()).isqrt()? >> Self::one()
         let large_cand = small_cand + Self::one()
-        ret case large_cand * large_cand of
+        ret case large_cand * large_cand of {
             <= self { Some(val=large_cand) }
             else { Some(val=small_cand) }
+        }
     }
 }
 
@@ -377,8 +382,9 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline
     fun ilog10_checked(self) -> Opt[U32] {
-        case self.ilog2_checked() of
+        case self.ilog2_checked() of {
             is Some[U32](val as i) { ret Some(val=*sized_integer::log_10_lookup_table.index_ref(U64::from(i))) }
+        }
         ret None()
     }
 }

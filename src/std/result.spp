@@ -31,9 +31,10 @@ sup [T, E] Res[T, E] {
     @inline
     @no_impl
     fun ok(self) -> Opt[T] {
-        # let converted: Opt[T] = case self of
+        # let converted: Opt[T] = case self of {
         #    is Pass[T](val) { Some(val) }
         #    is Fail[E](err) { None() }
+        # }
     }
 }
 
