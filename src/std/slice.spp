@@ -3,12 +3,9 @@ use std::allocator::GlobalAlloc
 use std::array::Arr
 use std::cast::From
 use std::clone::Clone
-use std::iterator::Iterator
-use std::iterator::IterMov
-use std::iterator::IterMut
-use std::iterator::IterRef
-use std::iterator::IndexMut
-use std::iterator::IndexRef
+use std::iter::IndexMut
+use std::iter::IndexRef
+use std::iterator::BidirectionalIterator
 use std::generator::GenOnce
 use std::mem::memory::Memory
 use std::mem::view::View
@@ -82,32 +79,64 @@ sup [E, A] Slice[E, A] ext std::ops::del::Del {
 }
 
 
-sup [E, A] Slice[E, A] ext IterMov[E] {
-    @compiler_builtin
-    cor iter_mov(self) -> Iterator[E] { }
+sup [E, A] Slice[E, A] {
+    cor iter_mov(self) -> Iterator[E] {
+        let index = 0_uz
+        loop index < self.len {
+            gen self[index]
+            index += 1_uz
+        }
+    }
+
+    cor iter_mut(&mut self) -> Iterator[&mut E] {
+        let index = 0_uz
+        loop index < self.len {
+            gen &mut self[index]
+            index += 1_uz
+        }
+    }
+
+    cor iter_ref(&self) -> Iterator[&E] {
+        let index = 0_uz
+        loop index < self.len {
+            gen &self[index]
+            index += 1_uz
+        }
+    }
+
+    cor reverse_iter_mov(self) -> Iterator[E] {
+        let index = self.len
+        loop index > 0_uz {
+            index -= 1_uz
+            gen self[index]
+        }
+    }
+
+    cor reverse_iter_mut(&mut self) -> Iterator[&mut E] {
+        let index = self.len
+        loop index > 0_uz {
+            index -= 1_uz
+            gen &mut self[index]
+        }
+    }
+
+    cor reverse_iter_ref(&self) -> Iterator[&E] {
+        let index = self.len
+        loop index > 0_uz {
+            index -= 1_uz
+            gen &self[index]
+        }
+    }
 }
 
 
-sup [E, A] Slice[E, A] ext IterMut[E] {
-    @compiler_builtin
-    cor iter_mut(&mut self) -> Iterator[&mut E] { }
-}
-
-
-sup [E, A] Slice[E, A] ext IterRef[E] {
-    @compiler_builtin
-    cor iter_ref(&self) -> Iterator[&E] { }
-}
-
-
-sup [E, A] Slice[E, A] ext IndexMut[E, USize] {
+sup [E, A] Slice[E, A] ext std::ops::idx::IndexMut[E, USize] {
     @compiler_builtin
     cor index_mut(&mut self, index: USize) -> GenOnce[&mut E] { }
 }
 
 
-sup [E, A] Slice[E, A] ext IndexRef[E, USize] {
+sup [E, A] Slice[E, A] ext std::ops::idx::IndexRef[E, USize] {
     @compiler_builtin
     cor index_ref(&self, index: USize) -> GenOnce[&E] { }
 }
-
