@@ -41,3 +41,6 @@ sup [T] Shared[T] ext DerefMut[T] {
     @compiler_builtin
     cor deref_mut(&mut self) -> GenOnce[&mut T] { }
 }
+
+
+sup [T] Shared[T] ext Copy { }
