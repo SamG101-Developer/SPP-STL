@@ -6,6 +6,7 @@ use std::clone::Clone
 use std::function::FunRef
 use std::generator::GenOnce
 use std::generator::GenOpt
+use std::iterator::Iterator
 use std::mem::memory::Memory
 use std::number::USize
 use std::slice::Slice
