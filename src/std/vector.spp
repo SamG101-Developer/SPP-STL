@@ -188,7 +188,7 @@ sup [T, A] Vec[T, A] ext std::opx::idx::IndexRef[T, USize] {
 sup [T, A] Vec[T, A] ext std::ops::add::Add[Self, Ret=Self] {
     fun add(self, that: Self) -> Self {
         let mut result = self
-        for element in that.iter_mov() {
+        loop element in that.iter_mov() {
             result.push(element)
         }
         ret result
@@ -198,7 +198,7 @@ sup [T, A] Vec[T, A] ext std::ops::add::Add[Self, Ret=Self] {
 
 sup [T, A] Vec[T, A] ext std::ops::add::AddAssign[Self] {
     fun add_assign(&mut self, that: Self) -> Void {
-        for element in that.iter_mov() {
+        loop element in that.iter_mov() {
             self.push(element)
         }
     }
