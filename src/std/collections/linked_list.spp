@@ -69,7 +69,7 @@ sup [T] LinkedList[T] {
 
         # Define variables for looping.
         let mut current = self.head
-        let mut prev: Opt[Shared[LinkedListNode[T]]] = None
+        let mut prev: Opt[Shared[LinkedListNode[T]]] = None()
         let mut i = 0_uz
 
         loop current is Some(val as node) {
@@ -91,8 +91,8 @@ sup [T] LinkedList[T] {
 
 sup [T] LinkedList[T] {
     fun clear(&mut self) -> Void {
-        self.head = None
-        self.tail = None
+        self.head = None()
+        self.tail = None()
         self.len = 0_uz
     }
 
