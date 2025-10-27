@@ -74,13 +74,13 @@ sup [T] LinkedList[T] {
 
         # Define variables for looping.
         let mut current = self.head
-        let mut prev: Opt[NodeType] = None()
+        let mut prev: Opt[Self::NodeType] = None()
         let mut i = 0_uz
 
-        loop current is Some[NodeType](val as node) {
+        loop current is Some[Self::NodeType](val as node) {
             case i == index {
                 let new_node = Shared(LinkedListNode(value=value, next=Some(val=node)))
-                case prev is Some[NodeType](val as prev_node) {
+                case prev is Some[Self::NodeType](val as prev_node) {
                     prev_node.next = Some(val=new_node)
                 }
                 self.len += 1_uz
@@ -115,7 +115,7 @@ sup [T] LinkedList[T] {
     cor iter_mov(self) -> Iterator[T] {
         # Iterate over the list nodes, moving out the values
         let mut current = self.head
-        loop current is Some[NodeType](val as node) {
+        loop current is Some[Self::NodeType](val as node) {
             gen node.value
             current = node.next
         }
@@ -124,7 +124,7 @@ sup [T] LinkedList[T] {
     cor iter_mut(&mut self) -> Iterator[&mut T] {
         # Iterate over the list nodes, yielding mutable references to the values
         let mut current = self.head
-        loop current is Some[NodeType](val as node) {
+        loop current is Some[Self::NodeType](val as node) {
             gen &mut node.value
             current = node.next
         }
@@ -133,7 +133,7 @@ sup [T] LinkedList[T] {
     cor iter_ref(&self) -> Iterator[&T] {
         # Iterate over the list nodes, yielding references to the values
         let mut current = self.head
-        loop current is Some[NodeType](val as node) {
+        loop current is Some[Self::NodeType](val as node) {
             gen &node.value
             current = node.next
         }
