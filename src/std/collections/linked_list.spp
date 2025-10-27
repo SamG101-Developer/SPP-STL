@@ -5,6 +5,7 @@ use std::option::None
 use std::option::Opt
 use std::option::Some
 use std::shared::Shared
+use std::void::Void
 
 
 cls LinkedListNode[T] {
