@@ -1,3 +1,6 @@
+use std::generator::GenOnce
+
+
 @public
 cls IndexMut[T, I] { }
 sup [T, I] IndexMut[T, I] {
