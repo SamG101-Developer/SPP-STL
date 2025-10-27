@@ -9,7 +9,7 @@ use std::void::Void
 
 
 cls LinkedListNode[T] {
-    value: T
+    val: T
     next: Opt[Shared[LinkedListNode[T]]]
 }
 
@@ -34,8 +34,8 @@ sup [T] LinkedList[T] {
     }
 
     @public
-    fun push_back(&mut self, value: T) -> Void {
-        let new_node = Shared(LinkedListNode(value=value, next=None()))
+    fun push_back(&mut self, val: T) -> Void {
+        let new_node = Shared(LinkedListNode(val=val, next=None()))
         case self.tail of {
             is None() {
                 self.head = Some(val=new_node)
@@ -50,8 +50,8 @@ sup [T] LinkedList[T] {
     }
 
     @public
-    fun push_front(&mut self, value: T) -> Void {
-        let new_node = Shared(LinkedListNode(value=value, next=self.head))
+    fun push_front(&mut self, val: T) -> Void {
+        let new_node = Shared(LinkedListNode(val=val, next=self.head))
         self.head = Some(val=new_node)
         case self.tail is None() {
             self.tail = Some(val=new_node)
@@ -59,16 +59,16 @@ sup [T] LinkedList[T] {
     }
 
     @public
-    fun push(&mut self, index: USize, value: T) -> Void {
+    fun push(&mut self, index: USize, val: T) -> Void {
         # For empty lists, push to the front.
         case index == 0_uz {
-            self.push_front(value)
+            self.push_front(val)
             ret
         }
 
         # For indices greater than or equal to the length, push to the back.
         case index >= self.len {
-            self.push_back(value)
+            self.push_back(val)
             ret
         }
 
@@ -79,7 +79,7 @@ sup [T] LinkedList[T] {
 
         loop current is Some[Self::NodeType](val as node) {
             case i == index {
-                let new_node = Shared(LinkedListNode(value=value, next=Some(val=node)))
+                let new_node = Shared(LinkedListNode(val=val, next=Some(val=node)))
                 case prev is Some[Self::NodeType](val as prev_node) {
                     prev_node.next = Some(val=new_node)
                 }
@@ -113,28 +113,28 @@ sup [T] LinkedList[T] {
 
 sup [T] LinkedList[T] {
     cor iter_mov(self) -> Iterator[T] {
-        # Iterate over the list nodes, moving out the values
+        # Iterate over the list nodes, moving out the values.
         let mut current = self.head
         loop current is Some[Self::NodeType](val as node) {
-            gen node.value
+            gen node.val
             current = node.next
         }
     }
 
     cor iter_mut(&mut self) -> Iterator[&mut T] {
-        # Iterate over the list nodes, yielding mutable references to the values
+        # Iterate over the list nodes, yielding mutable references to the values.
         let mut current = self.head
         loop current is Some[Self::NodeType](val as node) {
-            gen &mut node.value
+            gen &mut node.val
             current = node.next
         }
     }
     
     cor iter_ref(&self) -> Iterator[&T] {
-        # Iterate over the list nodes, yielding references to the values
+        # Iterate over the list nodes, yielding references to the values.
         let mut current = self.head
         loop current is Some[Self::NodeType](val as node) {
-            gen &node.value
+            gen &node.val
             current = node.next
         }
     }
