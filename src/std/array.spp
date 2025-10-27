@@ -1,6 +1,7 @@
 use std::cast::From
 use std::generator::GenOnce
 use std::iterator::Iterator
+use std::iterator::SizedIterator
 use std::mem::memory::Memory
 use std::mem::view::View
 use std::number::USize
