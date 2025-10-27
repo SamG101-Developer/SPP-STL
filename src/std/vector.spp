@@ -151,7 +151,7 @@ sup [T, A] Vec[T, A] {
 
 sup [T, A] Vec[T, A] ext SizedIterator[T] {
     fun size_hint(&self) -> USize {
-        ret self.len
+        ret self.buf.len
     }
 }
 
