@@ -18,6 +18,10 @@ cls Shared[T] {
 sup [T] Shared[T] {
     @public
     @compiler_builtin
+    fun new(value: T) -> Shared[T] { }
+
+    @public
+    @compiler_builtin
     fun shadow(&self) -> Shadow[T] { }
 
     @public
