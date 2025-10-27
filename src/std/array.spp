@@ -1,11 +1,6 @@
 use std::cast::From
-use std::iterator::Iterator
-use std::iterator::IterMov
-use std::iterator::IterMut
-use std::iterator::IterRef
-use std::iterator::IndexMut
-use std::iterator::IndexRef
 use std::generator::GenOnce
+use std::iterator::Iterator
 use std::mem::memory::Memory
 use std::mem::view::View
 use std::number::USize
