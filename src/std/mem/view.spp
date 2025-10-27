@@ -13,7 +13,7 @@ sup [T] View[T] {
 }
 
 
-sup [T] View[T] ext IterMov[T] {
+sup [T] View[T] {
     @compiler_builtin
     cor iter_mov(self) -> Iterator[T] { }
 
