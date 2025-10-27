@@ -34,7 +34,7 @@ sup [T] LinkedList[T] {
     fun push_back(&mut self, value: T) -> Void {
         let new_node = Shared(LinkedListNode(value=value, next=None()))
         case self.tail of {
-            is None {
+            is None() {
                 self.head = Some(new_node)
                 self.tail = Some(new_node)
             }
@@ -50,7 +50,7 @@ sup [T] LinkedList[T] {
     fun push_front(&mut self, value: T) -> Void {
         let new_node = Shared(LinkedListNode(value=value, next=self.head))
         self.head = Some(new_node)
-        case self.tail is None {
+        case self.tail is None() {
             self.tail = Some(new_node)
         }
     }
