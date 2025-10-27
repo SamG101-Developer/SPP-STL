@@ -33,12 +33,12 @@ sup [T] LinkedList[T] {
         let new_node = Shared(LinkedListNode(value=value, next=None()))
         case self.tail of {
             is None() {
-                self.head = Some(new_node)
-                self.tail = Some(new_node)
+                self.head = Some(val=new_node)
+                self.tail = Some(val=new_node)
             }
             is Some(val as tail_node) {
-                tail_node.next = Some(new_node)
-                self.tail = Some(new_node)
+                tail_node.next = Some(val=new_node)
+                self.tail = Some(val=new_node)
             }
         }
         self.len += 1_uz
@@ -47,9 +47,9 @@ sup [T] LinkedList[T] {
     @public
     fun push_front(&mut self, value: T) -> Void {
         let new_node = Shared(LinkedListNode(value=value, next=self.head))
-        self.head = Some(new_node)
+        self.head = Some(val=new_node)
         case self.tail is None() {
-            self.tail = Some(new_node)
+            self.tail = Some(val=new_node)
         }
     }
 
@@ -74,9 +74,9 @@ sup [T] LinkedList[T] {
 
         loop current is Some(val as node) {
             case i == index {
-                let new_node = Shared(LinkedListNode(value=value, next=Some(node)))
+                let new_node = Shared(LinkedListNode(value=value, next=Some(val=node)))
                 case prev is Some(val as prev_node) {
-                    prev_node.next = Some(new_node)
+                    prev_node.next = Some(val=new_node)
                 }
                 self.len += 1_uz
                 ret
