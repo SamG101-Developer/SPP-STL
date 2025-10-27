@@ -178,7 +178,7 @@ sup [T, A] Vec[T, A] ext std::ops::idx::IndexMut[T, USize] {
 }
 
 
-sup [T, A] Vec[T, A] ext std::opx::idxIndexRef[T, USize] {
+sup [T, A] Vec[T, A] ext std::opx::idx::IndexRef[T, USize] {
     cor index_ref(&self, index: USize) -> GenOnce[&T] {
         gen with self.buf.index_ref(index)
     }
