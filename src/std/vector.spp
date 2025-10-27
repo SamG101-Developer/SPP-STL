@@ -27,6 +27,12 @@ sup [T, A] Vec[T, A] {
     fun new() -> Vec[T, A] {
         # ret Vec[T, A](buf=A::alloc(1_uz))
     }
+
+    @public
+    @no_impl
+    fun new_with_capacity(capacity: USize) -> Vec[T, A] {
+        # ret Vec[T, A](buf=A::alloc(capacity))
+    }
 }
 
 
@@ -130,12 +136,20 @@ sup [T, A] Vec[T, A] {
         gen with self.buf.reverse_iter_mov()
     }
 
-    cor reverse_iter_mut(&mut self) -> Iteratot[&mut T] {
+    cor reverse_iter_mut(&mut self) -> Iterator[&mut T] {
         gen with self.buf.reverse_iter_mut()
     }
 
     cor reverse_iter_ref(&self) -> Iterator[&T] {
         gen with self.buf.reverse_iter_ref()
+    }
+}
+
+
+
+sup [T, A] Vec[T, A] ext SizedIterator[T] {
+    fun size_hint(&self) -> USize {
+        ret self.len
     }
 }
 

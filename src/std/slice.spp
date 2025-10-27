@@ -80,52 +80,29 @@ sup [E, A] Slice[E, A] ext std::ops::del::Del {
 
 
 sup [E, A] Slice[E, A] {
-    cor iter_mov(self) -> Iterator[E] {
-        let index = 0_uz
-        loop index < self.len {
-            gen self[index]
-            index += 1_uz
-        }
-    }
+    @compiler_builtin
+    cor iter_mov(self) -> Iterator[E] { }
 
-    cor iter_mut(&mut self) -> Iterator[&mut E] {
-        let index = 0_uz
-        loop index < self.len {
-            gen &mut self[index]
-            index += 1_uz
-        }
-    }
+    @compiler_builtin
+    cor iter_mut(&mut self) -> Iterator[&mut E] { }
 
-    cor iter_ref(&self) -> Iterator[&E] {
-        let index = 0_uz
-        loop index < self.len {
-            gen &self[index]
-            index += 1_uz
-        }
-    }
+    @compiler_builtin
+    cor iter_ref(&self) -> Iterator[&E] { }
 
-    cor reverse_iter_mov(self) -> Iterator[E] {
-        let index = self.len
-        loop index > 0_uz {
-            index -= 1_uz
-            gen self[index]
-        }
-    }
+    @compiler_builtin
+    cor reverse_iter_mov(self) -> Iterator[E] { }
 
-    cor reverse_iter_mut(&mut self) -> Iterator[&mut E] {
-        let index = self.len
-        loop index > 0_uz {
-            index -= 1_uz
-            gen &mut self[index]
-        }
-    }
+    @compiler_builtin
+    cor reverse_iter_mut(&mut self) -> Iterator[&mut E] { }
 
-    cor reverse_iter_ref(&self) -> Iterator[&E] {
-        let index = self.len
-        loop index > 0_uz {
-            index -= 1_uz
-            gen &self[index]
-        }
+    @compiler_builtin
+    cor reverse_iter_ref(&self) -> Iterator[&E] { }
+}
+
+
+sup [E, A] Slice[E, A] ext SizedIterator[E] {
+    fun size_hint(&self) -> USize {
+        ret self.len
     }
 }
 
