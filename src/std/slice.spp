@@ -3,7 +3,7 @@ use std::allocator::GlobalAlloc
 use std::array::Arr
 use std::cast::From
 use std::clone::Clone
-use std::iterator::BidirectionalIterator
+use std::iterator::Iterator
 use std::generator::GenOnce
 use std::mem::memory::Memory
 use std::mem::view::View
