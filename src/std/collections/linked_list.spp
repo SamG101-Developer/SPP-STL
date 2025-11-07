@@ -20,6 +20,7 @@ cls LinkedList[T] {
     len: USize
 }
 
+##
 
 sup [T] LinkedList[T] {
     type NodeType = Shared[LinkedListNode[T]]
@@ -139,3 +140,5 @@ sup [T] LinkedList[T] {
         }
     }
 }
+
+##
