@@ -1,10 +1,17 @@
+use std::alloc::Alloc
+use std::alloc::GlobalAlloc
 use std::generator::GenOnce
 use std::number::USize
 use std::ops::deref::DerefMut
 use std::ops::deref::DerefRef
+use std::ops::del::Del
+use std::ops::void::Void
 
 
-cls Single[T] {
+cls Single[T, A: Alloc[T] = GlobalAlloc[T]] {
+    @private
+    val: T
+
     @private
     pos: USize
 }
@@ -12,10 +19,6 @@ cls Single[T] {
 
 sup [T] Single[T] {
     type Element = T
-
-    @public
-    @compiler_builtin
-    fun new(item: T) -> Single[T] { }
 }
 
 
@@ -28,4 +31,10 @@ sup [T] Single[T] ext DerefRef[T] {
 sup [T] Single[T] ext DerefMut[T] {
     @compiler_builtin
     cor deref_mut(&mut self) -> GenOnce[&mut T] { }
+}
+
+
+sup [T] Single[T] ext Del {
+    @compiler_builtin
+    fun del(self) -> Void { }
 }

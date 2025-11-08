@@ -1,3 +1,15 @@
-cls Shadow[T] { }
+use std::alloc::Alloc
+use std::alloc::GlobalAlloc
+use std::shared::Shared
 
-sup [T] Shadow[T] { }
+
+cls Shadow[T, A: Alloc[T] = GlobalAlloc[T]] { }
+
+
+sup [T] Shadow[T] {
+    type Element = T
+
+    @public
+    @compiler_builtin
+    fun upgrade(&self) -> Shared[T] { }
+}
