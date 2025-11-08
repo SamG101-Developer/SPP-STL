@@ -158,22 +158,42 @@ fun ne[T: Num](this: &T, that: &T) -> Bool { }
 @public
 @always_inline
 @compiler_builtin
-fun lt[T: Num](this: &T, that: &T) -> Bool { }
+fun slt[T: Num](this: &T, that: &T) -> Bool { }
 
 @public
 @always_inline
 @compiler_builtin
-fun le[T: Num](this: &T, that: &T) -> Bool { }
+fun ult[T: Num](this: &T, that: &T) -> Bool { }
 
 @public
 @always_inline
 @compiler_builtin
-fun gt[T: Num](this: &T, that: &T) -> Bool { }
+fun sle[T: Num](this: &T, that: &T) -> Bool { }
 
 @public
 @always_inline
 @compiler_builtin
-fun ge[T: Num](this: &T, that: &T) -> Bool { }
+fun ule[T: Num](this: &T, that: &T) -> Bool { }
+
+@public
+@always_inline
+@compiler_builtin
+fun sgt[T: Num](this: &T, that: &T) -> Bool { }
+
+@public
+@always_inline
+@compiler_builtin
+fun ugt[T: Num](this: &T, that: &T) -> Bool { }
+
+@public
+@always_inline
+@compiler_builtin
+fun sge[T: Num](this: &T, that: &T) -> Bool { }
+
+@public
+@always_inline
+@compiler_builtin
+fun uge[T: Num](this: &T, that: &T) -> Bool { }
 
 @public
 @always_inline
@@ -583,11 +603,6 @@ fun szext[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerU
 @always_inline
 @compiler_builtin
 fun uzext[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerUnsigned[that_bit_width]) -> SizedIntegerUnsigned[this_bit_width] { }
-
-@public
-@always_inline
-@compiler_builtin
-fun sext[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerSigned[that_bit_width]) -> SizedIntegerSigned[this_bit_width] { }
 
 @public
 @always_inline
