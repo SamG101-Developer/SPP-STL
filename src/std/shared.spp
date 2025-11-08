@@ -6,6 +6,7 @@ use std::number::USize
 use std::ops::del::Del
 use std::ops::deref::DerefMut
 use std::ops::deref::DerefRef
+use std::option::Opt
 use std::shadow::Shadow
 use std::void::Void
 
@@ -39,7 +40,8 @@ sup [T] Shared[T] {
         ret self.shadow_counter
     }
 
-    @public inner(self) -> Opt[T] {
+    @public
+    fun inner(self) -> Opt[T] {
         ret case self.shared_counter == 1_uz { Some(val=self.val) } else { None() }
     }
 }
