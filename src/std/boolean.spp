@@ -14,12 +14,6 @@ cls Bool { }
 sup Bool ext Copy { }
 
 
-sup Bool ext Clone[Out=Bool] {
-    @compiler_builtin
-    fun clone(&self) -> Bool { }
-}
-
-
 sup Bool ext std::ops::and_::And[Rhs=Bool] {
     @compiler_builtin
     fun and_(self, that: Bool) -> Bool { }
