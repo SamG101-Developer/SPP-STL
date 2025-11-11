@@ -20,42 +20,42 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext FloatingPoint { }
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::eq::Eq[Rhs=Self] {
     fun eq(&self, that: &Self) -> Bool {
-        ret intrinsics::eq(self, that)
+        ret intrinsics::oeq(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::ne::Ne[Rhs=Self] {
     fun ne(&self, that: &Self) -> Bool {
-        ret intrinsics::ne(self, that)
+        ret intrinsics::one(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::lt::Lt[Rhs=Self] {
     fun lt(&self, that: &Self) -> Bool {
-        ret intrinsics::lt(self, that)
+        ret intrinsics::olt(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::le::Le[Rhs=Self] {
     fun le(&self, that: &Self) -> Bool {
-        ret intrinsics::le(self, that)
+        ret intrinsics::ole(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::gt::Gt[Rhs=Self] {
     fun gt(&self, that: &Self) -> Bool {
-        ret intrinsics::gt(self, that)
+        ret intrinsics::ogt(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::ge::Ge[Rhs=Self] {
     fun ge(&self, that: &Self) -> Bool {
-        ret intrinsics::ge(self, that)
+        ret intrinsics::oge(self, that)
     }
 }
 

@@ -153,7 +153,17 @@ fun eq[T: Num](this: &T, that: &T) -> Bool { }
 @public
 @always_inline
 @compiler_builtin
+fun oeq[T: Num](this: &T, that: &T) -> Bool { }  # ordered equal (floats)
+
+@public
+@always_inline
+@compiler_builtin
 fun ne[T: Num](this: &T, that: &T) -> Bool { }
+
+@public
+@always_inline
+@compiler_builtin
+fun one[T: Num](this: &T, that: &T) -> Bool { }  # ordered not equal (floats)
 
 @public
 @always_inline
@@ -168,12 +178,22 @@ fun ult[T: Num](this: &T, that: &T) -> Bool { }
 @public
 @always_inline
 @compiler_builtin
+fun ole[T: Num](this: &T, that: &T) -> Bool { }  # ordered less than or equal (floats)
+
+@public
+@always_inline
+@compiler_builtin
 fun sle[T: Num](this: &T, that: &T) -> Bool { }
 
 @public
 @always_inline
 @compiler_builtin
 fun ule[T: Num](this: &T, that: &T) -> Bool { }
+
+@public
+@always_inline
+@compiler_builtin
+fun olt[T: Num](this: &T, that: &T) -> Bool { }  # ordered less than (floats)
 
 @public
 @always_inline
@@ -188,12 +208,22 @@ fun ugt[T: Num](this: &T, that: &T) -> Bool { }
 @public
 @always_inline
 @compiler_builtin
+fun sge[T: Num](this: &T, that: &T) -> Bool { }  # ordered greater than or equal (floats)
+
+@public
+@always_inline
+@compiler_builtin
 fun sge[T: Num](this: &T, that: &T) -> Bool { }
 
 @public
 @always_inline
 @compiler_builtin
 fun uge[T: Num](this: &T, that: &T) -> Bool { }
+
+@public
+@always_inline
+@compiler_builtin
+fun ogt[T: Num](this: &T, that: &T) -> Bool { }  # ordered greater than (floats)
 
 @public
 @always_inline
