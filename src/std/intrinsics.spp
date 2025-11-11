@@ -208,7 +208,7 @@ fun ugt[T: Num](this: &T, that: &T) -> Bool { }
 @public
 @always_inline
 @compiler_builtin
-fun sge[T: Num](this: &T, that: &T) -> Bool { }  # ordered greater than or equal (floats)
+fun oge[T: Num](this: &T, that: &T) -> Bool { }  # ordered greater than or equal (floats)
 
 @public
 @always_inline
