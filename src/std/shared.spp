@@ -6,7 +6,9 @@ use std::number::USize
 use std::ops::del::Del
 use std::ops::deref::DerefMut
 use std::ops::deref::DerefRef
+use std::option::None
 use std::option::Opt
+use std::option::Some
 use std::shadow::Shadow
 use std::void::Void
 
