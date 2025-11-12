@@ -23,7 +23,7 @@ cls Slice[E, A: Alloc[E] = GlobalAlloc[E]] {
 }
 
 
-sup [E] Slice[E] {
+sup [E, A] Slice[E, A] {
     type Element = E
     type Allocator = A
 
