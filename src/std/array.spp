@@ -13,7 +13,7 @@ cls Arr[T, cmp n: USize] {
 }
 
 
-sup [T, cmp n: USize] {
+sup [T, cmp n: USize] Arr[T, n] {
     fun len(&self) -> USize {
         ret n
     }
