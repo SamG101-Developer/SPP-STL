@@ -1,3 +1,5 @@
+use std::alloc::Alloc
+use std::alloc::GlobalAlloc
 use std::cast::From
 use std::generator::GenOnce
 use std::iterator::Iterator
@@ -8,8 +10,8 @@ use std::slice::Slice
 
 
 @public
-cls Arr[T, cmp n: USize] {
-    mem: Memory[T]
+cls Arr[T, cmp n: USize, A: Alloc[T] = GlobalAlloc[T]] {
+    mem: Memory[T, A]
 }
 
 
