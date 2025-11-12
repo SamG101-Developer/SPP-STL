@@ -3,7 +3,6 @@ use std::generator::GenOnce
 use std::iterator::Iterator
 use std::iterator::SizedIterator
 use std::mem::memory::Memory
-use std::mem::view::View
 use std::number::USize
 use std::slice::Slice
 
@@ -14,8 +13,8 @@ cls Arr[T, cmp n: USize] {
 }
 
 
-sup [T, cmp n: USize] Arr[T, n] ext View[T] {
-    fun length(&self) -> USize {
+sup [T, cmp n: USize] {
+    fun len(&self) -> USize {
         ret n
     }
 }
