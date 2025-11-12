@@ -1,5 +1,5 @@
-use std::alloc::Alloc
-use std::alloc::GlobalAlloc
+use std::allocator::Alloc
+use std::allocator::GlobalAlloc
 use std::cast::From
 use std::generator::GenOnce
 use std::iterator::Iterator
