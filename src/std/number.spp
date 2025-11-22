@@ -2,23 +2,23 @@ use std::cast::From
 
 
 # Unsigned integers.
-type U8 = std::num::sized_integer::SizedInteger[8_u32, false]
-type U16 = std::num::sized_integer::SizedInteger[16_u32, false]
-type U32 = std::num::sized_integer::SizedInteger[32_u32, false]
-type U64 = std::num::sized_integer::SizedInteger[64_u32, false]
-type U128 = std::num::sized_integer::SizedInteger[128_u32, false]
-type U256 = std::num::sized_integer::SizedInteger[256_u32, false]
-type USize = std::num::sized_integer::SizedInteger[64_u32, false]
+type U8 = std::num::sized_integer_unsigned::SizedIntegerUnsigned[8_u32]
+type U16 = std::num::sized_integer_unsigned::SizedIntegerUnsigned[16_u32]
+type U32 = std::num::sized_integer_unsigned::SizedIntegerUnsigned[32_u32]
+type U64 = std::num::sized_integer_unsigned::SizedIntegerUnsigned[64_u32]
+type U128 = std::num::sized_integer_unsigned::SizedIntegerUnsigned[128_u32]
+type U256 = std::num::sized_integer_unsigned::SizedIntegerUnsigned[256_u32]
+type USize = std::num::sized_integer_unsigned::SizedIntegerUnsigned[64_u32]
 
 
 # Signed integers.
-type S8 = std::num::sized_integer::SizedInteger[8_u32, true]
-type S16 = std::num::sized_integer::SizedInteger[16_u32, true]
-type S32 = std::num::sized_integer::SizedInteger[32_u32, true]
-type S64 = std::num::sized_integer::SizedInteger[64_u32, true]
-type S128 = std::num::sized_integer::SizedInteger[128_u32, true]
-type S256 = std::num::sized_integer::SizedInteger[256_u32, true]
-type SSize = std::num::sized_integer::SizedInteger[64_u32, true]
+type S8 = std::num::sized_integer_signed::SizedIntegerSigned[8_u32]
+type S16 = std::num::sized_integer_signed::SizedIntegerSigned[16_u32]
+type S32 = std::num::sized_integer_signed::SizedIntegerSigned[32_u32]
+type S64 = std::num::sized_integer_signed::SizedIntegerSigned[64_u32]
+type S128 = std::num::sized_integer_signed::SizedIntegerSigned[128_u32]
+type S256 = std::num::sized_integer_signed::SizedIntegerSigned[256_u32]
+type SSize = std::num::sized_integer_signed::SizedIntegerSigned[64_u32]
 
 
 # Floating points.

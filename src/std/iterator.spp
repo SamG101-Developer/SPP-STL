@@ -10,61 +10,32 @@ use std::void::Void
 
 
 @public
-cls IterMov[T] { }
-sup [T] IterMov[T] {
-    @abstract_method
-    cor iter_mov(self) -> Iterator[T] { }
-}
-
-
-@public
-cls IterMut[T] { }
-sup [T] IterMut[T] {
-    @abstract_method
-    cor iter_mut(&mut self) -> Iterator[&mut T] { }
-}
-
-
-@public
-cls IterRef[T] { }
-sup [T] IterRef[T] {
-    @abstract_method
-    cor iter_ref(&self) -> Iterator[&T] { }
-}
-
-
-@public
-cls IndexMut[T, I] { }
-sup [T, I] IndexMut[T, I] {
-    @abstract_method
-    cor index_mut(&mut self, index: I) -> GenOnce[&mut T] { }
-}
-
-
-@public
-cls IndexRef[T, I] { }
-sup [T, I] IndexRef[T, I] {
-    @abstract_method
-    cor index_ref(&self, index: I) -> GenOnce[&T] { }
-}
-
-
-@public
 cls Iterator[T] { }
+sup [T] Iterator[T] ext Gen[T] { }
+
+
+@public
+cls SizedIterator[T] { }
+sup [T] SizedIterator[T] {
+    @public
+    @abstract_method
+    fun size_hint(&self) -> USize { }
+}
 
 
 sup [T] Iterator[T] {
+    # Concatenate this iterator with another iterator of the same element type. Iterate out of all elements from this
+    # iterator, then all elements from the other iterator.
     cor concat(self, other: Iterator[T]) -> Iterator[T] {
         gen with self
         gen with other
     }
 
-    # todo: can only cycle clonable objects, so move to "sup[T: Clone] Iterator[T]" when constraints are supported, and also sup [T: Clone] Iterator[T] ext Clone[Out=Self] {
-    # cor cycle(self) -> Iterator[T] {
-    #     loop true {
-    #         gen with self
-    #     }
-    # }
+    cor cycle(self) -> Iterator[T] {
+        loop true {
+            gen with self
+        }
+    }
 
     cor drop(self, count: USize) -> Iterator[T] {
         let mut index = 0_uz
@@ -171,6 +142,3 @@ sup [T] Iterator[T] {
         }
     }
 }
-
-
-sup [T] Iterator[T] ext Gen[T] { }

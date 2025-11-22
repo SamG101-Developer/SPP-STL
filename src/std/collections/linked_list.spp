@@ -1,0 +1,144 @@
+use std::boolean::Bool
+use std::iterator::Iterator
+use std::number::USize
+use std::option::None
+use std::option::Opt
+use std::option::Some
+use std::shared::Shared
+use std::void::Void
+
+
+cls LinkedListNode[T] {
+    val: T
+    next: Opt[Shared[LinkedListNode[T]]]
+}
+
+
+cls LinkedList[T] {
+    head: Opt[Shared[LinkedListNode[T]]]
+    tail: Opt[Shared[LinkedListNode[T]]]
+    len: USize
+}
+
+##
+
+sup [T] LinkedList[T] {
+    type NodeType = Shared[LinkedListNode[T]]
+}
+
+
+sup [T] LinkedList[T] {
+    @public
+    @no_impl
+    fun new() -> LinkedList[T] {
+        # ret LinkedList[T](head=None(), tail=None(), len=0_uz)
+    }
+
+    @public
+    fun push_back(&mut self, val: T) -> Void {
+        let new_node = Self::NodeType::new(LinkedListNode(val=val, next=None()))
+        case self.tail of {
+            is None() {
+                self.head = Some(val=new_node)
+                self.tail = Some(val=new_node)
+            }
+            is Some(val as tail_node) {
+                tail_node.next = Some(val=new_node)
+                self.tail = Some(val=new_node)
+            }
+        }
+        self.len += 1_uz
+    }
+
+    @public
+    fun push_front(&mut self, val: T) -> Void {
+        let new_node = Self::NodeType::new(LinkedListNode(val=val, next=self.head))
+        self.head = Some(val=new_node)
+        case self.tail is None() {
+            self.tail = Some(val=new_node)
+        }
+    }
+
+    @public
+    fun push(&mut self, index: USize, val: T) -> Void {
+        # For empty lists, push to the front.
+        case index == 0_uz {
+            self.push_front(val)
+            ret
+        }
+
+        # For indices greater than or equal to the length, push to the back.
+        case index >= self.len {
+            self.push_back(val)
+            ret
+        }
+
+        # Define variables for looping.
+        let mut current = self.head
+        let mut prev: Opt[Self::NodeType] = None()
+        let mut i = 0_uz
+
+        loop current is Some[Self::NodeType](val as node) {
+            case i == index {
+                let new_node = Self::NodeType::new(LinkedListNode(val=val, next=Some(val=node)))
+                case prev is Some[Self::NodeType](val as prev_node) {
+                    prev_node.next = Some(val=new_node)
+                }
+                self.len += 1_uz
+                ret
+            }
+            prev = current
+            current = node.next
+            i += 1_uz
+        }
+    }
+}
+
+
+sup [T] LinkedList[T] {
+    fun clear(&mut self) -> Void {
+        self.head = None()
+        self.tail = None()
+        self.len = 0_uz
+    }
+
+    fun length(&self) -> USize {
+        ret self.len
+    }
+
+    fun is_empty(&self) -> Bool {
+        ret self.len == 0_uz
+    }
+}
+
+
+sup [T] LinkedList[T] {
+    cor iter_mov(self) -> Iterator[T] {
+        # Iterate over the list nodes, moving out the values.
+        let mut current = self.head
+        loop current is Some[Self::NodeType](val as node) {
+            gen node.val
+            current = node.next
+        }
+    }
+
+    cor iter_mut(&mut self) -> Iterator[&mut T] {
+        # Iterate over the list nodes, yielding mutable references to the values.
+        let mut current = self.head
+        loop current is Some[Self::NodeType](val as node) {
+            gen &mut node.val
+            current = node.next
+        }
+    }
+    
+    cor iter_ref(&self) -> Iterator[&T] {
+        # Iterate over the list nodes, yielding references to the values.
+        let mut current = self.head
+        loop current is Some[Self::NodeType](val as node) {
+            gen &node.val
+            current = node.next
+        }
+    }
+}
+
+##

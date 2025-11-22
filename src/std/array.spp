@@ -1,25 +1,22 @@
+use std::allocator::Alloc
+use std::allocator::GlobalAlloc
 use std::cast::From
-use std::iterator::Iterator
-use std::iterator::IterMov
-use std::iterator::IterMut
-use std::iterator::IterRef
-use std::iterator::IndexMut
-use std::iterator::IndexRef
 use std::generator::GenOnce
+use std::iterator::Iterator
+use std::iterator::SizedIterator
 use std::mem::memory::Memory
-use std::mem::view::View
 use std::number::USize
 use std::slice::Slice
 
 
 @public
-cls Arr[T, cmp n: USize] {
-    mem: Memory[T]
+cls Arr[T, cmp n: USize, A: Alloc[T] = GlobalAlloc[T]] {
+    mem: Memory[T, A]
 }
 
 
-sup [T, cmp n: USize] Arr[T, n] ext View[T] {
-    fun length(&self) -> USize {
+sup [T, cmp n: USize] Arr[T, n] {
+    fun len(&self) -> USize {
         ret n
     }
 }
@@ -32,31 +29,41 @@ sup [T, A, cmp n: USize] Arr[T, n] ext From[Self, Slice[T, A]] {
 }
 
 
-sup [T, cmp n: USize] Arr[T, n] ext IterMov[T] {
+sup [T, cmp n: USize] Arr[T, n] {
     @compiler_builtin
     cor iter_mov(self) -> Iterator[T] { }
-}
 
-
-sup [T, cmp n: USize] Arr[T, n] ext IterMut[T] {
     @compiler_builtin
     cor iter_mut(&mut self) -> Iterator[&mut T] { }
-}
 
-
-sup [T, cmp n: USize] Arr[T, n] ext IterRef[T] {
     @compiler_builtin
     cor iter_ref(&self) -> Iterator[&T] { }
+
+    @compiler_builtin
+    cor reverse_iter_mov(self) -> Iterator[T] { }
+
+    @compiler_builtin
+    cor reverse_iter_mut(&mut self) -> Iterator[&mut T] { }
+
+    @compiler_builtin
+    cor reverse_iter_ref(&self) -> Iterator[&T] { }
 }
 
 
-sup [T, cmp n: USize] Arr[T, n] ext IndexMut[T, USize] {
+sup [T, cmp n: USize] Arr[T, n] ext SizedIterator[T] {
+    fun size_hint(&self) -> USize {
+        ret n
+    }
+}
+
+
+sup [T, cmp n: USize] Arr[T, n] ext std::ops::idx::IndexMut[T, USize] {
     @compiler_builtin
     cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] { }
 }
 
 
-sup [T, cmp n: USize] Arr[T, n] ext IndexRef[T, USize] {
+sup [T, cmp n: USize] Arr[T, n] ext std::ops::idx::IndexRef[T, USize] {
     @compiler_builtin
     cor index_ref(&self, index: USize) -> GenOnce[&T] { }
 }

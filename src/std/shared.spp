@@ -1,11 +1,22 @@
+use std::allocator::Alloc
+use std::allocator::GlobalAlloc
+use std::clone::Clone
 use std::generator::GenOnce
 use std::number::USize
+use std::ops::del::Del
 use std::ops::deref::DerefMut
 use std::ops::deref::DerefRef
+use std::option::None
+use std::option::Opt
+use std::option::Some
 use std::shadow::Shadow
+use std::void::Void
 
 
-cls Shared[T] {
+cls Shared[T, A: Alloc[T] = GlobalAlloc[T]] {
+    @private
+    val: T
+
     @private
     shared_counter: USize
 
@@ -15,9 +26,11 @@ cls Shared[T] {
 
 
 sup [T] Shared[T] {
+    type Element = T
+
     @public
     @compiler_builtin
-    fun shadow(&self) -> Shadow[T] { }
+    fun downgrade(&self) -> Shadow[T] { }
 
     @public
     fun shares(&self) -> USize {
@@ -27,6 +40,11 @@ sup [T] Shared[T] {
     @public
     fun shadows(&self) -> USize {
         ret self.shadow_counter
+    }
+
+    @public
+    fun inner(self) -> Opt[T] {
+        ret case self.shared_counter == 1_uz { Some(val=self.val) } else { None() }
     }
 }
 
@@ -40,4 +58,16 @@ sup [T] Shared[T] ext DerefRef[T] {
 sup [T] Shared[T] ext DerefMut[T] {
     @compiler_builtin
     cor deref_mut(&mut self) -> GenOnce[&mut T] { }
+}
+
+
+sup [T] Shared[T] ext Clone[Out=Self] {
+    @compiler_builtin
+    fun clone(&self) -> Self { }
+}
+
+
+sup [T] Shared[T] ext Del {
+    @compiler_builtin
+    fun del(self) -> Void { }
 }

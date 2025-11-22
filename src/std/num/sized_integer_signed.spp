@@ -80,6 +80,34 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
 }
 
 
+sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::lt::Lt[Rhs=Self] {
+    fun lt(&self, that: &Self) -> Bool {
+        ret intrinsics::slt(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::le::Le[Rhs=Self] {
+    fun le(&self, that: &Self) -> Bool {
+        ret intrinsics::sle(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::gt::Gt[Rhs=Self] {
+    fun gt(&self, that: &Self) -> Bool {
+        ret intrinsics::sgt(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::ge::Ge[Rhs=Self] {
+    fun ge(&self, that: &Self) -> Bool {
+        ret intrinsics::sge(self, that)
+    }
+}
+
+
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     @public
     @inline

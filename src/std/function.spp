@@ -1,28 +1,16 @@
 @public
 cls FunMov[Args, Out] { }
-sup [Args, Out] FunMov[Args, Out] {
-    @public
-    @compiler_builtin
-    fun call_mov(self, args: Args) -> Out { }
-}
+sup [Args, Out] FunMov[Args, Out] { }
 
 
 @public
 cls FunMut[Args, Out] { }
-sup [Args, Out] FunMut[Args, Out] {
-    @public
-    @compiler_builtin
-    fun call_mut(self, args: Args) -> Out { }
-}
+sup [Args, Out] FunMut[Args, Out] { }
 
 
 @public
 cls FunRef[Args, Out] { }
-sup [Args, Out] FunRef[Args, Out] {
-    @public
-    @compiler_builtin
-    fun call_ref(self, args: Args) -> Out { }
-}
+sup [Args, Out] FunRef[Args, Out] { }
 
 
 sup [Args, Out] FunRef[Args, Out] ext FunMut[Args, Out] { }

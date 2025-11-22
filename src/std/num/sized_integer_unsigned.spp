@@ -79,6 +79,34 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
 }
 
 
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::lt::Lt[Rhs=Self] {
+    fun lt(&self, that: &Self) -> Bool {
+        ret intrinsics::ult(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::le::Le[Rhs=Self] {
+    fun le(&self, that: &Self) -> Bool {
+        ret intrinsics::ule(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::gt::Gt[Rhs=Self] {
+    fun gt(&self, that: &Self) -> Bool {
+        ret intrinsics::ugt(self, that)
+    }
+}
+
+
+sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::ge::Ge[Rhs=Self] {
+    fun ge(&self, that: &Self) -> Bool {
+        ret intrinsics::uge(self, that)
+    }
+}
+
+
 sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     @public
     @inline

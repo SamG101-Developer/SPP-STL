@@ -4,14 +4,9 @@ use std::array::Arr
 use std::cast::From
 use std::clone::Clone
 use std::iterator::Iterator
-use std::iterator::IterMov
-use std::iterator::IterMut
-use std::iterator::IterRef
-use std::iterator::IndexMut
-use std::iterator::IndexRef
+use std::iterator::SizedIterator
 use std::generator::GenOnce
 use std::mem::memory::Memory
-use std::mem::view::View
 use std::number::U8
 use std::number::USize
 use std::string::Str
@@ -40,14 +35,14 @@ sup [E, A] Slice[E, A] {
 }
 
 
-sup [E, A] Slice[E, A] ext View[E] {
-    fun length(&self) -> USize {
+sup [E] Slice[E] {
+    fun len(&self) -> USize {
         ret self.len
     }
 }
 
 
-sup [E, A] Slice[E, A] ext Clone[Out=Self] {
+sup [E] Slice[E] ext Clone[Out=Self] {
     @no_impl
     fun clone(&self) -> Self {
     }
@@ -75,39 +70,48 @@ sup [E, A] Slice[E, A] ext From[Self, Vec[E, A]] {
 }
 
 
-sup [E, A] Slice[E, A] ext std::ops::del::Del {
+sup [E] Slice[E] ext std::ops::del::Del {
     fun del(self) -> Void {
         # A::deallocate(self.mem)  TODO: constraints
     }
 }
 
 
-sup [E, A] Slice[E, A] ext IterMov[E] {
+sup [E] Slice[E] {
     @compiler_builtin
     cor iter_mov(self) -> Iterator[E] { }
-}
 
-
-sup [E, A] Slice[E, A] ext IterMut[E] {
     @compiler_builtin
     cor iter_mut(&mut self) -> Iterator[&mut E] { }
-}
 
-
-sup [E, A] Slice[E, A] ext IterRef[E] {
     @compiler_builtin
     cor iter_ref(&self) -> Iterator[&E] { }
+
+    @compiler_builtin
+    cor reverse_iter_mov(self) -> Iterator[E] { }
+
+    @compiler_builtin
+    cor reverse_iter_mut(&mut self) -> Iterator[&mut E] { }
+
+    @compiler_builtin
+    cor reverse_iter_ref(&self) -> Iterator[&E] { }
 }
 
 
-sup [E, A] Slice[E, A] ext IndexMut[E, USize] {
+sup [E] Slice[E] ext SizedIterator[E] {
+    fun size_hint(&self) -> USize {
+        ret self.len
+    }
+}
+
+
+sup [E] Slice[E] ext std::ops::idx::IndexMut[E, USize] {
     @compiler_builtin
     cor index_mut(&mut self, index: USize) -> GenOnce[&mut E] { }
 }
 
 
-sup [E, A] Slice[E, A] ext IndexRef[E, USize] {
+sup [E] Slice[E] ext std::ops::idx::IndexRef[E, USize] {
     @compiler_builtin
     cor index_ref(&self, index: USize) -> GenOnce[&E] { }
 }
-
