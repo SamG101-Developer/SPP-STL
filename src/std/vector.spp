@@ -3,8 +3,8 @@ use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::array::Arr
 use std::boolean::Bool
+use std::cast::From
 use std::clone::Clone
-use std::from::From
 use std::function::FunRef
 use std::generator::GenOnce
 use std::generator::GenOpt
