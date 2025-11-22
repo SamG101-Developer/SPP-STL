@@ -1,8 +1,10 @@
 use std::algorithms::Sortable
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
+use std::array::Arr
 use std::boolean::Bool
 use std::clone::Clone
+use std::from::From
 use std::function::FunRef
 use std::generator::GenOnce
 use std::generator::GenOpt
@@ -148,10 +150,23 @@ sup [T, A] Vec[T, A] {
 }
 
 
-
 sup [T, A] Vec[T, A] ext SizedIterator[T] {
     fun size_hint(&self) -> USize {
         ret self.buf.len
+    }
+}
+
+
+sup [T, A] Vec[T, A] ext From[Self, Slice[T, A]] {
+    fun from(that: Slice[T, A]) -> Self {
+        ret Vec[T, A](buf=that)
+    }
+}
+
+
+sup [T, A, cmp n: USize] Vec[T, A] ext From[Self, Arr[T, n]] {
+    fun from(that: Arr[T, n]) -> Self {
+        ret Vec[T, A]::from(Slice[T, A]::from(that))
     }
 }
 
