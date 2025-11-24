@@ -16,7 +16,7 @@ cls Arr[T, cmp n: USize, A: Alloc[T] = GlobalAlloc[T]] {
 
 
 sup [T, cmp n: USize] Arr[T, n] {
-    fun len(&self) -> USize {
+    fun length(&self) -> USize {
         ret n
     }
 }

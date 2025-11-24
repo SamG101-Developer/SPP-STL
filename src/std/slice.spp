@@ -36,7 +36,7 @@ sup [E, A] Slice[E, A] {
 
 
 sup [E] Slice[E] {
-    fun len(&self) -> USize {
+    fun length(&self) -> USize {
         ret self.len
     }
 }
