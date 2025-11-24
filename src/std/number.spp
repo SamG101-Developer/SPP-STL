@@ -1,36 +1,40 @@
 use std::cast::From
 
+use std::num::sized_integer_unsigned::SizedIntegerUnsigned
+use std::num::sized_integer_signed::SizedIntegerSigned
+use std::num::sized_floating_point::SizedFloatingPoint
+
 
 # Unsigned integers.
-type U8 = std::num::sized_integer_unsigned::SizedIntegerUnsigned[8_u32]
-type U16 = std::num::sized_integer_unsigned::SizedIntegerUnsigned[16_u32]
-type U32 = std::num::sized_integer_unsigned::SizedIntegerUnsigned[32_u32]
-type U64 = std::num::sized_integer_unsigned::SizedIntegerUnsigned[64_u32]
-type U128 = std::num::sized_integer_unsigned::SizedIntegerUnsigned[128_u32]
-type U256 = std::num::sized_integer_unsigned::SizedIntegerUnsigned[256_u32]
-type USize = std::num::sized_integer_unsigned::SizedIntegerUnsigned[64_u32]
+type U8 = SizedIntegerUnsigned[8_u32]
+type U16 = SizedIntegerUnsigned[16_u32]
+type U32 = SizedIntegerUnsigned[32_u32]
+type U64 = SizedIntegerUnsigned[64_u32]
+type U128 = SizedIntegerUnsigned[128_u32]
+type U256 = SizedIntegerUnsigned[256_u32]
+type USize = SizedIntegerUnsigned[64_u32]
 
 
 # Signed integers.
-type S8 = std::num::sized_integer_signed::SizedIntegerSigned[8_u32]
-type S16 = std::num::sized_integer_signed::SizedIntegerSigned[16_u32]
-type S32 = std::num::sized_integer_signed::SizedIntegerSigned[32_u32]
-type S64 = std::num::sized_integer_signed::SizedIntegerSigned[64_u32]
-type S128 = std::num::sized_integer_signed::SizedIntegerSigned[128_u32]
-type S256 = std::num::sized_integer_signed::SizedIntegerSigned[256_u32]
-type SSize = std::num::sized_integer_signed::SizedIntegerSigned[64_u32]
+type S8 = SizedIntegerSigned[8_u32]
+type S16 = SizedIntegerSigned[16_u32]
+type S32 = SizedIntegerSigned[32_u32]
+type S64 = SizedIntegerSigned[64_u32]
+type S128 = SizedIntegerSigned[128_u32]
+type S256 = SizedIntegerSigned[256_u32]
+type SSize = SizedIntegerSigned[64_u32]
 
 
 # Floating points.
-type F8 = std::num::sized_floating_point::SizedFloatingPoint[8_u32]
-type F16 = std::num::sized_floating_point::SizedFloatingPoint[16_u32]
-type F32 = std::num::sized_floating_point::SizedFloatingPoint[32_u32]
-type F64 = std::num::sized_floating_point::SizedFloatingPoint[64_u32]
-type F128 = std::num::sized_floating_point::SizedFloatingPoint[128_u32]
+type F8 = SizedFloatingPoint[8_u32]
+type F16 = SizedFloatingPoint[16_u32]
+type F32 = SizedFloatingPoint[32_u32]
+type F64 = SizedFloatingPoint[64_u32]
+type F128 = SizedFloatingPoint[128_u32]
 
 
 # Can't add the FP256 until LLVM adds intrinsic support for them.
-# type F256 = std::num::sized_floating_point::SizedFloatingPoint[256_u32]
+# type F256 = SizedFloatingPoint[256_u32]
 
 
 sup U64 ext From[Self, U32] {
