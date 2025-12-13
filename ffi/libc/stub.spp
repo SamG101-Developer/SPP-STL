@@ -1,7 +1,9 @@
 use std::cffi::CChar
+use std::cffi::CFile
 use std::cffi::CInt
 use std::cffi::CPtr
 use std::cffi::CSizeT
+use std::cffi::CVoid
 
 
 # https://en.cppreference.com/w/c/io/fputs
