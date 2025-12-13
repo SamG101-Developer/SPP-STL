@@ -16,6 +16,7 @@ use std::streams::WritableStream
 use std::streams::StreamReadException
 use std::streams::StreamSeekException
 use std::streams::StreamWriteException
+use std::slice::Slice
 use std::string::Str
 use std::vector::Vec
 use std::void::Void
