@@ -65,7 +65,7 @@ sup StrView {
         case start > end or end > self.length() {
             std::abort::abort("StrView::slice: invalid slice indices")
         }
-        ret StrView { data: self.data + start, len: end - start }
+        ret StrView(data=self.data + start, len=end - start)
     }
 }
 
