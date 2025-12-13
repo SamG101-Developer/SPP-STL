@@ -7,6 +7,10 @@ use std::ops::ne::Ne
 use std::vector::Vec
 
 
+##
+A string type representing a sequence of bytes. This is a "higher level" abstraction over `Vec[U8]`, compared to the
+`StrView` type which  is an immutable, static lifetime span over a pointer to bytes.
+##
 @public
 cls Str {
     data: Vec[U8]

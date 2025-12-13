@@ -1,0 +1,82 @@
+use std::copy::Copy
+use std::mem::ptr::Ptr
+use std::num::U8
+use std::num::USize
+
+
+##
+A string view is a lightweight, non-owning reference to a sequence of UTF-8 encoded characters. It always has a static
+lifetime, allowing the pointer lifetime analysis to become trivial. `StrView` is useful for efficiently passing around
+string data without the overhead of ownership or copying. It provides basic functionality for querying length,
+checking emptiness, slicing, and comparing string views. For more advanced string manipulation, consider using the
+full-featured `Str` type from `std::string::Str`.
+##
+@public
+cls StrView {
+    @private
+    data: Ptr[U8]
+
+    @private
+    len: USize
+}
+
+
+sup StrView ext Copy { }
+
+
+sup StrView {
+    @public
+    @inline
+    fun length() -> USize {
+        ret self.len
+    }
+
+    @public
+    @inline
+    fun is_empty() -> Bool {
+        ret self.len == 0uz
+    }
+}
+
+
+sup StrView {
+    cor chars(self) -> Iterator[T] { }
+
+    cor reverse_chars(self) -> Iterator[T] { }
+}
+
+
+sup StrView {
+    @public
+    fun starts_with(&self, needle: StrView) -> Bool {
+         case needle.length() > self.length() { ret false }
+         ret std::mem::ops::mem_cmp(self.data, needle.data, needle.length()) == 0
+    }
+
+    @public
+    fun ends_with(&self, needle: StrView) -> Bool {
+        case needle.length() > self.length() { ret false }
+        let offset = self.length() - needle.length()
+        ret std::mem::ops::mem_cmp(self.data + offset, needle.data, needle.length()) == 0
+    }
+
+    @public
+    fun slice(&self, start: USize, end: USize) -> StrView {
+        case start > end || end > self.length() {
+            std::abort::abort("StrView::slice: invalid slice indices")
+        }
+        ret StrView { data: self.data + start, len: end - start }
+    }
+}
+
+
+sup StrView ext Eq[Rhs=StrView] {
+    @compiler_builtin
+    fun eq(&self, that: &StrView) -> Bool { }
+}
+
+
+sup StrView ext Ne[Rhs=StrView] {
+    @compiler_builtin
+    fun ne(&self, that: &StrView) -> Bool { }
+}
