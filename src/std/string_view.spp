@@ -25,6 +25,7 @@ sup StrView ext Copy { }
 
 
 sup StrView {
+sup StrView {
     @public
     @inline
     fun length() -> USize {
@@ -34,7 +35,7 @@ sup StrView {
     @public
     @inline
     fun is_empty() -> Bool {
-        ret self.len == 0uz
+        ret self.len == 0_uz
     }
 }
 
