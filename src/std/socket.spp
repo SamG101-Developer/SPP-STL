@@ -2,7 +2,7 @@ use std::number::U16
 use std::number::U64
 use std::result::Res
 use std::string::Str
-use std::string::StrView
+use std::string_view::StrView
 use std::void::Void
 
 
