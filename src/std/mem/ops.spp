@@ -45,7 +45,7 @@ fun calloc[T](n: USize) -> Opt[Memory[T]] {
     let raw_ptr = libc::calloc[T](n, size_of[T]())
 
     # Convert the returned pointer into a safe type.
-    ret case ptr.addr == 0_uz { None() } else { Some(val=Memory(ptr=Single(raw=raw_ptr), cap)) }
+    ret case raw_ptr.addr == 0_uz { None() } else { Some(val=Memory(ptr=Single(raw=raw_ptr), cap)) }
     ret None()
 }
 
