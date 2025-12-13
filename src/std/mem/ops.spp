@@ -37,7 +37,7 @@ fun malloc[T](n: USize) -> Opt[Memory[T]] {
     # Determine the size and get an allocated pointer.
     let size = n * size_of[T]()
     let raw = libc::malloc[T](size)
-    ret case raw.to_addr() == 0_uz { None() } else { Some(val=Memory(ptr=Single(ptr=Ptr[T](raw)), cap)) }
+    ret case raw.to_addr() == 0_uz { None() } else { Some(val=Memory(ptr=Single(raw), cap)) }
 }
 
 
@@ -45,7 +45,7 @@ fun calloc[T](n: USize) -> Opt[Memory[T]] {
     # Determine the size and get an allocated pointer.
     let cap = n * size_of[T]()
     let raw_ptr = libc::calloc[T](n, size_of[T]())
-    ret case raw_ptr.addr == 0_uz { None() } else { Some(val=Memory(ptr=Single(raw=Ptr[T](raw)), cap)) }
+    ret case raw_ptr.addr == 0_uz { None() } else { Some(val=Memory(ptr=Single(raw), cap)) }
 }
 
 
