@@ -47,7 +47,7 @@ sup Str {
 
 sup Str ext From[Self, StrView] {
     @compiler_builtin
-    fun from(that: View) -> Self { }
+    fun from(that: StrView) -> Self { }
 }
 
 
