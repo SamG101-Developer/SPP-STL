@@ -4,35 +4,56 @@ use std::cffi::CPtr
 use std::cffi::CSizeT
 
 
+https://en.cppreference.com/w/c/io/fputs
 @ffi
-fun fputs(str: &CPtr[CChar], stream: &CInt) -> CInt { }
+fun fputs(str: &CPtr[CChar], stream: &CFile) -> CInt { }
 
+
+https://en.cppreference.com/w/c/io/fgets
 @ffi
-fun fgets(buffer: &mut CPtr[CChar], count: CInt, stream: &CInt) -> CChar { }
+fun fgets(buffer: &mut CPtr[CChar], count: CInt, stream: &CFile) -> CPtr[CChar] { }
 
+
+https://en.cppreference.com/w/c/io/fopen
 @ffi
-fun fopen(filename: &CPtr[CChar], mode: &CPtr[CChar]) -> CInt { }
+fun fopen(filename: &CPtr[CChar], mode: &CPtr[CChar]) -> CPtr[CFile] { }
 
+
+https://en.cppreference.com/w/c/io/fread
 @ffi
-fun fread(buffer: &mut CPtr[CChar], size: CInt, count: CInt, stream: &mut CInt) -> CInt { }
+fun fread(buffer: &mut CPtr[CChar], size: CSizeT, count: CSizeT, stream: &mut CFile) -> CSizeT { }
 
+
+# https://en.cppreference.com/w/c/io/fwrite
 @ffi
-fun fwrite(buffer: &mut CPtr[CChar], size: CInt, count: CInt, stream: &mut CInt) -> CInt { }
+fun fwrite(buffer: &CPtr[CChar], size: CSizeT, count: CSizeT, stream: &mut CPtr[CFile]) -> CSizeT { }
 
+
+# https://en.cppreference.com/w/c/io/fclose
 @ffi
-fun fclose(stream: &mut CInt) -> CInt { }
+fun fclose(stream: &mut CPtr[CFile]) -> CInt { }
 
+
+# https://en.cppreference.com/w/c/io/fflush
 @ffi
-fun fflush(stream: &CInt) -> CInt { }
+fun fflush(stream: &CPtr[CFile]) -> CInt { }
 
+
+# https://en.cppreference.com/w/c/memory/malloc
 @ffi
 fun malloc[T](size: CSizeT) -> CPtr[T] { }
 
-@ffi
-fun calloc[T](count: CSizeT, size: CSizeT) -> CPtr[T] { }
 
+# https://en.cppreference.com/w/c/memory/calloc
 @ffi
-fun realloc[T](ptr: &mut CPtr[T], size: CSizeT) -> CInt { }
+fun calloc[T](num: CSizeT, size: CSizeT) -> CPtr[T] { }
 
+
+# https://en.cppreference.com/w/c/memory/realloc
 @ffi
-fun free[T](ptr: CPtr[T]) -> CInt { }
+fun realloc[T](ptr: &mut CPtr[T], new_size: CSizeT) -> CVoid { }
+
+
+# https://en.cppreference.com/w/c/memory/free
+@ffi
+fun free[T](ptr: CPtr[T]) -> CVoid { }
