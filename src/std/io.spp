@@ -2,7 +2,7 @@ use std::number::S32
 use std::option::Opt
 use std::option::Some
 use std::string::Str
-use std::string::StrView
+use std::string_view::StrView
 
 
 fun print(value: StrView) -> Opt[S32] {
