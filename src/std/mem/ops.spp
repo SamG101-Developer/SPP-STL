@@ -35,8 +35,8 @@ fun mem_cmp[T](a: &T, b: &T, n: USize) -> S32 {
 fun malloc[T](n: USize) -> Opt[Memory[T]] {
     # Determine the size and get an allocated pointer.
     let size = n * size_of[T]()
-    let mem = libc::malloc[T](size)
-    ret case mem.ptr.raw.to_addr() == 0_uz { None() } else { Some(val=mem) }
+    let raw = libc::malloc[T](size)
+    ret case raw.to_addr() == 0_uz { None() } else { Some(val=Memory(ptr=Single(raw=raw_ptr), cap)) }
 }
 
 
