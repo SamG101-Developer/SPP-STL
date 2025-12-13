@@ -1,3 +1,5 @@
+use std::cffi::CFile
+use std::mem::ptr::Ptr
 use std::number::U8
 use std::number::USize
 use std::number::S32
@@ -25,7 +27,7 @@ cls StdinStream { }
 sup StdinStream ext ReadableStream {
     fun read(&mut self, len: USize) -> Res[Vec[U8], StreamReadException] {
         let mut vec = Vec[U8]()
-        let val = libc::fgets(&mut vec.buf.mem.ptr.raw, 1024_s32, &stdin_handle)
+        let val = libc::fgets(&mut vec.buf.mem.ptr.raw, 1024_s32, &Ptr[CFile]::from_addr(stdin_handle))
         ret case val < 0_s32 { Fail(err=StreamReadException(msg="Failed to read from stdin")) } else { Pass(val=vec) }
     }
 
