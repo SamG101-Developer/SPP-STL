@@ -34,7 +34,7 @@ cls SeekableStream { }
 sup WritableStream {
     @public
     @abstract_method
-    fun write(&mut self, data: &Slice[U8], length: USize) -> Res[USize, StreamWriteException] { }
+    fun write(&mut self, data: &Slice[U8]) -> Res[USize, StreamWriteException] { }
 
     @public
     @abstract_method
