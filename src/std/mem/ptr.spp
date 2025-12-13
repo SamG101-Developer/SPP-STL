@@ -22,7 +22,7 @@ cls Ptr[T] {
 sup [T] Ptr[T] {
     @public
     fun from_addr(addr: USize) -> Ptr[T] {
-        ret Ptr[T](addr=addr)
+        ret Ptr[T](addr)
     }
 
     @public

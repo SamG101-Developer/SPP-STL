@@ -41,7 +41,7 @@ sup File {
 
     @public
     fun close(&mut self) -> Res[Void, FileNotFoundException] {
-        libc::fclose(&mut Ptr[CFile]::from_addr(handle))
+        libc::fclose(&mut Ptr[CFile]::from_addr(self.handle))
         self.open = false
         ret Pass[Void]()
     }
