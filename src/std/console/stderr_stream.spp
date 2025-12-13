@@ -17,7 +17,7 @@ cmp stderr: StderrStream = StderrStream()
 
 
 @private
-cmp stderr_handle: S32 = 2_s32
+cmp stderr_handle: USize = 2_uz
 
 
 @private

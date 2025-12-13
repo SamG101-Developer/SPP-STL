@@ -17,7 +17,7 @@ cmp stdout: StdoutStream = StdoutStream()
 
 
 @private
-cmp stdout_handle: S32 = 1_s32
+cmp stdout_handle: USize = 1_uz
 
 
 @private

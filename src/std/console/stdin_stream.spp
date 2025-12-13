@@ -15,7 +15,7 @@ cmp stdin: StdinStream = StdinStream()
 
 
 @private
-cmp stdin_handle: S32 = 1_s32
+cmp stdin_handle: USize = 1_uz
 
 
 @private
