@@ -1,5 +1,6 @@
 use std::boolean::Bool
 use std::clone::Clone
+use std::cast::From
 use std::iterator::Iterator
 use std::number::U8
 use std::ops::eq::Eq
