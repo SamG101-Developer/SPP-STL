@@ -26,7 +26,7 @@ fun size_of_value[T](value: T) -> USize {
 
 
 @compiler_builtin
-fun mem_cmp[T](a: &T, b: &T, n: USize) -> Bool {
+fun mem_cmp[T](a: &T, b: &T, n: USize) -> S32 {
     # Compares two memory regions byte by byte.
 }
 
