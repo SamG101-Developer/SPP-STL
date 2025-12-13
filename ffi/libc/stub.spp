@@ -8,12 +8,12 @@ use std::cffi::CVoid
 
 # https://en.cppreference.com/w/c/io/fputs
 @ffi
-fun fputs(str: &CPtr[CChar], stream: &CFile) -> CInt { }
+fun fputs(str: &CPtr[CChar], stream: &CPtr[CFile]) -> CInt { }
 
 
 # https://en.cppreference.com/w/c/io/fgets
 @ffi
-fun fgets(buffer: &mut CPtr[CChar], count: CInt, stream: &CFile) -> CPtr[CChar] { }
+fun fgets(buffer: &mut CPtr[CChar], count: CInt, stream: &CPtr[CFile]) -> CPtr[CChar] { }
 
 
 # https://en.cppreference.com/w/c/io/fopen
