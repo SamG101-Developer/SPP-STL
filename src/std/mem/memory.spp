@@ -1,6 +1,5 @@
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
-use std::boolean::Bool
 use std::clone::Clone
 use std::copy::Copy
 use std::number::USize
