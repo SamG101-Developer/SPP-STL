@@ -2,9 +2,10 @@ use std::number::S32
 use std::option::Opt
 use std::option::Some
 use std::string::Str
+use std::string::StrView
 
 
-fun print(value: &Str) -> Opt[S32] {
+fun print(value: StrView) -> Opt[S32] {
     let val = std::console::stdout_stream::stdout.write_all(&value.data).ok()
     ret val
 }

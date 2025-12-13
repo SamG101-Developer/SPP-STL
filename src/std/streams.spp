@@ -33,7 +33,7 @@ cls SeekableStream { }
 sup WritableStream {
     @public
     @abstract_method
-    fun write(&mut self, data: &Vec[U8], length: USize) -> Res[S32, StreamWriteException] { }
+    fun write(&mut self, data: &Slice[U8], length: USize) -> Res[USize, StreamWriteException] { }
 
     @public
     @abstract_method
@@ -42,9 +42,7 @@ sup WritableStream {
     @public
     @no_impl
     @virtual_method
-    fun write_all(&mut self, data: &Vec[U8]) -> Res[S32, StreamWriteException] {
-        ret Pass(val=0_s32)
-    }
+    fun write_all(&mut self, data: &Slice[U8]) -> Res[USize, StreamWriteException] { }
 }
 
 
