@@ -27,8 +27,8 @@ cls StdinStream { }
 sup StdinStream ext ReadableStream {
     fun read(&mut self, len: USize) -> Res[Vec[U8], StreamReadException] {
         let mut vec = Vec[U8]()
-        let val = libc::fgets(&mut vec.buf.mem.ptr.raw, 1024_s32, &Ptr[CFile]::from_addr(stdin_handle))
-        ret case val < 0_s32 { Fail(err=StreamReadException(msg="Failed to read from stdin")) } else { Pass(val=vec) }
+        let val = libc::fgets(&mut vec.buf.mem.ptr.raw, 1024_s32, &Ptr[CFile]::from_addr(stdin_handle)).to_addr()
+        ret case val < 0_uz { Fail(err=StreamReadException(msg="Failed to read from stdin")) } else { Pass(val=vec) }
     }
 
     fun read_all(&mut self) -> Res[Vec[U8], StreamReadException] {
