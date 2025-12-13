@@ -1,7 +1,7 @@
-use std::boolean::Bool
 use std::copy::Copy
 use std::mem::memory::Memory
 use std::number::USize
+use std::number::S32
 use std::option::Opt
 use std::option::None
 use std::option::Some
