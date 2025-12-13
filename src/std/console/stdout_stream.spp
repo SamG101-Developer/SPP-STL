@@ -1,3 +1,5 @@
+use std::cffi::CFile
+use std::mem::ptr::Ptr
 use std::number::U8
 use std::number::USize
 use std::number::S32
@@ -29,7 +31,7 @@ sup StdoutStream ext WritableStream {
     }
 
     fun flush(&mut self) -> Res[Void, StreamWriteException] {
-        let val = libc::fflush(&stdout_handle)
+        let val = libc::fflush(&Ptr[CFile]::from_addr(stdout_handle))
         ret case val < 0_s32 { Fail(err=StreamWriteException(msg="Failed to flush stdout")) } else { Pass[Void]() }
     }
 
