@@ -25,7 +25,6 @@ sup StrView ext Copy { }
 
 
 sup StrView {
-sup StrView {
     @public
     @inline
     fun length() -> USize {
