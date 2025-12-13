@@ -24,11 +24,11 @@ sup [E] Alloc[E] {
 
     @public
     @abstract_method
-    fun deallocate(memory: Memory[E]) -> Void { }
+    fun deallocate(mem: Memory[E]) -> Void { }
 
     @public
     @abstract_method
-    fun reallocate(mut memory: &mut Memory[E], n: USize) -> Res[Void, AllocException] { }
+    fun reallocate(mut mem: &mut Memory[E], n: USize) -> Res[Void, AllocException] { }
 }
 
 
