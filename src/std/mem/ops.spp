@@ -6,6 +6,7 @@ use std::option::Opt
 use std::option::None
 use std::option::Some
 use std::result::Exception
+use std::single::Single
 use std::void::Void
 
 
