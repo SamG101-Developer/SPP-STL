@@ -42,9 +42,11 @@ sup StrView {
 
 
 sup StrView {
-    cor chars(self) -> Iterator[T] { }
+    @compiler_builtin
+    cor chars(self) -> Iterator[U8] { }
 
-    cor reverse_chars(self) -> Iterator[T] { }
+    @compiler_builtin
+    cor reverse_chars(self) -> Iterator[U8] { }
 }
 
 
