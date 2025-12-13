@@ -44,6 +44,12 @@ sup Str {
 }
 
 
+sup Str ext From[Self, StrView] {
+    @compiler_builtin
+    fun from(that: View) -> Self { }
+}
+
+
 sup Str ext Eq[Rhs=Str] {
     fun eq(&self, that: &Str) -> Bool {
         # ret self.data.iter_ref().zip(that.data.iter_ref()).map(U8::eq).all()
