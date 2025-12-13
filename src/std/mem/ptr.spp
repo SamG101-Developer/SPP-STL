@@ -19,6 +19,19 @@ cls Ptr[T] {
 }
 
 
+sup [T] Ptr[T] {
+    @public
+    fun from_addr(addr: USize) -> Ptr[T] {
+        ret Ptr[T](addr=addr)
+    }
+
+    @public
+    fun to_addr(&self) -> USize {
+        ret self.addr
+    }
+}
+
+
 sup [T] Ptr[T] ext Add[Rhs=USize, Ret=Ptr[T]] {
     fun add(self, that: USize) -> Ptr[T] {
         ret Ptr[T](addr=self.addr + that * std::mem::ops::size_of[T]())

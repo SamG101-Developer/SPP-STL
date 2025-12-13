@@ -1,4 +1,5 @@
 use std::boolean::Bool
+use std::cffi::CFile
 use std::fs::path::Path
 use std::number::U8
 use std::number::USize
@@ -23,7 +24,7 @@ cls FileNotFoundException { }
 
 
 cls File {
-    handle: S32
+    handle: USize
     open: Bool = false
 }
 
@@ -32,14 +33,14 @@ sup File {
     @public
     fun open(path: &Path, mode: Str) -> Res[File, FileNotFoundException] {
         # Todo: this is just silly lol
-        let handle = libc::fopen(&path.path.data.buf.mem.ptr.raw, &mode.data.buf.mem.ptr.raw)
-        case handle == 0_s32 { ret Fail[FileNotFoundException]() }
+        let handle = libc::fopen(&path.path.data.buf.mem.ptr.raw, &mode.data.buf.mem.ptr.raw).as_addr()
+        case handle == 0_uz { ret Fail[FileNotFoundException]() }
         ret Pass(val=File(handle, open=true))
     }
 
     @public
     fun close(&mut self) -> Res[Void, FileNotFoundException] {
-        libc::fclose(&mut self.handle)
+        libc::fclose(&mut Ptr[CFile]::from_addr(handle))
         self.open = false
         ret Pass[Void]()
     }
