@@ -23,7 +23,7 @@ fun fopen(filename: &CPtr[CChar], mode: &CPtr[CChar]) -> CPtr[CFile] { }
 
 # https://en.cppreference.com/w/c/io/fread
 @ffi
-fun fread(buffer: &mut CPtr[CChar], size: CSizeT, count: CSizeT, stream: &mut CFile) -> CSizeT { }
+fun fread(buffer: &mut CPtr[CChar], size: CSizeT, count: CSizeT, stream: &mut CPtr[CFile]) -> CSizeT { }
 
 
 # https://en.cppreference.com/w/c/io/fwrite
