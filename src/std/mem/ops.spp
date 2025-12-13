@@ -24,48 +24,47 @@ fun size_of_value[T](value: T) -> USize {
 }
 
 
+@compiler_builtin
+fun mem_cmp[T](a: &T, b: &T, n: USize) -> Bool {
+    # Compares two memory regions byte by byte.
+}
+
+
 fun malloc[T](n: USize) -> Opt[Memory[T]] {
     # Determine the size and get an allocated pointer.
     let size = n * size_of[T]()
     let mem = libc::malloc[T](size)
-    # TODO
-    # ret case mem.ptr.pos of
-    #     == 0_uz { None() }
-    #     else { Some(val=mem) }
-    ret None()
+    ret case mem.ptr.pos == 0_uz { None() } else { Some(val=mem) }
 }
 
 
 fun calloc[T](n: USize) -> Opt[Memory[T]] {
     # Determine the size and get an allocated pointer.
-    let size = n * size_of[T]()
-    let mem = libc::calloc[T](n, size_of[T]())
+    let cap = n * size_of[T]()
+    let raw_ptr = libc::calloc[T](n, size_of[T]())
 
     # Convert the returned pointer into a safe type.
-    # TODO
-    # ret case mem.ptr.pos of
-    #     == 0_uz { None() }
-    #     else { Some(val=mem) }
+    ret case ptr.addr == 0_uz { None() } else { Some(val=Memory(ptr=Single(raw=raw_ptr), cap)) }
     ret None()
 }
 
 
-fun realloc[T](mut memory: &mut Memory[T], n: USize) -> Opt[Void] {
+fun realloc[T](mut mem: &mut Memory[T], n: USize) -> Opt[Void] {
     # Determine the size and get a reallocated pointer.
-    let size = n * size_of[T]()
-    let out = libc::realloc(&mut memory, size)
+    let cap = n * size_of[T]()
+    let raw_ptr = libc::realloc(&mut mem.raw, cap)
 
     # If the new pointer is null, return None (failed reallocation).
-    case out == 0_s32 { ret None() }
+    case raw_ptr.addr == 0_s32 { ret None() }
 
     # Otherwise, assign the new pointer and update the length.
-    memory.cap = n
-
+    mew.ptr.raw = raw_ptr
+    mem.cap = cap
     ret Some[Void]()
 }
 
 
-fun free[T](memory: Memory[T]) -> Void {
+fun free[T](mem: Memory[T]) -> Void {
     # Free the memory pointed to by the pointer.
-    libc::free(memory)
+    libc::free(mem.raw)
 }
