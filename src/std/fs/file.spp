@@ -62,12 +62,18 @@ sup File {
 
 sup File ext WritableStream {
     @no_impl
-    fun write(&mut self, data: &Vec[U8], length: USize) -> Res[S32, StreamWriteException] {
-        # libc::fwrite(&mut data, 8, S32::from(data.len()), &mut self.handle)
+    fun write(&mut self, data: &Slice[U8]) -> Res[USize, StreamWriteException] {
+        let file_handle = Ptr[CFile]::from_addr(self.handle)
+        let val = libc::fwrite(&data.buf.mem.ptr.raw, 1_uz, data.length(), &file_handle)
+        ret case val < 0_s32 { Fail(err=StreamWriteException(msg="Failed to write to stdout")) } else { Pass(val) }
     }
 
     @no_impl
-    fun flush(&mut self) -> Res[Void, StreamWriteException] { }
+    fun flush(&mut self) -> Res[Void, StreamWriteException] {
+        let file_handle = &Ptr[CFile]::from_addr(self.handle)
+        let val = libc::fflush(&file_handle)
+        ret case val < 0_s32 { Fail(err=StreamWriteException(msg="Failed to flush stdout")) } else { Pass[Void]() }
+    }
 }
 
 

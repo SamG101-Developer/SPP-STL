@@ -27,13 +27,13 @@ cls StdoutStream { }
 sup StdoutStream ext WritableStream {
     fun write(&mut self, data: &Slice[U8]) -> Res[USize, StreamWriteException] {
         let file_handle = Ptr[CFile]::from_addr(stdout_handle)
-        let val = libc::fputs(&data.buf.mem.ptr.raw, 1_uz, data.length(), &file_handle)
+        let val = libc::fwrite(&data.buf.mem.ptr.raw, 1_uz, data.length(), &file_handle)
         ret case val < 0_s32 { Fail(err=StreamWriteException(msg="Failed to write to stdout")) } else { Pass(val) }
     }
 
     fun flush(&mut self) -> Res[Void, StreamWriteException] {
         let file_handle = &Ptr[CFile]::from_addr(stdout_handle)
-        let val = libc::fflush(&handle)
+        let val = libc::fflush(&file_handle)
         ret case val < 0_s32 { Fail(err=StreamWriteException(msg="Failed to flush stdout")) } else { Pass[Void]() }
     }
 
