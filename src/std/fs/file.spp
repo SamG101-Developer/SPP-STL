@@ -34,7 +34,7 @@ sup File {
     @public
     fun open(path: &Path, mode: Str) -> Res[File, FileNotFoundException] {
         # Todo: this is just silly lol
-        let handle = libc::fopen(&path.path.data.buf.mem.ptr.raw, &mode.data.buf.mem.ptr.raw).as_addr()
+        let handle = libc::fopen(&path.path.data.buf.mem.ptr.raw, &mode.data.buf.mem.ptr.raw).to_addr()
         case handle == 0_uz { ret Fail[FileNotFoundException]() }
         ret Pass(val=File(handle, open=true))
     }
