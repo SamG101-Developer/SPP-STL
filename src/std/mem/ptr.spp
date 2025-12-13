@@ -1,6 +1,6 @@
 use std::ops::add::Add
 use std::ops::sub::Sub
-use std::num::USize
+use std::number::USize
 
 
 ##
