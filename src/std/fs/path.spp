@@ -1,6 +1,7 @@
 use std::boolean::Bool
 use std::clone::Clone
 use std::iterator::Iterator
+use std::number::U8
 use std::ops::eq::Eq
 use std::ops::div::Div
 use std::ops::ne::Ne
