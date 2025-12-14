@@ -65,7 +65,7 @@ sup File ext WritableStream {
     @no_impl
     fun write(&mut self, data: &Slice[U8]) -> Res[USize, StreamWriteException] {
         let file_handle = Ptr[CFile]::from_addr(self.handle)
-        let val = libc::fwrite(&data.buf.mem.ptr.raw, 1_uz, data.length(), &file_handle)
+        let val = libc::fwrite(&data.mem.ptr.raw, 1_uz, data.length(), &file_handle)
         ret case val < 0_s32 { Fail(err=StreamWriteException(msg="Failed to write to stdout")) } else { Pass(val) }
     }
 
