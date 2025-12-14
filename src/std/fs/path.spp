@@ -16,6 +16,11 @@ cls Path {
 
 
 sup Path {
+    cmp sep: U8 = 47_u8  # ASCII '/'
+}
+
+
+sup Path {
     @no_impl
     fun is_absolute(&self) -> Bool { }
 
@@ -47,7 +52,7 @@ sup Path {
 
 sup Path {
     fun file_name(&self) -> Opt[Str] {
-        let parts = self.path.split(&self.sep_char())
+        let parts = self.path.split(self.sep)
         # ret case parts.len() == 0_uz { None() } else { Some(val=parts.get_tail_ref().clone()) }
         ret None()
     }
@@ -68,9 +73,9 @@ sup Path {
     }
 
     fun dir_name(&self) -> Str {
-        # let parts = self.path.split(&self.sep_char())
+        # let parts = self.path.split(self.sep)
         # let parts = parts.iter_mov().take(parts.len() - 1)
-        # ret Str::join(parts, self.sep_char())
+        # ret Str::join(parts, self.sep)
         ret ""
     }
 
@@ -116,18 +121,6 @@ sup Path {
 
     @no_impl
     fun with_file_name(&self, name: Str) -> Path { }
-}
-
-
-sup Path {
-    @no_impl
-    fun sep_char(&self) -> Str { }
-
-    @no_impl
-    fun cur_dir_char(&self) -> Str { }
-
-    @no_impl
-    fun par_dir_char(&self) -> Str { }
 }
 
 

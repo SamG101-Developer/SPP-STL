@@ -3,6 +3,8 @@ use std::clone::Clone
 use std::cast::From
 use std::iterator::Iterator
 use std::number::U8
+use std::ops::add::Add
+use std::ops::add::AddAssign
 use std::ops::eq::Eq
 use std::ops::ne::Ne
 use std::string_view::StrView
@@ -33,7 +35,19 @@ sup Str {
     }
 
     @no_impl
-    fun split(&self, sep: &Str) -> Vec[Str] {
+    fun split(&self, sep: U8) -> Vec[Str] {
+        let mut current: Str = Str::from("")
+        let mut strings = Vec[Str]::new()
+        
+        for char in self.chars() {
+            case char == sep {
+                strings.push(current)
+                current = Str::from("")
+            }
+            else {
+                current += char
+            }
+        }
     }
 }
 
@@ -74,8 +88,25 @@ sup Str ext Clone[Out=Str] {
 }
 
 
-sup Str ext std::ops::add::Add[Rhs=Str, Ret=Str] {
+sup Str ext Add[Rhs=Str, Ret=Str] {
     @no_impl
     fun add(self, that: Str) -> Str { }
 }
 
+
+sup Str ext Add[Rhs=U8, Ret=Str] {
+    @no_impl
+    fun add(self, that: U8) -> Str { }
+}
+
+
+sup Str ext AddAssign[Rhs=Str] {
+    @no_impl
+    fun add_assign(&mut self, that: Str) -> Void { }
+}
+
+
+sup Str ext AddAssign[Rhs=U8] {
+    @no_impl
+    fun add_assign(&mut self, that: U8) -> Void { }
+}
