@@ -28,7 +28,7 @@ sup StderrStream ext WritableStream {
     fun write(&mut self, data: &Slice[U8]) -> Res[USize, StreamWriteException] {
             let file_handle = Ptr[CFile]::from_addr(stderr_handle)
             let val = libc::fwrite(&data.mem.ptr.raw, 1_uz, data.length(), &file_handle)
-            ret case val < 0_s32 { Fail(err=StreamWriteException(msg="Failed to write to stderr")) } else { Pass(val) }
+            ret case val < 0_uz { Fail(err=StreamWriteException(msg="Failed to write to stderr")) } else { Pass(val) }
         }
     
         fun flush(&mut self) -> Res[Void, StreamWriteException] {
