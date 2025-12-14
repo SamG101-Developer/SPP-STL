@@ -17,7 +17,7 @@ cls Path {
 
 
 sup Path {
-    cmp sep: U8 = 47_u8  # ASCII '/'
+    cmp sep: U8 = '/'
 }
 
 
@@ -60,7 +60,7 @@ sup Path {
 
     fun file_stem(&self) -> Opt[Str] {
         let file_name = self.file_name()
-        # ret file_name.map(|name: Str| name.split(&".")[0].clone())
+        # ret file_name.map(|name: Str| name.split('.')[0].clone())
         ret None()
     }
 
@@ -68,7 +68,7 @@ sup Path {
         let file_name = self.file_name()
         ret None()
         #ret file_name.map(|name: Str| {
-        #    let parts = name.split(&".")
+        #    let parts = name.split('.')
         #    case parts.len() > 1 { Some(val=parts[parts.len() - 1]) } else { None() }
         #})
     }
@@ -90,7 +90,7 @@ sup Path {
     }
 
     fun split_ext(&self) -> (Path, Opt[Str]) {
-        let parts = self.path.split(&".")
+        let parts = self.path.split('.')
         # ret (Path(path=parts[0_uz]), case parts.len() > 1 { Some(val=parts.index_ref(1).clone()) } else { None() })
         let dummy: Opt[Str] = Some(val=Str())
         ret (Path(), dummy)
