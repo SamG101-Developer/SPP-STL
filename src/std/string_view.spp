@@ -18,7 +18,7 @@ full-featured `Str` type from `std::string::Str`.
 @public
 cls StrView {
     @private
-    data: Ptr[U8]
+    ptr: Ptr[U8]
 
     @private
     len: USize
@@ -44,11 +44,17 @@ sup StrView {
 
 
 sup StrView {
+    @public
     @compiler_builtin
     cor chars(self) -> Iterator[U8] { }
 
+    @public
     @compiler_builtin
     cor reverse_chars(self) -> Iterator[U8] { }
+
+    @public
+    @compiler_builtin
+    cor bytes(self) -> GenOnce[&Slice[U8]] { }
 }
 
 
@@ -56,14 +62,14 @@ sup StrView {
     @public
     fun starts_with(&self, needle: StrView) -> Bool {
          case needle.length() > self.length() { ret false }
-         ret std::mem::ops::mem_cmp(self.data, needle.data, needle.length()) == 0
+         ret std::mem::ops::mem_cmp(self.ptr, needle.ptr, needle.length()) == 0
     }
 
     @public
     fun ends_with(&self, needle: StrView) -> Bool {
         case needle.length() > self.length() { ret false }
         let offset = self.length() - needle.length()
-        ret std::mem::ops::mem_cmp(self.data + offset, needle.data, needle.length()) == 0
+        ret std::mem::ops::mem_cmp(self.ptr + offset, needle.ptr, needle.length()) == 0
     }
 
     @public
@@ -71,7 +77,7 @@ sup StrView {
         case start > end or end > self.length() {
             std::abort::abort("StrView::slice: invalid slice indices")
         }
-        ret StrView(data=self.data + start, len=end - start)
+        ret StrView(ptr=self.ptr + start, len=end - start)
     }
 }
 

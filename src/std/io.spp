@@ -6,7 +6,7 @@ use std::string_view::StrView
 
 
 fun print(value: StrView) -> Opt[S32] {
-    let val = std::console::stdout_stream::stdout.write_all(&value.data).ok()
+    let val = std::console::stdout_stream::stdout.write_all(value.bytes()).ok()
     ret val
 }
 
