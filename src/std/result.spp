@@ -7,10 +7,6 @@ use std::string::Str
 
 
 @public
-cls Exception { msg: Str }
-
-
-@public
 cls Pass[T] { val: T }
 
 

@@ -1,4 +1,5 @@
 use std::copy::Copy
+use std::exception::Exception
 use std::mem::memory::Memory
 use std::mem::ptr::Ptr
 use std::number::USize
@@ -6,7 +7,6 @@ use std::number::S32
 use std::option::Opt
 use std::option::None
 use std::option::Some
-use std::result::Exception
 use std::single::Single
 use std::void::Void
 

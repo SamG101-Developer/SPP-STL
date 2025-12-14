@@ -1,0 +1,5 @@
+use std::string_view::StrView  # Is this right? Str?
+
+
+@public
+cls Exception { msg: StrView }
