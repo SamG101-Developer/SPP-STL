@@ -64,14 +64,14 @@ sup StrView {
     @public
     fun starts_with(&self, needle: StrView) -> Bool {
          case needle.length() > self.length() { ret false }
-         ret std::mem::ops::mem_cmp(self.ptr, needle.ptr, needle.length()) == 0
+         ret std::mem::ops::mem_cmp(&self.ptr, &needle.ptr, needle.length()) == 0
     }
 
     @public
     fun ends_with(&self, needle: StrView) -> Bool {
         case needle.length() > self.length() { ret false }
         let offset = self.length() - needle.length()
-        ret std::mem::ops::mem_cmp(self.ptr + offset, needle.ptr, needle.length()) == 0
+        ret std::mem::ops::mem_cmp(&(self.ptr + offset), &needle.ptr, needle.length()) == 0
     }
 
     @public
