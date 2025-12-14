@@ -33,13 +33,13 @@ sup StrView ext Copy { }
 sup StrView {
     @public
     @inline
-    fun length() -> USize {
+    fun length(&self) -> USize {
         ret self.len
     }
 
     @public
     @inline
-    fun is_empty() -> Bool {
+    fun is_empty(&self) -> Bool {
         ret self.len == 0_uz
     }
 }
@@ -48,11 +48,11 @@ sup StrView {
 sup StrView {
     @public
     @compiler_builtin
-    cor chars(self) -> Iterator[U8] { }
+    cor chars(&self) -> Iterator[U8] { }
 
     @public
     @compiler_builtin
-    cor reverse_chars(self) -> Iterator[U8] { }
+    cor reverse_chars(&self) -> Iterator[U8] { }
 
     @public
     @compiler_builtin
