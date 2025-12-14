@@ -77,7 +77,7 @@ sup Path {
         # let parts = self.path.split(self.sep)
         # let parts = parts.iter_mov().take(parts.len() - 1)
         # ret Str::join(parts, self.sep)
-        ret ""
+        ret Str::from("")
     }
 
     fun split(&self) -> (Opt[Path], Opt[Path]) {
