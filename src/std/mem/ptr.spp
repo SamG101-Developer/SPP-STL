@@ -1,4 +1,3 @@
-use std::copy::Copy
 use std::ops::add::Add
 use std::ops::sub::Sub
 use std::number::USize
@@ -31,9 +30,6 @@ sup [T] Ptr[T] {
         ret self.addr
     }
 }
-
-
-sup [T] Ptr[T] ext Copy { }
 
 
 sup [T] Ptr[T] ext Add[Rhs=USize, Ret=Ptr[T]] {
