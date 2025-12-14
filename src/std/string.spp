@@ -23,13 +23,13 @@ sup Str {
     @public
     fun to_ascii_uppercase(&self) -> Str {
         # ret self.data.iter_ref().map(U8::to_ascii_uppercase).collect(Str)
-        ret ""
+        ret Str::from("")
     }
 
     @public
     fun to_ascii_lowercase(&self) -> Str {
         # ret self.data.iter_ref().map(U8::to_ascii_lowercase).collect(Str)
-        ret ""
+        ret Str::from("")
     }
 
     @no_impl
