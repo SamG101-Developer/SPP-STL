@@ -5,7 +5,7 @@ use std::string::Str
 use std::string_view::StrView
 
 
-fun print(value: StrView) -> Opt[S32] {
+fun print(value: StrView) -> Opt[USize] {
     let val = std::console::stdout_stream::stdout.write_all(value.bytes()).ok()
     ret val
 }
