@@ -39,7 +39,7 @@ sup Str {
         let mut current: Str = Str::from("")
         let mut strings = Vec[Str]::new()
         
-        for char in self.chars() {
+        loop char in self.chars() {
             case char == sep {
                 strings.push(current)
                 current = Str::from("")
