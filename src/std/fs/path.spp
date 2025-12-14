@@ -1,6 +1,7 @@
 use std::boolean::Bool
 use std::clone::Clone
 use std::iterator::Iterator
+use std::number::U8
 use std::ops::eq::Eq
 use std::ops::div::Div
 use std::ops::ne::Ne
@@ -12,6 +13,11 @@ use std::string::Str
 
 cls Path {
     path: Str
+}
+
+
+sup Path {
+    cmp sep: U8 = '/'
 }
 
 
@@ -47,14 +53,14 @@ sup Path {
 
 sup Path {
     fun file_name(&self) -> Opt[Str] {
-        let parts = self.path.split(&self.sep_char())
+        let parts = self.path.split(self.sep)
         # ret case parts.len() == 0_uz { None() } else { Some(val=parts.get_tail_ref().clone()) }
         ret None()
     }
 
     fun file_stem(&self) -> Opt[Str] {
         let file_name = self.file_name()
-        # ret file_name.map(|name: Str| name.split(&".")[0].clone())
+        # ret file_name.map(|name: Str| name.split('.')[0].clone())
         ret None()
     }
 
@@ -62,16 +68,16 @@ sup Path {
         let file_name = self.file_name()
         ret None()
         #ret file_name.map(|name: Str| {
-        #    let parts = name.split(&".")
+        #    let parts = name.split('.')
         #    case parts.len() > 1 { Some(val=parts[parts.len() - 1]) } else { None() }
         #})
     }
 
     fun dir_name(&self) -> Str {
-        # let parts = self.path.split(&self.sep_char())
+        # let parts = self.path.split(self.sep)
         # let parts = parts.iter_mov().take(parts.len() - 1)
-        # ret Str::join(parts, self.sep_char())
-        ret ""
+        # ret Str::join(parts, self.sep)
+        ret Str::from("")
     }
 
     fun split(&self) -> (Opt[Path], Opt[Path]) {
@@ -84,7 +90,7 @@ sup Path {
     }
 
     fun split_ext(&self) -> (Path, Opt[Str]) {
-        let parts = self.path.split(&".")
+        let parts = self.path.split('.')
         # ret (Path(path=parts[0_uz]), case parts.len() > 1 { Some(val=parts.index_ref(1).clone()) } else { None() })
         let dummy: Opt[Str] = Some(val=Str())
         ret (Path(), dummy)
@@ -116,18 +122,6 @@ sup Path {
 
     @no_impl
     fun with_file_name(&self, name: Str) -> Path { }
-}
-
-
-sup Path {
-    @no_impl
-    fun sep_char(&self) -> Str { }
-
-    @no_impl
-    fun cur_dir_char(&self) -> Str { }
-
-    @no_impl
-    fun par_dir_char(&self) -> Str { }
 }
 
 

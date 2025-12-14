@@ -1,9 +1,12 @@
 use std::boolean::Bool
+use std::cffi::CFile
 use std::fs::path::Path
+use std::mem::ptr::Ptr
 use std::number::U8
 use std::number::USize
 use std::number::S32
 use std::ops::del::Del
+use std::result::Fail
 use std::result::Pass
 use std::result::Res
 use std::single::Single
@@ -13,6 +16,7 @@ use std::streams::WritableStream
 use std::streams::StreamReadException
 use std::streams::StreamSeekException
 use std::streams::StreamWriteException
+use std::slice::Slice
 use std::string::Str
 use std::vector::Vec
 use std::void::Void
@@ -22,7 +26,7 @@ cls FileNotFoundException { }
 
 
 cls File {
-    handle: S32
+    handle: USize
     open: Bool = false
 }
 
@@ -30,13 +34,15 @@ cls File {
 sup File {
     @public
     fun open(path: &Path, mode: Str) -> Res[File, FileNotFoundException] {
-        let handle = libc::fopen(&path.path.data.buf.mem, &mode.data.buf.mem)
+        # Todo: this is just silly lol
+        let handle = libc::fopen(&path.path.data.buf.mem.ptr.raw, &mode.data.buf.mem.ptr.raw).to_addr()
+        case handle == 0_uz { ret Fail[FileNotFoundException]() }
         ret Pass(val=File(handle, open=true))
     }
 
     @public
     fun close(&mut self) -> Res[Void, FileNotFoundException] {
-        libc::fclose(&mut self.handle)
+        libc::fclose(&mut Ptr[CFile]::from_addr(self.handle))
         self.open = false
         ret Pass[Void]()
     }
@@ -57,12 +63,18 @@ sup File {
 
 sup File ext WritableStream {
     @no_impl
-    fun write(&mut self, data: &Vec[U8], length: USize) -> Res[S32, StreamWriteException] {
-        # libc::fwrite(&mut data, 8, S32::from(data.len()), &mut self.handle)
+    fun write(&mut self, data: &Slice[U8]) -> Res[USize, StreamWriteException] {
+        let file_handle = Ptr[CFile]::from_addr(self.handle)
+        let val = libc::fwrite(&data.mem.ptr.raw, 1_uz, data.length(), &file_handle)
+        ret case val < 0_uz { Fail(err=StreamWriteException(msg="Failed to write to stdout")) } else { Pass(val) }
     }
 
     @no_impl
-    fun flush(&mut self) -> Res[Void, StreamWriteException] { }
+    fun flush(&mut self) -> Res[Void, StreamWriteException] {
+        let file_handle = &Ptr[CFile]::from_addr(self.handle)
+        let val = libc::fflush(&file_handle)
+        ret case val < 0_s32 { Fail(err=StreamWriteException(msg="Failed to flush stdout")) } else { Pass[Void]() }
+    }
 }
 
 

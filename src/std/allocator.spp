@@ -1,6 +1,6 @@
-use std::slice::Slice
+use std::exception::Exception
+use std::mem::memory::Memory
 use std::number::USize
-use std::result::Exception
 use std::result::Pass
 use std::result::Res
 use std::void::Void
@@ -16,19 +16,19 @@ cls Alloc[E] { }
 sup [E] Alloc[E] {
     @public
     @abstract_method
-    fun allocate(n: USize) -> Res[Slice[E], AllocException] { }
+    fun allocate(n: USize) -> Res[Memory[E], AllocException] { }
 
     @public
     @abstract_method
-    fun allocate_zeroed(n: USize) -> Res[Slice[E], AllocException] { }
+    fun allocate_zeroed(n: USize) -> Res[Memory[E], AllocException] { }
 
     @public
     @abstract_method
-    fun deallocate(slice: Slice[E]) -> Void { }
+    fun deallocate(mem: Memory[E]) -> Void { }
 
     @public
     @abstract_method
-    fun reallocate(mut slice: &mut Slice[E], n: USize) -> Res[Void, AllocException] { }
+    fun reallocate(mut mem: &mut Memory[E], n: USize) -> Res[Void, AllocException] { }
 }
 
 
@@ -36,21 +36,21 @@ cls GlobalAlloc[E] { }
 
 
 sup [E] GlobalAlloc[E] ext Alloc[E] {
-    fun allocate(n: USize) -> Res[Slice[E], AllocException] {
+    fun allocate(n: USize) -> Res[Memory[E], AllocException] {
         let mem = std::mem::ops::malloc[E](n).ok_or(AllocException(msg="Failed to allocate memory"))?
-        ret Pass(val=Slice(mem))
+        ret Pass(val=mem)
     }
 
-    fun allocate_zeroed(n: USize) -> Res[Slice[E], AllocException] {
+    fun allocate_zeroed(n: USize) -> Res[Memory[E], AllocException] {
         let mem = std::mem::ops::calloc[E](n).ok_or(AllocException(msg="Failed to allocate zeroed memory"))?
-        ret Pass(val=Slice(mem))
+        ret Pass(val=mem)
     }
 
-    fun deallocate(slice: Slice[E]) -> Void {
-        std::mem::ops::free[E](slice.mem)
+    fun deallocate(mem: Memory[E]) -> Void {
+        std::mem::ops::free[E](mem)
     }
 
-    fun reallocate(mut slice: &mut Slice[E], n: USize) -> Res[Void, AllocException] {
-        ret std::mem::ops::realloc[T=E](&mut slice.mem, n).ok_or(AllocException(msg="Failed to reallocate memory"))
+    fun reallocate(mut mem: &mut Memory[E], n: USize) -> Res[Void, AllocException] {
+        ret std::mem::ops::realloc[E](&mut mem, n).ok_or(AllocException(msg="Failed to reallocate memory"))
     }
 }

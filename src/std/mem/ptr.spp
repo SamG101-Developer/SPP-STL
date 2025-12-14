@@ -1,0 +1,46 @@
+use std::ops::add::Add
+use std::ops::sub::Sub
+use std::number::USize
+
+
+##
+The raw pointer type is requires for a few low level types in the S++ STL, such as the StringView. This means that we
+need to define it in the standard library. The uses of the raw pointer type are very limited, and provably safe. This
+class is not exposed outside of the standard library. It also has special LLVM support for pointer arithmetic.
+
+A raw pointer is always non-null and properly aligned for the type T. Due to its limited use, there are not any provided
+unsafe operations such as dereferencing. Instead, higher level abstractions such as Single[T] and Slice[T] provide safe
+access to the underlying data.
+##
+@protected
+cls Ptr[T] {
+    @private
+    addr: USize
+}
+
+
+sup [T] Ptr[T] {
+    @public
+    fun from_addr(addr: USize) -> Ptr[T] {
+        ret Ptr[T](addr)
+    }
+
+    @public
+    fun to_addr(&self) -> USize {
+        ret self.addr
+    }
+}
+
+
+sup [T] Ptr[T] ext Add[Rhs=USize, Ret=Ptr[T]] {
+    fun add(self, that: USize) -> Ptr[T] {
+        ret Ptr[T](addr=self.addr + that * std::mem::ops::size_of[T]())
+    }
+}
+
+
+sup [T] Ptr[T] ext Sub[Rhs=USize, Ret=Ptr[T]] {
+    fun sub(self, that: USize) -> Ptr[T] {
+        ret Ptr[T](addr=self.addr - that * std::mem::ops::size_of[T]())
+    }
+}

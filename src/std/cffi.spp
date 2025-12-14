@@ -11,4 +11,14 @@ type CFloat = std::number::F32
 type CDouble = std::number::F64
 type CSizeT = std::number::USize
 type CVoid = std::void::Void
-type CPtr[T] = std::mem::memory::Memory[T]
+cls CFile {}
+
+##
+For C pointer parameters:
+- Use &mut CPtr[T] to represent a "T*" in C.
+- Use &CPtr[T] to represent a "T const*" in C.
+
+For C pointer return
+- Use CPtr[T] to represent a "T*" in C.
+##
+type CPtr[T] = std::mem::ptr::Ptr[T]

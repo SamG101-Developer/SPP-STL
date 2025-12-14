@@ -1,3 +1,5 @@
+use std::cffi::CFile
+use std::mem::ptr::Ptr
 use std::number::U8
 use std::number::USize
 use std::number::S32
@@ -15,7 +17,7 @@ cmp stdin: StdinStream = StdinStream()
 
 
 @private
-cmp stdin_handle: S32 = 1_s32
+cmp stdin_handle: USize = 1_uz
 
 
 @private
@@ -25,10 +27,8 @@ cls StdinStream { }
 sup StdinStream ext ReadableStream {
     fun read(&mut self, len: USize) -> Res[Vec[U8], StreamReadException] {
         let mut vec = Vec[U8]()
-        let val = libc::fgets(&mut vec.buf.mem, 1024_s32, &stdin_handle)
-        # TODO
-        # ret case val < 0_s32 { Fail(err=StreamReadException(msg="Failed to read from stdin")) } else { Pass(val=vec) }
-        ret Pass(val=vec)
+        let val = libc::fgets(&mut vec.buf.mem.ptr.raw, 1024_s32, &Ptr[CFile]::from_addr(stdin_handle)).to_addr()
+        ret case val < 0_uz { Fail(err=StreamReadException(msg="Failed to read from stdin")) } else { Pass(val=vec) }
     }
 
     fun read_all(&mut self) -> Res[Vec[U8], StreamReadException] {

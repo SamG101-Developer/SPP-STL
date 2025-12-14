@@ -1,12 +1,14 @@
+use std::cffi::CFile
+use std::mem::ptr::Ptr
 use std::number::U8
 use std::number::USize
 use std::number::S32
-use std::result::Res
 use std::result::Fail
 use std::result::Pass
+use std::result::Res
+use std::slice::Slice
 use std::streams::WritableStream
 use std::streams::StreamWriteException
-use std::vector::Vec
 use std::void::Void
 
 
@@ -15,7 +17,7 @@ cmp stderr: StderrStream = StderrStream()
 
 
 @private
-cmp stderr_handle: S32 = 2_s32
+cmp stderr_handle: USize = 2_uz
 
 
 @private
@@ -23,22 +25,20 @@ cls StderrStream { }
 
 
 sup StderrStream ext WritableStream {
-    fun write(&mut self, data: &Vec[U8], length: USize) -> Res[S32, StreamWriteException] {
-        let val = libc::fputs(&data.buf.mem, &stderr_handle)
-        # TODO
-        # ret case val < 0_s32 { Fail(err=StreamWriteException(msg="Failed to write to stderr")) } else { Pass(val) }
-        ret Pass(val)
+    fun write(&mut self, data: &Slice[U8]) -> Res[USize, StreamWriteException] {
+        let file_handle = Ptr[CFile]::from_addr(stderr_handle)
+        let val = libc::fwrite(&data.mem.ptr.raw, 1_uz, data.length(), &file_handle)
+        ret case val < 0_uz { Fail(err=StreamWriteException(msg="Failed to write to stderr")) } else { Pass(val) }
     }
 
     fun flush(&mut self) -> Res[Void, StreamWriteException] {
-        let val = libc::fflush(&stderr_handle)
-        # TODO
-        # ret case val < 0_s32 { Fail(err=StreamWriteException(msg="Failed to flush stderr")) } else { Pass[Void]() }
-        ret Pass[Void]()
+        let file_handle = &Ptr[CFile]::from_addr(stderr_handle)
+        let val = libc::fflush(&file_handle)
+        ret case val < 0_s32 { Fail(err=StreamWriteException(msg="Failed to flush stderr")) } else { Pass[Void]() }
     }
 
-    fun write_all(&mut self, data: &Vec[U8]) -> Res[S32, StreamWriteException] {
+    @no_impl
+    fun write_all(&mut self, data: &Slice[U8]) -> Res[USize, StreamWriteException] {
         # ret self.write(data, data.len()).and_then(|| self.flush())
-        ret Pass(val=0_s32)
     }
 }

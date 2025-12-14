@@ -1,8 +1,8 @@
-use std::string::Str
+use std::string_view::StrView
 use std::void::Void
 
 
 @public
 @inline
 @compiler_builtin
-fun abort(msg: Str) -> ! { }
+fun abort(msg: StrView) -> ! { }
