@@ -17,7 +17,7 @@ sup [T] Fut[T] {
 
     @public
     @compiler_builtin
-    fun await_all(...futures: Fut[T]) -> Void { }
+    fun await_all(..futures: Fut[T]) -> Void { }
 
     @private
     @compiler_builtin
