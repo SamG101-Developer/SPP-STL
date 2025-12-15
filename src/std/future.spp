@@ -1,2 +1,25 @@
+use std::num::U8
+use std::option::Opt
+use std::threading::atom::Atom
+
+
 @public
-cls Fut[T] { }
+cls Fut[T] {
+    @private state: Atom[U8]
+    @private val: Opt[T]
+}
+
+
+sup [T] Fut[T] {
+    @public
+    @compiler_builtin
+    fun await(self) -> T { }
+
+    @public
+    @compiler_builtin
+    fun await_all(...futures: Fut[T]) -> Void { }
+
+    @private
+    @compiler_builtin
+    fun spawn[F](fun: F) -> Void { }
+}
