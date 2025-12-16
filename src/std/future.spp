@@ -1,6 +1,6 @@
 use std::number::U8
 use std::option::Opt
-use std::threading::atom::Atom
+use std::threading::atomic::Atom
 
 
 @public
