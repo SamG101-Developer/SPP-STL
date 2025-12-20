@@ -9,4 +9,9 @@ sup [Output, Residual] Try[Output, Residual] {
     @inline
     @abstract_method
     fun op_is_output(&self) -> Bool { }
+
+    @private
+    @inline
+    @abstract_method
+    fun op_as_output(self) -> Output { }
 }
