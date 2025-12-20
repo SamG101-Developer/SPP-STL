@@ -41,8 +41,8 @@ sup [T, E] Res[T, E] ext std::ops::try::Try[T, Fail[E]] {
     }
 
     fun op_as_output(self) -> T {
-        ret case self of {
-            is Pass[T](val) { val }
+        case self of {
+            is Pass[T](val) { ret val }
             is Fail[E](err) { std::abort::abort("called `Res::op_as_output()` on a `Fail` value") }
         }
     }
