@@ -40,7 +40,7 @@ sup [T, E] Res[T, E] ext std::ops::try::Try[T, Fail[E]] {
         ret *self is Fail[E](..)
     }
 
-    fun op_as_residual(self) -> E {
+    fun op_as_residual(self) -> Fail[E] {
         ret case self of {
             is Fail[E](val) { val }
             else { std::abort::abort("called `Res::op_as_residual` on a `Pass` value") }
