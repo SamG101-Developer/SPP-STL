@@ -216,7 +216,7 @@ sup [T] Opt[T] ext std::ops::try::Try[T, None] {
         ret *self is None()
     }
 
-    fun op_as_residual(self) -> T {
+    fun op_as_residual(self) -> None {
         ret case self of {
             is None() { None() }
             else { std::abort::abort("called `Opt::op_as_residual()` on a `Some` value") }
