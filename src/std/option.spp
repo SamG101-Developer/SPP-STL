@@ -11,16 +11,9 @@ use std::result::Fail
 # todo: declare a cmp constant None for NoneT (prevents having to use None() everywhere)
 
 
-@public
-cls Some[T] { val: T }
-
-
-@public
-cls None { }
-
-
-@public
-type Opt[T] = Some[T] or None
+@public cls Some[T] { val: T }
+@public cls None { }
+@public type Opt[T] = Some[T] or None
 
 
 # Todo: "T: Copy"
@@ -211,15 +204,15 @@ sup[T] Opt[T] {
 }
 
 
-sup [T] Opt[T] ext std::ops::try::Try[T, None] {
-    fun op_is_residual(&self) -> Bool {
-        ret *self is None()
+sup [T] Opt[T] ext std::ops::try::Try[T] {
+    fun op_is_output(&self) -> Bool {
+        ret *self is Some[T](..)
     }
 
-    fun op_as_residual(self) -> None {
+    fun op_as_output(self) -> T {
         ret case self of {
-            is None() { None() }
-            else { std::abort::abort("called `Opt::op_as_residual()` on a `Some` value") }
+            is Some[T](val) { val }
+            else { std::abort::abort("called `Opt::op_as_output` on a `None` value") }
         }
     }
 }

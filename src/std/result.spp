@@ -6,16 +6,9 @@ use std::option::Some
 use std::string::Str
 
 
-@public
-cls Pass[T] { val: T }
-
-
-@public
-cls Fail[E] { err: E }
-
-
-@public
-type Res[T, E] = Pass[T] or Fail[E]
+@public cls Pass[T] { val: T }
+@public cls Fail[E] { err: E }
+@public type Res[T, E] = Pass[T] or Fail[E]
 
 
 # Todo: "T: Copy, E: Copy"
@@ -35,15 +28,15 @@ sup [T, E] Res[T, E] {
 }
 
 
-sup [T, E] Res[T, E] ext std::ops::try::Try[T, Fail[E]] {
-    fun op_is_residual(&self) -> Bool {
-        ret *self is Fail[E](..)
+sup [T, E] Res[T, E] ext std::ops::try::Try[T] {
+    fun op_is_output(&self) -> Bool {
+        ret *self is Pass[T](..)
     }
 
-    fun op_as_residual(self) -> Fail[E] {
+    fun op_as_output(self) -> T {
         ret case self of {
-            is Fail[E](..) { self }
-            else { std::abort::abort("called `Res::op_as_residual` on a `Pass` value") }
+            is Pass[T](val) { val }
+            else { std::abort::abort("called `op_as_output` on a `Fail` value") }
         }
     }
 }

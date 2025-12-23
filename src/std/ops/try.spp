@@ -1,17 +1,17 @@
 use std::boolean::Bool
 
 
-cls Try[Output, Residual] {}
+@public cls Try[Output] {}
 
 
-sup [Output, Residual] Try[Output, Residual] {
-    @private
+sup [Output] Try[Output] {
+    @protected
     @inline
     @abstract_method
-    fun op_is_residual(&self) -> Bool { }
+    fun op_is_output(&self) -> Bool { }
 
-    @private
+    @protected
     @inline
     @abstract_method
-    fun op_as_residual(self) -> Residual { }
+    fun op_as_output(self) -> Output { }
 }
