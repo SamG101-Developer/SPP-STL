@@ -205,14 +205,14 @@ sup[T] Opt[T] {
 
 
 sup [T] Opt[T] ext std::ops::try::Try[Some[T], None, T] {
-    fun op_is_output(&self) -> Bool {
+    fun op_is_value(&self) -> Bool {
         ret *self is Some[T](..)
     }
 
-    fun op_as_output(self) -> T {
+    fun op_as_value(self) -> T {
         ret case self of {
             is Some[T](val) { val }
-            else { std::abort::abort("called `Opt::op_as_output` on a `None` value") }
+            else { std::abort::abort("called `Opt::op_as_value` on a `None` value") }
         }
     }
 }
