@@ -1,10 +1,10 @@
 use std::boolean::Bool
 
 
-@public cls Try[Output, Residual] {}
+@public cls Try[Output, Residual, Value] {}
 
 
-sup [Output, Residual] Try[Output, Residual, Value] {
+sup [Output, Residual, Value] Try[Output, Residual, Value] {
     @protected
     @inline
     @abstract_method
