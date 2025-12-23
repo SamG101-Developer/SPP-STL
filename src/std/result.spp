@@ -28,14 +28,14 @@ sup [T, E] Res[T, E] {
 }
 
 
-sup [T, E] Res[T, E] ext std::ops::try::Try[Pass[T], Fail[E]] {
+sup [T, E] Res[T, E] ext std::ops::try::Try[Pass[T], Fail[E], T] {
     fun op_is_output(&self) -> Bool {
         ret *self is Pass[T](..)
     }
 
-    fun op_as_output(self) -> Pass[T] {
+    fun op_as_output(self) -> T {
         ret case self of {
-            is Pass[T](..) { self }
+            is Pass[T](val) { val }
             else { std::abort::abort("called `op_as_output` on a `Fail` value") }
         }
     }

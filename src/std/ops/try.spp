@@ -4,14 +4,14 @@ use std::boolean::Bool
 @public cls Try[Output, Residual] {}
 
 
-sup [Output, Residual] Try[Output, Residual] {
+sup [Output, Residual] Try[Output, Residual, Value] {
     @protected
     @inline
     @abstract_method
-    fun op_is_output(&self) -> Bool { }
+    fun op_is_value(&self) -> Bool { }
 
     @protected
     @inline
     @abstract_method
-    fun op_as_output(self) -> Output { }
+    fun op_as_value(self) -> Value { }
 }
