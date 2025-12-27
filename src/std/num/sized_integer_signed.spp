@@ -14,6 +14,7 @@ use std::num::sized_floating_point::SizedFloatingPoint
 
 
 # Type alias the "signed" version of the the sized integer type.
+@public
 type SizedIntegerSigned[cmp bit_width: U32] = SizedInteger[bit_width, true]
 
 

@@ -13,6 +13,7 @@ use std::num::sized_floating_point::SizedFloatingPoint
 
 
 # Type alias the "unsigned" version of the the sized integer type.
+@public
 type SizedIntegerUnsigned[cmp bit_width: U32] = SizedInteger[bit_width, false]
 
 
@@ -25,7 +26,7 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::div::Div[
 
 sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::div::DivAssign[Rhs=Self] {
     fun div_assign(&mut self, that: Self) -> Void {
-        ret intrinsics::udiv_assign(self, that)
+        intrinsics::udiv_assign(self, that)
     }
 }
 
@@ -39,7 +40,7 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::rem::Rem[
 
 sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::rem::RemAssign[Rhs=Self] {
     fun rem_assign(&mut self, that: Self) -> Void {
-        ret intrinsics::urem_assign(self, that)
+        intrinsics::urem_assign(self, that)
     }
 }
 
