@@ -11,6 +11,7 @@ use std::num::bases::FloatingPoint
 
 
 # A sized floating point is a floating point type with a provided bit width.
+@public
 cls SizedFloatingPoint[cmp bit_width: U32] { }
 
 
@@ -69,7 +70,7 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::add::Add[Rh
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::add::AddAssign[Rhs=Self] {
     fun add_assign(&mut self, that: Self) -> Void {
-        ret intrinsics::float_add_assign(self, that)
+        intrinsics::float_add_assign(self, that)
     }
 }
 
@@ -83,7 +84,7 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::sub::Sub[Rh
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::sub::SubAssign[Rhs=Self] {
     fun sub_assign(&mut self, that: Self) -> Void {
-        ret intrinsics::float_sub_assign(self, that)
+        intrinsics::float_sub_assign(self, that)
     }
 }
 
@@ -97,7 +98,7 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::mul::Mul[Rh
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::mul::MulAssign[Rhs=Self] {
     fun mul_assign(&mut self, that: Self) -> Void {
-        ret intrinsics::float_mul_assign(self, that)
+        intrinsics::float_mul_assign(self, that)
     }
 }
 
@@ -111,7 +112,7 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::div::Div[Rh
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::div::DivAssign[Rhs=Self] {
     fun div_assign(&mut self, that: Self) -> Void {
-        ret intrinsics::float_div_assign(self, that)
+        intrinsics::float_div_assign(self, that)
     }
 }
 
@@ -125,7 +126,7 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::rem::Rem[Rh
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::rem::RemAssign[Rhs=Self] {
     fun rem_assign(&mut self, that: Self) -> Void {
-        ret intrinsics::float_rem_assign(self, that)
+        intrinsics::float_rem_assign(self, that)
     }
 }
 
@@ -145,6 +146,7 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::pow::Pow[Rh
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
+    @public
     fun neg(self) -> Self {
         ret intrinsics::float_neg(self)
     }
@@ -152,10 +154,14 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
+    @public
+    @inline
     fun min(self, that: Self) -> Self {
         ret intrinsics::float_min(self, that)
     }
 
+    @public
+    @inline
     fun max(self, that: Self) -> Self {
         ret intrinsics::float_max(self, that)
     }
@@ -427,4 +433,3 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
     #     ret SizedIntegerUnsigned[bit_width]::from(self)
     # }
 }
-
