@@ -22,7 +22,7 @@ cls Vec[T, A: Alloc[T] = GlobalAlloc[T]] {
 }
 
 
-sup [T, A] Vec[T] {
+sup [T, A] Vec[T, A] {
     type Element = T
     type Allocator = A
 
