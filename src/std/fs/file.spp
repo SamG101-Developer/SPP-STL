@@ -13,16 +13,16 @@ use std::single::Single
 use std::streams::ReadableStream
 use std::streams::SeekableStream
 use std::streams::WritableStream
-use std::streams::StreamReadException
-use std::streams::StreamSeekException
-use std::streams::StreamWriteException
 use std::slice::Slice
 use std::string::Str
+use std::string_view::StrView
 use std::vector::Vec
 use std::void::Void
 
 
-cls FileNotFoundException { }
+cls FileNotFoundErr {
+    @public msg: StrView
+}
 
 
 @public
@@ -34,15 +34,15 @@ cls File {
 
 sup File {
     @public
-    fun open(path: &Path, mode: Str) -> Res[File, FileNotFoundException] {
+    fun open(path: &Path, mode: Str) -> Res[File, FileNotFoundErr] {
         # Todo: this is just silly lol
         let handle = libc::fopen(&path.path.data.buf.mem.ptr.raw, &mode.data.buf.mem.ptr.raw).to_addr()
-        case handle == 0_uz { ret Fail[FileNotFoundException]() }
+        case handle == 0_uz { ret Fail(err=FileNotFoundErr(msg="Failed to open file")) }
         ret Pass(val=File(handle, open=true))
     }
 
     @public
-    fun close(&mut self) -> Res[Void, FileNotFoundException] {
+    fun close(&mut self) -> Res[Void, FileNotFoundErr] {
         libc::fclose(&mut Ptr[CFile]::from_addr(self.handle))
         self.open = false
         ret Pass[Void]()
@@ -63,29 +63,29 @@ sup File {
 
 
 sup File ext WritableStream {
-    fun write(&mut self, data: &Slice[U8]) -> Res[USize, StreamWriteException] {
+    fun write(&mut self, data: &Slice[U8]) -> Res[USize, StreamErr] {
         let file_handle = Ptr[CFile]::from_addr(self.handle)
         let val = libc::fwrite(&data.mem.ptr.raw, 1_uz, data.length(), &file_handle)
-        ret case val < 0_uz { Fail(err=StreamWriteException(msg="Failed to write to stdout")) } else { Pass(val) }
+        ret case val < 0_uz { Fail(err=StreamErr(msg="Failed to write to stdout")) } else { Pass(val) }
     }
 
-    fun flush(&mut self) -> Res[Void, StreamWriteException] {
+    fun flush(&mut self) -> Res[Void, StreamErr] {
         let file_handle = &Ptr[CFile]::from_addr(self.handle)
         let val = libc::fflush(&file_handle)
-        ret case val < 0_s32 { Fail(err=StreamWriteException(msg="Failed to flush stdout")) } else { Pass[Void]() }
+        ret case val < 0_s32 { Fail(err=StreamErr(msg="Failed to flush stdout")) } else { Pass[Void]() }
     }
 }
 
 
 sup File ext ReadableStream {
     @no_impl
-    fun read(&mut self, len: USize) -> Res[Vec[U8], StreamReadException] { }
+    fun read(&mut self, len: USize) -> Res[Vec[U8], StreamErr] { }
 }
 
 
 sup File ext SeekableStream {
     @no_impl
-    fun seek(&mut self, offset: USize) -> Res[Void, StreamSeekException] { }
+    fun seek(&mut self, offset: USize) -> Res[Void, StreamErr] { }
 }
 
 

@@ -7,7 +7,7 @@ use std::void::Void
 
 
 @public
-cls AllocException {
+cls AllocErr {
     @public msg: StrView
 }
 
@@ -19,11 +19,11 @@ cls Alloc[E] { }
 sup [E] Alloc[E] {
     @public
     @abstract_method
-    fun allocate(n: USize) -> Res[Memory[E], AllocException] { }
+    fun allocate(n: USize) -> Res[Memory[E], AllocErr] { }
 
     @public
     @abstract_method
-    fun allocate_zeroed(n: USize) -> Res[Memory[E], AllocException] { }
+    fun allocate_zeroed(n: USize) -> Res[Memory[E], AllocErr] { }
 
     @public
     @abstract_method
@@ -31,7 +31,7 @@ sup [E] Alloc[E] {
 
     @public
     @abstract_method
-    fun reallocate(mut mem: &mut Memory[E], n: USize) -> Res[Void, AllocException] { }
+    fun reallocate(mut mem: &mut Memory[E], n: USize) -> Res[Void, AllocErr] { }
 }
 
 
@@ -40,13 +40,13 @@ cls GlobalAlloc[E] { }
 
 
 sup [E] GlobalAlloc[E] ext Alloc[E] {
-    fun allocate(n: USize) -> Res[Memory[E], AllocException] {
-        let mem = std::mem::ops::malloc[E](n).ok_or(AllocException(msg="Failed to allocate memory"))?
+    fun allocate(n: USize) -> Res[Memory[E], AllocErr] {
+        let mem = std::mem::ops::malloc[E](n).ok_or(AllocErr(msg="Failed to allocate memory"))?
         ret Pass(val=mem)
     }
 
-    fun allocate_zeroed(n: USize) -> Res[Memory[E], AllocException] {
-        let mem = std::mem::ops::calloc[E](n).ok_or(AllocException(msg="Failed to allocate zeroed memory"))?
+    fun allocate_zeroed(n: USize) -> Res[Memory[E], AllocErr] {
+        let mem = std::mem::ops::calloc[E](n).ok_or(AllocErr(msg="Failed to allocate zeroed memory"))?
         ret Pass(val=mem)
     }
 
@@ -54,7 +54,7 @@ sup [E] GlobalAlloc[E] ext Alloc[E] {
         std::mem::ops::free[E](mem)
     }
 
-    fun reallocate(mut mem: &mut Memory[E], n: USize) -> Res[Void, AllocException] {
-        ret std::mem::ops::realloc[E](&mut mem, n).ok_or(AllocException(msg="Failed to reallocate memory"))
+    fun reallocate(mut mem: &mut Memory[E], n: USize) -> Res[Void, AllocErr] {
+        ret std::mem::ops::realloc[E](&mut mem, n).ok_or(AllocErr(msg="Failed to reallocate memory"))
     }
 }
