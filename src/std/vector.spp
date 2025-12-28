@@ -188,7 +188,7 @@ sup [T, A, cmp n: USize] Vec[T, A] ext From[Self, Arr[T, n, A]] {
 }
 
 
-sup [T, A] Vec[T, A] ext Clone[Out=Self] {
+sup [T] Vec[T] ext Clone[Out=Self] {
     @no_impl
     fun clone(&self) -> Self {
         # ret Vec[T, A](buf=self.buf.clone())
@@ -196,7 +196,7 @@ sup [T, A] Vec[T, A] ext Clone[Out=Self] {
 }
 
 
-sup [T] Vec[T, A] ext Sortable[T] {
+sup [T] Vec[T] ext Sortable[T] {
     @no_impl
     fun sort(&mut self) -> Void { }
 
@@ -205,21 +205,21 @@ sup [T] Vec[T, A] ext Sortable[T] {
 }
 
 
-sup [T] Vec[T, A] ext std::ops::idx::IndexMut[T, USize] {
+sup [T] Vec[T] ext std::ops::idx::IndexMut[T, USize] {
     cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] {
         gen with self.buf.index_mut(index)
     }
 }
 
 
-sup [T] Vec[T, A] ext std::ops::idx::IndexRef[T, USize] {
+sup [T] Vec[T] ext std::ops::idx::IndexRef[T, USize] {
     cor index_ref(&self, index: USize) -> GenOnce[&T] {
         gen with self.buf.index_ref(index)
     }
 }
 
 
-sup [T] Vec[T, A] ext std::ops::add::Add[Self, Ret=Self] {
+sup [T] Vec[T] ext std::ops::add::Add[Self, Ret=Self] {
     fun add(self, that: Self) -> Self {
         let mut result = self
         loop element in that.iter_mov() {
@@ -230,7 +230,7 @@ sup [T] Vec[T, A] ext std::ops::add::Add[Self, Ret=Self] {
 }
 
 
-sup [T] Vec[T, A] ext std::ops::add::AddAssign[Self] {
+sup [T] Vec[T] ext std::ops::add::AddAssign[Self] {
     fun add_assign(&mut self, that: Self) -> Void {
         loop element in that.iter_mov() {
             self.push(element)
