@@ -6,31 +6,31 @@ use std::num::sized_floating_point::SizedFloatingPoint
 
 
 # Unsigned integers.
-type U8 = SizedIntegerUnsigned[8_u32]
-type U16 = SizedIntegerUnsigned[16_u32]
-type U32 = SizedIntegerUnsigned[32_u32]
-type U64 = SizedIntegerUnsigned[64_u32]
-type U128 = SizedIntegerUnsigned[128_u32]
-type U256 = SizedIntegerUnsigned[256_u32]
-type USize = SizedIntegerUnsigned[64_u32]
+@public type U8 = SizedIntegerUnsigned[8_u32]
+@public type U16 = SizedIntegerUnsigned[16_u32]
+@public type U32 = SizedIntegerUnsigned[32_u32]
+@public type U64 = SizedIntegerUnsigned[64_u32]
+@public type U128 = SizedIntegerUnsigned[128_u32]
+@public type U256 = SizedIntegerUnsigned[256_u32]
+@public type USize = SizedIntegerUnsigned[64_u32]
 
 
 # Signed integers.
-type S8 = SizedIntegerSigned[8_u32]
-type S16 = SizedIntegerSigned[16_u32]
-type S32 = SizedIntegerSigned[32_u32]
-type S64 = SizedIntegerSigned[64_u32]
-type S128 = SizedIntegerSigned[128_u32]
-type S256 = SizedIntegerSigned[256_u32]
-type SSize = SizedIntegerSigned[64_u32]
+@public type S8 = SizedIntegerSigned[8_u32]
+@public type S16 = SizedIntegerSigned[16_u32]
+@public type S32 = SizedIntegerSigned[32_u32]
+@public type S64 = SizedIntegerSigned[64_u32]
+@public type S128 = SizedIntegerSigned[128_u32]
+@public type S256 = SizedIntegerSigned[256_u32]
+@public type SSize = SizedIntegerSigned[64_u32]
 
 
 # Floating points.
-type F8 = SizedFloatingPoint[8_u32]
-type F16 = SizedFloatingPoint[16_u32]
-type F32 = SizedFloatingPoint[32_u32]
-type F64 = SizedFloatingPoint[64_u32]
-type F128 = SizedFloatingPoint[128_u32]
+@public type F8 = SizedFloatingPoint[8_u32]
+@public type F16 = SizedFloatingPoint[16_u32]
+@public type F32 = SizedFloatingPoint[32_u32]
+@public type F64 = SizedFloatingPoint[64_u32]
+@public type F128 = SizedFloatingPoint[128_u32]
 
 
 # Can't add the FP256 until LLVM adds intrinsic support for them.

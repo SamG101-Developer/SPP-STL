@@ -1,12 +1,8 @@
 use std::void::Void
 
 
-@public
-cls Add[Rhs, Ret] {}
-
-
-@public
-cls AddAssign[Rhs] {}
+@public cls Add[Rhs, Ret] {}
+@public cls AddAssign[Rhs] {}
 
 
 sup [Rhs, Ret] Add[Rhs, Ret] {

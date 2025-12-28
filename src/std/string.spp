@@ -18,20 +18,20 @@ A string type representing a sequence of bytes. This is a "higher level" abstrac
 ##
 @public
 cls Str {
-    data: Vec[U8]
+    @public data: Vec[U8]
 }
 
 
 sup Str {
     @public
     fun to_ascii_uppercase(&self) -> Str {
-        # ret self.data.iter_ref().map(U8::to_ascii_uppercase).collect(Str)
+        # ret self.data.iter_ref().map(U8::to_ascii_uppercase).collect[Str]()
         ret Str::from("")
     }
 
     @public
     fun to_ascii_lowercase(&self) -> Str {
-        # ret self.data.iter_ref().map(U8::to_ascii_lowercase).collect(Str)
+        # ret self.data.iter_ref().map(U8::to_ascii_lowercase).collect[Str]()
         ret Str::from("")
     }
 

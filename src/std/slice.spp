@@ -36,6 +36,7 @@ sup [E, A] Slice[E, A] {
 
 
 sup [E] Slice[E] {
+    @public
     fun length(&self) -> USize {
         ret self.len
     }
@@ -78,21 +79,27 @@ sup [E] Slice[E] ext std::ops::del::Del {
 
 
 sup [E] Slice[E] {
+    @public
     @compiler_builtin
     cor iter_mov(self) -> Iterator[E] { }
 
+    @public
     @compiler_builtin
     cor iter_mut(&mut self) -> Iterator[&mut E] { }
 
+    @public
     @compiler_builtin
     cor iter_ref(&self) -> Iterator[&E] { }
 
+    @public
     @compiler_builtin
     cor reverse_iter_mov(self) -> Iterator[E] { }
 
+    @public
     @compiler_builtin
     cor reverse_iter_mut(&mut self) -> Iterator[&mut E] { }
 
+    @public
     @compiler_builtin
     cor reverse_iter_ref(&self) -> Iterator[&E] { }
 }

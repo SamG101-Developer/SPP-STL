@@ -23,206 +23,206 @@ cls Limits[T] { }
 
 
 sup Limits[U8] {
-    type SInt = S8
-    type FP = F8
+    @public type SInt = S8
+    @public type FP = F8
 
-    cmp max: U8 = 255_u8
-    cmp min: U8 = 0_u8
+    @public cmp max: U8 = 255_u8
+    @public cmp min: U8 = 0_u8
 }
 
 
 sup Limits[U16] {
-    type SInt = S16
-    type FP = F16
+    @public type SInt = S16
+    @public type FP = F16
 
-    cmp max: U16 = 65535_u16
-    cmp min: U16 = 0_u16
+    @public cmp max: U16 = 65535_u16
+    @public cmp min: U16 = 0_u16
 }
 
 
 sup Limits[U32] {
-    type SInt = S32
-    type FP = F32
+    @public type SInt = S32
+    @public type FP = F32
 
-    cmp max: U32 = 4294967295_u32
-    cmp min: U32 = 0_u32
+    @public cmp max: U32 = 4294967295_u32
+    @public cmp min: U32 = 0_u32
 }
 
 
 sup Limits[U64] {
-    type SInt = S64
-    type FP = F64
+    @public type SInt = S64
+    @public type FP = F64
 
-    cmp max: U64 = 18446744073709551615_u64
-    cmp min: U64 = 0_u64
+    @public cmp max: U64 = 18446744073709551615_u64
+    @public cmp min: U64 = 0_u64
 }
 
 
 sup Limits[U128] {
-    type SInt = S128
-    type FP = F128
+    @public type SInt = S128
+    @public type FP = F128
 
-    cmp max: U128 = 340282366920938463463374607431768211455_u128
-    cmp min: U128 = 0_u128
+    @public cmp max: U128 = 340282366920938463463374607431768211455_u128
+    @public cmp min: U128 = 0_u128
 }
 
 
 sup Limits[U256] {
-    type SInt = S256
+    @public type SInt = S256
 
-    cmp max: U256 = 115792089237316195423570985008687907853269984665640564039457584007913129639935_u256
-    cmp min: U256 = 0_u256
+    @public cmp max: U256 = 115792089237316195423570985008687907853269984665640564039457584007913129639935_u256
+    @public cmp min: U256 = 0_u256
 }
 
 
 sup Limits[S8] {
-    type UInt = U8
-    type FP = F8
+    @public type UInt = U8
+    @public type FP = F8
 
-    cmp max: S8 = 127_s8
-    cmp min: S8 = -128_s8
+    @public cmp max: S8 = 127_s8
+    @public cmp min: S8 = -128_s8
 }
 
 
 sup Limits[S16] {
-    type UInt = U16
-    type FP = F16
+    @public type UInt = U16
+    @public type FP = F16
 
-    cmp max: S16 = 32767_s16
-    cmp min: S16 = -32768_s16
+    @public cmp max: S16 = 32767_s16
+    @public cmp min: S16 = -32768_s16
 }
 
 
 sup Limits[S32] {
-    type UInt = U32
-    type FP = F32
+    @public type UInt = U32
+    @public type FP = F32
 
-    cmp max: S32 = 2147483647_s32
-    cmp min: S32 = -2147483648_s32
+    @public cmp max: S32 = 2147483647_s32
+    @public cmp min: S32 = -2147483648_s32
 }
 
 
 sup Limits[S64] {
-    type UInt = U64
-    type SInt = S64
+    @public type UInt = U64
+    @public type SInt = S64
 
-    cmp max: S64 = 9223372036854775807_s64
-    cmp min: S64 = -9223372036854775808_s64
+    @public cmp max: S64 = 9223372036854775807_s64
+    @public cmp min: S64 = -9223372036854775808_s64
 }
 
 
 sup Limits[S128] {
-    type UInt = U128
-    type FP = F128
+    @public type UInt = U128
+    @public type FP = F128
 
-    cmp max: S128 = 170141183460469231731687303715884105727_s128
-    cmp min: S128 = -170141183460469231731687303715884105728_s128
+    @public cmp max: S128 = 170141183460469231731687303715884105727_s128
+    @public cmp min: S128 = -170141183460469231731687303715884105728_s128
 }
 
 
 sup Limits[S256] {
-    type UInt = U256
+    @public type UInt = U256
 
-    cmp max: S256 = 57896044618658097711785492504343953926634992332820282019728792003956564819967_s256
-    cmp min: S256 = -57896044618658097711785492504343953926634992332820282019728792003956564819968_s256
+    @public cmp max: S256 = 57896044618658097711785492504343953926634992332820282019728792003956564819967_s256
+    @public cmp min: S256 = -57896044618658097711785492504343953926634992332820282019728792003956564819968_s256
 }
 
 
 sup Limits[F8] {
-    type UInt = U8
-    type SInt = S8
+    @public type UInt = U8
+    @public type SInt = S8
 
-    cmp mantissa_digits: U32 = 2_u32
-    cmp digits: U32 = 2_u32
-    cmp epsilon: F8 = 0.0_f8
-    cmp min: F8 = 0.0_f8
-    cmp min_positive: F8 = 0.0_f8
-    cmp max: F8 = 255.0_f8
-    cmp min_exp: S32 = -126_s32
-    cmp max_exp: S32 = 127_s32
-    cmp min_10_exp: S32 = -38_s32
-    cmp max_10_exp: S32 = 38_s32
-    cmp nan: F8 = 0.0_f8
-    cmp infinity: F8 = 0.0_f8
-    cmp neg_infinity: F8 = 0.0_f8
+    @public cmp mantissa_digits: U32 = 2_u32
+    @public cmp digits: U32 = 2_u32
+    @public cmp epsilon: F8 = 0.0_f8
+    @public cmp min: F8 = 0.0_f8
+    @public cmp min_positive: F8 = 0.0_f8
+    @public cmp max: F8 = 255.0_f8
+    @public cmp min_exp: S32 = -126_s32
+    @public cmp max_exp: S32 = 127_s32
+    @public cmp min_10_exp: S32 = -38_s32
+    @public cmp max_10_exp: S32 = 38_s32
+    @public cmp nan: F8 = 0.0_f8
+    @public cmp infinity: F8 = 0.0_f8
+    @public cmp neg_infinity: F8 = 0.0_f8
 }
 
 
 sup Limits[F16] {
-    type UInt = U16
-    type SInt = S16
+    @public type UInt = U16
+    @public type SInt = S16
 
-    cmp mantissa_digits: U32 = 0_u32
-    cmp digits: U32 = 0_u32
-    cmp epsilon: F16 = 0.0_f16
-    cmp min: F16 = 0.0_f16
-    cmp min_positive: F16 = 0.0_f16
-    cmp max: F16 = 0.0_f16
-    cmp min_exp: S32 = 0_s32
-    cmp max_exp: S32 = 0_s32
-    cmp min_10_exp: S32 = 0_s32
-    cmp max_10_exp: S32 = 0_s32
-    cmp nan: F16 = 0.0_f16
-    cmp infinity: F16 = 0.0_f16
-    cmp neg_infinity: F16 = 0.0_f16
+    @public cmp mantissa_digits: U32 = 0_u32
+    @public cmp digits: U32 = 0_u32
+    @public cmp epsilon: F16 = 0.0_f16
+    @public cmp min: F16 = 0.0_f16
+    @public cmp min_positive: F16 = 0.0_f16
+    @public cmp max: F16 = 0.0_f16
+    @public cmp min_exp: S32 = 0_s32
+    @public cmp max_exp: S32 = 0_s32
+    @public cmp min_10_exp: S32 = 0_s32
+    @public cmp max_10_exp: S32 = 0_s32
+    @public cmp nan: F16 = 0.0_f16
+    @public cmp infinity: F16 = 0.0_f16
+    @public cmp neg_infinity: F16 = 0.0_f16
 }
 
 
 sup Limits[F32] {
-    type UInt = U32
-    type SInt = S32
+    @public type UInt = U32
+    @public type SInt = S32
 
-    cmp mantissa_digits: U32 = 0_u32
-    cmp digits: U32 = 0_u32
-    cmp epsilon: F32 = 0.0_f32
-    cmp min: F32 = 0.0_f32
-    cmp min_positive: F32 = 0.0_f32
-    cmp max: F32 = 0.0_f32
-    cmp min_exp: S32 = 0_s32
-    cmp max_exp: S32 = 0_s32
-    cmp min_10_exp: S32 = 0_s32
-    cmp max_10_exp: S32 = 0_s32
-    cmp nan: F32 = 0.0_f32
-    cmp infinity: F32 = 0.0_f32
-    cmp neg_infinity: F32 = 0.0_f32
+    @public cmp mantissa_digits: U32 = 0_u32
+    @public cmp digits: U32 = 0_u32
+    @public cmp epsilon: F32 = 0.0_f32
+    @public cmp min: F32 = 0.0_f32
+    @public cmp min_positive: F32 = 0.0_f32
+    @public cmp max: F32 = 0.0_f32
+    @public cmp min_exp: S32 = 0_s32
+    @public cmp max_exp: S32 = 0_s32
+    @public cmp min_10_exp: S32 = 0_s32
+    @public cmp max_10_exp: S32 = 0_s32
+    @public cmp nan: F32 = 0.0_f32
+    @public cmp infinity: F32 = 0.0_f32
+    @public cmp neg_infinity: F32 = 0.0_f32
 }
 
 
 sup Limits[F64] {
-    type UInt = U64
-    type SInt = S64
+    @public type UInt = U64
+    @public type SInt = S64
 
-    cmp mantissa_digits: U32 = 0_u32
-    cmp digits: U32 = 15_u32
-    cmp epsilon: F64 = 0.0_f64
-    cmp min: F64 = 0.0_f64
-    cmp min_positive: F64 = 0.0_f64
-    cmp max: F64 = 0.0_f64
-    cmp min_exp: S32 = 0_s32
-    cmp max_exp: S32 = 0_s32
-    cmp min_10_exp: S32 = 0_s32
-    cmp max_10_exp: S32 = 0_s32
-    cmp nan: F64 = 0.0_f64
-    cmp infinity: F64 = 0.0_f64
-    cmp neg_infinity: F64 = 0.0_f64
+    @public cmp mantissa_digits: U32 = 0_u32
+    @public cmp digits: U32 = 15_u32
+    @public cmp epsilon: F64 = 0.0_f64
+    @public cmp min: F64 = 0.0_f64
+    @public cmp min_positive: F64 = 0.0_f64
+    @public cmp max: F64 = 0.0_f64
+    @public cmp min_exp: S32 = 0_s32
+    @public cmp max_exp: S32 = 0_s32
+    @public cmp min_10_exp: S32 = 0_s32
+    @public cmp max_10_exp: S32 = 0_s32
+    @public cmp nan: F64 = 0.0_f64
+    @public cmp infinity: F64 = 0.0_f64
+    @public cmp neg_infinity: F64 = 0.0_f64
 }
 
 
 sup Limits[F128] {
-    type UInt = U128
-    type SInt = S128
+    @public type UInt = U128
+    @public type SInt = S128
 
-    cmp mantissa_digits: U32 = 0_u32
-    cmp digits: U32 = 0_u32
-    cmp epsilon: F128 = 0.0_f128
-    cmp min: F128 = 0.0_f128
-    cmp min_positive: F128 = 0.0_f128
-    cmp max: F128 = 0.0_f128
-    cmp min_exp: S32 = 0_s32
-    cmp max_exp: S32 = 0_s32
-    cmp min_10_exp: S32 = 0_s32
-    cmp max_10_exp: S32 = 0_s32
-    cmp nan: F128 = 0.0_f128
-    cmp infinity: F128 = 0.0_f128
-    cmp neg_infinity: F128 = 0.0_f128
+    @public cmp mantissa_digits: U32 = 0_u32
+    @public cmp digits: U32 = 0_u32
+    @public cmp epsilon: F128 = 0.0_f128
+    @public cmp min: F128 = 0.0_f128
+    @public cmp min_positive: F128 = 0.0_f128
+    @public cmp max: F128 = 0.0_f128
+    @public cmp min_exp: S32 = 0_s32
+    @public cmp max_exp: S32 = 0_s32
+    @public cmp min_10_exp: S32 = 0_s32
+    @public cmp max_10_exp: S32 = 0_s32
+    @public cmp nan: F128 = 0.0_f128
+    @public cmp infinity: F128 = 0.0_f128
+    @public cmp neg_infinity: F128 = 0.0_f128
 }

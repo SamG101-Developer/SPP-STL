@@ -1,8 +1,7 @@
 use std::boolean::Bool
 
 
-@public
-cls Ne[Rhs] { }
+@public cls Ne[Rhs] { }
 
 
 sup [Rhs] Ne[Rhs] {

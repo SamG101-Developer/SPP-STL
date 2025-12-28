@@ -8,7 +8,7 @@ use std::result::Fail
 use std::result::Pass
 use std::slice::Slice
 use std::streams::ReadableStream
-use std::streams::StreamReadException
+use std::streams::StreamErr
 use std::vector::Vec
 
 
@@ -25,13 +25,13 @@ cls StdinStream { }
 
 
 sup StdinStream ext ReadableStream {
-    fun read(&mut self, len: USize) -> Res[Vec[U8], StreamReadException] {
+    fun read(&mut self, len: USize) -> Res[Vec[U8], StreamErr] {
         let mut vec = Vec[U8]()
         let val = libc::fgets(&mut vec.buf.mem.ptr.raw, 1024_s32, &Ptr[CFile]::from_addr(stdin_handle)).to_addr()
-        ret case val < 0_uz { Fail(err=StreamReadException(msg="Failed to read from stdin")) } else { Pass(val=vec) }
+        ret case val < 0_uz { Fail(err=StreamErr(msg="Failed to read from stdin")) } else { Pass(val=vec) }
     }
 
-    fun read_all(&mut self) -> Res[Vec[U8], StreamReadException] {
+    fun read_all(&mut self) -> Res[Vec[U8], StreamErr] {
         let mut vec = Vec[U8]()
         loop true {
             let val = self.read(1024_uz)?

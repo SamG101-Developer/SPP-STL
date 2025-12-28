@@ -1,35 +1,17 @@
 use std::generator::GenOnce
 
 
-@public
-cls IndexMut[T, I] { }
+@public cls IndexMut[T, I] { }
+@public cls IndexRef[T, I] { }
+
+
 sup [T, I] IndexMut[T, I] {
     @abstract_method
     cor index_mut(&mut self, index: I) -> GenOnce[&mut T] { }
 }
 
 
-@public
-cls IndexRef[T, I] { }
 sup [T, I] IndexRef[T, I] {
     @abstract_method
     cor index_ref(&self, index: I) -> GenOnce[&T] { }
 }
-
-
-##
-@public
-cls IndexSliceMut[T, I] { }
-sup [T, I] IndexSliceMut[T, I] {
-    @abstract_method
-    cor index_slice_mut(&mut self, range: Range[I]) -> GenOnce[&mut Slice[T]] { }
-}
-
-
-@public
-cls IndexSliceRef[T, I] { }
-sup [T, I] IndexSliceRef[T, I] {
-    @abstract_method
-    cor index_slice_ref(&self, range: Range[I]) -> GenOnce[&Slice[T]] { }
-}
-##

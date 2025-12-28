@@ -6,10 +6,12 @@ use std::result::Res
 use std::void::Void
 
 
+@public
 cls AllocException { }
 sup AllocException ext Exception { }
 
 
+@public
 cls Alloc[E] { }
 
 
@@ -32,6 +34,7 @@ sup [E] Alloc[E] {
 }
 
 
+@public
 cls GlobalAlloc[E] { }
 
 

@@ -1,12 +1,8 @@
 use std::void::Void
 
 
-@public
-cls Div[Rhs, Ret] { }
-
-
-@public
-cls DivAssign[Rhs] {}
+@public cls Div[Rhs, Ret] { }
+@public cls DivAssign[Rhs] {}
 
 
 sup [Rhs, Ret] Div[Rhs, Ret] {

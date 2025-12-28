@@ -1,12 +1,8 @@
 use std::void::Void
 
 
-@public
-cls BitShr[Rhs, Ret] {}
-
-
-@public
-cls BitShrAssign[Rhs] {}
+@public cls BitShr[Rhs, Ret] {}
+@public cls BitShrAssign[Rhs] {}
 
 
 sup [Rhs, Ret] BitShr[Rhs, Ret] {

@@ -15,24 +15,31 @@ cls MemoryIncompatibleSize {}
 sup MemoryIncompatibleSize ext Exception { }
 
 
+@public
+@inline
 @compiler_builtin
 fun size_of[T]() -> USize {
     # Returns the size of a type at compile time.
 }
 
 
+@public
+@inline
 @compiler_builtin
 fun size_of_value[T](value: T) -> USize {
     # Handles heap size checking for types that are not known at compile time.
 }
 
 
+@public
+@inline
 @compiler_builtin
 fun mem_cmp[T](a: &T, b: &T, n: USize) -> S32 {
     # Compares two memory regions byte by byte.
 }
 
 
+@public
 fun malloc[T](n: USize) -> Opt[Memory[T]] {
     # Determine the size and get an allocated pointer.
     let cap = n * size_of[T]()
@@ -41,6 +48,7 @@ fun malloc[T](n: USize) -> Opt[Memory[T]] {
 }
 
 
+@public
 fun calloc[T](n: USize) -> Opt[Memory[T]] {
     # Determine the size and get an allocated pointer.
     let cap = n * size_of[T]()
@@ -49,6 +57,7 @@ fun calloc[T](n: USize) -> Opt[Memory[T]] {
 }
 
 
+@public
 fun realloc[T](mut mem: &mut Memory[T], n: USize) -> Opt[Void] {
     # Determine the size and get a reallocated pointer.
     let cap = n * size_of[T]()
@@ -63,6 +72,7 @@ fun realloc[T](mut mem: &mut Memory[T], n: USize) -> Opt[Void] {
 }
 
 
+@public
 fun free[T](mem: Memory[T]) -> Void {
     # Free the memory pointed to by the pointer.
     libc::free(mem.ptr.raw)

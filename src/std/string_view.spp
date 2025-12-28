@@ -19,10 +19,7 @@ full-featured `Str` type from `std::string::Str`.
 ##
 @public
 cls StrView {
-    @private
     ptr: Ptr[U8]
-
-    @private
     len: USize
 }
 

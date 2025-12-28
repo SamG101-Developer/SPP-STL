@@ -5,7 +5,7 @@ use std::void::Void
 type BigDigit = U32
 
 
-@protected
+@public
 cls BigUInt {
     data: vector::Vec[BigDigit]
 }

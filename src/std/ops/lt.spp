@@ -1,8 +1,8 @@
 use std::boolean::Bool
 
 
-@public
-cls Lt[Rhs] { }
+@public cls Lt[Rhs] { }
+
 
 sup [Rhs] Lt[Rhs] {
     @public

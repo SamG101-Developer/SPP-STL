@@ -13,20 +13,16 @@ use std::shadow::Shadow
 use std::void::Void
 
 
+@public
 cls Shared[T, A: Alloc[T] = GlobalAlloc[T]] {
-    @private
     val: T
-
-    @private
     shared_counter: USize
-
-    @private
     shadow_counter: USize
 }
 
 
 sup [T] Shared[T] {
-    type Element = T
+    @public type Element = T
 
     @public
     @compiler_builtin

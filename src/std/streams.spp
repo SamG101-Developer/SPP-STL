@@ -2,60 +2,54 @@ use std::boolean::Bool
 use std::number::U8
 use std::number::S32
 use std::number::USize
-use std::exception::Exception
 use std::result::Res
 use std::result::Pass
 use std::slice::Slice
+use std::string_view::StrView
 use std::vector::Vec
 use std::void::Void
 
 
-cls StreamWriteException { }
-sup StreamWriteException ext Exception { }
+@public
+cls StreamErr {
+    @public msg: StrView
+}
 
-
-cls StreamReadException { }
-sup StreamReadException ext Exception { }
-
-
-cls StreamSeekException { }
-sup StreamSeekException ext Exception { }
-
-
+@public
 cls WritableStream { }
 
-
+@public
 cls ReadableStream { }
 
-
+@public
 cls SeekableStream { }
 
 
 sup WritableStream {
     @public
     @abstract_method
-    fun write(&mut self, data: &Slice[U8]) -> Res[USize, StreamWriteException] { }
+    fun write(&mut self, data: &Slice[U8]) -> Res[USize, StreamErr] { }
 
     @public
     @abstract_method
-    fun flush(&mut self) -> Res[Void, StreamWriteException] { }
+    fun flush(&mut self) -> Res[Void, StreamErr] { }
 
     @public
     @no_impl
     @virtual_method
-    fun write_all(&mut self, data: &Slice[U8]) -> Res[USize, StreamWriteException] { }
+    fun write_all(&mut self, data: &Slice[U8]) -> Res[USize, StreamErr] { }
 }
 
 
 sup ReadableStream {
     @public
     @abstract_method
-    fun read(&mut self, len: USize) -> Res[Vec[U8], StreamReadException] { }
+    fun read(&mut self, len: USize) -> Res[Vec[U8], StreamReadErr] { }
 
     @public
     @no_impl
     @virtual_method
-    fun read_all(&mut self) -> Res[Vec[U8], StreamReadException] {
+    fun read_all(&mut self) -> Res[Vec[U8], StreamReadErr] {
         ret Pass(val=Vec[U8]())
     }
 }
@@ -64,30 +58,30 @@ sup ReadableStream {
 sup SeekableStream {
     @public
     @abstract_method
-    fun seek(&mut self, offset: USize) -> Res[Void, StreamSeekException] { }
+    fun seek(&mut self, offset: USize) -> Res[Void, StreamErr] { }
 
     @public
     @no_impl
     @virtual_method
-    fun seek_from_start(&mut self, offset: USize) -> Res[Void, StreamSeekException] { }
+    fun seek_from_start(&mut self, offset: USize) -> Res[Void, StreamErr] { }
 
     @public
     @no_impl
     @virtual_method
-    fun seek_from_end(&mut self, offset: USize) -> Res[Void, StreamSeekException] { }
+    fun seek_from_end(&mut self, offset: USize) -> Res[Void, StreamErr] { }
 
     @public
     @no_impl
     @virtual_method
-    fun rewind(&mut self) -> Res[Void, StreamSeekException] { }
+    fun rewind(&mut self) -> Res[Void, StreamErr] { }
 
     @public
     @no_impl
     @virtual_method
-    fun stream_len(&mut self) -> Res[USize, StreamSeekException] { }
+    fun stream_len(&mut self) -> Res[USize, StreamErr] { }
 
     @public
     @no_impl
     @virtual_method
-    fun stream_pos(&mut self) -> Res[USize, StreamSeekException] { }
+    fun stream_pos(&mut self) -> Res[USize, StreamErr] { }
 }

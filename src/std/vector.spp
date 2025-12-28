@@ -18,11 +18,11 @@ use std::void::Void
 
 @public
 cls Vec[T, A: Alloc[T] = GlobalAlloc[T]] {
-    buf: Slice[T, A]
+    @public buf: Slice[T, A]
 }
 
 
-sup [T, A] Vec[T, A] {
+sup [T, A] Vec[T] {
     type Element = T
     type Allocator = A
 
@@ -40,7 +40,7 @@ sup [T, A] Vec[T, A] {
 }
 
 
-sup [T, A] Vec[T, A] {
+sup [T] Vec[T] {
     @public
     fun push(&mut self, element: T) -> Void {
         case self.buf.len == self.buf.mem.cap { self.grow_double() }
@@ -64,15 +64,18 @@ sup [T, A] Vec[T, A] {
 }
 
 
-sup [T, A] Vec[T, A] {
+sup [T] Vec[T] {
+    @public
     cor get_head_ref(&self) -> GenOpt[&T] {
         gen with self.get_ref(0_uz)
     }
 
+    @public
     cor get_tail_ref(&self) -> GenOpt[&T] {
         gen with self.get_ref(self.buf.len - 1_uz)
     }
 
+    @public
     cor get_ref(&self, index: USize) -> GenOpt[&T] {
         case index >= self.buf.len { gen }
         gen self.index_ref(index)
@@ -80,15 +83,18 @@ sup [T, A] Vec[T, A] {
 }
 
 
-sup [T, A] Vec[T, A] {
+sup [T] Vec[T] {
+    @public
     cor get_head_mut(&mut self) -> GenOpt[&mut T] {
         gen with self.get_mut(0_uz)
     }
 
+    @public
     cor get_tail_mut(&mut self) -> GenOpt[&mut T] {
         gen with self.get_mut(self.buf.len - 1_uz)
     }
 
+    @public
     cor get_mut(&mut self, index: USize) -> GenOpt[&mut T] {
         case index >= self.buf.len { gen }
         gen self.index_mut(index)
@@ -96,82 +102,93 @@ sup [T, A] Vec[T, A] {
 }
 
 
-sup [T, A] Vec[T, A] {
+sup [T] Vec[T] {
+    @public
     fun clear(&mut self) -> Void {
         self.buf.mem.clear()
     }
 
+    @public
     fun length(&self) -> USize {
         ret self.buf.len
     }
 
+    @public
     fun is_empty(&self) -> Bool {
         ret self.buf.len == 0_uz
     }
 }
 
 
-sup [T, A] Vec[T, A] {
+sup [T] Vec[T] {
+    @public
     fun resize(&mut self, new_length: USize) -> Void {
         self.buf.resize(new_length)
         self.buf.len = new_length
     }
 
+    @public
     fun shrink_to_fit(&mut self) -> Void {
         self.buf.resize(self.buf.len)
     }
 }
 
 
-sup [T, A] Vec[T, A] {
+sup [T] Vec[T] {
+    @public
     cor iter_mov(self) -> Iterator[T] {
         gen with self.buf.iter_mov()
     }
 
+    @public
     cor iter_mut(&mut self) -> Iterator[&mut T] {
         gen with self.buf.iter_mut()
     }
 
+    @public
     cor iter_ref(&self) -> Iterator[&T] {
         gen with self.buf.iter_ref()
     }
 
+    @public
     cor reverse_iter_mov(self) -> Iterator[T] {
         gen with self.buf.reverse_iter_mov()
     }
 
+    @public
     cor reverse_iter_mut(&mut self) -> Iterator[&mut T] {
         gen with self.buf.reverse_iter_mut()
     }
 
+    @public
     cor reverse_iter_ref(&self) -> Iterator[&T] {
         gen with self.buf.reverse_iter_ref()
     }
 }
 
 
-sup [T, A] Vec[T, A] ext SizedIterator[T] {
+sup [T] Vec[T] ext SizedIterator[T] {
     fun size_hint(&self) -> USize {
         ret self.buf.len
     }
 }
 
 
-sup [T, A] Vec[T, A] ext From[Self, Slice[T, A]] {
+sup [T] Vec[T] ext From[Self, Slice[T, A]] {
     fun from(that: Slice[T, A]) -> Self {
         ret Vec[T, A](buf=that)
     }
 }
 
 
-sup [T, A, cmp n: USize] Vec[T, A] ext From[Self, Arr[T, n]] {
-    fun from(that: Arr[T, n]) -> Self {
+sup [T, A, cmp n: USize] Vec[T, A] ext From[Self, Arr[T, n, A]] {
+    fun from(that: Arr[T, n, A]) -> Self {
         ret Vec[T, A]::from(Slice[T, A]::from(that))
     }
 }
 
 
-sup [T, A] Vec[T, A] ext Clone[Out=Self] {
+sup [T] Vec[T, A] ext Clone[Out=Self] {
     @no_impl
     fun clone(&self) -> Self {
         # ret Vec[T, A](buf=self.buf.clone())
@@ -179,7 +196,7 @@ sup [T, A] Vec[T, A] ext Clone[Out=Self] {
 }
 
 
-sup [T, A] Vec[T, A] ext Sortable[T] {
+sup [T] Vec[T, A] ext Sortable[T] {
     @no_impl
     fun sort(&mut self) -> Void { }
 
@@ -188,21 +205,21 @@ sup [T, A] Vec[T, A] ext Sortable[T] {
 }
 
 
-sup [T, A] Vec[T, A] ext std::ops::idx::IndexMut[T, USize] {
+sup [T] Vec[T, A] ext std::ops::idx::IndexMut[T, USize] {
     cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] {
         gen with self.buf.index_mut(index)
     }
 }
 
 
-sup [T, A] Vec[T, A] ext std::ops::idx::IndexRef[T, USize] {
+sup [T] Vec[T, A] ext std::ops::idx::IndexRef[T, USize] {
     cor index_ref(&self, index: USize) -> GenOnce[&T] {
         gen with self.buf.index_ref(index)
     }
 }
 
 
-sup [T, A] Vec[T, A] ext std::ops::add::Add[Self, Ret=Self] {
+sup [T] Vec[T, A] ext std::ops::add::Add[Self, Ret=Self] {
     fun add(self, that: Self) -> Self {
         let mut result = self
         loop element in that.iter_mov() {
@@ -213,7 +230,7 @@ sup [T, A] Vec[T, A] ext std::ops::add::Add[Self, Ret=Self] {
 }
 
 
-sup [T, A] Vec[T, A] ext std::ops::add::AddAssign[Self] {
+sup [T] Vec[T, A] ext std::ops::add::AddAssign[Self] {
     fun add_assign(&mut self, that: Self) -> Void {
         loop element in that.iter_mov() {
             self.push(element)

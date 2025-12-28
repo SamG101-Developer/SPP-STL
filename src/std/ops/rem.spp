@@ -1,12 +1,8 @@
 use std::void::Void
 
 
-@public
-cls Rem[Rhs, Ret] { }
-
-
-@public
-cls RemAssign[Rhs] {}
+@public cls Rem[Rhs, Ret] { }
+@public cls RemAssign[Rhs] {}
 
 
 sup [Rhs, Ret] Rem[Rhs, Ret] {

@@ -12,6 +12,7 @@ use std::ops::void::Void
 ##
 A uniquely owned pointer on the heap.
 ##
+@public
 cls Single[T, A: Alloc[T] = GlobalAlloc[T]] {
     @private
     raw: Ptr[T]
@@ -19,7 +20,7 @@ cls Single[T, A: Alloc[T] = GlobalAlloc[T]] {
 
 
 sup [T] Single[T] {
-    type Element = T
+    @public type Element = T
 }
 
 

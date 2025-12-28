@@ -1,12 +1,8 @@
 use std::void::Void
 
 
-@public
-cls Pow[Rhs, Ret] { }
-
-
-@public
-cls PowAssign[Rhs] {}
+@public cls Pow[Rhs, Ret] { }
+@public cls PowAssign[Rhs] {}
 
 
 sup [Rhs, Ret] Pow[Rhs, Ret] {

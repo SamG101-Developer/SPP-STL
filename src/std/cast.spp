@@ -4,10 +4,8 @@ use std::generator::GenOnce
 use std::generator::GenOpt
 
 
-cls From[This, That] { }
-
-
-cls TryFrom[This, That] { }
+@public cls From[This, That] { }
+@public cls TryFrom[This, That] { }
 
 
 sup [This, That] From[This, That] {

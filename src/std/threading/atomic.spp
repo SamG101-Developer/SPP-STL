@@ -1,3 +1,4 @@
+@public
 cls Atom[T] {
-    val: T
+    @public val: T
 }

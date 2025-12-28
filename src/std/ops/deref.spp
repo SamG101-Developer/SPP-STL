@@ -1,10 +1,8 @@
 use std::generator::GenOnce
 
 
-cls DerefRef[T] { }
-
-
-cls DerefMut[T] { }
+@public cls DerefRef[T] { }
+@public cls DerefMut[T] { }
 
 
 sup [T] DerefRef[T] {

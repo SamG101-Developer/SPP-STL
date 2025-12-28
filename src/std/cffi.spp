@@ -1,17 +1,17 @@
-type CBool = std::boolean::Bool
-type CChar = std::number::U8
-type CShort = std::number::S16
-type CInt = std::number::S32
-type CLong = std::number::S64
-type CUInt = std::number::U8
-type CUShort = std::number::U16
-type CUInt = std::number::U32
-type CULong = std::number::U64
-type CFloat = std::number::F32
-type CDouble = std::number::F64
-type CSizeT = std::number::USize
-type CVoid = std::void::Void
-cls CFile {}
+@public type CBool = std::boolean::Bool
+@public type CChar = std::number::U8
+@public type CShort = std::number::S16
+@public type CInt = std::number::S32
+@public type CLong = std::number::S64
+@public type CUInt = std::number::U8
+@public type CUShort = std::number::U16
+@public type CUInt = std::number::U32
+@public type CULong = std::number::U64
+@public type CFloat = std::number::F32
+@public type CDouble = std::number::F64
+@public type CSizeT = std::number::USize
+@public type CVoid = std::void::Void
+@public cls CFile {}
 
 ##
 For C pointer parameters:
@@ -21,4 +21,4 @@ For C pointer parameters:
 For C pointer return
 - Use CPtr[T] to represent a "T*" in C.
 ##
-type CPtr[T] = std::mem::ptr::Ptr[T]
+@public type CPtr[T] = std::mem::ptr::Ptr[T]

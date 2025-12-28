@@ -8,17 +8,15 @@ use std::single::Single
 use std::void::Void
 
 
+@public
 cls Memory[T, A: Alloc[T] = GlobalAlloc[T]] {
-    @private
     ptr: Single[T, A]
-
-    @private
     cap: USize
 }
 
 
 sup [T] Memory[T] {
-    type Element = T
+    @public type Element = T
 
     @public
     fun capacity(&self) -> USize {

@@ -1,10 +1,11 @@
 use std::generator::Gen
 
 
+@public
 cls Range[T] {
-    start: T
-    end: T
-    step: T
+    @public start: T
+    @public end: T
+    @public step: T
 }
 
 

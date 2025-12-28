@@ -8,7 +8,7 @@ use std::result::Pass
 use std::result::Res
 use std::slice::Slice
 use std::streams::WritableStream
-use std::streams::StreamWriteException
+use std::streams::StreamErr
 use std::void::Void
 
 
@@ -25,20 +25,20 @@ cls StderrStream { }
 
 
 sup StderrStream ext WritableStream {
-    fun write(&mut self, data: &Slice[U8]) -> Res[USize, StreamWriteException] {
+    fun write(&mut self, data: &Slice[U8]) -> Res[USize, StreamErr] {
         let file_handle = Ptr[CFile]::from_addr(stderr_handle)
         let val = libc::fwrite(&data.mem.ptr.raw, 1_uz, data.length(), &file_handle)
-        ret case val < 0_uz { Fail(err=StreamWriteException(msg="Failed to write to stderr")) } else { Pass(val) }
+        ret case val < 0_uz { Fail(err=StreamErr(msg="Failed to write to stderr")) } else { Pass(val) }
     }
 
-    fun flush(&mut self) -> Res[Void, StreamWriteException] {
+    fun flush(&mut self) -> Res[Void, StreamErr] {
         let file_handle = &Ptr[CFile]::from_addr(stderr_handle)
         let val = libc::fflush(&file_handle)
-        ret case val < 0_s32 { Fail(err=StreamWriteException(msg="Failed to flush stderr")) } else { Pass[Void]() }
+        ret case val < 0_s32 { Fail(err=StreamErr(msg="Failed to flush stderr")) } else { Pass[Void]() }
     }
 
     @no_impl
-    fun write_all(&mut self, data: &Slice[U8]) -> Res[USize, StreamWriteException] {
+    fun write_all(&mut self, data: &Slice[U8]) -> Res[USize, StreamErr] {
         # ret self.write(data, data.len()).and_then(|| self.flush())
     }
 }

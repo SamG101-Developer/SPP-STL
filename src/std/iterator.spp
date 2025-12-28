@@ -26,17 +26,20 @@ sup [T] SizedIterator[T] {
 sup [T] Iterator[T] {
     # Concatenate this iterator with another iterator of the same element type. Iterate out of all elements from this
     # iterator, then all elements from the other iterator.
+    @public
     cor concat(self, other: Iterator[T]) -> Iterator[T] {
         gen with self
         gen with other
     }
 
+    @public
     cor cycle(self) -> Iterator[T] {
         loop true {
             gen with self
         }
     }
 
+    @public
     cor drop(self, count: USize) -> Iterator[T] {
         let mut index = 0_uz
         loop item in self {
@@ -47,6 +50,7 @@ sup [T] Iterator[T] {
         }
     }
 
+    @public
     cor filter(self, predicate: FunRef[(&T,), Bool]) -> Iterator[T] {
         loop item in self {
             case predicate(&item) {
@@ -55,6 +59,7 @@ sup [T] Iterator[T] {
         }
     }
 
+    @public
     cor take(self, count: USize) -> Iterator[T] {
         let mut index = 0_uz
         loop item in self {
@@ -67,12 +72,14 @@ sup [T] Iterator[T] {
         }
     }
 
+    @public
     cor map[U](self, mapper: FunRef[(T,), U]) -> Iterator[U] {
         loop item in self {
             gen mapper(item)
         }
     }
 
+    @public
     cor slice(self, start: USize, end: USize) -> Iterator[T] {
         let mut index = 0_uz
         loop item in self {
@@ -83,6 +90,7 @@ sup [T] Iterator[T] {
         }
     }
 
+    @public
     cor step_by(self, step: USize) -> Iterator[T] {
         let mut index = 0_uz
         loop item in self {
@@ -93,6 +101,7 @@ sup [T] Iterator[T] {
         }
     }
 
+    @public
     fun count(self) -> USize {
         let mut count = 0_uz
         loop item in self {
@@ -101,6 +110,7 @@ sup [T] Iterator[T] {
         ret count
     }
 
+    @public
     fun fold[U](self, initial: U, reducer: FunRef[(U, T), U]) -> U {
         let mut acc = initial
         loop item in self {
@@ -109,6 +119,7 @@ sup [T] Iterator[T] {
         ret acc
     }
 
+    @public
     fun all(self, predicate: FunRef[(T,), Bool]) -> Bool {
         loop item in self {
             case predicate(item).not {
@@ -118,6 +129,7 @@ sup [T] Iterator[T] {
         ret true
     }
 
+    @public
     fun any(self, predicate: FunRef[(T,), Bool]) -> Bool {
         loop item in self {
             case predicate(item) {
@@ -127,6 +139,7 @@ sup [T] Iterator[T] {
         ret false
     }
 
+    @public
     fun find(self, predicate: FunRef[(&T,), Bool]) -> Opt[T] {  # todo: this should fail (could be Opt[&T] i think)
         loop item in self {
             case predicate(&item) {
@@ -136,6 +149,7 @@ sup [T] Iterator[T] {
         ret None()
     }
 
+    @public
     fun for_each(self, action: FunRef[(T,), Void]) -> Void {
         loop item in self {
             action(item)

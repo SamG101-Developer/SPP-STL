@@ -1,8 +1,8 @@
 use std::boolean::Bool
 
 
-@public
-cls Ior[Rhs] {}
+@public cls Ior[Rhs] {}
+
 
 sup [Rhs] Ior[Rhs] {
     @public

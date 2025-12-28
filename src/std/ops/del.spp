@@ -1,8 +1,7 @@
 use std::void::Void
 
 
-@public
-cls Del { }
+@public cls Del { }
 
 
 sup Del {

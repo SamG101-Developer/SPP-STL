@@ -14,8 +14,7 @@ access to the underlying data.
 ##
 @protected
 cls Ptr[T] {
-    @private
-    addr: USize
+    @private addr: USize
 }
 
 

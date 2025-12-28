@@ -1,12 +1,8 @@
 use std::void::Void
 
 
-@public
-cls Mul[Rhs, Ret] { }
-
-
-@public
-cls MulAssign[Rhs] { }
+@public cls Mul[Rhs, Ret] { }
+@public cls MulAssign[Rhs] { }
 
 
 sup [Rhs, Ret] Mul[Rhs, Ret] {
