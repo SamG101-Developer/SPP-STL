@@ -174,7 +174,7 @@ sup [T] Vec[T] ext SizedIterator[T] {
 }
 
 
-sup [T] Vec[T] ext From[Self, Slice[T, A]] {
+sup [T, A] Vec[T, A] ext From[Self, Slice[T, A]] {
     fun from(that: Slice[T, A]) -> Self {
         ret Vec[T, A](buf=that)
     }
