@@ -13,6 +13,7 @@ use std::single::Single
 use std::streams::ReadableStream
 use std::streams::SeekableStream
 use std::streams::WritableStream
+use std::streams::StreamErr
 use std::slice::Slice
 use std::string::Str
 use std::string_view::StrView
