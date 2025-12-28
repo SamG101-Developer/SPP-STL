@@ -44,12 +44,12 @@ sup WritableStream {
 sup ReadableStream {
     @public
     @abstract_method
-    fun read(&mut self, len: USize) -> Res[Vec[U8], StreamReadErr] { }
+    fun read(&mut self, len: USize) -> Res[Vec[U8], StreamErr] { }
 
     @public
     @no_impl
     @virtual_method
-    fun read_all(&mut self) -> Res[Vec[U8], StreamReadErr] {
+    fun read_all(&mut self) -> Res[Vec[U8], StreamErr] {
         ret Pass(val=Vec[U8]())
     }
 }
