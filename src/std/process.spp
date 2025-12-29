@@ -1,0 +1,22 @@
+use std::string::Str
+use std::string_view::StrView
+
+
+cls Process { }
+
+
+sup Process {
+    @public
+    fun get_cwd() -> Str {
+        # Return the current working directory as a string.
+        let cwd = sppc::proc_get_cwd()
+        ret Str::from(cwd)
+    }
+
+    @public
+    fun set_cwd(path: &Str) -> Bool {
+        # Set the current working directory to the specified path.
+        let result = sppc::proc_set_cwd(StrView::from(path))
+        ret result == 0
+    }A
+}
