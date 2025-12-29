@@ -27,15 +27,14 @@ sup [T, A] Vec[T, A] {
     type Allocator = A
 
     @public
-    @no_impl
     fun new() -> Vec[T, A] {
-        # ret Vec[T, A](buf=A::alloc(1_uz))
+        ret Vec[T, A]::new_with_capacity(1_uz)
     }
 
     @public
-    @no_impl
     fun new_with_capacity(capacity: USize) -> Vec[T, A] {
         # ret Vec[T, A](buf=A::alloc(capacity))
+        ret Vec[T, A]()
     }
 }
 
@@ -207,21 +206,23 @@ sup [T, A, cmp n: USize] Vec[T, A] ext From[Self, Arr[T, n, A]] {
 }
 
 
+# TODO: Constrain T to be Clone
 sup [T] Vec[T] ext Clone[Out=Self] {
-    @no_impl
     fun clone(&self) -> Self {
         # ret Vec[T, A](buf=self.buf.clone())
+        ret Vec[T]()
     }
 }
 
 
+# TODO: Constrain T to be Ord
+##
 sup [T] Vec[T] ext Sortable[T] {
-    @no_impl
     fun sort(&mut self) -> Void { }
 
-    @no_impl
     fun sort_by(&mut self, compare: FunRef[(T, T), Bool]) -> Void { }
 }
+##
 
 
 sup [T] Vec[T] ext std::ops::idx::IndexMut[T, USize] {
@@ -241,9 +242,7 @@ sup [T] Vec[T] ext std::ops::idx::IndexRef[T, USize] {
 sup [T] Vec[T] ext std::ops::add::Add[Self, Ret=Self] {
     fun add(self, that: Self) -> Self {
         let mut result = self
-        loop element in that.iter_mov() {
-            result.push(element)
-        }
+        result.push_vec(that)
         ret result
     }
 }
@@ -251,8 +250,6 @@ sup [T] Vec[T] ext std::ops::add::Add[Self, Ret=Self] {
 
 sup [T] Vec[T] ext std::ops::add::AddAssign[Self] {
     fun add_assign(&mut self, that: Self) -> Void {
-        loop element in that.iter_mov() {
-            self.push(element)
-        }
+        self.push_vec(that)
     }
 }
