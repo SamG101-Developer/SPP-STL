@@ -110,6 +110,40 @@ sup Socket {
 }
 
 
+sup Socket ext WritableStream {
+    fun write(&mut self, data: &Slice[U8]) -> Res[USize, StreamErr] {
+        let stream = StrView::from(data)
+        let val = sppc::fd_write(&stream, 1_uz, data.length(), self.fd)
+        ret case n of {
+            < 0_sz { Fail(err=StreamErr(msg="Failed to write to socket")) }
+            else { Pass(val=n) }
+        }
+    }
+
+    @public
+    fun flush(&mut self) -> Res[Void, StreamErr] {
+        # No-op for sockets (there is no buffering at this level).
+        ret Pass[Void]()
+    }
+}
+
+
+sup Socket ext ReadableStream {
+    fun read(&mut self, len: USize) -> Res[Vec[U8], StreamErr] {
+        let val = sppc::fd_read(&mut stream, 1_uz, len, self.fd)
+        let vec = Vec[U8]::from(stream)
+
+        ret case n of {
+            < 0_sz { Fail(err=StreamErr(msg="Failed to read from socket")) }
+            else {
+                buffer.set_len(USize::from(n))
+                Pass(val=buffer)
+            }
+        }
+    }
+}
+
+
 sup Socket ext Del {
     fun del(self) -> Void {
         sppc::fd_close(self.fd)

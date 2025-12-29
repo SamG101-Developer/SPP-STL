@@ -1,0 +1,59 @@
+use std::net::socket::Socket
+
+
+@public
+cls UdpSocket {}
+
+
+sup UdpSocket ext Socket { }
+
+
+sup UdpSocket {
+    @public
+    fun new(type_: S32, proto: S32) -> Res[UdpSocket, SocketErr] {
+        let fd = sppc::net_sock_init(Socket::sock_dgram, type_, proto)
+        ret case fd of {
+            < 0 { Fail(err=SocketErr(msg="Failed to create socket")) }
+            else { Pass(val=UdpSocket()) }
+        }
+    }
+}
+
+
+sup UdpSocket {
+    @public
+    fun bind(&self, host: StrView, port: U16) -> Res[Void, SocketErr] {
+        let val = sppc::net_sock_bind(self.fd, host, port)
+        ret case val of {
+            < 0 { Fail(err=SocketErr(msg="Failed to bind socket")) }
+            else { Pass[Void]() }
+        }
+    }
+}
+
+
+sup UdpSocket {
+    @public
+    fun write_datagram(&self, data: &Slice[U8], host: StrView, port: U16) -> Res[USize, SocketErr] {
+        let stream = StrView::from(data)
+        let val = sppc::net_sock_sendto(self.fd, &stream, data.length(), host, port)
+        ret case val of {
+            < 0 { Fail(err=SocketErr(msg="Failed to send datagram")) }
+            else { Pass(val=USize::from(val)) }
+        }
+    }
+
+    @public
+    fun read_datagram(&self, len: USize) -> Res[(Vec[U8], StrView, U16), SocketErr] {
+        let mut stream = StrView::with_capacity(len)
+        let val = sppc::net_sock_recvfrom(self.fd, &mut stream, len)
+        ret case val of {
+            < 0 { Fail(err=SocketErr(msg="Failed to receive datagram")) }
+            else {
+                stream.set_len(USize::from(val))
+                let vec = Vec[U8]::from(stream)
+                Pass(val=(vec, host, port))
+            }
+        }
+    }
+}
