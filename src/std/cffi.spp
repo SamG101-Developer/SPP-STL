@@ -2,23 +2,14 @@
 @public type CChar = std::number::U8
 @public type CShort = std::number::S16
 @public type CInt = std::number::S32
-@public type CLong = std::number::S64
+@public type CLongLong = std::number::S64
 @public type CUInt = std::number::U8
 @public type CUShort = std::number::U16
 @public type CUInt = std::number::U32
-@public type CULong = std::number::U64
+@public type CULongLong = std::number::U64
 @public type CFloat = std::number::F32
 @public type CDouble = std::number::F64
 @public type CSizeT = std::number::USize
+@public type CSSizeT = std::number::SSize
 @public type CVoid = std::void::Void
-@public cls CFile {}
-
-##
-For C pointer parameters:
-- Use &mut CPtr[T] to represent a "T*" in C.
-- Use &CPtr[T] to represent a "T const*" in C.
-
-For C pointer return
-- Use CPtr[T] to represent a "T*" in C.
-##
-@public type CPtr[T] = std::mem::ptr::Ptr[T]
+@public type CCharPtr = std::string_view::StrView
