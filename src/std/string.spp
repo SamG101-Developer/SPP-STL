@@ -10,6 +10,7 @@ use std::ops::ne::Ne
 use std::string_view::StrView
 use std::vector::Vec
 use std::void::Void
+use std::fs::path::Path
 
 
 ##
@@ -35,7 +36,7 @@ sup Str {
         ret Str::from("")
     }
 
-    @no_impl
+    @public
     fun split(&self, sep: U8) -> Vec[Str] {
         let mut current: Str = Str::from("")
         let mut strings = Vec[Str]::new()
@@ -67,6 +68,13 @@ sup Str ext From[Self, StrView] {
 }
 
 
+sup Str ext From[Self, Path] {
+    fun from(that: Path) -> Self {
+        ret that.path.clone()
+    }
+}
+
+
 sup Str ext Eq[Rhs=Str] {
     fun eq(&self, that: &Str) -> Bool {
         # ret self.data.iter_ref().zip(that.data.iter_ref()).map(U8::eq).all()
@@ -84,30 +92,36 @@ sup Str ext Ne[Rhs=Str] {
 
 
 sup Str ext Clone[Out=Str] {
-    @no_impl
-    fun clone(&self) -> Str { }
+    fun clone(&self) -> Str {
+        ret Str(data=self.data.clone())
+    }
 }
 
 
 sup Str ext Add[Rhs=Str, Ret=Str] {
-    @no_impl
-    fun add(self, that: Str) -> Str { }
+    fun add(self, that: Str) -> Str {
+        ret Str(data=self.data + that.data)
+    }
 }
 
 
 sup Str ext Add[Rhs=U8, Ret=Str] {
-    @no_impl
-    fun add(self, that: U8) -> Str { }
+    fun add(self, that: U8) -> Str {
+        self.data.push(that)
+        ret Str(data=self.data)
+    }
 }
 
 
 sup Str ext AddAssign[Rhs=Str] {
-    @no_impl
-    fun add_assign(&mut self, that: Str) -> Void { }
+    fun add_assign(&mut self, that: Str) -> Void {
+        self.data += that.data
+    }
 }
 
 
 sup Str ext AddAssign[Rhs=U8] {
-    @no_impl
-    fun add_assign(&mut self, that: U8) -> Void { }
+    fun add_assign(&mut self, that: U8) -> Void {
+        self.data.push(that)
+    }
 }
