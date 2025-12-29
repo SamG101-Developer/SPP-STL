@@ -28,70 +28,161 @@ cls FileNotFoundErr {
 
 @public
 cls File {
-    handle: USize
+    fd: USize
     open: Bool = false
+}
+
+
+sup File {
+    cmp lock_sh: S32 = 1
+    cmp lock_ex: S32 = 2
+    cmp lock_nb: S32 = 4
+    cmp lock_un: S32 = 8
 }
 
 
 sup File {
     @public
     fun open(path: &Path, mode: Str) -> Res[File, FileNotFoundErr] {
-        # Todo: this is just silly lol
-        let handle = libc::fopen(&path.path.data.buf.mem.ptr.raw, &mode.data.buf.mem.ptr.raw).to_addr()
-        case handle == 0_uz { ret Fail(err=FileNotFoundErr(msg="Failed to open file")) }
-        ret Pass(val=File(handle, open=true))
+        let fd = sppc::fd_open(&StrView::from(path), &StrView::from(mode))
+        case fd == 0_uz { ret Fail(err=FileNotFoundErr(msg="Failed to open file")) }
+        ret Pass(val=File(fd, open=true))
     }
 
     @public
     fun close(&mut self) -> Res[Void, FileNotFoundErr] {
-        libc::fclose(&mut Ptr[CFile]::from_addr(self.handle))
+        let err = sppc::fd_close(self.fd)
+        case err != 0 { ret Fail(err=FileNotFoundErr(msg="Failed to close file")) }
         self.open = false
         ret Pass[Void]()
     }
 
     @public
-    @no_impl
-    fun lock(&self) -> Bool { }
+    fun lock_unique(&self, non_blocking: Bool = true) -> Bool {
+        let val = sppc::fd_lock_ex(self.fd, non_blocking)
+        ret val == 0
+    }
 
     @public
-    @no_impl
-    fun unlock(&self) -> Bool { }
+    fun lock_shared(&self, non_blocking: Bool = true) -> Bool {
+        let val = sppc::fd_lock_sh(self.fd, non_blocking)
+        ret val == 0
+    }
 
     @public
-    @no_impl
-    fun set_len(&self, len: USize) -> Bool { }
+    fun unlock(&self) -> Bool {
+        let val = sppc::fd_unlock(self.fd)
+        ret val == 0
+    }
+
+    @public
+    fun set_len(&self, len: S32) -> Bool {
+        let val = sppc::ftruncate(self.fd, len)
+        ret val == 0
+    }
 }
 
 
 sup File ext WritableStream {
     fun write(&mut self, data: &Slice[U8]) -> Res[USize, StreamErr] {
-        let file_handle = Ptr[CFile]::from_addr(self.handle)
-        let val = libc::fwrite(&data.mem.ptr.raw, 1_uz, data.length(), &file_handle)
-        ret case val < 0_uz { Fail(err=StreamErr(msg="Failed to write to stdout")) } else { Pass(val) }
+        case self.open.not { ret Fail(err=StreamErr(msg="File is not open")) }
+        let val = sppc::fwrite(StrView::from(data), 1, data.length(), self.fd)
+        ret case val of {
+            < 0_uz { Fail(err=StreamErr(msg="Failed to write to stdout")) }
+            < data.length() { Fail(err=StreamErr(msg="Failed to write all data to stdout")) }
+            else { Pass(val) }
+        }
     }
 
     fun flush(&mut self) -> Res[Void, StreamErr] {
-        let file_handle = &Ptr[CFile]::from_addr(self.handle)
-        let val = libc::fflush(&file_handle)
-        ret case val < 0_s32 { Fail(err=StreamErr(msg="Failed to flush stdout")) } else { Pass[Void]() }
+        case self.open.not { ret Fail(err=StreamErr(msg="File is not open")) }
+        let val = sppc::fflush(self.fd)
+        ret case val of {
+            != 0 { Fail(err=StreamErr(msg="Failed to flush stdout")) }
+            else { Pass[Void]() }
+        }
     }
 }
 
 
 sup File ext ReadableStream {
-    @no_impl
-    fun read(&mut self, len: USize) -> Res[Vec[U8], StreamErr] { }
+    fun read(&mut self, len: USize) -> Res[Vec[U8], StreamErr] {
+        # Cannot read if the file is not open.
+        case self.open.not { ret Fail(err=StreamErr(msg="File is not open")) }
+        let mut stream = StrView()
+
+        # Read the data from the file into the buffer.
+        let read_bytes = sppc::fd_read(&mut stream, 1_uz, len, self.fd)
+        case read_bytes of {
+            == 0 and sppc::feof(self.fd) != 0 { ret Pass(val=stream) }
+            == 0 { ret Fail(err=StreamErr(msg="Failed to read from file")) }
+        }
+
+        # Resize the vector to the actual number of bytes read.
+        stream.resize(read_bytes)
+        ret Pass(val=stream)
+    }
 }
 
 
 sup File ext SeekableStream {
-    @no_impl
-    fun seek(&mut self, offset: USize) -> Res[Void, StreamErr] { }
+    fun seek(&mut self, offset: SSize) -> Res[Void, StreamErr] {
+        # Cannot seek if the file is not open.
+        case self.open.not { ret Fail(err=StreamErr(msg="File is not open")) }
+
+        # Use sppc to seek to the offset from the current position.
+        let val = sppc::fd_seek(self.fd, offset, SeekableStream::seek_cur)
+        ret case val of {
+            < 0 { Fail(err=StreamErr(msg="Failed to seek in file")) }
+            else { Pass[Void]() }
+        }
+    }
+
+    fun stream_len(&mut self) -> Res[SSize, StreamErr] {
+        # Save the current position.
+        let cur = self.stream_pos()?
+
+        # Seek to the end of the file and get the current position (which is the length).
+        self.seek_from_end(0)?
+        let len = self.stream_pos()?
+
+        # Restore the original position by rewinding and seeking to the saved position.
+        self.rewind()?
+        self.seek(cur)?
+        ret Pass(val=len)
+    }
+
+    fun stream_pos(&mut self) -> Res[SSize, StreamErr] {
+        let pos = sppc::fd_tell(self.fd)
+        ret case pos of {
+            < 0 { Fail(err=StreamErr(msg="Failed to get file position")) }
+            else { Pass(val=pos) }
+        }
+    }
+
+    fun seek_from_start(&mut self, offset: SSize) -> Res[Void, StreamErr] {
+        let val = sppc::fd_seek(self.fd, offset, SeekableStream::seek_set)
+        ret case val of {
+            < 0 { Fail(err=StreamErr(msg="Failed to seek in file")) }
+            else { Pass[Void]() }
+        }
+    }
+
+    fun seek_from_end(&mut self, offset: SSize) -> Res[Void, StreamErr] {
+        let val = sppc::fd_seek(self.fd, offset, SeekableStream::seek_end)
+        ret case val of {
+            < 0 { Fail(err=StreamErr(msg="Failed to seek in file")) }
+            else { Pass[Void]() }
+        }
+    }
+
+    fun rewind(&mut self) -> Res[Void, StreamErr] {
+        ret self.seek_from_start(0)
+    }
 }
 
 
 sup File ext Del {
-    @no_impl
     fun del(mut self) -> Void {
         self.close()
     }
