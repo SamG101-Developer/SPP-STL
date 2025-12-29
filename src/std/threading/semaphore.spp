@@ -1,0 +1,71 @@
+use std::threading::cond_var::CondVar
+use std::threading::mutex::LockErr
+use std::threading::mutex::Mutex
+use std::number::U64
+use std::void::Void
+
+
+@public
+cls Semaphore {
+    mutex: Mutex
+    cond_var: CondVar
+    count: U64
+}
+
+
+sup Semaphore {
+    @public
+    fun new(initial_count: U64) -> Ret[Semaphore, LockErr] {
+        ret Semaphore(mutex=Mutex::new()?, cond_var=CondVar::new()?, count=initial_count)
+    }
+
+    @public
+    fun aquire(&mut self) -> Ret[Void, LockErr] {
+        self.mutex.lock()?
+        loop self.count == 0 {
+            self.cond_var.wait(&mut self.mutex)?
+        }
+        self.count = self.count - 1
+        ret self.mutex.unlock()
+    }
+
+    @public
+    fun aquire_many(&mut self, n: U64) -> Ret[Void, LockErr] {
+        self.mutex.lock()?
+        loop self.count < n {
+            self.cond_var.wait(&mut self.mutex)?
+        }
+        self.count = self.count - n
+        ret self.mutex.unlock()
+    }
+
+    @public
+    fun try_aquire(&mut self) -> Ret[Bool, LockErr] {
+        self.mutex.lock()?
+        ret case self.count > 0 {
+            self.count -= 1
+            self.mutex.unlock()?
+            true
+        }
+        else {
+            self.mutex.unlock()?
+            false
+        }
+    }
+
+    @public
+    fun release(&mut self) -> Ret[Void, LockErr] {
+        self.mutex.lock()?
+        self.count = self.count + 1
+        self.cond_var.signal_one()?
+        ret self.mutex.unlock()
+    }
+
+    @public
+    fun release_many(&mut self, n: U64) -> Ret[Void, LockErr] {
+        self.mutex.lock()?
+        self.count = self.count + n
+        self.cond_var.signal_all()?
+        ret self.mutex.unlock()
+    }
+}
