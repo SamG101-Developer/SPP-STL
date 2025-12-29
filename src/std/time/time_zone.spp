@@ -1,0 +1,25 @@
+use std::number::S32
+use std::string::Str
+
+
+@public
+cls TimeZone {
+    name: Str
+    offset_seconds: S32
+}
+
+
+sup TimeZone {
+    @public
+    fun utc() -> TimeZone {
+        ret TimeZone(name=Str::from("UTC"), offset_seconds=0_s32)
+    }
+
+    @public
+    fun local() -> TimeZone {
+        # Platform-specific implementation to get the local timezone
+        let local_offset = sppc::time_get_local_tz_offset_seconds()
+        let local_name = sppc::time_get_local_tz_name()
+        ret TimeZone(name=Str::from(local_name), offset_seconds=local_offset)
+    }
+}

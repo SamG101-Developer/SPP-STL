@@ -97,7 +97,13 @@ fun net_sock_set_keepalive(socket_fd: CInt, keepalive: Bool) -> CInt { }
 fun net_sock_set_nodelay(socket_fd: CInt, nodelay: Bool) -> CInt { }
 
 @ffi
-fun time_now() -> CLongLong { }
+fun time_now_ns(clock: CInt) -> CLongLong { }
+
+@ffi
+fun time_get_local_tz_offset_seconds() -> CLongLong { }
+
+@ffi
+fun time_get_local_tz_name(buffer: &mut CCharPtr, size: CSizeT) -> CInt { }
 
 @ffi
 fun time_sleep_ms(milliseconds: CLongLong) -> CVoid { }
@@ -107,24 +113,6 @@ fun time_sleep_us(microseconds: CLongLong) -> CVoid { }
 
 @ffi
 fun time_sleep_ns(nanoseconds: CLongLong) -> CVoid { }
-
-@ffi
-fun time_monotonic_ms() -> CLongLong { }
-
-@ffi
-fun time_monotonic_us() -> CLongLong { }
-
-@ffi
-fun time_monotonic_ns() -> CLongLong { }
-
-@ffi
-fun time_performance_counter_ms() -> CLongLong { }
-
-@ffi
-fun time_performance_counter_us() -> CLongLong { }
-
-@ffi
-fun time_performance_counter_ns() -> CLongLong { }
 
 @ffi
 fun proc_get_pid() -> CInt { }
