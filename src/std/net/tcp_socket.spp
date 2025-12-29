@@ -1,0 +1,104 @@
+use std::number::U16
+use std::number::U64
+use std::result::Res
+use std::string::Str
+use std::string_view::StrView
+use std::streams::ReadableStream
+use std::streams::WritableStream
+use std::streams::StreamErr
+use std::void::Void
+use std::ops::del::Del
+use std::net::socket::Socket
+
+
+@public
+cls TcpSocket {
+    open: Bool = false
+}
+
+
+sup TcpSocket ext Socket { }
+
+
+sup TcpSocket {
+    @public
+    fun new(domain: S32, type_: S32, proto: S32) -> Res[TcpSocket, SocketErr] {
+        let fd = sppc::net_sock_init(domain, type_, proto)
+        ret case fd of {
+            < 0 { Fail(err=SocketErr(msg="Failed to create socket")) }
+            else { Pass(val=TcpSocket(open=true, handler=fd)) }
+        }
+    }
+
+    @public
+    fun connect(&self, host: StrView, port: U16) -> Res[Void, SocketErr] {
+        let val = sppc::net_sock_conn(self.handler, host.as_cstr_ptr(), port)
+        ret case val of {
+            < 0 { Fail(err=SocketErr(msg="Failed to connect to remote host")) }
+            else { Pass[Void]() }
+        }
+    }
+}
+
+sup TcpSocket {
+    @public
+    fun bind(&self, host: StrView, port: U16) -> Res[Void, SocketErr] {
+        let val = sppc::net_sock_bind(self.handler, host.as_cstr_ptr(), port)
+        ret case val of {
+            < 0 { Fail(err=SocketErr(msg="Failed to bind socket")) }
+            else { Pass[Void]() }
+        }
+    }
+
+    @public
+    fun listen(&self, backlog: U64 = 5_u64) -> Res[Void, SocketErr] {
+        let val = sppc::net_sock_listen(self.handler, backlog)
+        ret case val of {
+            < 0 { Fail(err=SocketErr(msg="Failed to listen on socket")) }
+            else { Pass[Void]() }
+        }
+    }
+
+    @public
+    fun accept(&self) -> Res[TcpSocket, SocketErr] {
+        let val = sppc::net_sock_accept(self.handler)
+        ret case val of {
+            < 0 { Fail(err=SocketErr(msg="Failed to accept connection")) }
+            else { Pass(val=TcpSocket(open=true, handler=val)) }
+        }
+    }
+}
+
+
+sup TcpSocket ext WritableStream {
+    fun write(&mut self, data: &Slice[U8]) -> Res[USize, StreamErr] {
+        let stream = StrView::from(data)
+        let val = sppc::fd_write(&stream, 1_uz, data.length(), self.fd)
+        ret case n of {
+            < 0_sz { Fail(err=StreamErr(msg="Failed to write to socket")) }
+            else { Pass(val=n) }
+        }
+    }
+
+    @public
+    fun flush(&mut self) -> Res[Void, StreamErr] {
+        # No-op for sockets (there is no buffering at this level).
+        ret Pass[Void]()
+    }
+}
+
+
+sup TcpSocket ext ReadableStream {
+    fun read(&mut self, len: USize) -> Res[Vec[U8], StreamErr] {
+        let val = sppc::fd_read(&mut stream, 1_uz, len, self.fd)
+        let vec = Vec[U8]::from(stream)
+
+        ret case n of {
+            < 0_sz { Fail(err=StreamErr(msg="Failed to read from socket")) }
+            else {
+                buffer.set_len(USize::from(n))
+                Pass(val=buffer)
+            }
+        }
+    }
+}

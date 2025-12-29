@@ -1,0 +1,117 @@
+use std::void::Void
+use std::ops::del::Del
+
+
+@public
+cls Socket {
+    fd: S32 = 0
+}
+
+
+@public
+cls SocketErr {
+    msg: StrView
+}
+
+
+sup Socket {
+    cmp sock_stream: S32 = 1
+    cmp sock_dgram: S32 = 2
+    cmp sock_raw: S32 = 3
+    cmp sock_rdm: S32 = 4
+    cmp sock_seqpacket: S32 = 5
+    cmp sock_dccp: S32 = 6
+    cmp sock_pkt: S32 = 10
+
+    cmp af_unspec: S32 = 0
+    cmp af_local: S32 = 1
+    cmp af_inet: S32 = 2
+    cmp af_ax25: S32 = 3
+    cmp af_ipx: S32 = 4
+    cmp af_appletalk: S32 = 5
+    cmp af_netrom: S32 = 6
+    cmp af_bridge: S32 = 7
+    cmp af_atmpvc: S32 = 8
+    cmp af_x25: S32 = 9
+    cmp af_inet6: S32 = 10
+    cmp af_rose: S32 = 11
+    cmp af_decnet: S32 = 12
+    cmp af_netbeui: S32 = 13
+    cmp af_security: S32 = 14
+    cmp af_key: S32 = 15
+    cmp af_netlink: S32 = 16
+    cmp af_packet: S32 = 17
+    cmp af_ash: S32 = 18
+    cmp af_econet: S32 = 19
+    cmp af_atmsvc: S32 = 20
+    cmp af_rds: S32 = 21
+    cmp af_sna: S32 = 22
+    cmp af_irda: S32 = 23
+    cmp af_pppox: S32 = 24
+    cmp af_wanpipe: S32 = 25
+    cmp af_llc: S32 = 26
+    cmp af_ib: S32 = 27
+    cmp af_mpls: S32 = 28
+    cmp af_can: S32 = 29
+    cmp af_tipc: S32 = 30
+    cmp af_bluetooth: S32 = 31
+    cmp af_iucv: S32 = 32
+    cmp af_rxrpc: S32 = 33
+    cmp af_isdn: S32 = 34
+    cmp af_phonet: S32 = 35
+    cmp af_ieee802154: S32 = 36
+    cmp af_caif: S32 = 37
+    cmp af_alg: S32 = 38
+    cmp af_nfc: S32 = 39
+    cmp af_vsock: S32 = 40
+    cmp af_kcm: S32 = 41
+    cmp af_qipcrtr: S32 = 42
+    cmp af_smc: S32 = 43
+    cmp af_xdp: S32 = 44
+    cmp af_mctp: S32 = 45
+    cmp af_max: S32 = 46
+
+    cmp ipproto_ip: S32 = 0
+    cmp ipproto_icmp: S32 = 1
+    cmp ipproto_igmp: S32 = 2
+    cmp ipproto_ipip: S32 = 4
+    cmp ipproto_tcp: S32 = 6
+    cmp ipproto_egp: S32 = 8
+    cmp ipproto_pup: S32 = 12
+    cmp ipproto_udp: S32 = 17
+    cmp ipproto_idp: S32 = 22
+    cmp ipproto_tp: S32 = 29
+    cmp ipproto_dccp: S32 = 33
+    cmp ipproto_ipv6: S32 = 41
+    cmp ipproto_rsvp: S32 = 46
+    cmp ipproto_gre: S32 = 47
+    cmp ipproto_esp: S32 = 50
+    cmp ipproto_ah: S32 = 51
+    cmp ipproto_mtp: S32 = 92
+    cmp ipproto_beetph: S32 = 94
+    cmp ipproto_encap: S32 = 98
+    cmp ipproto_pim: S32 = 103
+    cmp ipproto_comp: S32 = 108
+    cmp ipproto_sctp: S32 = 132
+    cmp ipproto_udplite: S32 = 136
+    cmp ipproto_mpls: S32 = 137
+    cmp ipproto_ethernet: S32 = 143
+    cmp ipproto_raw: S32 = 255
+    cmp ipproto_mptcp: S32 = 262
+    cmp ipproto_max: S32 = 263 # ?
+}
+
+
+sup Socket {
+    fun close(&mut self) -> Void {
+        sppc::fd_close(self.fd)
+        self.fd = 0_u64
+    }
+}
+
+
+sup Socket ext Del {
+    fun del(self) -> Void {
+        sppc::fd_close(self.fd)
+    }
+}
