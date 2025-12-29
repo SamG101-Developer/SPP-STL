@@ -417,4 +417,3 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
         ret None()
     }
 }
-

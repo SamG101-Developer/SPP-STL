@@ -168,6 +168,24 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext s
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
     @public
     @inline
+    fun leading_zeros(self) -> U32 {
+        ret intrinsics::ctlz(self)
+    }
+
+    @public
+    @inline
+    fun is_even(self) -> Bool {
+        ret (self.bit_and(Self::one()) == Self::zero())
+    }
+
+    @public
+    @inline
+    fun is_odd(self) -> Bool {
+        ret (self.bit_and(Self::one()) != Self::zero())
+    }
+
+    @public
+    @inline
     fun bit_shl_checked(self, that: U32) -> Opt[Self] {
         case that >= bit_width {
             ret None()
