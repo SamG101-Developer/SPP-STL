@@ -15,10 +15,7 @@ use std::void::Void
 
 
 cls Slice[E, A: Alloc[E] = GlobalAlloc[E]] {
-    @private
     mem: Memory[E]
-
-    @private
     len: USize
 }
 
@@ -28,9 +25,21 @@ sup [E, A] Slice[E, A] {
     type Allocator = A
 
     @public
-    @no_impl
     fun resize(&mut self, new_len: USize) -> Void {
+        # TODO: needs allocation support
         # A::reallocate(&mut self.mem, new_len)  # .expect("Failed to resize slice")
+    }
+}
+
+
+sup [E] Slice[E] {
+    @public
+    fun split(self, at: USize) -> (Self, Self) {
+        # TODO
+
+        let first = Slice[E]()
+        let second = Slice[E]()
+        ret (first, second)
     }
 }
 
@@ -43,15 +52,16 @@ sup [E] Slice[E] {
 }
 
 
+# TODO: needs constraints on E
 sup [E] Slice[E] ext Clone[Out=Self] {
-    @no_impl
     fun clone(&self) -> Self {
+        ret Slice[E]()
     }
 }
 
 
-sup [E, A, cmp n: USize] Slice[E, A] ext From[Self, Arr[E, n]] {
-    fun from(that: Arr[E, n]) -> Self {
+sup [E, A, cmp n: USize] Slice[E, A] ext From[Self, Arr[E, n, A]] {
+    fun from(that: Arr[E, n, A]) -> Self {
         ret Slice[E, A](mem=Memory(ptr=that.mem.ptr, cap=n), len=n)
     }
 }
@@ -60,6 +70,13 @@ sup [E, A, cmp n: USize] Slice[E, A] ext From[Self, Arr[E, n]] {
 sup [A] Slice[U8, A] ext From[Self, Str] {
     fun from(that: Str) -> Self {
         ret Slice[U8, A](mem=Memory(ptr=that.data.buf.mem.ptr, cap=that.data.buf.mem.cap), len=that.data.buf.len)
+    }
+}
+
+
+sup [A] Slice[U8, A] ext From[Self, StrView] {
+    fun from(that: StrView) -> Self {
+        ret Slice[U8, A](mem=Memory(ptr=that.ptr, cap=that.len), len=that.len)
     }
 }
 
