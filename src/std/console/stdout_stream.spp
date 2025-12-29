@@ -25,20 +25,21 @@ cls StdoutStream { }
 
 
 sup StdoutStream ext WritableStream {
-    fun write(&mut self, data: &Slice[U8]) -> Res[USize, StreamErr] {
-        let file_handle = Ptr[CFile]::from_addr(stdout_handle)
-        let val = libc::fwrite(&data.mem.ptr.raw, 1_uz, data.length(), &file_handle)
-        ret case val < 0_uz { Fail(err=StreamErr(msg="Failed to write to stdout")) } else { Pass(val) }
+    fun write(&mut self, data: &Slice[U8]) -> Res[SSize, StreamErr] {
+        let stream = StrView::from(data)
+        let val = sppc::fd_write(&stream, 1_uz, data.length(), stderr_handle)
+        ret case val of {
+            < 0_uz { Fail(err=StreamErr(msg="Failed to write to stdout")) }
+            < data.length() { Fail(err=StreamErr(msg="Failed to write all data to stdout")) }
+            else { Pass(val=val) }
+        }
     }
 
     fun flush(&mut self) -> Res[Void, StreamErr] {
-        let file_handle = &Ptr[CFile]::from_addr(stdout_handle)
-        let val = libc::fflush(&file_handle)
-        ret case val < 0_s32 { Fail(err=StreamErr(msg="Failed to flush stdout")) } else { Pass[Void]() }
-    }
-
-    @no_impl
-    fun write_all(&mut self, data: &Slice[U8]) -> Res[USize, StreamErr] {
-        # ret self.write(data, data.len()).and_then(|| self.flush())
+        let val = sppc::fflush(stderr_handle)
+        ret case val of {
+            != 0 { Fail(err=StreamErr(msg="Failed to flush stdout")) }
+            else { Pass[Void]() }
+        }
     }
 }

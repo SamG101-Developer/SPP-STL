@@ -26,22 +26,13 @@ cls StdinStream { }
 
 sup StdinStream ext ReadableStream {
     fun read(&mut self, len: USize) -> Res[Vec[U8], StreamErr] {
-        let mut vec = Vec[U8]()
-        let val = libc::fgets(&mut vec.buf.mem.ptr.raw, 1024_s32, &Ptr[CFile]::from_addr(stdin_handle)).to_addr()
-        ret case val < 0_uz { Fail(err=StreamErr(msg="Failed to read from stdin")) } else { Pass(val=vec) }
-    }
+        let mut stream = StrView()
+        let val = sppc::fd_read(&mut stream, 1_uz, len, stdin_handle)
 
-    fun read_all(&mut self) -> Res[Vec[U8], StreamErr] {
-        let mut vec = Vec[U8]()
-        loop true {
-            let val = self.read(1024_uz)?
-            case val.is_empty() {
-                exit
-            }
-            else {
-                vec += val
-            }
+        let vec = Vec[U8]::from(stream)
+        ret case val of {
+            < 0_uz { Fail(err=StreamErr(msg="Failed to read from stdin")) }
+            else { Pass(val=vec) }
         }
-        ret Pass(val=vec)
     }
 }
