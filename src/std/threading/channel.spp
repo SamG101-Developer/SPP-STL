@@ -1,0 +1,54 @@
+use std::collections::queue::Queue
+use std::threading::cond_var::CondVar
+use std::threading::mutex::LockErr
+use std::threading::mutex::Mutex
+use std::result::Res
+
+@public
+cls Sender[T] {
+    storage: Shared[Queue[T]]
+    mutex: Mutex
+    cond_var: CondVar
+}
+
+@public
+cls Receiver[T] {
+    storage: Shared[Queue[T]]
+}
+
+
+@public
+fun channel() -> (Sender[T], Receiver[T]) {
+    let storage = Shared[Queue[T]]::new()
+    let sender = Sender[T](storage=storage.clone())
+    let receiver = Receiver[T](storage=storage.clone())
+    ret (sender, receiver)
+}
+
+
+sup [T] Sender[T] {
+    @public
+    fun write(&mut self, data: T) -> Ret[Void, LockErr] {
+        self.mutex.lock()?
+        self.storage.push_back(data)
+        self.cond_var.notify_one()?
+        self.mutex.unlock()?
+    }
+}
+
+
+sup [T] Receiver[T] {
+    @public
+    fun read(&mut self, len: USize) -> Opt[T] {
+        self.mutex.lock()?
+        self.cond_var.wait(&self.mutex, || self.storage.is_empty().not)?
+        ret self.storage.pop_front()
+    }
+
+    @public
+    fun try_read(&mut self) -> Opt[T] {
+        self.mutex.lock()?
+        case self.storage.is_empty() { ret None() }
+        ret self.storage.pop_front()
+    }
+}
