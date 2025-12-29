@@ -56,6 +56,25 @@ sup [T] Vec[T] {
         self.buf.len += 1_uz
     }
 
+    @public
+    fun push_vec(&mut self, that: Vec[T]) -> Void {
+        # One time growth check
+        let required_cap = self.buf.len + that.buf.len
+        loop self.capacity() < required_cap { self.grow_double() }
+        self.buf.mem.place_mem(self.buf.len, that.buf.mem)
+        self.buf.len += that.buf.len
+    }
+
+    @public
+    fun insert_vec(&mut self, index: USize, that: Vec[T]) -> Void {
+        # One time growth check
+        let required_cap = self.buf.len + that.buf.len
+        loop self.capacity() < required_cap { self.grow_double() }
+        # self.buf.shift(index, that.buf.len)
+        self.buf.mem.place_mem(index, that.buf.mem)
+        self.buf.len += that.buf.len
+    }
+
     @private
     fun grow_double(&mut self) -> Void {
         let new_cap = self.buf.mem.cap * 2_uz
