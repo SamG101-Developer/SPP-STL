@@ -9,62 +9,67 @@ use std::ops::del::Del
 @public
 cls Thread {
     @public name: Str
-    @public unique_id: U64
-    @public native_id: U64
+    @public id: U64
     @public alive: Bool
 }
 
 
 sup Thread {
     @public
-    fun new(name: Str) -> Thread {
-        let unique_id = 0_u64  # libc::rand()
-        ret Thread(name, unique_id, native_id=0_u64, alive=false)
-    }
-
-    @public
-    fun start[In, Ret](&mut self, function: function::FunRef[In, Ret], args: In) -> void::Void {
-        self.native_id = 0_u64  # ffi::pthread::pthread_create(&mut self.unique_id, attr, function, args)
+    fun spawn[In, Out](function: function::FunRef[In, Out]) -> void::Void {
+        # Spawn a new thread using the sppc threading API.
+        self.id = sppc::thread_spawn(function)
         self.alive = true
     }
 
     @public
     fun cancel(&mut self) -> void::Void {
+        # Cancel the thread using the sppc threading API.
         self.alive = false
-        # ffi::pthread::pthread_cancel(self.native_id)
+        sppc::thread_cancel(self.id)
     }
 
     @public
     fun detach(&mut self) -> void::Void {
+        # Detach the thread using the sppc threading API.
         self.alive = false
-        # ffi::pthread::pthread_detach(self.native_id)
+        sppc::thread_detach(self.id)
     }
 
     @public
-    fun join(&mut self) -> void::Void {
+    fun join(self) -> void::Void {
+        # Join the thread using the sppc threading API.
         self.alive = false
-        # ffi::pthread::pthread_join(self.native_id, [S32])
+        sppc::thread_join(self.id)
     }
 
     @public
     fun kill(&mut self) -> void::Void {
+        # Kill the thread using the sppc threading API.
         self.alive = false
-        # ffi::pthread::pthread_kill(self.native_id, 0_u32)
+        sppc::thread_kill(self.id)
+    }
+
+    @public
+    fun is_alive(&self) -> boolean::Bool {
+        # Simple accessor to check if the thread is alive.
+        ret self.alive
     }
 }
 
 
 sup Thread ext Eq[Rhs=Thread] {
     fun eq(&self, that: &Thread) -> boolean::Bool {
-        ret true  # ffi::pthread::pthread_equal(self.native_id, that.native_id)
+        # Compare thread IDs for equality.
+        ret spp::thread_equal(self.id, that.id)
     }
 }
 
 
 sup Thread ext Del {
     fun del(mut self) -> void::Void {
+        # Ensure the thread is detached before deletion.
         self.alive = false
-        # ffi::pthread::pthread_join(self.native_identifier)
-        # ffi::pthread::pthread_exit(self.native_identifier)
+        sppc::thread_detach(self.id)
     }
 }
