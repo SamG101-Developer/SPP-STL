@@ -108,13 +108,12 @@ sup [T] Opt[T] {
 sup [T] Opt[T] {
     @public
     @inline
-    @no_impl
     fun xor(self, that: Opt[T]) -> Opt[T] {
-        # ret case (self, that) of {
-        #     is (Some[T](val), None()) { Some(val) }
-        #     is (None(), Some[T](val)) { Some(val) }
-        #     else { None() }
-        # }
+        ret case (self, that) of {
+            is (Some[T](val), None()) { Some(val) }
+            is (None(), Some[T](val)) { Some(val) }
+            else { None() }
+        }
     }
 }
 
@@ -122,12 +121,11 @@ sup [T] Opt[T] {
 sup [T] Opt[T] {
     @public
     @inline
-    @no_impl
     fun map[U](self, f: FunMov[(T,), U]) -> Opt[U] {
-        # ret case self of {
-        #     is Some[T](val) { Some(val=f(val)) }
-        #     else { None() }
-        # }
+        ret case self of {
+            is Some[T](val) { Some(val=f(val)) }
+            else { None() }
+        }
     }
 
     @public
@@ -153,22 +151,20 @@ sup [T] Opt[T] {
 sup [T] Opt[T] {
     @public
     @inline
-    @no_impl
     fun ok_or[E](self, err: E) -> Res[T, E] {
-        # ret case self of {
-        #     is Some[T](val) { Pass(val) }
-        #     else { Fail(err) }
-        # }
+        ret case self of {
+            is Some[T](val) { Pass(val) }
+            else { Fail(err) }
+        }
     }
 
     @public
     @inline
-    @no_impl
     fun ok_or_else[E](self, err: FunMov[(), E]) -> Res[T, E] {
-        # case self of {
-        #     is Some[T](val) { Pass(val) }
-        #     else { Fail(err=err()) }
-        # }
+        case self of {
+            is Some[T](val) { Pass(val) }
+            else { Fail(err=err()) }
+        }
     }
 }
 
@@ -176,12 +172,11 @@ sup [T] Opt[T] {
 sup[T] Opt[T] {
     @public
     @inline
-    @no_impl
     fun unwrap(self) -> T {
-        # ret case self of {
-        #     is Some[T](val) { val }
-        #     else { std::abort::abort("called `unwrap` on a `None` value") }
-        # }
+        ret case self of {
+            is Some[T](val) { val }
+            else { std::abort::abort("called `unwrap` on a `None` value") }
+        }
     }
 
     @public
