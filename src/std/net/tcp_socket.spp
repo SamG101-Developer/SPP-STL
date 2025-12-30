@@ -1,5 +1,6 @@
 use std::boolean::Bool
 use std::net::socket::Socket
+use std::net::socket::SocketErr
 use std::number::U16
 use std::number::U64
 use std::number::S32
