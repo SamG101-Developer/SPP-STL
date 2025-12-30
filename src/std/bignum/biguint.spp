@@ -286,7 +286,7 @@ sup BigUInt ext std::ops::bit_shr::BitShrAssign[Rhs=Self] {
 
         loop i in Range[USize]::between(word_shift, self.data.length()) {
             let shifted = U64::from(*self.data[i])
-            case i + 1_uz < self.data.length() { shifted |= U64::from(self.data[i + 1_uz]) << 32 }
+            case i + 1_uz < self.data.length() { shifted |= U64::from(*self.data[i + 1_uz]) << 32 }
             shifted >>= U64::from(bit_shift)
             # *val.data[mut i - USize::from(word_shift)] = U32::from(shifted & 0xFFFFFFFF_u64)  TODO: wait for deref support
         }
@@ -304,8 +304,8 @@ sup BigUInt ext std::ops::add::AddAssign[Rhs=Self] {
         let carry = 0_u64
 
         loop i in Range[USize]::between(0_uz, len) {
-            let a = self.data[i]
-            let b = case i < that.data.length() { that.data[i] } else { 0_u32 }
+            let a = *self.data[i]
+            let b = case i < that.data.length() { *that.data[i] } else { 0_u32 }
             let sum = U64::from(a) + U64::from(b) + carry
             # *self.data[mut i] = U32::from(sum & 0xFFFFFFFF_u64)  TODO: wait for deref support
             carry = sum >> 32
