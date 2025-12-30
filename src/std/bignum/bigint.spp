@@ -3,7 +3,6 @@ use std::cast::From
 use std::limits::Limits
 use std::number::U32
 use std::void::Void
-use std::bignum::biguint::BigUInt
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 use std::num::sized_integer_signed::SizedIntegerSigned
 
@@ -24,7 +23,7 @@ sup [cmp bit_width: U32] BigInt ext From[Self, SizedIntegerUnsigned[bit_width]] 
 
 sup [cmp bit_width: U32] BigInt ext From[Self, SizedIntegerSigned[bit_width]] {
     fun from(that: SizedIntegerSigned[bit_width]) -> Self {
-        let unsigned = Limits[SizedIntegerSigned[bit_width]]::UInt::from(that)
+        let unsigned = SizedIntegerUnsigned[bit_width]::from(that)
         ret BigInt(sign=that.is_negative(), data=BigUInt::from(unsigned))
     }
 }
