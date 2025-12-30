@@ -1,6 +1,10 @@
 use std::number::S32
+use std::result::Fail
+use std::result::Pass
+use std::result::Ret
 use std::string::Str
 use std::string_view::StrView
+use std::time::time::TimeErr
 
 
 @public
@@ -27,6 +31,6 @@ sup TimeZone {
         case local_offset < 0 or val < 0 {
             ret Fail(err=TimeErr(msg="Failed to get local timezone"))
         }
-        ret TimeZone(name=Str::from(local_name), offset_seconds=local_offset)
+        ret Pass(val=TimeZone(name=Str::from(local_name), offset_seconds=local_offset))
     }
 }
