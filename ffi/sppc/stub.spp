@@ -1,8 +1,15 @@
+use std::cffi::CBool
 use std::cffi::CChar
+use std::cffi::CCharPtr
+use std::cffi::CDouble
 use std::cffi::CInt
 use std::cffi::CLongLong
 use std::cffi::CSizeT
+use std::cffi::CUInt
+use std::cffi::CULongLong
+use std::cffi::CUShort
 use std::cffi::CVoid
+use std::cffi::CVoidPtr
 
 
 @ffi
@@ -90,13 +97,13 @@ fun net_sock_set_recv_timeout(socket_fd: CInt, timeout_ms: CInt) -> CInt { }
 fun net_sock_set_send_timeout(socket_fd: CInt, timeout_ms: CInt) -> CInt { }
 
 @ffi
-fun net_sock_set_reuseaddr(socket_fd: CInt, reuse: Bool) -> CInt { }
+fun net_sock_set_reuseaddr(socket_fd: CInt, reuse: CBool) -> CInt { }
 
 @ffi
-fun net_sock_set_keepalive(socket_fd: CInt, keepalive: Bool) -> CInt { }
+fun net_sock_set_keepalive(socket_fd: CInt, keepalive: CBool) -> CInt { }
 
 @ffi
-fun net_sock_set_nodelay(socket_fd: CInt, nodelay: Bool) -> CInt { }
+fun net_sock_set_nodelay(socket_fd: CInt, nodelay: CBool) -> CInt { }
 
 @ffi
 fun time_now_ns(clock: CInt) -> CLongLong { }
