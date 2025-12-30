@@ -115,7 +115,7 @@ fun time_get_local_tz_offset_seconds() -> CLongLong { }
 fun time_get_local_tz_name(buffer: &mut CCharPtr) -> CInt { }
 
 @ffi
-fun time_sleep_ns(nanoseconds: CLongLong) -> CVoid { }
+fun time_sleep_ns(nanoseconds: CLongLong) -> CInt { }
 
 @ffi
 fun proc_get_pid() -> CInt { }
