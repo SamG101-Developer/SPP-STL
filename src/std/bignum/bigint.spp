@@ -289,14 +289,14 @@ sup BigInt ext std::ops::ne::Ne[Rhs=Self] {
 
 sup BigInt ext std::ops::ge::Ge[Rhs=Self] {
     fun ge(&self, that: &BigInt) -> Bool {
-        case self.sign != that.sign {
-            ret self.sign.not
+        ret case self.sign != that.sign {
+            self.sign.not
         }
         else case self.sign {
-            ret self.data.ge(&that.data)
+            self.data.ge(&that.data)
         }
         else {
-            ret self.data.le(&that.data)
+            self.data.le(&that.data)
         }
     }
 }
@@ -304,14 +304,14 @@ sup BigInt ext std::ops::ge::Ge[Rhs=Self] {
 
 sup BigInt ext std::ops::gt::Gt[Rhs=Self] {
     fun gt(&self, that: &BigInt) -> Bool {
-        case self.sign != that.sign {
-            ret self.sign.not
+        ret case self.sign != that.sign {
+            self.sign.not
         }
         else case self.sign {
-            ret self.data.gt(&that.data)
+            self.data.gt(&that.data)
         }
         else {
-            ret self.data.lt(&that.data)
+            self.data.lt(&that.data)
         }
     }
 }
@@ -319,14 +319,14 @@ sup BigInt ext std::ops::gt::Gt[Rhs=Self] {
 
 sup BigInt ext std::ops::le::Le[Rhs=Self] {
     fun le(&self, that: &BigInt) -> Bool {
-        case self.sign != that.sign {
-            ret self.sign
+        ret case self.sign != that.sign {
+            self.sign
         }
         else case self.sign {
-            ret self.data.le(&that.data)
+            self.data.le(&that.data)
         }
         else {
-            ret self.data.ge(&that.data)
+            self.data.ge(&that.data)
         }
     }
 }
@@ -334,14 +334,14 @@ sup BigInt ext std::ops::le::Le[Rhs=Self] {
 
 sup BigInt ext std::ops::lt::Lt[Rhs=Self] {
     fun lt(&self, that: &BigInt) -> Bool {
-        case self.sign != that.sign {
-            ret self.sign
+        ret case self.sign != that.sign {
+            self.sign
         }
         else case self.sign {
-            ret self.data.lt(&that.data)
+            self.data.lt(&that.data)
         }
         else {
-            ret self.data.gt(&that.data)
+            self.data.gt(&that.data)
         }
     }
 }
