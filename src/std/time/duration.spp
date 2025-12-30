@@ -78,16 +78,16 @@ sup Duration ext Sub[Rhs=Self, Ret=Self] {
 
 
 sup Duration ext Mul[Rhs=S64, Ret=Self] {
-    fun mul(self, scalar: S64) -> Self {
-        let total_nanos = self.total_nanoseconds() * scalar
+    fun mul(self, that: S64) -> Self {
+        let total_nanos = self.total_nanoseconds() * that
         ret Duration::from_nanoseconds(total_nanos)
     }
 }
 
 
 sup Duration ext Div[Rhs=S64, Ret=Self] {
-    fun div(self, scalar: S64) -> Self {
-        let total_nanos = self.total_nanoseconds() / scalar
+    fun div(self, that: S64) -> Self {
+        let total_nanos = self.total_nanoseconds() / that
         ret Duration::from_nanoseconds(total_nanos)
     }
 }
