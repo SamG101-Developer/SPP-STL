@@ -139,7 +139,7 @@ fun proc_get_env(key: &CCharPtr) -> CCharPtr { }
 fun proc_unset_env(key: &CCharPtr) -> CInt { }
 
 @ffi
-fun proc_exec(path: &CCharPtr, argv: &CCharPtrPtr, env: &CCharPtrPtr) -> CInt { }
+fun proc_exec(path: &CCharPtr, argv: &CCharPtr, env: &CCharPtr) -> CInt { }
 
 @ffi
 fun proc_wait(pid: CInt) -> CInt { }
