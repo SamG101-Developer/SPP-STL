@@ -143,13 +143,13 @@ sup Socket ext ReadableStream {
     fun read(&mut self, len: USize) -> Res[Vec[U8], StreamErr] {
         let mut stream = StrView::new_with_capacity(len)
         let val = sppc::fd_read(&mut stream, 1_uz, len, self.fd)
-        let vec = Vec[U8]::from(Slice[U8]::from(stream))
 
         ret case val of {
             < 0_uz { Fail(err=StreamErr(msg="Failed to read from socket")) }
             else {
-                buffer.set_length(USize::from(val))
-                Pass(val=buffer)
+                # buffer.set_length(USize::from(val))
+                let vec = Vec[U8]::from(Slice[U8]::from(stream))
+                Pass(val=vec)
             }
         }
     }
