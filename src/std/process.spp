@@ -1,4 +1,7 @@
 use std::boolean::Bool
+use std::option::None
+use std::option::Opt
+use std::option::Some
 use std::string::Str
 use std::string_view::StrView
 
