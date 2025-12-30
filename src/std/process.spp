@@ -1,4 +1,5 @@
 use std::boolean::Bool
+use std::number::USize
 use std::option::None
 use std::option::Opt
 use std::option::Some
@@ -10,10 +11,13 @@ cls Process { }
 
 
 sup Process {
+    cmp max_path_length: USize = 4096_uz
+
     @public
     fun get_cwd() -> Str {
         # Return the current working directory as a string.
-        let cwd = sppc::proc_get_cwd()
+        let cwd = StrView()
+        sppc::proc_get_cwd(&mut cwd, Process::max_path_length)
         ret Str::from(cwd)
     }
 
