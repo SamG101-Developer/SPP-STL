@@ -56,12 +56,12 @@ sup BigUInt {
 
     @public
     fun is_zero(&self) -> Bool {
-        ret self.data.length() == 1_uz and self.data[0] == 0_u32
+        ret self.data.length() == 1_uz and self.data[0_uz] == 0_u32
     }
 
     @public
     fun is_one(&self) -> Bool {
-        ret self.data.length() == 1_uz and self.data[0] == 1_u32
+        ret self.data.length() == 1_uz and self.data[0_uz] == 1_u32
     }
 
     @private
