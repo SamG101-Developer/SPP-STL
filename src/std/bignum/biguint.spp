@@ -4,11 +4,26 @@ use std::number::U64
 use std::number::USize
 use std::range::Range
 use std::void::Void
+use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 
 
 @public
 cls BigUInt {
     data: vector::Vec[U32]
+}
+
+
+sup [cmp bit_width: U32] BigUInt ext From[Self, SizedIntegerUnsigned[bit_width]] {
+    fun from(that: SizedIntegerUnsigned[bit_width]) -> Self {
+        let val = BigUInt()
+        let mut temp = that
+        loop temp != 0_u32 {
+            val.data.push(U32::from(temp & 0xFFFFFFFF_u32))
+            temp >>= 32_u32
+        }
+        case val.data.length() == 0_uz { val.data.push(0_u32) }
+        ret val
+    }
 }
 
 

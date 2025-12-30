@@ -1,14 +1,30 @@
 use std::bignum::biguint::BigUInt
 use std::boolean::Bool
 use std::cast::From
-use std::number::S32
 use std::void::Void
+use std::num::sized_integer_unsigned::SizedIntegerUnsigned
+use std::num::sized_integer_signed::SizedIntegerSigned
 
 
 @public
 cls BigInt {
     sign: Bool
     data: BigUInt
+}
+
+
+sup [cmp bit_width: U32] BigInt ext From[Self, SizedIntegerUnsigned[bit_width]] {
+    fun from(that: SizedIntegerUnsigned[bit_width]) -> Self {
+        ret BigInt(sign=false, data=BigUInt::from(that))
+    }
+}
+
+
+sup [cmp bit_width: U32] BigInt ext From[Self, SizedIntegerSigned[bit_width]] {
+    fun from(that: SizedIntegerSigned[bit_width]) -> Self {
+        let unsigned = Limits[SizedIntegerSigned[bit_width]]::UInt::from(that)
+        ret BigInt(sign=that.is_negative(), data=BigUInt::from(unsigned))
+    }
 }
 
 
