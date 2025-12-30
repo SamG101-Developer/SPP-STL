@@ -32,12 +32,12 @@ sup [cmp bit_width: U32] BigUInt ext From[Self, SizedIntegerUnsigned[bit_width]]
 sup BigUInt {
     @public
     fun is_even(&self) -> Bool {
-        ret self.data[0].is_even()
+        ret self.data[0_uz].is_even()
     }
 
     @public
     fun is_odd(&self) -> Bool {
-        ret self.data[0].is_odd()
+        ret self.data[0_uz].is_odd()
     }
 
     @public
@@ -374,7 +374,7 @@ sup BigUInt ext std::ops::div::DivAssign[Rhs=Self] {
         loop shift >= 0_u32 {
             case dividend >= divisor {
                 dividend -= divisor
-                quotient.data[0] |= 1 << shift
+                quotient.data[0_uz] |= 1 << shift
             }
             divisor >>= 1
             shift -= 1_u32
@@ -401,7 +401,7 @@ sup BigUInt ext std::ops::pow::PowAssign[Rhs=Self] {
         let mut exponent = that.clone()
 
         loop exponent != BigUInt::zero() {
-            case (exponent.data[0] & 1_u32) != 0_u32 { val *= base.clone() }
+            case (exponent.data[0_uz] & 1_u32) != 0_u32 { val *= base.clone() }
             base *= base.clone()
             exponent >>= BigUInt::one()
         }
