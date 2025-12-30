@@ -56,7 +56,7 @@ sup TcpSocket {
     }
 
     @public
-    fun listen(&self, backlog: U64 = 5_u64) -> Res[Void, SocketErr] {
+    fun listen(&self, backlog: S32 = 5) -> Res[Void, SocketErr] {
         let val = sppc::net_sock_listen(self.fd, backlog)
         ret case val of {
             < 0 { Fail(err=SocketErr(msg="Failed to listen on socket")) }
