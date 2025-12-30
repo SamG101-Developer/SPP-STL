@@ -1,5 +1,6 @@
 use std::boolean::Bool
 use std::cast::From
+use std::clone::Clone
 use std::limits::Limits
 use std::number::U32
 use std::number::USize
@@ -45,6 +46,13 @@ sup BigInt {
     @private
     fun bit_length(&self) -> USize {
         ret self.data.bit_length()
+    }
+}
+
+
+sup BigInt ext Clone[Self] {
+    fun clone(&self) -> Self {
+        ret BigInt(sign=self.sign, data=self.data.clone())
     }
 }
 
