@@ -50,7 +50,7 @@ sup UdpSocket {
         let stream = StrView::from(data)
         let val = sppc::net_sock_sendto(self.fd, &stream, data.length(), host, port)
         ret case val of {
-            < 0 { Fail(err=SocketErr(msg="Failed to send datagram")) }
+            < 0_u64 { Fail(err=SocketErr(msg="Failed to send datagram")) }
             else { Pass(val=USize::from(val)) }
         }
     }
@@ -60,7 +60,7 @@ sup UdpSocket {
         let mut stream = StrView::new_with_capacity(len)
         let val = sppc::net_sock_recvfrom(self.fd, &mut stream, len)
         ret case val of {
-            < 0 { Fail(err=SocketErr(msg="Failed to receive datagram")) }
+            < 0_u64 { Fail(err=SocketErr(msg="Failed to receive datagram")) }
             else {
                 stream.set_len(USize::from(val))
                 let vec = Vec[U8]::from(stream)
