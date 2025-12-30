@@ -1,5 +1,11 @@
+use std::boolean::Bool
+use std::net::socket::Socket
 use std::number::U16
 use std::number::U64
+use std::number::S32
+use std::ops::del::Del
+use std::result::Fail
+use std::result::Pass
 use std::result::Res
 use std::string::Str
 use std::string_view::StrView
@@ -7,8 +13,6 @@ use std::streams::ReadableStream
 use std::streams::WritableStream
 use std::streams::StreamErr
 use std::void::Void
-use std::ops::del::Del
-use std::net::socket::Socket
 
 
 @public
