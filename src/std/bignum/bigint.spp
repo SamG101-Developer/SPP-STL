@@ -30,6 +30,19 @@ sup [cmp bit_width: U32] BigInt ext From[Self, SizedIntegerSigned[bit_width]] {
 }
 
 
+sup BigInt {
+    @public
+    fun is_even(&self) -> Bool {
+        ret self.data.is_even()
+    }
+
+    @public
+    fun is_odd(&self) -> Bool {
+        ret self.data.is_odd()
+    }
+}
+
+
 sup BigInt ext std::ops::bit_and::BitAnd[Rhs=Self, Ret=Self] {
     fun bit_and(self, that: Self) -> Self {
         # Forward to BigUInt implementation for magnitude operation
@@ -155,7 +168,7 @@ sup BigInt ext std::ops::rem::Rem[Rhs=Self, Ret=Self] {
 sup BigInt ext std::ops::pow::Pow[Rhs=Self, Ret=Self] {
     fun pow(self, that: Self) -> Self {
         let result_data = self.data.pow(that.data)
-        let result_sign = case that.data.is_even() { true } else { self.sign }
+        let result_sign = case that.is_even() { true } else { self.sign }
         ret BigInt(sign=result_sign, data=result_data)
     }
 }

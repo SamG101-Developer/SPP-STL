@@ -30,6 +30,16 @@ sup [cmp bit_width: U32] BigUInt ext From[Self, SizedIntegerUnsigned[bit_width]]
 
 sup BigUInt {
     @public
+    fun is_even(&self) -> Bool {
+        ret self.data[0].is_even()
+    }
+
+    @public
+    fun is_odd(&self) -> Bool {
+        ret self.data[0].is_odd()
+    }
+
+    @public
     fun zero() -> Self {
         let val = BigUInt()
         val.data.push(0_u32)

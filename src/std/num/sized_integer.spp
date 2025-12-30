@@ -175,13 +175,13 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
     @public
     @inline
     fun is_even(self) -> Bool {
-        ret (self.bit_and(Self::one()) == Self::zero())
+        ret self & Self::one() == Self::zero()
     }
 
     @public
     @inline
     fun is_odd(self) -> Bool {
-        ret (self.bit_and(Self::one()) != Self::zero())
+        ret self & Self::one() != Self::zero()
     }
 
     @public
