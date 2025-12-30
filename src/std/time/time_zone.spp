@@ -1,5 +1,6 @@
 use std::number::S32
 use std::string::Str
+use std::string_view::StrView
 
 
 @public
@@ -16,10 +17,16 @@ sup TimeZone {
     }
 
     @public
-    fun local() -> TimeZone {
-        # Platform-specific implementation to get the local timezone
+    fun local() -> Ret[TimeZone, TimeErr] {
+        # Platform-specific implementation to get the local timezone.
+        let local_name = StrView::new()
         let local_offset = sppc::time_get_local_tz_offset_seconds()
-        let local_name = sppc::time_get_local_tz_name()
+        let val = sppc::time_get_local_tz_name(&mut local_name)
+
+        # Check for errors, otherwise construct a TimeZone object.
+        case local_offset < 0 or val < 0 {
+            ret Fail(err=TimeErr(msg="Failed to get local timezone"))
+        }
         ret TimeZone(name=Str::from(local_name), offset_seconds=local_offset)
     }
 }

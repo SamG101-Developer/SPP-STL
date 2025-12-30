@@ -112,13 +112,7 @@ fun time_now_ns(clock: CInt) -> CLongLong { }
 fun time_get_local_tz_offset_seconds() -> CLongLong { }
 
 @ffi
-fun time_get_local_tz_name(buffer: &mut CCharPtr, size: CSizeT) -> CInt { }
-
-@ffi
-fun time_sleep_ms(milliseconds: CLongLong) -> CVoid { }
-
-@ffi
-fun time_sleep_us(microseconds: CLongLong) -> CVoid { }
+fun time_get_local_tz_name(buffer: &mut CCharPtr) -> CInt { }
 
 @ffi
 fun time_sleep_ns(nanoseconds: CLongLong) -> CVoid { }
@@ -151,7 +145,7 @@ fun proc_kill(pid: CInt) -> CInt { }
 fun proc_is_running(pid: CInt) -> CInt { }
 
 @ffi
-fun proc_get_cwd(buffer: &mut CCharPtr, size: CSizeT) -> CVoid { }
+fun proc_get_cwd(buffer: &mut CCharPtr) -> CVoid { }
 
 @ffi
 fun proc_set_cwd(path: &CCharPtr) -> CInt { }
@@ -199,7 +193,7 @@ fun fs_rmdir(path: &CCharPtr) -> CInt { }
 fun fs_chmod(path: &CCharPtr, mode: CUInt) -> CInt { }
 
 @ffi
-fun fs_symlink_target(path: &CCharPtr, buffer: &mut CCharPtr, size: CSizeT) -> CInt { }
+fun fs_symlink_target(path: &CCharPtr, buffer: &mut CCharPtr) -> CInt { }
 
 @ffi
 fun sys_cpu_count() -> CInt { }

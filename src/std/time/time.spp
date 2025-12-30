@@ -1,0 +1,12 @@
+@public
+cls TimeErr {
+    @public msg: StrView
+}
+
+
+fun sleep(duration: Duration) -> Result[Void, TimeErr] {
+    # Use the C function to sleep for the specified duration.
+    let val = sppc::time_sleep_ns(duration.to_nanoseconds())
+    case val < 0 { ret Fail(err=TimeErr(msg="Failed to sleep for the specified duration")) }
+    ret Pass[Void]()
+}
