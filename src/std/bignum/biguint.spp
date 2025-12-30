@@ -253,8 +253,8 @@ sup BigUInt ext std::ops::bit_xor::BitXorAssign[Rhs=Self] {
 sup BigUInt ext std::ops::bit_shl::BitShlAssign[Rhs=Self] {
     fun bit_shl_assign(&mut self, that: Self) -> Void {
         case that.is_zero() { ret }
-        let word_shift = that.bit_length() / 32_u32
-        let bit_shift = that.bit_length() % 32_u32
+        let word_shift = that.bit_length() / 32_uz
+        let bit_shift = that.bit_length() % 32_uz
 
         let val = self.clone()
         val.data.resize(self.data.length() + USize::from(word_shift) + 1_uz)
@@ -274,8 +274,8 @@ sup BigUInt ext std::ops::bit_shl::BitShlAssign[Rhs=Self] {
 sup BigUInt ext std::ops::bit_shr::BitShrAssign[Rhs=Self] {
     fun bit_shr_assign(&mut self, that: Self) -> Void {
         case that.is_zero() { ret }
-        let word_shift = that.bit_length() / 32_u32
-        let bit_shift = that.bit_length() % 32_u32
+        let word_shift = that.bit_length() / 32_uz
+        let bit_shift = that.bit_length() % 32_uz
         let val = self.clone()
 
         case USize::from(word_shift) >= self.data.length() {
