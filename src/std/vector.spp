@@ -271,3 +271,15 @@ sup [T] Vec[T] ext std::ops::eq::Eq[Self] {
         ret true
     }
 }
+
+
+# TODO: Constrain T to be Ne
+sup [T] Vec[T] ext std::ops::ne::Ne[Self] {
+    fun ne(&self, that: &Vec[T]) -> Bool {
+        case self.buf.len != that.buf.len { ret true }
+        loop i in Range[USize]::between(0_uz, self.buf.len) {
+            # TODO: Compare the values.
+        }
+        ret false
+    }
+}
