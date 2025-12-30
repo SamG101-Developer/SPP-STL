@@ -319,7 +319,7 @@ sup BigUInt ext std::ops::add::AddAssign[Rhs=Self] {
 sup BigUInt ext std::ops::sub::SubAssign[Rhs=Self] {
     fun sub_assign(&mut self, that: Self) -> Void {
         case self < that { std::abort::abort("BigUInt::sub: subtraction would result in negative value") }
-        let borrow = 0_u64
+        let mut borrow = 0_u64
 
         loop i in Range[USize]::between(0_uz, self.data.length()) {
             let a = U64::from(*self.data[i])
