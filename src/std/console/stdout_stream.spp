@@ -23,7 +23,7 @@ cls StdoutStream { }
 
 
 sup StdoutStream ext WritableStream {
-    fun write(&mut self, data: &Slice[U8]) -> Res[SSize, StreamErr] {
+    fun write(&mut self, data: &Slice[U8]) -> Res[USize, StreamErr] {
         let stream = StrView::from(data)
         let val = sppc::fd_write(&stream, 1_uz, data.length(), stderr_handle)
         ret case val of {
