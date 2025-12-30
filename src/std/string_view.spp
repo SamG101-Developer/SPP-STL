@@ -3,7 +3,6 @@ use std::cast::From
 use std::copy::Copy
 use std::generator::GenOnce
 use std::iterator::Iterator
-use std::mem::ptr::Ptr
 use std::number::U8
 use std::number::USize
 use std::ops::eq::Eq

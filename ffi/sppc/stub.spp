@@ -40,13 +40,13 @@ fun fd_lock_sh(fd: CInt, non_blocking: CBool) -> CInt { }
 fun fd_unlock(fd: CInt) -> CInt { }
 
 @ffi
-fun mem_alloc[T](size: CSizeT) -> Memory[T] { }
+fun mem_alloc[T](size: CSizeT) -> CVoidPtr[T] { }
 
 @ffi
-fun mem_dealloc(ptr: Memory[T]) -> CVoid { }
+fun mem_dealloc(ptr: CVoidPtr[T]) -> CVoid { }
 
 @ffi
-fun mem_realloc(ptr: Memory[T], new_size: CSizeT) -> Memory[T] { }
+fun mem_realloc(ptr: CVoidPtr[T], new_size: CSizeT) -> CVoidPtr[T] { }
 
 @ffi
 fun net_sock_init(domain: CInt, type_: CInt, protocol: CInt) -> CInt { }

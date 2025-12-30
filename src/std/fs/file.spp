@@ -1,7 +1,4 @@
 use std::boolean::Bool
-use std::cffi::CFile
-use std::fs::path::Path
-use std::mem::ptr::Ptr
 use std::number::U8
 use std::number::USize
 use std::number::S32
@@ -19,6 +16,7 @@ use std::string::Str
 use std::string_view::StrView
 use std::vector::Vec
 use std::void::Void
+use std::fs::path::Path
 
 
 cls FileNotFoundErr {

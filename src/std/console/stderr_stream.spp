@@ -1,5 +1,3 @@
-use std::cffi::CFile
-use std::mem::ptr::Ptr
 use std::number::U8
 use std::number::USize
 use std::number::S32
