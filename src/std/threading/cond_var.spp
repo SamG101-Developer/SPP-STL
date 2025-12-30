@@ -1,5 +1,11 @@
-use std::threading::mutex::Mutex
+use std::function::FunRef
 use std::number::U64
+use std::result::Ret
+use std::result::Pass
+use std::result::Fail
+use std::void::Void
+use std::threading::mutex::LockErr
+use std::threading::mutex::Mutex
 
 
 @public
