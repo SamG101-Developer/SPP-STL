@@ -1,5 +1,5 @@
 use std::number::U64
-use std::mutex::LockErr
+use std::threading::mutex::LockErr
 
 
 @public
