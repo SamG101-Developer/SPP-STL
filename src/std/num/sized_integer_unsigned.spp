@@ -17,7 +17,7 @@ use std::num::sized_floating_point::SizedFloatingPoint
 type SizedIntegerUnsigned[cmp bit_width: U32] = SizedInteger[bit_width, false]
 
 
-sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerUnsigned[this_bit_width] ext From[SizedIntegerUnsigned[that_bit_width]] {
+sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerUnsigned[this_bit_width] ext From[Self, SizedIntegerUnsigned[that_bit_width]] {
     fun from(that: SizedIntegerUnsigned[that_bit_width]) -> Self {
         # Destination (this) bits are less than the source (that) bits => truncate.
         case this_bit_width < that_bit_width { ret intrinsics::trunc(that) }
@@ -28,7 +28,7 @@ sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerUnsigned[this
 }
 
 
-sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerUnsigned[this_bit_width] ext From[SizedIntegerSigned[that_bit_width]] {
+sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerUnsigned[this_bit_width] ext From[Self, SizedIntegerSigned[that_bit_width]] {
     fun from(that: SizedIntegerSigned[that_bit_width]) -> Self {
         # Destination (this) bits are less than the source (that) bits => truncate.
         case this_bit_width < that_bit_width { ret intrinsics::trunc(that) }
