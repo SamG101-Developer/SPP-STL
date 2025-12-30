@@ -144,7 +144,7 @@ sup Socket ext ReadableStream {
         let val = sppc::fd_read(&mut stream, 1_uz, len, self.fd)
         let vec = Vec[U8]::from(stream)
 
-        ret case n of {
+        ret case val of {
             < 0_sz { Fail(err=StreamErr(msg="Failed to read from socket")) }
             else {
                 buffer.set_length(USize::from(n))
