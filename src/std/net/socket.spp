@@ -141,6 +141,7 @@ sup Socket ext WritableStream {
 
 sup Socket ext ReadableStream {
     fun read(&mut self, len: USize) -> Res[Vec[U8], StreamErr] {
+        let mut stream = StrView::new_with_capacity(len)
         let val = sppc::fd_read(&mut stream, 1_uz, len, self.fd)
         let vec = Vec[U8]::from(stream)
 
