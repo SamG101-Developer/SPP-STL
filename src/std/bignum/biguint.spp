@@ -343,8 +343,12 @@ sup BigUInt ext std::ops::mul::MulAssign[Rhs=Self] {
             ret
         }
 
-        case self.is_one() { ret that.clone() }
-        case that.is_one() { ret self.clone() }
+        case self.is_one() {
+            self.data = that.data
+            ret
+        }
+
+        case that.is_one() { ret }
 
         let val = BigUInt()
         val.data.resize(self.data.length() + that.data.length())
