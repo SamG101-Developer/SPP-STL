@@ -1,4 +1,4 @@
-use std::number::S32
+use std::number::S64
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
@@ -17,7 +17,7 @@ cls TimeZone {
 sup TimeZone {
     @public
     fun utc() -> TimeZone {
-        ret TimeZone(name=Str::from("UTC"), offset_seconds=0_s32)
+        ret TimeZone(name=Str::from("UTC"), offset_seconds=0_s64)
     }
 
     @public
