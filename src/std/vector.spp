@@ -12,6 +12,7 @@ use std::iterator::Iterator
 use std::iterator::SizedIterator
 use std::mem::memory::Memory
 use std::number::USize
+use std::range::Range
 use std::slice::Slice
 use std::void::Void
 
