@@ -1,3 +1,11 @@
+use std::time::duration::Duration
+use std::result::Pass
+use std::result::Fail
+use std::result::Result
+use std::string_view::StrView
+use std::void::Void
+
+
 @public
 cls TimeErr {
     @public msg: StrView
