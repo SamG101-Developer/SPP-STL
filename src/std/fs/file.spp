@@ -137,7 +137,7 @@ sup File ext SeekableStream {
         }
     }
 
-    fun stream_len(&mut self) -> Res[SSize, StreamErr] {
+    fun stream_length(&mut self) -> Res[SSize, StreamErr] {
         # Save the current position.
         let cur = self.stream_pos()?
 

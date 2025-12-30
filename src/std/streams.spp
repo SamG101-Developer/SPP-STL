@@ -41,7 +41,7 @@ sup WritableStream {
         # TODO
 
         let mut total_written = 0_uz
-        loop total_written < data.len() {
+        loop total_written < data.length() {
             let written = 1_uz  # self.write(&data.slice_from(total_written))?
             total_written = total_written + written
         }
@@ -59,7 +59,7 @@ sup ReadableStream {
     @virtual_method
     fun read_all(&mut self) -> Res[Vec[U8], StreamErr] {
         let mut out = Vec[U8]()
-        loop chunk.len() != 0_uz {
+        loop chunk.length() != 0_uz {
             let chunk = self.read(4096_uz)?
             out.push_vec(chunk)
         }
@@ -79,7 +79,7 @@ sup SeekableStream {
 
     @public
     @abstract_method
-    fun stream_len(&mut self) -> Res[SSize, StreamErr] { }
+    fun stream_length(&mut self) -> Res[SSize, StreamErr] { }
 
     @public
     @abstract_method
@@ -95,7 +95,7 @@ sup SeekableStream {
     @public
     @virtual_method
     fun seek_from_end(&mut self, offset: SSize) -> Res[Void, StreamErr] {
-        let len = self.stream_len()?
+        let len = self.stream_length()?
         self.rewind()?
         ret self.seek(len + offset)
     }
