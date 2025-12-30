@@ -20,7 +20,7 @@ sup Process {
     @public
     fun set_cwd(path: StrView) -> Bool {
         # Set the current working directory to the specified path.
-        let result = sppc::proc_set_cwd(&StrView::from(path))
+        let result = sppc::proc_set_cwd(&path)
         ret result == 0
     }
 
