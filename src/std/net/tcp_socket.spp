@@ -37,7 +37,7 @@ sup TcpSocket {
 
     @public
     fun connect(&self, host: StrView, port: U16) -> Res[Void, SocketErr] {
-        let val = sppc::net_sock_conn(self.fd, host, port)
+        let val = sppc::net_sock_conn(self.fd, &host, port)
         ret case val of {
             < 0 { Fail(err=SocketErr(msg="Failed to connect to remote host")) }
             else { Pass[Void]() }
@@ -48,7 +48,7 @@ sup TcpSocket {
 sup TcpSocket {
     @public
     fun bind(&self, host: StrView, port: U16) -> Res[Void, SocketErr] {
-        let val = sppc::net_sock_bind(self.fd, host, port)
+        let val = sppc::net_sock_bind(self.fd, &host, port)
         ret case val of {
             < 0 { Fail(err=SocketErr(msg="Failed to bind socket")) }
             else { Pass[Void]() }
