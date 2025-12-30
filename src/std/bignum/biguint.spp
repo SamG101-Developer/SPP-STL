@@ -66,9 +66,11 @@ sup BigUInt {
 
     @private
     fun trim(&mut self) -> Void {
+        ##
         loop self.data.length() > 1_uz and self.data.get_tail_ref() == 0_u32 {
             self.data.pop()
         }
+        ##
     }
 
     @private
