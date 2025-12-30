@@ -364,7 +364,7 @@ sup BigUInt ext std::ops::mul::MulAssign[Rhs=Self] {
                 carry = prod >> 32_u64
             }
             case carry != 0_u64 {
-                val.data[i + that.data.length()] += U32::from(carry)
+                # *val.data[mut i + that.data.length()] += U32::from(carry)  TODO: wait for deref support
             }
         }
 
