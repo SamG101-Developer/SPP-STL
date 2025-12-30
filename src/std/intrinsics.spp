@@ -652,6 +652,11 @@ fun fpext[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedFloating
 @public
 @always_inline
 @compiler_builtin
+fun bit_cast[T, U](value: T) -> U { }  # Identity function (type hint to change U32 to S32 etc - same bit width)
+
+@public
+@always_inline
+@compiler_builtin
 fun fptosi[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedFloatingPoint[that_bit_width]) -> SizedIntegerSigned[this_bit_width] { }
 
 @public

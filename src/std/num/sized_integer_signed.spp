@@ -22,11 +22,17 @@ sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerSigned[this_b
         # Destination (this) bits are less than the source (that) bits => truncate.
         case this_bit_width < that_bit_width {
             let u = intrinsics::utrunc[this_bit_width](that)
-            ret Self::from(u)
+            ret intrinsics::bit_cast[Self](u)
         }
 
-        # Source (that) is unsigned, so zero-extend.
-        ret intrinsics::uzext[this_bit_width](that)
+        # Destination (this) bits are greater than the source (that) bits => zero-extend.
+        case this_bit_width > that_bit_width {
+            let u = intrinsics::uzext[this_bit_width](that)
+            ret intrinsics::bit_cast[Self](u)
+        }
+
+        # Same bit-widths => direct conversion.
+        ret intrinsics::bit_cast[Self](that)
     }
 }
 
@@ -36,11 +42,17 @@ sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerSigned[this_b
         # Destination (this) bits are less than the source (that) bits => truncate.
         case this_bit_width < that_bit_width {
             let s = intrinsics::strunc[this_bit_width](that)
-            ret s
+            ret intrinsics::bit_cast[Self](s)
         }
 
-        # Source (that) is signed, so sign-extend.
-        ret intrinsics::szext[this_bit_width](that)
+        # Destination (this) bits are greater than the source (that) bits => sign-extend.
+        case this_bit_width > that_bit_width {
+            let s = intrinsics::szext[this_bit_width](that)
+            ret intrinsics::bit_cast[Self](s)
+        }
+
+        # Same bit-widths => direct conversion.
+        ret intrinsics::bit_cast[Self](that)
     }
 }
 
