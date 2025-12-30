@@ -1,4 +1,8 @@
 use std::number::U64
+use std::result::Fail
+use std::result::Pass
+use std::result::Res
+use std::string_view::StrView
 use std::void::Void
 
 
@@ -22,7 +26,7 @@ cls LockErr {
 
 sup Mutex {
     @public
-    fun new() -> Ret[Mutex, LockErr] {
+    fun new() -> Res[Mutex, LockErr] {
         # Create a new mutex using the sppc threading API.
         let id = sppc::mutex_create()
         case id == 0_u64 { ret Fail(err=LockErr(msg="Failed to create mutex")) }
@@ -30,7 +34,7 @@ sup Mutex {
     }
 
     @public
-    fun lock(&self) -> Ret[MutexLockGard, LockErr] {
+    fun lock(&self) -> Res[MutexLockGard, LockErr] {
         # Lock the mutex using the sppc threading API.
         let guard_id = sppc::mutex_lock(self.id)
         case guard_id == 0_u64 { ret Fail(err=LockErr(msg="Failed to lock mutex")) }
@@ -38,7 +42,7 @@ sup Mutex {
     }
 
     @public
-    cor try_lock(&self) -> Ret[MutexLockGard, LockErr] {
+    cor try_lock(&self) -> Res[MutexLockGard, LockErr] {
         # Try to lock the mutex using the sppc threading API.
         let guard_id = sppc::mutex_try_lock(self.id)
         case guard_id == 0_u64 { ret Fail(err=LockErr(msg="Failed to try to lock mutex")) }

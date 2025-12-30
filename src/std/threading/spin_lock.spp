@@ -1,4 +1,8 @@
 use std::number::U64
+use std::result::Fail
+use std::result::Pass
+use std::result::Res
+use std::void::Void
 use std::threading::mutex::LockErr
 
 
@@ -10,14 +14,14 @@ cls SpinLock {
 
 sup SpinLock {
     @public
-    fun new() -> Ret[SpinLock, LockErr] {
+    fun new() -> Res[SpinLock, LockErr] {
         # Create a new spin lock using the sppc threading API.
         let id = sppc::spinlock_create()
         ret SpinLock(id)
     }
 
     @public
-    fun lock(&self) -> Ret[Void, LockErr] {
+    fun lock(&self) -> Res[Void, LockErr] {
         # Acquire the spin lock using the sppc threading API.
         let spin_id = sppc::spinlock_lock(self.id)
         case spin_id == 0 { ret Fail(err=LockErr(msg="Failed to acquire spin lock"))  }
@@ -25,7 +29,7 @@ sup SpinLock {
     }
 
     @public
-    fun try_lock(&self) -> Ret[Bool, LockErr] {
+    fun try_lock(&self) -> Res[Bool, LockErr] {
         # Try to acquire the spin lock using the sppc threading API.
         let spin_id = sppc::spinlock_try_lock(self.id)
         case spin_id == 0 { ret Fail(err=LockErr(msg="Failed to try acquire spin lock"))  }
@@ -33,7 +37,7 @@ sup SpinLock {
     }
 
     @public
-    fun unlock(&self) -> Ret[Void, LockErr] {
+    fun unlock(&self) -> Res[Void, LockErr] {
         # Release the spin lock using the sppc threading API.
         let spin_id = sppc::spinlock_unlock(self.id)
         case spin_id == 0 { ret Fail(err=LockErr(msg="Failed to release spin lock"))  }

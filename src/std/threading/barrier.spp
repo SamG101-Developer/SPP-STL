@@ -1,4 +1,9 @@
 use std::number::U64
+use std::result::Fail
+use std::result::Pass
+use std::result::Res
+use std::void::Void
+use std::threading::lock_err::LockErr
 
 
 @public
@@ -11,7 +16,7 @@ cls Barrier {
 
 sup Barrier {
     @public
-    fun new(total: U64) -> Ret[Barrier, LockErr] {
+    fun new(total: U64) -> Res[Barrier, LockErr] {
         # Create a new barrier using the sppc threading API.
         let id = sppc::barrier_create(total)
         case id == 0 { ret Fail(err=LockErr(msg="Failed to create barrier")) }
@@ -19,7 +24,7 @@ sup Barrier {
     }
 
     @public
-    fun wait(&mut self) -> Ret[Void, LockErr] {
+    fun wait(&mut self) -> Res[Void, LockErr] {
         # Wait at the barrier until all threads have reached this point.
         let err = sppc::barrier_wait(self.id)
         case err != 0 { ret Fail(err=LockErr(msg="Failed to wait at barrier")) }

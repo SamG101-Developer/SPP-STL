@@ -1,8 +1,8 @@
 use std::function::FunRef
 use std::number::U64
-use std::result::Ret
-use std::result::Pass
 use std::result::Fail
+use std::result::Pass
+use std::result::Res
 use std::void::Void
 use std::threading::mutex::LockErr
 use std::threading::mutex::Mutex
@@ -16,7 +16,7 @@ cls CondVar {
 
 sup CondVar {
     @public
-    fun new() -> Ret[CondVar, LockErr] {
+    fun new() -> Res[CondVar, LockErr] {
         # Create a new mutex using the sppc threading API.
         let id = sppc::condvar_create()
         case id == 0 { ret Fail(err=LockErr(msg="Failed to create condition variable")) }
@@ -24,7 +24,7 @@ sup CondVar {
     }
 
     @public
-    fun wait(self, mutex: &Mutex, pred: FunRef[(), Bool]) -> Ret[Void, LockErr] {
+    fun wait(self, mutex: &Mutex, pred: FunRef[(), Bool]) -> Res[Void, LockErr] {
         # Wait on the condition variable, releasing the associated mutex.
         # TODO: Implement predicate handling to avoid spurious wake-ups.
         let val = sppc::condvar_wait(self.id, mutex.id)
@@ -33,7 +33,7 @@ sup CondVar {
     }
 
     @public
-    fun signal_one(self) -> Ret[Void, LockErr] {
+    fun signal_one(self) -> Res[Void, LockErr] {
         # Signal one thread waiting on the condition variable.
         let val = sppc::condvar_signal(self.id)
         case val != 0 { ret Fail(err=LockErr(msg="Failed to signal condition variable")) }
@@ -41,7 +41,7 @@ sup CondVar {
     }
 
     @public
-    fun signal_all(self) -> Ret[Void, LockErr] {
+    fun signal_all(self) -> Res[Void, LockErr] {
         # Wake up all threads waiting on the condition variable.
         let val = sppc::condvar_broadcast(self.id)
         case val != 0 { ret Fail(err=LockErr(msg="Failed to broadcast condition variable")) }

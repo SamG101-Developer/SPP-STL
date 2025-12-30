@@ -1,8 +1,12 @@
+use std::boolean::Bool
+use std::option::Opt
+use std::option::None
+use std::result::Res
+use std::shared::Shared
 use std::collections::queue::Queue
 use std::threading::cond_var::CondVar
 use std::threading::mutex::LockErr
 use std::threading::mutex::Mutex
-use std::result::Res
 
 @public
 cls Sender[T] {
@@ -28,7 +32,7 @@ fun channel() -> (Sender[T], Receiver[T]) {
 
 sup [T] Sender[T] {
     @public
-    fun write(&mut self, data: T) -> Ret[Void, LockErr] {
+    fun write(&mut self, data: T) -> Res[Void, LockErr] {
         self.mutex.lock()?
         self.storage.push_back(data)
         self.cond_var.notify_one()?
