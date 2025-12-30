@@ -88,7 +88,7 @@ fun net_sock_sendto(socket_fd: CInt, data: &CCharPtr, size: CSizeT, host: &CChar
 fun net_sock_recvfrom(socket_fd: CInt, buffer: &mut CCharPtr, size: CSizeT) -> CLongLong { }
 
 @ffi
-fun net_sock_set_nonblocking(socket_fd: CInt, non_blocking: Bool) -> CInt { }
+fun net_sock_set_nonblocking(socket_fd: CInt, non_blocking: CBool) -> CInt { }
 
 @ffi
 fun net_sock_set_recv_timeout(socket_fd: CInt, timeout_ms: CInt) -> CInt { }
