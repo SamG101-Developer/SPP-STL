@@ -35,3 +35,13 @@ sup TimePoint {
         ret TimePoint(seconds_since_epoch, nanoseconds)
     }
 }
+
+
+sup TimePoint ext std::ops::add::Sub[Rhs=Self, Ret=Duration] {
+    fun sub(self, that: Self) -> Duration {
+        let sec_diff = self.seconds_since_epoch - that.seconds_since_epoch
+        let nsec_diff = self.nanoseconds - that.nanoseconds
+        let total_nanos = sec_diff * 1000000000_s64 + nsec_diff
+        ret Duration(total_nanos)
+    }
+}
