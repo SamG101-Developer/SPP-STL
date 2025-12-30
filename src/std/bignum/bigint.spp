@@ -262,8 +262,10 @@ sup BigInt ext std::ops::ge::Ge[Rhs=Self] {
             ret self.sign.not
         }
         else case self.sign {
-            true { ret self.data.ge(&that.data) }
-            false { ret self.data.le(&that.data) }
+            ret self.data.ge(&that.data)
+        }
+        else {
+            ret self.data.le(&that.data)
         }
     }
 }
@@ -275,8 +277,10 @@ sup BigInt ext std::ops::gt::Gt[Rhs=Self] {
             ret self.sign.not
         }
         else case self.sign {
-            true { ret self.data.gt(&that.data) }
-            false { ret self.data.lt(&that.data) }
+            ret self.data.gt(&that.data)
+        }
+        else {
+            ret self.data.lt(&that.data)
         }
     }
 }
@@ -288,8 +292,10 @@ sup BigInt ext std::ops::le::Le[Rhs=Self] {
             ret self.sign
         }
         else case self.sign {
-            true { ret self.data.le(&that.data) }
-            false { ret self.data.ge(&that.data) }
+            ret self.data.le(&that.data)
+        }
+        else {
+            ret self.data.ge(&that.data)
         }
     }
 }
@@ -301,8 +307,10 @@ sup BigInt ext std::ops::lt::Lt[Rhs=Self] {
             ret self.sign
         }
         else case self.sign {
-            true { ret self.data.lt(&that.data) }
-            false { ret self.data.gt(&that.data) }
+            ret self.data.lt(&that.data)
+        }
+        else {
+            ret self.data.gt(&that.data)
         }
     }
 }
