@@ -301,7 +301,7 @@ sup BigUInt ext std::ops::add::AddAssign[Rhs=Self] {
     fun add_assign(&mut self, that: Self) -> Void {
         let len = self.data.length().max(that.data.length())
         self.data.resize(len)
-        let carry = 0_u64
+        let mut carry = 0_u64
 
         loop i in Range[USize]::between(0_uz, len) {
             let a = *self.data[i]
