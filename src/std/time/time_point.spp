@@ -1,5 +1,6 @@
 use std::number::S32
 use std::number::S64
+use std::time::duration::Duration
 
 
 cls Clocks { }
