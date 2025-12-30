@@ -37,8 +37,8 @@ fun mem_cmp[T](a: &T, b: &T, n: USize) -> S32 {
 fun malloc[T](n: USize) -> Opt[Memory[T]] {
     # Determine the size and get an allocated pointer.
     let cap = n * size_of[T]()
-    let raw = libc::malloc[T](cap)
-    ret case raw.to_addr() == 0_uz { None() } else { Some(val=Memory(ptr=Single(raw), cap)) }
+    let raw = sppc::mem_alloc[T](cap)
+    ret Some(val=raw)  # TODO: Handle allocation failure.
 }
 
 
@@ -46,8 +46,8 @@ fun malloc[T](n: USize) -> Opt[Memory[T]] {
 fun calloc[T](n: USize) -> Opt[Memory[T]] {
     # Determine the size and get an allocated pointer.
     let cap = n * size_of[T]()
-    let raw = libc::calloc[T](n, size_of[T]())
-    ret case raw.to_addr() == 0_uz { None() } else { Some(val=Memory(ptr=Single(raw), cap)) }
+    let raw = sppc::mem_calloc[T](n, size_of[T]())
+    ret Some(val=raw)  # TODO: Handle allocation failure.
 }
 
 
@@ -55,12 +55,9 @@ fun calloc[T](n: USize) -> Opt[Memory[T]] {
 fun realloc[T](mut mem: &mut Memory[T], n: USize) -> Opt[Void] {
     # Determine the size and get a reallocated pointer.
     let cap = n * size_of[T]()
-    libc::realloc(&mut mem.ptr.raw, cap)
+    sppc::realloc(&mut mem, cap)
 
-    # If the new pointer is null, return None (failed reallocation).
-    case mem.ptr.raw.to_addr() == 0_uz { ret None() }
-
-    # Otherwise, update the length.
+    # Update the capacity attribute of the memory (S++ side).
     mem.cap = cap
     ret Some[Void]()
 }
@@ -69,5 +66,5 @@ fun realloc[T](mut mem: &mut Memory[T], n: USize) -> Opt[Void] {
 @public
 fun free[T](mem: Memory[T]) -> Void {
     # Free the memory pointed to by the pointer.
-    libc::free(mem.ptr.raw)
+    sppc::mem_dealloc[T](mem)
 }

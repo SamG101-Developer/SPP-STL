@@ -43,6 +43,9 @@ fun fd_unlock(fd: CInt) -> CInt { }
 fun mem_alloc[T](size: CSizeT) -> CVoidPtr[T] { }
 
 @ffi
+fun mem_calloc[T](num: CSizeT, size: CSizeT) -> CVoidPtr[T] { }
+
+@ffi
 fun mem_dealloc(ptr: CVoidPtr[T]) -> CVoid { }
 
 @ffi

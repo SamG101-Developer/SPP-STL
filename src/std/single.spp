@@ -1,7 +1,6 @@
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::generator::GenOnce
-use std::mem::ptr::Ptr
 use std::number::USize
 use std::ops::deref::DerefMut
 use std::ops::deref::DerefRef
