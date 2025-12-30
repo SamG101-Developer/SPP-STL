@@ -1,3 +1,4 @@
+use std::boolean::Bool
 use std::string::Str
 use std::string_view::StrView
 
@@ -14,7 +15,7 @@ sup Process {
     }
 
     @public
-    fun set_cwd(path: &Str) -> Bool {
+    fun set_cwd(path: StrView) -> Bool {
         # Set the current working directory to the specified path.
         let result = sppc::proc_set_cwd(StrView::from(path))
         ret result == 0
