@@ -11,13 +11,11 @@ cls Process { }
 
 
 sup Process {
-    cmp max_path_length: USize = 4096_uz
-
     @public
     fun get_cwd() -> Str {
         # Return the current working directory as a string.
         let mut cwd = StrView()
-        sppc::proc_get_cwd(&mut cwd, Process::max_path_length)
+        sppc::proc_get_cwd(&mut cwd)
         ret Str::from(cwd)
     }
 
