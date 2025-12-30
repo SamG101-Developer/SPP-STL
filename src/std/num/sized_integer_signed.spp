@@ -23,7 +23,7 @@ sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerSigned[this_b
         case this_bit_width < that_bit_width { ret intrinsics::utrunc[this_bit_width](that) }
 
         # Source (that) is unsigned, so zero-extend.
-        intrinsics::zext(that)
+        intrinsics::zext[this_bit_width](that)
     }
 }
 
@@ -34,7 +34,7 @@ sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerSigned[this_b
         case this_bit_width < that_bit_width { ret intrinsics::strunc[this_bit_width](that) }
 
         # Source (that) is signed, so sign-extend.
-        ret intrinsics::sext(that)
+        ret intrinsics::sext[this_bit_width](that)
     }
 }
 
