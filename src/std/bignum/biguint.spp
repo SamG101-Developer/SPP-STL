@@ -394,7 +394,7 @@ sup BigUInt ext std::ops::div::DivAssign[Rhs=Self] {
         divisor <<= shift
         quotient <<= shift + Self::one()
 
-        loop shift >= 0_u32 {
+        loop shift >= Self::zero() {
             case dividend >= divisor {
                 dividend -= divisor
                 # *quotient.data[mut 0_uz] |= 1 << shift  TODO: wait for deref support
