@@ -16,7 +16,7 @@ sup Process {
     @public
     fun get_cwd() -> Str {
         # Return the current working directory as a string.
-        let cwd = StrView()
+        let mut cwd = StrView()
         sppc::proc_get_cwd(&mut cwd, Process::max_path_length)
         ret Str::from(cwd)
     }
