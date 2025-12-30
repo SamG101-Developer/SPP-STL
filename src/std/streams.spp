@@ -59,9 +59,10 @@ sup ReadableStream {
     @virtual_method
     fun read_all(&mut self) -> Res[Vec[U8], StreamErr] {
         let mut out = Vec[U8]()
-        loop chunk.length() != 0_uz {
+        loop true {
             let chunk = self.read(4096_uz)?
             out.push_vec(chunk)
+            case chunk.length() == 0_uz { exit }
         }
         ret Pass(val=out)
     }
