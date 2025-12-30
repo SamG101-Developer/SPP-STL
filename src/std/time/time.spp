@@ -1,7 +1,7 @@
 use std::time::duration::Duration
 use std::result::Pass
 use std::result::Fail
-use std::result::Result
+use std::result::Res
 use std::string_view::StrView
 use std::void::Void
 
@@ -12,7 +12,7 @@ cls TimeErr {
 }
 
 
-fun sleep(duration: Duration) -> Result[Void, TimeErr] {
+fun sleep(duration: Duration) -> Res[Void, TimeErr] {
     # Use the C function to sleep for the specified duration.
     let val = sppc::time_sleep_ns(duration.to_nanoseconds())
     case val < 0 { ret Fail(err=TimeErr(msg="Failed to sleep for the specified duration")) }
