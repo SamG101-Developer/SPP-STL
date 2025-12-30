@@ -19,9 +19,9 @@ sup [T, E] Res[T, E] {
     @public
     @inline
     fun ok(self) -> Opt[T] {
-        let converted: Opt[T] = case self of {
+        ret case self of {
            is Pass[T](val) { Some(val) }
-           is Fail[E](err) { None() }
+           else { None() }
         }
     }
 }
