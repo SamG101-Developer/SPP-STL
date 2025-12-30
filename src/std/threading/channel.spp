@@ -3,6 +3,7 @@ use std::option::Opt
 use std::option::None
 use std::result::Res
 use std::shared::Shared
+use std::void::Void
 use std::collections::queue::Queue
 use std::threading::cond_var::CondVar
 use std::threading::mutex::LockErr
