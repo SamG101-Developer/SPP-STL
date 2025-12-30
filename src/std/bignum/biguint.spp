@@ -390,7 +390,7 @@ sup BigUInt ext std::ops::div::DivAssign[Rhs=Self] {
         let mut quotient = BigUInt::zero()
         let mut current_quotient = BigUInt::one()
 
-        let shift = dividend.bit_length() - divisor.bit_length()
+        let shift = BigUInt::from(dividend.bit_length() - divisor.bit_length())
         divisor <<= shift
         quotient <<= shift + 1
 
