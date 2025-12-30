@@ -105,6 +105,6 @@ sup SeekableStream {
     @virtual_method
     fun rewind(&mut self) -> Res[Void, StreamErr] {
         let pos = self.stream_pos()?
-        ret self.seek(pos.negate())
+        ret self.seek(pos.neg())
     }
 }
