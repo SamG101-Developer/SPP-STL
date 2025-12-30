@@ -128,7 +128,7 @@ sup Socket ext WritableStream {
         let val = sppc::fd_write(&stream, 1_uz, data.length(), self.fd)
         ret case val of {
             < 0_uz { Fail(err=StreamErr(msg="Failed to write to socket")) }
-            else { Pass(val=n) }
+            else { Pass(val) }
         }
     }
 
@@ -147,7 +147,7 @@ sup Socket ext ReadableStream {
         ret case val of {
             < 0_uz { Fail(err=StreamErr(msg="Failed to read from socket")) }
             else {
-                buffer.set_length(USize::from(n))
+                buffer.set_length(USize::from(val))
                 Pass(val=buffer)
             }
         }
