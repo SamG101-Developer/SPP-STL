@@ -1,6 +1,6 @@
 use std::boolean::Bool
-use std::duration::Duration
-use std::time::TimePoint
+use std::time::duration::Duration
+use std::time::time_point::TimePoint
 
 
 @public
