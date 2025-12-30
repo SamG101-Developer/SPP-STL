@@ -132,6 +132,11 @@ sup [T] Vec[T] {
     }
 
     @public
+    fun capacity(&self) -> USize {
+        ret self.buf.mem.cap
+    }
+
+    @public
     fun is_empty(&self) -> Bool {
         ret self.buf.len == 0_uz
     }
