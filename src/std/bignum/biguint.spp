@@ -73,6 +73,7 @@ sup BigUInt {
 
     @private
     fun bit_length(&self) -> USize {
+        ##
         case self.is_zero() { ret 0_uz }
         let last = self.data.get_tail_ref().clone()
         let bits = 32_u32 * (self.data.length() - 1_uz)
@@ -81,6 +82,8 @@ sup BigUInt {
             bits += 1_u32
         }
         ret bits
+        ##
+        ret 0_uz  # Placeholder
     }
 }
 
