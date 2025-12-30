@@ -148,6 +148,11 @@ fun bit_not[T: Integer](value: T) -> T { }
 @public
 @always_inline
 @compiler_builtin
+fun bit_not_assign[T: Integer](this: &mut T) -> Void { }
+
+@public
+@always_inline
+@compiler_builtin
 fun abs[T: Integer](this: T, that: T) -> T { }
 
 @public

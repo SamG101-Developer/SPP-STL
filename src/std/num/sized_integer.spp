@@ -130,6 +130,13 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext s
 }
 
 
+sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_not::BitNotAssign {
+    fun bit_not_assign(&mut self) -> Void {
+        intrinsics::bit_not_assign(self)
+    }
+}
+
+
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::add::Add[Rhs=Self, Ret=Self] {
     fun add(self, that: Self) -> Self {
         ret intrinsics::add(self, that)
