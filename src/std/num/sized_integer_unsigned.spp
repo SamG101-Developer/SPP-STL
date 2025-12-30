@@ -20,10 +20,13 @@ type SizedIntegerUnsigned[cmp bit_width: U32] = SizedInteger[bit_width, false]
 sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerUnsigned[this_bit_width] ext From[Self, SizedIntegerUnsigned[that_bit_width]] {
     fun from(that: SizedIntegerUnsigned[that_bit_width]) -> Self {
         # Destination (this) bits are less than the source (that) bits => truncate.
-        case this_bit_width < that_bit_width { ret intrinsics::utrunc[this_bit_width](that) }
+        case this_bit_width < that_bit_width {
+            let u = intrinsics::utrunc[this_bit_width](that)
+            ret u
+        }
 
         # Source (that) is unsigned, so zero-extend.
-        ret intrinsics::zext(that)
+        ret intrinsics::uzext(that)
     }
 }
 
@@ -31,10 +34,13 @@ sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerUnsigned[this
 sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerUnsigned[this_bit_width] ext From[Self, SizedIntegerSigned[that_bit_width]] {
     fun from(that: SizedIntegerSigned[that_bit_width]) -> Self {
         # Destination (this) bits are less than the source (that) bits => truncate.
-        case this_bit_width < that_bit_width { ret intrinsics::strunc[this_bit_width](that) }
+        case this_bit_width < that_bit_width {
+            let s = intrinsics::strunc[this_bit_width](that)
+            ret Self::from(s)
+        }
 
         # Source (that) is signed, so sign-extend.
-        ret intrinsics::sext(that)
+        ret intrinsics::szext(that)
     }
 }
 
