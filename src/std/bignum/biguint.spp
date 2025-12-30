@@ -378,8 +378,12 @@ sup BigUInt ext std::ops::div::DivAssign[Rhs=Self] {
     fun div_assign(&mut self, that: Self) -> Void {
         # Skip for known answers.
         case that.is_zero() { std::abort::abort("BigUInt::div: division by zero") }
-        case that.is_one() { ret self.clone() }
-        case self < that { ret BigUInt::zero() }
+        case that.is_one() {  ret }
+        case self < that {
+            self.data.clear()
+            self.data.push(0_u32)
+            ret
+        }
 
         let dividend = self.clone()
         let mut divisor = that.clone()
