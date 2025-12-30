@@ -8,7 +8,7 @@ use std::string_view::StrView
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
-use std::vec::Vec
+use std::vector::Vec
 
 
 @public
