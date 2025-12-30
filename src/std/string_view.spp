@@ -28,6 +28,14 @@ sup StrView ext Copy { }
 
 sup StrView {
     @public
+    @compiler_builtin
+    fun new() -> StrView { }
+
+    @public
+    @compiler_builtin
+    fun new_with_capacity(capacity: USize) -> StrView { }
+
+    @public
     @inline
     @compiler_builtin
     fun length(&self) -> USize { }
