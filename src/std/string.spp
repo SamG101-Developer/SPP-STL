@@ -50,6 +50,7 @@ sup Str {
                 current += char
             }
         }
+        ret strings
     }
 }
 
