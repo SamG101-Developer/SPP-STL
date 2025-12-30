@@ -214,7 +214,7 @@ sup BigUInt ext std::ops::bit_and::BitAndAssign[Rhs=Self] {
     fun bit_and_assign(&mut self, that: Self) -> Void {
         let len = self.data.length().min(that.data.length())
         self.data.resize(len)
-        loop i in Range::between(0_uz, len) {
+        loop i in Range[USize]::between(0_uz, len) {
             self.data[i] = self.data[i] & that.data[i]
         }
         self.trim()
@@ -226,7 +226,7 @@ sup BigUInt ext std::ops::bit_ior::BitIorAssign[Rhs=Self] {
     fun bit_ior_assign(&mut self, that: Self) -> Void {
         let len = self.data.length().max(that.data.length())
         self.data.resize(len)
-        loop i in Range::between(0_uz, len) {
+        loop i in Range[USize]::between(0_uz, len) {
             let a = self.data[i]
             let b = case i < that.data.length() { that.data[i] } else { 0_u32 }
             self.data[i] = a | b
@@ -240,7 +240,7 @@ sup BigUInt ext std::ops::bit_xor::BitXorAssign[Rhs=Self] {
     fun bit_xor_assign(&mut self, that: Self) -> Void {
         let len = self.data.length().max(that.data.length())
         self.data.resize(len)
-        loop i in Range::between(0_uz, len) {
+        loop i in Range[USize]::between(0_uz, len) {
             let a = self.data[i]
             let b = case i < that.data.length() { that.data[i] } else { 0_u32 }
             self.data[i] = a ^ b
@@ -259,7 +259,7 @@ sup BigUInt ext std::ops::bit_shl::BitShlAssign[Rhs=Self] {
         let val = self.clone()
         val.data.resize(self.data.length() + USize::from(word_shift) + 1_uz)
 
-        loop i in Range::between(0_uz, self.data.length()) {
+        loop i in Range[USize]::between(0_uz, self.data.length()) {
             let shifted = U64::from(self.data[i]) << U64::from(bit_shift)
             val.data[i + USize::from(word_shift)] |= U32::from(shifted & 0xFFFFFFFF_u64)
             val.data[i + USize::from(word_shift) + 1_uz] |= U32::from(shifted >> 32)
@@ -284,7 +284,7 @@ sup BigUInt ext std::ops::bit_shr::BitShrAssign[Rhs=Self] {
             ret
         }
 
-        loop i in Range::between(word_shift, self.data.length()) {
+        loop i in Range[USize]::between(word_shift, self.data.length()) {
             let shifted = U64::from(self.data[i])
             case i + 1_uz < self.data.length() { shifted |= U64::from(self.data[i + 1_uz]) << 32 }
             shifted >>= U64::from(bit_shift)
@@ -303,7 +303,7 @@ sup BigUInt ext std::ops::add::AddAssign[Rhs=Self] {
         self.data.resize(len)
         let carry = 0_u64
 
-        loop i in Range::between(0_uz, len) {
+        loop i in Range[USize]::between(0_uz, len) {
             let a = self.data[i]
             let b = case i < that.data.length() { that.data[i] } else { 0_u32 }
             let sum = U64::from(a) + U64::from(b) + carry
@@ -321,7 +321,7 @@ sup BigUInt ext std::ops::sub::SubAssign[Rhs=Self] {
         case self < that { std::abort::abort("BigUInt::sub: subtraction would result in negative value") }
         let borrow = 0_u64
 
-        loop i in Range::between(0_uz, self.data.length()) {
+        loop i in Range[USize]::between(0_uz, self.data.length()) {
             let a = U64::from(self.data[i])
             let b = case i < that.data.length() { U64::from(that.data[i]) } else { 0_u64 }
             let sub = a - b - borrow
@@ -344,9 +344,9 @@ sup BigUInt ext std::ops::mul::MulAssign[Rhs=Self] {
         let val = BigUInt()
         val.data.resize(self.data.length() + that.data.length())
 
-        loop i in Range::between(0_uz, self.data.length()) {
+        loop i in Range[USize]::between(0_uz, self.data.length()) {
             let mut carry = 0_u64
-            loop j in Range::between(0_uz, that.data.length()) {
+            loop j in Range[USize]::between(0_uz, that.data.length()) {
                 let a = U64::from(self.data[i])
                 let b = U64::from(that.data[j])
                 let existing = U64::from(val.data[i + j])
@@ -463,7 +463,7 @@ sup BigUInt ext std::ops::lt::Lt[Rhs=Self] {
             > that.data.length() { ret false }
         }
 
-        loop i in Range::between(self.data.length(), -1_uz).step_by(-1_uz) {
+        loop i in Range[USize]::between(self.data.length(), -1_uz).step_by(-1_uz) {
             case self.data[i] < that.data[i] { ret true }
             case self.data[i] > that.data[i] { ret false }
         }
