@@ -392,15 +392,15 @@ sup BigUInt ext std::ops::div::DivAssign[Rhs=Self] {
 
         let shift = BigUInt::from(dividend.bit_length() - divisor.bit_length())
         divisor <<= shift
-        quotient <<= shift + 1
+        quotient <<= shift + Self::one()
 
         loop shift >= 0_u32 {
             case dividend >= divisor {
                 dividend -= divisor
                 # *quotient.data[mut 0_uz] |= 1 << shift  TODO: wait for deref support
             }
-            divisor >>= 1
-            shift -= 1_u32
+            divisor >>= Self::one()
+            shift -= Self::one()
         }
 
         self.data = quotient.data
