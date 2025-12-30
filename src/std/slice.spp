@@ -61,13 +61,11 @@ sup [E] Slice[E] ext Clone[Out=Self] {
 }
 
 
-##
-sup [E, A, cmp n: USize] Slice[E, A] ext From[Self, Arr[E, n, A]] {
-    fun from(that: Arr[E, n, A]) -> Self {
-        ret Slice[E, A](mem=Memory(ptr=that.mem.ptr, cap=n), len=n)
+sup [E, cmp n: USize] Slice[E] ext From[Self, Arr[E, n]] {
+    fun from(that: Arr[E, n]) -> Self {
+        ret Slice[E](mem=Memory(ptr=that.mem.ptr, cap=n), len=n)
     }
 }
-##
 
 
 sup [A] Slice[U8, A] ext From[Self, Str] {
