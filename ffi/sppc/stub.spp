@@ -151,7 +151,7 @@ fun proc_kill(pid: CInt) -> CInt { }
 fun proc_is_running(pid: CInt) -> CInt { }
 
 @ffi
-fun proc_get_cwd(buffer: &mut CCharPtr, size: CSizeT) -> CCharPtr { }
+fun proc_get_cwd(buffer: &mut CCharPtr, size: CSizeT) -> CVoid { }
 
 @ffi
 fun proc_set_cwd(path: &CCharPtr) -> CInt { }
