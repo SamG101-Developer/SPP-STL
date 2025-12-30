@@ -1,4 +1,5 @@
 use std::boolean::Bool
+use std::cast::From
 use std::number::U32
 use std::number::U64
 use std::number::USize
