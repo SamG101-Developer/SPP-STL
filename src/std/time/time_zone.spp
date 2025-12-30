@@ -10,7 +10,7 @@ use std::time::time::TimeErr
 @public
 cls TimeZone {
     name: Str
-    offset_seconds: S32
+    offset_seconds: S64
 }
 
 
@@ -28,7 +28,7 @@ sup TimeZone {
         let val = sppc::time_get_local_tz_name(&mut local_name)
 
         # Check for errors, otherwise construct a TimeZone object.
-        case local_offset < 0_u64 or val < 0_u64 {
+        case local_offset < 0_s64 or val < 0_s64 {
             ret Fail(err=TimeErr(msg="Failed to get local timezone"))
         }
         ret Pass(val=TimeZone(name=Str::from(local_name), offset_seconds=local_offset))
