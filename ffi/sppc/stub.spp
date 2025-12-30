@@ -1,5 +1,4 @@
 use std::cffi::CChar
-use std::cffi::CFile
 use std::cffi::CInt
 use std::cffi::CPtr
 use std::cffi::CSizeT
