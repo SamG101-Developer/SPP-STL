@@ -30,12 +30,12 @@ sup StrView ext Copy { }
 sup StrView {
     @public
     @inline
-    @compiler_bulitin
+    @compiler_builtin
     fun length(&self) -> USize { }
 
     @public
     @inline
-    @compiler_bulitin
+    @compiler_builtin
     fun is_empty(&self) -> Bool { }
 }
 
@@ -61,11 +61,11 @@ sup StrView {
     fun starts_with(&self, needle: StrView) -> Bool { }
 
     @public
-    @compiler_bulitin
+    @compiler_builtin
     fun ends_with(&self, needle: StrView) -> Bool { }
 
     @public
-    @compiler_bulitin
+    @compiler_builtin
     fun slice(&self, start: USize, end: USize) -> StrView { }
 }
 
