@@ -62,7 +62,7 @@ sup UdpSocket {
         ret case val of {
             < 0_s64 { Fail(err=SocketErr(msg="Failed to receive datagram")) }
             else {
-                stream.set_len(USize::from(val))
+                stream.set_length(USize::from(val))
                 let vec = Vec[U8]::from(stream)
                 Pass(val=(vec, host, port))
             }

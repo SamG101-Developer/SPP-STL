@@ -75,7 +75,7 @@ sup File {
     }
 
     @public
-    fun set_len(&self, len: S32) -> Bool {
+    fun set_length(&self, len: S32) -> Bool {
         let val = sppc::ftruncate(self.fd, len)
         ret val == 0
     }
