@@ -105,6 +105,7 @@ sup [T] Opt[T] {
 }
 
 
+## TODO: Need to support flow typing of nested patterns
 sup [T] Opt[T] {
     @public
     @inline
@@ -116,6 +117,7 @@ sup [T] Opt[T] {
         }
     }
 }
+##
 
 
 sup [T] Opt[T] {
