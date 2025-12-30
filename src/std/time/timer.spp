@@ -45,13 +45,13 @@ sup Timer {
 
     @public
     fun elapsed(&self) -> Duration {
-        case self.running {
+        ret case self.running {
             let now = TimePoint::now()
             let elapsed = now - self.start_time
-            ret self.paused_duration + elapsed
+            self.paused_duration + elapsed
         }
         else {
-            ret self.paused_duration
+            self.paused_duration
         }
     }
 }
