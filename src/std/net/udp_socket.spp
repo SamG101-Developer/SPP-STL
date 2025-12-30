@@ -49,7 +49,7 @@ sup UdpSocket {
     @public
     fun write_datagram(&self, data: &Slice[U8], host: StrView, port: U16) -> Res[USize, SocketErr] {
         let stream = StrView::from(data.clone())
-        let val = sppc::net_sock_sendto(self.fd, &stream, data.length(), host, port)
+        let val = sppc::net_sock_sendto(self.fd, &stream, data.length(), &host, port)
         ret case val of {
             < 0_s64 { Fail(err=SocketErr(msg="Failed to send datagram")) }
             else { Pass(val=USize::from(val)) }
