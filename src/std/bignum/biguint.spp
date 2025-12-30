@@ -215,7 +215,7 @@ sup BigUInt ext std::ops::bit_and::BitAndAssign[Rhs=Self] {
         let len = self.data.length().min(that.data.length())
         self.data.resize(len)
         loop i in Range[USize]::between(0_uz, len) {
-            self.data[i] &= *that.data[i]
+            # self.data[i] &= *that.data[i]  TODO: wait for deref support
         }
         self.trim()
     }
@@ -261,8 +261,8 @@ sup BigUInt ext std::ops::bit_shl::BitShlAssign[Rhs=Self] {
 
         loop i in Range[USize]::between(0_uz, self.data.length()) {
             let shifted = U64::from(self.data[i]) << U64::from(bit_shift)
-            val.data[i + USize::from(word_shift)] |= U32::from(shifted & 0xFFFFFFFF_u64)
-            val.data[i + USize::from(word_shift) + 1_uz] |= U32::from(shifted >> 32)
+            # val.data[mut i + USize::from(word_shift)] |= U32::from(shifted & 0xFFFFFFFF_u64)  TODO: wait for deref support
+            # val.data[mut i + USize::from(word_shift) + 1_uz] |= U32::from(shifted >> 32)  TODO: wait for deref support
         }
 
         self.data = val.data
@@ -384,7 +384,7 @@ sup BigUInt ext std::ops::div::DivAssign[Rhs=Self] {
         loop shift >= 0_u32 {
             case dividend >= divisor {
                 dividend -= divisor
-                quotient.data[0_uz] |= 1 << shift
+                # *quotient.data[mut 0_uz] |= 1 << shift  TODO: wait for deref support
             }
             divisor >>= 1
             shift -= 1_u32
