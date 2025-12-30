@@ -21,7 +21,7 @@ sup TimeZone {
     }
 
     @public
-    fun local() -> Ret[TimeZone, TimeErr] {
+    fun local() -> Res[TimeZone, TimeErr] {
         # Platform-specific implementation to get the local timezone.
         let local_name = StrView::new()
         let local_offset = sppc::time_get_local_tz_offset_seconds()
