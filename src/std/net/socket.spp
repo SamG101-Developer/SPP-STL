@@ -120,7 +120,6 @@ sup Socket ext WritableStream {
         }
     }
 
-    @public
     fun flush(&mut self) -> Res[Void, StreamErr] {
         # No-op for sockets (there is no buffering at this level).
         ret Pass[Void]()
