@@ -215,7 +215,7 @@ sup BigUInt ext std::ops::bit_and::BitAndAssign[Rhs=Self] {
         let len = self.data.length().min(that.data.length())
         self.data.resize(len)
         loop i in Range[USize]::between(0_uz, len) {
-            self.data[i] = self.data[i] & that.data[i]
+            self.data[i] = self.data[i] & *that.data[i]
         }
         self.trim()
     }
@@ -228,7 +228,7 @@ sup BigUInt ext std::ops::bit_ior::BitIorAssign[Rhs=Self] {
         self.data.resize(len)
         loop i in Range[USize]::between(0_uz, len) {
             let a = self.data[i]
-            let b = case i < that.data.length() { that.data[i] } else { 0_u32 }
+            let b = case i < that.data.length() { *that.data[i] } else { 0_u32 }
             self.data[i] = a | b
         }
         self.trim()
@@ -242,7 +242,7 @@ sup BigUInt ext std::ops::bit_xor::BitXorAssign[Rhs=Self] {
         self.data.resize(len)
         loop i in Range[USize]::between(0_uz, len) {
             let a = self.data[i]
-            let b = case i < that.data.length() { that.data[i] } else { 0_u32 }
+            let b = case i < that.data.length() { *that.data[i] } else { 0_u32 }
             self.data[i] = a ^ b
         }
         self.trim()
