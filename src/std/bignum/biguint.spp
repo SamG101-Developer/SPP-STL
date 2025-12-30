@@ -4,13 +4,14 @@ use std::number::U32
 use std::number::U64
 use std::number::USize
 use std::range::Range
+use std::vector::Vec
 use std::void::Void
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 
 
 @public
 cls BigUInt {
-    data: vector::Vec[U32]
+    data: Vec[U32]
 }
 
 
@@ -73,7 +74,7 @@ sup BigUInt {
     @private
     fun bit_length(&self) -> USize {
         case self.is_zero() { ret 0_uz }
-        let last = self.data.get_tail().clone()
+        let last = self.data.get_tail_ref().clone()
         let bits = 32_u32 * (self.data.length() - 1_uz)
         loop last != 0_u32 {
             last >>= 1_u32
