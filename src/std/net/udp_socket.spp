@@ -65,7 +65,7 @@ sup UdpSocket {
             < 0_s64 { Fail(err=SocketErr(msg="Failed to receive datagram")) }
             else {
                 # TODO: Truncate based on actual received length
-                let vec = Vec[U8]::from(stream)
+                let vec = Vec[U8]::from(Slice[U8]::from(stream))
                 Pass(val=(vec, Str::from(host), port))
             }
         }
