@@ -2,6 +2,7 @@ use std::bignum::biguint::BigUInt
 use std::boolean::Bool
 use std::cast::From
 use std::void::Void
+use std::number::U32
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 use std::num::sized_integer_signed::SizedIntegerSigned
 
