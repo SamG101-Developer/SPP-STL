@@ -308,7 +308,7 @@ sup BigUInt ext std::ops::add::AddAssign[Rhs=Self] {
             let b = case i < that.data.length() { *that.data[i] } else { 0_u32 }
             let sum = U64::from(a) + U64::from(b) + carry
             # *self.data[mut i] = U32::from(sum & 0xFFFFFFFF_u64)  TODO: wait for deref support
-            carry = sum >> 32
+            carry = sum >> 32_u64
         }
 
         case carry != 0_u64 { self.data.push(U32::from(carry)) }
@@ -326,7 +326,7 @@ sup BigUInt ext std::ops::sub::SubAssign[Rhs=Self] {
             let b = case i < that.data.length() { U64::from(*that.data[i]) } else { 0_u64 }
             let sub = a - b - borrow
             self.data.push(U32::from(sub & 0xFFFFFFFF_u64))
-            borrow = (sub >> 63) & 0x1_u64
+            borrow = (sub >> 63_u64) & 0x1_u64
         }
 
         self.trim()
@@ -352,7 +352,7 @@ sup BigUInt ext std::ops::mul::MulAssign[Rhs=Self] {
                 let existing = U64::from(*val.data[i + j])
                 let prod = a * b + existing + carry
                 # *val.data[mut i + j] = U32::from(prod & 0xFFFFFFFF_u64)  TODO: wait for deref support
-                carry = prod >> 32
+                carry = prod >> 32_u64
             }
             case carry != 0_u64 {
                 val.data[i + that.data.length()] += U32::from(carry)
