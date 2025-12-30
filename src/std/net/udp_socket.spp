@@ -59,7 +59,7 @@ sup UdpSocket {
     @public
     fun read_datagram(&self, len: USize) -> Res[(Vec[U8], Str, U16), SocketErr] {
         let mut stream = StrView::new_with_capacity(len)
-        let (host, port) = (StrView::new_with_capacity(256_uz), 0_u16)
+        let (mut host, mut port) = (StrView::new_with_capacity(256_uz), 0_u16)
         let val = sppc::net_sock_recvfrom(self.fd, &mut stream, len, &mut host, &mut port)
         ret case val of {
             < 0_s64 { Fail(err=SocketErr(msg="Failed to receive datagram")) }
