@@ -337,7 +337,12 @@ sup BigUInt ext std::ops::sub::SubAssign[Rhs=Self] {
 sup BigUInt ext std::ops::mul::MulAssign[Rhs=Self] {
     fun mul_assign(&mut self, that: Self) -> Void {
         # Skip for known answers.
-        case self.is_zero() or that.is_zero() { ret BigUInt::zero() }
+        case self.is_zero() or that.is_zero() {
+            self.data.clear()
+            self.data.push(0_u32)
+            ret
+        }
+
         case self.is_one() { ret that.clone() }
         case that.is_one() { ret self.clone() }
 
