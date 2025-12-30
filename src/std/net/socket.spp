@@ -127,7 +127,7 @@ sup Socket ext WritableStream {
         let stream = StrView::from(data.clone())
         let val = sppc::fd_write(&stream, 1_uz, data.length(), self.fd)
         ret case val of {
-            < 0_sz { Fail(err=StreamErr(msg="Failed to write to socket")) }
+            < 0_uz { Fail(err=StreamErr(msg="Failed to write to socket")) }
             else { Pass(val=n) }
         }
     }
@@ -145,7 +145,7 @@ sup Socket ext ReadableStream {
         let vec = Vec[U8]::from(stream)
 
         ret case val of {
-            < 0_sz { Fail(err=StreamErr(msg="Failed to read from socket")) }
+            < 0_uz { Fail(err=StreamErr(msg="Failed to read from socket")) }
             else {
                 buffer.set_length(USize::from(n))
                 Pass(val=buffer)
