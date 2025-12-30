@@ -93,7 +93,7 @@ sup BigUInt {
 
 sup BigUInt ext Clone[Self] {
     fun clone(&self) -> Self {
-        let val = BigUInt()
+        let mut val = BigUInt()
         val.data = self.data.clone()
         ret val
     }
@@ -102,7 +102,7 @@ sup BigUInt ext Clone[Self] {
 
 sup BigUInt ext std::ops::bit_and::BitAnd[Rhs=Self, Ret=Self] {
     fun bit_and(self, that: Self) -> Self {
-        let val = self.clone()
+        let mut val = self.clone()
         val &= that
         ret val
     }
@@ -111,7 +111,7 @@ sup BigUInt ext std::ops::bit_and::BitAnd[Rhs=Self, Ret=Self] {
 
 sup BigUInt ext std::ops::bit_ior::BitIor[Rhs=Self, Ret=Self] {
     fun bit_ior(self, that: Self) -> Self {
-        let val = self.clone()
+        let mut val = self.clone()
         val |= that
         ret val
     }
@@ -120,7 +120,7 @@ sup BigUInt ext std::ops::bit_ior::BitIor[Rhs=Self, Ret=Self] {
 
 sup BigUInt ext std::ops::bit_xor::BitXor[Rhs=Self, Ret=Self] {
     fun bit_xor(self, that: Self) -> Self {
-        let val = self.clone()
+        let mut val = self.clone()
         val ^= that
         ret val
     }
@@ -129,7 +129,7 @@ sup BigUInt ext std::ops::bit_xor::BitXor[Rhs=Self, Ret=Self] {
 
 sup BigUInt ext std::ops::bit_not::BitNot[Ret=Self] {
     fun bit_not(self) -> Self {
-        let val = self.clone()
+        let mut val = self.clone()
         loop i in Range::between(0_uz, val.data.length()) {
             val.data[i] = val.data[i].bit_not()
         }
@@ -140,7 +140,7 @@ sup BigUInt ext std::ops::bit_not::BitNot[Ret=Self] {
 
 sup BigUInt ext std::ops::bit_shl::BitShl[Rhs=Self, Ret=Self] {
     fun bit_shl(self, that: Self) -> Self {
-        let val = self.clone()
+        let mut val = self.clone()
         val <<= that
         ret val
     }
@@ -149,7 +149,7 @@ sup BigUInt ext std::ops::bit_shl::BitShl[Rhs=Self, Ret=Self] {
 
 sup BigUInt ext std::ops::bit_shr::BitShr[Rhs=Self, Ret=Self] {
     fun bit_shr(self, that: Self) -> Self {
-        let val = self.clone()
+        let mut val = self.clone()
         val >>= that
         ret val
     }
@@ -158,7 +158,7 @@ sup BigUInt ext std::ops::bit_shr::BitShr[Rhs=Self, Ret=Self] {
 
 sup BigUInt ext std::ops::add::Add[Rhs=Self, Ret=Self] {
     fun add(self, that: Self) -> Self {
-        let val = self.clone()
+        let mut val = self.clone()
         val += that
         ret val
     }
@@ -167,7 +167,7 @@ sup BigUInt ext std::ops::add::Add[Rhs=Self, Ret=Self] {
 
 sup BigUInt ext std::ops::sub::Sub[Rhs=Self, Ret=Self] {
     fun sub(self, that: Self) -> Self {
-        let val = self.clone()
+        let mut val = self.clone()
         val -= that
         ret val
     }
@@ -176,7 +176,7 @@ sup BigUInt ext std::ops::sub::Sub[Rhs=Self, Ret=Self] {
 
 sup BigUInt ext std::ops::mul::Mul[Rhs=Self, Ret=Self] {
     fun mul(self, that: Self) -> Self {
-        let val = self.clone()
+        let mut val = self.clone()
         val *= that
         ret val
     }
@@ -185,7 +185,7 @@ sup BigUInt ext std::ops::mul::Mul[Rhs=Self, Ret=Self] {
 
 sup BigUInt ext std::ops::div::Div[Rhs=Self, Ret=Self] {
     fun div(self, that: Self) -> Self {
-        let val = self.clone()
+        let mut val = self.clone()
         val /= that
         ret val
     }
@@ -194,7 +194,7 @@ sup BigUInt ext std::ops::div::Div[Rhs=Self, Ret=Self] {
 
 sup BigUInt ext std::ops::rem::Rem[Rhs=Self, Ret=Self] {
     fun rem(self, that: Self) -> Self {
-        let val = self.clone()
+        let mut val = self.clone()
         val %= that
         ret val
     }
@@ -203,7 +203,7 @@ sup BigUInt ext std::ops::rem::Rem[Rhs=Self, Ret=Self] {
 
 sup BigUInt ext std::ops::pow::Pow[Rhs=Self, Ret=Self] {
     fun pow(self, that: Self) -> Self {
-        let val = self.clone()
+        let mut val = self.clone()
         val **= that
         ret val
     }
