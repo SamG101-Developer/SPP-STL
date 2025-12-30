@@ -44,14 +44,7 @@ sup BigInt {
 
     @private
     fun bit_length(&self) -> USize {
-        case self.is_zero() { ret 0_uz }
-        let last = self.data.get_tail().clone()
-        let bits = 32_u32 * (self.data.length() - 1_uz)
-        loop last != 0_u32 {
-            last >>= 1_u32
-            bits += 1_u32
-        }
-        ret bits
+        ret self.data.bit_length()
     }
 }
 
