@@ -1,7 +1,7 @@
 use std::boolean::Bool
+use std::void::Void
 use std::time::duration::Duration
 use std::time::time_point::TimePoint
-use std::void::Void
 
 
 @public
