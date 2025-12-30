@@ -130,7 +130,7 @@ sup BigUInt ext std::ops::bit_xor::BitXor[Rhs=Self, Ret=Self] {
 sup BigUInt ext std::ops::bit_not::BitNot[Ret=Self] {
     fun bit_not(self) -> Self {
         let mut val = self.clone()
-        loop i in Range::between(0_uz, val.data.length()) {
+        loop i in Range[USize]::between(0_uz, val.data.length()) {
             val.data[i] = val.data[i].bit_not()
         }
         ret val
