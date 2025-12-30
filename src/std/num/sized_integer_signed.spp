@@ -26,7 +26,7 @@ sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerSigned[this_b
         }
 
         # Source (that) is unsigned, so zero-extend.
-        intrinsics::uzext[this_bit_width](that)
+        ret intrinsics::uzext[this_bit_width](that)
     }
 }
 
