@@ -1,6 +1,5 @@
 use std::cffi::CChar
 use std::cffi::CInt
-use std::cffi::CPtr
 use std::cffi::CSizeT
 use std::cffi::CVoid
 
