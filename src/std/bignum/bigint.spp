@@ -91,17 +91,17 @@ sup BigInt ext std::ops::bit_shr::BitShr[Rhs=Self, Ret=Self] {
 sup BigInt ext std::ops::add::Add[Rhs=Self, Ret=Self] {
     fun add(self, that: Self) -> Self {
         # Handle sign cases
-        case self.sign == that.sign {
+        ret case self.sign == that.sign {
             let result_data = self.data.add(that.data)
-            ret BigInt(sign=self.sign, data=result_data)
+            BigInt(sign=self.sign, data=result_data)
         }
         else case self.data >= that.data {
             let result_data = self.data.sub(that.data)
-            ret BigInt(sign=self.sign, data=result_data)
+            BigInt(sign=self.sign, data=result_data)
         }
         else {
             let result_data = that.data.sub(self.data)
-            ret BigInt(sign=that.sign, data=result_data)
+            BigInt(sign=that.sign, data=result_data)
         }
     }
 }
@@ -110,17 +110,17 @@ sup BigInt ext std::ops::add::Add[Rhs=Self, Ret=Self] {
 sup BigInt ext std::ops::sub::Sub[Rhs=Self, Ret=Self] {
     fun sub(self, that: Self) -> Self {
         # Handle sign cases
-        case self.sign != that.sign {
+        ret case self.sign != that.sign {
             let result_data = self.data.add(that.data)
-            ret BigInt(sign=self.sign, data=result_data)
+            BigInt(sign=self.sign, data=result_data)
         }
         else case self.data >= that.data {
             let result_data = self.data.sub(that.data)
-            ret BigInt(sign=self.sign, data=result_data)
+            BigInt(sign=self.sign, data=result_data)
         }
         else {
             let result_data = that.data.sub(self.data)
-            ret BigInt(sign=self.sign.not, data=result_data)
+            BigInt(sign=self.sign.not, data=result_data)
         }
     }
 }
