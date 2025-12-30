@@ -85,7 +85,7 @@ fun net_sock_close(socket_fd: CInt) -> CInt { }
 fun net_sock_sendto(socket_fd: CInt, data: &CCharPtr, size: CSizeT, host: &CCharPtr, port: CUShort) -> CLongLong { }
 
 @ffi
-fun net_sock_recvfrom(socket_fd: CInt, buffer: &mut CCharPtr, size: CSizeT) -> CLongLong { }
+fun net_sock_recvfrom(socket_fd: CInt, buffer: &mut CCharPtr, size: CSizeT, host_buffer: &mut CCharPtr, port: &mut CUShort) -> CLongLong { }
 
 @ffi
 fun net_sock_set_nonblocking(socket_fd: CInt, non_blocking: CBool) -> CInt { }
