@@ -3,7 +3,7 @@ use std::result::Fail
 use std::result::Pass
 use std::result::Res
 use std::void::Void
-use std::threading::lock_err::LockErr
+use std::threading::mutex::LockErr
 
 
 @public
