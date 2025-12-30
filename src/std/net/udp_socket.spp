@@ -3,12 +3,14 @@ use std::net::socket::SocketErr
 use std::number::U8
 use std::number::U16
 use std::number::S32
+use std::number::USize
 use std::slice::Slice
 use std::string_view::StrView
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
 use std::vector::Vec
+use std::void::Void
 
 
 @public
