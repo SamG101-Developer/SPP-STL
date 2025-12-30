@@ -405,7 +405,6 @@ sup BigUInt ext std::ops::div::DivAssign[Rhs=Self] {
 
         self.data = quotient.data
         self.trim()
-        ret quotient
     }
 }
 
