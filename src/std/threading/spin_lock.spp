@@ -1,3 +1,4 @@
+use std::boolean::Bool
 use std::number::U64
 use std::result::Fail
 use std::result::Pass
