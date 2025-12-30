@@ -1,7 +1,7 @@
 use std::number::S32
 use std::result::Fail
 use std::result::Pass
-use std::result::Ret
+use std::result::Res
 use std::string::Str
 use std::string_view::StrView
 use std::time::time::TimeErr
