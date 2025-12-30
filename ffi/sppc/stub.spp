@@ -24,7 +24,7 @@ fun fd_flush(fd: CInt) -> CInt { }
 @ffi
 fun fd_seek(fd: CInt, offset: CLongLong, whence: CInt) -> CInt { }
 
-@fii
+@ffi
 fun fd_tell(fd: CInt) -> CInt { }
 
 @ffi
