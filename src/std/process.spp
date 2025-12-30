@@ -33,9 +33,9 @@ sup Process {
     }
 
     @public
-    fun set_env(var_key: StrView, var_val: StrView) -> Bool {
+    fun set_env(var_key: StrView, var_val: StrView, overwrite: Bool = true) -> Bool {
         # Set the value of an environment variable.
-        let result = sppc::proc_set_env(&var_key, &var_val)
+        let result = sppc::proc_set_env(&var_key, &var_val, overwrite)
         ret result == 0
     }
 
