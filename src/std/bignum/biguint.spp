@@ -229,7 +229,7 @@ sup BigUInt ext std::ops::bit_ior::BitIorAssign[Rhs=Self] {
         loop i in Range[USize]::between(0_uz, len) {
             let a = self.data[i]
             let b = case i < that.data.length() { *that.data[i] } else { 0_u32 }
-            # self.data[mut i] = a | b  TODO: wait for deref support
+            # *self.data[mut i] = a | b  TODO: wait for deref support
         }
         self.trim()
     }
@@ -243,7 +243,7 @@ sup BigUInt ext std::ops::bit_xor::BitXorAssign[Rhs=Self] {
         loop i in Range[USize]::between(0_uz, len) {
             let a = self.data[i]
             let b = case i < that.data.length() { *that.data[i] } else { 0_u32 }
-            self.data[i] = a ^ b
+            # *self.data[mut i] = a ^ b  TODO: wait for deref support
         }
         self.trim()
     }
@@ -288,7 +288,7 @@ sup BigUInt ext std::ops::bit_shr::BitShrAssign[Rhs=Self] {
             let shifted = U64::from(self.data[i])
             case i + 1_uz < self.data.length() { shifted |= U64::from(self.data[i + 1_uz]) << 32 }
             shifted >>= U64::from(bit_shift)
-            val.data[i - USize::from(word_shift)] = U32::from(shifted & 0xFFFFFFFF_u64)
+            # *val.data[mut i - USize::from(word_shift)] = U32::from(shifted & 0xFFFFFFFF_u64)  TODO: wait for deref support
         }
 
         self.data = val.data
@@ -307,7 +307,7 @@ sup BigUInt ext std::ops::add::AddAssign[Rhs=Self] {
             let a = self.data[i]
             let b = case i < that.data.length() { that.data[i] } else { 0_u32 }
             let sum = U64::from(a) + U64::from(b) + carry
-            self.data[i] = U32::from(sum & 0xFFFFFFFF_u64)
+            # *self.data[mut i] = U32::from(sum & 0xFFFFFFFF_u64)  TODO: wait for deref support
             carry = sum >> 32
         }
 
@@ -351,7 +351,7 @@ sup BigUInt ext std::ops::mul::MulAssign[Rhs=Self] {
                 let b = U64::from(that.data[j])
                 let existing = U64::from(val.data[i + j])
                 let prod = a * b + existing + carry
-                val.data[i + j] = U32::from(prod & 0xFFFFFFFF_u64)
+                # *val.data[mut i + j] = U32::from(prod & 0xFFFFFFFF_u64)  TODO: wait for deref support
                 carry = prod >> 32
             }
             case carry != 0_u64 {
