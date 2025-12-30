@@ -28,7 +28,7 @@ sup TimePoint {
     @public
     fun now(clock: S32 = 0) -> TimePoint {
         # Platform-specific implementation to get the current time
-        let time_now = sppc::time_now_ns()
+        let time_now = sppc::time_now_ns(clock)
         let seconds_since_epoch = time_now / 1000000000_s32
         let nanoseconds = time_now % 1000000000_s32
         ret TimePoint(seconds_since_epoch, nanoseconds)
