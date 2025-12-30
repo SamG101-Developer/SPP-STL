@@ -61,7 +61,7 @@ sup Thread {
 sup Thread ext Eq[Rhs=Thread] {
     fun eq(&self, that: &Thread) -> boolean::Bool {
         # Compare thread IDs for equality.
-        ret spp::thread_equal(self.id, that.id)
+        ret sppc::thread_equal(self.id, that.id)
     }
 }
 
