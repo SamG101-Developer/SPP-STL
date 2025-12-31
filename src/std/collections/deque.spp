@@ -56,12 +56,12 @@ sup [T] Deque[T] {
 
 sup [T, cmp block_size: USize] Deque[T, block_size] {
     @public
-    fun is_empty() -> Bool {
+    fun is_empty(&self) -> Bool {
         ret self.head_blk == self.tail_blk and self.head_idx == self.tail_idx
     }
 
     @public
-    fun length() -> USize {
+    fun length(&self) -> USize {
         let head_pos = self.head_blk * block_size + self.head_idx
         let tail_pos = self.tail_blk * block_size + self.tail_idx
         ret tail_pos - head_pos
