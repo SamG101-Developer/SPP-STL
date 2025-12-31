@@ -22,7 +22,7 @@ sup [T] Deque[T] {
     @public
     fun push_back(&mut self, val: T) -> Void {
         self.ensure_tail_space()
-        self.blocks[self.tail_blk][self.tail_idx] = val
+        # *self.blocks[mut self.tail_blk][mut self.tail_idx] = val TODO: fix mutable indexing
         self.advance_tail()
     }
 
@@ -30,7 +30,7 @@ sup [T] Deque[T] {
     fun push_front(&mut self, val: T) -> Void {
         self.ensure_head_space()
         self.retreat_head()
-        self.blocks[self.head_blk][self.head_idx] = val
+        # *self.blocks[mut self.head_blk][mut self.head_idx] = val TODO: fix mutable indexing
     }
 }
 
@@ -127,5 +127,9 @@ sup [T, cmp block_size: USize] Deque[T, block_size] {
             self.tail_idx = block_size
         }
         self.tail_idx -= 1_uz
+    }
+
+    fun temp_test(&mut self) -> Void {
+        let temp = self.blocks[0_uz][0_uz]
     }
 }
