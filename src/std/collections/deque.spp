@@ -130,6 +130,6 @@ sup [T, cmp block_size: USize] Deque[T, block_size] {
     }
 
     fun temp_test(&mut self) -> Void {
-        let temp = self.blocks[0_uz][0_uz]
+        let temp = self.blocks.get_ref(0_uz).get_ref(0_uz)
     }
 }
