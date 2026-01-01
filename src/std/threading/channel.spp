@@ -37,7 +37,7 @@ sup [T] Sender[T] {
     @public
     fun write(&mut self, data: T) -> Res[Void, LockErr] {
         self.mutex.lock()?
-        self.storage.push_back(data)
+        self.storage.push(data)
         self.cond_var.notify_one()?
         self.mutex.unlock()?
     }
@@ -49,13 +49,13 @@ sup [T] Receiver[T] {
     fun read(&mut self, len: USize) -> Opt[T] {
         self.mutex.lock()?
         self.cond_var.wait(&self.mutex, || self.storage.is_empty().not)?
-        ret self.storage.pop_front()
+        ret self.storage.pop()
     }
 
     @public
     fun try_read(&mut self) -> Opt[T] {
         self.mutex.lock()?
         case self.storage.is_empty() { ret None() }
-        ret self.storage.pop_front()
+        ret self.storage.pop()
     }
 }
