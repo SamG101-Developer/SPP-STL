@@ -15,7 +15,7 @@ cmp stderr: StderrStream = StderrStream()
 
 
 @private
-cmp stderr_handle: USize = 2_uz
+cmp stderr_fd: USize = 2_uz
 
 
 @private
@@ -25,7 +25,7 @@ cls StderrStream { }
 sup StderrStream ext WritableStream {
     fun write(&mut self, data: &Slice[U8]) -> Res[USize, StreamErr] {
         let stream = StrView::from(data)
-        let val = sppc::fd_write(&stream, 1_uz, data.length(), stderr_handle)
+        let val = sppc::fd_write(&stream, 1_uz, data.length(), stderr_fd)
         ret case val of {
             < 0_uz { Fail(err=StreamErr(msg="Failed to write to stderr")) }
             < data.length() { Fail(err=StreamErr(msg="Partial write to stderr")) }
@@ -34,7 +34,7 @@ sup StderrStream ext WritableStream {
     }
 
     fun flush(&mut self) -> Res[Void, StreamErr] {
-        let val = sppc::fflush(stderr_handle)
+        let val = sppc::fflush(stderr_fd)
         ret case val of {
             != 0_s32 { Fail(err=StreamErr(msg="Failed to flush stderr")) }
             else { Pass[Void]() }

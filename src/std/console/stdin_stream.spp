@@ -14,7 +14,7 @@ cmp stdin: StdinStream = StdinStream()
 
 
 @private
-cmp stdin_handle: USize = 1_uz
+cmp stdin_fd: USize = 1_uz
 
 
 @private
@@ -24,7 +24,7 @@ cls StdinStream { }
 sup StdinStream ext ReadableStream {
     fun read(&mut self, len: USize) -> Res[Vec[U8], StreamErr] {
         let mut stream = StrView()
-        let val = sppc::fd_read(&mut stream, 1_uz, len, stdin_handle)
+        let val = sppc::fd_read(&mut stream, 1_uz, len, stdin_fd)
 
         let vec = Vec[U8]::from(stream)
         ret case val of {
