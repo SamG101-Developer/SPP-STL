@@ -17,6 +17,10 @@ cls Single[T, A: Alloc[T] = GlobalAlloc[T]] { }
 
 sup [T] Single[T] {
     @public type Element = T
+
+    @public
+    @compiler_builtin
+    fun new(value: T) -> Single[T] { }
 }
 
 

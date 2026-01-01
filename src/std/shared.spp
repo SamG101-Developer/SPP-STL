@@ -15,7 +15,6 @@ use std::void::Void
 
 @public
 cls Shared[T, A: Alloc[T] = GlobalAlloc[T]] {
-    val: T
     shared_counter: USize
     shadow_counter: USize
 }
@@ -23,6 +22,10 @@ cls Shared[T, A: Alloc[T] = GlobalAlloc[T]] {
 
 sup [T] Shared[T] {
     @public type Element = T
+
+    @public
+    @compiler_builtin
+    fun new(val: T) -> Shared[T] { }
 
     @public
     @compiler_builtin
@@ -36,11 +39,6 @@ sup [T] Shared[T] {
     @public
     fun shadows(&self) -> USize {
         ret self.shadow_counter
-    }
-
-    @public
-    fun inner(self) -> Opt[T] {
-        ret case self.shared_counter == 1_uz { Some(val=self.val) } else { None() }
     }
 }
 

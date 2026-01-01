@@ -25,7 +25,8 @@ cls Receiver[T] {
 
 @public
 fun channel[T]() -> (Sender[T], Receiver[T]) {
-    let storage = Shared[Queue[T]]::new()
+    let queue = Queue[T]::new()
+    let storage = Shared[Queue[T]]::new(queue)
     let sender = Sender[T](storage=storage.clone())
     let receiver = Receiver[T](storage=storage.clone())
     ret (sender, receiver)
