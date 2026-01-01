@@ -49,10 +49,10 @@ sup [T] Sender[T] {
 
 sup [T] Receiver[T] {
     @public
-    fun read(&mut self, len: USize) -> Res[Opt[T], LockErr] {
+    fun read(&mut self, len: USize) -> Res[T, LockErr] {
         self.mutex.lock()?
         self.cond_var.wait(&self.mutex, || self.storage.is_empty().not)?
-        ret Pass(val=self.storage.pop())
+        ret Pass(val=self.storage.pop().unwrap())
     }
 
     @public
