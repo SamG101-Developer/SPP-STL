@@ -45,7 +45,7 @@ sup File {
     @public
     fun open(path: &Path, mode: Str) -> Res[File, FileNotFoundErr] {
         let fd = sppc::fd_open(&StrView::from(path.clone()), &StrView::from(mode))
-        case fd == 0_uz { ret Fail(err=FileNotFoundErr(msg="Failed to open file")) }
+        case fd == 0 { ret Fail(err=FileNotFoundErr(msg="Failed to open file")) }
         ret Pass(val=File(fd, open=true))
     }
 
