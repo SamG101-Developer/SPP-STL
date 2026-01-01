@@ -21,7 +21,7 @@ sup CondVar {
         # Create a new mutex using the sppc threading API.
         let id = sppc::condvar_create()
         case id == 0 { ret Fail(err=LockErr(msg="Failed to create condition variable")) }
-        ret CondVar(id)
+        ret Pass(val=CondVar(id))
     }
 
     @public
