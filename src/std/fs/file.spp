@@ -75,7 +75,7 @@ sup File {
     }
 
     @public
-    fun set_length(&self, len: S32) -> Bool {
+    fun set_length(&self, len: S64) -> Bool {
         let val = sppc::fd_truncate(self.fd, len)
         ret val == 0
     }
