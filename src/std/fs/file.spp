@@ -118,7 +118,7 @@ sup File ext ReadableStream {
         }
 
         # Resize the vector to the actual number of bytes read.
-        stream.resize(read_bytes)
+        # stream.resize(read_bytes)
         ret Pass(val=stream)
     }
 }
