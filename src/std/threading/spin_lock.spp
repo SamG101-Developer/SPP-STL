@@ -18,7 +18,7 @@ sup SpinLock {
     fun new() -> Res[SpinLock, LockErr] {
         # Create a new spin lock using the sppc threading API.
         let id = sppc::spinlock_create()
-        ret SpinLock(id)
+        ret Pass(val=SpinLock(id))
     }
 
     @public
