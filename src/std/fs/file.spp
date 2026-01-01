@@ -113,10 +113,7 @@ sup File ext ReadableStream {
 
         # Read the data from the file into the buffer.
         let read_bytes = sppc::fd_read(&mut stream, 1_uz, len, self.fd)
-        case read_bytes == 0_u64 and sppc::fd_eof(self.fd) != 0 {
-            ret Pass(val=stream)
-        }
-        else case read_bytes == 0_u64 {
+        case read_bytes == 0_u64 {  # TODO: this is wrong, need to handle EOF differently
             ret Fail(err=StreamErr(msg="Failed to read from file"))
         }
 
