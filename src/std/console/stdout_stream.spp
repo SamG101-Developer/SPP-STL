@@ -1,6 +1,6 @@
 use std::number::U8
 use std::number::USize
-use std::number::SSize
+use std::number::S32
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
@@ -15,7 +15,7 @@ cmp stdout: StdoutStream = StdoutStream()
 
 
 @private
-cmp stdout_fd: USize = 1_uz
+cmp stdout_fd: S32 = 1
 
 
 @private
