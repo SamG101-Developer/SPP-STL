@@ -166,13 +166,13 @@ fun rng_fill_bytes(buffer: &mut CCharPtr, size: CSizeT) -> CVoid { }
 fun fs_exists(path: &CCharPtr) -> CInt { }
 
 @ffi
-fun fs_isfile(path: &CCharPtr) -> CInt { }
+fun fs_is_file(path: &CCharPtr) -> CInt { }
 
 @ffi
-fun fs_isdir(path: &CCharPtr) -> CInt { }
+fun fs_is_dir(path: &CCharPtr) -> CInt { }
 
 @ffi
-fun fs_issymlink(path: &CCharPtr) -> CInt { }
+fun fs_is_symlink(path: &CCharPtr) -> CInt { }
 
 @ffi
 fun fs_file_size(path: &CCharPtr) -> CLongLong { }
