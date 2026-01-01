@@ -143,7 +143,7 @@ sup File ext SeekableStream {
         let cur = self.stream_pos()?
 
         # Seek to the end of the file and get the current position (which is the length).
-        self.seek_from_end(0)?
+        self.seek_from_end(0_sz)?
         let len = self.stream_pos()?
 
         # Restore the original position by rewinding and seeking to the saved position.
@@ -155,7 +155,7 @@ sup File ext SeekableStream {
     fun stream_pos(&mut self) -> Res[SSize, StreamErr] {
         let pos = sppc::fd_tell(self.fd)
         ret case pos of {
-            < 0_s64 { Fail(err=StreamErr(msg="Failed to get file position")) }
+            < 0_sz { Fail(err=StreamErr(msg="Failed to get file position")) }
             else { Pass(val=pos) }
         }
     }
@@ -177,7 +177,7 @@ sup File ext SeekableStream {
     }
 
     fun rewind(&mut self) -> Res[Void, StreamErr] {
-        ret self.seek_from_start(0_s64)
+        ret self.seek_from_start(0_sz)
     }
 }
 
