@@ -39,7 +39,7 @@ sup [T] Sender[T] {
         self.mutex.lock()?
         self.storage.push(data)
         self.cond_var.signal_one()?
-        self.mutex.unlock()?
+        ret self.mutex.unlock()
     }
 }
 
