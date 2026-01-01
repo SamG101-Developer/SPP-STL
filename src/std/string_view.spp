@@ -33,11 +33,11 @@ sup StrView {
 
     @public
     @compiler_builtin
-    fun from_utf8(utf8: &Slice[U8]) -> StrView { }
+    fun new_with_capacity(capacity: USize) -> StrView { }
 
     @public
     @compiler_builtin
-    fun new_with_capacity(capacity: USize) -> StrView { }
+    fun from_utf8(utf8: &Slice[U8]) -> StrView { }
 
     @public
     @inline

@@ -28,7 +28,7 @@ sup StdinStream ext ReadableStream {
         let mut stream = StrView()
         let val = sppc::fd_read(&mut stream, 1_uz, len, stdin_fd)
 
-        let vec = Vec[U8]::from(stream)
+        let vec = Vec[U8]::from(Slice[U8]::from(stream))
         ret case val of {
             < 0_uz { Fail(err=StreamErr(msg="Failed to read from stdin")) }
             else { Pass(val=vec) }
