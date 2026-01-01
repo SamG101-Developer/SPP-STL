@@ -57,6 +57,17 @@ sup Str {
 
 sup Str {
     @public
+    @compiler_builtin
+    fun starts_with(&self, needle: StrView) -> Bool { }
+
+    @public
+    @compiler_builtin
+    fun ends_with(&self, needle: StrView) -> Bool { }
+}
+
+
+sup Str {
+    @public
     cor chars(&self) -> Iterator[U8] {
         gen with self.data.clone().iter_mov()
     }
