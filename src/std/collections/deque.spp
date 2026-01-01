@@ -41,7 +41,7 @@ sup [T] Deque[T] {
         case self.is_empty() { ret None() }
         self.retreat_tail()
         let val = self.blocks[self.tail_blk].mem.take(self.tail_idx)
-        ret Some(val)
+        ret val
     }
 
     @public
@@ -49,7 +49,7 @@ sup [T] Deque[T] {
         case self.is_empty() { ret None() }
         let val = self.blocks[self.head_blk].mem.take(self.head_idx)
         self.advance_head()
-        ret Some(val)
+        ret val
     }
 }
 
