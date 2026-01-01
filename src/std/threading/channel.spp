@@ -20,6 +20,8 @@ cls Sender[T] {
 @public
 cls Receiver[T] {
     storage: Shared[Queue[T]]
+    mutex: Mutex
+    cond_var: CondVar
 }
 
 
@@ -54,7 +56,7 @@ sup [T] Receiver[T] {
 
     @public
     fun try_read(&mut self) -> Opt[T] {
-        self.mutex.lock()?
+        self.mutex.lock().ok()?
         case self.storage.is_empty() { ret None() }
         ret self.storage.pop()
     }
