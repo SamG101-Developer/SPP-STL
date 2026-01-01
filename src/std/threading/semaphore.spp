@@ -44,7 +44,7 @@ sup Semaphore {
     @public
     fun try_aquire(&mut self) -> Res[Bool, LockErr] {
         self.mutex.lock()?
-        ret case self.count > 0 {
+        ret case self.count > 0_u64 {
             self.count -= 1_u64
             self.mutex.unlock()?
             true
