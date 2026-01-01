@@ -25,7 +25,7 @@ sup CondVar {
     }
 
     @public
-    fun wait(self, mutex: &Mutex, pred: FunRef[(), Bool] = || true) -> Res[Void, LockErr] {
+    fun wait(self, mutex: &Mutex, pred: FunRef[(), Bool]) -> Res[Void, LockErr] {
         # Wait on the condition variable, releasing the associated mutex.
         # TODO: Implement predicate handling to avoid spurious wake-ups.
         loop pred().not {
@@ -33,6 +33,12 @@ sup CondVar {
             case val != 0 { ret Fail(err=LockErr(msg="Failed to wait on condition variable")) }
         }
         ret Pass[Void]()
+    }
+
+    @public
+    fun wait(self, mutex: &Mutex) -> Res[Void, LockErr] {
+        # Wait on the condition variable, releasing the associated mutex.
+        self.wait(mutex, || true)
     }
 
     @public
