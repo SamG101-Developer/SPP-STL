@@ -238,7 +238,7 @@ fun mutex_create() -> CInt { }
 fun mutex_lock(mutex_id: CInt) -> CInt { }
 
 @ffi
-fun mutex_trylock(mutex_id: CInt) -> CInt { }
+fun mutex_try_lock(mutex_id: CInt) -> CInt { }
 
 @ffi
 fun mutex_unlock(mutex_id: CInt) -> CInt { }
@@ -265,16 +265,16 @@ fun condvar_destroy(condvar_id: CInt) -> CInt { }
 fun rwlock_create() -> CInt { }
 
 @ffi
-fun rwlock_rdlock(rwlock_id: CInt) -> CInt { }
+fun rwlock_read_lock(rwlock_id: CInt) -> CInt { }
 
 @ffi
-fun rwlock_wrlock(rwlock_id: CInt) -> CInt { }
+fun rwlock_write_lock(rwlock_id: CInt) -> CInt { }
 
 @ffi
-fun rwlock_tryrdlock(rwlock_id: CInt) -> CInt { }
+fun rwlock_try_read_lock(rwlock_id: CInt) -> CInt { }
 
 @ffi
-fun rwlock_trywrlock(rwlock_id: CInt) -> CInt { }
+fun rwlock_try_write_lock(rwlock_id: CInt) -> CInt { }
 
 @ffi
 fun rwlock_unlock(rwlock_id: CInt) -> CInt { }
@@ -298,7 +298,7 @@ fun spinlock_create() -> CInt { }
 fun spinlock_lock(spinlock_id: CInt) -> CInt { }
 
 @ffi
-fun spinlock_trylock(spinlock_id: CInt) -> CInt { }
+fun spinlock_try_lock(spinlock_id: CInt) -> CInt { }
 
 @ffi
 fun spinlock_unlock(spinlock_id: CInt) -> CInt { }
