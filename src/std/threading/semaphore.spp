@@ -25,7 +25,7 @@ sup Semaphore {
     @public
     fun aquire(&mut self) -> Res[Void, LockErr] {
         self.mutex.lock()?
-        loop self.count == 0 {
+        loop self.count == 0_u64 {
             self.cond_var.wait(&mut self.mutex)?
         }
         self.count = self.count - 1_u64
