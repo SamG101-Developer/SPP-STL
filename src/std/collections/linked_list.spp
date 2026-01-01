@@ -62,7 +62,8 @@ sup [T] LinkedList[T] {
     @public
     fun pop_back(&mut self) -> Opt[T] {
         case self.tail is None() { ret None() }
-        let tail_idx = self.tail.unwrap
+
+        let tail_idx = self.tail.unwrap()
         let tail_node = self.nodes[tail_idx]
         let val = tail_node.val
 
@@ -78,7 +79,7 @@ sup [T] LinkedList[T] {
     fun pop_front(&mut self) -> Opt[T] {
         case self.head is None() { ret None() }
 
-        let head_idx = self.head.unwrap
+        let head_idx = self.head.unwrap()
         let head_node = self.nodes[head_idx]
         let val = head_node.val
 
