@@ -63,14 +63,17 @@ sup [T] LinkedList[T] {
     fun pop_back(&mut self) -> Opt[T] {
         case self.tail is None() { ret None() }
 
+        # Get the current tail node.
         let tail_idx = self.tail.unwrap()
         let tail_node = self.nodes[tail_idx]
         let val = tail_node.val
 
         # Update the tail to the previous node.
         self.tail = tail_node.prev
-        case self.tail is Some[USize](val as new_tail) { self.nodes[mut new_tail].next = None() }
-        case self.tail is None() { self.head = None() }
+        case self.tail of {
+            is Some[USize](val as new_tail) { self.nodes[mut new_tail].next = None() }
+            is None() { self.head = None() }
+        }
 
         ret Some(val)
     }
@@ -79,14 +82,17 @@ sup [T] LinkedList[T] {
     fun pop_front(&mut self) -> Opt[T] {
         case self.head is None() { ret None() }
 
+        # Get the current head node.
         let head_idx = self.head.unwrap()
         let head_node = self.nodes[head_idx]
         let val = head_node.val
 
         # Update the head to the next node.
         self.head = head_node.next
-        case self.head is Some[USize](val as new_head) { self.nodes[mut new_head].prev = None() }
-        case self.head is None() { self.tail = None() }
+        case self.head of {
+            is Some[USize](val as new_head) { self.nodes[mut new_head].prev = None() }
+            is None() { self.tail = None() }
+        }
 
         ret Some(val)
     }
