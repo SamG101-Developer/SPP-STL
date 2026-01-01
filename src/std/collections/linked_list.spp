@@ -69,7 +69,7 @@ sup [T] LinkedList[T] {
 
         # Update the tail to the previous node.
         self.tail = tail_node.prev
-        case self.tail is Some[USize](val as new_tail) { new_tail.next = None() }
+        case self.tail is Some[USize](val as new_tail) { self.nodes[mut new_tail].next = None() }
         case self.tail is None() { self.head = None() }
 
         ret Some(val)
@@ -85,7 +85,7 @@ sup [T] LinkedList[T] {
 
         # Update the head to the next node.
         self.head = head_node.next
-        case self.head is Some[USize](val as new_head) { new_head.prev = None() }
+        case self.head is Some[USize](val as new_head) { self.nodes[mut new_head].prev = None() }
         case self.head is None() { self.tail = None() }
 
         ret Some(val)
