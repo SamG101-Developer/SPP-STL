@@ -30,7 +30,7 @@ sup Mutex {
         # Create a new mutex using the sppc threading API.
         let id = sppc::mutex_create()
         case id == 0 { ret Fail(err=LockErr(msg="Failed to create mutex")) }
-        ret Mutex(id)
+        ret Pass(val=Mutex(id))
     }
 
     @public

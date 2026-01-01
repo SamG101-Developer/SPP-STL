@@ -30,7 +30,7 @@ sup RwLock {
         # Create a new rwlock using the sppc threading API.
         let id = sppc::rwlock_create()
         case id == 0 { ret Fail(err=LockErr(msg="Failed to create rwlock")) }
-        ret RwLock(id)
+        ret Pass(val=RwLock(id))
     }
 
     @public

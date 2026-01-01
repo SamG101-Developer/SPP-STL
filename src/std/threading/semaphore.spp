@@ -18,7 +18,7 @@ cls Semaphore {
 sup Semaphore {
     @public
     fun new(initial_count: U64) -> Res[Semaphore, LockErr] {
-        ret Semaphore(mutex=Mutex::new()?, cond_var=CondVar::new()?, count=initial_count)
+        ret Pass(Semaphore(mutex=Mutex::new()?, cond_var=CondVar::new()?, count=initial_count))
     }
 
     @public
