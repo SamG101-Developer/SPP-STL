@@ -97,8 +97,8 @@ sup [T] LinkedList[T] {
         let val = node.val
 
         # Update the previous node to point to the next node.
-        case node.prev is Some[USize](val as prev_node) { prev_node.next = node.next }
-        case node.next is Some[USize](val as next_node) { next_node.prev = node.prev }
+        case node.prev is Some[USize](val as prev_node) { self.nodes[mut prev_node].next = node.next }
+        case node.next is Some[USize](val as next_node) { self.nodes[mut next_node].prev = node.prev }
 
         # Update head and tail if necessary.
         case self.head is Some[USize](val as head_idx) {
