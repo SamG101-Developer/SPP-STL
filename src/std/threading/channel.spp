@@ -48,15 +48,15 @@ sup [T] Sender[T] {
 
 sup [T] Receiver[T] {
     @public
-    fun read(&mut self, len: USize) -> Opt[T] {
+    fun read(&mut self, len: USize) -> Res[T, LockErr] {
         self.mutex.lock()?
         self.cond_var.wait(&self.mutex, || self.storage.is_empty().not)?
         ret self.storage.pop()
     }
 
     @public
-    fun try_read(&mut self) -> Opt[T] {
-        self.mutex.lock().ok()?
+    fun try_read(&mut self) -> Res[T, LockErr] {
+        self.mutex.lock()?
         case self.storage.is_empty() { ret None() }
         ret self.storage.pop()
     }
