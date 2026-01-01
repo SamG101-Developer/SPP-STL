@@ -38,7 +38,7 @@ sup RwLock {
         # Acquire a read lock using the sppc threading API.
         let guard_id = sppc::rwlock_read_lock(self.id)
         case guard_id == 0 { ret Fail(err=LockErr(msg="Failed to acquire read lock")) }
-        ret Pass(val=RwReadLockGuard(guard_id))
+        ret Pass(val=RwReadLockGuard(id=guard_id))
     }
 
     @public
@@ -46,7 +46,7 @@ sup RwLock {
         # Acquire a write lock using the sppc threading API.
         let guard_id = sppc::rwlock_write_lock(self.id)
         case guard_id == 0 { ret Fail(err=LockErr(msg="Failed to acquire write lock")) }
-        ret Pass(val=RwWriteLockGuard(guard_id))
+        ret Pass(val=RwWriteLockGuard(id=guard_id))
     }
 
     @public
@@ -54,7 +54,7 @@ sup RwLock {
         # Try to acquire a read lock using the sppc threading API.
         let guard_id = sppc::rwlock_try_read_lock(self.id)
         case guard_id == 0 { ret Fail(err=LockErr(msg="Failed to try to acquire read lock")) }
-        ret Pass(val=RwReadLockGuard(guard_id))
+        ret Pass(val=RwReadLockGuard(id=guard_id))
     }
 
     @public
@@ -62,7 +62,7 @@ sup RwLock {
         # Try to acquire a write lock using the sppc threading API.
         let guard_id = sppc::rwlock_try_write_lock(self.id)
         case guard_id == 0 { ret Fail(err=LockErr(msg="Failed to try to acquire write lock")) }
-        ret Pass(val=RwWriteLockGuard(guard_id))
+        ret Pass(val=RwWriteLockGuard(id=guard_id))
     }
 
     @public
