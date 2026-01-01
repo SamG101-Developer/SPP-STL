@@ -45,9 +45,9 @@ sup Path {
 
     @public
     fun exists(&self) -> Bool {
-        # Check if the path exists in the filesystem.
+        # Check if the path exists in the filesystem (ignore C error).
         let found = sppc::fs_exists(&StrView::from(self.path.clone()))
-        ret found
+        ret found > 0
     }
 
     @public
@@ -115,20 +115,23 @@ sup Path {
 sup Path {
     @public
     fun is_file(&self) -> Bool {
+        # Check if the path is a file in the filesystem (ignore C error).
         let test = sppc::fs_is_file(&StrView::from(self.path.clone()))
-        ret test
+        ret test > 0
     }
 
     @public
     fun is_dir(&self) -> Bool {
+        # Check if the path is a directory in the filesystem (ignore C error).
         let test = sppc::fs_is_dir(&StrView::from(self.path.clone()))
-        ret test
+        ret test > 0
     }
 
     @public
     fun is_symlink(&self) -> Bool {
+        # Check if the path is a symlink in the filesystem (ignore C error).
         let test = sppc::fs_is_symlink(&StrView::from(self.path.clone()))
-        ret test
+        ret test > 0
     }
 }
 
