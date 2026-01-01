@@ -3,6 +3,7 @@ use std::clone::Clone
 use std::cast::From
 use std::iterator::Iterator
 use std::number::U8
+use std::number::USize
 use std::ops::add::Add
 use std::ops::add::AddAssign
 use std::ops::eq::Eq
