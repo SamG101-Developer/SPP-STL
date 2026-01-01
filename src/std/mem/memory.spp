@@ -19,6 +19,11 @@ sup [T] Memory[T] {
     @public type Element = T
 
     @public
+    fun new(cap: USize) -> Memory[T, A] {
+        ret Memory[T, A](cap)
+    }
+
+    @public
     fun capacity(&self) -> USize {
         ret self.cap
     }
