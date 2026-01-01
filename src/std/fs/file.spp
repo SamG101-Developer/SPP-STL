@@ -28,7 +28,7 @@ cls FileNotFoundErr {
 
 @public
 cls File {
-    fd: USize
+    fd: S32
     open: Bool = false
 }
 
