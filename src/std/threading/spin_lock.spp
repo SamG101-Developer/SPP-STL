@@ -32,7 +32,7 @@ sup SpinLock {
     @public
     fun try_lock(&self) -> Res[Bool, LockErr] {
         # Try to acquire the spin lock using the sppc threading API.
-        let spin_id = sppc::spinlock_try_lock(self.id)
+        let spin_id = sppc::spinlock_trylock(self.id)
         case spin_id == 0 { ret Fail(err=LockErr(msg="Failed to try acquire spin lock"))  }
         ret Pass(val=spin_id == 1)
     }
