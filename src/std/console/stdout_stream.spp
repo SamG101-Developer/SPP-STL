@@ -7,6 +7,7 @@ use std::result::Res
 use std::slice::Slice
 use std::streams::WritableStream
 use std::streams::StreamErr
+use std::string_view::StrView
 use std::void::Void
 
 
