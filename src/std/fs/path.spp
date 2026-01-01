@@ -27,7 +27,7 @@ sup Path {
 sup Path {
     @public
     fun is_absolute(&self) -> Bool {
-        ret self.path.starts_with(Str::from_char(self.sep))
+        ret self.path.starts_with(Str::from(self.sep))
     }
 
     @public
@@ -140,8 +140,8 @@ sup Path {
     @public
     fun join(&self, other: Str) -> Path {
         let mut new_path = self.path.clone()
-        case new_path.ends_with(Str::from_char(self.sep)).not {
-            new_path += Str::from_char(self.sep)
+        case new_path.ends_with(Str::from(self.sep)).not {
+            new_path += Str::from(self.sep)
         }
         new_path += other
         ret Path(path=new_path)
@@ -151,7 +151,7 @@ sup Path {
     fun with_added_extension(&self, ex: Str) -> Path {
         let mut new_path = self.path.clone()
         case ex.length() > 0_uz {
-            new_path += Str::from_char('.')
+            new_path += Str::from('.')
             new_path += ex
         }
         ret Path(path=new_path)
@@ -162,7 +162,7 @@ sup Path {
         let (base_path, _) = self.split_ext()
         let mut new_path = base_path.path.clone()
         case ex.length() > 0_uz {
-            new_path += Str::from_char('.')
+            new_path += Str::from('.')
             new_path += ex
         }
         ret Path(path=new_path)
@@ -172,8 +172,8 @@ sup Path {
     fun with_file_name(&self, name: Str) -> Path {
         let dir = self.dir_name()
         let mut new_path = dir.clone()
-        case new_path.ends_with(Str::from_char(self.sep)).not {
-            new_path += Str::from_char(self.sep)
+        case new_path.ends_with(Str::from(self.sep)).not {
+            new_path += Str::from(self.sep)
         }
         new_path += name
         ret Path(path=new_path)
