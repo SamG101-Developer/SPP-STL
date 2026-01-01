@@ -8,7 +8,7 @@ use std::ops::del::Del
 @public
 cls Thread {
     @public name: Str
-    @public id: S32S3
+    @public id: S32
     @public alive: Bool
 }
 
