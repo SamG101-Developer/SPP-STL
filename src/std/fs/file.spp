@@ -155,7 +155,7 @@ sup File ext SeekableStream {
     fun stream_pos(&mut self) -> Res[SSize, StreamErr] {
         let pos = sppc::fd_tell(self.fd)
         ret case pos of {
-            < 0 { Fail(err=StreamErr(msg="Failed to get file position")) }
+            < 0_s64 { Fail(err=StreamErr(msg="Failed to get file position")) }
             else { Pass(val=pos) }
         }
     }
