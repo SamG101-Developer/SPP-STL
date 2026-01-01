@@ -1,5 +1,5 @@
 use std::boolean::Bool
-use std::number::U64
+use std::number::S32
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
@@ -9,7 +9,7 @@ use std::threading::mutex::LockErr
 
 @public
 cls SpinLock {
-    @public id: U64
+    @public id: S32
 }
 
 

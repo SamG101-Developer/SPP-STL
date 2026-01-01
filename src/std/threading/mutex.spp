@@ -1,4 +1,4 @@
-use std::number::U64
+use std::number::S32
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
@@ -8,13 +8,13 @@ use std::void::Void
 
 @public
 cls Mutex {
-    @public id: U64
+    @public id: S32
 }
 
 
 @public
 cls MutexLockGard {
-    @public id: U64
+    @public id: S32
 }
 
 
@@ -29,7 +29,7 @@ sup Mutex {
     fun new() -> Res[Mutex, LockErr] {
         # Create a new mutex using the sppc threading API.
         let id = sppc::mutex_create()
-        case id == 0_u64 { ret Fail(err=LockErr(msg="Failed to create mutex")) }
+        case id == 0 { ret Fail(err=LockErr(msg="Failed to create mutex")) }
         ret Mutex(id)
     }
 
@@ -37,7 +37,7 @@ sup Mutex {
     fun lock(&self) -> Res[MutexLockGard, LockErr] {
         # Lock the mutex using the sppc threading API.
         let guard_id = sppc::mutex_lock(self.id)
-        case guard_id == 0_u64 { ret Fail(err=LockErr(msg="Failed to lock mutex")) }
+        case guard_id == 0 { ret Fail(err=LockErr(msg="Failed to lock mutex")) }
         ret Pass(val=MutexLockGard(id=guard_id))
     }
 
@@ -45,7 +45,7 @@ sup Mutex {
     cor try_lock(&self) -> Res[MutexLockGard, LockErr] {
         # Try to lock the mutex using the sppc threading API.
         let guard_id = sppc::mutex_try_lock(self.id)
-        case guard_id == 0_u64 { ret Fail(err=LockErr(msg="Failed to try to lock mutex")) }
+        case guard_id == 0 { ret Fail(err=LockErr(msg="Failed to try to lock mutex")) }
         ret Pass(val=MutexLockGard(id=guard_id))
     }
 

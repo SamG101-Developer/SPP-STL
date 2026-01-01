@@ -1,6 +1,5 @@
 use std::boolean::Bool
 use std::string::Str
-use std::number::U64
 use std::number::S32
 use std::ops::eq::Eq
 use std::ops::del::Del
@@ -9,7 +8,7 @@ use std::ops::del::Del
 @public
 cls Thread {
     @public name: Str
-    @public id: U64
+    @public id: S32S3
     @public alive: Bool
 }
 

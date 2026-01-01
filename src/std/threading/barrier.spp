@@ -1,4 +1,5 @@
 use std::number::U64
+use std::number::S32
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
@@ -8,7 +9,7 @@ use std::threading::mutex::LockErr
 
 @public
 cls Barrier {
-    @public id: U64
+    @public id: S32
     @public total: U64
     @public count: U64
 }

@@ -1,4 +1,4 @@
-use std::number::U64
+use std::number::S32
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
@@ -8,19 +8,19 @@ use std::threading::mutex::LockErr
 
 @public
 cls RwReadLockGuard {
-    id: U64
+    id: S32
 }
 
 
 @public
 cls RwWriteLockGuard {
-    id: U64
+    id: S32
 }
 
 
 @public
 cls RwLock {
-    id: U64
+    id: S32
 }
 
 
