@@ -27,7 +27,6 @@ sup CondVar {
     @public
     fun wait(self, mutex: &Mutex, pred: FunRef[(), Bool]) -> Res[Void, LockErr] {
         # Wait on the condition variable, releasing the associated mutex.
-        # TODO: Implement predicate handling to avoid spurious wake-ups.
         loop pred().not {
             let val = sppc::condvar_wait(self.id, mutex.id)
             case val != 0 { ret Fail(err=LockErr(msg="Failed to wait on condition variable")) }
