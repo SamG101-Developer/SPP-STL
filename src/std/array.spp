@@ -15,7 +15,7 @@ cls Arr[T, cmp n: USize, A: Alloc[T] = GlobalAlloc[T]] {
 }
 
 
-sup [T, cmp n: USize] Arr[T, n] {
+sup [T, cmp n: USize, A] Arr[T, n, A] {
     fun new() -> Self {
         ret Arr[T, n](mem=Memory[T, A]::new(n))
     }
