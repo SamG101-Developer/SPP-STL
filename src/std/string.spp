@@ -79,6 +79,16 @@ sup Str {
     cor chars(&self) -> Iterator[U8] {
         gen with self.data.clone().iter_mov()
     }
+
+    @public
+    fun length(&self) -> USize {
+        ret self.data.length()
+    }
+
+    @public
+    fun is_empty(&self) -> Bool {
+        ret self.data.is_empty()
+    }
 }
 
 
