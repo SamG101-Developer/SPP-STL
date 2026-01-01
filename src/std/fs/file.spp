@@ -177,7 +177,7 @@ sup File ext SeekableStream {
     }
 
     fun rewind(&mut self) -> Res[Void, StreamErr] {
-        ret self.seek_from_start(0)
+        ret self.seek_from_start(0_s64)
     }
 }
 
