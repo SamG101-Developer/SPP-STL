@@ -44,7 +44,7 @@ sup [T] LinkedList[T] {
     fun push_front(&mut self, value: T) -> USize {
         # Create a new node and add it to the front of the node vector.
         let idx = self.nodes.length()
-        let new_node = LinkedListNode[T](val=value, prev=None, next=self.head)
+        let new_node = LinkedListNode[T](val=value, prev=None(), next=self.head)
         self.nodes.push(new_node)
 
         # Update the previous head node to point back to the new node.
