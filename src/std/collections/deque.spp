@@ -11,12 +11,21 @@ use std::void::Void
 @public
 cls Deque[T, cmp block_size: USize = 64_uz] {
     blocks: Vec[Arr[T, block_size]]
-    head_blk: USize
-    head_idx: USize
-    tail_blk: USize
-    tail_idx: USize
+    head_blk: USize = 0_uz
+    head_idx: USize = 0_uz
+    tail_blk: USize = 0_uz
+    tail_idx: USize = 0_uz
 }
 
+
+sup [T] Deque[T] {
+    @public
+    fun new() -> Deque[T] {
+        let mut blocks = Vec[Arr[T, 64_uz]]::new()
+        blocks.push(Arr[T, 64_uz]::new())
+        ret Deque[T](blocks)
+    }
+}
 
 sup [T] Deque[T] {
     @public
