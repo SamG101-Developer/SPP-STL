@@ -33,6 +33,10 @@ sup StrView {
 
     @public
     @compiler_builtin
+    fun from_utf8(utf8: &Slice[U8]) -> StrView { }
+
+    @public
+    @compiler_builtin
     fun new_with_capacity(capacity: USize) -> StrView { }
 
     @public
@@ -92,12 +96,6 @@ sup StrView ext Ne[Rhs=StrView] {
 sup StrView ext From[Self, Str] {
     @compiler_builtin
     fun from(that: Str) -> Self { }
-}
-
-
-sup StrView ext From[Self, Slice[U8]] {
-    @compiler_builtin
-    fun from(that: Slice[U8]) -> Self { }
 }
 
 

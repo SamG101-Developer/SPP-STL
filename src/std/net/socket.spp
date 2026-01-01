@@ -124,7 +124,7 @@ sup Socket {
 
 sup Socket ext WritableStream {
     fun write(&mut self, data: &Slice[U8]) -> Res[USize, StreamErr] {
-        let stream = StrView::from(data.clone())
+        let stream = StrView::from_utf8(data)
         let val = sppc::fd_write(&stream, 1_uz, data.length(), self.fd)
         ret case val of {
             < 0_uz { Fail(err=StreamErr(msg="Failed to write to socket")) }
