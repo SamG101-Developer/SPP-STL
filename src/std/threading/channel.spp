@@ -38,7 +38,7 @@ sup [T] Sender[T] {
     fun write(&mut self, data: T) -> Res[Void, LockErr] {
         self.mutex.lock()?
         self.storage.push(data)
-        self.cond_var.notify_one()?
+        self.cond_var.signal_one()?
         self.mutex.unlock()?
     }
 }
