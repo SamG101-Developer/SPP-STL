@@ -50,9 +50,11 @@ sup Mutex {
     }
 
     @public
-    fun unlock(&self) -> Void {
+    fun unlock(&self) -> Res[Void, LockErr] {
         # Unlock the mutex using the sppc threading API.
-        sppc::mutex_unlock(self.id)
+        let val = sppc::mutex_unlock(self.id)
+        case val != 0 { ret Fail(err=LockErr(msg="Failed to unlock mutex")) }
+        ret Pass[Void]()
     }
 }
 
