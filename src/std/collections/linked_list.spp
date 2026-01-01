@@ -32,7 +32,7 @@ sup [T] LinkedList[T] {
         self.nodes.push(new_node)
 
         # Update the previous tail node to point to the new node.
-        case self.tail is Some(val as tail_node) { tail_node.next = Some(val=idx) }
+        case self.tail is Some[USize](val as tail_node) { tail_node.next = Some(val=idx) }
         self.tail = Some(val=idx)
 
         # If the list was empty, set the head to the new node.
@@ -48,7 +48,7 @@ sup [T] LinkedList[T] {
         self.nodes.push(new_node)
 
         # Update the previous head node to point back to the new node.
-        case self.head is Some(val as head_node) { head_node.prev = Some(val=idx) }
+        case self.head is Some[USize](val as head_node) { head_node.prev = Some(val=idx) }
         self.head = Some(val=idx)
 
         # If the list was empty, set the tail to the new node.
