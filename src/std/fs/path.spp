@@ -140,7 +140,7 @@ sup Path {
     @public
     fun join(&self, other: Str) -> Path {
         let mut new_path = self.path.clone()
-        case new_path.ends_with(Str::from(self.sep)).not {
+        case new_path.ends_with(StrView::from(self.sep)).not {
             new_path += Str::from(self.sep)
         }
         new_path += other
@@ -172,7 +172,7 @@ sup Path {
     fun with_file_name(&self, name: Str) -> Path {
         let dir = self.dir_name()
         let mut new_path = dir.clone()
-        case new_path.ends_with(Str::from(self.sep)).not {
+        case new_path.ends_with(StrView::from(self.sep)).not {
             new_path += Str::from(self.sep)
         }
         new_path += name
