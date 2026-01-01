@@ -58,7 +58,6 @@ sup [T] Receiver[T] {
     @public
     fun try_read(&mut self) -> Res[Opt[T], LockErr] {
         self.mutex.lock()?
-        case self.storage.is_empty() { ret Pass(val=None()) }
         ret Pass(val=self.storage.pop())
     }
 }
