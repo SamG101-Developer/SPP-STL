@@ -4,7 +4,6 @@ use std::number::USize
 use std::number::S32
 use std::number::S64
 use std::number::SSize
-use std::ops::del::Del
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
@@ -18,6 +17,7 @@ use std::string::Str
 use std::string_view::StrView
 use std::vector::Vec
 use std::void::Void
+use std::ops::del::Del
 use std::fs::path::Path
 
 
@@ -44,7 +44,7 @@ sup File {
 sup File {
     @public
     fun open(path: &Path, mode: Str) -> Res[File, FileNotFoundErr] {
-        let fd = sppc::fd_open(&StrView::from(path), &StrView::from(mode))
+        let fd = sppc::fd_open(&StrView::from(path.clone()), &StrView::from(mode))
         case fd == 0_uz { ret Fail(err=FileNotFoundErr(msg="Failed to open file")) }
         ret Pass(val=File(fd, open=true))
     }
