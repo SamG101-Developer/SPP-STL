@@ -34,7 +34,7 @@ sup StdoutStream ext WritableStream {
     }
 
     fun flush(&mut self) -> Res[Void, StreamErr] {
-        let val = sppc::fflush(stderr_fd)
+        let val = sppc::fd_flush(stderr_fd)
         ret case val of {
             != 0 { Fail(err=StreamErr(msg="Failed to flush stdout")) }
             else { Pass[Void]() }
