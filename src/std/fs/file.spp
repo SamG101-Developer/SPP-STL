@@ -118,7 +118,7 @@ sup File ext ReadableStream {
         }
 
         # Resize the vector to the actual number of bytes read.
-        let vec = Vec[U8]::from(stream)
+        let vec = Vec[U8]::from(Slice[U8]::from(stream))
         vec.resize(read_bytes)
         ret Pass(val=vec)
     }
