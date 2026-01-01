@@ -25,6 +25,14 @@ cls Str {
 
 sup Str {
     @public
+    fun new() -> Str {
+        ret Str(data=Vec[U8]::new())
+    }
+}
+
+
+sup Str {
+    @public
     fun to_ascii_uppercase(&self) -> Str {
         # ret self.data.iter_ref().map(U8::to_ascii_uppercase).collect[Str]()
         ret Str::from("")
@@ -83,6 +91,16 @@ sup Str ext From[Self, StrView] {
 sup Str ext From[Self, Path] {
     fun from(that: Path) -> Self {
         ret that.path.clone()
+    }
+}
+
+
+sup Str ext From[Self, U8] {
+    fun from(that: U8) -> Self {
+        # Create a Str from a single Char (U8)
+        let mut str = Str::new()
+        str += that
+        ret str
     }
 }
 
