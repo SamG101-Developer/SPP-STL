@@ -143,7 +143,7 @@ sup [T] LinkedList[T] {
         loop current is Some[USize](val as idx) {
             let node = self.nodes[idx]
             gen &mut node.val
-            current = node.next
+            # current = node.next  TODO: Needs anti-flow support
         }
     }
 
@@ -154,7 +154,7 @@ sup [T] LinkedList[T] {
         loop current is Some[USize](val as idx) {
             let node = self.nodes[idx]
             gen &node.val
-            current = node.next
+            # current = node.next  TODO: Needs anti-flow support
         }
     }
 
@@ -165,7 +165,7 @@ sup [T] LinkedList[T] {
         loop current is Some[USize](val as idx) {
             let node = self.nodes[idx]
             gen &mut node.val
-            current = node.prev
+            # current = node.prev  TODO: Needs anti-flow support
         }
     }
 
@@ -176,7 +176,7 @@ sup [T] LinkedList[T] {
         loop current is Some[USize](val as idx) {
             let node = self.nodes[idx]
             gen &node.val
-            current = node.prev
+            # current = node.prev  TODO: Needs anti-flow support
         }
     }
 }
