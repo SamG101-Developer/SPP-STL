@@ -27,7 +27,7 @@ sup Path {
 sup Path {
     @public
     fun is_absolute(&self) -> Bool {
-        ret self.path.starts_with(Str::from(self.sep))
+        ret self.path.starts_with(StrView::from(self.sep))
     }
 
     @public

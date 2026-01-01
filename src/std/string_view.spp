@@ -101,6 +101,12 @@ sup StrView ext From[Self, Slice[U8]] {
 }
 
 
+sup StrView ext From[Self, U8] {
+    @compiler_builtin
+    fun from(that: U8) -> Self { }
+}
+
+
 sup StrView ext From[Self, Path] {
     fun from(that: Path) -> Self {
         ret StrView::from(that.path)
