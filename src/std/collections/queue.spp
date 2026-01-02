@@ -31,12 +31,12 @@ sup [T] Queue[T] {
     }
 
     @public
-    fun is_empty(self) -> Bool {
+    fun is_empty(&self) -> Bool {
         ret self.head >= self.tail
     }
 
     @public
-    fun length(self) -> USize {
+    fun length(&self) -> USize {
         ret self.tail - self.head
     }
 }
