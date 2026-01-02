@@ -31,7 +31,7 @@ sup [T] Deque[T] {
     @public
     fun push_back(&mut self, val: T) -> Void {
         self.ensure_tail_space()
-        # *self.blocks[mut self.tail_blk][mut self.tail_idx] = val TODO: fix mutable indexing
+        *self.blocks[mut self.tail_blk][mut self.tail_idx] = val
         self.advance_tail()
     }
 
