@@ -36,7 +36,7 @@ sup Thread {
     }
 
     @public
-    fun join(self) -> void::Void {
+    fun join(mut self) -> void::Void {
         # Join the thread using the sppc threading API.
         self.alive = false
         sppc::thread_join(self.id)
