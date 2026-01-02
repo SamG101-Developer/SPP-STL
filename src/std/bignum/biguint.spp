@@ -408,7 +408,7 @@ sup BigUInt ext std::ops::div::DivAssign[Rhs=Self] {
 
 sup BigUInt ext std::ops::rem::RemAssign[Rhs=Self] {
     fun rem_assign(&mut self, that: Self) -> Void {
-        self -= (self / that) * that
+        self -= (self / that.clone()) * that
     }
 }
 
