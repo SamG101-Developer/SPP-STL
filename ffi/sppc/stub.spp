@@ -283,7 +283,7 @@ fun rwlock_unlock(rwlock_id: CInt) -> CInt { }
 fun rwlock_destroy(rwlock_id: CInt) -> CInt { }
 
 @ffi
-fun barrier_create(count: CInt) -> CInt { }
+fun barrier_create(count: CUInt) -> CInt { }
 
 @ffi
 fun barrier_wait(barrier_id: CInt) -> CInt { }

@@ -10,18 +10,18 @@ use std::threading::mutex::LockErr
 @public
 cls Barrier {
     @public id: S32
-    @public total: U64
-    @public count: U64
+    @public total: U32
+    @public count: U32
 }
 
 
 sup Barrier {
     @public
-    fun new(total: U64) -> Res[Barrier, LockErr] {
+    fun new(total: U32) -> Res[Barrier, LockErr] {
         # Create a new barrier using the sppc threading API.
         let id = sppc::barrier_create(total)
         case id == 0 { ret Fail(err=LockErr(msg="Failed to create barrier")) }
-        ret Pass(val=Barrier(id, total=total, count=0_u64))
+        ret Pass(val=Barrier(id, total=total, count=0_u32))
     }
 
     @public
@@ -29,7 +29,7 @@ sup Barrier {
         # Wait at the barrier until all threads have reached this point.
         let err = sppc::barrier_wait(self.id)
         case err != 0 { ret Fail(err=LockErr(msg="Failed to wait at barrier")) }
-        self.count += 1_u64
+        self.count += 1_u32
         ret Pass[Void]()
     }
 }
