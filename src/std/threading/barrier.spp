@@ -21,7 +21,7 @@ sup Barrier {
         # Create a new barrier using the sppc threading API.
         let id = sppc::barrier_create(total)
         case id == 0 { ret Fail(err=LockErr(msg="Failed to create barrier")) }
-        ret Pass(val=Barrier(total=total, count=0))
+        ret Pass(val=Barrier(id, total=total, count=0_u64))
     }
 
     @public
@@ -29,7 +29,7 @@ sup Barrier {
         # Wait at the barrier until all threads have reached this point.
         let err = sppc::barrier_wait(self.id)
         case err != 0 { ret Fail(err=LockErr(msg="Failed to wait at barrier")) }
-        self.count += 1
+        self.count += 1_u64
     }
 }
 
