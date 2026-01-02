@@ -80,7 +80,8 @@ sup Thread {
 sup Thread ext Eq[Rhs=Thread] {
     fun eq(&self, that: &Thread) -> Bool {
         # Compare thread IDs for equality.
-        ret sppc::thread_equal(self.id, that.id)
+        let val = sppc::thread_equal(self.id, that.id)
+        ret val != 0
     }
 }
 
