@@ -181,8 +181,8 @@ sup BigInt ext std::ops::rem::Rem[Rhs=Self, Ret=Self] {
 
 sup BigInt ext std::ops::pow::Pow[Rhs=Self, Ret=Self] {
     fun pow(self, that: Self) -> Self {
-        let result_data = self.data.pow(that.data)
         let result_sign = case that.is_even() { true } else { self.sign }
+        let result_data = self.data.pow(that.data)
         ret BigInt(sign=result_sign, data=result_data)
     }
 }
