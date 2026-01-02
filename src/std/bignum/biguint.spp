@@ -228,7 +228,7 @@ sup BigUInt ext std::ops::bit_ior::BitIorAssign[Rhs=Self] {
         self.data.resize(len)
         loop i in Range[USize]::between(0_uz, len) {
             let a = self.data[i]
-            let b = case i < that.data.length() { *that.data[i] } else { 0_u32 }
+            let b = case i < that.data.length() { that.data[i]@ } else { 0_u32 }
             # *self.data[mut i] = a | b  TODO: wait for deref support
         }
         self.trim()
@@ -242,7 +242,7 @@ sup BigUInt ext std::ops::bit_xor::BitXorAssign[Rhs=Self] {
         self.data.resize(len)
         loop i in Range[USize]::between(0_uz, len) {
             let a = self.data[i]
-            let b = case i < that.data.length() { *that.data[i] } else { 0_u32 }
+            let b = case i < that.data.length() { that.data[i]@ } else { 0_u32 }
             # *self.data[mut i] = a ^ b  TODO: wait for deref support
         }
         self.trim()
@@ -305,7 +305,7 @@ sup BigUInt ext std::ops::add::AddAssign[Rhs=Self] {
 
         loop i in Range[USize]::between(0_uz, len) {
             let a = *self.data[i]
-            let b = case i < that.data.length() { *that.data[i] } else { 0_u32 }
+            let b = case i < that.data.length() { that.data[i]@ } else { 0_u32 }
             let sum = U64::from(a) + U64::from(b) + carry
             # *self.data[mut i] = U32::from(sum & 0xFFFFFFFF_u64)  TODO: wait for deref support
             carry = sum >> 32_u64
@@ -323,7 +323,7 @@ sup BigUInt ext std::ops::sub::SubAssign[Rhs=Self] {
 
         loop i in Range[USize]::between(0_uz, self.data.length()) {
             let a = U64::from(*self.data[i])
-            let b = case i < that.data.length() { U64::from(*that.data[i]) } else { 0_u64 }
+            let b = case i < that.data.length() { U64::from(that.data[i]@) } else { 0_u64 }
             let sub = a - b - borrow
             self.data.push(U32::from(sub & 0xFFFFFFFF_u64))
             borrow = (sub >> 63_u64) & 0x1_u64
@@ -354,7 +354,7 @@ sup BigUInt ext std::ops::mul::MulAssign[Rhs=Self] {
             let mut carry = 0_u64
             loop j in Range[USize]::between(0_uz, that.data.length()) {
                 let a = U64::from(*self.data[i])
-                let b = U64::from(*that.data[j])
+                let b = U64::from(that.data[j]@)
                 let existing = U64::from(*val.data[i + j])
                 let prod = a * b + existing + carry
                 # *val.data[mut i + j] = U32::from(prod & 0xFFFFFFFF_u64)  TODO: wait for deref support
