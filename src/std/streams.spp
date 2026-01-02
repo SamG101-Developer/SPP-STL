@@ -61,8 +61,8 @@ sup ReadableStream {
         let mut out = Vec[U8]()
         loop true {
             let chunk = self.read(4096_uz)?
-            out.push_vec(chunk)
             case chunk.length() == 0_uz { exit }
+            out.push_vec(chunk)
         }
         ret Pass(val=out)
     }
