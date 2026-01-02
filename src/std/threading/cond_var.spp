@@ -25,7 +25,7 @@ sup CondVar {
     }
 
     @public
-    fun wait(self, mutex: &Mutex, pred: FunRef[(), Bool]) -> Res[Void, LockErr] {
+    fun wait(&self, mutex: &Mutex, pred: FunRef[(), Bool]) -> Res[Void, LockErr] {
         # Wait on the condition variable, releasing the associated mutex.
         loop pred().not {
             let val = sppc::condvar_wait(self.id, mutex.id)
@@ -35,13 +35,13 @@ sup CondVar {
     }
 
     @public
-    fun wait(self, mutex: &Mutex) -> Res[Void, LockErr] {
+    fun wait(&self, mutex: &Mutex) -> Res[Void, LockErr] {
         # Wait on the condition variable, releasing the associated mutex.
         ret self.wait(mutex, || true)
     }
 
     @public
-    fun signal_one(self) -> Res[Void, LockErr] {
+    fun signal_one(&self) -> Res[Void, LockErr] {
         # Signal one thread waiting on the condition variable.
         let val = sppc::condvar_signal(self.id)
         case val != 0 { ret Fail(err=LockErr(msg="Failed to signal condition variable")) }
@@ -49,7 +49,7 @@ sup CondVar {
     }
 
     @public
-    fun signal_all(self) -> Res[Void, LockErr] {
+    fun signal_all(&self) -> Res[Void, LockErr] {
         # Wake up all threads waiting on the condition variable.
         let val = sppc::condvar_broadcast(self.id)
         case val != 0 { ret Fail(err=LockErr(msg="Failed to broadcast condition variable")) }
