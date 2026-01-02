@@ -55,7 +55,7 @@ fun calloc[T](n: USize) -> Opt[Memory[T]] {
 fun realloc[T](mut mem: &mut Memory[T], n: USize) -> Opt[Void] {
     # Determine the size and get a reallocated pointer.
     let cap = n * size_of[T]()
-    sppc::realloc(&mut mem, cap)
+    sppc::mem_realloc(&mut mem, cap)
 
     # Update the capacity attribute of the memory (S++ side).
     mem.cap = cap
