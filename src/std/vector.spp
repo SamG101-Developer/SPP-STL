@@ -85,6 +85,25 @@ sup [T] Vec[T] {
 
 sup [T] Vec[T] {
     @public
+    fun pop_back(&mut self) -> Opt[T] {
+        # Remove the last element and decrease the length.
+        self.buf.len -= 1_uz
+        ret self.buf.mem.take(self.buf.len)
+    }
+
+    @public
+    fun pop(&mut self, index: USize) -> Opt[T] {
+        # Remove the nth element and decrease the length.
+        self.buf.len -= 1_uz
+        let val = self.buf.mem.take(index)
+        # self.buf.shift_back(index, 1_uz)
+        ret val
+    }
+}
+
+
+sup [T] Vec[T] {
+    @public
     cor get_head_ref(&self) -> GenOpt[&T] {
         gen with self.get_ref(0_uz)
     }
