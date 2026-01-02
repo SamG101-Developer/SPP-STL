@@ -66,7 +66,7 @@ sup [T] LinkedList[T] {
         # Get the current tail node.
         let tail_idx = self.tail.unwrap()
         let tail_node = self.nodes.pop(tail_idx)
-        let val = tail_node.val
+        let val = tail_node?.val
 
         # Update the tail to the previous node.
         self.tail = tail_node.prev
@@ -75,7 +75,7 @@ sup [T] LinkedList[T] {
             is None() { self.head = None() }
         }
 
-        ret val
+        ret Some(val)
     }
 
     @public
@@ -85,7 +85,7 @@ sup [T] LinkedList[T] {
         # Get the current head node.
         let head_idx = self.head.unwrap()
         let head_node = self.nodes.pop(head_idx)
-        let val = head_node.val
+        let val = head_node?.val
 
         # Update the head to the next node.
         self.head = head_node.next
@@ -94,14 +94,14 @@ sup [T] LinkedList[T] {
             is None() { self.tail = None() }
         }
 
-        ret val
+        ret Some(val)
     }
 
     @public
     fun pop(&mut self, index: USize) -> Opt[T] {
         case index >= self.nodes.length() { ret None() }
         let node = self.nodes.pop(index)
-        let val = node.val
+        let val = node?.val
 
         # Update the previous node to point to the next node.
         case node.prev is Some[USize](val as prev_node) { self.nodes[mut prev_node].next = node.next }
@@ -115,7 +115,7 @@ sup [T] LinkedList[T] {
             case tail_idx == index { self.tail = node.prev }
         }
 
-        ret val
+        ret Some(val)
     }
 }
 
