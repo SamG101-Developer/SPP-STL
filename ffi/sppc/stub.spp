@@ -244,7 +244,7 @@ fun mutex_try_lock(mutex_id: CInt) -> CInt { }
 fun mutex_unlock(mutex_id: CInt) -> CInt { }
 
 @ffi
-fun mutex_destroy() -> CInt { }
+fun mutex_destroy(mutex_id: CInt) -> CInt { }
 
 @ffi
 fun condvar_create() -> CInt { }
