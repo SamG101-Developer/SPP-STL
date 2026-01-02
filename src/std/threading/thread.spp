@@ -28,7 +28,7 @@ sup Thread {
     @public
     fun spawn[In, Out](function: FunRef[In, Out]) -> Res[Thread, ThreadErr] {
         # Spawn a new thread using the sppc threading API.
-        thread_id = sppc::thread_spawn(function)
+        let thread_id = sppc::thread_spawn(function)
         case thread_id < 0 { ret Fail(err=ThreadErr(msg="Failed to spawn thread")) }
         ret Pass(val=Thread(id=thread_id, alive=true))
     }
