@@ -31,7 +31,7 @@ sup [E] Alloc[E] {
 
     @public
     @abstract_method
-    fun reallocate(mut mem: &mut Memory[E], n: USize) -> Res[Void, AllocErr] { }
+    fun reallocate(mem: Memory[E], n: USize) -> Res[Memory[E], AllocErr] { }
 }
 
 
@@ -51,10 +51,10 @@ sup [E] GlobalAlloc[E] ext Alloc[E] {
     }
 
     fun deallocate(mem: Memory[E]) -> Void {
-        std::mem::ops::free[E](mem)
+        std::mem::ops::free(mem)
     }
 
-    fun reallocate(mut mem: &mut Memory[E], n: USize) -> Res[Void, AllocErr] {
-        ret std::mem::ops::realloc[E](&mut mem, n).ok_or(AllocErr(msg="Failed to reallocate memory"))
+    fun reallocate(mem: Memory[E], n: USize) -> Res[Memory[E], AllocErr] {
+        ret std::mem::ops::realloc(mem, n).ok_or(AllocErr(msg="Failed to reallocate memory"))
     }
 }
