@@ -1,56 +1,76 @@
 use std::boolean::Bool
-use std::string::Str
+use std::function::FunRef
 use std::number::S32
+use std::result::Fail
+use std::result::Pass
+use std::result::Res
+use std::string::Str
+use std::string_view::StrView
+use std::void::Void
 use std::ops::eq::Eq
 use std::ops::del::Del
 
 
 @public
 cls Thread {
-    @public name: Str
     @public id: S32
     @public alive: Bool
 }
 
 
+@public
+cls ThreadErr {
+    @public msg: StrView
+}
+
+
 sup Thread {
     @public
-    fun spawn[In, Out](function: function::FunRef[In, Out]) -> void::Void {
+    fun spawn[In, Out](function: FunRef[In, Out]) -> Res[Thread, ThreadErr] {
         # Spawn a new thread using the sppc threading API.
-        self.id = sppc::thread_spawn(function)
-        self.alive = true
+        thread_id = sppc::thread_spawn(function)
+        case thread_id < 0 { ret Fail(err=ThreadErr(msg="Failed to spawn thread")) }
+        ret Pass(val=Thread(id=thread_id, alive=true))
     }
 
     @public
-    fun cancel(&mut self) -> void::Void {
+    fun cancel(&mut self) -> Res[Void, ThreadErr] {
         # Cancel the thread using the sppc threading API.
         self.alive = false
-        sppc::thread_cancel(self.id)
+        let val = sppc::thread_cancel(self.id)
+        case val != 0 { ret Fail(err=ThreadErr(msg="Failed to cancel thread")) }
+        ret Pass[Void]()
     }
 
     @public
-    fun detach(&mut self) -> void::Void {
+    fun detach(&mut self) -> Res[Void, ThreadErr] {
         # Detach the thread using the sppc threading API.
         self.alive = false
-        sppc::thread_detach(self.id)
+        let val = sppc::thread_detach(self.id)
+        case val != 0 { ret Fail(err=ThreadErr(msg="Failed to detach thread")) }
+        ret Pass[Void]()
     }
 
     @public
-    fun join(mut self) -> void::Void {
+    fun join(mut self) -> Res[Void, ThreadErr] {
         # Join the thread using the sppc threading API.
         self.alive = false
-        sppc::thread_join(self.id)
+        let val = sppc::thread_join(self.id)
+        case val != 0 { ret Fail(err=ThreadErr(msg="Failed to join thread")) }
+        ret Pass[Void]()
     }
 
     @public
-    fun kill(&mut self) -> void::Void {
+    fun kill(&mut self) -> Res[Void, ThreadErr] {
         # Kill the thread using the sppc threading API.
         self.alive = false
-        sppc::thread_kill(self.id)
+        let val = sppc::thread_kill(self.id)
+        case val != 0 { ret Fail(err=ThreadErr(msg="Failed to kill thread")) }
+        ret Pass[Void]()
     }
 
     @public
-    fun is_alive(&self) -> boolean::Bool {
+    fun is_alive(&self) -> Bool {
         # Simple accessor to check if the thread is alive.
         ret self.alive
     }
@@ -58,7 +78,7 @@ sup Thread {
 
 
 sup Thread ext Eq[Rhs=Thread] {
-    fun eq(&self, that: &Thread) -> boolean::Bool {
+    fun eq(&self, that: &Thread) -> Bool {
         # Compare thread IDs for equality.
         ret sppc::thread_equal(self.id, that.id)
     }
@@ -66,7 +86,7 @@ sup Thread ext Eq[Rhs=Thread] {
 
 
 sup Thread ext Del {
-    fun del(mut self) -> void::Void {
+    fun del(mut self) -> Void {
         # Ensure the thread is detached before deletion.
         self.alive = false
         sppc::thread_detach(self.id)
