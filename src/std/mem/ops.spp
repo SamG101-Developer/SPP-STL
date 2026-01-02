@@ -66,5 +66,5 @@ fun realloc[T](mut mem: &mut Memory[T], n: USize) -> Opt[Void] {
 @public
 fun free[T](mem: Memory[T]) -> Void {
     # Free the memory pointed to by the pointer.
-    sppc::mem_dealloc[T](mem)
+    sppc::mem_dealloc(mem)
 }
