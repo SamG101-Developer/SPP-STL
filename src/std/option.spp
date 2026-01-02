@@ -34,7 +34,7 @@ sup [T] Opt[T] {
     @public
     @inline
     fun is_some(&self) -> Bool {
-        ret *self is Some[T](..)
+        ret self* is Some[T](..)
     }
 
     @public
@@ -49,7 +49,7 @@ sup [T] Opt[T] {
     @public
     @inline
     fun is_none(&self) -> Bool {
-        ret *self is None()
+        ret self* is None()
     }
 
     @public
@@ -203,7 +203,7 @@ sup[T] Opt[T] {
 
 sup [T] Opt[T] ext std::ops::try::Try[Some[T], None, T] {
     fun op_is_value(&self) -> Bool {
-        ret *self is Some[T](..)
+        ret self* is Some[T](..)
     }
 
     fun op_as_value(self) -> T {
