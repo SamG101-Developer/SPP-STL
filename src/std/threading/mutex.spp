@@ -42,7 +42,7 @@ sup Mutex {
     }
 
     @public
-    cor try_lock(&self) -> Res[MutexLockGard, LockErr] {
+    fun try_lock(&self) -> Res[MutexLockGard, LockErr] {
         # Try to lock the mutex using the sppc threading API.
         let guard_id = sppc::mutex_try_lock(self.id)
         case guard_id == 0 { ret Fail(err=LockErr(msg="Failed to try to lock mutex")) }
