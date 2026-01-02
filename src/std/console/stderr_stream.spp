@@ -25,11 +25,15 @@ cls StderrStream { }
 
 sup StderrStream ext WritableStream {
     fun write(&mut self, data: &Slice[U8]) -> Res[USize, StreamErr] {
+        # Get the data length, form the stream, and write to stderr.
+        let len = data.length()
         let stream = StrView::from_utf8(data)
-        let val = sppc::fd_write(&stream, 1_uz, data.length(), stderr_fd)
+        let val = sppc::fd_write(&stream, 1_uz, len, stderr_fd)
+
+        # Report a failed write (negative value) or return the number of bytes written.
         ret case val of {
             < 0_uz { Fail(err=StreamErr(msg="Failed to write to stderr")) }
-            < data.length() { Fail(err=StreamErr(msg="Partial write to stderr")) }
+            < len { Fail(err=StreamErr(msg="Partial write to stderr")) }
             else { Pass(val) }
         }
     }
