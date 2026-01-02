@@ -388,8 +388,8 @@ sup BigUInt ext std::ops::div::DivAssign[Rhs=Self] {
         let mut current_quotient = BigUInt::one()
 
         let shift = BigUInt::from(dividend.bit_length() - divisor.bit_length())
-        divisor <<= shift
-        quotient <<= shift + Self::one()
+        divisor <<= shift.clone()  # TODO: remove clones at some point (memory moves)
+        quotient <<= shift.clone() + Self::one()
 
         loop shift >= Self::zero() {
             case dividend >= divisor {
