@@ -30,6 +30,7 @@ sup Barrier {
         let err = sppc::barrier_wait(self.id)
         case err != 0 { ret Fail(err=LockErr(msg="Failed to wait at barrier")) }
         self.count += 1_u64
+        ret Pass[Void]()
     }
 }
 
