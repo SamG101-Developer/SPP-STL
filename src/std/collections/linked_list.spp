@@ -163,7 +163,7 @@ sup [T] LinkedList[T] {
         # Start from the tail and traverse the list backwards.
         let mut current = self.tail
         loop current is Some[USize](val as idx) {
-            let node = self.nodes[mut idx]
+            let mut node = self.nodes[mut idx]
             gen &mut node.val
             # current = node.prev  TODO: Needs anti-flow support
         }
