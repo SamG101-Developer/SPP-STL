@@ -355,7 +355,7 @@ sup BigUInt ext std::ops::mul::MulAssign[Rhs=Self] {
             loop j in Range[USize]::between(0_uz, that.data.length()) {
                 let a = U64::from(self.data[i]@)
                 let b = U64::from(that.data[j]@)
-                let existing = U64::from(*val.data[i + j])
+                let existing = U64::from(val.data[i + j]@)
                 let prod = a * b + existing + carry
                 # *val.data[mut i + j] = U32::from(prod & 0xFFFFFFFF_u64)  TODO: wait for deref support
                 carry = prod >> 32_u64
