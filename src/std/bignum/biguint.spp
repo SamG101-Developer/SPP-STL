@@ -349,7 +349,6 @@ sup BigUInt ext std::ops::mul::MulAssign[Rhs=Self] {
         }
 
         let val = BigUInt()
-        val.data.resize(self.data.length() + that.data.length())
 
         loop i in Range[USize]::between(0_uz, self.data.length()) {
             let mut carry = 0_u64
