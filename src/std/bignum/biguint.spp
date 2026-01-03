@@ -394,7 +394,7 @@ sup BigUInt ext std::ops::div::DivAssign[Rhs=Self] {
         loop shift >= Self::zero() {
             case dividend >= divisor {
                 dividend -= divisor.clone()
-                quotient.data[mut 0_uz]@ |= 1 << shift.data[0_uz]
+                quotient.data[mut 0_uz]@ |= 1 << shift.data[0_uz]@
             }
             divisor >>= Self::one()
             shift -= Self::one()
