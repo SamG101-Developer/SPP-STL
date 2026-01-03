@@ -215,7 +215,7 @@ sup BigUInt ext std::ops::bit_and::BitAndAssign[Rhs=Self] {
         let len = self.data.length().min(that.data.length())
         self.data.resize(len)
         loop i in Range[USize]::between(0_uz, len) {
-            # self.data[i] &= *that.data[i]  TODO: wait for deref support
+            self.data[mut i] &= that.data[i]@
         }
         self.trim()
     }
@@ -229,7 +229,7 @@ sup BigUInt ext std::ops::bit_ior::BitIorAssign[Rhs=Self] {
         loop i in Range[USize]::between(0_uz, len) {
             let a = self.data[i]
             let b = case i < that.data.length() { that.data[i]@ } else { 0_u32 }
-            # *self.data[mut i] = a | b  TODO: wait for deref support
+            self.data[mut i]@ = a | b
         }
         self.trim()
     }
@@ -243,7 +243,7 @@ sup BigUInt ext std::ops::bit_xor::BitXorAssign[Rhs=Self] {
         loop i in Range[USize]::between(0_uz, len) {
             let a = self.data[i]
             let b = case i < that.data.length() { that.data[i]@ } else { 0_u32 }
-            # *self.data[mut i] = a ^ b  TODO: wait for deref support
+            self.data[mut i]@ = a ^ b
         }
         self.trim()
     }
@@ -261,8 +261,8 @@ sup BigUInt ext std::ops::bit_shl::BitShlAssign[Rhs=Self] {
 
         loop i in Range[USize]::between(0_uz, self.data.length()) {
             let shifted = U64::from(self.data[i]@) << U64::from(bit_shift)
-            # val.data[mut i + USize::from(word_shift)] |= U32::from(shifted & 0xFFFFFFFF_u64)  TODO: wait for deref support
-            # val.data[mut i + USize::from(word_shift) + 1_uz] |= U32::from(shifted >> 32)  TODO: wait for deref support
+            val.data[mut i + USize::from(word_shift) + 0_uz]@ |= U32::from(shifted & 0xFFFFFFFF_u64)
+            val.data[mut i + USize::from(word_shift) + 1_uz]@ |= U32::from(shifted >> 32)
         }
 
         self.data = val.data
@@ -288,7 +288,7 @@ sup BigUInt ext std::ops::bit_shr::BitShrAssign[Rhs=Self] {
             let shifted = U64::from(self.data[i]@)
             case i + 1_uz < self.data.length() { shifted |= U64::from(self.data[i + 1_uz]@) << 32_u64 }
             shifted >>= U64::from(bit_shift)
-            # *val.data[mut i - USize::from(word_shift)] = U32::from(shifted & 0xFFFFFFFF_u64)  TODO: wait for deref support
+            val.data[mut i - USize::from(word_shift)]@ = U32::from(shifted & 0xFFFFFFFF_u64)
         }
 
         self.data = val.data
@@ -307,7 +307,7 @@ sup BigUInt ext std::ops::add::AddAssign[Rhs=Self] {
             let a = self.data[i]@
             let b = case i < that.data.length() { that.data[i]@ } else { 0_u32 }
             let sum = U64::from(a) + U64::from(b) + carry
-            # *self.data[mut i] = U32::from(sum & 0xFFFFFFFF_u64)  TODO: wait for deref support
+            self.data[mut i]@ = U32::from(sum & 0xFFFFFFFF_u64)
             carry = sum >> 32_u64
         }
 
@@ -357,11 +357,11 @@ sup BigUInt ext std::ops::mul::MulAssign[Rhs=Self] {
                 let b = U64::from(that.data[j]@)
                 let existing = U64::from(val.data[i + j]@)
                 let prod = a * b + existing + carry
-                # *val.data[mut i + j] = U32::from(prod & 0xFFFFFFFF_u64)  TODO: wait for deref support
+                val.data[mut i + j]@ = U32::from(prod & 0xFFFFFFFF_u64)
                 carry = prod >> 32_u64
             }
             case carry != 0_u64 {
-                # *val.data[mut i + that.data.length()] += U32::from(carry)  TODO: wait for deref support
+                val.data[mut i + that.data.length()]@ += U32::from(carry)
             }
         }
 
@@ -394,7 +394,7 @@ sup BigUInt ext std::ops::div::DivAssign[Rhs=Self] {
         loop shift >= Self::zero() {
             case dividend >= divisor {
                 dividend -= divisor.clone()
-                # *quotient.data[mut 0_uz] |= 1 << shift  TODO: wait for deref support
+                quotient.data[mut 0_uz]@ |= 1 << shift
             }
             divisor >>= Self::one()
             shift -= Self::one()

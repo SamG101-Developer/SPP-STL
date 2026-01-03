@@ -39,7 +39,7 @@ sup [T] Deque[T] {
     fun push_front(&mut self, val: T) -> Void {
         self.ensure_head_space()
         self.retreat_head()
-        # *self.blocks[mut self.head_blk][mut self.head_idx] = val TODO: fix mutable indexing
+        self.blocks[mut self.head_blk][mut self.head_idx]@ = val
     }
 }
 
