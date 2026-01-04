@@ -59,7 +59,7 @@ sup CondVar {
 
 
 sup CondVar ext std::ops::del::Del {
-    fun del(self) -> Void {
+    fun del(&mut self) -> Void {
         # Destroy the condition variable using the sppc threading API.
         sppc::condvar_destroy(self.id)
     }

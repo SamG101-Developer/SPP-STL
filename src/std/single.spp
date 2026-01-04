@@ -45,5 +45,5 @@ sup [T] Single[T] ext FwdMov[T] {
 
 sup [T] Single[T] ext Del {
     @compiler_builtin
-    fun del(self) -> Void { }
+    fun del(&mut self) -> Void { }
 }

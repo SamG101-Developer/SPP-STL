@@ -60,7 +60,7 @@ sup Mutex {
 
 
 sup Mutex ext std::ops::del::Del {
-    fun del(self) -> Void {
+    fun del(&mut self) -> Void {
         # Destroy the mutex using the sppc threading API.
         sppc::mutex_destroy(self.id)
     }

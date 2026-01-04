@@ -76,7 +76,7 @@ sup RwLock {
 
 
 sup RwLock ext std::ops::del::Del {
-    fun del(self) -> Void {
+    fun del(&mut self) -> Void {
         # Destroy the rwlock using the sppc threading API.
         sppc::rwlock_destroy(self.id)
     }

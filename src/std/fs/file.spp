@@ -187,7 +187,7 @@ sup File ext SeekableStream {
 
 
 sup File ext Del {
-    fun del(mut self) -> Void {
+    fun del(&mut self) -> Void {
         self.close()
     }
 }

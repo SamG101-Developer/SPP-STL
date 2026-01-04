@@ -90,7 +90,7 @@ sup [E, A] Slice[E, A] ext From[Self, Vec[E, A]] {
 
 
 sup [E] Slice[E] ext std::ops::del::Del {
-    fun del(self) -> Void {
+    fun del(&mut self) -> Void {
         # A::deallocate(self.mem)  TODO: constraints
     }
 }

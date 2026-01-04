@@ -163,7 +163,7 @@ sup Socket ext ReadableStream {
 
 
 sup Socket ext Del {
-    fun del(self) -> Void {
+    fun del(&mut self) -> Void {
         sppc::fd_close(self.fd)
     }
 }

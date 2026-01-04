@@ -36,7 +36,7 @@ sup Barrier {
 
 
 sup Barrier ext std::ops::del::Del {
-    fun del(self) -> Void {
+    fun del(&mut self) -> Void {
         # Destroy the barrier when it is no longer needed.
         sppc::barrier_destroy(self.id)
     }

@@ -56,5 +56,5 @@ sup [T] Shared[T] ext Clone[Out=Self] {
 
 sup [T] Shared[T] ext Del {
     @compiler_builtin
-    fun del(self) -> Void { }
+    fun del(&mut self) -> Void { }
 }

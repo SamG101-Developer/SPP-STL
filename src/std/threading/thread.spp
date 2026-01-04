@@ -87,7 +87,7 @@ sup Thread ext Eq[Rhs=Thread] {
 
 
 sup Thread ext Del {
-    fun del(mut self) -> Void {
+    fun del(&mut self) -> Void {
         # Ensure the thread is detached before deletion.
         self.alive = false
         sppc::thread_detach(self.id)
