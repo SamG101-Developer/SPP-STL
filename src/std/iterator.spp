@@ -111,7 +111,7 @@ sup [T] Iterator[T] {
     }
 
     @public
-    fun fold[U](self, initial: U, reducer: FunRef[(U, T), U]) -> U {
+    fun fold[U](self, initial: U, reducer: FunRef[(U, &T), U]) -> U {
         let mut acc = initial
         loop item in self {
             acc = reducer(acc, item)
