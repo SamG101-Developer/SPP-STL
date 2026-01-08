@@ -9,12 +9,6 @@ use std::option::Some
 use std::void::Void
 
 
-@public cls IterDirFwd { }
-@public cls IterDirRev { }
-@public cls IterDirRng { jump: SSize }
-@public type IterDir = IterDirFwd or IterDirRev or IterDirRng
-
-
 @public
 cls Iterator[T] { }
 sup [T] Iterator[T] ext Gen[T or None] { }
