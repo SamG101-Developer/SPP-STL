@@ -6,8 +6,8 @@ use std::boolean::Bool
 use std::cast::From
 use std::clone::Clone
 use std::function::FunRef
+use std::generator::Gen
 use std::generator::GenOnce
-use std::generator::GenOpt
 use std::iterator::Iterator
 use std::iterator::SizedIterator
 use std::number::USize
@@ -43,14 +43,14 @@ sup [T, A] Vec[T, A] {
 
 sup [T] Vec[T] {
     @public
-    fun push(&mut self, element: T) -> Void {
+    fun push_back(&mut self, element: T) -> Void {
         case self.buf.len == self.buf.mem.cap { self.grow_double() }
         self.buf.mem.place(self.buf.len, element)
         self.buf.len += 1_uz
     }
 
     @public
-    fun insert(&mut self, index: USize, element: T) -> Void {
+    fun push(&mut self, index: USize, element: T) -> Void {
         case self.buf.len == self.buf.mem.cap { self.grow_double() }
         # self.buf.shift(index, 1_uz)
         self.buf.mem.place(index, element)
@@ -58,7 +58,7 @@ sup [T] Vec[T] {
     }
 
     @public
-    fun push_vec(&mut self, that: Vec[T]) -> Void {
+    fun push_back_vec(&mut self, that: Vec[T]) -> Void {
         # One time growth check
         let required_cap = self.buf.len + that.buf.len
         loop self.capacity() < required_cap { self.grow_double() }
@@ -67,7 +67,7 @@ sup [T] Vec[T] {
     }
 
     @public
-    fun insert_vec(&mut self, index: USize, that: Vec[T]) -> Void {
+    fun push_vec(&mut self, index: USize, that: Vec[T]) -> Void {
         # One time growth check
         let required_cap = self.buf.len + that.buf.len
         loop self.capacity() < required_cap { self.grow_double() }
@@ -105,17 +105,17 @@ sup [T] Vec[T] {
 
 sup [T] Vec[T] {
     @public
-    cor get_head_ref(&self) -> GenOpt[&T] {
+    cor get_head_ref(&self) -> Gen[&T or None] {
         gen with self.get_ref(0_uz)
     }
 
     @public
-    cor get_tail_ref(&self) -> GenOpt[&T] {
+    cor get_tail_ref(&self) -> Gen[&T or None] {
         gen with self.get_ref(self.buf.len - 1_uz)
     }
 
     @public
-    cor get_ref(&self, index: USize) -> GenOpt[&T] {
+    cor get_ref(&self, index: USize) -> Gen[&T or None] {
         case index >= self.buf.len { gen }
         gen self.index_ref(index)
     }
@@ -124,17 +124,17 @@ sup [T] Vec[T] {
 
 sup [T] Vec[T] {
     @public
-    cor get_head_mut(&mut self) -> GenOpt[&mut T] {
+    cor get_head_mut(&mut self) -> Gen[&mut T or None] {
         gen with self.get_mut(0_uz)
     }
 
     @public
-    cor get_tail_mut(&mut self) -> GenOpt[&mut T] {
+    cor get_tail_mut(&mut self) -> Gen[&mut T or None] {
         gen with self.get_mut(self.buf.len - 1_uz)
     }
 
     @public
-    cor get_mut(&mut self, index: USize) -> GenOpt[&mut T] {
+    cor get_mut(&mut self, index: USize) -> Gen[&mut T or None] {
         case index >= self.buf.len { gen }
         gen self.index_mut(index)
     }

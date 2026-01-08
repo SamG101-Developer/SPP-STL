@@ -55,6 +55,60 @@ sup [T] LinkedList[T] {
         case self.tail is None() { self.tail = Some(val=idx) }
         ret idx
     }
+
+    @public
+    fun push(&mut self, index: USize, value: T) -> USize {
+        # Create a new node.
+        let idx = self.nodes.length()
+        let new_node = LinkedListNode(val=value, prev=None(), next=None())
+        self.nodes.push(new_node)
+
+        # Insert the new node at the specified index.
+        case index == 0_uz {
+            # Inserting at the front.
+            self.push_front(value)
+        }
+        else case index >= self.nodes.length() - 1_uz {
+            # Inserting at the back.
+            self.push_back(value)
+        }
+        else {
+            # Inserting in the middle.
+            let next_node = self.nodes[index]
+            let prev_node = self.nodes[next_node.prev.unwrap()]
+
+            # Update borrows.
+            self.nodes[mut idx].prev = Some(val=next_node.prev.unwrap())
+            self.nodes[mut idx].next = Some(val=index)
+            self.nodes[mut prev_node.prev.unwrap()].next = Some(val=idx)
+            self.nodes[mut index].prev = Some(val=idx)
+
+            ret idx
+        }
+    }
+
+    @public
+    fun push_back_list(&mut self, other: &mut LinkedList[T]) -> Void {
+        # Move all the nodes from the other list to the end of this list, in O(1) time.
+        case other.head is None() { ret }  # Other list is empty.
+        case self.tail is None() {
+            # This list is empty, so just take the other list's nodes.
+            self.head = other.head
+            self.tail = other.tail
+            self.nodes = other.nodes
+        }
+        else {
+            # Link the two lists together.
+            let self_tail_idx = self.tail.unwrap()
+            let other_head_idx = other.head.unwrap()
+
+            self.nodes[mut self_tail_idx].next = Some(val=other_head_idx)
+            other.nodes[mut other_head_idx].prev = Some(val=self_tail_idx)
+
+            self.tail = other.tail
+            self.nodes.extend(other.nodes)
+        }
+    }
 }
 
 
@@ -116,6 +170,14 @@ sup [T] LinkedList[T] {
         }
 
         ret Some(val)
+    }
+
+    @public
+    fun clear(&mut self) -> Void {
+        # Reset head and tail, and clear nodes.
+        self.head = None()
+        self.tail = None()
+        self.nodes.clear()
     }
 }
 

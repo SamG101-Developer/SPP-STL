@@ -15,6 +15,17 @@ use std::vector::Vec
 use std::void::Void
 
 
+##
+The Slice type in S++ is a dynamic array. It owns its memory and provides various methods for manipulating the array,
+such as resizing, splitting, and iterating over its elements. It is comonly used as the underlying buffer for other data
+structures like Vec, as this class wraps the Memory type to provide higher-level functionality.
+
+It is generic over the element type E and an allocator type A, which defaults to GlobalAlloc. This allows for flexible
+memory management strategies. The Slice class adds a runtime-based "length" field to track the number of elements
+currently stored in the slice, which is not always equal to the capacity of the underlying memory. The capacity is
+managed by the Memory type, and represents the total number of elements that can be stored without requiring
+reallocation.
+##
 cls Slice[E, A: Alloc[E] = GlobalAlloc[E]] {
     mem: Memory[E]
     len: USize
