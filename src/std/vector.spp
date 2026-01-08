@@ -10,6 +10,7 @@ use std::generator::Gen
 use std::generator::GenOnce
 use std::iterator::Iterator
 use std::number::USize
+use std::option::None
 use std::option::Opt
 use std::range::Range
 use std::slice::Slice
