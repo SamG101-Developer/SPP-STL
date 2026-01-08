@@ -4,49 +4,22 @@ use std::void::Void
 
 
 @public
-cls Gen[Yield, Send=Void] { }
+cls Gen[Yield, Err=Void, Send=Void] { }
 sup [Yield, Send] Gen[Yield, Send] {
     @private
     @compiler_builtin
-    fun send(&mut self, value: Send) -> Void { }
+    fun resume(&mut self, value: Send) -> Void { }
 }
 
 
-# todo: remove "send" param?
 @public
 cls GenOnce[Yield, Send=Void] { }
 sup [Yield, Send] GenOnce[Yield, Send] {
     @private
     @compiler_builtin
-    fun send(&mut self, value: Send) -> Void { }
-}
-
-
-@public
-cls GenOpt[Yield, Send=Void] { }
-sup [Yield, Send] GenOpt[Yield, Send] {
-    @private
-    @compiler_builtin
-    fun send(&mut self, value: Send) -> Void { }
-}
-
-
-@public
-cls GenRes[Yield, Err, Send=Void] { }
-sup [Yield, Err, Send] GenRes[Yield, Err, Send] {
-    @private
-    @compiler_builtin
-    fun send(&mut self, value: Send) -> Void { }
+    fun resume(&mut self, value: Send) -> Void { }
 }
 
 
 @private
 cls Generated[Yield] { }
-
-
-@private
-cls GeneratedOpt[Yield] { }
-
-
-@private
-cls GeneratedRes[Yield, Err] { }

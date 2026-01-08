@@ -9,23 +9,22 @@ use std::option::Some
 use std::void::Void
 
 
+@public cls IterDirFwd { }
+@public cls IterDirRev { }
+@public cls IterDirRng { jump: SSize }
+@public type IterDir = IterDirFwd or IterDirRev or IterDirRng
+
+
 @public
 cls Iterator[T] { }
-sup [T] Iterator[T] ext Gen[T] { }
-
-
-@public
-cls SizedIterator[T] { }
-sup [T] SizedIterator[T] {
-    @public
-    @abstract_method
-    fun size_hint(&self) -> USize { }
-}
+sup [T] Iterator[T] ext Gen[T or None] { }
 
 
 sup [T] Iterator[T] {
-    # Concatenate this iterator with another iterator of the same element type. Iterate out of all elements from this
-    # iterator, then all elements from the other iterator.
+    ##
+    Concatenate this iterator with another iterator of the same element type. Iterate out of all elements from this
+    iterator, then all elements from the other iterator.
+    ##
     @public
     cor concat(self, other: Iterator[T]) -> Iterator[T] {
         gen with self
