@@ -4,7 +4,6 @@ use std::array::Arr
 use std::cast::From
 use std::clone::Clone
 use std::iterator::Iterator
-use std::iterator::SizedIterator
 use std::generator::GenOnce
 use std::mem::memory::Memory
 use std::number::U8
@@ -131,13 +130,6 @@ sup [E] Slice[E] {
     @public
     @compiler_builtin
     cor reverse_iter_ref(&self) -> Iterator[&E] { }
-}
-
-
-sup [E] Slice[E] ext SizedIterator[E] {
-    fun size_hint(&self) -> USize {
-        ret self.len
-    }
 }
 
 

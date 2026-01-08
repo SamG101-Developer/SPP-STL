@@ -9,7 +9,6 @@ use std::function::FunRef
 use std::generator::Gen
 use std::generator::GenOnce
 use std::iterator::Iterator
-use std::iterator::SizedIterator
 use std::number::USize
 use std::option::Opt
 use std::range::Range
@@ -207,13 +206,6 @@ sup [T] Vec[T] {
     @public
     cor reverse_iter_ref(&self) -> Iterator[&T] {
         gen with self.buf.reverse_iter_ref()
-    }
-}
-
-
-sup [T] Vec[T] ext SizedIterator[T] {
-    fun size_hint(&self) -> USize {
-        ret self.buf.len
     }
 }
 
