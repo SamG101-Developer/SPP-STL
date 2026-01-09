@@ -17,7 +17,7 @@ use std::result::Fail
 
 
 # Todo: "T: Copy"
-sup [T] Opt[T] ext Copy { }
+# sup [T] Opt[T] ext Copy { }
 
 
 #sup [T: Clone[Out=T]] Opt[T] ext Clone[Out=Opt[T]] {
@@ -34,7 +34,7 @@ sup [T] Opt[T] {
     @public
     @inline
     fun is_some(&self) -> Bool {
-        ret self@ is Some[T](..)
+        ret self is &Some[T](..)
     }
 
     @public
@@ -49,7 +49,7 @@ sup [T] Opt[T] {
     @public
     @inline
     fun is_none(&self) -> Bool {
-        ret self@ is None()
+        ret self is &None()
     }
 
     @public
@@ -203,7 +203,7 @@ sup[T] Opt[T] {
 
 sup [T] Opt[T] ext std::ops::try::Try[Some[T], None, T] {
     fun op_is_value(&self) -> Bool {
-        ret self@ is Some[T](..)
+        ret self is &Some[T](a)
     }
 
     fun op_as_value(self) -> T {
@@ -211,5 +211,16 @@ sup [T] Opt[T] ext std::ops::try::Try[Some[T], None, T] {
             is Some[T](val) { val }
             else { std::abort::abort("called `Opt::op_as_value` on a `None` value") }
         }
+    }
+}
+
+
+sup [T] T or None ext std::ops::try::Try[T, None, T] {
+    fun op_is_value(&self) -> Bool {
+        ret true  # TODO
+    }
+
+    fun op_as_value(self) -> T {
+        ret self
     }
 }
