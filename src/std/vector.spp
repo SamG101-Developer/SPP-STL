@@ -135,7 +135,7 @@ sup [T] Vec[T] {
 
     @public
     cor get_mut(&mut self, index: USize) -> Gen[&mut T or None] {
-        case index >= self.buf.len { gen }
+        case index >= self.buf.len { gen None() }
         gen self.index_mut(index)
     }
 }
