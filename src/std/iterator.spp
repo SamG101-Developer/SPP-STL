@@ -11,7 +11,7 @@ use std::void::Void
 
 @public
 cls Iterator[T] { }
-sup [T] Iterator[T] ext Gen[T or None] { }
+sup [T] Iterator[T] ext Gen[T] { }
 
 
 sup [T] Iterator[T] {
