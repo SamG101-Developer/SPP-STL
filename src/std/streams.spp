@@ -62,7 +62,7 @@ sup ReadableStream {
         loop true {
             let chunk = self.read(4096_uz)?
             case chunk.length() == 0_uz { exit }
-            out.push_vec(chunk)
+            out.push_back_vec(chunk)
         }
         ret Pass(val=out)
     }
