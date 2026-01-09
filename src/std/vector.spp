@@ -116,7 +116,7 @@ sup [T] Vec[T] {
 
     @public
     cor get_ref(&self, index: USize) -> Gen[&T or None] {
-        case index >= self.buf.len { gen }
+        case index >= self.buf.len { gen None() }
         gen self.index_ref(index)
     }
 }
