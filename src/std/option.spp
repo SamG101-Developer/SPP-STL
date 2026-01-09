@@ -211,14 +211,3 @@ sup [T] Opt[T] ext std::ops::try::Try[Some[T], None, T] {
         }
     }
 }
-
-
-sup [T] T or None ext std::ops::try::Try[T, None, T] {
-    fun op_is_value(&self) -> Bool {
-        ret true  # TODO
-    }
-
-    fun op_as_value(self) -> T {
-        ret self
-    }
-}
