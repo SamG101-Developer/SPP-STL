@@ -95,7 +95,7 @@ sup [T] LinkedList[T] {
             # This list is empty, so just take the other list's nodes.
             self.head = other.head
             self.tail = other.tail
-            self.nodes = other.nodes
+            self.nodes = std::mem::ops::replace(&mut other.nodes, Vec[LinkedListNode[T]]::new())
         }
         else {
             # Link the two lists together.
@@ -193,20 +193,6 @@ sup [T] LinkedList[T] {
     fun length(&self) -> USize {
         # The length is the number of nodes in the list.
         ret self.nodes.length()
-    }
-}
-
-
-sup [T] LinkedList[T] {
-    @private
-    fun take_nodes(&mut self) -> Vec[LinkedListNode[T]] {
-        # Reset head and tail.
-        self.head = None()
-        self.tail = None()
-
-        # Take ownership of the nodes vector and reset the list.
-        let nodes = std::mem::ops::replace(&mut self.nodes, Vec[LinkedListNode[T]]::new())
-        ret nodes
     }
 }
 
