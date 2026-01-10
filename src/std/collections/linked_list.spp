@@ -60,8 +60,6 @@ sup [T] LinkedList[T] {
     fun push(&mut self, index: USize, value: T) -> USize {
         # Create a new node.
         let idx = self.nodes.length()
-        let new_node = LinkedListNode(val=value, prev=None(), next=None())
-        self.nodes.push_back(new_node)
 
         # Insert the new node at the specified index.
         case index == 0_uz {
