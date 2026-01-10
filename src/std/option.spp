@@ -204,7 +204,7 @@ sup[T] Opt[T] {
 
 sup [T] Opt[T] ext std::ops::try::Try[Some[T], None, T] {
     fun op_is_value(&self) -> Bool {
-        ret self@ is Some[T](a)
+        ret self@ is Some[T](..)
     }
 
     fun op_as_value(self) -> T {
