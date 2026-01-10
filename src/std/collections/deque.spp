@@ -1,0 +1,171 @@
+use std::array::Arr
+use std::boolean::Bool
+use std::function::FunMov
+use std::number::USize
+use std::option::None
+use std::option::Opt
+use std::option::Some
+use std::vector::Vec
+use std::void::Void
+
+
+@public
+cls Deque[T, cmp block_size: USize = 64_uz] {
+    blocks: Vec[Arr[T, block_size]]
+    head_blk: USize = 0_uz
+    head_idx: USize = 0_uz
+    tail_blk: USize = 0_uz
+    tail_idx: USize = 0_uz
+}
+
+
+sup [T] Deque[T] {
+    @public
+    fun new() -> Deque[T] {
+        let mut blocks = Vec[Arr[T, 64_uz]]::new()
+        blocks.push_back(Arr[T, 64_uz]::new())
+        ret Deque[T](blocks)
+    }
+}
+
+sup [T] Deque[T] {
+    @public
+    fun push_back(&mut self, val: T) -> Void {
+        self.ensure_tail_space()
+        self.blocks[mut self.tail_blk][mut self.tail_idx]@ = val
+        self.advance_tail()
+    }
+
+    @public
+    fun push_front(&mut self, val: T) -> Void {
+        self.ensure_head_space()
+        self.retreat_head()
+        self.blocks[mut self.head_blk][mut self.head_idx]@ = val
+    }
+}
+
+
+sup [T] Deque[T] {
+    @public
+    fun pop_back(&mut self) -> Opt[T] {
+        case self.is_empty() { ret None() }
+        self.retreat_tail()
+        let val = self.blocks[self.tail_blk].mem.take(self.tail_idx)
+        ret val
+    }
+
+    @public
+    fun pop_back_if(&mut self, pred: FunMov[(&mut T,), Bool]) -> Opt[T] {
+        let mut val = self.pop_back()?
+        ret case pred(&mut val) { Some(val) } else { None() }
+    }
+
+    @public
+    fun pop_front(&mut self) -> Opt[T] {
+        case self.is_empty() { ret None() }
+        let val = self.blocks[self.head_blk].mem.take(self.head_idx)
+        self.advance_head()
+        ret val
+    }
+
+    @public
+    fun pop_front_if(&mut self, pred: FunMov[(&mut T,), Bool]) -> Opt[T] {
+        let mut val = self.pop_front()?
+        ret case pred(&mut val) { Some(val) } else { None() }
+    }
+}
+
+
+sup [T, cmp block_size: USize] Deque[T, block_size] {
+    @public
+    fun clear(&mut self) -> Void {
+        self.blocks.clear()
+        self.blocks.push_back(Arr[T, block_size]())
+        self.head_blk, self.head_idx = 0_uz, 0_uz
+        self.tail_blk, self.tail_idx = 0_uz, 0_uz
+    }
+
+    @public
+    fun is_empty(&self) -> Bool {
+        ret self.head_blk == self.tail_blk and self.head_idx == self.tail_idx
+    }
+
+    @public
+    fun capacity(&self) -> USize {
+        let total_blocks = self.blocks.length()
+        ret total_blocks * block_size
+    }
+
+    @public
+    fun length(&self) -> USize {
+        let head_pos = self.head_blk * block_size + self.head_idx
+        let tail_pos = self.tail_blk * block_size + self.tail_idx
+        ret tail_pos - head_pos
+    }
+}
+
+
+sup [T, cmp block_size: USize] Deque[T, block_size] {
+    fun alloc_block_back(&mut self) -> Void {
+        self.blocks.push_back(Arr[T, block_size]())
+    }
+
+    fun alloc_block_front(&mut self) -> Void {
+        self.blocks.push(0_uz, Arr[T, block_size]())
+        self.tail_blk += 1_uz
+    }
+
+    fun ensure_tail_space(&mut self) -> Void {
+        case self.tail_idx != block_size { ret }
+        self.tail_blk += 1_uz
+        self.tail_idx = 0_uz
+        case self.tail_blk == self.blocks.length() { self.alloc_block_back() }
+    }
+
+    fun ensure_head_space(&mut self) -> Void {
+        case self.head_idx != 0_uz { ret }
+        case self.head_blk == 0_uz {
+            self.alloc_block_front()
+        }
+        else {
+            self.head_blk -= 1_uz
+            self.head_idx = block_size
+        }
+    }
+
+    fun advance_head(&mut self) -> Void {
+        self.head_idx += 1_uz
+        case self.head_idx == block_size {
+            self.head_blk += 1_uz
+            self.head_idx = 0_uz
+        }
+    }
+
+    fun advance_tail(&mut self) -> Void {
+        self.tail_idx += 1_uz
+        case self.tail_idx == block_size {
+            self.tail_blk += 1_uz
+            self.tail_idx = 0_uz
+        }
+    }
+
+    fun retreat_head(&mut self) -> Void {
+        case self.head_idx == 0_uz {
+            self.head_blk -= 1_uz
+            self.head_idx = block_size
+        }
+        self.head_idx -= 1_uz
+    }
+
+    fun retreat_tail(&mut self) -> Void {
+        case self.tail_idx == 0_uz {
+            self.tail_blk -= 1_uz
+            self.tail_idx = block_size
+        }
+        self.tail_idx -= 1_uz
+    }
+
+    fun temp_test(self) -> Self {
+        ret self.temp_test().temp_test().temp_test()
+    }
+}

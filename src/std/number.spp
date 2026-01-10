@@ -35,10 +35,3 @@ use std::num::sized_floating_point::SizedFloatingPoint
 
 # Can't add the FP256 until LLVM adds intrinsic support for them.
 # type F256 = SizedFloatingPoint[256_u32]
-
-
-sup U64 ext From[Self, U32] {
-    fun from(that: U32) -> Self {
-        ret intrinsics::uzext[64_u32](that)
-    }
-}

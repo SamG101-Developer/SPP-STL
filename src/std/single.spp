@@ -1,10 +1,10 @@
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::generator::GenOnce
-use std::mem::ptr::Ptr
 use std::number::USize
-use std::ops::deref::DerefMut
-use std::ops::deref::DerefRef
+use std::ops::fwd::FwdMov
+use std::ops::fwd::FwdMut
+use std::ops::fwd::FwdRef
 use std::ops::del::Del
 use std::ops::void::Void
 
@@ -13,30 +13,37 @@ use std::ops::void::Void
 A uniquely owned pointer on the heap.
 ##
 @public
-cls Single[T, A: Alloc[T] = GlobalAlloc[T]] {
-    @private
-    raw: Ptr[T]
-}
+cls Single[T, A: Alloc[T] = GlobalAlloc[T]] { }
 
 
 sup [T] Single[T] {
     @public type Element = T
+
+    @public
+    @compiler_builtin
+    fun new(value: T) -> Single[T] { }
 }
 
 
-sup [T] Single[T] ext DerefRef[T] {
+sup [T] Single[T] ext FwdRef[T] {
     @compiler_builtin
-    cor deref_ref(&self) -> GenOnce[&T] { }
+    cor fwd_ref(&self) -> GenOnce[&T] { }
 }
 
 
-sup [T] Single[T] ext DerefMut[T] {
+sup [T] Single[T] ext FwdMut[T] {
     @compiler_builtin
-    cor deref_mut(&mut self) -> GenOnce[&mut T] { }
+    cor fwd_mut(&mut self) -> GenOnce[&mut T] { }
+}
+
+
+sup [T] Single[T] ext FwdMov[T] {
+    @compiler_builtin
+    cor fwd_mov(self) -> GenOnce[T] { }
 }
 
 
 sup [T] Single[T] ext Del {
     @compiler_builtin
-    fun del(self) -> Void { }
+    fun del(&mut self) -> Void { }
 }

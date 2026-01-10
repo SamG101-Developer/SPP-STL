@@ -4,21 +4,29 @@ use std::array::Arr
 use std::cast::From
 use std::clone::Clone
 use std::iterator::Iterator
-use std::iterator::SizedIterator
 use std::generator::GenOnce
 use std::mem::memory::Memory
 use std::number::U8
 use std::number::USize
 use std::string::Str
+use std::string_view::StrView
 use std::vector::Vec
 use std::void::Void
 
 
-cls Slice[E, A: Alloc[E] = GlobalAlloc[E]] {
-    @private
-    mem: Memory[E]
+##
+The Slice type in S++ is a dynamic array. It owns its memory and provides various methods for manipulating the array,
+such as resizing, splitting, and iterating over its elements. It is comonly used as the underlying buffer for other data
+structures like Vec, as this class wraps the Memory type to provide higher-level functionality.
 
-    @private
+It is generic over the element type E and an allocator type A, which defaults to GlobalAlloc. This allows for flexible
+memory management strategies. The Slice class adds a runtime-based "length" field to track the number of elements
+currently stored in the slice, which is not always equal to the capacity of the underlying memory. The capacity is
+managed by the Memory type, and represents the total number of elements that can be stored without requiring
+reallocation.
+##
+cls Slice[E, A: Alloc[E] = GlobalAlloc[E]] {
+    mem: Memory[E]
     len: USize
 }
 
@@ -28,9 +36,21 @@ sup [E, A] Slice[E, A] {
     type Allocator = A
 
     @public
-    @no_impl
     fun resize(&mut self, new_len: USize) -> Void {
+        # TODO: needs allocation support
         # A::reallocate(&mut self.mem, new_len)  # .expect("Failed to resize slice")
+    }
+}
+
+
+sup [E] Slice[E] {
+    @public
+    fun split(self, at: USize) -> (Self, Self) {
+        # TODO
+
+        let first = Slice[E]()
+        let second = Slice[E]()
+        ret (first, second)
     }
 }
 
@@ -43,16 +63,18 @@ sup [E] Slice[E] {
 }
 
 
+# TODO: needs constraints on E
 sup [E] Slice[E] ext Clone[Out=Self] {
-    @no_impl
     fun clone(&self) -> Self {
+        ret Slice[E]()
     }
 }
 
 
-sup [E, A, cmp n: USize] Slice[E, A] ext From[Self, Arr[E, n]] {
+# TODO: adding "A" to Arr causes an inference conflict error -> shouldn't
+sup [E, cmp n: USize] Slice[E] ext From[Self, Arr[E, n]] {
     fun from(that: Arr[E, n]) -> Self {
-        ret Slice[E, A](mem=Memory(ptr=that.mem.ptr, cap=n), len=n)
+        ret Slice[E](mem=Memory(ptr=that.mem.ptr, cap=n), len=n)
     }
 }
 
@@ -64,6 +86,12 @@ sup [A] Slice[U8, A] ext From[Self, Str] {
 }
 
 
+sup [A] Slice[U8, A] ext From[Self, StrView] {
+    @compiler_builtin
+    fun from(that: StrView) -> Self { }
+}
+
+
 sup [E, A] Slice[E, A] ext From[Self, Vec[E, A]] {
     fun from(that: Vec[E, A]) -> Self {
         ret Slice[E, A](mem=Memory(ptr=that.buf.mem.ptr, cap=that.buf.mem.cap), len=that.buf.len)
@@ -72,7 +100,7 @@ sup [E, A] Slice[E, A] ext From[Self, Vec[E, A]] {
 
 
 sup [E] Slice[E] ext std::ops::del::Del {
-    fun del(self) -> Void {
+    fun del(&mut self) -> Void {
         # A::deallocate(self.mem)  TODO: constraints
     }
 }
@@ -102,13 +130,6 @@ sup [E] Slice[E] {
     @public
     @compiler_builtin
     cor reverse_iter_ref(&self) -> Iterator[&E] { }
-}
-
-
-sup [E] Slice[E] ext SizedIterator[E] {
-    fun size_hint(&self) -> USize {
-        ret self.len
-    }
 }
 
 

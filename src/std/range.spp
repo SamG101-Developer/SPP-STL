@@ -14,6 +14,11 @@ sup [T] Range[T] {
     fun step_by(self, step: T) -> Range[T] {
         ret Range(start=self.start, end=self.end, step)
     }
+
+    @public
+    fun between(start: T, end: T) -> Range[T] {
+        ret Range(start=start, end=end)
+    }
 }
 
 

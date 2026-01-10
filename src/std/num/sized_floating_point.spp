@@ -19,6 +19,17 @@ cls SizedFloatingPoint[cmp bit_width: U32] { }
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext FloatingPoint { }
 
 
+sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedFloatingPoint[this_bit_width] ext From[Self, SizedFloatingPoint[that_bit_width]] {
+    fun from(that: SizedFloatingPoint[that_bit_width]) -> Self {
+        # Destination (this) bits are less than the source (that) bits => truncate.
+        case this_bit_width < that_bit_width { ret intrinsics::fptrunc[this_bit_width](that) }
+
+        # Source (that) is unsigned, so zero-extend.
+        ret intrinsics::fpext[this_bit_width](that)
+    }
+}
+
+
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::eq::Eq[Rhs=Self] {
     fun eq(&self, that: &Self) -> Bool {
         ret intrinsics::oeq(self, that)

@@ -1,6 +1,5 @@
 use std::copy::Copy
 use std::mem::memory::Memory
-use std::mem::ptr::Ptr
 use std::number::USize
 use std::number::S32
 use std::option::Opt
@@ -38,8 +37,8 @@ fun mem_cmp[T](a: &T, b: &T, n: USize) -> S32 {
 fun malloc[T](n: USize) -> Opt[Memory[T]] {
     # Determine the size and get an allocated pointer.
     let cap = n * size_of[T]()
-    let raw = libc::malloc[T](cap)
-    ret case raw.to_addr() == 0_uz { None() } else { Some(val=Memory(ptr=Single(raw), cap)) }
+    let raw = sppc::mem_alloc[T](cap)
+    ret Some(val=raw)  # TODO: Handle allocation failure.
 }
 
 
@@ -47,28 +46,57 @@ fun malloc[T](n: USize) -> Opt[Memory[T]] {
 fun calloc[T](n: USize) -> Opt[Memory[T]] {
     # Determine the size and get an allocated pointer.
     let cap = n * size_of[T]()
-    let raw = libc::calloc[T](n, size_of[T]())
-    ret case raw.to_addr() == 0_uz { None() } else { Some(val=Memory(ptr=Single(raw), cap)) }
+    let raw = sppc::mem_calloc[T](n, size_of[T]())
+    ret Some(val=raw)  # TODO: Handle allocation failure.
 }
 
 
 @public
-fun realloc[T](mut mem: &mut Memory[T], n: USize) -> Opt[Void] {
+fun realloc[T](mem: Memory[T], n: USize) -> Opt[Memory[T]] {
     # Determine the size and get a reallocated pointer.
     let cap = n * size_of[T]()
-    libc::realloc(&mut mem.ptr.raw, cap)
+    let mut new_mem = sppc::mem_realloc(mem, cap)
 
-    # If the new pointer is null, return None (failed reallocation).
-    case mem.ptr.raw.to_addr() == 0_uz { ret None() }
-
-    # Otherwise, update the length.
-    mem.cap = cap
-    ret Some[Void]()
+    # Update the capacity attribute of the memory (S++ side).
+    new_mem.cap = cap
+    ret Some(val=new_mem)
 }
 
 
 @public
 fun free[T](mem: Memory[T]) -> Void {
     # Free the memory pointed to by the pointer.
-    libc::free(mem.ptr.raw)
+    sppc::mem_dealloc(mem)
+}
+
+
+@public
+fun swap[T](a: &mut T, b: &mut T) -> Void {
+    let temp = take(a)
+    a@ = take(b)
+    b@ = temp
+}
+
+
+@public
+fun replace[T](dest: &mut T, src: T) -> T {
+    let old = take(dest)
+    dest@ = src
+    ret old
+}
+
+
+@public
+@compiler_builtin
+fun take[T](src: &mut T) -> T {
+    # This is safe because of uniform default initialization, where the "src" will be replaced with a default value for
+    # T, based on the standard object initialization: T().
+}
+
+
+@public
+@compiler_builtin
+fun drop[T](val: T) -> Void {
+    # Safely disposes of a value, calling its destructor if necessary. This is safe as it takes ownership, so an
+    # uninitialized value cannot be left behind in the caller's context (at runtime).
 }

@@ -1,0 +1,39 @@
+use std::boolean::Bool
+use std::number::USize
+use std::option::Opt
+use std::vector::Vec
+use std::void::Void
+
+
+@public
+cls Stack[T] {
+    buf: Vec[T]
+}
+
+
+sup [T] Stack[T] {
+    @public
+    fun new() -> Stack[T] {
+        ret Stack[T](buf=Vec[T]::new())
+    }
+
+    @public
+    fun push(&mut self, val: T) -> Void {
+        self.buf.push_back(val)
+    }
+
+    @public
+    fun pop(&mut self) -> Opt[T] {
+        ret self.buf.pop_back()
+    }
+
+    @public
+    fun is_empty(&self) -> Bool {
+        ret self.buf.is_empty()
+    }
+
+    @public
+    fun length(&self) -> USize {
+        ret self.buf.length()
+    }
+}

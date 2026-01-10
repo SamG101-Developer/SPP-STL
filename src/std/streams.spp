@@ -1,7 +1,8 @@
 use std::boolean::Bool
 use std::number::U8
-use std::number::S32
 use std::number::USize
+use std::number::S32
+use std::number::SSize
 use std::result::Res
 use std::result::Pass
 use std::slice::Slice
@@ -35,9 +36,17 @@ sup WritableStream {
     fun flush(&mut self) -> Res[Void, StreamErr] { }
 
     @public
-    @no_impl
     @virtual_method
-    fun write_all(&mut self, data: &Slice[U8]) -> Res[USize, StreamErr] { }
+    fun write_all(&mut self, data: &Slice[U8]) -> Res[USize, StreamErr] {
+        # TODO
+
+        let mut total_written = 0_uz
+        loop total_written < data.length() {
+            let written = 1_uz  # self.write(&data.slice_from(total_written))?
+            total_written = total_written + written
+        }
+        ret Pass(val=total_written)
+    }
 }
 
 
@@ -47,41 +56,55 @@ sup ReadableStream {
     fun read(&mut self, len: USize) -> Res[Vec[U8], StreamErr] { }
 
     @public
-    @no_impl
     @virtual_method
     fun read_all(&mut self) -> Res[Vec[U8], StreamErr] {
-        ret Pass(val=Vec[U8]())
+        let mut out = Vec[U8]()
+        loop true {
+            let chunk = self.read(4096_uz)?
+            case chunk.length() == 0_uz { exit }
+            out.push_back_vec(chunk)
+        }
+        ret Pass(val=out)
     }
 }
 
 
 sup SeekableStream {
+    @public cmp seek_set: S32 = 0
+    @public cmp seek_cur: S32 = 1
+    @public cmp seek_end: S32 = 2
+
     @public
     @abstract_method
-    fun seek(&mut self, offset: USize) -> Res[Void, StreamErr] { }
+    fun seek(&mut self, offset: SSize) -> Res[Void, StreamErr] { }
 
     @public
-    @no_impl
-    @virtual_method
-    fun seek_from_start(&mut self, offset: USize) -> Res[Void, StreamErr] { }
+    @abstract_method
+    fun stream_length(&mut self) -> Res[SSize, StreamErr] { }
 
     @public
-    @no_impl
-    @virtual_method
-    fun seek_from_end(&mut self, offset: USize) -> Res[Void, StreamErr] { }
+    @abstract_method
+    fun stream_pos(&mut self) -> Res[SSize, StreamErr] { }
 
     @public
-    @no_impl
     @virtual_method
-    fun rewind(&mut self) -> Res[Void, StreamErr] { }
+    fun seek_from_start(&mut self, offset: SSize) -> Res[Void, StreamErr] {
+        self.rewind()?
+        ret self.seek(offset)
+    }
 
     @public
-    @no_impl
     @virtual_method
-    fun stream_len(&mut self) -> Res[USize, StreamErr] { }
+    fun seek_from_end(&mut self, offset: SSize) -> Res[Void, StreamErr] {
+        let len = self.stream_length()?
+        self.rewind()?
+        ret self.seek(len + offset)
+    }
 
     @public
-    @no_impl
     @virtual_method
-    fun stream_pos(&mut self) -> Res[USize, StreamErr] { }
+    fun rewind(&mut self) -> Res[Void, StreamErr] {
+        let pos = self.stream_pos()?
+        ret self.seek(pos.neg())
+    }
 }

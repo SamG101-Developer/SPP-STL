@@ -1,0 +1,50 @@
+use std::boolean::Bool
+use std::number::USize
+use std::option::None
+use std::option::Opt
+use std::option::Some
+use std::string::Str
+use std::string_view::StrView
+
+
+cls Process { }
+
+
+sup Process {
+    @public
+    fun get_cwd() -> Str {
+        # Return the current working directory as a string.
+        let mut cwd = StrView()
+        sppc::proc_get_cwd(&mut cwd)
+        ret Str::from(cwd)
+    }
+
+    @public
+    fun set_cwd(path: StrView) -> Bool {
+        # Set the current working directory to the specified path.
+        let result = sppc::proc_set_cwd(&path)
+        ret result == 0
+    }
+
+    @public
+    fun get_env(var_key: StrView) -> Opt[Str] {
+        # Get the value of an environment variable.
+        let env_val = sppc::proc_get_env(&var_key)
+        case env_val.is_empty() { ret None() }
+        ret Some(val=Str::from(env_val))
+    }
+
+    @public
+    fun set_env(var_key: StrView, var_val: StrView, overwrite: Bool = true) -> Bool {
+        # Set the value of an environment variable.
+        let result = sppc::proc_set_env(&var_key, &var_val, overwrite)
+        ret result == 0
+    }
+
+    @public
+    fun unset_env(var_key: StrView) -> Bool {
+        # Unset an environment variable.
+        let result = sppc::proc_unset_env(&var_key)
+        ret result == 0
+    }
+}

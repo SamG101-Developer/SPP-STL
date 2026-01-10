@@ -1,0 +1,42 @@
+use std::boolean::Bool
+use std::collections::deque::Deque
+use std::number::USize
+use std::option::Opt
+use std::void::Void
+
+
+@public
+cls Queue[T] {
+    buf: Deque[T]
+    head: USize
+    tail: USize
+}
+
+
+sup [T] Queue[T] {
+    @public
+    fun new() -> Queue[T] {
+        ret Queue[T](buf=Deque[T]::new(), head=0_uz, tail=0_uz)
+    }
+
+    @public
+    fun push(&mut self, val: T) -> Void {
+        self.buf.push_back(val)
+        self.tail += 1_uz
+    }
+
+    @public
+    fun pop(&mut self) -> Opt[T] {
+        ret self.buf.pop_front()
+    }
+
+    @public
+    fun is_empty(&self) -> Bool {
+        ret self.head >= self.tail
+    }
+
+    @public
+    fun length(&self) -> USize {
+        ret self.tail - self.head
+    }
+}

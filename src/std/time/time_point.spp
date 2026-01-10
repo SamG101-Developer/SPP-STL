@@ -1,0 +1,48 @@
+use std::number::S32
+use std::number::S64
+use std::time::duration::Duration
+
+
+cls Clocks { }
+sup Clocks {
+    @public cmp clock_real_time: S32 = 0_s32
+    @public cmp clock_monotonic: S32 = 1_s32
+    @public cmp clock_high_resolution: S32 = 2_s32
+    @public cmp clock_thread_specific: S32 = 3_s32
+    @public cmp clock_monotonic_raw: S32 = 4_s32
+    @public cmp clock_realtime_coarse: S32 = 5_s32
+    @public cmp clock_monotonic_coarse: S32 = 6_s32
+    @public cmp clock_boottime: S32 = 7_s32
+    @public cmp clock_realtime_alarm: S32 = 8_s32
+    @public cmp clock_boottime_alarm: S32 = 9_s32
+    @public cmp clock_tai: S32 = 11_s32
+}
+
+
+@public
+cls TimePoint {
+    @public seconds_since_epoch: S64
+    @public nanoseconds: S64
+}
+
+
+sup TimePoint {
+    @public
+    fun now(clock: S32 = 0) -> TimePoint {
+        # Platform-specific implementation to get the current time.
+        let time_now = sppc::time_now_ns(clock)
+        let seconds_since_epoch = time_now / 1000000000_s64
+        let nanoseconds = time_now % 1000000000_s64
+        ret TimePoint(seconds_since_epoch, nanoseconds)
+    }
+}
+
+
+sup TimePoint ext std::ops::sub::Sub[Rhs=Self, Ret=Duration] {
+    fun sub(self, that: Self) -> Duration {
+        # The difference between two TimePoints results in a Duration.
+        let sec_diff = self.seconds_since_epoch - that.seconds_since_epoch
+        let nsec_diff = self.nanoseconds - that.nanoseconds
+        ret Duration(seconds=sec_diff, nanoseconds=nsec_diff)
+    }
+}

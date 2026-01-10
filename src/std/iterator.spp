@@ -14,18 +14,11 @@ cls Iterator[T] { }
 sup [T] Iterator[T] ext Gen[T] { }
 
 
-@public
-cls SizedIterator[T] { }
-sup [T] SizedIterator[T] {
-    @public
-    @abstract_method
-    fun size_hint(&self) -> USize { }
-}
-
-
 sup [T] Iterator[T] {
-    # Concatenate this iterator with another iterator of the same element type. Iterate out of all elements from this
-    # iterator, then all elements from the other iterator.
+    ##
+    Concatenate this iterator with another iterator of the same element type. Iterate out of all elements from this
+    iterator, then all elements from the other iterator.
+    ##
     @public
     cor concat(self, other: Iterator[T]) -> Iterator[T] {
         gen with self
@@ -111,7 +104,7 @@ sup [T] Iterator[T] {
     }
 
     @public
-    fun fold[U](self, initial: U, reducer: FunRef[(U, T), U]) -> U {
+    fun fold[U](self, initial: U, reducer: FunRef[(U, &T), U]) -> U {
         let mut acc = initial
         loop item in self {
             acc = reducer(acc, item)

@@ -1,0 +1,75 @@
+use std::boolean::Bool
+use std::net::socket::Socket
+use std::net::socket::SocketErr
+use std::number::U16
+use std::number::U64
+use std::number::S32
+use std::ops::del::Del
+use std::result::Fail
+use std::result::Pass
+use std::result::Res
+use std::string::Str
+use std::string_view::StrView
+use std::streams::ReadableStream
+use std::streams::WritableStream
+use std::streams::StreamErr
+use std::void::Void
+
+
+@public
+cls TcpSocket {
+    open: Bool = false
+}
+
+
+sup TcpSocket ext Socket { }
+
+
+sup TcpSocket {
+    @public
+    fun new(type_: S32, proto: S32) -> Res[TcpSocket, SocketErr] {
+        let fd = sppc::net_sock_init(Socket::sock_stream, type_, proto)
+        ret case fd of {
+            < 0 { Fail(err=SocketErr(msg="Failed to create socket")) }
+            else { Pass(val=TcpSocket(open=true, fd)) }
+        }
+    }
+
+    @public
+    fun connect(&self, host: StrView, port: U16) -> Res[Void, SocketErr] {
+        let val = sppc::net_sock_conn(self.fd, &host, port)
+        ret case val of {
+            < 0 { Fail(err=SocketErr(msg="Failed to connect to remote host")) }
+            else { Pass[Void]() }
+        }
+    }
+}
+
+sup TcpSocket {
+    @public
+    fun bind(&self, host: StrView, port: U16) -> Res[Void, SocketErr] {
+        let val = sppc::net_sock_bind(self.fd, &host, port)
+        ret case val of {
+            < 0 { Fail(err=SocketErr(msg="Failed to bind socket")) }
+            else { Pass[Void]() }
+        }
+    }
+
+    @public
+    fun listen(&self, backlog: S32 = 5) -> Res[Void, SocketErr] {
+        let val = sppc::net_sock_listen(self.fd, backlog)
+        ret case val of {
+            < 0 { Fail(err=SocketErr(msg="Failed to listen on socket")) }
+            else { Pass[Void]() }
+        }
+    }
+
+    @public
+    fun accept(&self) -> Res[TcpSocket, SocketErr] {
+        let val = sppc::net_sock_accept(self.fd)
+        ret case val of {
+            < 0 { Fail(err=SocketErr(msg="Failed to accept connection")) }
+            else { Pass(val=TcpSocket(open=true, fd=val)) }
+        }
+    }
+}

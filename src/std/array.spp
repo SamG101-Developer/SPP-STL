@@ -3,7 +3,6 @@ use std::allocator::GlobalAlloc
 use std::cast::From
 use std::generator::GenOnce
 use std::iterator::Iterator
-use std::iterator::SizedIterator
 use std::mem::memory::Memory
 use std::number::USize
 use std::slice::Slice
@@ -15,7 +14,11 @@ cls Arr[T, cmp n: USize, A: Alloc[T] = GlobalAlloc[T]] {
 }
 
 
-sup [T, cmp n: USize] Arr[T, n] {
+sup [T, cmp n: USize, A] Arr[T, n, A] {
+    fun new() -> Self {
+        ret Arr[T, n](mem=Memory[T, A]::new(n))
+    }
+
     fun length(&self) -> USize {
         ret n
     }
@@ -47,13 +50,6 @@ sup [T, cmp n: USize] Arr[T, n] {
 
     @compiler_builtin
     cor reverse_iter_ref(&self) -> Iterator[&T] { }
-}
-
-
-sup [T, cmp n: USize] Arr[T, n] ext SizedIterator[T] {
-    fun size_hint(&self) -> USize {
-        ret n
-    }
 }
 
 

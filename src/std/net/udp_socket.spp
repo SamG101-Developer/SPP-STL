@@ -1,0 +1,80 @@
+use std::net::socket::Socket
+use std::net::socket::SocketErr
+use std::number::U8
+use std::number::U16
+use std::number::S32
+use std::number::USize
+use std::slice::Slice
+use std::string::Str
+use std::string_view::StrView
+use std::result::Fail
+use std::result::Pass
+use std::result::Res
+use std::vector::Vec
+use std::void::Void
+
+
+@public
+cls UdpSocket {}
+
+
+sup UdpSocket ext Socket { }
+
+
+sup UdpSocket {
+    @public
+    fun new(type_: S32, proto: S32) -> Res[UdpSocket, SocketErr] {
+        let fd = sppc::net_sock_init(Socket::sock_dgram, type_, proto)
+        ret case fd of {
+            < 0 { Fail(err=SocketErr(msg="Failed to create socket")) }
+            else { Pass(val=UdpSocket()) }
+        }
+    }
+}
+
+
+sup UdpSocket {
+    @public
+    fun bind(&self, host: StrView, port: U16) -> Res[Void, SocketErr] {
+        let val = sppc::net_sock_bind(self.fd, &host, port)
+        ret case val of {
+            < 0 { Fail(err=SocketErr(msg="Failed to bind socket")) }
+            else { Pass[Void]() }
+        }
+    }
+}
+
+
+sup UdpSocket {
+    @public
+    fun write_datagram(&self, data: &Slice[U8], host: StrView, port: U16) -> Res[USize, SocketErr] {
+        # Get the data length, form the stream, and send the datagram.
+        let len = data.length()
+        let stream = StrView::from_utf8(data)
+        let val = sppc::net_sock_sendto(self.fd, &stream, len, &host, port)
+
+        # Report a failed send (negative value) or return the number of bytes sent.
+        ret case val of {
+            < 0_s64 { Fail(err=SocketErr(msg="Failed to send datagram")) }
+            else { Pass(val=USize::from(val)) }
+        }
+    }
+
+    @public
+    fun read_datagram(&self, len: USize) -> Res[(Vec[U8], Str, U16), SocketErr] {
+        # Prepare the stream and receive the datagram.
+        let mut stream = StrView::new_with_capacity(len)
+        let (mut host, mut port) = (StrView::new_with_capacity(256_uz), 0_u16)
+        let val = sppc::net_sock_recvfrom(self.fd, &mut stream, len, &mut host, &mut port)
+
+        # Report a failed receive (negative value) or return the received data, host, and port.
+        ret case val of {
+            < 0_s64 { Fail(err=SocketErr(msg="Failed to receive datagram")) }
+            else {
+                # TODO: Truncate based on actual received length
+                let vec = Vec[U8]::from(Slice[U8]::from(stream))
+                Pass(val=(vec, Str::from(host), port))
+            }
+        }
+    }
+}

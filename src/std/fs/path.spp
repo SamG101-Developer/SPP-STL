@@ -8,7 +8,9 @@ use std::ops::ne::Ne
 use std::option::None
 use std::option::Opt
 use std::option::Some
+use std::process::Process
 use std::string::Str
+use std::string_view::StrView
 
 
 @public
@@ -23,34 +25,37 @@ sup Path {
 
 
 sup Path {
-    @no_impl
-    fun is_absolute(&self) -> Bool { }
-
-    @no_impl
-    fun is_relative(&self) -> Bool { }
-
-    @no_impl
-    fun to_absolute(&self) -> Path { }
-
-    @no_impl
-    fun to_relative(&self) -> Path { }
-
-    @no_impl
-    fun exists(&self) -> Bool { }
-
-    @no_impl
-    fun parent(&self) -> Path { }
-}
-
-
-sup Path {
     @public
-    @no_impl
-    fun startswith(&self, prefix: &Str) -> Bool { }
+    fun is_absolute(&self) -> Bool {
+        ret self.path.starts_with(StrView::from(self.sep))
+    }
 
     @public
-    @no_impl
-    fun endswith(&self, suffix: &Str) -> Bool { }
+    fun is_relative(&self) -> Bool {
+        ret self.is_absolute().not
+    }
+
+    @public
+    fun to_absolute(&self) -> Path {
+        # Get the current working directory and join with self.path.
+        let cwd = Process::get_cwd()
+        let abs_path = Path(path=cwd) / self.path
+        ret abs_path
+    }
+
+    @public
+    fun exists(&self) -> Bool {
+        # Check if the path exists in the filesystem (ignore C error).
+        let found = sppc::fs_exists(&StrView::from(self.path.clone()))
+        ret found > 0
+    }
+
+    @public
+    fun parent(&self) -> Path {
+        # Get the parent directory of the path (which is the dir_name).
+        let dir_name = self.dir_name()
+        ret Path(path=dir_name)
+    }
 }
 
 
@@ -108,35 +113,92 @@ sup Path {
 
 
 sup Path {
-    @no_impl
-    fun is_file(&self) -> Bool { }
+    @public
+    fun is_file(&self) -> Bool {
+        # Check if the path is a file in the filesystem (ignore C error).
+        let test = sppc::fs_is_file(&StrView::from(self.path.clone()))
+        ret test > 0
+    }
 
-    @no_impl
-    fun is_dir(&self) -> Bool { }
+    @public
+    fun is_dir(&self) -> Bool {
+        # Check if the path is a directory in the filesystem (ignore C error).
+        let test = sppc::fs_is_dir(&StrView::from(self.path.clone()))
+        ret test > 0
+    }
 
-    @no_impl
-    fun is_symlink(&self) -> Bool { }
+    @public
+    fun is_symlink(&self) -> Bool {
+        # Check if the path is a symlink in the filesystem (ignore C error).
+        let test = sppc::fs_is_symlink(&StrView::from(self.path.clone()))
+        ret test > 0
+    }
 }
 
 
 sup Path {
-    @no_impl
-    fun join(&self, other: Str) -> Path { }
+    @public
+    fun join(&self, other: Str) -> Path {
+        let mut new_path = self.path.clone()
+        case new_path.ends_with(StrView::from(self.sep)).not {
+            new_path += Str::from(self.sep)
+        }
+        new_path += other
+        ret Path(path=new_path)
+    }
 
-    @no_impl
-    fun with_added_extension(&self, ex: Str) -> Path { }
+    @public
+    fun with_added_extension(&self, ex: Str) -> Path {
+        let mut new_path = self.path.clone()
+        case ex.length() > 0_uz {
+            new_path += Str::from('.')
+            new_path += ex
+        }
+        ret Path(path=new_path)
+    }
 
-    @no_impl
-    fun with_extension(&self, ex: Str) -> Path { }
+    @public
+    fun with_extension(&self, ex: Str) -> Path {
+        let (base_path, _) = self.split_ext()
+        let mut new_path = base_path.path.clone()
+        case ex.length() > 0_uz {
+            new_path += Str::from('.')
+            new_path += ex
+        }
+        ret Path(path=new_path)
+    }
 
-    @no_impl
-    fun with_file_name(&self, name: Str) -> Path { }
+    @public
+    fun with_file_name(&self, name: Str) -> Path {
+        let dir = self.dir_name()
+        let mut new_path = dir.clone()
+        case new_path.ends_with(StrView::from(self.sep)).not {
+            new_path += Str::from(self.sep)
+        }
+        new_path += name
+        ret Path(path=new_path)
+    }
 }
 
 
 sup Path {
-    @no_impl
-    cor iter_ref(&self) -> Iterator[&Str] { }
+    @public
+    cor iter_mov(self) -> Iterator[Str] {
+        let parts = self.path.split(self.sep)
+        gen with parts.iter_mov()
+    }
+
+    @public
+    cor iter_mut(&mut self) -> Iterator[&mut Str] {
+        let parts = self.path.split(self.sep)
+        gen with parts.iter_mut()
+    }
+
+    @public
+    cor iter_ref(&self) -> Iterator[&Str] {
+        let parts = self.path.split(self.sep)
+        gen with parts.iter_ref()
+    }
 }
 
 

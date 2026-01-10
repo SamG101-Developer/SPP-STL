@@ -7,5 +7,5 @@ use std::void::Void
 sup Del {
     @public
     @abstract_method
-    fun del(self) -> Void { }
+    fun del(&mut self) -> Void { }
 }

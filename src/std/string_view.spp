@@ -1,13 +1,15 @@
 use std::boolean::Bool
+use std::cast::From
 use std::copy::Copy
 use std::generator::GenOnce
 use std::iterator::Iterator
-use std::mem::ptr::Ptr
 use std::number::U8
 use std::number::USize
 use std::ops::eq::Eq
 use std::ops::ne::Ne
 use std::slice::Slice
+use std::string::Str
+use std::fs::path::Path
 
 
 ##
@@ -18,10 +20,7 @@ checking emptiness, slicing, and comparing string views. For more advanced strin
 full-featured `Str` type from `std::string::Str`.
 ##
 @public
-cls StrView {
-    ptr: Ptr[U8]
-    len: USize
-}
+cls StrView { }
 
 
 sup StrView ext Copy { }
@@ -29,16 +28,26 @@ sup StrView ext Copy { }
 
 sup StrView {
     @public
-    @inline
-    fun length(&self) -> USize {
-        ret self.len
-    }
+    @compiler_builtin
+    fun new() -> StrView { }
+
+    @public
+    @compiler_builtin
+    fun new_with_capacity(capacity: USize) -> StrView { }
+
+    @public
+    @compiler_builtin
+    fun from_utf8(utf8: &Slice[U8]) -> StrView { }
 
     @public
     @inline
-    fun is_empty(&self) -> Bool {
-        ret self.len == 0_uz
-    }
+    @compiler_builtin
+    fun length(&self) -> USize { }
+
+    @public
+    @inline
+    @compiler_builtin
+    fun is_empty(&self) -> Bool { }
 }
 
 
@@ -59,25 +68,16 @@ sup StrView {
 
 sup StrView {
     @public
-    fun starts_with(&self, needle: StrView) -> Bool {
-         case needle.length() > self.length() { ret false }
-         ret std::mem::ops::mem_cmp(&self.ptr, &needle.ptr, needle.length()) == 0
-    }
+    @compiler_builtin
+    fun starts_with(&self, needle: StrView) -> Bool { }
 
     @public
-    fun ends_with(&self, needle: StrView) -> Bool {
-        case needle.length() > self.length() { ret false }
-        let offset = self.length() - needle.length()
-        ret std::mem::ops::mem_cmp(&(self.ptr + offset), &needle.ptr, needle.length()) == 0
-    }
+    @compiler_builtin
+    fun ends_with(&self, needle: StrView) -> Bool { }
 
     @public
-    fun slice(&self, start: USize, end: USize) -> StrView {
-        case start > end or end > self.length() {
-            std::abort::abort("StrView::slice: invalid slice indices")
-        }
-        ret StrView(ptr=self.ptr + start, len=end - start)
-    }
+    @compiler_builtin
+    fun slice(&self, start: USize, end: USize) -> StrView { }
 }
 
 
@@ -90,4 +90,23 @@ sup StrView ext Eq[Rhs=StrView] {
 sup StrView ext Ne[Rhs=StrView] {
     @compiler_builtin
     fun ne(&self, that: &StrView) -> Bool { }
+}
+
+
+sup StrView ext From[Self, Str] {
+    @compiler_builtin
+    fun from(that: Str) -> Self { }
+}
+
+
+sup StrView ext From[Self, U8] {
+    @compiler_builtin
+    fun from(that: U8) -> Self { }
+}
+
+
+sup StrView ext From[Self, Path] {
+    fun from(that: Path) -> Self {
+        ret StrView::from(that.path)
+    }
 }

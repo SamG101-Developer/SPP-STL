@@ -1,10 +1,66 @@
+use std::boolean::Bool
+use std::function::FunRef
+use std::number::S32
+use std::result::Fail
+use std::result::Pass
+use std::result::Res
+use std::void::Void
+use std::threading::mutex::LockErr
 use std::threading::mutex::Mutex
 
 
 @public
-cls CondVar[T] {
-    mutex: Mutex[T]
+cls CondVar {
+    id: S32
 }
 
 
+sup CondVar {
+    @public
+    fun new() -> Res[CondVar, LockErr] {
+        # Create a new mutex using the sppc threading API.
+        let id = sppc::condvar_create()
+        case id == 0 { ret Fail(err=LockErr(msg="Failed to create condition variable")) }
+        ret Pass(val=CondVar(id))
+    }
 
+    @public
+    fun wait(&self, mutex: &Mutex, pred: FunRef[(), Bool]) -> Res[Void, LockErr] {
+        # Wait on the condition variable, releasing the associated mutex.
+        loop pred().not {
+            let val = sppc::condvar_wait(self.id, mutex.id)
+            case val != 0 { ret Fail(err=LockErr(msg="Failed to wait on condition variable")) }
+        }
+        ret Pass[Void]()
+    }
+
+    @public
+    fun wait(&self, mutex: &Mutex) -> Res[Void, LockErr] {
+        # Wait on the condition variable, releasing the associated mutex.
+        ret self.wait(mutex, || true)
+    }
+
+    @public
+    fun signal_one(&self) -> Res[Void, LockErr] {
+        # Signal one thread waiting on the condition variable.
+        let val = sppc::condvar_signal(self.id)
+        case val != 0 { ret Fail(err=LockErr(msg="Failed to signal condition variable")) }
+        ret Pass[Void]()
+    }
+
+    @public
+    fun signal_all(&self) -> Res[Void, LockErr] {
+        # Wake up all threads waiting on the condition variable.
+        let val = sppc::condvar_broadcast(self.id)
+        case val != 0 { ret Fail(err=LockErr(msg="Failed to broadcast condition variable")) }
+        ret Pass[Void]()
+    }
+}
+
+
+sup CondVar ext std::ops::del::Del {
+    fun del(&mut self) -> Void {
+        # Destroy the condition variable using the sppc threading API.
+        sppc::condvar_destroy(self.id)
+    }
+}

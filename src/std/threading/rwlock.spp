@@ -1,0 +1,83 @@
+use std::number::S32
+use std::result::Fail
+use std::result::Pass
+use std::result::Res
+use std::void::Void
+use std::threading::mutex::LockErr
+
+
+@public
+cls RwReadLockGuard {
+    id: S32
+}
+
+
+@public
+cls RwWriteLockGuard {
+    id: S32
+}
+
+
+@public
+cls RwLock {
+    id: S32
+}
+
+
+sup RwLock {
+    @public
+    fun new() -> Res[RwLock, LockErr] {
+        # Create a new rwlock using the sppc threading API.
+        let id = sppc::rwlock_create()
+        case id == 0 { ret Fail(err=LockErr(msg="Failed to create rwlock")) }
+        ret Pass(val=RwLock(id))
+    }
+
+    @public
+    fun read(&self) -> Res[RwReadLockGuard, LockErr] {
+        # Acquire a read lock using the sppc threading API.
+        let guard_id = sppc::rwlock_read_lock(self.id)
+        case guard_id == 0 { ret Fail(err=LockErr(msg="Failed to acquire read lock")) }
+        ret Pass(val=RwReadLockGuard(id=guard_id))
+    }
+
+    @public
+    fun write(&self) -> Res[RwWriteLockGuard, LockErr] {
+        # Acquire a write lock using the sppc threading API.
+        let guard_id = sppc::rwlock_write_lock(self.id)
+        case guard_id == 0 { ret Fail(err=LockErr(msg="Failed to acquire write lock")) }
+        ret Pass(val=RwWriteLockGuard(id=guard_id))
+    }
+
+    @public
+    fun try_read(&self) -> Res[RwReadLockGuard, LockErr] {
+        # Try to acquire a read lock using the sppc threading API.
+        let guard_id = sppc::rwlock_try_read_lock(self.id)
+        case guard_id == 0 { ret Fail(err=LockErr(msg="Failed to try to acquire read lock")) }
+        ret Pass(val=RwReadLockGuard(id=guard_id))
+    }
+
+    @public
+    fun try_write(&self) -> Res[RwWriteLockGuard, LockErr] {
+        # Try to acquire a write lock using the sppc threading API.
+        let guard_id = sppc::rwlock_try_write_lock(self.id)
+        case guard_id == 0 { ret Fail(err=LockErr(msg="Failed to try to acquire write lock")) }
+        ret Pass(val=RwWriteLockGuard(id=guard_id))
+    }
+
+    @public
+    fun unlock(&self) -> Res[Void, LockErr] {
+        # Unlock the rwlock using the sppc threading API.
+        let val = sppc::rwlock_unlock(self.id)
+        case val != 0 { ret Fail(err=LockErr(msg="Failed to unlock rwlock")) }
+        ret Pass[Void]()
+    }
+}
+
+
+sup RwLock ext std::ops::del::Del {
+    fun del(&mut self) -> Void {
+        # Destroy the rwlock using the sppc threading API.
+        sppc::rwlock_destroy(self.id)
+    }
+}

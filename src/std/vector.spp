@@ -6,14 +6,16 @@ use std::boolean::Bool
 use std::cast::From
 use std::clone::Clone
 use std::function::FunRef
+use std::generator::Gen
 use std::generator::GenOnce
-use std::generator::GenOpt
 use std::iterator::Iterator
-use std::iterator::SizedIterator
-use std::mem::memory::Memory
 use std::number::USize
+use std::option::None
+use std::option::Opt
+use std::range::Range
 use std::slice::Slice
 use std::void::Void
+use std::mem::memory::Memory
 
 
 @public
@@ -27,33 +29,51 @@ sup [T, A] Vec[T, A] {
     type Allocator = A
 
     @public
-    @no_impl
     fun new() -> Vec[T, A] {
-        # ret Vec[T, A](buf=A::alloc(1_uz))
+        ret Vec[T, A]::new_with_capacity(1_uz)
     }
 
     @public
-    @no_impl
     fun new_with_capacity(capacity: USize) -> Vec[T, A] {
         # ret Vec[T, A](buf=A::alloc(capacity))
+        ret Vec[T, A]()
     }
 }
 
 
 sup [T] Vec[T] {
     @public
-    fun push(&mut self, element: T) -> Void {
+    fun push_back(&mut self, element: T) -> Void {
         case self.buf.len == self.buf.mem.cap { self.grow_double() }
         self.buf.mem.place(self.buf.len, element)
         self.buf.len += 1_uz
     }
 
     @public
-    fun insert(&mut self, index: USize, element: T) -> Void {
+    fun push(&mut self, index: USize, element: T) -> Void {
         case self.buf.len == self.buf.mem.cap { self.grow_double() }
         # self.buf.shift(index, 1_uz)
         self.buf.mem.place(index, element)
         self.buf.len += 1_uz
+    }
+
+    @public
+    fun push_back_vec(&mut self, that: Vec[T]) -> Void {
+        # One time growth check
+        let required_cap = self.buf.len + that.buf.len
+        loop self.capacity() < required_cap { self.grow_double() }
+        self.buf.mem.place_mem(self.buf.len, that.buf.mem)
+        self.buf.len += that.buf.len
+    }
+
+    @public
+    fun push_vec(&mut self, index: USize, that: Vec[T]) -> Void {
+        # One time growth check
+        let required_cap = self.buf.len + that.buf.len
+        loop self.capacity() < required_cap { self.grow_double() }
+        # self.buf.shift(index, that.buf.len)
+        self.buf.mem.place_mem(index, that.buf.mem)
+        self.buf.len += that.buf.len
     }
 
     @private
@@ -66,18 +86,37 @@ sup [T] Vec[T] {
 
 sup [T] Vec[T] {
     @public
-    cor get_head_ref(&self) -> GenOpt[&T] {
+    fun pop_back(&mut self) -> Opt[T] {
+        # Remove the last element and decrease the length.
+        self.buf.len -= 1_uz
+        ret self.buf.mem.take(self.buf.len)
+    }
+
+    @public
+    fun pop(&mut self, index: USize) -> Opt[T] {
+        # Remove the nth element and decrease the length.
+        self.buf.len -= 1_uz
+        let val = self.buf.mem.take(index)
+        # self.buf.shift_back(index, 1_uz)
+        ret val
+    }
+}
+
+
+sup [T] Vec[T] {
+    @public
+    cor get_head_ref(&self) -> Gen[&T or None] {
         gen with self.get_ref(0_uz)
     }
 
     @public
-    cor get_tail_ref(&self) -> GenOpt[&T] {
+    cor get_tail_ref(&self) -> Gen[&T or None] {
         gen with self.get_ref(self.buf.len - 1_uz)
     }
 
     @public
-    cor get_ref(&self, index: USize) -> GenOpt[&T] {
-        case index >= self.buf.len { gen }
+    cor get_ref(&self, index: USize) -> Gen[&T or None] {
+        case index >= self.buf.len { gen None() }
         gen self.index_ref(index)
     }
 }
@@ -85,18 +124,18 @@ sup [T] Vec[T] {
 
 sup [T] Vec[T] {
     @public
-    cor get_head_mut(&mut self) -> GenOpt[&mut T] {
+    cor get_head_mut(&mut self) -> Gen[&mut T or None] {
         gen with self.get_mut(0_uz)
     }
 
     @public
-    cor get_tail_mut(&mut self) -> GenOpt[&mut T] {
+    cor get_tail_mut(&mut self) -> Gen[&mut T or None] {
         gen with self.get_mut(self.buf.len - 1_uz)
     }
 
     @public
-    cor get_mut(&mut self, index: USize) -> GenOpt[&mut T] {
-        case index >= self.buf.len { gen }
+    cor get_mut(&mut self, index: USize) -> Gen[&mut T or None] {
+        case index >= self.buf.len { gen None() }
         gen self.index_mut(index)
     }
 }
@@ -111,6 +150,11 @@ sup [T] Vec[T] {
     @public
     fun length(&self) -> USize {
         ret self.buf.len
+    }
+
+    @public
+    fun capacity(&self) -> USize {
+        ret self.buf.mem.cap
     }
 
     @public
@@ -167,13 +211,6 @@ sup [T] Vec[T] {
 }
 
 
-sup [T] Vec[T] ext SizedIterator[T] {
-    fun size_hint(&self) -> USize {
-        ret self.buf.len
-    }
-}
-
-
 sup [T, A] Vec[T, A] ext From[Self, Slice[T, A]] {
     fun from(that: Slice[T, A]) -> Self {
         ret Vec[T, A](buf=that)
@@ -188,21 +225,23 @@ sup [T, A, cmp n: USize] Vec[T, A] ext From[Self, Arr[T, n, A]] {
 }
 
 
+# TODO: Constrain T to be Clone
 sup [T] Vec[T] ext Clone[Out=Self] {
-    @no_impl
     fun clone(&self) -> Self {
         # ret Vec[T, A](buf=self.buf.clone())
+        ret Vec[T]()
     }
 }
 
 
+# TODO: Constrain T to be Ord
+##
 sup [T] Vec[T] ext Sortable[T] {
-    @no_impl
     fun sort(&mut self) -> Void { }
 
-    @no_impl
     fun sort_by(&mut self, compare: FunRef[(T, T), Bool]) -> Void { }
 }
+##
 
 
 sup [T] Vec[T] ext std::ops::idx::IndexMut[T, USize] {
@@ -222,9 +261,7 @@ sup [T] Vec[T] ext std::ops::idx::IndexRef[T, USize] {
 sup [T] Vec[T] ext std::ops::add::Add[Self, Ret=Self] {
     fun add(self, that: Self) -> Self {
         let mut result = self
-        loop element in that.iter_mov() {
-            result.push(element)
-        }
+        result.push_back_vec(that)
         ret result
     }
 }
@@ -232,8 +269,30 @@ sup [T] Vec[T] ext std::ops::add::Add[Self, Ret=Self] {
 
 sup [T] Vec[T] ext std::ops::add::AddAssign[Self] {
     fun add_assign(&mut self, that: Self) -> Void {
-        loop element in that.iter_mov() {
-            self.push(element)
+        self.push_back_vec(that)
+    }
+}
+
+
+# TODO: Constrain T to be Eq
+sup [T] Vec[T] ext std::ops::eq::Eq[Self] {
+    fun eq(&self, that: &Vec[T]) -> Bool {
+        case self.buf.len != that.buf.len { ret false }
+        loop i in Range[USize]::between(0_uz, self.buf.len) {
+            # TODO: Compare the values.
         }
+        ret true
+    }
+}
+
+
+# TODO: Constrain T to be Ne
+sup [T] Vec[T] ext std::ops::ne::Ne[Self] {
+    fun ne(&self, that: &Vec[T]) -> Bool {
+        case self.buf.len != that.buf.len { ret true }
+        loop i in Range[USize]::between(0_uz, self.buf.len) {
+            # TODO: Compare the values.
+        }
+        ret false
     }
 }

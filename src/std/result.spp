@@ -11,26 +11,24 @@ use std::string::Str
 @public type Res[T, E] = Pass[T] or Fail[E]
 
 
-# Todo: "T: Copy, E: Copy"
-sup [T, E] Res[T, E] ext Copy { }
+sup [T: Copy, E: Copy] Res[T, E] ext Copy { }
 
 
 sup [T, E] Res[T, E] {
     @public
     @inline
-    @no_impl
     fun ok(self) -> Opt[T] {
-        # let converted: Opt[T] = case self of {
-        #    is Pass[T](val) { Some(val) }
-        #    is Fail[E](err) { None() }
-        # }
+        ret case self of {
+           is Pass[T](val) { Some(val) }
+           else { None() }
+        }
     }
 }
 
 
 sup [T, E] Res[T, E] ext std::ops::try::Try[Pass[T], Fail[E], T] {
     fun op_is_value(&self) -> Bool {
-        ret *self is Pass[T](..)
+        ret self@ is Pass[T](..)
     }
 
     fun op_as_value(self) -> T {

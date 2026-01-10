@@ -3,6 +3,7 @@ use std::clone::Clone
 use std::cast::From
 use std::iterator::Iterator
 use std::number::U8
+use std::number::USize
 use std::ops::add::Add
 use std::ops::add::AddAssign
 use std::ops::eq::Eq
@@ -10,6 +11,7 @@ use std::ops::ne::Ne
 use std::string_view::StrView
 use std::vector::Vec
 use std::void::Void
+use std::fs::path::Path
 
 
 ##
@@ -19,6 +21,14 @@ A string type representing a sequence of bytes. This is a "higher level" abstrac
 @public
 cls Str {
     @public data: Vec[U8]
+}
+
+
+sup Str {
+    @public
+    fun new() -> Str {
+        ret Str(data=Vec[U8]::new())
+    }
 }
 
 
@@ -35,21 +45,33 @@ sup Str {
         ret Str::from("")
     }
 
-    @no_impl
+    @public
     fun split(&self, sep: U8) -> Vec[Str] {
         let mut current: Str = Str::from("")
         let mut strings = Vec[Str]::new()
         
         loop char in self.chars() {
             case char == sep {
-                strings.push(current)
+                strings.push_back(current)
                 current = Str::from("")
             }
             else {
                 current += char
             }
         }
+        ret strings
     }
+}
+
+
+sup Str {
+    @public
+    @compiler_builtin
+    fun starts_with(&self, needle: StrView) -> Bool { }
+
+    @public
+    @compiler_builtin
+    fun ends_with(&self, needle: StrView) -> Bool { }
 }
 
 
@@ -58,12 +80,39 @@ sup Str {
     cor chars(&self) -> Iterator[U8] {
         gen with self.data.clone().iter_mov()
     }
+
+    @public
+    fun length(&self) -> USize {
+        ret self.data.length()
+    }
+
+    @public
+    fun is_empty(&self) -> Bool {
+        ret self.data.is_empty()
+    }
 }
 
 
 sup Str ext From[Self, StrView] {
     @compiler_builtin
     fun from(that: StrView) -> Self { }
+}
+
+
+sup Str ext From[Self, Path] {
+    fun from(that: Path) -> Self {
+        ret that.path.clone()
+    }
+}
+
+
+sup Str ext From[Self, U8] {
+    fun from(that: U8) -> Self {
+        # Create a Str from a single Char (U8)
+        let mut str = Str::new()
+        str += that
+        ret str
+    }
 }
 
 
@@ -84,30 +133,36 @@ sup Str ext Ne[Rhs=Str] {
 
 
 sup Str ext Clone[Out=Str] {
-    @no_impl
-    fun clone(&self) -> Str { }
+    fun clone(&self) -> Str {
+        ret Str(data=self.data.clone())
+    }
 }
 
 
 sup Str ext Add[Rhs=Str, Ret=Str] {
-    @no_impl
-    fun add(self, that: Str) -> Str { }
+    fun add(self, that: Str) -> Str {
+        ret Str(data=self.data + that.data)
+    }
 }
 
 
 sup Str ext Add[Rhs=U8, Ret=Str] {
-    @no_impl
-    fun add(self, that: U8) -> Str { }
+    fun add(self, that: U8) -> Str {
+        self.data.push_back(that)
+        ret Str(data=self.data)
+    }
 }
 
 
 sup Str ext AddAssign[Rhs=Str] {
-    @no_impl
-    fun add_assign(&mut self, that: Str) -> Void { }
+    fun add_assign(&mut self, that: Str) -> Void {
+        self.data += that.data
+    }
 }
 
 
 sup Str ext AddAssign[Rhs=U8] {
-    @no_impl
-    fun add_assign(&mut self, that: U8) -> Void { }
+    fun add_assign(&mut self, that: U8) -> Void {
+        self.data.push_back(that)
+    }
 }

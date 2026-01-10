@@ -1,0 +1,307 @@
+use std::cffi::CBool
+use std::cffi::CChar
+use std::cffi::CCharPtr
+use std::cffi::CDouble
+use std::cffi::CInt
+use std::cffi::CLongLong
+use std::cffi::CSizeT
+use std::cffi::CUInt
+use std::cffi::CULongLong
+use std::cffi::CUShort
+use std::cffi::CVoid
+use std::cffi::CVoidPtr
+
+
+@ffi
+fun fd_read(buffer: &mut CCharPtr, size: CSizeT, count: CSizeT, fd: CInt) -> CSizeT { }
+
+@ffi
+fun fd_write(buffer: &CCharPtr, size: CSizeT, count: CSizeT, fd: CInt) -> CSizeT { }
+
+@ffi
+fun fd_open(path: &CCharPtr, mode: &CCharPtr) -> CInt { }
+
+@ffi
+fun fd_close(fd: CInt) -> CInt { }
+
+@ffi
+fun fd_flush(fd: CInt) -> CInt { }
+
+@ffi
+fun fd_seek(fd: CInt, offset: CLongLong, whence: CInt) -> CInt { }
+
+@ffi
+fun fd_tell(fd: CInt) -> CLongLong { }
+
+@ffi
+fun fd_truncate(fd: CInt, length: CLongLong) -> CInt { }
+
+@ffi
+fun fd_lock_ex(fd: CInt, non_blocking: CBool) -> CInt { }
+
+@ffi
+fun fd_lock_sh(fd: CInt, non_blocking: CBool) -> CInt { }
+
+@ffi
+fun fd_unlock(fd: CInt) -> CInt { }
+
+@ffi
+fun mem_alloc[T](size: CSizeT) -> CVoidPtr[T] { }
+
+@ffi
+fun mem_calloc[T](num: CSizeT, size: CSizeT) -> CVoidPtr[T] { }
+
+@ffi
+fun mem_dealloc[T](ptr: CVoidPtr[T]) -> CVoid { }
+
+@ffi
+fun mem_realloc[T](ptr: CVoidPtr[T], new_size: CSizeT) -> CVoidPtr[T] { }
+
+@ffi
+fun net_sock_init(domain: CInt, type_: CInt, protocol: CInt) -> CInt { }
+
+@ffi
+fun net_sock_send(socket_fd: CInt, data: &CCharPtr, size: CSizeT) -> CLongLong { }
+
+@ffi
+fun net_sock_recv(socket_fd: CInt, buffer: &mut CCharPtr, size: CSizeT) -> CLongLong { }
+
+@ffi
+fun net_sock_conn(socket_fd: CInt, host: &CCharPtr, port: CUShort) -> CInt { }
+
+@ffi
+fun net_sock_bind(socket_fd: CInt, host: &CCharPtr, port: CUShort) -> CInt { }
+
+@ffi
+fun net_sock_listen(socket_fd: CInt, backlong: CInt) -> CInt { }
+
+@ffi
+fun net_sock_accept(socket_fd: CInt) -> CInt { }
+
+@ffi
+fun net_sock_close(socket_fd: CInt) -> CInt { }
+
+@ffi
+fun net_sock_sendto(socket_fd: CInt, data: &CCharPtr, size: CSizeT, host: &CCharPtr, port: CUShort) -> CLongLong { }
+
+@ffi
+fun net_sock_recvfrom(socket_fd: CInt, buffer: &mut CCharPtr, size: CSizeT, host_buffer: &mut CCharPtr, port: &mut CUShort) -> CLongLong { }
+
+@ffi
+fun net_sock_set_nonblocking(socket_fd: CInt, non_blocking: CBool) -> CInt { }
+
+@ffi
+fun net_sock_set_recv_timeout(socket_fd: CInt, timeout_ms: CInt) -> CInt { }
+
+@ffi
+fun net_sock_set_send_timeout(socket_fd: CInt, timeout_ms: CInt) -> CInt { }
+
+@ffi
+fun net_sock_set_reuseaddr(socket_fd: CInt, reuse: CBool) -> CInt { }
+
+@ffi
+fun net_sock_set_keepalive(socket_fd: CInt, keepalive: CBool) -> CInt { }
+
+@ffi
+fun net_sock_set_nodelay(socket_fd: CInt, nodelay: CBool) -> CInt { }
+
+@ffi
+fun time_now_ns(clock: CInt) -> CLongLong { }
+
+@ffi
+fun time_get_local_tz_offset_seconds() -> CLongLong { }
+
+@ffi
+fun time_get_local_tz_name(buffer: &mut CCharPtr) -> CInt { }
+
+@ffi
+fun time_sleep_ns(nanoseconds: CLongLong) -> CInt { }
+
+@ffi
+fun proc_get_pid() -> CInt { }
+
+@ffi
+fun proc_get_parent_pid() -> CInt { }
+
+@ffi
+fun proc_set_env(key: &CCharPtr, value: &CCharPtr, overwrite: CBool) -> CInt { }
+
+@ffi
+fun proc_get_env(key: &CCharPtr) -> CCharPtr { }
+
+@ffi
+fun proc_unset_env(key: &CCharPtr) -> CInt { }
+
+@ffi
+fun proc_exec(path: &CCharPtr, argv: &CCharPtr, env: &CCharPtr) -> CInt { }
+
+@ffi
+fun proc_wait(pid: CInt) -> CInt { }
+
+@ffi
+fun proc_kill(pid: CInt) -> CInt { }
+
+@ffi
+fun proc_is_running(pid: CInt) -> CInt { }
+
+@ffi
+fun proc_get_cwd(buffer: &mut CCharPtr) -> CVoid { }
+
+@ffi
+fun proc_set_cwd(path: &CCharPtr) -> CInt { }
+
+@ffi
+fun rng_seed(seed: CULongLong) -> CVoid { }
+
+@ffi
+fun rng_next_u32() -> CULongLong { }
+
+@ffi
+fun rng_next_double() -> CDouble { }
+
+@ffi
+fun rng_fill_bytes(buffer: &mut CCharPtr, size: CSizeT) -> CVoid { }
+
+@ffi
+fun fs_exists(path: &CCharPtr) -> CInt { }
+
+@ffi
+fun fs_is_file(path: &CCharPtr) -> CInt { }
+
+@ffi
+fun fs_is_dir(path: &CCharPtr) -> CInt { }
+
+@ffi
+fun fs_is_symlink(path: &CCharPtr) -> CInt { }
+
+@ffi
+fun fs_file_size(path: &CCharPtr) -> CLongLong { }
+
+@ffi
+fun fs_remove(path: &CCharPtr) -> CInt { }
+
+@ffi
+fun fs_rename(old_path: &CCharPtr, new_path: &CCharPtr) -> CInt { }
+
+@ffi
+fun fs_mkdir(path: &CCharPtr, mode: CUInt) -> CInt { }
+
+@ffi
+fun fs_rmdir(path: &CCharPtr) -> CInt { }
+
+@ffi
+fun fs_chmod(path: &CCharPtr, mode: CUInt) -> CInt { }
+
+@ffi
+fun fs_symlink_target(path: &CCharPtr, buffer: &mut CCharPtr) -> CInt { }
+
+@ffi
+fun sys_cpu_count() -> CInt { }
+
+@ffi
+fun sys_page_size() -> CLongLong { }
+
+@ffi
+fun sys_thread_id() -> CULongLong { }
+
+@ffi
+fun thread_spawn[F](start_routine: F) -> CInt { }
+
+@ffi
+fun thread_join(thread_id: CInt) -> CInt { }
+
+@ffi
+fun thread_detach(thread_id: CInt) -> CInt { }
+
+@ffi
+fun thread_kill(thread_id: CInt) -> CInt { }
+
+@ffi
+fun thread_cancel(thread_id: CInt) -> CInt { }
+
+@ffi
+fun thread_equal(thread_id_1: CInt, thread_id_2: CInt) -> CInt { }
+
+@ffi
+fun thread_yield() -> CInt { }
+
+@ffi
+fun thread_sleep_ms(milliseconds: CLongLong) -> CInt { }
+
+@ffi
+fun thread_get_id() -> CInt { }
+
+@ffi
+fun mutex_create() -> CInt { }
+
+@ffi
+fun mutex_lock(mutex_id: CInt) -> CInt { }
+
+@ffi
+fun mutex_try_lock(mutex_id: CInt) -> CInt { }
+
+@ffi
+fun mutex_unlock(mutex_id: CInt) -> CInt { }
+
+@ffi
+fun mutex_destroy(mutex_id: CInt) -> CInt { }
+
+@ffi
+fun condvar_create() -> CInt { }
+
+@ffi
+fun condvar_wait(condvar_id: CInt, mutex_id: CInt) -> CInt { }
+
+@ffi
+fun condvar_signal(condvar_id: CInt) -> CInt { }
+
+@ffi
+fun condvar_broadcast(condvar_id: CInt) -> CInt { }
+
+@ffi
+fun condvar_destroy(condvar_id: CInt) -> CInt { }
+
+@ffi
+fun rwlock_create() -> CInt { }
+
+@ffi
+fun rwlock_read_lock(rwlock_id: CInt) -> CInt { }
+
+@ffi
+fun rwlock_write_lock(rwlock_id: CInt) -> CInt { }
+
+@ffi
+fun rwlock_try_read_lock(rwlock_id: CInt) -> CInt { }
+
+@ffi
+fun rwlock_try_write_lock(rwlock_id: CInt) -> CInt { }
+
+@ffi
+fun rwlock_unlock(rwlock_id: CInt) -> CInt { }
+
+@ffi
+fun rwlock_destroy(rwlock_id: CInt) -> CInt { }
+
+@ffi
+fun barrier_create(count: CUInt) -> CInt { }
+
+@ffi
+fun barrier_wait(barrier_id: CInt) -> CInt { }
+
+@ffi
+fun barrier_destroy(barrier_id: CInt) -> CInt { }
+
+@ffi
+fun spinlock_create() -> CInt { }
+
+@ffi
+fun spinlock_lock(spinlock_id: CInt) -> CInt { }
+
+@ffi
+fun spinlock_try_lock(spinlock_id: CInt) -> CInt { }
+
+@ffi
+fun spinlock_unlock(spinlock_id: CInt) -> CInt { }
+
+@ffi
+fun spinlock_destroy(spinlock_id: CInt) -> CInt { }

@@ -1,0 +1,57 @@
+use std::boolean::Bool
+use std::void::Void
+use std::time::duration::Duration
+use std::time::time_point::TimePoint
+
+
+@public
+cls Timer {
+    @public start_time: TimePoint
+    @public paused_duration: Duration
+    @public running: Bool
+}
+
+
+sup Timer {
+    @public
+    fun start() -> Timer {
+        ret Timer(
+            start_time=TimePoint::now(),
+            paused_duration=Duration::from_seconds(0_s64),
+            running=true)
+    }
+
+    @public
+    fun stop(&mut self) -> Void {
+        case self.running.not { ret }
+        let elapsed = TimePoint::now() - self.start_time
+        self.paused_duration = self.paused_duration + elapsed
+        self.running = false
+    }
+
+    @public
+    fun resume(&mut self) -> Void {
+        case self.running { ret }
+        self.start_time = TimePoint::now()
+        self.running = true
+    }
+
+    @public
+    fun reset(&mut self) -> Void {
+        self.start_time = TimePoint::now()
+        self.paused_duration = Duration::from_seconds(0_s64)
+        self.running = true
+    }
+
+    @public
+    fun elapsed(&self) -> Duration {
+        ret case self.running {
+            let now = TimePoint::now()
+            let elapsed = now - self.start_time
+            self.paused_duration + elapsed
+        }
+        else {
+            self.paused_duration
+        }
+    }
+}

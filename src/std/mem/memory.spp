@@ -15,6 +15,14 @@ cls Memory[T, A: Alloc[T] = GlobalAlloc[T]] {
 }
 
 
+sup [T, A] Memory[T, A] {
+    @public
+    fun new(cap: USize) -> Memory[T, A] {
+        ret Memory[T, A](cap)
+    }
+}
+
+
 sup [T] Memory[T] {
     @public type Element = T
 
@@ -34,11 +42,15 @@ sup [T] Memory[T] {
     @protected
     @compiler_builtin
     fun place(&mut self, index: USize, value: T) -> Void { }
+
+    @protected
+    @compiler_builtin
+    fun place_mem(&mut self, index: USize, value: Memory[T]) -> Void { }
 }
 
 
 sup [T] Memory[T] ext Clone[Out=Memory[T]] {
-    @no_impl
+    @compiler_builtin
     fun clone(&self) -> Memory[T] { }
 }
 

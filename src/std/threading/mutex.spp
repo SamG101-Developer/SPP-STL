@@ -1,58 +1,67 @@
-use std::generator::GenOnce
-use std::generator::GenOpt
-use std::number::U64
+use std::number::S32
+use std::result::Fail
+use std::result::Pass
+use std::result::Res
+use std::string_view::StrView
 use std::void::Void
 
 
 @public
-cls Mutex[T] {
-    @public unique_id: U64
-    @public native_id: U64
-    value: T
+cls Mutex {
+    @public id: S32
 }
 
 
-sup [T] Mutex[T] {
+@public
+cls MutexLockGard {
+    @public id: S32
+}
+
+
+@public
+cls LockErr {
+    @public msg: StrView
+}
+
+
+sup Mutex {
     @public
-    fun new(value: T) -> Mutex[T] {
-        let unique_id = 0_u64  # libc::rand()
-        let native_id = 0_u64  # pthread::pthread_create_mutex()
-        ret Mutex(unique_id, native_id, value)
+    fun new() -> Res[Mutex, LockErr] {
+        # Create a new mutex using the sppc threading API.
+        let id = sppc::mutex_create()
+        case id == 0 { ret Fail(err=LockErr(msg="Failed to create mutex")) }
+        ret Pass(val=Mutex(id))
     }
 
     @public
-    cor lock_ref(&mut self) -> GenOnce[&T] {
-        # pthread::pthread_mutex_lock(&mut self.native_id)
-        gen &self.value
+    fun lock(&self) -> Res[MutexLockGard, LockErr] {
+        # Lock the mutex using the sppc threading API.
+        let guard_id = sppc::mutex_lock(self.id)
+        case guard_id == 0 { ret Fail(err=LockErr(msg="Failed to lock mutex")) }
+        ret Pass(val=MutexLockGard(id=guard_id))
     }
 
     @public
-    cor lock_mut(&mut self) -> GenOnce[&mut T] {
-        # pthread::pthread_mutex_lock(&mut self.native_id)
-        gen &mut self.value
+    fun try_lock(&self) -> Res[MutexLockGard, LockErr] {
+        # Try to lock the mutex using the sppc threading API.
+        let guard_id = sppc::mutex_try_lock(self.id)
+        case guard_id == 0 { ret Fail(err=LockErr(msg="Failed to try to lock mutex")) }
+        ret Pass(val=MutexLockGard(id=guard_id))
     }
 
     @public
-    cor try_lock_ref(&mut self) -> GenOpt[&T] {
-        # pthread::pthread_mutex_trylock(&mut self.native_id)
-        gen &self.value
-    }
-
-    @public
-    cor try_lock_mut(&mut self) -> GenOpt[&mut T] {
-        # pthread::pthread_mutex_trylock(&mut self.native_id)
-        gen &mut self.value
-    }
-
-    @public
-    fun unlock(&mut self) -> Void {
-        # pthread::pthread_mutex_unlock(&mut self.native_id)
+    fun unlock(&self) -> Res[Void, LockErr] {
+        # Unlock the mutex using the sppc threading API.
+        let val = sppc::mutex_unlock(self.id)
+        case val != 0 { ret Fail(err=LockErr(msg="Failed to unlock mutex")) }
+        ret Pass[Void]()
     }
 }
 
 
-sup [T] Mutex[T] ext std::ops::del::Del {
-    fun del(self) -> Void {
-        # pthread::pthread_mutex_destroy(self.native_identifier)
+sup Mutex ext std::ops::del::Del {
+    fun del(&mut self) -> Void {
+        # Destroy the mutex using the sppc threading API.
+        sppc::mutex_destroy(self.id)
     }
 }

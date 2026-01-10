@@ -5,140 +5,254 @@ use std::option::None
 use std::option::Opt
 use std::option::Some
 use std::shared::Shared
+use std::vector::Vec
 use std::void::Void
 
 
 cls LinkedListNode[T] {
     val: T
-    next: Opt[Shared[LinkedListNode[T]]]
+    prev: Opt[USize]  # Index of the previous node in the list.
+    next: Opt[USize]  # Index of the next node in the list.
 }
 
 
 cls LinkedList[T] {
-    head: Opt[Shared[LinkedListNode[T]]]
-    tail: Opt[Shared[LinkedListNode[T]]]
-    len: USize
-}
-
-##
-
-sup [T] LinkedList[T] {
-    type NodeType = Shared[LinkedListNode[T]]
+    head: Opt[USize]
+    tail: Opt[USize]
+    nodes: Vec[LinkedListNode[T]]
 }
 
 
 sup [T] LinkedList[T] {
     @public
-    @no_impl
-    fun new() -> LinkedList[T] {
-        # ret LinkedList[T](head=None(), tail=None(), len=0_uz)
+    fun push_back(&mut self, value: T) -> USize {
+        # Create a new node and add it to the end of the node vector.
+        let idx = self.nodes.length()
+        let new_node = LinkedListNode(val=value, prev=self.tail, next=None())
+        self.nodes.push_back(new_node)
+
+        # Update the previous tail node to point to the new node.
+        case self.tail is Some[USize](val as tail_node) { self.nodes[mut tail_node].next = Some(val=idx) }
+        self.tail = Some(val=idx)
+
+        # If the list was empty, set the head to the new node.
+        case self.head is None() { self.head = Some(val=idx) }
+        ret idx
     }
 
     @public
-    fun push_back(&mut self, val: T) -> Void {
-        let new_node = Self::NodeType::new(LinkedListNode(val=val, next=None()))
-        case self.tail of {
-            is None() {
-                self.head = Some(val=new_node)
-                self.tail = Some(val=new_node)
-            }
-            is Some(val as tail_node) {
-                tail_node.next = Some(val=new_node)
-                self.tail = Some(val=new_node)
-            }
-        }
-        self.len += 1_uz
+    fun push_front(&mut self, value: T) -> USize {
+        # Create a new node and add it to the front of the node vector.
+        let idx = self.nodes.length()
+        let new_node = LinkedListNode(val=value, prev=None(), next=self.head)
+        self.nodes.push_back(new_node)
+
+        # Update the previous head node to point back to the new node.
+        case self.head is Some[USize](val as head_node) { self.nodes[mut head_node].prev = Some(val=idx) }
+        self.head = Some(val=idx)
+
+        # If the list was empty, set the tail to the new node.
+        case self.tail is None() { self.tail = Some(val=idx) }
+        ret idx
     }
 
     @public
-    fun push_front(&mut self, val: T) -> Void {
-        let new_node = Self::NodeType::new(LinkedListNode(val=val, next=self.head))
-        self.head = Some(val=new_node)
-        case self.tail is None() {
-            self.tail = Some(val=new_node)
-        }
-    }
+    fun push(&mut self, index: USize, value: T) -> USize {
+        # Create a new node.
+        let idx = self.nodes.length()
 
-    @public
-    fun push(&mut self, index: USize, val: T) -> Void {
-        # For empty lists, push to the front.
+        # Insert the new node at the specified index.
         case index == 0_uz {
-            self.push_front(val)
-            ret
+            # Inserting at the front.
+            self.push_front(value)
+        }
+        else case index >= self.nodes.length() - 1_uz {
+            # Inserting at the back.
+            self.push_back(value)
+        }
+        else {
+            # Inserting in the middle.
+            let next_node = self.nodes[index]
+            let prev_node = self.nodes[next_node.prev.unwrap()]
+            let new_node = LinkedListNode(val=value, prev=None(), next=None())
+            self.nodes.push_back(new_node)
+
+            # Update borrows.
+            self.nodes[mut idx].prev = Some(val=next_node.prev.unwrap())
+            self.nodes[mut idx].next = Some(val=index)
+            self.nodes[mut prev_node.prev.unwrap()].next = Some(val=idx)
+            self.nodes[mut index].prev = Some(val=idx)
         }
 
-        # For indices greater than or equal to the length, push to the back.
-        case index >= self.len {
-            self.push_back(val)
-            ret
+        ret idx
+    }
+
+    @public
+    fun push_back_list(&mut self, other: &mut LinkedList[T]) -> Void {
+        # Move all the nodes from the other list to the end of this list, in O(1) time.
+        case other.head is None() { ret }  # Other list is empty.
+        case self.tail is None() {
+            # This list is empty, so just take the other list's nodes.
+            self.head = other.head
+            self.tail = other.tail
+            self.nodes = other.take_nodes()
         }
+        else {
+            # Link the two lists together.
+            let self_tail_idx = self.tail.unwrap()
+            let other_head_idx = other.head.unwrap()
 
-        # Define variables for looping.
-        let mut current = self.head
-        let mut prev: Opt[Self::NodeType] = None()
-        let mut i = 0_uz
+            self.nodes[mut self_tail_idx].next = Some(val=other_head_idx)
+            other.nodes[mut other_head_idx].prev = Some(val=self_tail_idx)
 
-        loop current is Some[Self::NodeType](val as node) {
-            case i == index {
-                let new_node = Self::NodeType::new(LinkedListNode(val=val, next=Some(val=node)))
-                case prev is Some[Self::NodeType](val as prev_node) {
-                    prev_node.next = Some(val=new_node)
-                }
-                self.len += 1_uz
-                ret
-            }
-            prev = current
-            current = node.next
-            i += 1_uz
+            self.tail = other.tail
+            self.nodes.push_back_vec(other.take_nodes())
         }
     }
 }
 
 
 sup [T] LinkedList[T] {
+    @public
+    fun pop_back(&mut self) -> Opt[T] {
+        case self.tail is None() { ret None() }
+
+        # Get the current tail node.
+        let tail_idx = self.tail.unwrap()
+        let tail_node = self.nodes.pop(tail_idx)?
+        let val = tail_node.val
+
+        # Update the tail to the previous node.
+        self.tail = tail_node.prev
+        case self.tail of {
+            is Some[USize](val as new_tail) { self.nodes[mut new_tail].next = None() }
+            is None() { self.head = None() }
+        }
+
+        ret Some(val)
+    }
+
+    @public
+    fun pop_front(&mut self) -> Opt[T] {
+        case self.head is None() { ret None() }
+
+        # Get the current head node.
+        let head_idx = self.head.unwrap()
+        let head_node = self.nodes.pop(head_idx)?
+        let val = head_node.val
+
+        # Update the head to the next node.
+        self.head = head_node.next
+        case self.head of {
+            is Some[USize](val as new_head) { self.nodes[mut new_head].prev = None() }
+            is None() { self.tail = None() }
+        }
+
+        ret Some(val)
+    }
+
+    @public
+    fun pop(&mut self, index: USize) -> Opt[T] {
+        case index >= self.nodes.length() { ret None() }
+        let node = self.nodes.pop(index)?
+        let val = node.val
+
+        # Update the previous node to point to the next node.
+        case node.prev is Some[USize](val as prev_node) { self.nodes[mut prev_node].next = node.next }
+        case node.next is Some[USize](val as next_node) { self.nodes[mut next_node].prev = node.prev }
+
+        # Update head and tail if necessary.
+        case self.head is Some[USize](val as head_idx) {
+            case head_idx == index { self.head = node.next }
+        }
+        case self.tail is Some[USize](val as tail_idx) {
+            case tail_idx == index { self.tail = node.prev }
+        }
+
+        ret Some(val)
+    }
+
+    @public
     fun clear(&mut self) -> Void {
+        # Reset head and tail, and clear nodes.
         self.head = None()
         self.tail = None()
-        self.len = 0_uz
-    }
-
-    fun length(&self) -> USize {
-        ret self.len
-    }
-
-    fun is_empty(&self) -> Bool {
-        ret self.len == 0_uz
+        self.nodes.clear()
     }
 }
 
 
 sup [T] LinkedList[T] {
-    cor iter_mov(self) -> Iterator[T] {
-        # Iterate over the list nodes, moving out the values.
-        let mut current = self.head
-        loop current is Some[Self::NodeType](val as node) {
-            gen node.val
-            current = node.next
-        }
+    @public
+    fun is_empty(&self) -> Bool {
+        # The list is empty if the head is None.
+        ret self.head is None()
     }
 
-    cor iter_mut(&mut self) -> Iterator[&mut T] {
-        # Iterate over the list nodes, yielding mutable references to the values.
-        let mut current = self.head
-        loop current is Some[Self::NodeType](val as node) {
-            gen &mut node.val
-            current = node.next
-        }
-    }
-    
-    cor iter_ref(&self) -> Iterator[&T] {
-        # Iterate over the list nodes, yielding references to the values.
-        let mut current = self.head
-        loop current is Some[Self::NodeType](val as node) {
-            gen &node.val
-            current = node.next
-        }
+    @public
+    fun length(&self) -> USize {
+        # The length is the number of nodes in the list.
+        ret self.nodes.length()
     }
 }
 
-##
+
+sup [T] LinkedList[T] {
+    @private
+    fun take_nodes(&mut self) -> Vec[LinkedListNode[T]] {
+        # Reset head and tail.
+        self.head = None()
+        self.tail = None()
+
+        # Take ownership of the nodes vector and reset the list.
+        let nodes = std::mem::ops::replace(&mut self.nodes, Vec[LinkedListNode[T]]::new())
+        ret nodes
+    }
+}
+
+
+sup [T] LinkedList[T] {
+    @public
+    cor iter_mut(&mut self) -> Iterator[&mut T] {
+        # Start from the head and traverse the list.
+        let mut current = self.head
+        loop current is Some[USize](val as idx) {
+            let mut node = self.nodes[mut idx]
+            gen &mut node.val
+            # current = node.next  TODO: Needs anti-flow support
+        }
+    }
+
+    @public
+    cor iter_ref(&self) -> Iterator[&T] {
+        # Start from the head and traverse the list.
+        let mut current = self.head
+        loop current is Some[USize](val as idx) {
+            let node = self.nodes[idx]
+            gen &node.val
+            # current = node.next  TODO: Needs anti-flow support
+        }
+    }
+
+    @public
+    cor reverse_iter_mut(&mut self) -> Iterator[&mut T] {
+        # Start from the tail and traverse the list backwards.
+        let mut current = self.tail
+        loop current is Some[USize](val as idx) {
+            let mut node = self.nodes[mut idx]
+            gen &mut node.val
+            # current = node.prev  TODO: Needs anti-flow support
+        }
+    }
+
+    @public
+    cor reverse_iter_ref(&self) -> Iterator[&T] {
+        # Start from the tail and traverse the list backwards.
+        let mut current = self.tail
+        loop current is Some[USize](val as idx) {
+            let node = self.nodes[idx]
+            gen &node.val
+            # current = node.prev  TODO: Needs anti-flow support
+        }
+    }
+}

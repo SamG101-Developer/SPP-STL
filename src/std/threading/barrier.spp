@@ -1,0 +1,43 @@
+use std::number::U32
+use std::number::S32
+use std::result::Fail
+use std::result::Pass
+use std::result::Res
+use std::void::Void
+use std::threading::mutex::LockErr
+
+
+@public
+cls Barrier {
+    @public id: S32
+    @public total: U32
+    @public count: U32
+}
+
+
+sup Barrier {
+    @public
+    fun new(total: U32) -> Res[Barrier, LockErr] {
+        # Create a new barrier using the sppc threading API.
+        let id = sppc::barrier_create(total)
+        case id == 0 { ret Fail(err=LockErr(msg="Failed to create barrier")) }
+        ret Pass(val=Barrier(id, total=total, count=0_u32))
+    }
+
+    @public
+    fun wait(&mut self) -> Res[Void, LockErr] {
+        # Wait at the barrier until all threads have reached this point.
+        let err = sppc::barrier_wait(self.id)
+        case err != 0 { ret Fail(err=LockErr(msg="Failed to wait at barrier")) }
+        self.count += 1_u32
+        ret Pass[Void]()
+    }
+}
+
+
+sup Barrier ext std::ops::del::Del {
+    fun del(&mut self) -> Void {
+        # Destroy the barrier when it is no longer needed.
+        sppc::barrier_destroy(self.id)
+    }
+}

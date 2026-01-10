@@ -1,10 +1,16 @@
-use std::bignum::biguint::BigUInt
 use std::boolean::Bool
 use std::cast::From
-use std::number::S32
+use std::clone::Clone
+use std::limits::Limits
+use std::number::U32
+use std::number::USize
 use std::void::Void
+use std::bignum::biguint::BigUInt
+use std::num::sized_integer_unsigned::SizedIntegerUnsigned
+use std::num::sized_integer_signed::SizedIntegerSigned
 
 
+# TODO: Move implementations like Add into AddAssign, then for Add, just clone ans assign.
 @public
 cls BigInt {
     sign: Bool
@@ -12,151 +18,345 @@ cls BigInt {
 }
 
 
-sup BigInt ext From[Self, S32] {
-    @no_impl
-    fun from(that: S32) -> Self { }
+sup [cmp bit_width: U32] BigInt ext From[Self, SizedIntegerUnsigned[bit_width]] {
+    fun from(that: SizedIntegerUnsigned[bit_width]) -> Self {
+        ret BigInt(sign=false, data=BigUInt::from(that))
+    }
+}
+
+
+sup [cmp bit_width: U32] BigInt ext From[Self, SizedIntegerSigned[bit_width]] {
+    fun from(that: SizedIntegerSigned[bit_width]) -> Self {
+        let unsigned = SizedIntegerUnsigned[bit_width]::from(that)
+        ret BigInt(sign=that.is_negative(), data=BigUInt::from(unsigned))
+    }
+}
+
+
+sup BigInt {
+    @public
+    fun is_even(&self) -> Bool {
+        ret self.data.is_even()
+    }
+
+    @public
+    fun is_odd(&self) -> Bool {
+        ret self.data.is_odd()
+    }
+
+    @private
+    fun bit_length(&self) -> USize {
+        ret self.data.bit_length()
+    }
+}
+
+
+sup BigInt ext Clone[Self] {
+    fun clone(&self) -> Self {
+        ret BigInt(sign=self.sign, data=self.data.clone())
+    }
 }
 
 
 sup BigInt ext std::ops::bit_and::BitAnd[Rhs=Self, Ret=Self] {
-    @no_impl
-    fun bit_and(self, that: Self) -> Self { }
+    fun bit_and(self, that: Self) -> Self {
+        # Forward to BigUInt implementation for magnitude operation
+        let result_data = self.data.bit_and(that.data)
+        let result_sign = self.sign and that.sign
+        ret BigInt(sign=result_sign, data=result_data)
+    }
 }
 
 
 sup BigInt ext std::ops::bit_ior::BitIor[Rhs=Self, Ret=Self] {
-    @no_impl
-    fun bit_ior(self, that: Self) -> Self { }
+    fun bit_ior(self, that: Self) -> Self {
+        # Forward to BigUInt implementation for magnitude operation
+        let result_data = self.data.bit_ior(that.data)
+        let result_sign = self.sign or that.sign
+        ret BigInt(sign=result_sign, data=result_data)
+    }
 }
 
 
 sup BigInt ext std::ops::bit_xor::BitXor[Rhs=Self, Ret=Self] {
-    @no_impl
-    fun bit_xor(self, that: Self) -> Self { }
+    fun bit_xor(self, that: Self) -> Self {
+        # Forward to BigUInt implementation for magnitude operation
+        let result_data = self.data.bit_xor(that.data)
+        let result_sign = self.sign != that.sign
+        ret BigInt(sign=result_sign, data=result_data)
+    }
 }
 
 
 sup BigInt ext std::ops::bit_not::BitNot[Ret=Self] {
-    @no_impl
-    fun bit_not(self) -> Self { }
+    fun bit_not(self) -> Self {
+        # Forward to BigUInt implementation for magnitude operation
+        let result_data = self.data.bit_not()
+        let result_sign = self.sign.not
+        ret BigInt(sign=result_sign, data=result_data)
+    }
 }
 
 
 sup BigInt ext std::ops::bit_shl::BitShl[Rhs=Self, Ret=Self] {
-    @no_impl
-    fun bit_shl(self, that: Self) -> Self { }
+    fun bit_shl(self, that: Self) -> Self {
+        # Forward to BigUInt implementation for magnitude operation
+        let result_data = self.data.bit_shl(that.data)
+        ret BigInt(sign=self.sign, data=result_data)
+    }
 }
 
 
 sup BigInt ext std::ops::bit_shr::BitShr[Rhs=Self, Ret=Self] {
-    @no_impl
-    fun bit_shr(self, that: Self) -> Self { }
+    fun bit_shr(self, that: Self) -> Self {
+        # Forward to BigUInt implementation for magnitude operation
+        let result_data = self.data.bit_shr(that.data)
+        ret BigInt(sign=self.sign, data=result_data)
+    }
 }
 
 
 sup BigInt ext std::ops::add::Add[Rhs=Self, Ret=Self] {
-    @no_impl
-    fun add(self, that: Self) -> Self { }
+    fun add(self, that: Self) -> Self {
+        # Handle sign cases
+        ret case self.sign == that.sign {
+            let result_data = self.data.add(that.data)
+            BigInt(sign=self.sign, data=result_data)
+        }
+        else case self.data >= that.data {
+            let result_data = self.data.sub(that.data)
+            BigInt(sign=self.sign, data=result_data)
+        }
+        else {
+            let result_data = that.data.sub(self.data)
+            BigInt(sign=that.sign, data=result_data)
+        }
+    }
 }
 
 
 sup BigInt ext std::ops::sub::Sub[Rhs=Self, Ret=Self] {
-    @no_impl
-    fun sub(self, that: Self) -> Self { }
+    fun sub(self, that: Self) -> Self {
+        # Handle sign cases
+        ret case self.sign != that.sign {
+            let result_data = self.data.add(that.data)
+            BigInt(sign=self.sign, data=result_data)
+        }
+        else case self.data >= that.data {
+            let result_data = self.data.sub(that.data)
+            BigInt(sign=self.sign, data=result_data)
+        }
+        else {
+            let result_data = that.data.sub(self.data)
+            BigInt(sign=self.sign.not, data=result_data)
+        }
+    }
 }
 
 
 sup BigInt ext std::ops::mul::Mul[Rhs=Self, Ret=Self] {
-    @no_impl
-    fun mul(self, that: Self) -> Self { }
+    fun mul(self, that: Self) -> Self {
+        let result_data = self.data.mul(that.data)
+        let result_sign = self.sign != that.sign
+        ret BigInt(sign=result_sign, data=result_data)
+    }
 }
 
 
 sup BigInt ext std::ops::div::Div[Rhs=Self, Ret=Self] {
-    @no_impl
-    fun div(self, that: Self) -> Self { }
+    fun div(self, that: Self) -> Self {
+        let result_data = self.data.div(that.data)
+        let result_sign = self.sign != that.sign
+        ret BigInt(sign=result_sign, data=result_data)
+    }
 }
 
 
 sup BigInt ext std::ops::rem::Rem[Rhs=Self, Ret=Self] {
-    @no_impl
-    fun rem(self, that: Self) -> Self { }
+    fun rem(self, that: Self) -> Self {
+        let result_data = self.data.rem(that.data)
+        ret BigInt(sign=self.sign, data=result_data)
+    }
 }
 
 
 sup BigInt ext std::ops::pow::Pow[Rhs=Self, Ret=Self] {
-    @no_impl
-    fun pow(self, that: Self) -> Self { }
+    fun pow(self, that: Self) -> Self {
+        let result_sign = case that.is_even() { true } else { self.sign }
+        let result_data = self.data.pow(that.data)
+        ret BigInt(sign=result_sign, data=result_data)
+    }
+}
+
+
+sup BigInt ext std::ops::bit_and::BitAndAssign[Rhs=Self] {
+    fun bit_and_assign(&mut self, that: Self) -> Void {
+        let result = self.clone().bit_and(that)
+        self.sign = result.sign
+        self.data = result.data
+    }
+}
+
+
+sup BigInt ext std::ops::bit_ior::BitIorAssign[Rhs=Self] {
+    fun bit_ior_assign(&mut self, that: Self) -> Void {
+        let result = self.clone().bit_ior(that)
+        self.sign = result.sign
+        self.data = result.data
+    }
+}
+
+
+sup BigInt ext std::ops::bit_xor::BitXorAssign[Rhs=Self] {
+    fun bit_xor_assign(&mut self, that: Self) -> Void {
+        let result = self.clone().bit_xor(that)
+        self.sign = result.sign
+        self.data = result.data
+    }
+}
+
+
+sup BigInt ext std::ops::bit_shl::BitShlAssign[Rhs=Self] {
+    fun bit_shl_assign(&mut self, that: Self) -> Void {
+        let result = self.clone().bit_shl(that)
+        self.sign = result.sign
+        self.data = result.data
+    }
+}
+
+
+sup BigInt ext std::ops::bit_shr::BitShrAssign[Rhs=Self] {
+    fun bit_shr_assign(&mut self, that: Self) -> Void {
+        let result = self.clone().bit_shr(that)
+        self.sign = result.sign
+        self.data = result.data
+    }
 }
 
 
 sup BigInt ext std::ops::add::AddAssign[Rhs=Self] {
-    @no_impl
-    fun add_assign(&mut self, that: Self) -> Void { }
+    fun add_assign(&mut self, that: Self) -> Void {
+        let result = self.clone().add(that)
+        self.sign = result.sign
+        self.data = result.data
+    }
 }
 
 
 sup BigInt ext std::ops::sub::SubAssign[Rhs=Self] {
-    @no_impl
-    fun sub_assign(&mut self, that: Self) -> Void { }
+    fun sub_assign(&mut self, that: Self) -> Void {
+        let result = self.clone().sub(that)
+        self.sign = result.sign
+        self.data = result.data
+    }
 }
 
 
 sup BigInt ext std::ops::mul::MulAssign[Rhs=Self] {
-    @no_impl
-    fun mul_assign(&mut self, that: Self) -> Void { }
+    fun mul_assign(&mut self, that: Self) -> Void {
+        let result = self.clone().mul(that)
+        self.sign = result.sign
+        self.data = result.data
+    }
 }
 
 
 sup BigInt ext std::ops::div::DivAssign[Rhs=Self] {
-    @no_impl
-    fun div_assign(&mut self, that: Self) -> Void { }
+    fun div_assign(&mut self, that: Self) -> Void {
+        let result = self.clone().div(that)
+        self.sign = result.sign
+        self.data = result.data
+    }
 }
 
 
 sup BigInt ext std::ops::rem::RemAssign[Rhs=Self] {
-    @no_impl
-    fun rem_assign(&mut self, that: Self) -> Void { }
+    fun rem_assign(&mut self, that: Self) -> Void {
+        let result = self.clone().rem(that)
+        self.sign = result.sign
+        self.data = result.data
+    }
 }
 
 
 sup BigInt ext std::ops::pow::PowAssign[Rhs=Self] {
-    @no_impl
-    fun pow_assign(&mut self, that: Self) -> Void { }
+    fun pow_assign(&mut self, that: Self) -> Void {
+        let result = self.clone().pow(that)
+        self.sign = result.sign
+        self.data = result.data
+    }
 }
 
 
 sup BigInt ext std::ops::eq::Eq[Rhs=Self] {
-    @no_impl
-    fun eq(&self, that: &BigInt) -> Bool { }
+    fun eq(&self, that: &BigInt) -> Bool {
+        ret self.sign == that.sign and self.data.eq(&that.data)
+    }
 }
 
 
 sup BigInt ext std::ops::ne::Ne[Rhs=Self] {
-    @no_impl
-    fun ne(&self, that: &BigInt) -> Bool { }
+    fun ne(&self, that: &BigInt) -> Bool {
+        ret self.sign != that.sign or self.data.ne(&that.data)
+    }
 }
 
 
 sup BigInt ext std::ops::ge::Ge[Rhs=Self] {
-    @no_impl
-    fun ge(&self, that: &BigInt) -> Bool { }
+    fun ge(&self, that: &BigInt) -> Bool {
+        ret case self.sign != that.sign {
+            self.sign.not
+        }
+        else case self.sign {
+            self.data.ge(&that.data)
+        }
+        else {
+            self.data.le(&that.data)
+        }
+    }
 }
 
 
 sup BigInt ext std::ops::gt::Gt[Rhs=Self] {
-    @no_impl
-    fun gt(&self, that: &BigInt) -> Bool { }
+    fun gt(&self, that: &BigInt) -> Bool {
+        ret case self.sign != that.sign {
+            self.sign.not
+        }
+        else case self.sign {
+            self.data.gt(&that.data)
+        }
+        else {
+            self.data.lt(&that.data)
+        }
+    }
 }
 
 
 sup BigInt ext std::ops::le::Le[Rhs=Self] {
-    @no_impl
-    fun le(&self, that: &BigInt) -> Bool { }
+    fun le(&self, that: &BigInt) -> Bool {
+        ret case self.sign != that.sign {
+            self.sign
+        }
+        else case self.sign {
+            self.data.le(&that.data)
+        }
+        else {
+            self.data.ge(&that.data)
+        }
+    }
 }
 
 
 sup BigInt ext std::ops::lt::Lt[Rhs=Self] {
-    @no_impl
-    fun lt(&self, that: &BigInt) -> Bool { }
+    fun lt(&self, that: &BigInt) -> Bool {
+        ret case self.sign != that.sign {
+            self.sign
+        }
+        else case self.sign {
+            self.data.lt(&that.data)
+        }
+        else {
+            self.data.gt(&that.data)
+        }
+    }
 }

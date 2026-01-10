@@ -1,0 +1,63 @@
+use std::boolean::Bool
+use std::number::USize
+use std::option::Opt
+use std::option::None
+use std::result::Pass
+use std::result::Res
+use std::shared::Shared
+use std::void::Void
+use std::collections::queue::Queue
+use std::threading::cond_var::CondVar
+use std::threading::mutex::LockErr
+use std::threading::mutex::Mutex
+
+@public
+cls Sender[T] {
+    storage: Shared[Queue[T]]
+    mutex: Mutex
+    cond_var: CondVar
+}
+
+@public
+cls Receiver[T] {
+    storage: Shared[Queue[T]]
+    mutex: Mutex
+    cond_var: CondVar
+}
+
+
+@public
+fun channel[T]() -> (Sender[T], Receiver[T]) {
+    let queue = Queue[T]::new()
+    let storage = Shared[Queue[T]]::new(queue)
+    let sender = Sender[T](storage=storage.clone())
+    let receiver = Receiver[T](storage=storage.clone())
+    ret (sender, receiver)
+}
+
+
+sup [T] Sender[T] {
+    @public
+    fun write(&mut self, data: T) -> Res[Void, LockErr] {
+        self.mutex.lock()?
+        self.storage.push(data)
+        self.cond_var.signal_one()?
+        ret self.mutex.unlock()
+    }
+}
+
+
+sup [T] Receiver[T] {
+    @public
+    fun read(&mut self, len: USize) -> Res[T, LockErr] {
+        self.mutex.lock()?
+        self.cond_var.wait(&self.mutex, |caps &self| self.storage.is_empty().not)?
+        ret Pass(val=self.storage.pop().unwrap())
+    }
+
+    @public
+    fun try_read(&mut self) -> Res[Opt[T], LockErr] {
+        self.mutex.lock()?
+        ret Pass(val=self.storage.pop())
+    }
+}

@@ -16,8 +16,7 @@ use std::result::Fail
 @public type Opt[T] = Some[T] or None
 
 
-# Todo: "T: Copy"
-sup [T] Opt[T] ext Copy { }
+sup [T: Copy] Opt[T] ext Copy { }
 
 
 #sup [T: Clone[Out=T]] Opt[T] ext Clone[Out=Opt[T]] {
@@ -34,7 +33,7 @@ sup [T] Opt[T] {
     @public
     @inline
     fun is_some(&self) -> Bool {
-        ret *self is Some[T](..)
+        ret self@ is Some[T](..)
     }
 
     @public
@@ -49,7 +48,7 @@ sup [T] Opt[T] {
     @public
     @inline
     fun is_none(&self) -> Bool {
-        ret *self is None()
+        ret self@ is None()
     }
 
     @public
@@ -105,29 +104,30 @@ sup [T] Opt[T] {
 }
 
 
+# TODO: Nesting + variants doesn't work.
+##
 sup [T] Opt[T] {
     @public
     @inline
-    @no_impl
     fun xor(self, that: Opt[T]) -> Opt[T] {
-        # ret case (self, that) of {
-        #     is (Some[T](val), None()) { Some(val) }
-        #     is (None(), Some[T](val)) { Some(val) }
-        #     else { None() }
-        # }
+        ret case (self, that) of {
+            is (Some[T](val), None()) { Some(val) }
+            is (None(), Some[T](val)) { Some(val) }
+            else { None() }
+        }
     }
 }
+##
 
 
 sup [T] Opt[T] {
     @public
     @inline
-    @no_impl
     fun map[U](self, f: FunMov[(T,), U]) -> Opt[U] {
-        # ret case self of {
-        #     is Some[T](val) { Some(val=f(val)) }
-        #     else { None() }
-        # }
+        ret case self of {
+            is Some[T](val) { Some(val=f(val)) }
+            else { None() }
+        }
     }
 
     @public
@@ -153,22 +153,20 @@ sup [T] Opt[T] {
 sup [T] Opt[T] {
     @public
     @inline
-    @no_impl
     fun ok_or[E](self, err: E) -> Res[T, E] {
-        # ret case self of {
-        #     is Some[T](val) { Pass(val) }
-        #     else { Fail(err) }
-        # }
+        ret case self of {
+            is Some[T](val) { Pass(val) }
+            else { Fail(err) }
+        }
     }
 
     @public
     @inline
-    @no_impl
     fun ok_or_else[E](self, err: FunMov[(), E]) -> Res[T, E] {
-        # case self of {
-        #     is Some[T](val) { Pass(val) }
-        #     else { Fail(err=err()) }
-        # }
+        ret case self of {
+            is Some[T](val) { Pass(val) }
+            else { Fail(err=err()) }
+        }
     }
 }
 
@@ -176,12 +174,11 @@ sup [T] Opt[T] {
 sup[T] Opt[T] {
     @public
     @inline
-    @no_impl
     fun unwrap(self) -> T {
-        # ret case self of {
-        #     is Some[T](val) { val }
-        #     else { std::abort::abort("called `unwrap` on a `None` value") }
-        # }
+        ret case self of {
+            is Some[T](val) { val }
+            else { std::abort::abort("called `unwrap` on a `None` value") }
+        }
     }
 
     @public
@@ -206,7 +203,7 @@ sup[T] Opt[T] {
 
 sup [T] Opt[T] ext std::ops::try::Try[Some[T], None, T] {
     fun op_is_value(&self) -> Bool {
-        ret *self is Some[T](..)
+        ret self@ is Some[T](..)
     }
 
     fun op_as_value(self) -> T {

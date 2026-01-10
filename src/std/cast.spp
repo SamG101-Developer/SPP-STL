@@ -1,7 +1,7 @@
+use std::option::None
 use std::option::Opt
 use std::option::Some
 use std::generator::GenOnce
-use std::generator::GenOpt
 
 
 @public cls From[This, That] { }
@@ -27,8 +27,7 @@ sup [This, That] TryFrom[This, That] {
 # derived types to their base types when ownership is transferred.
 @public
 @compiler_builtin
-fun upcast_mov[Base, Derived: Base](derived: Derived) -> Base {
-}
+fun upcast_mov[Base, Derived: Base](derived: Derived) -> Base { }
 
 
 # The `upcast_mut` method does not slice an object, but borrows part of it mutably from memory. The part it borrows
@@ -36,29 +35,24 @@ fun upcast_mov[Base, Derived: Base](derived: Derived) -> Base {
 # base part of the object, or a method only accepts a borrow to the base type.
 @public
 @compiler_builtin
-cor upcast_mut[Base, Derived: Base](derived: &mut Derived) -> GenOnce[&mut Base] {
-}
+cor upcast_mut[Base, Derived: Base](derived: &mut Derived) -> GenOnce[&mut Base] { }
 
 
 @public
 @compiler_builtin
-cor upcast_ref[Base, Derived: Base](derived: &Derived) -> GenOnce[&Base] {
-}
+cor upcast_ref[Base, Derived: Base](derived: &Derived) -> GenOnce[&Base] { }
 
 
 @public
 @compiler_builtin
-fun downcast_mov[Base, Derived: Base](base: Base) -> Derived {
-}
+fun downcast_mov[Base, Derived: Base](base: Base) -> Derived { }
 
 
 @public
 @compiler_builtin
-cor downcast_mut[Base, Derived: Base](base: &mut Base) -> GenOpt[&mut Derived] {
-}
+cor downcast_mut[Base, Derived: Base](base: &mut Base) -> GenOnce[&mut Derived or None] { }
 
 
 @public
 @compiler_builtin
-cor downcast_ref[Base, Derived: Base](base: &Base) -> GenOpt[&Derived] {
-}
+cor downcast_ref[Base, Derived: Base](base: &Base) -> GenOnce[&Derived or None] { }
