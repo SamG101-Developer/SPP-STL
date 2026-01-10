@@ -56,7 +56,7 @@ sup [T] Deque[T] {
 
     @public
     fun pop_back_if(&mut self, pred: FunMov[(&mut T,), Bool]) -> Opt[T] {
-        let val = self.pop_back()?
+        let mut val = self.pop_back()?
         ret case pred(&mut val) { Some(val) } else { None() }
     }
 
@@ -70,7 +70,7 @@ sup [T] Deque[T] {
 
     @public
     fun pop_front_if(&mut self, pred: FunMov[(&mut T,), Bool]) -> Opt[T] {
-        let val = self.pop_front()?
+        let mut val = self.pop_front()?
         ret case pred(&mut val) { Some(val) } else { None() }
     }
 }
