@@ -74,6 +74,8 @@ sup [T] LinkedList[T] {
             # Inserting in the middle.
             let next_node = self.nodes[index]
             let prev_node = self.nodes[next_node.prev.unwrap()]
+            let new_node = LinkedListNode(val=value, prev=None(), next=None())
+            self.nodes.push_back(new_node)
 
             # Update borrows.
             self.nodes[mut idx].prev = Some(val=next_node.prev.unwrap())
