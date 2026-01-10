@@ -88,7 +88,7 @@ sup [T] LinkedList[T] {
     }
 
     @public
-    fun push_back_list(&mut self, other: &mut LinkedList[T]) -> Void {
+    fun push_back_list(&mut self, mut other: &mut LinkedList[T]) -> Void {
         # Move all the nodes from the other list to the end of this list, in O(1) time.
         case other.head is None() { ret }  # Other list is empty.
         case self.tail is None() {
