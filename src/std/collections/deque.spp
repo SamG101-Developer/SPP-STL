@@ -23,7 +23,7 @@ sup [T] Deque[T] {
     @public
     fun new() -> Deque[T] {
         let mut blocks = Vec[Arr[T, 64_uz]]::new()
-        blocks.push(Arr[T, 64_uz]::new())
+        blocks.push_back(Arr[T, 64_uz]::new())
         ret Deque[T](blocks)
     }
 }
@@ -80,7 +80,7 @@ sup [T, cmp block_size: USize] Deque[T, block_size] {
     @public
     fun clear(&mut self) -> Void {
         self.blocks.clear()
-        self.blocks.push(Arr[T, block_size]())
+        self.blocks.push_back(Arr[T, block_size]())
         self.head_blk, self.head_idx = 0_uz, 0_uz
         self.tail_blk, self.tail_idx = 0_uz, 0_uz
     }
@@ -107,11 +107,11 @@ sup [T, cmp block_size: USize] Deque[T, block_size] {
 
 sup [T, cmp block_size: USize] Deque[T, block_size] {
     fun alloc_block_back(&mut self) -> Void {
-        self.blocks.push(Arr[T, block_size]())
+        self.blocks.push_back(Arr[T, block_size]())
     }
 
     fun alloc_block_front(&mut self) -> Void {
-        self.blocks.insert(0_uz, Arr[T, block_size]())
+        self.blocks.push(0_uz, Arr[T, block_size]())
         self.tail_blk += 1_uz
     }
 

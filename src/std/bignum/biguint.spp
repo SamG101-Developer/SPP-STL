@@ -21,10 +21,10 @@ sup [cmp bit_width: U32] BigUInt ext From[Self, SizedIntegerUnsigned[bit_width]]
         let val = BigUInt()
         let mut temp = that
         loop temp != 0_u32 {
-            val.data.push(U32::from(temp & 0xFFFFFFFF_u32))
+            val.data.push_back(U32::from(temp & 0xFFFFFFFF_u32))
             temp >>= 32_u32
         }
-        case val.data.length() == 0_uz { val.data.push(0_u32) }
+        case val.data.length() == 0_uz { val.data.push_back(0_u32) }
         ret val
     }
 }
@@ -44,14 +44,14 @@ sup BigUInt {
     @public
     fun zero() -> Self {
         let val = BigUInt()
-        val.data.push(0_u32)
+        val.data.push_back(0_u32)
         ret val
     }
 
     @public
     fun one() -> Self {
         let val = BigUInt()
-        val.data.push(1_u32)
+        val.data.push_back(1_u32)
         ret val
     }
 
@@ -280,7 +280,7 @@ sup BigUInt ext std::ops::bit_shr::BitShrAssign[Rhs=Self] {
 
         case USize::from(word_shift) >= self.data.length() {
             self.data.clear()
-            self.data.push(0_u32)
+            self.data.push_back(0_u32)
             ret
         }
 
@@ -311,7 +311,7 @@ sup BigUInt ext std::ops::add::AddAssign[Rhs=Self] {
             carry = sum >> 32_u64
         }
 
-        case carry != 0_u64 { self.data.push(U32::from(carry)) }
+        case carry != 0_u64 { self.data.push_back(U32::from(carry)) }
     }
 }
 
@@ -325,7 +325,7 @@ sup BigUInt ext std::ops::sub::SubAssign[Rhs=Self] {
             let a = U64::from(self.data[i]@)
             let b = case i < that.data.length() { U64::from(that.data[i]@) } else { 0_u64 }
             let sub = a - b - borrow
-            self.data.push(U32::from(sub & 0xFFFFFFFF_u64))
+            self.data.push_back(U32::from(sub & 0xFFFFFFFF_u64))
             borrow = (sub >> 63_u64) & 0x1_u64
         }
 
@@ -339,7 +339,7 @@ sup BigUInt ext std::ops::mul::MulAssign[Rhs=Self] {
         # Skip for known answers.
         case self.is_zero() or that.is_zero() {
             self.data.clear()
-            self.data.push(0_u32)
+            self.data.push_back(0_u32)
             ret
         }
 
@@ -378,7 +378,7 @@ sup BigUInt ext std::ops::div::DivAssign[Rhs=Self] {
         case that.is_one() {  ret }
         case self < that {
             self.data.clear()
-            self.data.push(0_u32)
+            self.data.push_back(0_u32)
             ret
         }
 

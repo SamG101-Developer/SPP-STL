@@ -29,7 +29,7 @@ sup [T] LinkedList[T] {
         # Create a new node and add it to the end of the node vector.
         let idx = self.nodes.length()
         let new_node = LinkedListNode(val=value, prev=self.tail, next=None())
-        self.nodes.push(new_node)
+        self.nodes.push_back(new_node)
 
         # Update the previous tail node to point to the new node.
         case self.tail is Some[USize](val as tail_node) { self.nodes[mut tail_node].next = Some(val=idx) }
@@ -45,7 +45,7 @@ sup [T] LinkedList[T] {
         # Create a new node and add it to the front of the node vector.
         let idx = self.nodes.length()
         let new_node = LinkedListNode(val=value, prev=None(), next=self.head)
-        self.nodes.push(new_node)
+        self.nodes.push_back(new_node)
 
         # Update the previous head node to point back to the new node.
         case self.head is Some[USize](val as head_node) { self.nodes[mut head_node].prev = Some(val=idx) }
@@ -61,7 +61,7 @@ sup [T] LinkedList[T] {
         # Create a new node.
         let idx = self.nodes.length()
         let new_node = LinkedListNode(val=value, prev=None(), next=None())
-        self.nodes.push(new_node)
+        self.nodes.push_back(new_node)
 
         # Insert the new node at the specified index.
         case index == 0_uz {

@@ -52,7 +52,7 @@ sup Str {
         
         loop char in self.chars() {
             case char == sep {
-                strings.push(current)
+                strings.push_back(current)
                 current = Str::from("")
             }
             else {
@@ -148,7 +148,7 @@ sup Str ext Add[Rhs=Str, Ret=Str] {
 
 sup Str ext Add[Rhs=U8, Ret=Str] {
     fun add(self, that: U8) -> Str {
-        self.data.push(that)
+        self.data.push_back(that)
         ret Str(data=self.data)
     }
 }
@@ -163,6 +163,6 @@ sup Str ext AddAssign[Rhs=Str] {
 
 sup Str ext AddAssign[Rhs=U8] {
     fun add_assign(&mut self, that: U8) -> Void {
-        self.data.push(that)
+        self.data.push_back(that)
     }
 }

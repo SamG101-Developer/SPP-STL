@@ -19,7 +19,7 @@ sup [T] Stack[T] {
 
     @public
     fun push(&mut self, val: T) -> Void {
-        self.buf.push(val)
+        self.buf.push_back(val)
     }
 
     @public
