@@ -105,6 +105,8 @@ sup [T] Opt[T] {
 }
 
 
+# TODO: Nesting + variants doesn't work.
+##
 sup [T] Opt[T] {
     @public
     @inline
@@ -116,6 +118,7 @@ sup [T] Opt[T] {
         }
     }
 }
+##
 
 
 sup [T] Opt[T] {
