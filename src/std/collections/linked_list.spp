@@ -82,9 +82,9 @@ sup [T] LinkedList[T] {
             self.nodes[mut idx].next = Some(val=index)
             self.nodes[mut prev_node.prev.unwrap()].next = Some(val=idx)
             self.nodes[mut index].prev = Some(val=idx)
-
-            ret idx
         }
+
+        ret idx
     }
 
     @public
