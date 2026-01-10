@@ -24,7 +24,7 @@ sup [T] Stack[T] {
 
     @public
     fun pop(&mut self) -> Opt[T] {
-        ret self.buf.pop()
+        ret self.buf.pop_back()
     }
 
     @public
