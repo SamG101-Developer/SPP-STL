@@ -106,7 +106,7 @@ sup [T] LinkedList[T] {
             other.nodes[mut other_head_idx].prev = Some(val=self_tail_idx)
 
             self.tail = other.tail
-            self.nodes.extend(other.nodes)
+            self.nodes.push_back_vec(other.nodes)
         }
     }
 }
