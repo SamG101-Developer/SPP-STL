@@ -198,6 +198,20 @@ sup [T] LinkedList[T] {
 
 
 sup [T] LinkedList[T] {
+    @private
+    fun take_nodes(&mut self) -> Vec[LinkedListNode[T]] {
+        # Reset head and tail.
+        self.head = None()
+        self.tail = None()
+
+        # Take ownership of the nodes vector and reset the list.
+        let nodes = std::mem::replace(&mut self.nodes, Vec[LinkedListNode[T]]::new())
+        ret nodes
+    }
+}
+
+
+sup [T] LinkedList[T] {
     @public
     cor iter_mut(&mut self) -> Iterator[&mut T] {
         # Start from the head and traverse the list.

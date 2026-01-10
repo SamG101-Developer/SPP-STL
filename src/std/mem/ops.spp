@@ -68,3 +68,35 @@ fun free[T](mem: Memory[T]) -> Void {
     # Free the memory pointed to by the pointer.
     sppc::mem_dealloc(mem)
 }
+
+
+@public
+fun swap[T](a: &mut T, b: &mut T) -> Void {
+    let temp = take(a)
+    a@ = take(b)
+    b@ = temp
+}
+
+
+@public
+fun replace[T](dest: &mut T, src: T) -> T {
+    let old = take(dest)
+    dest@ = src
+    ret old
+}
+
+
+@public
+@compiler_builtin
+fun take[T](src: &mut T) -> T {
+    # This is safe because of uniform default initialization, where the "src" will be replaced with a default value for
+    # T, based on the standard object initialization: T().
+}
+
+
+@public
+@compiler_builtin
+fun drop[T](val: T) -> Void {
+    # Safely disposes of a value, calling its destructor if necessary. This is safe as it takes ownership, so an
+    # uninitialized value cannot be left behind in the caller's context (at runtime).
+}
