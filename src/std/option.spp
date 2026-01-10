@@ -49,7 +49,7 @@ sup [T] Opt[T] {
     @public
     @inline
     fun is_none(&self) -> Bool {
-        ret self is &None()
+        ret self@ is None()
     }
 
     @public
