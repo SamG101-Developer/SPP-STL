@@ -11,8 +11,7 @@ use std::string::Str
 @public type Res[T, E] = Pass[T] or Fail[E]
 
 
-# Todo: "T: Copy, E: Copy"
-# sup [T, E] Res[T, E] ext Copy { }
+sup [T: Copy, E: Copy] Res[T, E] ext Copy { }
 
 
 sup [T, E] Res[T, E] {

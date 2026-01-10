@@ -16,8 +16,7 @@ use std::result::Fail
 @public type Opt[T] = Some[T] or None
 
 
-# Todo: "T: Copy"
-# sup [T] Opt[T] ext Copy { }
+sup [T: Copy] Opt[T] ext Copy { }
 
 
 #sup [T: Clone[Out=T]] Opt[T] ext Clone[Out=Opt[T]] {
