@@ -205,7 +205,7 @@ sup [T] LinkedList[T] {
         self.tail = None()
 
         # Take ownership of the nodes vector and reset the list.
-        let nodes = std::mem::replace(&mut self.nodes, Vec[LinkedListNode[T]]::new())
+        let nodes = std::mem::ops::replace(&mut self.nodes, Vec[LinkedListNode[T]]::new())
         ret nodes
     }
 }
