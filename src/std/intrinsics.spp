@@ -18,7 +18,7 @@ use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 !public
 !always_inline
 !compiler_builtin
-fun add[T: Integer](this: T, that: T) -> T { }
+cmp fun add[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
