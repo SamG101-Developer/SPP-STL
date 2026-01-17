@@ -37,7 +37,7 @@ sup CondVar {
     @public
     fun wait(&self, mutex: &Mutex) -> Res[Void, LockErr] {
         # Wait on the condition variable, releasing the associated mutex.
-        ret self.wait(mutex, || true)
+        ret self.wait(mutex, () true)
     }
 
     @public
