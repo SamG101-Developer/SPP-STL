@@ -1,5 +1,6 @@
 use std::boolean::Bool
 use std::function::FunRef
+use std::function::FunMut
 use std::generator::Gen
 use std::generator::GenOnce
 use std::number::USize
