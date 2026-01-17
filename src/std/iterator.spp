@@ -99,7 +99,7 @@ sup [T] Iterator[T] {
     }
 
     !public
-    fun all(self, predicate: FunRef[(T), Bool]) -> Bool {
+    fun all(self, predicate: FunRef[(T,), Bool]) -> Bool {
         loop item in self {
             case predicate(item).not { ret false }
         }
@@ -107,7 +107,7 @@ sup [T] Iterator[T] {
     }
 
     !public
-    fun any(self, predicate: FunRef[(T), Bool]) -> Bool {
+    fun any(self, predicate: FunRef[(T,), Bool]) -> Bool {
         loop item in self {
             case predicate(item) { ret true }
         }
@@ -120,7 +120,7 @@ sup [T] Iterator[T] {
     is returned inside an optional type, as the elememt may have not been found, and "None" is needed instead.
     ##
     !public
-    fun find(self, predicate: FunRef[(&T), Bool]) -> Opt[T] {  # todo: this should fail (could be Opt[&T] i think)
+    fun find(self, predicate: FunRef[(&T,), Bool]) -> Opt[T] {  # todo: this should fail (could be Opt[&T] i think)
         loop item in self {
             case predicate(&item) { ret Some(val=item) }
         }
@@ -133,7 +133,7 @@ sup [T] Iterator[T] {
     but without skip/exit semantics because of the internal closure state.
     ##
     !public
-    fun for_each(self, action: FunRef[(&T), Void]) -> Void {
+    fun for_each(self, action: FunRef[(&T,), Void]) -> Void {
         loop item in self { action(&item) }
     }
 
@@ -143,7 +143,7 @@ sup [T] Iterator[T] {
     without skip/exit semantics because of the internal closure state.
     ##
     !public
-    fun for_each(self, action: FunMut[(&mut T), Void]) -> Void {
+    fun for_each(self, action: FunMut[(&mut T,), Void]) -> Void {
         loop item in self { action(&mut item) }
     }
 }
