@@ -144,7 +144,7 @@ sup [T] Iterator[T] {
     without skip/exit semantics because of the internal closure state.
     ##
     !public
-    fun for_each(mut self, action: FunMut[(&mut T,), Void]) -> Void {
+    fun for_each(self, mut action: FunMut[(&mut T,), Void]) -> Void {
         loop mut item in self { action(&mut item) }
     }
 }
