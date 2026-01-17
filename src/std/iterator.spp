@@ -145,6 +145,6 @@ sup [T] Iterator[T] {
     ##
     !public
     fun for_each(self, action: FunMut[(&mut T,), Void]) -> Void {
-        loop item in self { action(&mut item) }
+        loop mut item in self { action(&mut item) }
     }
 }
