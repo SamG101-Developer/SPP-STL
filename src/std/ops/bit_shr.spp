@@ -1,20 +1,20 @@
 use std::void::Void
 
 
-@public cls BitShr[Rhs, Ret] {}
-@public cls BitShrAssign[Rhs] {}
+!public cls BitShr[Rhs, Ret] {}
+!public cls BitShrAssign[Rhs] {}
 
 
 sup [Rhs, Ret] BitShr[Rhs, Ret] {
-    @public
-    @abstract_method
+    !public
+    !abstract_method
     fun bit_shr(self, that: Rhs) -> Ret { }
 }
 
 
 sup [Rhs] BitShrAssign[Rhs] {
-    @public
-    @abstract_method
+    !public
+    !abstract_method
     fun bit_shr_assign(&mut self, that: Rhs) -> Void { }
 }
 

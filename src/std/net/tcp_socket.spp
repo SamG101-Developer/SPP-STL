@@ -16,7 +16,7 @@ use std::streams::StreamErr
 use std::void::Void
 
 
-@public
+!public
 cls TcpSocket {
     open: Bool = false
 }
@@ -26,7 +26,7 @@ sup TcpSocket ext Socket { }
 
 
 sup TcpSocket {
-    @public
+    !public
     fun new(type_: S32, proto: S32) -> Res[TcpSocket, SocketErr] {
         let fd = sppc::net_sock_init(Socket::sock_stream, type_, proto)
         ret case fd of {
@@ -35,7 +35,7 @@ sup TcpSocket {
         }
     }
 
-    @public
+    !public
     fun connect(&self, host: StrView, port: U16) -> Res[Void, SocketErr] {
         let val = sppc::net_sock_conn(self.fd, &host, port)
         ret case val of {
@@ -46,7 +46,7 @@ sup TcpSocket {
 }
 
 sup TcpSocket {
-    @public
+    !public
     fun bind(&self, host: StrView, port: U16) -> Res[Void, SocketErr] {
         let val = sppc::net_sock_bind(self.fd, &host, port)
         ret case val of {
@@ -55,7 +55,7 @@ sup TcpSocket {
         }
     }
 
-    @public
+    !public
     fun listen(&self, backlog: S32 = 5) -> Res[Void, SocketErr] {
         let val = sppc::net_sock_listen(self.fd, backlog)
         ret case val of {
@@ -64,7 +64,7 @@ sup TcpSocket {
         }
     }
 
-    @public
+    !public
     fun accept(&self) -> Res[TcpSocket, SocketErr] {
         let val = sppc::net_sock_accept(self.fd)
         ret case val of {

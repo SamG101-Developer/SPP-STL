@@ -4,19 +4,19 @@ use std::threading::atomic::Atom
 use std::void::Void
 
 
-@public
+!public
 cls Fut[T] {
-    @private state: Atom[U8]
-    @private val: Opt[T]
+    !private state: Atom[U8]
+    !private val: Opt[T]
 }
 
 
 sup [T] Fut[T] {
-    @public
-    @compiler_builtin
+    !public
+    !compiler_builtin
     fun await(self) -> T { }
 
-    @public
-    @compiler_builtin
+    !public
+    !compiler_builtin
     fun await_all(..futures: Fut[T]) -> Void { }
 }

@@ -12,7 +12,7 @@ use std::num::bases::Integer
 
 
 # A sized integer is an integer type with a provided bit width.
-@public
+!public
 cls SizedInteger[cmp bit_width: U32, cmp signed: Bool] { }
 
 
@@ -180,26 +180,26 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext s
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
-    @public
-    @inline
+    !public
+    !inline
     fun leading_zeros(self) -> U32 {
         ret intrinsics::ctlz(self)
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun is_even(self) -> Bool {
         ret self & Self::one() == Self::zero()
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun is_odd(self) -> Bool {
         ret self & Self::one() != Self::zero()
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun bit_shl_checked(self, that: U32) -> Opt[Self] {
         case that >= bit_width {
             ret None()
@@ -207,14 +207,14 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
         ret Some(val=intrinsics::bit_shl(self, that))
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun bit_shl_overflow(self, that: U32) -> (Self, Bool) {
         ret (self.bit_shl_wrapping(that), that >= bit_width)
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun bit_shl_wrapping(self, that: U32) -> Self {
         ret intrinsics::bit_shl(self, that & (bit_width - 1_u32))
     }
@@ -222,8 +222,8 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
-    @public
-    @inline
+    !public
+    !inline
     fun bit_shr_checked(self, that: U32) -> Opt[Self] {
         case that >= bit_width {
             ret None()
@@ -231,14 +231,14 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
         ret Some(val=intrinsics::bit_shr(self, that))
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun bit_shr_overflow(self, that: U32) -> (Self, Bool) {
         ret (self.bit_shr_wrapping(that), that >= bit_width)
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun bit_shr_wrapping(self, that: U32) -> Self {
         ret intrinsics::bit_shr(self, that & (bit_width - 1_u32))
     }
@@ -246,18 +246,18 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
-    @public
-    @inline
-    @compiler_builtin
+    !public
+    !inline
+    !compiler_builtin
     fun zero() -> Self { }
 
-    @public
-    @inline
-    @compiler_builtin
+    !public
+    !inline
+    !compiler_builtin
     fun one() -> Self { }
 
-    @public
-    @inline
-    @compiler_builtin
+    !public
+    !inline
+    !compiler_builtin
     fun two() -> Self { }
 }

@@ -11,21 +11,21 @@ use std::ops::eq::Eq
 use std::ops::del::Del
 
 
-@public
+!public
 cls Thread {
-    @public id: S32
-    @public alive: Bool
+    !public id: S32
+    !public alive: Bool
 }
 
 
-@public
+!public
 cls ThreadErr {
-    @public msg: StrView
+    !public msg: StrView
 }
 
 
 sup Thread {
-    @public
+    !public
     fun spawn[In, Out](function: FunRef[In, Out]) -> Res[Thread, ThreadErr] {
         # Spawn a new thread using the sppc threading API.
         let thread_id = sppc::thread_spawn(function)
@@ -33,7 +33,7 @@ sup Thread {
         ret Pass(val=Thread(id=thread_id, alive=true))
     }
 
-    @public
+    !public
     fun cancel(&mut self) -> Res[Void, ThreadErr] {
         # Cancel the thread using the sppc threading API.
         self.alive = false
@@ -42,7 +42,7 @@ sup Thread {
         ret Pass[Void]()
     }
 
-    @public
+    !public
     fun detach(&mut self) -> Res[Void, ThreadErr] {
         # Detach the thread using the sppc threading API.
         self.alive = false
@@ -51,7 +51,7 @@ sup Thread {
         ret Pass[Void]()
     }
 
-    @public
+    !public
     fun join(mut self) -> Res[Void, ThreadErr] {
         # Join the thread using the sppc threading API.
         self.alive = false
@@ -60,7 +60,7 @@ sup Thread {
         ret Pass[Void]()
     }
 
-    @public
+    !public
     fun kill(&mut self) -> Res[Void, ThreadErr] {
         # Kill the thread using the sppc threading API.
         self.alive = false
@@ -69,7 +69,7 @@ sup Thread {
         ret Pass[Void]()
     }
 
-    @public
+    !public
     fun is_alive(&self) -> Bool {
         # Simple accessor to check if the thread is alive.
         ret self.alive

@@ -2,7 +2,7 @@ use std::string_view::StrView
 use std::void::Void
 
 
-@public
-@inline
-@compiler_builtin
+!public
+!inline
+!compiler_builtin
 fun abort(msg: StrView) -> ! { }

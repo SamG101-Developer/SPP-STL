@@ -24,7 +24,7 @@ cls LinkedList[T] {
 
 
 sup [T] LinkedList[T] {
-    @public
+    !public
     fun push_back(&mut self, value: T) -> USize {
         # Create a new node and add it to the end of the node vector.
         let idx = self.nodes.length()
@@ -40,7 +40,7 @@ sup [T] LinkedList[T] {
         ret idx
     }
 
-    @public
+    !public
     fun push_front(&mut self, value: T) -> USize {
         # Create a new node and add it to the front of the node vector.
         let idx = self.nodes.length()
@@ -56,7 +56,7 @@ sup [T] LinkedList[T] {
         ret idx
     }
 
-    @public
+    !public
     fun push(&mut self, index: USize, value: T) -> USize {
         # Create a new node.
         let idx = self.nodes.length()
@@ -87,7 +87,7 @@ sup [T] LinkedList[T] {
         ret idx
     }
 
-    @public
+    !public
     fun push_back_list(&mut self, other: &mut LinkedList[T]) -> Void {
         # Move all the nodes from the other list to the end of this list, in O(1) time.
         case other.head is None() { ret }  # Other list is empty.
@@ -113,7 +113,7 @@ sup [T] LinkedList[T] {
 
 
 sup [T] LinkedList[T] {
-    @public
+    !public
     fun pop_back(&mut self) -> Opt[T] {
         case self.tail is None() { ret None() }
 
@@ -132,7 +132,7 @@ sup [T] LinkedList[T] {
         ret Some(val)
     }
 
-    @public
+    !public
     fun pop_front(&mut self) -> Opt[T] {
         case self.head is None() { ret None() }
 
@@ -151,7 +151,7 @@ sup [T] LinkedList[T] {
         ret Some(val)
     }
 
-    @public
+    !public
     fun pop(&mut self, index: USize) -> Opt[T] {
         case index >= self.nodes.length() { ret None() }
         let node = self.nodes.pop(index)?
@@ -172,7 +172,7 @@ sup [T] LinkedList[T] {
         ret Some(val)
     }
 
-    @public
+    !public
     fun clear(&mut self) -> Void {
         # Reset head and tail, and clear nodes.
         self.head = None()
@@ -183,13 +183,13 @@ sup [T] LinkedList[T] {
 
 
 sup [T] LinkedList[T] {
-    @public
+    !public
     fun is_empty(&self) -> Bool {
         # The list is empty if the head is None.
         ret self.head is None()
     }
 
-    @public
+    !public
     fun length(&self) -> USize {
         # The length is the number of nodes in the list.
         ret self.nodes.length()
@@ -198,7 +198,7 @@ sup [T] LinkedList[T] {
 
 
 sup [T] LinkedList[T] {
-    @private
+    !private
     fun take_nodes(&mut self) -> Vec[LinkedListNode[T]] {
         # Reset head and tail.
         self.head = None()
@@ -212,7 +212,7 @@ sup [T] LinkedList[T] {
 
 
 sup [T] LinkedList[T] {
-    @public
+    !public
     cor iter_mut(&mut self) -> Iterator[&mut T] {
         # Start from the head and traverse the list.
         let mut current = self.head
@@ -223,7 +223,7 @@ sup [T] LinkedList[T] {
         }
     }
 
-    @public
+    !public
     cor iter_ref(&self) -> Iterator[&T] {
         # Start from the head and traverse the list.
         let mut current = self.head
@@ -234,7 +234,7 @@ sup [T] LinkedList[T] {
         }
     }
 
-    @public
+    !public
     cor reverse_iter_mut(&mut self) -> Iterator[&mut T] {
         # Start from the tail and traverse the list backwards.
         let mut current = self.tail
@@ -245,7 +245,7 @@ sup [T] LinkedList[T] {
         }
     }
 
-    @public
+    !public
     cor reverse_iter_ref(&self) -> Iterator[&T] {
         # Start from the tail and traverse the list backwards.
         let mut current = self.tail

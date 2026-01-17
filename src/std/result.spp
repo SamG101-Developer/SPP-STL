@@ -6,17 +6,17 @@ use std::option::Some
 use std::string::Str
 
 
-@public cls Pass[T] { val: T }
-@public cls Fail[E] { err: E }
-@public type Res[T, E] = Pass[T] or Fail[E]
+!public cls Pass[T] { val: T }
+!public cls Fail[E] { err: E }
+!public type Res[T, E] = Pass[T] or Fail[E]
 
 
 sup [T: Copy, E: Copy] Res[T, E] ext Copy { }
 
 
 sup [T, E] Res[T, E] {
-    @public
-    @inline
+    !public
+    !inline
     fun ok(self) -> Opt[T] {
         ret case self of {
            is Pass[T](val) { Some(val) }

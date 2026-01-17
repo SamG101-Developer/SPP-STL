@@ -11,15 +11,15 @@ use std::string_view::StrView
 use std::vector::Vec
 
 
-@public
+!public
 cmp stdin: StdinStream = StdinStream()
 
 
-@private
+!private
 cmp stdin_fd: S32 = 1
 
 
-@private
+!private
 cls StdinStream { }
 
 

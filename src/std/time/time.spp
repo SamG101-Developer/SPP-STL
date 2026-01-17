@@ -6,9 +6,9 @@ use std::string_view::StrView
 use std::void::Void
 
 
-@public
+!public
 cls TimeErr {
-    @public msg: StrView
+    !public msg: StrView
 }
 
 

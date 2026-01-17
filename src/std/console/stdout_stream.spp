@@ -11,15 +11,15 @@ use std::string_view::StrView
 use std::void::Void
 
 
-@public
+!public
 cmp stdout: StdoutStream = StdoutStream()
 
 
-@private
+!private
 cmp stdout_fd: S32 = 1
 
 
-@private
+!private
 cls StdoutStream { }
 
 

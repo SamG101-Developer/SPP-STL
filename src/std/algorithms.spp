@@ -3,14 +3,14 @@ use std::function::FunRef
 use std::void::Void
 
 
-@public
+!public
 cls Sortable[T] { }
 
 
 sup [T] Sortable[T] {
-    @abstract_method
+    !abstract_method
     fun sort(&mut self) -> Void { }
 
-    @abstract_method
+    !abstract_method
     fun sort_by(&mut self, compare: FunRef[(T, T), Bool]) -> Void { }
 }

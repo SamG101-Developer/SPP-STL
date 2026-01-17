@@ -19,7 +19,7 @@ string data without the overhead of ownership or copying. It provides basic func
 checking emptiness, slicing, and comparing string views. For more advanced string manipulation, consider using the
 full-featured `Str` type from `std::string::Str`.
 ##
-@public
+!public
 cls StrView { }
 
 
@@ -27,80 +27,80 @@ sup StrView ext Copy { }
 
 
 sup StrView {
-    @public
-    @compiler_builtin
+    !public
+    !compiler_builtin
     fun new() -> StrView { }
 
-    @public
-    @compiler_builtin
+    !public
+    !compiler_builtin
     fun new_with_capacity(capacity: USize) -> StrView { }
 
-    @public
-    @compiler_builtin
+    !public
+    !compiler_builtin
     fun from_utf8(utf8: &Slice[U8]) -> StrView { }
 
-    @public
-    @inline
-    @compiler_builtin
+    !public
+    !inline
+    !compiler_builtin
     fun length(&self) -> USize { }
 
-    @public
-    @inline
-    @compiler_builtin
+    !public
+    !inline
+    !compiler_builtin
     fun is_empty(&self) -> Bool { }
 }
 
 
 sup StrView {
-    @public
-    @compiler_builtin
+    !public
+    !compiler_builtin
     cor chars(&self) -> Iterator[U8] { }
 
-    @public
-    @compiler_builtin
+    !public
+    !compiler_builtin
     cor reverse_chars(&self) -> Iterator[U8] { }
 
-    @public
-    @compiler_builtin
+    !public
+    !compiler_builtin
     cor bytes(&self) -> GenOnce[&Slice[U8]] { }
 }
 
 
 sup StrView {
-    @public
-    @compiler_builtin
+    !public
+    !compiler_builtin
     fun starts_with(&self, needle: StrView) -> Bool { }
 
-    @public
-    @compiler_builtin
+    !public
+    !compiler_builtin
     fun ends_with(&self, needle: StrView) -> Bool { }
 
-    @public
-    @compiler_builtin
+    !public
+    !compiler_builtin
     fun slice(&self, start: USize, end: USize) -> StrView { }
 }
 
 
 sup StrView ext Eq[Rhs=StrView] {
-    @compiler_builtin
+    !compiler_builtin
     fun eq(&self, that: &StrView) -> Bool { }
 }
 
 
 sup StrView ext Ne[Rhs=StrView] {
-    @compiler_builtin
+    !compiler_builtin
     fun ne(&self, that: &StrView) -> Bool { }
 }
 
 
 sup StrView ext From[Self, Str] {
-    @compiler_builtin
+    !compiler_builtin
     fun from(that: Str) -> Self { }
 }
 
 
 sup StrView ext From[Self, U8] {
-    @compiler_builtin
+    !compiler_builtin
     fun from(that: U8) -> Self { }
 }
 

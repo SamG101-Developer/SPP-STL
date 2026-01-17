@@ -2,17 +2,17 @@ use std::copy::Copy
 
 
 # The base numeric types in the standard library.
-@protected
+!protected
 cls Num { }
 
 
 # The base integer type that is numeric.
-@protected
+!protected
 cls Integer { }
 
 
 # The base floating point type that is numeric.
-@protected
+!protected
 cls FloatingPoint { }
 
 

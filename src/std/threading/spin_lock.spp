@@ -7,21 +7,21 @@ use std::void::Void
 use std::threading::mutex::LockErr
 
 
-@public
+!public
 cls SpinLock {
-    @public id: S32
+    !public id: S32
 }
 
 
 sup SpinLock {
-    @public
+    !public
     fun new() -> Res[SpinLock, LockErr] {
         # Create a new spin lock using the sppc threading API.
         let id = sppc::spinlock_create()
         ret Pass(val=SpinLock(id))
     }
 
-    @public
+    !public
     fun lock(&self) -> Res[Void, LockErr] {
         # Acquire the spin lock using the sppc threading API.
         let spin_id = sppc::spinlock_lock(self.id)
@@ -29,7 +29,7 @@ sup SpinLock {
         ret Pass[Void]()
     }
 
-    @public
+    !public
     fun try_lock(&self) -> Res[Bool, LockErr] {
         # Try to acquire the spin lock using the sppc threading API.
         let spin_id = sppc::spinlock_try_lock(self.id)
@@ -37,7 +37,7 @@ sup SpinLock {
         ret Pass(val=spin_id == 1)
     }
 
-    @public
+    !public
     fun unlock(&self) -> Res[Void, LockErr] {
         # Release the spin lock using the sppc threading API.
         let spin_id = sppc::spinlock_unlock(self.id)

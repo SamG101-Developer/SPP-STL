@@ -6,36 +6,36 @@ use std::string_view::StrView
 use std::void::Void
 
 
-@public
+!public
 cls AllocErr {
-    @public msg: StrView
+    !public msg: StrView
 }
 
 
-@public
+!public
 cls Alloc[E] { }
 
 
 sup [E] Alloc[E] {
-    @public
-    @abstract_method
+    !public
+    !abstract_method
     fun allocate(n: USize) -> Res[Memory[E], AllocErr] { }
 
-    @public
-    @abstract_method
+    !public
+    !abstract_method
     fun allocate_zeroed(n: USize) -> Res[Memory[E], AllocErr] { }
 
-    @public
-    @abstract_method
+    !public
+    !abstract_method
     fun deallocate(mem: Memory[E]) -> Void { }
 
-    @public
-    @abstract_method
+    !public
+    !abstract_method
     fun reallocate(mem: Memory[E], n: USize) -> Res[Memory[E], AllocErr] { }
 }
 
 
-@public
+!public
 cls GlobalAlloc[E] { }
 
 

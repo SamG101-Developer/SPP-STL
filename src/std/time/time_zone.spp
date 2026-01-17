@@ -7,7 +7,7 @@ use std::string_view::StrView
 use std::time::time::TimeErr
 
 
-@public
+!public
 cls TimeZone {
     name: Str
     offset_seconds: S64
@@ -15,12 +15,12 @@ cls TimeZone {
 
 
 sup TimeZone {
-    @public
+    !public
     fun utc() -> TimeZone {
         ret TimeZone(name=Str::from("UTC"), offset_seconds=0_s64)
     }
 
-    @public
+    !public
     fun local() -> Res[TimeZone, TimeErr] {
         # Platform-specific implementation to get the local timezone.
         let mut local_name = StrView::new()

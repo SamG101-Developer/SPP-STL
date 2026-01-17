@@ -14,7 +14,7 @@ use std::vector::Vec
 use std::void::Void
 
 
-@public
+!public
 cls UdpSocket {}
 
 
@@ -22,7 +22,7 @@ sup UdpSocket ext Socket { }
 
 
 sup UdpSocket {
-    @public
+    !public
     fun new(type_: S32, proto: S32) -> Res[UdpSocket, SocketErr] {
         let fd = sppc::net_sock_init(Socket::sock_dgram, type_, proto)
         ret case fd of {
@@ -34,7 +34,7 @@ sup UdpSocket {
 
 
 sup UdpSocket {
-    @public
+    !public
     fun bind(&self, host: StrView, port: U16) -> Res[Void, SocketErr] {
         let val = sppc::net_sock_bind(self.fd, &host, port)
         ret case val of {
@@ -46,7 +46,7 @@ sup UdpSocket {
 
 
 sup UdpSocket {
-    @public
+    !public
     fun write_datagram(&self, data: &Slice[U8], host: StrView, port: U16) -> Res[USize, SocketErr] {
         # Get the data length, form the stream, and send the datagram.
         let len = data.length()
@@ -60,7 +60,7 @@ sup UdpSocket {
         }
     }
 
-    @public
+    !public
     fun read_datagram(&self, len: USize) -> Res[(Vec[U8], Str, U16), SocketErr] {
         # Prepare the stream and receive the datagram.
         let mut stream = StrView::new_with_capacity(len)

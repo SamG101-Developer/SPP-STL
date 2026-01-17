@@ -1,19 +1,19 @@
 use std::void::Void
 
 
-@public cls Mul[Rhs, Ret] { }
-@public cls MulAssign[Rhs] { }
+!public cls Mul[Rhs, Ret] { }
+!public cls MulAssign[Rhs] { }
 
 
 sup [Rhs, Ret] Mul[Rhs, Ret] {
-    @public
-    @abstract_method
+    !public
+    !abstract_method
     fun mul(self, that: Rhs) -> Ret { }
 }
 
 
 sup [Rhs] MulAssign[Rhs] {
-    @public
-    @abstract_method
+    !public
+    !abstract_method
     fun mul_assign(&mut self, that: Rhs) -> Void { }
 }

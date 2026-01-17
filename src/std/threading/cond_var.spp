@@ -9,14 +9,14 @@ use std::threading::mutex::LockErr
 use std::threading::mutex::Mutex
 
 
-@public
+!public
 cls CondVar {
     id: S32
 }
 
 
 sup CondVar {
-    @public
+    !public
     fun new() -> Res[CondVar, LockErr] {
         # Create a new mutex using the sppc threading API.
         let id = sppc::condvar_create()
@@ -24,7 +24,7 @@ sup CondVar {
         ret Pass(val=CondVar(id))
     }
 
-    @public
+    !public
     fun wait(&self, mutex: &Mutex, pred: FunRef[(), Bool]) -> Res[Void, LockErr] {
         # Wait on the condition variable, releasing the associated mutex.
         loop pred().not {
@@ -34,13 +34,13 @@ sup CondVar {
         ret Pass[Void]()
     }
 
-    @public
+    !public
     fun wait(&self, mutex: &Mutex) -> Res[Void, LockErr] {
         # Wait on the condition variable, releasing the associated mutex.
         ret self.wait(mutex, () true)
     }
 
-    @public
+    !public
     fun signal_one(&self) -> Res[Void, LockErr] {
         # Signal one thread waiting on the condition variable.
         let val = sppc::condvar_signal(self.id)
@@ -48,7 +48,7 @@ sup CondVar {
         ret Pass[Void]()
     }
 
-    @public
+    !public
     fun signal_all(&self) -> Res[Void, LockErr] {
         # Wake up all threads waiting on the condition variable.
         let val = sppc::condvar_broadcast(self.id)

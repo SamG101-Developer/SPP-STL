@@ -4,16 +4,16 @@ use std::time::duration::Duration
 use std::time::time_point::TimePoint
 
 
-@public
+!public
 cls Timer {
-    @public start_time: TimePoint
-    @public paused_duration: Duration
-    @public running: Bool
+    !public start_time: TimePoint
+    !public paused_duration: Duration
+    !public running: Bool
 }
 
 
 sup Timer {
-    @public
+    !public
     fun start() -> Timer {
         ret Timer(
             start_time=TimePoint::now(),
@@ -21,7 +21,7 @@ sup Timer {
             running=true)
     }
 
-    @public
+    !public
     fun stop(&mut self) -> Void {
         case self.running.not { ret }
         let elapsed = TimePoint::now() - self.start_time
@@ -29,21 +29,21 @@ sup Timer {
         self.running = false
     }
 
-    @public
+    !public
     fun resume(&mut self) -> Void {
         case self.running { ret }
         self.start_time = TimePoint::now()
         self.running = true
     }
 
-    @public
+    !public
     fun reset(&mut self) -> Void {
         self.start_time = TimePoint::now()
         self.paused_duration = Duration::from_seconds(0_s64)
         self.running = true
     }
 
-    @public
+    !public
     fun elapsed(&self) -> Duration {
         ret case self.running {
             let now = TimePoint::now()

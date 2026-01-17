@@ -15,657 +15,657 @@ use std::num::sized_integer_signed::SizedIntegerSigned
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun add[T: Integer](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun add_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun sub[T: Integer](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun sub_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun mul[T: Integer](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun mul_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun sdiv[T: Integer](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun udiv_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun udiv[T: Integer](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun srem_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun srem[T: Integer](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun urem_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun urem[T: Integer](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun sdiv_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun sneg[T: Integer](value: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun bit_shl[T: Integer, U: Integer](this: T, by: U) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun bit_shl_assign[T: Integer, U: Integer](this: &mut T, by: U) -> Void { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun bit_shr[T: Integer, U: Integer](this: T, by: U) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun bit_shr_assign[T: Integer, U: Integer](this: &mut T, by: U) -> Void { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun bit_ior[T: Integer](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun bit_ior_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun bit_and[T: Integer](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun bit_and_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun bit_xor[T: Integer](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun bit_xor_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun bit_not[T: Integer](value: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun bit_not_assign[T: Integer](this: &mut T) -> Void { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun abs[T: Integer](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun eq[T: Num](this: &T, that: &T) -> Bool { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun oeq[T: Num](this: &T, that: &T) -> Bool { }  # ordered equal (floats)
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun ne[T: Num](this: &T, that: &T) -> Bool { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun one[T: Num](this: &T, that: &T) -> Bool { }  # ordered not equal (floats)
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun slt[T: Num](this: &T, that: &T) -> Bool { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun ult[T: Num](this: &T, that: &T) -> Bool { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun ole[T: Num](this: &T, that: &T) -> Bool { }  # ordered less than or equal (floats)
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun sle[T: Num](this: &T, that: &T) -> Bool { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun ule[T: Num](this: &T, that: &T) -> Bool { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun olt[T: Num](this: &T, that: &T) -> Bool { }  # ordered less than (floats)
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun sgt[T: Num](this: &T, that: &T) -> Bool { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun ugt[T: Num](this: &T, that: &T) -> Bool { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun oge[T: Num](this: &T, that: &T) -> Bool { }  # ordered greater than or equal (floats)
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun sge[T: Num](this: &T, that: &T) -> Bool { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun uge[T: Num](this: &T, that: &T) -> Bool { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun ogt[T: Num](this: &T, that: &T) -> Bool { }  # ordered greater than (floats)
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun max_val[T: Integer]() -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun min_val[T: Integer]() -> T { }
 
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun smax[T: Integer](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun umax[T: Integer](this: T, that: T) -> T { }
 
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun smin[T: Integer](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun umin[T: Integer](this: T, that: T) -> T { }
 
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun icmp[T: Integer](this: T, that: T) -> S32 { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun scmp[T: Integer](this: T, that: T) -> S32 { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun fcmp[T: Integer](this: T, that: T) -> S32 { }
 
 
-# @public
-# @always_inline
-# @compiler_builtin
+# !public
+# !always_inline
+# !compiler_builtin
 # fun mem_copy[T](dest: &mut Memory[T], src: &Memory[T], size: USize) -> Void { }
 
 
-# @public
-# @always_inline
-# @compiler_builtin
+# !public
+# !always_inline
+# !compiler_builtin
 # fun mem_move[T](dest: &mut Memory[T], src: &Memory[T], size: USize) -> Void { }
 
 
-# @public
-# @always_inline
-# @compiler_builtin
+# !public
+# !always_inline
+# !compiler_builtin
 # fun mem_set[T: Copy](dest: &mut Memory[T], value: T, size: USize) -> Void { }
 
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_add[T: FloatingPoint](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_add_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_sub[T: FloatingPoint](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_sub_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_mul[T: FloatingPoint](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_mul_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_div[T: FloatingPoint](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_div_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_rem[T: FloatingPoint](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_rem_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_neg[T: FloatingPoint](value: T) -> T { }
 
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_sqrt[T: FloatingPoint](value: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_cbrt[T: FloatingPoint](value: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_powi[T: FloatingPoint](base: T, exponent: S32) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_powf[T: FloatingPoint](base: T, exponent: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_sin[T: FloatingPoint](value: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_cos[T: FloatingPoint](value: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_tan[T: FloatingPoint](value: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_asin[T: FloatingPoint](value: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_acos[T: FloatingPoint](value: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_atan[T: FloatingPoint](value: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_atan2[T: FloatingPoint](y: T, x: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_sinh[T: FloatingPoint](value: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_cosh[T: FloatingPoint](value: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_tanh[T: FloatingPoint](value: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_exp[T: FloatingPoint](value: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_exp2[T: FloatingPoint](value: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_exp10[T: FloatingPoint](value: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_ln[T: FloatingPoint](value: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_log2[T: FloatingPoint](value: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_log10[T: FloatingPoint](value: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_abs[T: FloatingPoint](value: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_max[T: FloatingPoint](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_min[T: FloatingPoint](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_copysign[T: FloatingPoint](value: T, sign: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_floor[T: FloatingPoint](value: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_ceil[T: FloatingPoint](value: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_trunc[T: FloatingPoint](value: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun float_round[T: FloatingPoint](value: T) -> T { }
 
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun bitreverse[T: Integer](value: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun ctlz[T: Integer](value: T) -> U32 { }
 
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun sadd_overflow[T: Integer](this: T, that: T) -> (T, Bool) { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun uadd_overflow[T: Integer](this: T, that: T) -> (T, Bool) { }
 
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun ssub_overflow[T: Integer](this: T, that: T) -> (T, Bool) { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun usub_overflow[T: Integer](this: T, that: T) -> (T, Bool) { }
 
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun smul_overflow[T: Integer](this: T, that: T) -> (T, Bool) { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun umul_overflow[T: Integer](this: T, that: T) -> (T, Bool) { }
 
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun sadd_saturating[T: Integer](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun uadd_saturating[T: Integer](this: T, that: T) -> T { }
 
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun ssub_saturating[T: Integer](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun usub_saturating[T: Integer](this: T, that: T) -> T { }
 
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun uadd_wrapping[T: Integer](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun sadd_wrapping[T: Integer](this: T, that: T) -> T { }
 
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun usub_wrapping[T: Integer](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun ssub_wrapping[T: Integer](this: T, that: T) -> T { }
 
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun umul_wrapping[T: Integer](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun smul_wrapping[T: Integer](this: T, that: T) -> T { }
 
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun sshl_saturating[T: Integer](this: T, that: T) -> T { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun ushl_saturating[T: Integer](this: T, that: T) -> T { }
 
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun sitofp[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerSigned[that_bit_width]) -> SizedFloatingPoint[this_bit_width] { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun uitofp[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerUnsigned[that_bit_width]) -> SizedFloatingPoint[this_bit_width] { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun fptrunc[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedFloatingPoint[that_bit_width]) -> SizedFloatingPoint[this_bit_width] { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun strunc[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerSigned[that_bit_width]) -> SizedIntegerSigned[this_bit_width] { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun utrunc[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerUnsigned[that_bit_width]) -> SizedIntegerUnsigned[this_bit_width] { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun sext[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerSigned[that_bit_width]) -> SizedIntegerSigned[this_bit_width] { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun zext[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerUnsigned[that_bit_width]) -> SizedIntegerUnsigned[this_bit_width] { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun fpext[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedFloatingPoint[that_bit_width]) -> SizedFloatingPoint[this_bit_width] { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun bit_cast[T, U](value: U) -> T { }  # Identity function (type hint to change U32 to S32 etc - same bit width)
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun fptosi[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedFloatingPoint[that_bit_width]) -> SizedIntegerSigned[this_bit_width] { }
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun fptoui[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedFloatingPoint[that_bit_width]) -> SizedIntegerUnsigned[this_bit_width] { }
 
 
-@public
-@always_inline
-@compiler_builtin
+!public
+!always_inline
+!compiler_builtin
 fun fpclass[T: FloatingPoint](value: T, flag: S32) -> Bool { }

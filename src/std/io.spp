@@ -5,14 +5,14 @@ use std::string::Str
 use std::string_view::StrView
 
 
-@public
+!public
 fun print(value: StrView) -> Opt[USize] {
     let val = std::console::stdout_stream::stdout.write_all(value.bytes()).ok()
     ret val
 }
 
 
-@public
+!public
 fun input() -> Opt[Str] {
     let vec = std::console::stdin_stream::stdin.read_all().ok()?
     ret Some(val=Str(data=vec))

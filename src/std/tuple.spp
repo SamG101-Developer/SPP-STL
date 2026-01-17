@@ -1,8 +1,8 @@
-@protected
+!protected
 cls TupleLike { }
 
 
-@public
+!public
 cls Tup[..Items] { }
 
 

@@ -18,14 +18,14 @@ use std::fs::path::Path
 A string type representing a sequence of bytes. This is a "higher level" abstraction over `Vec[U8]`, compared to the
 `StrView` type which  is an immutable, static lifetime span over a pointer to bytes.
 ##
-@public
+!public
 cls Str {
-    @public data: Vec[U8]
+    !public data: Vec[U8]
 }
 
 
 sup Str {
-    @public
+    !public
     fun new() -> Str {
         ret Str(data=Vec[U8]::new())
     }
@@ -33,19 +33,19 @@ sup Str {
 
 
 sup Str {
-    @public
+    !public
     fun to_ascii_uppercase(&self) -> Str {
         # ret self.data.iter_ref().map(U8::to_ascii_uppercase).collect[Str]()
         ret Str::from("")
     }
 
-    @public
+    !public
     fun to_ascii_lowercase(&self) -> Str {
         # ret self.data.iter_ref().map(U8::to_ascii_lowercase).collect[Str]()
         ret Str::from("")
     }
 
-    @public
+    !public
     fun split(&self, sep: U8) -> Vec[Str] {
         let mut current: Str = Str::from("")
         let mut strings = Vec[Str]::new()
@@ -65,28 +65,28 @@ sup Str {
 
 
 sup Str {
-    @public
-    @compiler_builtin
+    !public
+    !compiler_builtin
     fun starts_with(&self, needle: StrView) -> Bool { }
 
-    @public
-    @compiler_builtin
+    !public
+    !compiler_builtin
     fun ends_with(&self, needle: StrView) -> Bool { }
 }
 
 
 sup Str {
-    @public
+    !public
     cor chars(&self) -> Iterator[U8] {
         gen with self.data.clone().iter_mov()
     }
 
-    @public
+    !public
     fun length(&self) -> USize {
         ret self.data.length()
     }
 
-    @public
+    !public
     fun is_empty(&self) -> Bool {
         ret self.data.is_empty()
     }
@@ -94,7 +94,7 @@ sup Str {
 
 
 sup Str ext From[Self, StrView] {
-    @compiler_builtin
+    !compiler_builtin
     fun from(that: StrView) -> Self { }
 }
 

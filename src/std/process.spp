@@ -11,7 +11,7 @@ cls Process { }
 
 
 sup Process {
-    @public
+    !public
     fun get_cwd() -> Str {
         # Return the current working directory as a string.
         let mut cwd = StrView()
@@ -19,14 +19,14 @@ sup Process {
         ret Str::from(cwd)
     }
 
-    @public
+    !public
     fun set_cwd(path: StrView) -> Bool {
         # Set the current working directory to the specified path.
         let result = sppc::proc_set_cwd(&path)
         ret result == 0
     }
 
-    @public
+    !public
     fun get_env(var_key: StrView) -> Opt[Str] {
         # Get the value of an environment variable.
         let env_val = sppc::proc_get_env(&var_key)
@@ -34,14 +34,14 @@ sup Process {
         ret Some(val=Str::from(env_val))
     }
 
-    @public
+    !public
     fun set_env(var_key: StrView, var_val: StrView, overwrite: Bool = true) -> Bool {
         # Set the value of an environment variable.
         let result = sppc::proc_set_env(&var_key, &var_val, overwrite)
         ret result == 0
     }
 
-    @public
+    !public
     fun unset_env(var_key: StrView) -> Bool {
         # Unset an environment variable.
         let result = sppc::proc_unset_env(&var_key)

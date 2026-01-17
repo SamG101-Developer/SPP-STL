@@ -1,14 +1,14 @@
-@public
+!public
 cls FunMov[Args, Out] { }
 sup [Args, Out] FunMov[Args, Out] { }
 
 
-@public
+!public
 cls FunMut[Args, Out] { }
 sup [Args, Out] FunMut[Args, Out] { }
 
 
-@public
+!public
 cls FunRef[Args, Out] { }
 sup [Args, Out] FunRef[Args, Out] { }
 

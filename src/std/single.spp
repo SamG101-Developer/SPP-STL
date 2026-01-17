@@ -12,38 +12,38 @@ use std::ops::void::Void
 ##
 A uniquely owned pointer on the heap.
 ##
-@public
+!public
 cls Single[T, A: Alloc[T] = GlobalAlloc[T]] { }
 
 
 sup [T] Single[T] {
-    @public type Element = T
+    !public type Element = T
 
-    @public
-    @compiler_builtin
+    !public
+    !compiler_builtin
     fun new(value: T) -> Single[T] { }
 }
 
 
 sup [T] Single[T] ext FwdRef[T] {
-    @compiler_builtin
+    !compiler_builtin
     cor fwd_ref(&self) -> GenOnce[&T] { }
 }
 
 
 sup [T] Single[T] ext FwdMut[T] {
-    @compiler_builtin
+    !compiler_builtin
     cor fwd_mut(&mut self) -> GenOnce[&mut T] { }
 }
 
 
 sup [T] Single[T] ext FwdMov[T] {
-    @compiler_builtin
+    !compiler_builtin
     cor fwd_mov(self) -> GenOnce[T] { }
 }
 
 
 sup [T] Single[T] ext Del {
-    @compiler_builtin
+    !compiler_builtin
     fun del(&mut self) -> Void { }
 }

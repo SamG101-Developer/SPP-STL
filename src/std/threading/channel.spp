@@ -11,14 +11,14 @@ use std::threading::cond_var::CondVar
 use std::threading::mutex::LockErr
 use std::threading::mutex::Mutex
 
-@public
+!public
 cls Sender[T] {
     storage: Shared[Queue[T]]
     mutex: Mutex
     cond_var: CondVar
 }
 
-@public
+!public
 cls Receiver[T] {
     storage: Shared[Queue[T]]
     mutex: Mutex
@@ -26,7 +26,7 @@ cls Receiver[T] {
 }
 
 
-@public
+!public
 fun channel[T]() -> (Sender[T], Receiver[T]) {
     let queue = Queue[T]::new()
     let storage = Shared[Queue[T]]::new(queue)
@@ -37,7 +37,7 @@ fun channel[T]() -> (Sender[T], Receiver[T]) {
 
 
 sup [T] Sender[T] {
-    @public
+    !public
     fun write(&mut self, data: T) -> Res[Void, LockErr] {
         self.mutex.lock()?
         self.storage.push(data)
@@ -48,14 +48,14 @@ sup [T] Sender[T] {
 
 
 sup [T] Receiver[T] {
-    @public
+    !public
     fun read(&mut self, len: USize) -> Res[T, LockErr] {
         self.mutex.lock()?
         self.cond_var.wait(&self.mutex, (caps &self) self.storage.is_empty().not)?
         ret Pass(val=self.storage.pop().unwrap())
     }
 
-    @public
+    !public
     fun try_read(&mut self) -> Res[Opt[T], LockErr] {
         self.mutex.lock()?
         ret Pass(val=self.storage.pop())

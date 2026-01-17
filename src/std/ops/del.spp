@@ -1,11 +1,11 @@
 use std::void::Void
 
 
-@public cls Del { }
+!public cls Del { }
 
 
 sup Del {
-    @public
-    @abstract_method
+    !public
+    !abstract_method
     fun del(&mut self) -> Void { }
 }

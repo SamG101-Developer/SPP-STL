@@ -3,14 +3,14 @@ use std::allocator::GlobalAlloc
 use std::shared::Shared
 
 
-@public
+!public
 cls Shadow[T, A: Alloc[T] = GlobalAlloc[T]] { }
 
 
 sup [T] Shadow[T] {
-    @public type Element = T
+    !public type Element = T
 
-    @public
-    @compiler_builtin
+    !public
+    !compiler_builtin
     fun upgrade(&self) -> Shared[T] { }
 }

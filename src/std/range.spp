@@ -1,21 +1,21 @@
 use std::generator::Gen
 
 
-@public
+!public
 cls Range[T] {
-    @public start: T
-    @public end: T
-    @public step: T
+    !public start: T
+    !public end: T
+    !public step: T
 }
 
 
 sup [T] Range[T] {
-    @public
+    !public
     fun step_by(self, step: T) -> Range[T] {
         ret Range(start=self.start, end=self.end, step)
     }
 
-    @public
+    !public
     fun between(start: T, end: T) -> Range[T] {
         ret Range(start=start, end=end)
     }

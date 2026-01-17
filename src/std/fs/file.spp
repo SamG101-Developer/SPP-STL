@@ -22,11 +22,11 @@ use std::fs::path::Path
 
 
 cls FileNotFoundErr {
-    @public msg: StrView
+    !public msg: StrView
 }
 
 
-@public
+!public
 cls File {
     fd: S32
     open: Bool = false
@@ -42,14 +42,14 @@ sup File {
 
 
 sup File {
-    @public
+    !public
     fun open(path: &Path, mode: Str) -> Res[File, FileNotFoundErr] {
         let fd = sppc::fd_open(&StrView::from(path.clone()), &StrView::from(mode))
         case fd == 0 { ret Fail(err=FileNotFoundErr(msg="Failed to open file")) }
         ret Pass(val=File(fd, open=true))
     }
 
-    @public
+    !public
     fun close(&mut self) -> Res[Void, FileNotFoundErr] {
         let err = sppc::fd_close(self.fd)
         case err != 0 { ret Fail(err=FileNotFoundErr(msg="Failed to close file")) }
@@ -57,25 +57,25 @@ sup File {
         ret Pass[Void]()
     }
 
-    @public
+    !public
     fun lock_unique(&self, non_blocking: Bool = true) -> Bool {
         let val = sppc::fd_lock_ex(self.fd, non_blocking)
         ret val == 0
     }
 
-    @public
+    !public
     fun lock_shared(&self, non_blocking: Bool = true) -> Bool {
         let val = sppc::fd_lock_sh(self.fd, non_blocking)
         ret val == 0
     }
 
-    @public
+    !public
     fun unlock(&self) -> Bool {
         let val = sppc::fd_unlock(self.fd)
         ret val == 0
     }
 
-    @public
+    !public
     fun set_length(&self, len: S64) -> Bool {
         let val = sppc::fd_truncate(self.fd, len)
         ret val == 0

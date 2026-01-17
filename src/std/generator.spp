@@ -3,23 +3,23 @@ use std::option::None
 use std::void::Void
 
 
-@public
+!public
 cls Gen[Yield, Err=Void, Send=Void] { }
 sup [Yield, Send] Gen[Yield, Send] {
-    @private
-    @compiler_builtin
+    !private
+    !compiler_builtin
     fun send(&mut self, value: Send) -> Generated[Yield or None] { }
 }
 
 
-@public
+!public
 cls GenOnce[Yield, Send=Void] { }
 sup [Yield, Send] GenOnce[Yield, Send] {
-    @private
-    @compiler_builtin
+    !private
+    !compiler_builtin
     fun send(&mut self, value: Send) -> Generated[Yield or None] { }
 }
 
 
-@private
+!private
 cls Generated[Yield] { }

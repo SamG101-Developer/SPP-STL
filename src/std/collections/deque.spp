@@ -9,7 +9,7 @@ use std::vector::Vec
 use std::void::Void
 
 
-@public
+!public
 cls Deque[T, cmp block_size: USize = 64_uz] {
     blocks: Vec[Arr[T, block_size]]
     head_blk: USize = 0_uz
@@ -20,7 +20,7 @@ cls Deque[T, cmp block_size: USize = 64_uz] {
 
 
 sup [T] Deque[T] {
-    @public
+    !public
     fun new() -> Deque[T] {
         let mut blocks = Vec[Arr[T, 64_uz]]::new()
         blocks.push_back(Arr[T, 64_uz]::new())
@@ -29,14 +29,14 @@ sup [T] Deque[T] {
 }
 
 sup [T] Deque[T] {
-    @public
+    !public
     fun push_back(&mut self, val: T) -> Void {
         self.ensure_tail_space()
         self.blocks[mut self.tail_blk][mut self.tail_idx]@ = val
         self.advance_tail()
     }
 
-    @public
+    !public
     fun push_front(&mut self, val: T) -> Void {
         self.ensure_head_space()
         self.retreat_head()
@@ -46,7 +46,7 @@ sup [T] Deque[T] {
 
 
 sup [T] Deque[T] {
-    @public
+    !public
     fun pop_back(&mut self) -> Opt[T] {
         case self.is_empty() { ret None() }
         self.retreat_tail()
@@ -54,13 +54,13 @@ sup [T] Deque[T] {
         ret val
     }
 
-    @public
+    !public
     fun pop_back_if(&mut self, pred: FunMov[(&mut T,), Bool]) -> Opt[T] {
         let mut val = self.pop_back()?
         ret case pred(&mut val) { Some(val) } else { None() }
     }
 
-    @public
+    !public
     fun pop_front(&mut self) -> Opt[T] {
         case self.is_empty() { ret None() }
         let val = self.blocks[self.head_blk].mem.take(self.head_idx)
@@ -68,7 +68,7 @@ sup [T] Deque[T] {
         ret val
     }
 
-    @public
+    !public
     fun pop_front_if(&mut self, pred: FunMov[(&mut T,), Bool]) -> Opt[T] {
         let mut val = self.pop_front()?
         ret case pred(&mut val) { Some(val) } else { None() }
@@ -77,7 +77,7 @@ sup [T] Deque[T] {
 
 
 sup [T, cmp block_size: USize] Deque[T, block_size] {
-    @public
+    !public
     fun clear(&mut self) -> Void {
         self.blocks.clear()
         self.blocks.push_back(Arr[T, block_size]())
@@ -85,18 +85,18 @@ sup [T, cmp block_size: USize] Deque[T, block_size] {
         self.tail_blk, self.tail_idx = 0_uz, 0_uz
     }
 
-    @public
+    !public
     fun is_empty(&self) -> Bool {
         ret self.head_blk == self.tail_blk and self.head_idx == self.tail_idx
     }
 
-    @public
+    !public
     fun capacity(&self) -> USize {
         let total_blocks = self.blocks.length()
         ret total_blocks * block_size
     }
 
-    @public
+    !public
     fun length(&self) -> USize {
         let head_pos = self.head_blk * block_size + self.head_idx
         let tail_pos = self.tail_blk * block_size + self.tail_idx
