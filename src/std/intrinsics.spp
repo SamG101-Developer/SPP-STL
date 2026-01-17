@@ -28,7 +28,7 @@ fun add_assign[T: Integer](this: &mut T, that: T) -> Void { }
 !public
 !always_inline
 !compiler_builtin
-fun sub[T: Integer](this: T, that: T) -> T { }
+cmp fun sub[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
