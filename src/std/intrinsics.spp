@@ -158,7 +158,7 @@ fun abs[T: Integer](this: T, that: T) -> T { }
 !public
 !always_inline
 !compiler_builtin
-fun eq[T: Num](this: &T, that: &T) -> Bool { }
+cmp fun eq[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
@@ -168,7 +168,7 @@ fun oeq[T: Num](this: &T, that: &T) -> Bool { }  # ordered equal (floats)
 !public
 !always_inline
 !compiler_builtin
-fun ne[T: Num](this: &T, that: &T) -> Bool { }
+cmp fun ne[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline

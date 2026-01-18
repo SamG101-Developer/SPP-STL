@@ -40,14 +40,14 @@ cmp log_10_lookup_table: [U32; 256_uz] = [
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::eq::Eq[Rhs=Self] {
-    fun eq(&self, that: &Self) -> Bool {
+    cmp fun eq(&self, that: &Self) -> Bool {
         ret intrinsics::eq(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::ne::Ne[Rhs=Self] {
-    fun ne(&self, that: &Self) -> Bool {
+    cmp fun ne(&self, that: &Self) -> Bool {
         ret intrinsics::ne(self, that)
     }
 }
