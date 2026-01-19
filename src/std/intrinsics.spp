@@ -238,12 +238,12 @@ cmp fun oge[T: Num](this: &T, that: &T) -> Bool { }  # ordered greater than or e
 !public
 !always_inline
 !compiler_builtin
-fun max_val[T: Integer]() -> T { }
+fun max_val[T: Integer]() -> T { }  # Todo: Remove and use Limits[T]::max
 
 !public
 !always_inline
 !compiler_builtin
-fun min_val[T: Integer]() -> T { }
+fun min_val[T: Integer]() -> T { }  # Todo: Remove and use Limits[T]::min
 
 
 !public
@@ -364,11 +364,6 @@ cmp fun float_neg[T: FloatingPoint](value: T) -> T { }
 !always_inline
 !compiler_builtin
 fun float_sqrt[T: FloatingPoint](value: T) -> T { }
-
-!public
-!always_inline
-!compiler_builtin
-fun float_cbrt[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline

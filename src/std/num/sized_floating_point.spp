@@ -228,11 +228,13 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
         ret intrinsics::float_sqrt(self)
     }
 
+    ##
     !public
     !inline
     fun cbrt(self) -> Self {
         ret intrinsics::float_cbrt(self)
     }
+    ##
 }
 
 
