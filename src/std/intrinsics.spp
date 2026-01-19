@@ -448,17 +448,17 @@ fun float_log10[T: FloatingPoint](value: T) -> T { }
 !public
 !always_inline
 !compiler_builtin
-fun float_abs[T: FloatingPoint](value: T) -> T { }
+cmp fun float_abs[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun float_max[T: FloatingPoint](this: T, that: T) -> T { }
+cmp fun float_max[T: FloatingPoint](this: T, that: T) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun float_min[T: FloatingPoint](this: T, that: T) -> T { }
+cmp fun float_min[T: FloatingPoint](this: T, that: T) -> T { }
 
 !public
 !always_inline
