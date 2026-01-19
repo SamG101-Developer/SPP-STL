@@ -27,7 +27,7 @@ sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerUnsigned[this
 
         # Destination (this) bits are greater than the source (that) bits => zero-extend.
         case this_bit_width > that_bit_width {
-            let u = intrinsics::zext[this_bit_width](that)
+            let u = intrinsics::uzext[this_bit_width](that)
             ret intrinsics::bit_cast[Self](u)
         }
 
@@ -47,7 +47,7 @@ sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerUnsigned[this
 
         # Destination (this) bits are greater than the source (that) bits => zero-extend.
         case this_bit_width > that_bit_width {
-            let s = intrinsics::sext[this_bit_width](that)
+            let s = intrinsics::szext[this_bit_width](that)
             ret intrinsics::bit_cast[Self](s)
         }
 

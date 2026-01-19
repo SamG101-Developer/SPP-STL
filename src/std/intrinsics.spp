@@ -634,12 +634,12 @@ fun utrunc[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedInteger
 !public
 !always_inline
 !compiler_builtin
-fun sext[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerSigned[that_bit_width]) -> SizedIntegerSigned[this_bit_width] { }
+fun szext[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerSigned[that_bit_width]) -> SizedIntegerSigned[this_bit_width] { }
 
 !public
 !always_inline
 !compiler_builtin
-fun zext[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerUnsigned[that_bit_width]) -> SizedIntegerUnsigned[this_bit_width] { }
+fun uzext[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerUnsigned[that_bit_width]) -> SizedIntegerUnsigned[this_bit_width] { }
 
 !public
 !always_inline
