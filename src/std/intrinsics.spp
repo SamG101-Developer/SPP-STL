@@ -23,7 +23,7 @@ cmp fun add[T: Integer](this: T, that: T) -> T { }
 !public
 !always_inline
 !compiler_builtin
-fun add_assign[T: Integer](this: &mut T, that: T) -> Void { }
+cmp fun add_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
@@ -33,127 +33,127 @@ cmp fun sub[T: Integer](this: T, that: T) -> T { }
 !public
 !always_inline
 !compiler_builtin
-fun sub_assign[T: Integer](this: &mut T, that: T) -> Void { }
+cmp fun sub_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
 !compiler_builtin
-fun mul[T: Integer](this: T, that: T) -> T { }
+cmp fun mul[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun mul_assign[T: Integer](this: &mut T, that: T) -> Void { }
+cmp fun mul_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
 !compiler_builtin
-fun sdiv[T: Integer](this: T, that: T) -> T { }
+cmp fun sdiv[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun udiv_assign[T: Integer](this: &mut T, that: T) -> Void { }
+cmp fun sdiv_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
 !compiler_builtin
-fun udiv[T: Integer](this: T, that: T) -> T { }
+cmp fun udiv_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
 !compiler_builtin
-fun srem_assign[T: Integer](this: &mut T, that: T) -> Void { }
+cmp fun udiv[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun srem[T: Integer](this: T, that: T) -> T { }
+cmp fun srem_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
 !compiler_builtin
-fun urem_assign[T: Integer](this: &mut T, that: T) -> Void { }
+cmp fun srem[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun urem[T: Integer](this: T, that: T) -> T { }
+cmp fun urem_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
 !compiler_builtin
-fun sdiv_assign[T: Integer](this: &mut T, that: T) -> Void { }
+cmp fun urem[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun sneg[T: Integer](value: T) -> T { }
+cmp fun sneg[T: Integer](value: T) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun bit_shl[T: Integer, U: Integer](this: T, by: U) -> T { }
+cmp fun bit_shl[T: Integer, U: Integer](this: T, by: U) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun bit_shl_assign[T: Integer, U: Integer](this: &mut T, by: U) -> Void { }
+cmp fun bit_shl_assign[T: Integer, U: Integer](this: &mut T, by: U) -> Void { }
 
 !public
 !always_inline
 !compiler_builtin
-fun bit_shr[T: Integer, U: Integer](this: T, by: U) -> T { }
+cmp fun bit_shr[T: Integer, U: Integer](this: T, by: U) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun bit_shr_assign[T: Integer, U: Integer](this: &mut T, by: U) -> Void { }
+cmp fun bit_shr_assign[T: Integer, U: Integer](this: &mut T, by: U) -> Void { }
 
 !public
 !always_inline
 !compiler_builtin
-fun bit_ior[T: Integer](this: T, that: T) -> T { }
+cmp fun bit_ior[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun bit_ior_assign[T: Integer](this: &mut T, that: T) -> Void { }
+cmp fun bit_ior_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
 !compiler_builtin
-fun bit_and[T: Integer](this: T, that: T) -> T { }
+cmp fun bit_and[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun bit_and_assign[T: Integer](this: &mut T, that: T) -> Void { }
+cmp fun bit_and_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
 !compiler_builtin
-fun bit_xor[T: Integer](this: T, that: T) -> T { }
+cmp fun bit_xor[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun bit_xor_assign[T: Integer](this: &mut T, that: T) -> Void { }
+cmp fun bit_xor_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
 !compiler_builtin
-fun bit_not[T: Integer](value: T) -> T { }
+cmp fun bit_not[T: Integer](value: T) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun bit_not_assign[T: Integer](this: &mut T) -> Void { }
+cmp fun bit_not_assign[T: Integer](this: &mut T) -> Void { }
 
 !public
 !always_inline
 !compiler_builtin
-fun abs[T: Integer](this: T, that: T) -> T { }
+cmp fun abs[T: Integer](this: T, that: T) -> T { }  # todo: not being used anywhere atm
 
 !public
 !always_inline
@@ -163,7 +163,7 @@ cmp fun eq[T: Num](this: &T, that: &T) -> Bool { }
 !public
 !always_inline
 !compiler_builtin
-fun oeq[T: Num](this: &T, that: &T) -> Bool { }  # ordered equal (floats)
+cmp fun oeq[T: Num](this: &T, that: &T) -> Bool { }  # ordered equal (floats)
 
 !public
 !always_inline
@@ -173,67 +173,67 @@ cmp fun ne[T: Num](this: &T, that: &T) -> Bool { }
 !public
 !always_inline
 !compiler_builtin
-fun one[T: Num](this: &T, that: &T) -> Bool { }  # ordered not equal (floats)
+cmp fun one[T: Num](this: &T, that: &T) -> Bool { }  # ordered not equal (floats)
 
 !public
 !always_inline
 !compiler_builtin
-fun slt[T: Num](this: &T, that: &T) -> Bool { }
+cmp fun slt[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
 !compiler_builtin
-fun ult[T: Num](this: &T, that: &T) -> Bool { }
+cmp fun ult[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
 !compiler_builtin
-fun ole[T: Num](this: &T, that: &T) -> Bool { }  # ordered less than or equal (floats)
+cmp fun olt[T: Num](this: &T, that: &T) -> Bool { }  # ordered less than (floats)
 
 !public
 !always_inline
 !compiler_builtin
-fun sle[T: Num](this: &T, that: &T) -> Bool { }
+cmp fun sle[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
 !compiler_builtin
-fun ule[T: Num](this: &T, that: &T) -> Bool { }
+cmp fun ule[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
 !compiler_builtin
-fun olt[T: Num](this: &T, that: &T) -> Bool { }  # ordered less than (floats)
+cmp fun ole[T: Num](this: &T, that: &T) -> Bool { }  # ordered less than or equal (floats)
 
 !public
 !always_inline
 !compiler_builtin
-fun sgt[T: Num](this: &T, that: &T) -> Bool { }
+cmp fun sgt[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
 !compiler_builtin
-fun ugt[T: Num](this: &T, that: &T) -> Bool { }
+cmp fun ugt[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
 !compiler_builtin
-fun oge[T: Num](this: &T, that: &T) -> Bool { }  # ordered greater than or equal (floats)
+cmp fun ogt[T: Num](this: &T, that: &T) -> Bool { }  # ordered greater than (floats)
 
 !public
 !always_inline
 !compiler_builtin
-fun sge[T: Num](this: &T, that: &T) -> Bool { }
+cmp fun sge[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
 !compiler_builtin
-fun uge[T: Num](this: &T, that: &T) -> Bool { }
+cmp fun uge[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
 !compiler_builtin
-fun ogt[T: Num](this: &T, that: &T) -> Bool { }  # ordered greater than (floats)
+cmp fun oge[T: Num](this: &T, that: &T) -> Bool { }  # ordered greater than or equal (floats)
 
 !public
 !always_inline
@@ -249,25 +249,26 @@ fun min_val[T: Integer]() -> T { }
 !public
 !always_inline
 !compiler_builtin
-fun smax[T: Integer](this: T, that: T) -> T { }
+cmp fun smax[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun umax[T: Integer](this: T, that: T) -> T { }
+cmp fun umax[T: Integer](this: T, that: T) -> T { }
 
 
 !public
 !always_inline
 !compiler_builtin
-fun smin[T: Integer](this: T, that: T) -> T { }
+cmp fun smin[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun umin[T: Integer](this: T, that: T) -> T { }
+cmp fun umin[T: Integer](this: T, that: T) -> T { }
 
 
+##
 !public
 !always_inline
 !compiler_builtin
@@ -282,6 +283,7 @@ fun scmp[T: Integer](this: T, that: T) -> S32 { }
 !always_inline
 !compiler_builtin
 fun fcmp[T: Integer](this: T, that: T) -> S32 { }
+##
 
 
 # !public
@@ -305,57 +307,57 @@ fun fcmp[T: Integer](this: T, that: T) -> S32 { }
 !public
 !always_inline
 !compiler_builtin
-fun float_add[T: FloatingPoint](this: T, that: T) -> T { }
+cmp fun float_add[T: FloatingPoint](this: T, that: T) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun float_add_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
+cmp fun float_add_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
 !compiler_builtin
-fun float_sub[T: FloatingPoint](this: T, that: T) -> T { }
+cmp fun float_sub[T: FloatingPoint](this: T, that: T) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun float_sub_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
+cmp fun float_sub_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
 !compiler_builtin
-fun float_mul[T: FloatingPoint](this: T, that: T) -> T { }
+cmp fun float_mul[T: FloatingPoint](this: T, that: T) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun float_mul_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
+cmp fun float_mul_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
 !compiler_builtin
-fun float_div[T: FloatingPoint](this: T, that: T) -> T { }
+cmp fun float_div[T: FloatingPoint](this: T, that: T) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun float_div_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
+cmp fun float_div_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
 !compiler_builtin
-fun float_rem[T: FloatingPoint](this: T, that: T) -> T { }
+cmp fun float_rem[T: FloatingPoint](this: T, that: T) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun float_rem_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
+cmp fun float_rem_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
 !compiler_builtin
-fun float_neg[T: FloatingPoint](value: T) -> T { }
+cmp fun float_neg[T: FloatingPoint](value: T) -> T { }
 
 
 !public
@@ -481,22 +483,22 @@ fun float_copysign[T: FloatingPoint](value: T, sign: T) -> T { }
 !public
 !always_inline
 !compiler_builtin
-fun float_floor[T: FloatingPoint](value: T) -> T { }
+cmp fun float_floor[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun float_ceil[T: FloatingPoint](value: T) -> T { }
+cmp fun float_ceil[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun float_trunc[T: FloatingPoint](value: T) -> T { }
+cmp fun float_trunc[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun float_round[T: FloatingPoint](value: T) -> T { }
+cmp fun float_round[T: FloatingPoint](value: T) -> T { }
 
 
 !public

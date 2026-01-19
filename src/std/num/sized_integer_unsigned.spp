@@ -58,28 +58,28 @@ sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerUnsigned[this
 
 
 sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::div::Div[Rhs=Self, Ret=Self] {
-    fun div(self, that: Self) -> Self {
+    cmp fun div(self, that: Self) -> Self {
         ret intrinsics::udiv(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::div::DivAssign[Rhs=Self] {
-    fun div_assign(&mut self, that: Self) -> Void {
+    cmp fun div_assign(&mut self, that: Self) -> Void {
         intrinsics::udiv_assign(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::rem::Rem[Rhs=Self, Ret=Self] {
-    fun rem(self, that: Self) -> Self {
+    cmp fun rem(self, that: Self) -> Self {
         ret intrinsics::urem(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::rem::RemAssign[Rhs=Self] {
-    fun rem_assign(&mut self, that: Self) -> Void {
+    cmp fun rem_assign(&mut self, that: Self) -> Void {
         intrinsics::urem_assign(self, that)
     }
 }
@@ -108,41 +108,41 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::pow::Pow[
 sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     !public
     !inline
-    fun min(self, that: Self) -> Self {
+    cmp fun min(self, that: Self) -> Self {
         ret intrinsics::umin(self, that)
     }
 
     !public
     !inline
-    fun max(self, that: Self) -> Self {
+    cmp fun max(self, that: Self) -> Self {
         ret intrinsics::umax(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::lt::Lt[Rhs=Self] {
-    fun lt(&self, that: &Self) -> Bool {
+    cmp fun lt(&self, that: &Self) -> Bool {
         ret intrinsics::ult(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::le::Le[Rhs=Self] {
-    fun le(&self, that: &Self) -> Bool {
+    cmp fun le(&self, that: &Self) -> Bool {
         ret intrinsics::ule(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::gt::Gt[Rhs=Self] {
-    fun gt(&self, that: &Self) -> Bool {
+    cmp fun gt(&self, that: &Self) -> Bool {
         ret intrinsics::ugt(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] ext std::ops::ge::Ge[Rhs=Self] {
-    fun ge(&self, that: &Self) -> Bool {
+    cmp fun ge(&self, that: &Self) -> Bool {
         ret intrinsics::uge(self, that)
     }
 }

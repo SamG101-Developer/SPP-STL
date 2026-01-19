@@ -31,112 +31,112 @@ sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedFloatingPoint[this_b
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::eq::Eq[Rhs=Self] {
-    fun eq(&self, that: &Self) -> Bool {
+    cmp fun eq(&self, that: &Self) -> Bool {
         ret intrinsics::oeq(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::ne::Ne[Rhs=Self] {
-    fun ne(&self, that: &Self) -> Bool {
+    cmp fun ne(&self, that: &Self) -> Bool {
         ret intrinsics::one(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::lt::Lt[Rhs=Self] {
-    fun lt(&self, that: &Self) -> Bool {
+    cmp fun lt(&self, that: &Self) -> Bool {
         ret intrinsics::olt(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::le::Le[Rhs=Self] {
-    fun le(&self, that: &Self) -> Bool {
+    cmp fun le(&self, that: &Self) -> Bool {
         ret intrinsics::ole(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::gt::Gt[Rhs=Self] {
-    fun gt(&self, that: &Self) -> Bool {
+    cmp fun gt(&self, that: &Self) -> Bool {
         ret intrinsics::ogt(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::ge::Ge[Rhs=Self] {
-    fun ge(&self, that: &Self) -> Bool {
+    cmp fun ge(&self, that: &Self) -> Bool {
         ret intrinsics::oge(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::add::Add[Rhs=Self, Ret=Self] {
-    fun add(self, that: Self) -> Self {
+    cmp fun add(self, that: Self) -> Self {
         ret intrinsics::float_add(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::add::AddAssign[Rhs=Self] {
-    fun add_assign(&mut self, that: Self) -> Void {
+    cmp fun add_assign(&mut self, that: Self) -> Void {
         intrinsics::float_add_assign(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::sub::Sub[Rhs=Self, Ret=Self] {
-    fun sub(self, that: Self) -> Self {
+    cmp fun sub(self, that: Self) -> Self {
         ret intrinsics::float_sub(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::sub::SubAssign[Rhs=Self] {
-    fun sub_assign(&mut self, that: Self) -> Void {
+    cmp fun sub_assign(&mut self, that: Self) -> Void {
         intrinsics::float_sub_assign(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::mul::Mul[Rhs=Self, Ret=Self] {
-    fun mul(self, that: Self) -> Self {
+    cmp fun mul(self, that: Self) -> Self {
         ret intrinsics::float_mul(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::mul::MulAssign[Rhs=Self] {
-    fun mul_assign(&mut self, that: Self) -> Void {
+    cmp fun mul_assign(&mut self, that: Self) -> Void {
         intrinsics::float_mul_assign(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::div::Div[Rhs=Self, Ret=Self] {
-    fun div(self, that: Self) -> Self {
+    cmp fun div(self, that: Self) -> Self {
         ret intrinsics::float_div(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::div::DivAssign[Rhs=Self] {
-    fun div_assign(&mut self, that: Self) -> Void {
+    cmp fun div_assign(&mut self, that: Self) -> Void {
         intrinsics::float_div_assign(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::rem::Rem[Rhs=Self, Ret=Self] {
-    fun rem(self, that: Self) -> Self {
+    cmp fun rem(self, that: Self) -> Self {
         ret intrinsics::float_rem(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::rem::RemAssign[Rhs=Self] {
-    fun rem_assign(&mut self, that: Self) -> Void {
+    cmp fun rem_assign(&mut self, that: Self) -> Void {
         intrinsics::float_rem_assign(self, that)
     }
 }
@@ -158,7 +158,7 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] ext std::ops::pow::Pow[Rh
 
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
     !public
-    fun neg(self) -> Self {
+    cmp fun neg(self) -> Self {
         ret intrinsics::float_neg(self)
     }
 }
@@ -167,13 +167,13 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
     !public
     !inline
-    fun min(self, that: Self) -> Self {
+    cmp fun min(self, that: Self) -> Self {
         ret intrinsics::float_min(self, that)
     }
 
     !public
     !inline
-    fun max(self, that: Self) -> Self {
+    cmp fun max(self, that: Self) -> Self {
         ret intrinsics::float_max(self, that)
     }
 }
@@ -239,31 +239,31 @@ sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
 sup [cmp bit_width: U32] SizedFloatingPoint[bit_width] {
     !public
     !inline
-    fun abs(self) -> Self {
+    cmp fun abs(self) -> Self {
         ret intrinsics::float_abs(self)
     }
 
     !public
     !inline
-    fun ceil(self) -> Self {
+    cmp fun ceil(self) -> Self {
         ret intrinsics::float_ceil(self)
     }
 
     !public
     !inline
-    fun floor(self) -> Self {
+    cmp fun floor(self) -> Self {
         ret intrinsics::float_floor(self)
     }
 
     !public
     !inline
-    fun round(self) -> Self {
+    cmp fun round(self) -> Self {
         ret intrinsics::float_round(self)
     }
 
     !public
     !inline
-    fun trunc(self) -> Self {
+    cmp fun trunc(self) -> Self {
         ret intrinsics::float_trunc(self)
     }
 }
