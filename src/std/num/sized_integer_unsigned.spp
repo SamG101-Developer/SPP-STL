@@ -2,7 +2,6 @@ use std::boolean::Bool
 use std::cast::From
 use std::number::U32
 use std::number::U64
-use std::limits::Limits
 use std::option::Opt
 use std::option::None
 use std::option::Some
@@ -226,7 +225,7 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     fun mul_saturating(self, that: Self) -> Self {
         ret case self.mul_checked(that) of {
             is Some[Self](val) { val }
-            else { Limits[Self]::max }
+            else { intrinsics::max_val[Self]() }
         }
     }
 
@@ -373,7 +372,7 @@ sup [cmp bit_width: U32] SizedIntegerUnsigned[bit_width] {
     fun pow_saturating(self, that: U32) -> Self {
         ret case self.pow_checked(that) of {
             is Some[Self](val) { val }
-            else { Limits[Self]::max }
+            else { intrinsics::max_val[Self]() }
         }
     }
 }
