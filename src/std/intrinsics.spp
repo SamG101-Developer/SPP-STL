@@ -239,12 +239,12 @@ cmp fun oge[T: Num](this: &T, that: &T) -> Bool { }  # ordered greater than or e
 !public
 !always_inline
 !compiler_builtin
-fun max_val[T: Integer]() -> T { }
+cmp fun max_val[T: Integer]() -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun min_val[T: Integer]() -> T { }
+cmp fun min_val[T: Integer]() -> T { }
 
 
 !public
@@ -460,6 +460,16 @@ fun float_log10[T: FloatingPoint](value: T) -> T { }
 !always_inline
 !compiler_builtin
 cmp fun float_abs[T: FloatingPoint](value: T) -> T { }
+
+!public
+!always_inline
+!compiler_builtin
+cmp fun float_max_val[T: FloatingPoint]() -> T { }
+
+!public
+!always_inline
+!compiler_builtin
+cmp fun float_min_val[T: FloatingPoint]() -> T { }
 
 !public
 !always_inline
