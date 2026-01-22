@@ -6,26 +6,26 @@ use std::string_view::StrView
 use std::void::Void
 
 
-@public
+!public
 cls Mutex {
-    @public id: S32
+    !public id: S32
 }
 
 
-@public
+!public
 cls MutexLockGard {
-    @public id: S32
+    !public id: S32
 }
 
 
-@public
+!public
 cls LockErr {
-    @public msg: StrView
+    !public msg: StrView
 }
 
 
 sup Mutex {
-    @public
+    !public
     fun new() -> Res[Mutex, LockErr] {
         # Create a new mutex using the sppc threading API.
         let id = sppc::mutex_create()
@@ -33,7 +33,7 @@ sup Mutex {
         ret Pass(val=Mutex(id))
     }
 
-    @public
+    !public
     fun lock(&self) -> Res[MutexLockGard, LockErr] {
         # Lock the mutex using the sppc threading API.
         let guard_id = sppc::mutex_lock(self.id)
@@ -41,7 +41,7 @@ sup Mutex {
         ret Pass(val=MutexLockGard(id=guard_id))
     }
 
-    @public
+    !public
     fun try_lock(&self) -> Res[MutexLockGard, LockErr] {
         # Try to lock the mutex using the sppc threading API.
         let guard_id = sppc::mutex_try_lock(self.id)
@@ -49,7 +49,7 @@ sup Mutex {
         ret Pass(val=MutexLockGard(id=guard_id))
     }
 
-    @public
+    !public
     fun unlock(&self) -> Res[Void, LockErr] {
         # Unlock the mutex using the sppc threading API.
         let val = sppc::mutex_unlock(self.id)

@@ -9,31 +9,31 @@ use std::single::Single
 use std::void::Void
 
 
-@public
-@inline
-@compiler_builtin
+!public
+!inline
+!compiler_builtin
 fun size_of[T]() -> USize {
     # Returns the size of a type at compile time.
 }
 
 
-@public
-@inline
-@compiler_builtin
+!public
+!inline
+!compiler_builtin
 fun size_of_value[T](value: T) -> USize {
     # Handles heap size checking for types that are not known at compile time.
 }
 
 
-@public
-@inline
-@compiler_builtin
+!public
+!inline
+!compiler_builtin
 fun mem_cmp[T](a: &T, b: &T, n: USize) -> S32 {
     # Compares two memory regions byte by byte.
 }
 
 
-@public
+!public
 fun malloc[T](n: USize) -> Opt[Memory[T]] {
     # Determine the size and get an allocated pointer.
     let cap = n * size_of[T]()
@@ -42,7 +42,7 @@ fun malloc[T](n: USize) -> Opt[Memory[T]] {
 }
 
 
-@public
+!public
 fun calloc[T](n: USize) -> Opt[Memory[T]] {
     # Determine the size and get an allocated pointer.
     let cap = n * size_of[T]()
@@ -51,7 +51,7 @@ fun calloc[T](n: USize) -> Opt[Memory[T]] {
 }
 
 
-@public
+!public
 fun realloc[T](mem: Memory[T], n: USize) -> Opt[Memory[T]] {
     # Determine the size and get a reallocated pointer.
     let cap = n * size_of[T]()
@@ -63,14 +63,14 @@ fun realloc[T](mem: Memory[T], n: USize) -> Opt[Memory[T]] {
 }
 
 
-@public
+!public
 fun free[T](mem: Memory[T]) -> Void {
     # Free the memory pointed to by the pointer.
     sppc::mem_dealloc(mem)
 }
 
 
-@public
+!public
 fun swap[T](a: &mut T, b: &mut T) -> Void {
     let temp = take(a)
     a@ = take(b)
@@ -78,7 +78,7 @@ fun swap[T](a: &mut T, b: &mut T) -> Void {
 }
 
 
-@public
+!public
 fun replace[T](dest: &mut T, src: T) -> T {
     let old = take(dest)
     dest@ = src
@@ -86,16 +86,16 @@ fun replace[T](dest: &mut T, src: T) -> T {
 }
 
 
-@public
-@compiler_builtin
+!public
+!compiler_builtin
 fun take[T](src: &mut T) -> T {
     # This is safe because of uniform default initialization, where the "src" will be replaced with a default value for
     # T, based on the standard object initialization: T().
 }
 
 
-@public
-@compiler_builtin
+!public
+!compiler_builtin
 fun drop[T](val: T) -> Void {
     # Safely disposes of a value, calling its destructor if necessary. This is safe as it takes ownership, so an
     # uninitialized value cannot be left behind in the caller's context (at runtime).

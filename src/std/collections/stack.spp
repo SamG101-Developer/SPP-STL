@@ -5,34 +5,34 @@ use std::vector::Vec
 use std::void::Void
 
 
-@public
+!public
 cls Stack[T] {
     buf: Vec[T]
 }
 
 
 sup [T] Stack[T] {
-    @public
+    !public
     fun new() -> Stack[T] {
         ret Stack[T](buf=Vec[T]::new())
     }
 
-    @public
+    !public
     fun push(&mut self, val: T) -> Void {
         self.buf.push_back(val)
     }
 
-    @public
+    !public
     fun pop(&mut self) -> Opt[T] {
         ret self.buf.pop_back()
     }
 
-    @public
+    !public
     fun is_empty(&self) -> Bool {
         ret self.buf.is_empty()
     }
 
-    @public
+    !public
     fun length(&self) -> USize {
         ret self.buf.length()
     }

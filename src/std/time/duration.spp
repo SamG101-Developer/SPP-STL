@@ -5,7 +5,7 @@ use std::ops::mul::Mul
 use std::ops::div::Div
 
 
-@public
+!public
 cls Duration {
     seconds: S64
     nanoseconds: S64
@@ -13,48 +13,48 @@ cls Duration {
 
 
 sup Duration {
-    @public
+    !public
     fun from_seconds(seconds: S64) -> Duration {
         ret Duration(seconds=seconds, nanoseconds=0_s64)
     }
 
-    @public
+    !public
     fun from_milliseconds(milliseconds: S64) -> Duration {
         let secs = milliseconds / 1000_s64
         let nanos = (milliseconds % 1000_s64) * 1000000_s64
         ret Duration(seconds=secs, nanoseconds=nanos)
     }
 
-    @public
+    !public
     fun from_microseconds(microseconds: S64) -> Duration {
         let secs = microseconds / 1000000_s64
         let nanos = (microseconds % 1000000_s64) * 1000_s64
         ret Duration(seconds=secs, nanoseconds=nanos)
     }
 
-    @public
+    !public
     fun from_nanoseconds(nanoseconds: S64) -> Duration {
         let secs = nanoseconds / 1000000000_s64
         let nanos = nanoseconds % 1000000000_s64
         ret Duration(seconds=secs, nanoseconds=nanos)
     }
 
-    @public
+    !public
     fun total_seconds(&self) -> S64 {
         ret self.seconds
     }
 
-    @public
+    !public
     fun total_milliseconds(&self) -> S64 {
         ret self.seconds * 1000_s64 + (self.nanoseconds / 1000000_s64)
     }
 
-    @public
+    !public
     fun total_microseconds(&self) -> S64 {
         ret self.seconds * 1000000_s64 + (self.nanoseconds / 1000_s64)
     }
 
-    @public
+    !public
     fun total_nanoseconds(&self) -> S64 {
         ret self.seconds * 1000000000_s64 + self.nanoseconds
     }

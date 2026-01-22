@@ -10,7 +10,7 @@ use std::void::Void
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 
 
-@public
+!public
 cls BigUInt {
     data: Vec[U32]
 }
@@ -31,41 +31,41 @@ sup [cmp bit_width: U32] BigUInt ext From[Self, SizedIntegerUnsigned[bit_width]]
 
 
 sup BigUInt {
-    @public
+    !public
     fun is_even(&self) -> Bool {
         ret self.data[0_uz].is_even()
     }
 
-    @public
+    !public
     fun is_odd(&self) -> Bool {
         ret self.data[0_uz].is_odd()
     }
 
-    @public
+    !public
     fun zero() -> Self {
         let val = BigUInt()
         val.data.push_back(0_u32)
         ret val
     }
 
-    @public
+    !public
     fun one() -> Self {
         let val = BigUInt()
         val.data.push_back(1_u32)
         ret val
     }
 
-    @public
+    !public
     fun is_zero(&self) -> Bool {
         ret self.data.length() == 1_uz and self.data[0_uz] == 0_u32
     }
 
-    @public
+    !public
     fun is_one(&self) -> Bool {
         ret self.data.length() == 1_uz and self.data[0_uz] == 1_u32
     }
 
-    @private
+    !private
     fun trim(&mut self) -> Void {
         ##
         loop self.data.length() > 1_uz and self.data.get_tail_ref() == 0_u32 {
@@ -74,7 +74,7 @@ sup BigUInt {
         ##
     }
 
-    @private
+    !private
     fun bit_length(&self) -> USize {
         ##
         case self.is_zero() { ret 0_uz }

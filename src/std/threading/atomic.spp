@@ -2,38 +2,38 @@ use std::number::U8
 use std::void::Void
 
 
-@public
+!public
 cls Atom[T] {
-    @public val: T
+    !public val: T
 }
 
 
 sup [T] Atom[T] {
-    @public cmp mem_order_relaxed: U8 = 0_u8
-    @public cmp mem_order_acquire: U8 = 1_u8
-    @public cmp mem_order_release: U8 = 2_u8
-    @public cmp mem_order_acq_rel: U8 = 3_u8
-    @public cmp mem_order_seq_cst: U8 = 4_u8
+    !public cmp mem_order_relaxed: U8 = 0_u8
+    !public cmp mem_order_acquire: U8 = 1_u8
+    !public cmp mem_order_release: U8 = 2_u8
+    !public cmp mem_order_acq_rel: U8 = 3_u8
+    !public cmp mem_order_seq_cst: U8 = 4_u8
 }
 
 
 sup [T] Atom[T] {
-    @public
+    !public
     fun new(val: T) -> Atom[T] {
         ret Atom[T](val)
     }
 
-    @public
+    !public
     fun load(&self, order: U8 = 4_u8) -> T {
         ret self.val
     }
 
-    @public
+    !public
     fun store(&mut self, val: T, order: U8 = 4_u8) -> Void {
         self.val = val
     }
 
-    @public
+    !public
     fun swap(&mut self, val: T, order: U8 = 4_u8) -> T {
         let old_val = self.val
         self.val = val

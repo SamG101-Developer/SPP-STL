@@ -1,11 +1,11 @@
 use std::boolean::Bool
 
 
-@public cls Gt[Rhs] { }
+!public cls Gt[Rhs] { }
 
 
 sup [Rhs] Gt[Rhs] {
-    @public
-    @abstract_method
+    !public
+    !abstract_method
     fun gt(&self, that: &Rhs) -> Bool { }
 }

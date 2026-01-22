@@ -1,11 +1,11 @@
 use std::boolean::Bool
 
 
-@public cls And[Rhs] {}
+!public cls And[Rhs] {}
 
 
 sup [Rhs] And[Rhs] {
-    @public
-    @abstract_method
+    !public
+    !abstract_method
     fun and_(self, that: Rhs) -> Bool { }
 }

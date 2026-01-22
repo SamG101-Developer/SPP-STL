@@ -5,7 +5,7 @@ use std::option::Opt
 use std::void::Void
 
 
-@public
+!public
 cls Queue[T] {
     buf: Deque[T]
     head: USize
@@ -14,28 +14,28 @@ cls Queue[T] {
 
 
 sup [T] Queue[T] {
-    @public
+    !public
     fun new() -> Queue[T] {
         ret Queue[T](buf=Deque[T]::new(), head=0_uz, tail=0_uz)
     }
 
-    @public
+    !public
     fun push(&mut self, val: T) -> Void {
         self.buf.push_back(val)
         self.tail += 1_uz
     }
 
-    @public
+    !public
     fun pop(&mut self) -> Opt[T] {
         ret self.buf.pop_front()
     }
 
-    @public
+    !public
     fun is_empty(&self) -> Bool {
         ret self.head >= self.tail
     }
 
-    @public
+    !public
     fun length(&self) -> USize {
         ret self.tail - self.head
     }

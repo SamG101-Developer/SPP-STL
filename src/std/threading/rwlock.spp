@@ -6,26 +6,26 @@ use std::void::Void
 use std::threading::mutex::LockErr
 
 
-@public
+!public
 cls RwReadLockGuard {
     id: S32
 }
 
 
-@public
+!public
 cls RwWriteLockGuard {
     id: S32
 }
 
 
-@public
+!public
 cls RwLock {
     id: S32
 }
 
 
 sup RwLock {
-    @public
+    !public
     fun new() -> Res[RwLock, LockErr] {
         # Create a new rwlock using the sppc threading API.
         let id = sppc::rwlock_create()
@@ -33,7 +33,7 @@ sup RwLock {
         ret Pass(val=RwLock(id))
     }
 
-    @public
+    !public
     fun read(&self) -> Res[RwReadLockGuard, LockErr] {
         # Acquire a read lock using the sppc threading API.
         let guard_id = sppc::rwlock_read_lock(self.id)
@@ -41,7 +41,7 @@ sup RwLock {
         ret Pass(val=RwReadLockGuard(id=guard_id))
     }
 
-    @public
+    !public
     fun write(&self) -> Res[RwWriteLockGuard, LockErr] {
         # Acquire a write lock using the sppc threading API.
         let guard_id = sppc::rwlock_write_lock(self.id)
@@ -49,7 +49,7 @@ sup RwLock {
         ret Pass(val=RwWriteLockGuard(id=guard_id))
     }
 
-    @public
+    !public
     fun try_read(&self) -> Res[RwReadLockGuard, LockErr] {
         # Try to acquire a read lock using the sppc threading API.
         let guard_id = sppc::rwlock_try_read_lock(self.id)
@@ -57,7 +57,7 @@ sup RwLock {
         ret Pass(val=RwReadLockGuard(id=guard_id))
     }
 
-    @public
+    !public
     fun try_write(&self) -> Res[RwWriteLockGuard, LockErr] {
         # Try to acquire a write lock using the sppc threading API.
         let guard_id = sppc::rwlock_try_write_lock(self.id)
@@ -65,7 +65,7 @@ sup RwLock {
         ret Pass(val=RwWriteLockGuard(id=guard_id))
     }
 
-    @public
+    !public
     fun unlock(&self) -> Res[Void, LockErr] {
         # Unlock the rwlock using the sppc threading API.
         let val = sppc::rwlock_unlock(self.id)

@@ -6,8 +6,8 @@ use std::string::Str
 cls Hash[T, Out=U64] { }
 
 sup [T, Out] Hash[T, Out] {
-    @public
-    @abstract_method
+    !public
+    !abstract_method
     fun hash(val: &T) -> Out { }
 }
 ##

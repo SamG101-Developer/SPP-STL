@@ -11,9 +11,9 @@ use std::result::Fail
 # todo: declare a cmp constant None for NoneT (prevents having to use None() everywhere)
 
 
-@public cls Some[T] { val: T }
-@public cls None { }
-@public type Opt[T] = Some[T] or None
+!public cls Some[T] { val: T }
+!public cls None { }
+!public type Opt[T] = Some[T] or None
 
 
 sup [T: Copy] Opt[T] ext Copy { }
@@ -30,14 +30,14 @@ sup [T: Copy] Opt[T] ext Copy { }
 
 
 sup [T] Opt[T] {
-    @public
-    @inline
+    !public
+    !inline
     fun is_some(&self) -> Bool {
         ret self@ is Some[T](..)
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun is_some_and(self, pred: FunMov[(T,), Bool]) -> Bool {
         ret case self of {
             is Some[T](val) { pred(val) }
@@ -45,14 +45,14 @@ sup [T] Opt[T] {
         }
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun is_none(&self) -> Bool {
         ret self@ is None()
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun is_none_or(self, pred: FunMov[(T,), Bool]) -> Bool {
         ret case self of {
             is Some[T](val) { pred(val) }
@@ -63,8 +63,8 @@ sup [T] Opt[T] {
 
 
 sup [T] Opt[T] {
-    @public
-    @inline
+    !public
+    !inline
     fun and_[U](self, that: Opt[U]) -> Opt[U] {
         ret case self of {
             is Some[T](..) { that }
@@ -72,8 +72,8 @@ sup [T] Opt[T] {
         }
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun and_then[U](self, pred: FunMov[(T,), Opt[U]]) -> Opt[U] {
         ret case self of {
             is Some[T](val) { pred(val) }
@@ -84,8 +84,8 @@ sup [T] Opt[T] {
 
 
 sup [T] Opt[T] {
-    @public
-    @inline
+    !public
+    !inline
     fun ior_(self, that: Opt[T]) -> Opt[T] {
         ret case self of {
             is Some[T](..) { self }
@@ -93,8 +93,8 @@ sup [T] Opt[T] {
         }
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun ior_else(self, that: FunMov[(), Opt[T]]) -> Opt[T] {
         ret case self of {
             is Some[T](..) { self }
@@ -107,8 +107,8 @@ sup [T] Opt[T] {
 # TODO: Nesting + variants doesn't work.
 ##
 sup [T] Opt[T] {
-    @public
-    @inline
+    !public
+    !inline
     fun xor(self, that: Opt[T]) -> Opt[T] {
         ret case (self, that) of {
             is (Some[T](val), None()) { Some(val) }
@@ -121,8 +121,8 @@ sup [T] Opt[T] {
 
 
 sup [T] Opt[T] {
-    @public
-    @inline
+    !public
+    !inline
     fun map[U](self, f: FunMov[(T,), U]) -> Opt[U] {
         ret case self of {
             is Some[T](val) { Some(val=f(val)) }
@@ -130,8 +130,8 @@ sup [T] Opt[T] {
         }
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun map_or[U](self, default: U, f: FunMov[(T,), U]) -> U {
         ret case self of {
             is Some[T](val) { f(val) }
@@ -139,8 +139,8 @@ sup [T] Opt[T] {
         }
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun map_or_else[U](self, default: FunMov[(), U], f: FunMov[(T,), U]) -> U {
         ret case self of {
             is Some[T](val) { f(val) }
@@ -151,8 +151,8 @@ sup [T] Opt[T] {
 
 
 sup [T] Opt[T] {
-    @public
-    @inline
+    !public
+    !inline
     fun ok_or[E](self, err: E) -> Res[T, E] {
         ret case self of {
             is Some[T](val) { Pass(val) }
@@ -160,8 +160,8 @@ sup [T] Opt[T] {
         }
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun ok_or_else[E](self, err: FunMov[(), E]) -> Res[T, E] {
         ret case self of {
             is Some[T](val) { Pass(val) }
@@ -172,8 +172,8 @@ sup [T] Opt[T] {
 
 
 sup[T] Opt[T] {
-    @public
-    @inline
+    !public
+    !inline
     fun unwrap(self) -> T {
         ret case self of {
             is Some[T](val) { val }
@@ -181,8 +181,8 @@ sup[T] Opt[T] {
         }
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun unwrap_or(self, default: T) -> T {
         ret case self of {
             is Some[T](val) { val }
@@ -190,8 +190,8 @@ sup[T] Opt[T] {
         }
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun unwrap_or_else(self, default: FunMov[(), T]) -> T {
         ret case self of {
             is Some[T](val) { val }

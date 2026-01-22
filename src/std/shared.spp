@@ -12,7 +12,7 @@ use std::shadow::Shadow
 use std::void::Void
 
 
-@public
+!public
 cls Shared[T, A: Alloc[T] = GlobalAlloc[T]] {
     shared_counter: USize
     shadow_counter: USize
@@ -20,22 +20,22 @@ cls Shared[T, A: Alloc[T] = GlobalAlloc[T]] {
 
 
 sup [T] Shared[T] {
-    @public type Element = T
+    !public type Element = T
 
-    @public
-    @compiler_builtin
+    !public
+    !compiler_builtin
     fun new(val: T) -> Shared[T] { }
 
-    @public
-    @compiler_builtin
+    !public
+    !compiler_builtin
     fun downgrade(&self) -> Shadow[T] { }
 
-    @public
+    !public
     fun shares(&self) -> USize {
         ret self.shared_counter
     }
 
-    @public
+    !public
     fun shadows(&self) -> USize {
         ret self.shadow_counter
     }
@@ -43,18 +43,18 @@ sup [T] Shared[T] {
 
 
 sup [T] Shared[T] ext FwdRef[T] {
-    @compiler_builtin
+    !compiler_builtin
     cor fwd_ref(&self) -> GenOnce[&T] { }
 }
 
 
 sup [T] Shared[T] ext Clone[Out=Self] {
-    @compiler_builtin
+    !compiler_builtin
     fun clone(&self) -> Self { }
 }
 
 
 sup [T] Shared[T] ext Del {
-    @compiler_builtin
+    !compiler_builtin
     fun del(&mut self) -> Void { }
 }

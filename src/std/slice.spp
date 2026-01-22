@@ -35,7 +35,7 @@ sup [E, A] Slice[E, A] {
     type Element = E
     type Allocator = A
 
-    @public
+    !public
     fun resize(&mut self, new_len: USize) -> Void {
         # TODO: needs allocation support
         # A::reallocate(&mut self.mem, new_len)  # .expect("Failed to resize slice")
@@ -44,7 +44,7 @@ sup [E, A] Slice[E, A] {
 
 
 sup [E] Slice[E] {
-    @public
+    !public
     fun split(self, at: USize) -> (Self, Self) {
         # TODO
 
@@ -56,7 +56,7 @@ sup [E] Slice[E] {
 
 
 sup [E] Slice[E] {
-    @public
+    !public
     fun length(&self) -> USize {
         ret self.len
     }
@@ -87,7 +87,7 @@ sup [A] Slice[U8, A] ext From[Self, Str] {
 
 
 sup [A] Slice[U8, A] ext From[Self, StrView] {
-    @compiler_builtin
+    !compiler_builtin
     fun from(that: StrView) -> Self { }
 }
 
@@ -107,39 +107,39 @@ sup [E] Slice[E] ext std::ops::del::Del {
 
 
 sup [E] Slice[E] {
-    @public
-    @compiler_builtin
+    !public
+    !compiler_builtin
     cor iter_mov(self) -> Iterator[E] { }
 
-    @public
-    @compiler_builtin
+    !public
+    !compiler_builtin
     cor iter_mut(&mut self) -> Iterator[&mut E] { }
 
-    @public
-    @compiler_builtin
+    !public
+    !compiler_builtin
     cor iter_ref(&self) -> Iterator[&E] { }
 
-    @public
-    @compiler_builtin
+    !public
+    !compiler_builtin
     cor reverse_iter_mov(self) -> Iterator[E] { }
 
-    @public
-    @compiler_builtin
+    !public
+    !compiler_builtin
     cor reverse_iter_mut(&mut self) -> Iterator[&mut E] { }
 
-    @public
-    @compiler_builtin
+    !public
+    !compiler_builtin
     cor reverse_iter_ref(&self) -> Iterator[&E] { }
 }
 
 
 sup [E] Slice[E] ext std::ops::idx::IndexMut[E, USize] {
-    @compiler_builtin
+    !compiler_builtin
     cor index_mut(&mut self, index: USize) -> GenOnce[&mut E] { }
 }
 
 
 sup [E] Slice[E] ext std::ops::idx::IndexRef[E, USize] {
-    @compiler_builtin
+    !compiler_builtin
     cor index_ref(&self, index: USize) -> GenOnce[&E] { }
 }

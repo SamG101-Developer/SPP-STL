@@ -1,19 +1,19 @@
 use std::void::Void
 
 
-@public cls Sub[Rhs, Ret] {}
-@public cls SubAssign[Rhs] {}
+!public cls Sub[Rhs, Ret] {}
+!public cls SubAssign[Rhs] {}
 
 
 sup [Rhs, Ret] Sub[Rhs, Ret] {
-    @public
-    @abstract_method
+    !public
+    !abstract_method
     fun sub(self, that: Rhs) -> Ret { }
 }
 
 
 sup [Rhs] SubAssign[Rhs] {
-    @public
-    @abstract_method
+    !public
+    !abstract_method
     fun sub_assign(&mut self, that: Rhs) -> Void { }
 }

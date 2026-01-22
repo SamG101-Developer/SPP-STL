@@ -13,7 +13,7 @@ use std::num::sized_floating_point::SizedFloatingPoint
 
 
 # Type alias the "signed" version of the the sized integer type.
-@public
+!public
 type SizedIntegerSigned[cmp bit_width: U32] = SizedInteger[bit_width, true]
 
 
@@ -27,7 +27,7 @@ sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerSigned[this_b
 
         # Destination (this) bits are greater than the source (that) bits => zero-extend.
         case this_bit_width > that_bit_width {
-            let u = intrinsics::zext[this_bit_width](that)
+            let u = intrinsics::uzext[this_bit_width](that)
             ret intrinsics::bit_cast[Self](u)
         }
 
@@ -47,7 +47,7 @@ sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerSigned[this_b
 
         # Destination (this) bits are greater than the source (that) bits => sign-extend.
         case this_bit_width > that_bit_width {
-            let s = intrinsics::sext[this_bit_width](that)
+            let s = intrinsics::szext[this_bit_width](that)
             ret intrinsics::bit_cast[Self](s)
         }
 
@@ -58,28 +58,28 @@ sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerSigned[this_b
 
 
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::div::Div[Rhs=Self, Ret=Self] {
-    fun div(self, that: Self) -> Self {
+    cmp fun div(self, that: Self) -> Self {
         ret intrinsics::sdiv(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::div::DivAssign[Rhs=Self] {
-    fun div_assign(&mut self, that: Self) -> Void {
+    cmp fun div_assign(&mut self, that: Self) -> Void {
         intrinsics::sdiv_assign(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::rem::Rem[Rhs=Self, Ret=Self] {
-    fun rem(self, that: Self) -> Self {
+    cmp fun rem(self, that: Self) -> Self {
         ret intrinsics::srem(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::rem::RemAssign[Rhs=Self] {
-    fun rem_assign(&mut self, that: Self) -> Void {
+    cmp fun rem_assign(&mut self, that: Self) -> Void {
         intrinsics::srem_assign(self, that)
     }
 }
@@ -106,70 +106,70 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::pow::Pow[Rh
 
 
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
-    @public
-    @inline
-    fun min(self, that: Self) -> Self {
+    !public
+    !inline
+    cmp fun min(self, that: Self) -> Self {
         ret intrinsics::smin(self, that)
     }
 
-    @public
-    @inline
-    fun max(self, that: Self) -> Self {
+    !public
+    !inline
+    cmp fun max(self, that: Self) -> Self {
         ret intrinsics::smax(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::lt::Lt[Rhs=Self] {
-    fun lt(&self, that: &Self) -> Bool {
+    cmp fun lt(&self, that: &Self) -> Bool {
         ret intrinsics::slt(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::le::Le[Rhs=Self] {
-    fun le(&self, that: &Self) -> Bool {
+    cmp fun le(&self, that: &Self) -> Bool {
         ret intrinsics::sle(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::gt::Gt[Rhs=Self] {
-    fun gt(&self, that: &Self) -> Bool {
+    cmp fun gt(&self, that: &Self) -> Bool {
         ret intrinsics::sgt(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::ge::Ge[Rhs=Self] {
-    fun ge(&self, that: &Self) -> Bool {
+    cmp fun ge(&self, that: &Self) -> Bool {
         ret intrinsics::sge(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
-    @public
-    @inline
+    !public
+    !inline
     fun add_checked(self, that: Self) -> Opt[Self] {
         let (val, overflowed) = intrinsics::sadd_overflow(self, that)
         ret case overflowed { None() } else { Some(val) }
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun add_overflow(self, that: Self) -> (Self, Bool) {
         ret intrinsics::sadd_overflow(self, that)
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun add_saturating(self, that: Self) -> Self {
         ret intrinsics::sadd_saturating(self, that)
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun add_wrapping(self, that: Self) -> Self {
         ret intrinsics::sadd_wrapping(self, that)
     }
@@ -177,27 +177,27 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
 
 
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
-    @public
-    @inline
+    !public
+    !inline
     fun sub_checked(self, that: Self) -> Opt[Self] {
         let (val, overflowed) = intrinsics::ssub_overflow(self, that)
         ret case overflowed { None() } else { Some(val) }
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun sub_overflow(self, that: Self) -> (Self, Bool) {
         ret intrinsics::ssub_overflow(self, that)
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun sub_saturating(self, that: Self) -> Self {
         ret intrinsics::ssub_saturating(self, that)
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun sub_wrapping(self, that: Self) -> Self {
         ret intrinsics::ssub_wrapping(self, that)
     }
@@ -205,21 +205,21 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
 
 
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
-    @public
-    @inline
+    !public
+    !inline
     fun mul_checked(self, that: Self) -> Opt[Self] {
         let (val, overflowed) = intrinsics::smul_overflow(self, that)
         ret case overflowed { None() } else { Some(val) }
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun mul_overflow(self, that: Self) -> (Self, Bool) {
         ret intrinsics::smul_overflow(self, that)
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun mul_saturating(self, that: Self) -> Self {
         ret case self.mul_checked(that) of {
             is Some[Self](val) { val }
@@ -228,8 +228,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
         }
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun mul_wrapping(self, that: Self) -> Self {
         ret intrinsics::smul_wrapping(self, that)
     }
@@ -237,8 +237,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
 
 
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
-    @public
-    @inline
+    !public
+    !inline
     fun div_checked(self, that: Self) -> Opt[Self] {
         case that == Self::zero() or (self == intrinsics::min_val[Self]() & that == Self::neg_one()) {
             ret None()
@@ -246,8 +246,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
         ret Some(val=intrinsics::sdiv(self, that))
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun div_overflow(self, that: Self) -> (Self, Bool) {
         ret case self == intrinsics::min_val[Self]() & that == Self::neg_one() {
             (self, true)
@@ -257,8 +257,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
         }
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun div_saturating(self, that: Self) -> Self {
         let out = self.div_overflow(that)
         ret case out of {
@@ -267,14 +267,14 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
         }
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun div_wrapping(self, that: Self) -> Self {
         ret self.div_overflow(that).0
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun div_floor(self, that: Self) -> Self {
         let d = self / that
         let r = self % that
@@ -282,8 +282,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
         ret case r != Self::zero() { d + c } else { d }
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun div_ceil(self, that: Self) -> Self {
         let d = self / that
         let r = self % that
@@ -294,8 +294,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
 
 
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
-    @public
-    @inline
+    !public
+    !inline
     fun rem_checked(self, that: Self) -> Opt[Self] {
         case that == Self::zero() or (self == intrinsics::min_val[Self]() & that == Self::neg_one()) {
             ret None()
@@ -303,8 +303,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
         ret Some(val=intrinsics::srem(self, that))
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun rem_overflow(self, that: Self) -> (Self, Bool) {
         case that == Self::neg_one() {
             ret (self, self == intrinsics::min_val[Self]())
@@ -313,8 +313,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     }
 
 
-    @public
-    @inline
+    !public
+    !inline
     fun rem_wrapping(self, that: Self) -> Self {
         ret self.rem_overflow(that).0
     }
@@ -323,8 +323,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
 
 
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
-    @public
-    @inline
+    !public
+    !inline
     fun pow_checked(self, that: U32) -> Opt[Self] {
         case that == 0_u32 {
             ret Some(val=Self::one())
@@ -342,8 +342,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
         ret Some(val=out)
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun pow_overflow(self, that: U32) -> (Self, Bool) {
         case that == 0_u32 {
             ret (Self::one(), false)
@@ -365,8 +365,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
         ret (out, false)
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun pow_wrapping(self, that: U32) -> Self {
         case that == 0_u32 {
             ret Self::one()
@@ -384,8 +384,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
         ret out
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun pow_saturating(self, that: U32) -> Self {
         ret case self.pow_checked(that) of {
             is Some[Self](val) { val }
@@ -397,8 +397,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
 
 
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
-    @public
-    @inline
+    !public
+    !inline
     fun mod(self, that: Self) -> Self {
         let r = self % that
         ret case r < Self::zero() { r.add_wrapping(that.abs_wrapping()) } else { r }
@@ -407,40 +407,40 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
 
 
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
-    @public
-    @inline
-    @compiler_builtin
+    !public
+    !inline
+    !compiler_builtin
     fun neg_one() -> Self { }
 }
 
 
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
-    @public
-    @inline
+    !public
+    !inline
     fun is_positive(self) -> Bool {
         ret self > Self::zero()
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun is_negative(self) -> Bool {
         ret self < Self::zero()
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun abs(self) -> Self {
         ret case self < Self::zero() { self.neg() } else { self }
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun abs_checked(self) -> Opt[Self] {
         ret case self.is_negative() { self.neg_checked() } else { Some(val=self) }
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun abs_wrapping(self) -> Self {
         ret case self.is_negative() { self.neg_wrapping() } else { self }
     }
@@ -448,21 +448,21 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
 
 
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
-    @public
-    @inline
-    fun neg(self) -> Self {
+    !public
+    !inline
+    cmp fun neg(self) -> Self {
         ret intrinsics::sneg(self)
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun neg_checked(self) -> Opt[Self] {
         let (val, overflowed) = self.neg_overflow()
         ret case overflowed { None() } else { Some(val) }
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun neg_overflow(self) -> (Self, Bool) {
         case self == intrinsics::min_val[Self]() {
             ret (intrinsics::min_val[Self](), true)
@@ -470,8 +470,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
         ret (intrinsics::sneg(self), false)
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun neg_wrapping(self) -> Self {
         ret Self::zero().sub_wrapping(self)
     }
@@ -479,8 +479,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
 
 
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
-    @public
-    @inline
+    !public
+    !inline
     fun isqrt(self) -> Self {
         case self.isqrt_checked() is Some[Self](val) {
             ret val
@@ -488,8 +488,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
         std::abort::abort("iroot: input must be a non-negative integer")
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun isqrt_checked(self) -> Opt[Self] {
         case self < Self::zero() {
             ret None()
@@ -509,8 +509,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
 
 
 sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
-    @public
-    @inline
+    !public
+    !inline
     fun ilog(self, base: Self) -> U32 {
         case self.ilog_checked(base) is Some[U32](val) {
             ret val
@@ -518,8 +518,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
         std::abort::abort("ilog: base must be a positive integer")
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun ilog2(self) -> U32 {
         case self.ilog2_checked() is Some[U32](val) {
             ret val
@@ -527,8 +527,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
         std::abort::abort("ilog2: base must be a positive integer")
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun ilog10(self) -> U32 {
         case self.ilog10_checked() is Some[U32](val) {
             ret val
@@ -536,8 +536,8 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
         std::abort::abort("ilog10: base must be a positive integer")
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun ilog_checked(self, base: Self) -> Opt[U32] {
         case self <= Self::zero() or base <= Self::one() {
             ret None()
@@ -545,14 +545,14 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
         ret Some(val=self.ilog2_checked()? / base.ilog2_checked()?)
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun ilog2_checked(self) -> Opt[U32] {
         ret Some(val=bit_width - 1_u32 - intrinsics::ctlz(self))
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun ilog10_checked(self) -> Opt[U32] {
         case self.ilog2_checked() of {
             is Some[U32](val as i) { ret Some(val=sized_integer::log_10_lookup_table.index_ref(U64::from(i))@) }

@@ -1,19 +1,19 @@
 use std::void::Void
 
 
-@public cls BitNot[Ret] { }
-@public cls BitNotAssign { }
+!public cls BitNot[Ret] { }
+!public cls BitNotAssign { }
 
 
 sup [Ret] BitNot[Ret] {
-    @public
-    @abstract_method
+    !public
+    !abstract_method
     fun bit_not(self) -> Ret { }
 }
 
 
 sup BitNotAssign {
-    @public
-    @abstract_method
+    !public
+    !abstract_method
     fun bit_not_assign(&mut self) -> Void { }
 }

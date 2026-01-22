@@ -14,13 +14,13 @@ use std::vector::Vec
 use std::void::Void
 
 
-@public
+!public
 cls Socket {
     fd: S32 = 0
 }
 
 
-@public
+!public
 cls SocketErr {
     msg: StrView
 }

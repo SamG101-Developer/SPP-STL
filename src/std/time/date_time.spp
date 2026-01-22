@@ -4,21 +4,21 @@ use std::time::time_zone::TimeZone
 use std::time::time_point::TimePoint
 
 
-@public
+!public
 cls DateTime {
-    @public year: U32
-    @public month: U32
-    @public day: U32
-    @public hour: U32
-    @public minute: U32
-    @public second: U32
-    @public nanosecond: U32
-    @public timezone_offset_seconds: S32
+    !public year: U32
+    !public month: U32
+    !public day: U32
+    !public hour: U32
+    !public minute: U32
+    !public second: U32
+    !public nanosecond: U32
+    !public timezone_offset_seconds: S32
 }
 
 
 sup DateTime {
-    @public
+    !public
     fun from_timestamp(timestamp: &TimePoint, timezone: &TimeZone) -> DateTime {
         # TODO
         ret DateTime()

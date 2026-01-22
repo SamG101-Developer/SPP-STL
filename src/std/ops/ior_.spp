@@ -1,11 +1,11 @@
 use std::boolean::Bool
 
 
-@public cls Ior[Rhs] {}
+!public cls Ior[Rhs] {}
 
 
 sup [Rhs] Ior[Rhs] {
-    @public
-    @abstract_method
+    !public
+    !abstract_method
     fun ior_(self, that: Rhs) -> Bool { }
 }

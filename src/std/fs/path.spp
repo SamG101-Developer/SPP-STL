@@ -13,29 +13,29 @@ use std::string::Str
 use std::string_view::StrView
 
 
-@public
+!public
 cls Path {
     path: Str
 }
 
 
 sup Path {
-    @public cmp sep: U8 = '/'
+    !public cmp sep: U8 = '/'
 }
 
 
 sup Path {
-    @public
+    !public
     fun is_absolute(&self) -> Bool {
         ret self.path.starts_with(StrView::from(self.sep))
     }
 
-    @public
+    !public
     fun is_relative(&self) -> Bool {
         ret self.is_absolute().not
     }
 
-    @public
+    !public
     fun to_absolute(&self) -> Path {
         # Get the current working directory and join with self.path.
         let cwd = Process::get_cwd()
@@ -43,14 +43,14 @@ sup Path {
         ret abs_path
     }
 
-    @public
+    !public
     fun exists(&self) -> Bool {
         # Check if the path exists in the filesystem (ignore C error).
         let found = sppc::fs_exists(&StrView::from(self.path.clone()))
         ret found > 0
     }
 
-    @public
+    !public
     fun parent(&self) -> Path {
         # Get the parent directory of the path (which is the dir_name).
         let dir_name = self.dir_name()
@@ -60,21 +60,21 @@ sup Path {
 
 
 sup Path {
-    @public
+    !public
     fun file_name(&self) -> Opt[Str] {
         let parts = self.path.split(self.sep)
         # ret case parts.len() == 0_uz { None() } else { Some(val=parts.get_tail_ref().clone()) }
         ret None()
     }
 
-    @public
+    !public
     fun file_stem(&self) -> Opt[Str] {
         let file_name = self.file_name()
         # ret file_name.map(|name: Str| name.split('.')[0].clone())
         ret None()
     }
 
-    @public
+    !public
     fun extension(&self) -> Opt[Str] {
         let file_name = self.file_name()
         ret None()
@@ -84,7 +84,7 @@ sup Path {
         #})
     }
 
-    @public
+    !public
     fun dir_name(&self) -> Str {
         # let parts = self.path.split(self.sep)
         # let parts = parts.iter_mov().take(parts.len() - 1)
@@ -92,7 +92,7 @@ sup Path {
         ret Str::from("")
     }
 
-    @public
+    !public
     fun split(&self) -> (Opt[Path], Opt[Path]) {
         let temp0: Opt[Path] = None()
         let temp1: Opt[Path] = None()
@@ -102,7 +102,7 @@ sup Path {
             #self.file_name().map(|file: Str| Path(path=file)))
     }
 
-    @public
+    !public
     fun split_ext(&self) -> (Path, Opt[Str]) {
         let parts = self.path.split('.')
         # ret (Path(path=parts[0_uz]), case parts.len() > 1 { Some(val=parts.index_ref(1).clone()) } else { None() })
@@ -113,21 +113,21 @@ sup Path {
 
 
 sup Path {
-    @public
+    !public
     fun is_file(&self) -> Bool {
         # Check if the path is a file in the filesystem (ignore C error).
         let test = sppc::fs_is_file(&StrView::from(self.path.clone()))
         ret test > 0
     }
 
-    @public
+    !public
     fun is_dir(&self) -> Bool {
         # Check if the path is a directory in the filesystem (ignore C error).
         let test = sppc::fs_is_dir(&StrView::from(self.path.clone()))
         ret test > 0
     }
 
-    @public
+    !public
     fun is_symlink(&self) -> Bool {
         # Check if the path is a symlink in the filesystem (ignore C error).
         let test = sppc::fs_is_symlink(&StrView::from(self.path.clone()))
@@ -137,7 +137,7 @@ sup Path {
 
 
 sup Path {
-    @public
+    !public
     fun join(&self, other: Str) -> Path {
         let mut new_path = self.path.clone()
         case new_path.ends_with(StrView::from(self.sep)).not {
@@ -147,7 +147,7 @@ sup Path {
         ret Path(path=new_path)
     }
 
-    @public
+    !public
     fun with_added_extension(&self, ex: Str) -> Path {
         let mut new_path = self.path.clone()
         case ex.length() > 0_uz {
@@ -157,7 +157,7 @@ sup Path {
         ret Path(path=new_path)
     }
 
-    @public
+    !public
     fun with_extension(&self, ex: Str) -> Path {
         let (base_path, _) = self.split_ext()
         let mut new_path = base_path.path.clone()
@@ -168,7 +168,7 @@ sup Path {
         ret Path(path=new_path)
     }
 
-    @public
+    !public
     fun with_file_name(&self, name: Str) -> Path {
         let dir = self.dir_name()
         let mut new_path = dir.clone()
@@ -182,19 +182,19 @@ sup Path {
 
 
 sup Path {
-    @public
+    !public
     cor iter_mov(self) -> Iterator[Str] {
         let parts = self.path.split(self.sep)
         gen with parts.iter_mov()
     }
 
-    @public
+    !public
     cor iter_mut(&mut self) -> Iterator[&mut Str] {
         let parts = self.path.split(self.sep)
         gen with parts.iter_mut()
     }
 
-    @public
+    !public
     cor iter_ref(&self) -> Iterator[&Str] {
         let parts = self.path.split(self.sep)
         gen with parts.iter_ref()

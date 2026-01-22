@@ -12,7 +12,7 @@ use std::num::bases::Integer
 
 
 # A sized integer is an integer type with a provided bit width.
-@public
+!public
 cls SizedInteger[cmp bit_width: U32, cmp signed: Bool] { }
 
 
@@ -40,166 +40,166 @@ cmp log_10_lookup_table: [U32; 256_uz] = [
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::eq::Eq[Rhs=Self] {
-    fun eq(&self, that: &Self) -> Bool {
+    cmp fun eq(&self, that: &Self) -> Bool {
         ret intrinsics::eq(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::ne::Ne[Rhs=Self] {
-    fun ne(&self, that: &Self) -> Bool {
+    cmp fun ne(&self, that: &Self) -> Bool {
         ret intrinsics::ne(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_and::BitAnd[Rhs=Self, Ret=Self] {
-    fun bit_and(self, that: Self) -> Self {
+    cmp fun bit_and(self, that: Self) -> Self {
         ret intrinsics::bit_and(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_and::BitAndAssign[Rhs=Self] {
-    fun bit_and_assign(&mut self, that: Self) -> Void {
+    cmp fun bit_and_assign(&mut self, that: Self) -> Void {
         intrinsics::bit_and_assign(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_ior::BitIor[Rhs=Self, Ret=Self] {
-    fun bit_ior(self, that: Self) -> Self {
+    cmp fun bit_ior(self, that: Self) -> Self {
         ret intrinsics::bit_ior(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_ior::BitIorAssign[Rhs=Self] {
-    fun bit_ior_assign(&mut self, that: Self) -> Void {
+    cmp fun bit_ior_assign(&mut self, that: Self) -> Void {
         intrinsics::bit_ior_assign(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_xor::BitXor[Rhs=Self, Ret=Self] {
-    fun bit_xor(self, that: Self) -> Self {
+    cmp fun bit_xor(self, that: Self) -> Self {
         ret intrinsics::bit_xor(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_xor::BitXorAssign[Rhs=Self] {
-    fun bit_xor_assign(&mut self, that: Self) -> Void {
+    cmp fun bit_xor_assign(&mut self, that: Self) -> Void {
         intrinsics::bit_xor_assign(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_shl::BitShl[Rhs=U32, Ret=Self] {
-    fun bit_shl(self, that: Self) -> Self {
+    cmp fun bit_shl(self, that: Self) -> Self {
         ret intrinsics::bit_shl(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_shl::BitShlAssign[Rhs=U32] {
-    fun bit_shl_assign(&mut self, that: Self) -> Void {
+    cmp fun bit_shl_assign(&mut self, that: Self) -> Void {
         intrinsics::bit_shl_assign(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_shr::BitShr[Rhs=U32, Ret=Self] {
-    fun bit_shr(self, that: Self) -> Self {
+    cmp fun bit_shr(self, that: Self) -> Self {
         ret intrinsics::bit_shr(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_shr::BitShrAssign[Rhs=U32] {
-    fun bit_shr_assign(&mut self, that: Self) -> Void {
+    cmp fun bit_shr_assign(&mut self, that: Self) -> Void {
         intrinsics::bit_shr_assign(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_not::BitNot[Ret=Self] {
-    fun bit_not(self) -> Self {
+    cmp fun bit_not(self) -> Self {
         ret intrinsics::bit_not(self)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::bit_not::BitNotAssign {
-    fun bit_not_assign(&mut self) -> Void {
+    cmp fun bit_not_assign(&mut self) -> Void {
         intrinsics::bit_not_assign(self)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::add::Add[Rhs=Self, Ret=Self] {
-    fun add(self, that: Self) -> Self {
+    cmp fun add(self, that: Self) -> Self {
         ret intrinsics::add(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::add::AddAssign[Rhs=Self] {
-    fun add_assign(&mut self, that: Self) -> Void {
+    cmp fun add_assign(&mut self, that: Self) -> Void {
         intrinsics::add_assign(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::sub::Sub[Rhs=Self, Ret=Self] {
-    fun sub(self, that: Self) -> Self {
+    cmp fun sub(self, that: Self) -> Self {
         ret intrinsics::sub(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::sub::SubAssign[Rhs=Self] {
-    fun sub_assign(&mut self, that: Self) -> Void {
+    cmp fun sub_assign(&mut self, that: Self) -> Void {
         intrinsics::sub_assign(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::mul::Mul[Rhs=Self, Ret=Self] {
-    fun mul(self, that: Self) -> Self {
+    cmp fun mul(self, that: Self) -> Self {
         ret intrinsics::mul(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] ext std::ops::mul::MulAssign[Rhs=Self] {
-    fun mul_assign(&mut self, that: Self) -> Void {
+    cmp fun mul_assign(&mut self, that: Self) -> Void {
         intrinsics::mul_assign(self, that)
     }
 }
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
-    @public
-    @inline
+    !public
+    !inline
     fun leading_zeros(self) -> U32 {
         ret intrinsics::ctlz(self)
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun is_even(self) -> Bool {
         ret self & Self::one() == Self::zero()
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun is_odd(self) -> Bool {
         ret self & Self::one() != Self::zero()
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun bit_shl_checked(self, that: U32) -> Opt[Self] {
         case that >= bit_width {
             ret None()
@@ -207,14 +207,14 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
         ret Some(val=intrinsics::bit_shl(self, that))
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun bit_shl_overflow(self, that: U32) -> (Self, Bool) {
         ret (self.bit_shl_wrapping(that), that >= bit_width)
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun bit_shl_wrapping(self, that: U32) -> Self {
         ret intrinsics::bit_shl(self, that & (bit_width - 1_u32))
     }
@@ -222,8 +222,8 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
-    @public
-    @inline
+    !public
+    !inline
     fun bit_shr_checked(self, that: U32) -> Opt[Self] {
         case that >= bit_width {
             ret None()
@@ -231,14 +231,14 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
         ret Some(val=intrinsics::bit_shr(self, that))
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun bit_shr_overflow(self, that: U32) -> (Self, Bool) {
         ret (self.bit_shr_wrapping(that), that >= bit_width)
     }
 
-    @public
-    @inline
+    !public
+    !inline
     fun bit_shr_wrapping(self, that: U32) -> Self {
         ret intrinsics::bit_shr(self, that & (bit_width - 1_u32))
     }
@@ -246,18 +246,18 @@ sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
 
 
 sup [cmp bit_width: U32, cmp signed: Bool] SizedInteger[bit_width, signed] {
-    @public
-    @inline
-    @compiler_builtin
+    !public
+    !inline
+    !compiler_builtin
     fun zero() -> Self { }
 
-    @public
-    @inline
-    @compiler_builtin
+    !public
+    !inline
+    !compiler_builtin
     fun one() -> Self { }
 
-    @public
-    @inline
-    @compiler_builtin
+    !public
+    !inline
+    !compiler_builtin
     fun two() -> Self { }
 }

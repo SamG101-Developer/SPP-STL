@@ -1,5 +1,6 @@
 use std::boolean::Bool
 use std::function::FunRef
+use std::function::FunMut
 use std::generator::Gen
 use std::generator::GenOnce
 use std::number::USize
@@ -9,7 +10,7 @@ use std::option::Some
 use std::void::Void
 
 
-@public
+!public
 cls Iterator[T] { }
 sup [T] Iterator[T] ext Gen[T] { }
 
@@ -19,40 +20,36 @@ sup [T] Iterator[T] {
     Concatenate this iterator with another iterator of the same element type. Iterate out of all elements from this
     iterator, then all elements from the other iterator.
     ##
-    @public
+    !public
     cor concat(self, other: Iterator[T]) -> Iterator[T] {
         gen with self
         gen with other
     }
 
-    @public
+    !public
     cor cycle(self) -> Iterator[T] {
         loop true {
             gen with self
         }
     }
 
-    @public
+    !public
     cor drop(self, count: USize) -> Iterator[T] {
         let mut index = 0_uz
         loop item in self {
-            case index >= count {
-                gen item
-            }
+            case index >= count { gen item }
             index += 1_uz
         }
     }
 
-    @public
+    !public
     cor filter(self, predicate: FunRef[(&T,), Bool]) -> Iterator[T] {
         loop item in self {
-            case predicate(&item) {
-                gen item
-            }
+            case predicate(&item) { gen item }
         }
     }
 
-    @public
+    !public
     cor take(self, count: USize) -> Iterator[T] {
         let mut index = 0_uz
         loop item in self {
@@ -65,87 +62,89 @@ sup [T] Iterator[T] {
         }
     }
 
-    @public
+    !public
     cor map[U](self, mapper: FunRef[(T,), U]) -> Iterator[U] {
-        loop item in self {
-            gen mapper(item)
-        }
+        loop item in self { gen mapper(item) }
     }
 
-    @public
+    !public
     cor slice(self, start: USize, end: USize) -> Iterator[T] {
         let mut index = 0_uz
         loop item in self {
-            case index >= start and index < end {
-                gen item
-            }
+            case index >= start and index < end { gen item }
             index += 1_uz
         }
     }
 
-    @public
+    !public
     cor step_by(self, step: USize) -> Iterator[T] {
         let mut index = 0_uz
         loop item in self {
-            case index % step == 0_uz {
-                gen item
-            }
+            case index % step == 0_uz { gen item }
             index += step
         }
     }
 
-    @public
+    !public
     fun count(self) -> USize {
         let mut count = 0_uz
-        loop item in self {
-            count += 1_uz
-        }
+        loop item in self { count += 1_uz }
         ret count
     }
 
-    @public
+    !public
     fun fold[U](self, initial: U, reducer: FunRef[(U, &T), U]) -> U {
         let mut acc = initial
-        loop item in self {
-            acc = reducer(acc, item)
-        }
+        loop item in self { acc = reducer(acc, item) }
         ret acc
     }
 
-    @public
+    !public
     fun all(self, predicate: FunRef[(T,), Bool]) -> Bool {
         loop item in self {
-            case predicate(item).not {
-                ret false
-            }
+            case predicate(item).not { ret false }
         }
         ret true
     }
 
-    @public
+    !public
     fun any(self, predicate: FunRef[(T,), Bool]) -> Bool {
         loop item in self {
-            case predicate(item) {
-                ret true
-            }
+            case predicate(item) { ret true }
         }
         ret false
     }
 
-    @public
+    ##
+    The "find" method searches through each element in this iterator, and applies the predicate function to the element.
+    If the result of this is "true", then the predicate is satisfied and a matching element has been found. This element
+    is returned inside an optional type, as the elememt may have not been found, and "None" is needed instead.
+    ##
+    !public
     fun find(self, predicate: FunRef[(&T,), Bool]) -> Opt[T] {  # todo: this should fail (could be Opt[&T] i think)
         loop item in self {
-            case predicate(&item) {
-                ret Some(val=item)
-            }
+            case predicate(&item) { ret Some(val=item) }
         }
         ret None()
     }
 
-    @public
-    fun for_each(self, action: FunRef[(T,), Void]) -> Void {
-        loop item in self {
-            action(item)
-        }
+    ##
+    Apply a method to every element of the iterator as an immutable borrow. This will convert the elements to a borrow
+    no matter their inner state, and pass them into the action function. This is equivalent to a for loop semantically,
+    but without skip/exit semantics because of the internal closure state.
+    ##
+    !public
+    fun for_each(self, action: FunRef[(&T,), Void]) -> Void {
+        loop item in self { action(&item) }
+    }
+
+    ##
+    Apply a method to every element of the iterator as a mutable borrow. This will convert the elements to a borrow no
+    matter their inner state, and pass them into the action function. This is equivalent to a for loop semantically, but
+    without skip/exit semantics because of the internal closure state.
+    ##
+    !public
+    fun for_each(self, mut action: FunMut[(&mut T,), Void]) -> Void {
+        loop mut item in self { action(&mut item) }
     }
 }

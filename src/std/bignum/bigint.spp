@@ -11,7 +11,7 @@ use std::num::sized_integer_signed::SizedIntegerSigned
 
 
 # TODO: Move implementations like Add into AddAssign, then for Add, just clone ans assign.
-@public
+!public
 cls BigInt {
     sign: Bool
     data: BigUInt
@@ -34,17 +34,17 @@ sup [cmp bit_width: U32] BigInt ext From[Self, SizedIntegerSigned[bit_width]] {
 
 
 sup BigInt {
-    @public
+    !public
     fun is_even(&self) -> Bool {
         ret self.data.is_even()
     }
 
-    @public
+    !public
     fun is_odd(&self) -> Bool {
         ret self.data.is_odd()
     }
 
-    @private
+    !private
     fun bit_length(&self) -> USize {
         ret self.data.bit_length()
     }
