@@ -26,7 +26,7 @@ managed by the Memory type, and represents the total number of elements that can
 reallocation.
 ##
 cls Slice[E, A: Alloc[E] = GlobalAlloc[E]] {
-    mem: Memory[E]
+    mem: Memory[E, A]
     len: USize
 }
 
