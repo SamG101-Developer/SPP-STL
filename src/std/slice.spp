@@ -81,7 +81,9 @@ sup [E, cmp n: USize, A] Slice[E, A] ext From[Self, Arr[E, n, A]] {
 
 sup [A] Slice[U8, A] ext From[Self, Str] {
     fun from(that: Str) -> Self {
-        ret Slice[U8, A](mem=Memory[A=A](ptr=that.data.buf.mem.ptr, cap=that.data.buf.mem.cap), len=that.data.buf.len)
+        # The issue is that "mem" in Str has an allocator already fixed on U8,
+        # not the generic A here, which is a type mismatch.
+        ret Slice[U8, A](mem=that.data.buf.mem, len=that.data.buf.len)
     }
 }
 
