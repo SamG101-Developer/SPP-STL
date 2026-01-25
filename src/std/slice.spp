@@ -74,14 +74,14 @@ sup [E] Slice[E] ext Clone[Out=Self] {
 # TODO: adding "A" to Arr causes an inference conflict error -> shouldn't
 sup [E, cmp n: USize] Slice[E] ext From[Self, Arr[E, n]] {
     fun from(that: Arr[E, n]) -> Self {
-        ret Slice[E](mem=Memory(ptr=that.mem.ptr, cap=n), len=n)
+        ret Slice[E](mem=Memory[A=A](ptr=that.mem.ptr, cap=n), len=n)
     }
 }
 
 
 sup [A] Slice[U8, A] ext From[Self, Str] {
     fun from(that: Str) -> Self {
-        ret Slice[U8, A](mem=Memory(ptr=that.data.buf.mem.ptr, cap=that.data.buf.mem.cap), len=that.data.buf.len)
+        ret Slice[U8, A](mem=Memory[A=A](ptr=that.data.buf.mem.ptr, cap=that.data.buf.mem.cap), len=that.data.buf.len)
     }
 }
 
@@ -94,7 +94,7 @@ sup [A] Slice[U8, A] ext From[Self, StrView] {
 
 sup [E, A] Slice[E, A] ext From[Self, Vec[E, A]] {
     fun from(that: Vec[E, A]) -> Self {
-        ret Slice[E, A](mem=Memory(ptr=that.buf.mem.ptr, cap=that.buf.mem.cap), len=that.buf.len)
+        ret Slice[E, A](mem=Memory[A=A](ptr=that.buf.mem.ptr, cap=that.buf.mem.cap), len=that.buf.len)
     }
 }
 
