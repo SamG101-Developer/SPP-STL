@@ -4,7 +4,7 @@ use std::void::Void
 
 
 !public
-cls Gen[Yield, Err=Void, Send=Void] { }
+cls Gen[Yield, Send=Void] { }
 sup [Yield, Send] Gen[Yield, Send] {
     !private
     !compiler_builtin
