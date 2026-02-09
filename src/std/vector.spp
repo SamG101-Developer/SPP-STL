@@ -24,7 +24,7 @@ cls Vec[T, A: Alloc[T] = GlobalAlloc[T]] {
 }
 
 
-sup [T, A] Vec[T, A] {
+sup [T, A: Alloc[T]] Vec[T, A] {
     type Element = T
     type Allocator = A
 
@@ -38,10 +38,7 @@ sup [T, A] Vec[T, A] {
         # ret Vec[T, A](buf=A::alloc(capacity))
         ret Vec[T, A]()
     }
-}
 
-
-sup [T] Vec[T] {
     !public
     fun push_back(&mut self, element: T) -> Void {
         case self.buf.len == self.buf.mem.cap { self.grow_double() }
@@ -81,10 +78,7 @@ sup [T] Vec[T] {
         let new_cap = self.buf.mem.cap * 2_uz
         # A::realloc(&mut self.buf, new_cap) TODO
     }
-}
 
-
-sup [T] Vec[T] {
     !public
     fun pop_back(&mut self) -> Opt[T] {
         # Remove the last element and decrease the length.
@@ -100,10 +94,7 @@ sup [T] Vec[T] {
         # self.buf.shift_back(index, 1_uz)
         ret val
     }
-}
 
-
-sup [T] Vec[T] {
     !public
     cor get_head_ref(&self) -> Gen[&T or None] {
         gen with self.get_ref(0_uz)
@@ -119,10 +110,7 @@ sup [T] Vec[T] {
         case index >= self.buf.len { gen None() }
         gen self.index_ref(index)
     }
-}
 
-
-sup [T] Vec[T] {
     !public
     cor get_head_mut(&mut self) -> Gen[&mut T or None] {
         gen with self.get_mut(0_uz)
@@ -138,10 +126,7 @@ sup [T] Vec[T] {
         case index >= self.buf.len { gen None() }
         gen self.index_mut(index)
     }
-}
 
-
-sup [T] Vec[T] {
     !public
     fun clear(&mut self) -> Void {
         self.buf.mem.clear()
@@ -161,10 +146,7 @@ sup [T] Vec[T] {
     fun is_empty(&self) -> Bool {
         ret self.buf.len == 0_uz
     }
-}
 
-
-sup [T] Vec[T] {
     !public
     fun resize(&mut self, new_length: USize) -> Void {
         self.buf.resize(new_length)
@@ -175,10 +157,7 @@ sup [T] Vec[T] {
     fun shrink_to_fit(&mut self) -> Void {
         self.buf.resize(self.buf.len)
     }
-}
 
-
-sup [T] Vec[T] {
     !public
     cor iter_mov(self) -> Iterator[T] {
         gen with self.buf.iter_mov()
@@ -211,14 +190,14 @@ sup [T] Vec[T] {
 }
 
 
-sup [T, A] Vec[T, A] ext From[Self, Slice[T, A]] {
+sup [T, A: Alloc[T]] Vec[T, A] ext From[Self, Slice[T, A]] {
     fun from(that: Slice[T, A]) -> Self {
         ret Vec[T, A](buf=that)
     }
 }
 
 
-sup [T, A, cmp n: USize] Vec[T, A] ext From[Self, Arr[T, n, A]] {
+sup [T, A: Alloc[T], cmp n: USize] Vec[T, A] ext From[Self, Arr[T, n, A]] {
     fun from(that: Arr[T, n, A]) -> Self {
         ret Vec[T, A]::from(Slice[T, A]::from(that))
     }
@@ -226,7 +205,7 @@ sup [T, A, cmp n: USize] Vec[T, A] ext From[Self, Arr[T, n, A]] {
 
 
 # TODO: Constrain T to be Clone
-sup [T] Vec[T] ext Clone[Out=Self] {
+sup [T: Clone[T], A: Alloc[T]] Vec[T, A] ext Clone[Out=Self] {
     fun clone(&self) -> Self {
         # ret Vec[T, A](buf=self.buf.clone())
         ret Vec[T]()
@@ -244,21 +223,21 @@ sup [T] Vec[T] ext Sortable[T] {
 ##
 
 
-sup [T] Vec[T] ext std::ops::idx::IndexMut[T, USize] {
+sup [T, A: Alloc[T]] Vec[T, A] ext std::ops::idx::IndexMut[T, USize] {
     cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] {
         gen with self.buf.index_mut(index)
     }
 }
 
 
-sup [T] Vec[T] ext std::ops::idx::IndexRef[T, USize] {
+sup [T, A: Alloc[T]] Vec[T, A] ext std::ops::idx::IndexRef[T, USize] {
     cor index_ref(&self, index: USize) -> GenOnce[&T] {
         gen with self.buf.index_ref(index)
     }
 }
 
 
-sup [T] Vec[T] ext std::ops::add::Add[Self, Ret=Self] {
+sup [T, A: Alloc[T]] Vec[T, A] ext std::ops::add::Add[Self, Ret=Self] {
     fun add(self, that: Self) -> Self {
         let mut result = self
         result.push_back_vec(that)
@@ -267,7 +246,7 @@ sup [T] Vec[T] ext std::ops::add::Add[Self, Ret=Self] {
 }
 
 
-sup [T] Vec[T] ext std::ops::add::AddAssign[Self] {
+sup [T, A: Alloc[T]] Vec[T, A] ext std::ops::add::AddAssign[Self] {
     fun add_assign(&mut self, that: Self) -> Void {
         self.push_back_vec(that)
     }
@@ -275,7 +254,7 @@ sup [T] Vec[T] ext std::ops::add::AddAssign[Self] {
 
 
 # TODO: Constrain T to be Eq
-sup [T] Vec[T] ext std::ops::eq::Eq[Self] {
+sup [T, A: Alloc[T]] Vec[T, A] ext std::ops::eq::Eq[Self] {
     fun eq(&self, that: &Vec[T]) -> Bool {
         case self.buf.len != that.buf.len { ret false }
         loop i in Range[USize]::between(0_uz, self.buf.len) {
@@ -287,7 +266,7 @@ sup [T] Vec[T] ext std::ops::eq::Eq[Self] {
 
 
 # TODO: Constrain T to be Ne
-sup [T] Vec[T] ext std::ops::ne::Ne[Self] {
+sup [T, A: Alloc[T]] Vec[T, A] ext std::ops::ne::Ne[Self] {
     fun ne(&self, that: &Vec[T]) -> Bool {
         case self.buf.len != that.buf.len { ret true }
         loop i in Range[USize]::between(0_uz, self.buf.len) {
