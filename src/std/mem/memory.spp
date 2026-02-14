@@ -8,23 +8,27 @@ use std::single::Single
 use std::void::Void
 
 
+# The Memory type is the lowest-level contiguous storage abstraction, representing a block of memory allocated on the
+# heap. It is capacity aware, but not length aware, and cannot be resized. It provides methods for taking an element
+# from the storage, or putting placing an element into the storage.
+#
+# The Memory type is allocator aware, allowing for customizable allocation strategies. In order to fit with the
+# ownership model, it maintains a uniquely owned Single pointer (the location of the memory on the heap) and a capacity
+# field (the number of elements that can be stored in the memory). The allocator falls through to the Single pointer.
 !public
 cls Memory[T, A: Alloc[T] = GlobalAlloc[T]] {
     ptr: Single[T, A]
     cap: USize
+    alloc: A
 }
 
-
-sup [T, A] Memory[T, A] {
-    !public
-    fun new(cap: USize) -> Memory[T, A] {
-        ret Memory[T, A](cap)
-    }
-}
-
-
-sup [T] Memory[T] {
+sup [T, A: Alloc[T]] Memory[T, A] {
     !public type Element = T
+
+    !public
+    fun new(cap: USize, alloc: A = A()) -> Memory[T, A] {
+        ret Memory(cap, alloc)
+    }
 
     !public
     fun capacity(&self) -> USize {
@@ -32,8 +36,15 @@ sup [T] Memory[T] {
     }
 
     !public
-    !compiler_builtin
-    fun clear(&mut self) -> Void { }
+    fun clear(&mut self) -> Void {
+        self.alloc.deallocate(&mut self.ptr, self.cap)
+        self.cap = 0_uz
+    }
+
+    !public
+    fun is_empty(&self) -> Bool {
+        ret self.cap == 0_uz
+    }
 
     !protected
     !compiler_builtin
@@ -48,8 +59,7 @@ sup [T] Memory[T] {
     fun place_mem(&mut self, index: USize, value: Memory[T]) -> Void { }
 }
 
-
-sup [T] Memory[T] ext Clone[Out=Memory[T]] {
+sup [T: Clone[T], A: Alloc[T]] Memory[T] ext Clone[Out=Memory[T]] {
     !compiler_builtin
     fun clone(&self) -> Memory[T] { }
 }
