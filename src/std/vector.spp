@@ -155,7 +155,7 @@ sup [T, A: Alloc[T]] Vec[T, A] {
 
     !public
     fun shrink_to_fit(&mut self) -> Void {
-        self.buf.resize(self.buf.len)
+        # self.buf.resize(self.buf.len)
     }
 
     !public
