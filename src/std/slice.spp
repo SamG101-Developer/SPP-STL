@@ -90,7 +90,7 @@ sup [E, A: Alloc[E]] Slice[E, A] {
 
 sup [E: Clone[E], A: Alloc[E]] Slice[E, A] ext Clone[Out=Self] {
     fun clone(&self) -> Self {
-        ret Slice[E]()
+        ret Slice[E, A]()
     }
 }
 
