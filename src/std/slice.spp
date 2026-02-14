@@ -31,18 +31,13 @@ sup [E, A: Alloc[E]] Slice[E, A] {
     type Allocator = A
 
     !public
-    fun resize(&mut self, new_len: USize) -> Void {
-        # TODO: needs allocation support
-        # A::reallocate(&mut self.mem, new_len)  # .expect("Failed to resize slice")
+    fun new(len: USize, alloc: A = A()) -> Self {
+        ret Slice[E, A](mem=Memory[E, A]::new(len, alloc), len=len)
     }
 
     !public
-    fun split(self, at: USize) -> (Self, Self) {
-        # TODO
-
-        let first = Slice[E]()
-        let second = Slice[E]()
-        ret (first, second)
+    fun new_with_capacity(cap: USize, len: USize, alloc: A = A()) -> Self {
+        ret Slice[E, A](mem=Memory[E, A]::new(cap), len=0_uz)
     }
 
     !public
@@ -82,6 +77,14 @@ sup [E, A: Alloc[E]] Slice[E, A] {
     !public
     !compiler_builtin
     cor reverse_iter_ref(&self) -> Iterator[&E] { }
+
+    !public
+    !compiler_builtin
+    cor get_ref(&self) -> GenOnce[&E or None] { }
+
+    !public
+    !compiler_builtin
+    cor get_mut(&mut self) -> GenOnce[&mut E or None] { }
 }
 
 sup [E: Clone[E], A: Alloc[E]] Slice[E, A] ext Clone[Out=Self] {
