@@ -208,7 +208,7 @@ sup [T, A: Alloc[T], cmp n: USize] Vec[T, A] ext From[Self, Arr[T, n, A]] {
 sup [T: Clone[T], A: Alloc[T]] Vec[T, A] ext Clone[Out=Self] {
     fun clone(&self) -> Self {
         # ret Vec[T, A](buf=self.buf.clone())
-        ret Vec[T]()
+        ret Vec[T, A]()
     }
 }
 
