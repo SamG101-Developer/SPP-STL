@@ -149,7 +149,7 @@ sup [T, A: Alloc[T]] Vec[T, A] {
 
     !public
     fun resize(&mut self, new_length: USize) -> Void {
-        self.buf.resize(new_length)
+        # self.buf.resize(new_length)
         self.buf.len = new_length
     }
 
