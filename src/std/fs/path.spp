@@ -203,7 +203,7 @@ sup Path {
 
 
 sup Path ext Clone[Out=Path] {
-    fun clone(&self) -> Path {
+    fun clone(&self) -> Self {
         ret Path(path=self.path.clone())
     }
 }

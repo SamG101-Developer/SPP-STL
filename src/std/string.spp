@@ -133,7 +133,7 @@ sup Str ext Ne[Rhs=Str] {
 
 
 sup Str ext Clone[Out=Str] {
-    fun clone(&self) -> Str {
+    fun clone(&self) -> Self {
         ret Str(data=self.data.clone())
     }
 }

@@ -59,9 +59,9 @@ sup [T, A: Alloc[T]] Memory[T, A] {
     fun place_mem(&mut self, index: USize, value: Memory[T]) -> Void { }
 }
 
-sup [T: Clone[T], A: Alloc[T]] Memory[T] ext Clone[Out=Memory[T]] {
+sup [T: Clone[T], A: Alloc[T]] Memory[T, A] ext Clone[Out=Memory[T, A]] {
     !compiler_builtin
-    fun clone(&self) -> Memory[T] { }
+    fun clone(&self) -> Self { }
 }
 
 
