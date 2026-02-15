@@ -7,6 +7,7 @@ use std::number::USize
 use std::option::Opt
 use std::single::Single
 use std::void::Void
+use std::ops::del::Del
 
 
 # The Memory type is the lowest-level contiguous storage abstraction, representing a block of memory allocated on the
@@ -38,7 +39,7 @@ sup [T, A: Alloc[T]] Memory[T, A] {
 
     !public
     fun clear(&mut self) -> Void {
-        self.alloc.deallocate(&mut self.ptr, self.cap)
+        self.alloc.deallocate(&mut self)
         self.cap = 0_uz
     }
 
@@ -65,5 +66,11 @@ sup [T: Clone[T], A: Alloc[T]] Memory[T, A] ext Clone[Out=Memory[T, A]] {
     fun clone(&self) -> Self { }
 }
 
+sup [T: Copy, A: Alloc[T]] Memory[T, A] ext Copy { }
 
-sup [T: Copy] Memory[T] ext Copy { }
+sup [T, A: Alloc[T]] Memory[T, A] ext Del {
+    !compiler_builtin
+    fun del(&mut self) -> Void {
+        self.clear()
+    }
+}
