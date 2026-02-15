@@ -11,27 +11,78 @@ cls AllocErr {
     !public msg: StrView
 }
 
+sup AllocErr {
+    !public
+    fun new(msg: StrView) -> Self { ret Self(msg) }
+}
+
+!public
+cls Layout {
+    !public size: USize
+    !public align: USize
+}
+
 
 !public
 cls Alloc[E] { }
 
 
+# The Alloc implementation defines the interface for memory allocation, deallocation, and reallocation. It is designed
+# to be extended by specific allocator implementations, such as GlobalAlloc. The methods in Alloc are abstract, meaning
+# that they must be implemented by any subclass that extends Alloc. This allows for flexibility in how memory is
+# managed, while still providing a consistent interface for allocation operations.
+#
+# The required methods are the allocate and de-allocate methods, which handle the basic memory management tasks. The
+# other methods can be implemented but have stable default behaviour by using the required allocation methods, and other
+# memory utilities, particularly from sppc.
 sup [E] Alloc[E] {
-    !public
-    !abstract_method
-    fun allocate(n: USize) -> Res[Memory[E], AllocErr] { }
 
+    # Allocates a block of memory for the specified layout. The method returns a Result type, which can either be a
+    # successful allocation (Pass) containing the allocated memory, or an error (Err) containing an AllocErr with a
+    # message describing the failure. The only error that can occur in this method is a failure to allocate memory,
+    # which is typically due to insufficient system resources.
     !public
     !abstract_method
-    fun allocate_zeroed(n: USize) -> Res[Memory[E], AllocErr] { }
+    fun allocate(&self, layout: Layout) -> Res[Memory[E], AllocErr] { }
 
+    # Deallocates a previously allocated block of memory. This method is abstract and must be implemented by any
+    # subclass that extends Alloc. The method takes a Memory object as an argument, by move, which means that the caller
+    # is transferring ownership of the memory to the allocator for deallocation. This makes manual de-allocation safe.
     !public
     !abstract_method
-    fun deallocate(mem: Memory[E]) -> Void { }
+    fun deallocate(&self, mem: Memory[E]) -> Void { }
 
+    # Allocates a block of memory for the specified layout, and initializes all bytes to zero. This method has a default
+    # implementation that uses the allocate method to get a block of memory, and then uses the mem_set function from
+    # sppc to set all bytes to zero. The method returns a Result type, as it has to handle the possibility of allocation
+    # failure.
     !public
-    !abstract_method
-    fun reallocate(mem: Memory[E], n: USize) -> Res[Memory[E], AllocErr] { }
+    !virtual_method
+    fun allocate_zeroed(&self, n: Layout) -> Res[Memory[E], AllocErr] {
+        let mem = self.allocate(n)?
+        std::mem::ops::mem_set(mem, 0, n * std::mem::ops::size_of[E]())
+        ret Pass(val=mem)
+    }
+
+    # Reallocates a block of memory to a new size. This method has a default implementation that first deallocates the
+    # existing memory block, and then allocates a new block of the desired size. The method returns a Result type, as it
+    # has to handle the possibility of allocation failure during the new allocation.
+    !public
+    !virtual_method
+    fun reallocate(&self, mem: Memory[E], n: Layout) -> Res[Memory[E], AllocErr] {
+        self.deallocate(mem)
+        ret self.allocate(n)
+    }
+
+    # Reallocates a block of memory to a new size, and initializes any new bytes to zero. This method has a default
+    # implementation that first deallocates the existing memory block, and then allocates a new block of the desired
+    # size using the allocate_zeroed method.
+    !public
+    !virtual_method
+    fun reallocate_zeroed(&self, mem: Memory[E], n: USize) -> Res[Memory[E], AllocErr] {
+        self.deallocate(mem)
+        ret self.allocate_zeroed(n)
+    }
 }
 
 
@@ -40,21 +91,22 @@ cls GlobalAlloc[E] { }
 
 
 sup [E] GlobalAlloc[E] ext Alloc[E] {
-    fun allocate(n: USize) -> Res[Memory[E], AllocErr] {
-        let mem = std::mem::ops::malloc[E](n).ok_or(AllocErr(msg="Failed to allocate memory"))?
+    fun allocate(&self, layout: Layout) -> Res[Memory[E], AllocErr] {
+        let mem = std::mem::ops::malloc[E](layout.size).ok_or_else(AllocErr::new)?
         ret Pass(val=mem)
     }
 
-    fun allocate_zeroed(n: USize) -> Res[Memory[E], AllocErr] {
-        let mem = std::mem::ops::calloc[E](n).ok_or(AllocErr(msg="Failed to allocate zeroed memory"))?
-        ret Pass(val=mem)
-    }
-
-    fun deallocate(mem: Memory[E]) -> Void {
+    fun deallocate(&self, mem: Memory[E]) -> Void {
         std::mem::ops::free(mem)
     }
 
-    fun reallocate(mem: Memory[E], n: USize) -> Res[Memory[E], AllocErr] {
-        ret std::mem::ops::realloc(mem, n).ok_or(AllocErr(msg="Failed to reallocate memory"))
+    fun allocate_zeroed(&self, layout: Layout) -> Res[Memory[E], AllocErr] {
+        let mem = std::mem::ops::calloc[E](layout.size).ok_or_else(AllocErr::new)?
+        ret Pass(val=mem)
+    }
+
+    fun reallocate(&self, mem: Memory[E], layout: Layout) -> Res[Memory[E], AllocErr] {
+        let mem = std::mem::ops::realloc(mem, layout.size).ok_or_else(AllocErr::new)?
+        ret Pass(val=mem)
     }
 }
