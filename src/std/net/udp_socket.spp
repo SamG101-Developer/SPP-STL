@@ -15,7 +15,7 @@ use std::void::Void
 
 
 !public
-cls UdpSocket {}
+cls UdpSocket { }
 
 
 sup UdpSocket ext Socket { }

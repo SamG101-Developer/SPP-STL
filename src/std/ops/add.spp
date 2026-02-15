@@ -1,10 +1,11 @@
 use std::void::Void
 
 
-!public cls Add[Rhs, Ret] {}
-!public cls AddAssign[Rhs] {}
+!public cls Add[Rhs, Ret] { }
+!public cls AddAssign[Rhs] { }
 
 
+# Allow the use of the "+" operator.
 sup [Rhs, Ret] Add[Rhs, Ret] {
     !public
     !abstract_method
@@ -12,6 +13,7 @@ sup [Rhs, Ret] Add[Rhs, Ret] {
 }
 
 
+# Allow the use of the "+=" operator.
 sup [Rhs] AddAssign[Rhs] {
     !public
     !abstract_method

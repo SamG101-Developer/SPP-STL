@@ -1,7 +1,7 @@
 use std::number::U8
 use std::option::Opt
-use std::threading::atomic::Atom
 use std::void::Void
+use std::threading::atomic::Atom
 
 
 !public

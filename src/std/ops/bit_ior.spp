@@ -1,8 +1,8 @@
 use std::void::Void
 
 
-!public cls BitIor[Rhs, Ret] {}
-!public cls BitIorAssign[Rhs] {}
+!public cls BitIor[Rhs, Ret] { }
+!public cls BitIorAssign[Rhs] { }
 
 
 sup [Rhs, Ret] BitIor[Rhs, Ret] {

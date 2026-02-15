@@ -1,8 +1,8 @@
 use std::void::Void
 
 
-!public cls Sub[Rhs, Ret] {}
-!public cls SubAssign[Rhs] {}
+!public cls Sub[Rhs, Ret] { }
+!public cls SubAssign[Rhs] { }
 
 
 sup [Rhs, Ret] Sub[Rhs, Ret] {

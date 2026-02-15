@@ -1,7 +1,7 @@
 use std::boolean::Bool
 
 
-!public cls Try[Output, Residual, Value] {}
+!public cls Try[Output, Residual, Value] { }
 
 
 sup [Output, Residual, Value] Try[Output, Residual, Value] {

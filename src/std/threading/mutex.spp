@@ -8,13 +8,13 @@ use std::void::Void
 
 !public
 cls Mutex {
-    !public id: S32
+    id: S32
 }
 
 
 !public
 cls MutexLockGard {
-    !public id: S32
+    id: S32
 }
 
 
