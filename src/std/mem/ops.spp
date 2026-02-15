@@ -1,7 +1,8 @@
 use std::copy::Copy
 use std::mem::memory::Memory
-use std::number::USize
 use std::number::S32
+use std::number::U8
+use std::number::USize
 use std::option::Opt
 use std::option::None
 use std::option::Some
