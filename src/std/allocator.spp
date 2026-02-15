@@ -58,9 +58,9 @@ sup [E] Alloc[E] {
     # failure.
     !public
     !virtual_method
-    fun allocate_zeroed(&self, n: Layout) -> Res[Memory[E], AllocErr] {
-        let mem = self.allocate(n)?
-        std::mem::ops::mem_set(mem, 0, n * std::mem::ops::size_of[E]())
+    fun allocate_zeroed(&self, layout: Layout) -> Res[Memory[E], AllocErr] {
+        let mem = self.allocate(layout)?
+        std::mem::ops::mem_set(mem, 0, layout.size * std::mem::ops::size_of[E]())
         ret Pass(val=mem)
     }
 
@@ -69,9 +69,9 @@ sup [E] Alloc[E] {
     # has to handle the possibility of allocation failure during the new allocation.
     !public
     !virtual_method
-    fun reallocate(&self, mem: Memory[E], n: Layout) -> Res[Memory[E], AllocErr] {
+    fun reallocate(&self, mem: Memory[E], layout: Layout) -> Res[Memory[E], AllocErr] {
         self.deallocate(mem)
-        ret self.allocate(n)
+        ret self.allocate(layout)
     }
 
     # Reallocates a block of memory to a new size, and initializes any new bytes to zero. This method has a default
@@ -79,9 +79,9 @@ sup [E] Alloc[E] {
     # size using the allocate_zeroed method.
     !public
     !virtual_method
-    fun reallocate_zeroed(&self, mem: Memory[E], n: USize) -> Res[Memory[E], AllocErr] {
+    fun reallocate_zeroed(&self, mem: Memory[E], layout: Layout) -> Res[Memory[E], AllocErr] {
         self.deallocate(mem)
-        ret self.allocate_zeroed(n)
+        ret self.allocate_zeroed(layout)
     }
 }
 
