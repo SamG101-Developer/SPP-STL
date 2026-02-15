@@ -9,36 +9,38 @@ use std::single::Single
 use std::void::Void
 
 
+# Returns the size of a type at compile time.
 !public
 !inline
 !compiler_builtin
-fun size_of[T]() -> USize {
-    # Returns the size of a type at compile time.
-}
+fun size_of[T]() -> USize { }
 
-
+# Handles heap size checking for types that are not known at compile time.
 !public
 !inline
 !compiler_builtin
-fun size_of_value[T](value: T) -> USize {
-    # Handles heap size checking for types that are not known at compile time.
-}
+fun size_of_value[T](value: T) -> USize { }
 
-
+# Compares two memory regions byte by byte.
 !public
 !inline
 !compiler_builtin
-fun mem_cmp[T](a: &T, b: &T, n: USize) -> S32 {
-    # Compares two memory regions byte by byte.
-}
+fun mem_cmp[T](a: &T, b: &T, n: USize) -> S32 { }
 
+# Set the byte value of a memory region to a specified value.
+!public
+!inline
+!compiler_builtin
+fun mem_set[T](dest: &mut T, value: U8, n: USize) -> Void { }
 
+# Allocates a block of memory on the heap for "n" elements of type "T". The memory will return None for each access
+# immediately after malloc is used, ebcause there are no values inside the memory. But the memory object itself is
+# initialized, fllowing standard ownership rules.
 !public
 fun malloc[T](n: USize) -> Opt[Memory[T]] {
-    # Determine the size and get an allocated pointer.
     let cap = n * size_of[T]()
     let raw = sppc::mem_alloc[T](cap)
-    ret Some(val=raw)  # TODO: Handle allocation failure.
+    ret Some(val=raw)
 }
 
 
@@ -47,7 +49,7 @@ fun calloc[T](n: USize) -> Opt[Memory[T]] {
     # Determine the size and get an allocated pointer.
     let cap = n * size_of[T]()
     let raw = sppc::mem_calloc[T](n, size_of[T]())
-    ret Some(val=raw)  # TODO: Handle allocation failure.
+    ret Some(val=raw)
 }
 
 
@@ -90,7 +92,7 @@ fun replace[T](dest: &mut T, src: T) -> T {
 !compiler_builtin
 fun take[T](src: &mut T) -> T {
     # This is safe because of uniform default initialization, where the "src" will be replaced with a default value for
-    # T, based on the standard object initialization: T().
+    # T, based on the standard object initialization: T(). Effectively the same as "mem::replace(src, T())".
 }
 
 
