@@ -35,6 +35,8 @@ cls Alloc[E] { }
 # The required methods are the allocate and de-allocate methods, which handle the basic memory management tasks. The
 # other methods can be implemented but have stable default behaviour by using the required allocation methods, and other
 # memory utilities, particularly from sppc.
+#
+# Todo: Memory[E, A] <- Somehow fill the "A" argument, differing for inheritance.
 sup [E] Alloc[E] {
 
     # Allocates a block of memory for the specified layout. The method returns a Result type, which can either be a
@@ -92,7 +94,8 @@ cls GlobalAlloc[E] { }
 
 sup [E] GlobalAlloc[E] ext Alloc[E] {
     fun allocate(&self, layout: Layout) -> Res[Memory[E], AllocErr] {
-        let mem = std::mem::ops::malloc[E](layout.size).ok_or_else(AllocErr::new)?
+        # let mem = std::mem::ops::malloc[E](layout.size).ok_or_else(AllocErr::new)?
+        let mem = std::mem::Memory[E, Self]()
         ret Pass(val=mem)
     }
 
@@ -101,12 +104,14 @@ sup [E] GlobalAlloc[E] ext Alloc[E] {
     }
 
     fun allocate_zeroed(&self, layout: Layout) -> Res[Memory[E], AllocErr] {
-        let mem = std::mem::ops::calloc[E](layout.size).ok_or_else(AllocErr::new)?
+        # let mem = std::mem::ops::calloc[E](layout.size).ok_or_else(AllocErr::new)?
+        let mem = std::mem::Memory[E, Self]()
         ret Pass(val=mem)
     }
 
     fun reallocate(&self, mem: Memory[E], layout: Layout) -> Res[Memory[E], AllocErr] {
-        let mem = std::mem::ops::realloc(mem, layout.size).ok_or_else(AllocErr::new)?
+        # let mem = std::mem::ops::realloc(mem, layout.size).ok_or_else(AllocErr::new)?
+        let mem = std::mem::Memory[E, Self]()
         ret Pass(val=mem)
     }
 }
