@@ -38,6 +38,8 @@ cls Alloc[E] { }
 #
 # Todo: Memory[E, A] <- Somehow fill the "A" argument, differing for inheritance.
 sup [E] Alloc[E] {
+    type Element = E
+    type A = Alloc[E]
 
     # Allocates a block of memory for the specified layout. The method returns a Result type, which can either be a
     # successful allocation (Pass) containing the allocated memory, or an error (Err) containing an AllocErr with a
@@ -45,14 +47,14 @@ sup [E] Alloc[E] {
     # which is typically due to insufficient system resources.
     !public
     !abstract_method
-    fun allocate(&self, layout: Layout) -> Res[Memory[E], AllocErr] { }
+    fun allocate(&self, layout: Layout) -> Res[Memory[E, A], AllocErr] { }
 
     # Deallocates a previously allocated block of memory. This method is abstract and must be implemented by any
     # subclass that extends Alloc. The method takes a Memory object as an argument, by move, which means that the caller
     # is transferring ownership of the memory to the allocator for deallocation. This makes manual de-allocation safe.
     !public
     !abstract_method
-    fun deallocate(&self, mem: Memory[E]) -> Void { }
+    fun deallocate(&self, mem: Memory[E, A]) -> Void { }
 
     # Allocates a block of memory for the specified layout, and initializes all bytes to zero. This method has a default
     # implementation that uses the allocate method to get a block of memory, and then uses the mem_set function from
@@ -60,7 +62,7 @@ sup [E] Alloc[E] {
     # failure.
     !public
     !virtual_method
-    fun allocate_zeroed(&self, layout: Layout) -> Res[Memory[E], AllocErr] {
+    fun allocate_zeroed(&self, layout: Layout) -> Res[Memory[E, A], AllocErr] {
         let mut mem = self.allocate(layout)?
         std::mem::ops::mem_set(&mut mem, 0_u8, layout.size * std::mem::ops::size_of[E]())
         ret Pass(val=mem)
@@ -71,7 +73,7 @@ sup [E] Alloc[E] {
     # has to handle the possibility of allocation failure during the new allocation.
     !public
     !virtual_method
-    fun reallocate(&self, mem: Memory[E], layout: Layout) -> Res[Memory[E], AllocErr] {
+    fun reallocate(&self, mem: Memory[E, A], layout: Layout) -> Res[Memory[E, A], AllocErr] {
         self.deallocate(mem)
         ret self.allocate(layout)
     }
@@ -81,7 +83,7 @@ sup [E] Alloc[E] {
     # size using the allocate_zeroed method.
     !public
     !virtual_method
-    fun reallocate_zeroed(&self, mem: Memory[E], layout: Layout) -> Res[Memory[E], AllocErr] {
+    fun reallocate_zeroed(&self, mem: Memory[E, A], layout: Layout) -> Res[Memory[E, A], AllocErr] {
         self.deallocate(mem)
         ret self.allocate_zeroed(layout)
     }
@@ -93,23 +95,25 @@ cls GlobalAlloc[E] { }
 
 
 sup [E] GlobalAlloc[E] ext Alloc[E] {
-    fun allocate(&self, layout: Layout) -> Res[Memory[E], AllocErr] {
+    type A = GlobalAlloc[E]
+
+    fun allocate(&self, layout: Layout) -> Res[Memory[E, A], AllocErr] {
         # let mem = std::mem::ops::malloc[E](layout.size).ok_or_else(AllocErr::new)?
         let mem = Memory[E, Self]()
         ret Pass(val=mem)
     }
 
-    fun deallocate(&self, mem: Memory[E]) -> Void {
+    fun deallocate(&self, mem: Memory[E, A]) -> Void {
         std::mem::ops::free(mem)
     }
 
-    fun allocate_zeroed(&self, layout: Layout) -> Res[Memory[E], AllocErr] {
+    fun allocate_zeroed(&self, layout: Layout) -> Res[Memory[E, A], AllocErr] {
         # let mem = std::mem::ops::calloc[E](layout.size).ok_or_else(AllocErr::new)?
         let mem = Memory[E, Self]()
         ret Pass(val=mem)
     }
 
-    fun reallocate(&self, mem: Memory[E], layout: Layout) -> Res[Memory[E], AllocErr] {
+    fun reallocate(&self, mem: Memory[E, A], layout: Layout) -> Res[Memory[E, A], AllocErr] {
         # let mem = std::mem::ops::realloc(mem, layout.size).ok_or_else(AllocErr::new)?
         let mem = Memory[E, Self]()
         ret Pass(val=mem)
