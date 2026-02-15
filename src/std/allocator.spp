@@ -60,7 +60,7 @@ sup [E] Alloc[E] {
     !virtual_method
     fun allocate_zeroed(&self, layout: Layout) -> Res[Memory[E], AllocErr] {
         let mem = self.allocate(layout)?
-        std::mem::ops::mem_set(mem, 0_u8, layout.size * std::mem::ops::size_of[E]())
+        std::mem::ops::mem_set(&mut mem, 0_u8, layout.size * std::mem::ops::size_of[E]())
         ret Pass(val=mem)
     }
 
