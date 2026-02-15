@@ -69,7 +69,6 @@ sup [T: Clone[T], A: Alloc[T]] Memory[T, A] ext Clone[Out=Memory[T, A]] {
 sup [T: Copy, A: Alloc[T]] Memory[T, A] ext Copy { }
 
 sup [T, A: Alloc[T]] Memory[T, A] ext Del {
-    !compiler_builtin
     fun del(&mut self) -> Void {
         self.clear()
     }
