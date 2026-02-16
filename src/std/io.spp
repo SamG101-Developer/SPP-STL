@@ -10,7 +10,7 @@ use std::string_view::StrView
 !public
 fun print(value: StrView) -> Opt[USize] {
     let slice = Slice[U8]::from(value)
-    ret std::console::stdout_stream::stdout.write_all(slice).ok()
+    ret std::console::stdout_stream::stdout.write_all(&slice).ok()
 }
 
 
