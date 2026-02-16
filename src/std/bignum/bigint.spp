@@ -8,6 +8,8 @@ use std::void::Void
 use std::bignum::biguint::BigUInt
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 use std::num::sized_integer_signed::SizedIntegerSigned
+use std::ops::eq::Eq
+use std::ops::ord::Ord
 
 
 # TODO: Move implementations like Add into AddAssign, then for Add, just clone ans assign.
