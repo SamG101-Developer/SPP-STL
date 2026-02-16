@@ -111,7 +111,7 @@ sup Slice[U8] ext From[Self, Str] {
     }
 }
 
-sup [A: Alloc[U8]] Slice[U8, A] ext From[Self, StrView] {
+sup [A: Alloc[U8, A]] Slice[U8, A] ext From[Self, StrView] {
     !compiler_builtin
     fun from(that: StrView) -> Self { }
 }
