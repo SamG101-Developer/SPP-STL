@@ -273,7 +273,7 @@ sup BigInt ext Eq[Rhs=Self] {
 }
 
 sup BigInt ext Ord[Rhs=Self] {
-    fun ord(&self, that: &Rhs) -> S32 {
+    fun ord(&self, that: &BigInt) -> S32 {
         case self.sign != that.sign {
             ret case self.sign { -1_s32 } else { 1_s32 }
         }
