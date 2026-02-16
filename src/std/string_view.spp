@@ -133,14 +133,14 @@ sup StrView {
     fun find(&self, needle: StrView) -> Opt[USize] {
         let index = sppc::str_str(self, needle)
         case index == -1 { ret None() }
-        ret Some(USize::from(index))
+        ret Some(val=USize::from(index))
     }
 
     !public
     fun rfind(&self, needle: StrView) -> Opt[USize] {
         let index = 0 # sppc::str_rstr(self, needle) TODO
         case index == -1 { ret None() }
-        ret Some(USize::from(index))
+        ret Some(val=USize::from(index))
     }
 
     !public
