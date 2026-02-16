@@ -76,6 +76,7 @@ sup [T] Iterator[T] {
         }
     }
 
+    ##
     !public
     cor zip[U](self, that: Iterator[U]) -> Iterator[(T, U)] {
         loop true {
@@ -87,6 +88,7 @@ sup [T] Iterator[T] {
             }
         }
     }
+    ##
 
     !public
     cor step_by(self, step: USize) -> Iterator[T] {

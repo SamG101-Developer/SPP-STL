@@ -106,18 +106,18 @@ sup StrView {
     !public
     fun starts_with(&self, needle: StrView) -> Bool {
         case needle.length() > self.length() { ret false }
-        loop (a, b) in self.chars().zip(needle.chars()) {
-            case a != b { ret false }
-        }
+        # loop (a, b) in self.chars().zip(needle.chars()) {
+        #     case a != b { ret false }
+        # }
         ret true
     }
 
     !public
     fun ends_with(&self, needle: StrView) -> Bool {
         case needle.length() > self.length() { ret false }
-        loop (a, b) in self.reverse_chars().zip(needle.reverse_chars()) {
-            case a != b { ret false }
-        }
+        # loop (a, b) in self.reverse_chars().zip(needle.reverse_chars()) {
+        #     case a != b { ret false }
+        # }
         ret true
     }
 
