@@ -13,7 +13,7 @@ use std::void::Void
 
 
 !public
-cls Shared[T, A: Alloc[T] = GlobalAlloc[T]] {
+cls Shared[T, A: Alloc[T, A] = GlobalAlloc[T]] {
     shared_counter: USize
     shadow_counter: USize
 }

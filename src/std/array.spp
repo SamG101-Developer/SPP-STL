@@ -6,15 +6,16 @@ use std::iterator::Iterator
 use std::mem::memory::Memory
 use std::number::USize
 use std::slice::Slice
+use std::ops::idx::IndexMut
+use std::ops::idx::IndexRef
 
 
 !public
-cls Arr[T, cmp n: USize, A: Alloc[T] = GlobalAlloc[T]] {
+cls Arr[T, cmp n: USize, A: Alloc[T, A] = GlobalAlloc[T]] {
     mem: Memory[T, A]
 }
 
-
-sup [T, cmp n: USize, A: Alloc[T]] Arr[T, n, A] {
+sup [T, cmp n: USize, A: Alloc[T, A]] Arr[T, n, A] {
     fun new() -> Self {
         ret Arr[T, n](mem=Memory[T, A]::new(n))
     }
@@ -23,38 +24,69 @@ sup [T, cmp n: USize, A: Alloc[T]] Arr[T, n, A] {
         ret n
     }
 
+    !public
     !compiler_builtin
     cor iter_mov(self) -> Iterator[T] { }
 
+    !public
     !compiler_builtin
     cor iter_mut(&mut self) -> Iterator[&mut T] { }
 
+    !public
     !compiler_builtin
     cor iter_ref(&self) -> Iterator[&T] { }
 
+    !public
     !compiler_builtin
     cor reverse_iter_mov(self) -> Iterator[T] { }
 
+    !public
     !compiler_builtin
     cor reverse_iter_mut(&mut self) -> Iterator[&mut T] { }
 
+    !public
     !compiler_builtin
     cor reverse_iter_ref(&self) -> Iterator[&T] { }
+
+    !public
+    !compiler_builtin
+    cor get_ref(&self) -> GenOnce[&T or None] { }
+
+    !public
+    !compiler_builtin
+    cor get_mut(&mut self) -> GenOnce[&mut T or None] { }
+
+    !public
+    fun swap(&mut self, i: USize, j: USize) -> Void {
+        std::mem::ops::swap(self[mut i], self[mut j])
+    }
 }
 
+sup [T: Clone[T], cmp n: USize, A: Alloc[T, A]] Arr[T, n, A] {
+    fun new(val: T) -> Self {
+        let array = Arr[T, n](mem=Memory[T, A]::new(n))
+        array.fill(val)
+        ret array
+    }
 
-sup [T, cmp n: USize, A: Alloc[T]] Arr[T, n, A] ext std::ops::idx::IndexMut[T, USize] {
+    fun fill(&mut self, value: T) -> Void {
+        loop i in Range::between(0_uz, n) {
+            self[i] = value.clone()
+        }
+    }
+}
+
+sup [T, cmp n: USize, A: Alloc[T, A]] Arr[T, n, A] ext IndexMut[T, USize] {
     !compiler_builtin
     cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] { }
 }
 
-
-sup [T, cmp n: USize, A: Alloc[T]] Arr[T, n, A] ext std::ops::idx::IndexRef[T, USize] {
+sup [T, cmp n: USize, A: Alloc[T, A]] Arr[T, n, A] ext IndexRef[T, USize] {
     !compiler_builtin
     cor index_ref(&self, index: USize) -> GenOnce[&T] { }
 }
 
-sup [T, cmp n: USize, A: Alloc[T]] Arr[T, n, A] ext From[Self, Slice[T, A]] {
+sup [T, cmp n: USize, A: Alloc[T, A]] Arr[T, n, A] ext From[Self, Slice[T, A]] {
     fun from(that: Slice[T, A]) -> Self {
         ret Arr[T, n, A](mem=Memory[T, A](ptr=that.mem.ptr, cap=n))
     }

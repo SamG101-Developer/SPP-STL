@@ -13,6 +13,8 @@ use std::string::Str
 use std::string_view::StrView
 use std::vector::Vec
 use std::void::Void
+use std::ops::idx::IndexRef
+use std::ops::idx::IndexMut
 
 
 # The Slice type in S++ is a dynamic array. It has a fixed size, but given at runtime. The Array type's fixed size is
@@ -22,12 +24,12 @@ use std::void::Void
 #
 # Internally, the Slice composes the Memory type, because the Memory type has impementation details that would not
 # benefit from being exposed at the Slice level, such as the take and place methods.
-cls Slice[E, A: Alloc[E] = GlobalAlloc[E]] {
+cls Slice[E, A: Alloc[E, A] = GlobalAlloc[E]] {
     mem: Memory[E, A]
     len: USize
 }
 
-sup [E, A: Alloc[E]] Slice[E, A] {
+sup [E, A: Alloc[E, A]] Slice[E, A] {
     type Element = E
     type Allocator = A
 
@@ -88,13 +90,13 @@ sup [E, A: Alloc[E]] Slice[E, A] {
     cor get_mut(&mut self) -> GenOnce[&mut E or None] { }
 }
 
-sup [E: Clone[E], A: Alloc[E]] Slice[E, A] ext Clone[Out=Self] {
+sup [E: Clone[E], A: Alloc[E, A]] Slice[E, A] ext Clone[Out=Self] {
     fun clone(&self) -> Self {
         ret Slice[E, A]()
     }
 }
 
-sup [E, cmp n: USize, A: Alloc[E]] Slice[E, A] ext From[Self, Arr[E, n, A]] {
+sup [E, cmp n: USize, A: Alloc[E, A]] Slice[E, A] ext From[Self, Arr[E, n, A]] {
     fun from(that: Arr[E, n, A]) -> Self {
         ret Slice[E, A](mem=Memory[A=A](ptr=that.mem.ptr, cap=n), len=n)
     }
@@ -114,24 +116,24 @@ sup [A: Alloc[U8]] Slice[U8, A] ext From[Self, StrView] {
     fun from(that: StrView) -> Self { }
 }
 
-sup [E, A: Alloc[E]] Slice[E, A] ext From[Self, Vec[E, A]] {
+sup [E, A: Alloc[E, A]] Slice[E, A] ext From[Self, Vec[E, A]] {
     fun from(that: Vec[E, A]) -> Self {
         ret Slice[E, A](mem=Memory[A=A](ptr=that.buf.mem.ptr, cap=that.buf.mem.cap), len=that.buf.len)
     }
 }
 
-sup [E, A: Alloc[E]] Slice[E, A] ext std::ops::del::Del {
-    fun del(&mut self) -> Void {
-        # A::deallocate(self.mem)  TODO: constraints
+sup [E, A: Alloc[E, A]] Slice[E, A] ext From[Self, Memory[E, A]] {
+    fun from(that: Memory[E, A]) -> Self {
+        ret Slice[E, A](mem=that, len=that.capacity())
     }
 }
 
-sup [E, A: Alloc[E]] Slice[E, A] ext std::ops::idx::IndexMut[E, USize] {
+sup [E, A: Alloc[E, A]] Slice[E, A] ext IndexMut[E, USize] {
     !compiler_builtin
     cor index_mut(&mut self, index: USize) -> GenOnce[&mut E] { }
 }
 
-sup [E, A: Alloc[E]] Slice[E, A] ext std::ops::idx::IndexRef[E, USize] {
+sup [E, A: Alloc[E, A]] Slice[E, A] ext IndexRef[E, USize] {
     !compiler_builtin
     cor index_ref(&self, index: USize) -> GenOnce[&E] { }
 }

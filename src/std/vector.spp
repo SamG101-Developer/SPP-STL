@@ -16,15 +16,16 @@ use std::range::Range
 use std::slice::Slice
 use std::void::Void
 use std::mem::memory::Memory
+use std::ops::eq::Eq
 
 
 !public
-cls Vec[T, A: Alloc[T] = GlobalAlloc[T]] {
+cls Vec[T, A: Alloc[T, A] = GlobalAlloc[T]] {
     !public buf: Slice[T, A]
 }
 
 
-sup [T, A: Alloc[T]] Vec[T, A] {
+sup [T, A: Alloc[T, A]] Vec[T, A] {
     type Element = T
     type Allocator = A
 
@@ -76,7 +77,7 @@ sup [T, A: Alloc[T]] Vec[T, A] {
     !private
     fun grow_double(&mut self) -> Void {
         let new_cap = self.buf.mem.cap * 2_uz
-        # A::realloc(&mut self.buf, new_cap) TODO
+        # self.bug.mem.reallocate(&mut self.buf, new_cap) TODO
     }
 
     !public
@@ -190,14 +191,14 @@ sup [T, A: Alloc[T]] Vec[T, A] {
 }
 
 
-sup [T, A: Alloc[T]] Vec[T, A] ext From[Self, Slice[T, A]] {
+sup [T, A: Alloc[T, A]] Vec[T, A] ext From[Self, Slice[T, A]] {
     fun from(that: Slice[T, A]) -> Self {
         ret Vec[T, A](buf=that)
     }
 }
 
 
-sup [T, A: Alloc[T], cmp n: USize] Vec[T, A] ext From[Self, Arr[T, n, A]] {
+sup [T, A: Alloc[T, A], cmp n: USize] Vec[T, A] ext From[Self, Arr[T, n, A]] {
     fun from(that: Arr[T, n, A]) -> Self {
         ret Vec[T, A]::from(Slice[T, A]::from(that))
     }
@@ -205,7 +206,7 @@ sup [T, A: Alloc[T], cmp n: USize] Vec[T, A] ext From[Self, Arr[T, n, A]] {
 
 
 # TODO: Constrain T to be Clone
-sup [T: Clone[T], A: Alloc[T]] Vec[T, A] ext Clone[Out=Self] {
+sup [T: Clone[T], A: Alloc[T, A]] Vec[T, A] ext Clone[Out=Self] {
     fun clone(&self) -> Self {
         # ret Vec[T, A](buf=self.buf.clone())
         ret Vec[T, A]()
@@ -223,21 +224,21 @@ sup [T] Vec[T] ext Sortable[T] {
 ##
 
 
-sup [T, A: Alloc[T]] Vec[T, A] ext std::ops::idx::IndexMut[T, USize] {
+sup [T, A: Alloc[T, A]] Vec[T, A] ext std::ops::idx::IndexMut[T, USize] {
     cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] {
         gen with self.buf.index_mut(index)
     }
 }
 
 
-sup [T, A: Alloc[T]] Vec[T, A] ext std::ops::idx::IndexRef[T, USize] {
+sup [T, A: Alloc[T, A]] Vec[T, A] ext std::ops::idx::IndexRef[T, USize] {
     cor index_ref(&self, index: USize) -> GenOnce[&T] {
         gen with self.buf.index_ref(index)
     }
 }
 
 
-sup [T, A: Alloc[T]] Vec[T, A] ext std::ops::add::Add[Self, Ret=Self] {
+sup [T, A: Alloc[T, A]] Vec[T, A] ext std::ops::add::Add[Self, Ret=Self] {
     fun add(self, that: Self) -> Self {
         let mut result = self
         result.push_back_vec(that)
@@ -246,15 +247,14 @@ sup [T, A: Alloc[T]] Vec[T, A] ext std::ops::add::Add[Self, Ret=Self] {
 }
 
 
-sup [T, A: Alloc[T]] Vec[T, A] ext std::ops::add::AddAssign[Self] {
+sup [T, A: Alloc[T, A]] Vec[T, A] ext std::ops::add::AddAssign[Self] {
     fun add_assign(&mut self, that: Self) -> Void {
         self.push_back_vec(that)
     }
 }
 
 
-# TODO: Constrain T to be Eq
-sup [T, A: Alloc[T]] Vec[T, A] ext std::ops::eq::Eq[Self] {
+sup [T: Eq[T], A: Alloc[T, A]] Vec[T, A] ext std::ops::eq::Eq[Self] {
     fun eq(&self, that: &Vec[T]) -> Bool {
         case self.buf.len != that.buf.len { ret false }
         loop i in Range[USize]::between(0_uz, self.buf.len) {
@@ -262,11 +262,7 @@ sup [T, A: Alloc[T]] Vec[T, A] ext std::ops::eq::Eq[Self] {
         }
         ret true
     }
-}
 
-
-# TODO: Constrain T to be Ne
-sup [T, A: Alloc[T]] Vec[T, A] ext std::ops::ne::Ne[Self] {
     fun ne(&self, that: &Vec[T]) -> Bool {
         case self.buf.len != that.buf.len { ret true }
         loop i in Range[USize]::between(0_uz, self.buf.len) {

@@ -4,7 +4,7 @@ use std::shared::Shared
 
 
 !public
-cls Shadow[T, A: Alloc[T] = GlobalAlloc[T]] { }
+cls Shadow[T, A: Alloc[T, A] = GlobalAlloc[T]] { }
 
 
 sup [T] Shadow[T] {

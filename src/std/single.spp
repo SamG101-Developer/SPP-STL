@@ -13,9 +13,9 @@ use std::ops::void::Void
 A uniquely owned pointer on the heap.
 ##
 !public
-cls Single[T, A: Alloc[T] = GlobalAlloc[T]] { }
+cls Single[T, A: Alloc[T, A] = GlobalAlloc[T]] { }
 
-sup [T, A: Alloc[T]] Single[T, A] {
+sup [T, A: Alloc[T, A]] Single[T, A] {
     !public type Element = T
 
     !public

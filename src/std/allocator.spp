@@ -24,7 +24,7 @@ cls Layout {
 
 
 !public
-cls Alloc[E] { }
+cls Alloc[E, A: Alloc[E, A]] { }
 
 
 # The Alloc implementation defines the interface for memory allocation, deallocation, and reallocation. It is designed
@@ -37,9 +37,8 @@ cls Alloc[E] { }
 # memory utilities, particularly from sppc.
 #
 # Todo: Memory[E, A] <- Somehow fill the "A" argument, differing for inheritance.
-sup [E] Alloc[E] {
+sup [E, A: Alloc[E, A]] Alloc[E, A] {
     type Element = E
-    type A = Alloc[E]
 
     # Allocates a block of memory for the specified layout. The method returns a Result type, which can either be a
     # successful allocation (Pass) containing the allocated memory, or an error (Err) containing an AllocErr with a
@@ -94,26 +93,25 @@ sup [E] Alloc[E] {
 cls GlobalAlloc[E] { }
 
 
-sup [E] GlobalAlloc[E] ext Alloc[E] {
-    type A = GlobalAlloc[E]
+sup [E] GlobalAlloc[E] ext Alloc[E, GlobalAlloc[E]] {
 
-    fun allocate(&self, layout: Layout) -> Res[Memory[E, A], AllocErr] {
+    fun allocate(&self, layout: Layout) -> Res[Memory[E, GlobalAlloc[E]], AllocErr] {
         # let mem = std::mem::ops::malloc[E](layout.size).ok_or_else(AllocErr::new)?
         let mem = Memory[E, Self]()
         ret Pass(val=mem)
     }
 
-    fun deallocate(&self, mem: Memory[E, A]) -> Void {
+    fun deallocate(&self, mem: Memory[E, GlobalAlloc[E]]) -> Void {
         std::mem::ops::free(mem)
     }
 
-    fun allocate_zeroed(&self, layout: Layout) -> Res[Memory[E, A], AllocErr] {
+    fun allocate_zeroed(&self, layout: Layout) -> Res[Memory[E, GlobalAlloc[E]], AllocErr] {
         # let mem = std::mem::ops::calloc[E](layout.size).ok_or_else(AllocErr::new)?
         let mem = Memory[E, Self]()
         ret Pass(val=mem)
     }
 
-    fun reallocate(&self, mem: Memory[E, A], layout: Layout) -> Res[Memory[E, A], AllocErr] {
+    fun reallocate(&self, mem: Memory[E, GlobalAlloc[E]], layout: Layout) -> Res[Memory[E, GlobalAlloc[E]], AllocErr] {
         # let mem = std::mem::ops::realloc(mem, layout.size).ok_or_else(AllocErr::new)?
         let mem = Memory[E, Self]()
         ret Pass(val=mem)

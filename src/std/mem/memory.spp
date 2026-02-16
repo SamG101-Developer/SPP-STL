@@ -18,13 +18,13 @@ use std::ops::del::Del
 # ownership model, it maintains a uniquely owned Single pointer (the location of the memory on the heap) and a capacity
 # field (the number of elements that can be stored in the memory). The allocator falls through to the Single pointer.
 !public
-cls Memory[T, A: Alloc[T] = GlobalAlloc[T]] {
+cls Memory[T, A: Alloc[T, A] = GlobalAlloc[T]] {
     ptr: Single[T, A]
     cap: USize
     alloc: A
 }
 
-sup [T, A: Alloc[T]] Memory[T, A] {
+sup [T, A: Alloc[T, A]] Memory[T, A] {
     !public type Element = T
 
     !public
@@ -61,14 +61,14 @@ sup [T, A: Alloc[T]] Memory[T, A] {
     fun place_mem(&mut self, index: USize, value: Memory[T]) -> Void { }
 }
 
-sup [T: Clone[T], A: Alloc[T]] Memory[T, A] ext Clone[Out=Memory[T, A]] {
+sup [T: Clone[T], A: Alloc[T, A]] Memory[T, A] ext Clone[Out=Memory[T, A]] {
     !compiler_builtin
     fun clone(&self) -> Self { }
 }
 
-sup [T: Copy, A: Alloc[T]] Memory[T, A] ext Copy { }
+sup [T: Copy, A: Alloc[T, A]] Memory[T, A] ext Copy { }
 
-sup [T, A: Alloc[T]] Memory[T, A] ext Del {
+sup [T, A: Alloc[T, A]] Memory[T, A] ext Del {
     fun del(&mut self) -> Void {
         self.clear()
     }
