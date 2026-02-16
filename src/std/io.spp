@@ -7,7 +7,8 @@ use std::string_view::StrView
 
 !public
 fun print(value: StrView) -> Opt[USize] {
-    let val = std::console::stdout_stream::stdout.write_all(value.bytes()).ok()
+    let slice = Slice::from(value)
+    let val = std::console::stdout_stream::stdout.write_all(slice).ok()
     ret val
 }
 
