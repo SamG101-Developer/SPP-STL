@@ -44,7 +44,7 @@ sup [E] Alloc[E] {
     # which is typically due to insufficient system resources.
     !public
     !abstract_method
-    fun allocate[A=Self](&self, layout: Layout) -> Res[Memory[E, A], AllocErr] { }
+    fun allocate[A](&self, layout: Layout) -> Res[Memory[E, A], AllocErr] { }
 
     # Deallocates a previously allocated block of memory. This method is abstract and must be implemented by any
     # subclass that extends Alloc. The method takes a Memory object as an argument, by move, which means that the caller
@@ -59,7 +59,7 @@ sup [E] Alloc[E] {
     # failure.
     !public
     !virtual_method
-    fun allocate_zeroed[A=Self](&self, layout: Layout) -> Res[Memory[E, A], AllocErr] {
+    fun allocate_zeroed[A](&self, layout: Layout) -> Res[Memory[E, A], AllocErr] {
         let mut mem = self.allocate(layout)?
         std::mem::ops::mem_set(&mut mem, 0_u8, layout.size * std::mem::ops::size_of[E]())
         ret Pass(val=mem)
@@ -93,7 +93,7 @@ cls GlobalAlloc[E] { }
 
 sup [E] GlobalAlloc[E] ext Alloc[E] {
 
-    fun allocate[A=Self](&self, layout: Layout) -> Res[Memory[E, A], AllocErr] {
+    fun allocate[A](&self, layout: Layout) -> Res[Memory[E, A], AllocErr] {
         # let mem = std::mem::ops::malloc[E](layout.size).ok_or_else(AllocErr::new)?
         let mem = Memory[E, A]()
         ret Pass(val=mem)
@@ -103,7 +103,7 @@ sup [E] GlobalAlloc[E] ext Alloc[E] {
         std::mem::ops::free(mem)
     }
 
-    fun allocate_zeroed[A=Self](&self, layout: Layout) -> Res[Memory[E, A], AllocErr] {
+    fun allocate_zeroed[A](&self, layout: Layout) -> Res[Memory[E, A], AllocErr] {
         # let mem = std::mem::ops::calloc[E](layout.size).ok_or_else(AllocErr::new)?
         let mem = Memory[E, A]()
         ret Pass(val=mem)
