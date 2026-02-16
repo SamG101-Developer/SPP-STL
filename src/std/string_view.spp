@@ -126,19 +126,19 @@ sup StrView {
 
     !public
     fun contains(&self, needle: StrView) -> Bool {
-        ret sppc::str_str(self, needle) != -1
+        ret sppc::str_str(self, &needle) != -1
     }
 
     !public
     fun find(&self, needle: StrView) -> Opt[USize] {
-        let index = sppc::str_str(self, needle)
+        let index = sppc::str_str(self, &needle)
         case index == -1 { ret None() }
         ret Some(val=USize::from(index))
     }
 
     !public
     fun rfind(&self, needle: StrView) -> Opt[USize] {
-        let index = 0 # sppc::str_rstr(self, needle) TODO
+        let index = 0 # sppc::str_rstr(self, &needle) TODO
         case index == -1 { ret None() }
         ret Some(val=USize::from(index))
     }
