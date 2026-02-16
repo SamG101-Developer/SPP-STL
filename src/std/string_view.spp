@@ -26,9 +26,7 @@ full-featured `Str` type from `std::string::Str`.
 !public
 cls StrView { }
 
-
 sup StrView ext Copy { }
-
 
 sup StrView {
     !public
@@ -104,7 +102,6 @@ sup StrView {
     cor reverse_bytes(&self) -> Iterator[U8] { }
 }
 
-
 sup StrView {
     !public
     fun starts_with(&self, needle: StrView) -> Bool {
@@ -138,7 +135,7 @@ sup StrView {
 
     !public
     fun rfind(&self, needle: StrView) -> Opt[USize] {
-        let index = 0 # sppc::str_rstr(self, &needle) TODO
+        let index = "" # sppc::str_rstr(self, &needle) TODO
         case index == -1 { ret None() }
         ret Some(val=USize::from(index))
     }
@@ -147,7 +144,6 @@ sup StrView {
     !compiler_builtin
     fun slice(&self, start: USize, end: USize) -> StrView { }
 }
-
 
 sup StrView ext Eq[Rhs=StrView] {
     fun eq(&self, that: &StrView) -> Bool {
@@ -159,18 +155,15 @@ sup StrView ext Eq[Rhs=StrView] {
     }
 }
 
-
 sup StrView ext From[Self, Str] {
     !compiler_builtin
     fun from(that: Str) -> Self { }
 }
 
-
 sup StrView ext From[Self, U8] {
     !compiler_builtin
     fun from(that: U8) -> Self { }
 }
-
 
 sup StrView ext From[Self, Path] {
     fun from(that: Path) -> Self {
