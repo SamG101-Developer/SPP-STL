@@ -1,6 +1,7 @@
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::cast::From
+use std::clone::Clone
 use std::generator::GenOnce
 use std::iterator::Iterator
 use std::mem::memory::Memory
