@@ -2,6 +2,7 @@ use std::boolean::Bool
 use std::cast::From
 use std::number::U32
 use std::number::U64
+use std::number::S32
 use std::option::Opt
 use std::option::None
 use std::option::Some
