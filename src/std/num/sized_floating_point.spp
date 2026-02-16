@@ -54,7 +54,7 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Eq[Rhs=Self] {
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext Ord[Rhs=Self] {
-    fun ord(&self, that: &Rhs) -> S32 {
+    fun ord(&self, that: &Self) -> S32 {
         ret intrinsics::fcmp(self, that)
     }
 

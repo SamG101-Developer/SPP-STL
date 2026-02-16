@@ -4,6 +4,7 @@ use std::clone::Clone
 use std::number::U32
 use std::number::U64
 use std::number::USize
+use std::number::S32
 use std::range::Range
 use std::vector::Vec
 use std::void::Void
@@ -416,7 +417,7 @@ sup BigUInt ext std::ops::eq::Eq[Rhs=Self] {
 
 sup BigUInt ext std::ops::ord::Ord[Rhs=Self] {
     # TODO: Implement this properly.
-    fun ord(&self, that: &Rhs) -> S32 {
+    fun ord(&self, that: &Self) -> S32 {
         ret 0_s32  # Placeholder
     }
 }
