@@ -63,7 +63,9 @@ sup [T, cmp n: USize, A: Alloc[T, A]] Arr[T, n, A] {
     }
 }
 
-sup [T: Clone[T], cmp n: USize, A: Alloc[T, A]] Arr[T, n, A] {
+
+# todo: ": Clone[T]"
+sup [T, cmp n: USize, A: Alloc[T, A]] Arr[T, n, A] {
     fun new(val: T) -> Self {
         let array = Arr[T, n](mem=Memory[T, A]::new(n))
         array.fill(val)
@@ -72,7 +74,7 @@ sup [T: Clone[T], cmp n: USize, A: Alloc[T, A]] Arr[T, n, A] {
 
     fun fill(&mut self, value: T) -> Void {
         loop i in Range::between(0_uz, n) {
-            self[i] = value.clone()
+            # self[i] = value.clone()
         }
     }
 }
