@@ -1,4 +1,5 @@
 use std::boolean::Bool
+use std::boolean::Integral
 use std::copy::Copy
 use std::mem::memory::Memory
 use std::void::Void
@@ -257,7 +258,6 @@ cmp fun smax[T: Integer](this: T, that: T) -> T { }
 !compiler_builtin
 cmp fun umax[T: Integer](this: T, that: T) -> T { }
 
-
 !public
 !always_inline
 !compiler_builtin
@@ -269,22 +269,20 @@ cmp fun smin[T: Integer](this: T, that: T) -> T { }
 cmp fun umin[T: Integer](this: T, that: T) -> T { }
 
 
-##
 !public
 !always_inline
 !compiler_builtin
-fun icmp[T: Integer](this: T, that: T) -> S32 { }
+cmp fun ucmp[T: Integer](this: &T, that: &T) -> S32 { }
 
 !public
 !always_inline
 !compiler_builtin
-fun scmp[T: Integer](this: T, that: T) -> S32 { }
+cmp fun scmp[T: Integer](this: &T, that: &T) -> S32 { }
 
 !public
 !always_inline
 !compiler_builtin
-fun fcmp[T: Integer](this: T, that: T) -> S32 { }
-##
+cmp fun fcmp[T: Integer](this: &T, that: &T) -> S32 { }
 
 
 # !public
@@ -620,42 +618,42 @@ fun ushl_saturating[T: Integer](this: T, that: T) -> T { }
 !public
 !always_inline
 !compiler_builtin
-fun sitofp[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerSigned[that_bit_width]) -> SizedFloatingPoint[this_bit_width] { }
+fun sitofp[cmp this_w: U32, cmp that_w: U32](value: SizedIntegerSigned[that_w]) -> SizedFloatingPoint[this_w] { }
 
 !public
 !always_inline
 !compiler_builtin
-fun uitofp[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerUnsigned[that_bit_width]) -> SizedFloatingPoint[this_bit_width] { }
+fun uitofp[cmp this_w: U32, cmp that_w: U32](value: SizedIntegerUnsigned[that_w]) -> SizedFloatingPoint[this_w] { }
 
 !public
 !always_inline
 !compiler_builtin
-fun fptrunc[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedFloatingPoint[that_bit_width]) -> SizedFloatingPoint[this_bit_width] { }
+fun fptrunc[cmp this_w: U32, cmp that_w: U32](value: SizedFloatingPoint[that_w]) -> SizedFloatingPoint[this_w] { }
 
 !public
 !always_inline
 !compiler_builtin
-fun strunc[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerSigned[that_bit_width]) -> SizedIntegerSigned[this_bit_width] { }
+fun strunc[cmp this_w: U32, cmp that_w: U32](value: SizedIntegerSigned[that_w]) -> SizedIntegerSigned[this_w] { }
 
 !public
 !always_inline
 !compiler_builtin
-fun utrunc[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerUnsigned[that_bit_width]) -> SizedIntegerUnsigned[this_bit_width] { }
+fun utrunc[cmp this_w: U32, cmp that_w: U32](value: SizedIntegerUnsigned[that_w]) -> SizedIntegerUnsigned[this_w] { }
 
 !public
 !always_inline
 !compiler_builtin
-fun szext[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerSigned[that_bit_width]) -> SizedIntegerSigned[this_bit_width] { }
+fun szext[cmp this_w: U32, cmp that_w: U32](value: SizedIntegerSigned[that_w]) -> SizedIntegerSigned[this_w] { }
 
 !public
 !always_inline
 !compiler_builtin
-fun uzext[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedIntegerUnsigned[that_bit_width]) -> SizedIntegerUnsigned[this_bit_width] { }
+fun uzext[cmp this_w: U32, cmp that_w: U32](value: SizedIntegerUnsigned[that_w]) -> SizedIntegerUnsigned[this_w] { }
 
 !public
 !always_inline
 !compiler_builtin
-fun fpext[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedFloatingPoint[that_bit_width]) -> SizedFloatingPoint[this_bit_width] { }
+fun fpext[cmp this_w: U32, cmp that_w: U32](value: SizedFloatingPoint[that_w]) -> SizedFloatingPoint[this_w] { }
 
 !public
 !always_inline
@@ -665,15 +663,66 @@ fun bit_cast[T, U](value: U) -> T { }  # Identity function (type hint to change 
 !public
 !always_inline
 !compiler_builtin
-fun fptosi[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedFloatingPoint[that_bit_width]) -> SizedIntegerSigned[this_bit_width] { }
+fun fptosi[cmp this_w: U32, cmp that_w: U32](value: SizedFloatingPoint[that_w]) -> SizedIntegerSigned[this_w] { }
 
 !public
 !always_inline
 !compiler_builtin
-fun fptoui[cmp this_bit_width: U32, cmp that_bit_width: U32](value: SizedFloatingPoint[that_bit_width]) -> SizedIntegerUnsigned[this_bit_width] { }
+fun fptoui[cmp this_w: U32, cmp that_w: U32](value: SizedFloatingPoint[that_w]) -> SizedIntegerUnsigned[this_w] { }
 
 
 !public
 !always_inline
 !compiler_builtin
 fun fpclass[T: FloatingPoint](value: T, flag: S32) -> Bool { }
+
+
+!public
+!always_inline
+!compiler_builtin
+fun atomic_fetch_add[T: Integer](dest: &mut T, val: T, order: U8) -> USize { }
+
+!public
+!always_inline
+!compiler_builtin
+fun atomic_fetch_sub[T: Integer](dest: &mut T, val: T, order: U8) -> USize { }
+
+!public
+!always_inline
+!compiler_builtin
+fun atomic_fetch_and[T: Integral](dest: &mut T, val: T, order: U8) -> USize { }
+
+!public
+!always_inline
+!compiler_builtin
+fun atomic_fetch_or[T: Integral](dest: &mut T, val: T, order: U8) -> USize { }
+
+!public
+!always_inline
+!compiler_builtin
+fun atomic_fetch_xor[T: Integral](dest: &mut T, val: T, order: U8) -> USize { }
+
+!public
+!always_inline
+!compiler_builtin
+fun atomic_fetch_nand[T: Integral](dest: &mut T, val: T, order: U8) -> USize { }
+
+!public
+!always_inline
+!compiler_builtin
+fun atomic_load[T: Integral](src: &T, order: U8) -> T { }
+
+!public
+!always_inline
+!compiler_builtin
+fun atomic_store[T: Integral](dest: &mut T, val: T, order: U8) -> Void { }
+
+!public
+!always_inline
+!compiler_builtin
+fun atomic_swap[T: Integral](dest: &mut T, val: T, order: U8) -> T { }
+
+!public
+!always_inline
+!compiler_builtin
+fun atomic_compare_exchange[T: Integral](dest: &mut T, expected: &T, desired: T, success_order: U8, failure_order: U8) -> (T, Bool) { }

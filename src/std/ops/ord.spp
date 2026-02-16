@@ -1,0 +1,51 @@
+use std::boolean::Bool
+use std::number::S32
+
+
+!public cmp lt: S32 = -1
+!public cmp eq: S32 = 0
+!public cmp gt: S32 = 1
+!public cls Ord[Rhs] { }
+
+
+sup [Rhs] Ord[Rhs] {
+    !public
+    !astract_method
+    fun ord(&self, that: &Rhs) -> S32 { }
+
+    !public
+    !virtual_method
+    fun lt(&self, that: &Rhs) -> Bool {
+        ret self.ord(that) == lt
+    }
+
+    !public
+    !virtual_method
+    fun le(&self, that: &Rhs) -> Bool {
+        ret case self.lt(that) { true } else { self.eq(that) }
+    }
+
+    !public
+    !virtual_method
+    fun gt(&self, that: &Rhs) -> Bool {
+        ret that < self
+    }
+
+    !public
+    !virtual_method
+    fun le(&self, that: &Rhs) -> Bool {
+        ret case self.lt(that) { true } else { self.eq(that) }
+    }
+
+    !public
+    !virtual_method
+    fun min(self, that: Rhs) -> Self {
+        ret case self < that { self } else { that }
+    }
+
+    !public
+    !virtual_method
+    fun max(self, that: Rhs) -> Self {
+        ret case self < that { that } else { self }
+    }
+}

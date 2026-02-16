@@ -7,6 +7,13 @@ use std::option::None
 use std::option::Some
 use std::void::Void
 
+use std::ops::ord::Ord
+use std::ops::div::Div
+use std::ops::div_assign::DivAssign
+use std::ops::rem::Rem
+use std::ops::rem_assign::RemAssign
+use std::ops::pow::Pow
+
 use std::num::sized_integer::SizedInteger
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 use std::num::sized_floating_point::SizedFloatingPoint
@@ -14,20 +21,21 @@ use std::num::sized_floating_point::SizedFloatingPoint
 
 # Type alias the "signed" version of the the sized integer type.
 !public
-type SizedIntegerSigned[cmp bit_width: U32] = SizedInteger[bit_width, true]
+type SizedIntegerSigned[cmp w: U32] = SizedInteger[w, true]
 
-
-sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerSigned[this_bit_width] ext From[Self, SizedIntegerUnsigned[that_bit_width]] {
-    fun from(that: SizedIntegerUnsigned[that_bit_width]) -> Self {
+sup [cmp this_w: U32, cmp that_w: U32]
+SizedIntegerSigned[this_w] ext
+From[Self, SizedIntegerUnsigned[that_w]] {
+    fun from(that: SizedIntegerUnsigned[that_w]) -> Self {
         # Destination (this) bits are less than the source (that) bits => truncate.
-        case this_bit_width < that_bit_width {
-            let u = intrinsics::utrunc[this_bit_width](that)
+        case this_w < that_w {
+            let u = intrinsics::utrunc[this_w](that)
             ret intrinsics::bit_cast[Self](u)
         }
 
         # Destination (this) bits are greater than the source (that) bits => zero-extend.
-        case this_bit_width > that_bit_width {
-            let u = intrinsics::uzext[this_bit_width](that)
+        case this_w > that_w {
+            let u = intrinsics::uzext[this_w](that)
             ret intrinsics::bit_cast[Self](u)
         }
 
@@ -36,18 +44,19 @@ sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerSigned[this_b
     }
 }
 
-
-sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerSigned[this_bit_width] ext From[Self, SizedIntegerSigned[that_bit_width]] {
-    fun from(that: SizedIntegerSigned[that_bit_width]) -> Self {
+sup [cmp this_w: U32, cmp that_w: U32]
+SizedIntegerSigned[this_w] ext
+From[Self, SizedIntegerSigned[that_w]] {
+    fun from(that: SizedIntegerSigned[that_w]) -> Self {
         # Destination (this) bits are less than the source (that) bits => truncate.
-        case this_bit_width < that_bit_width {
-            let s = intrinsics::strunc[this_bit_width](that)
+        case this_w < that_w {
+            let s = intrinsics::strunc[this_w](that)
             ret intrinsics::bit_cast[Self](s)
         }
 
         # Destination (this) bits are greater than the source (that) bits => sign-extend.
-        case this_bit_width > that_bit_width {
-            let s = intrinsics::szext[this_bit_width](that)
+        case this_w > that_w {
+            let s = intrinsics::szext[this_w](that)
             ret intrinsics::bit_cast[Self](s)
         }
 
@@ -56,36 +65,31 @@ sup [cmp this_bit_width: U32, cmp that_bit_width: U32] SizedIntegerSigned[this_b
     }
 }
 
-
-sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::div::Div[Rhs=Self, Ret=Self] {
+sup [cmp w: U32] SizedIntegerSigned[w] ext Div[Rhs=Self, Ret=Self] {
     cmp fun div(self, that: Self) -> Self {
         ret intrinsics::sdiv(self, that)
     }
 }
 
-
-sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::div::DivAssign[Rhs=Self] {
+sup [cmp w: U32] SizedIntegerSigned[w] ext DivAssign[Rhs=Self] {
     cmp fun div_assign(&mut self, that: Self) -> Void {
         intrinsics::sdiv_assign(self, that)
     }
 }
 
-
-sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::rem::Rem[Rhs=Self, Ret=Self] {
+sup [cmp w: U32] SizedIntegerSigned[w] ext Rem[Rhs=Self, Ret=Self] {
     cmp fun rem(self, that: Self) -> Self {
         ret intrinsics::srem(self, that)
     }
 }
 
-
-sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::rem::RemAssign[Rhs=Self] {
+sup [cmp w: U32] SizedIntegerSigned[w] ext RemAssign[Rhs=Self] {
     cmp fun rem_assign(&mut self, that: Self) -> Void {
         intrinsics::srem_assign(self, that)
     }
 }
 
-
-sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::pow::Pow[Rhs=U32, Ret=Self] {
+sup [cmp w: U32] SizedIntegerSigned[w] ext Pow[Rhs=U32, Ret=Self] {
     fun pow(self, that: U32) -> Self {
         case that == 0_u32 {
             ret Self::one()
@@ -104,51 +108,37 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::pow::Pow[Rh
     }
 }
 
+sup [cmp w: U32] SizedIntegerSigned[w] ext Ord[Rhs=Self] {
+    cmp fun ord(&self, that: &Self) -> S32 {
+        ret intrinsics::scmp(self, that)
+    }
 
-sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
-    !public
-    !inline
+    cmp fun lt(&self, that: &Self) -> Bool {
+        ret intrinsics::slt(self, that)
+    }
+
+    cmp fun le(&self, that: &Self) -> Bool {
+        ret intrinsics::sle(self, that)
+    }
+
+    cmp fun gt(&self, that: &Self) -> Bool {
+        ret intrinsics::sgt(self, that)
+    }
+
+    cmp fun ge(&self, that: &Self) -> Bool {
+        ret intrinsics::sge(self, that)
+    }
+
     cmp fun min(self, that: Self) -> Self {
         ret intrinsics::smin(self, that)
     }
 
-    !public
-    !inline
     cmp fun max(self, that: Self) -> Self {
         ret intrinsics::smax(self, that)
     }
 }
 
-
-sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::lt::Lt[Rhs=Self] {
-    cmp fun lt(&self, that: &Self) -> Bool {
-        ret intrinsics::slt(self, that)
-    }
-}
-
-
-sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::le::Le[Rhs=Self] {
-    cmp fun le(&self, that: &Self) -> Bool {
-        ret intrinsics::sle(self, that)
-    }
-}
-
-
-sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::gt::Gt[Rhs=Self] {
-    cmp fun gt(&self, that: &Self) -> Bool {
-        ret intrinsics::sgt(self, that)
-    }
-}
-
-
-sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] ext std::ops::ge::Ge[Rhs=Self] {
-    cmp fun ge(&self, that: &Self) -> Bool {
-        ret intrinsics::sge(self, that)
-    }
-}
-
-
-sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
+sup [cmp w: U32] SizedIntegerSigned[w] {
     !public
     !inline
     fun add_checked(self, that: Self) -> Opt[Self] {
@@ -175,8 +165,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     }
 }
 
-
-sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
+sup [cmp w: U32] SizedIntegerSigned[w] {
     !public
     !inline
     fun sub_checked(self, that: Self) -> Opt[Self] {
@@ -203,8 +192,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     }
 }
 
-
-sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
+sup [cmp w: U32] SizedIntegerSigned[w] {
     !public
     !inline
     fun mul_checked(self, that: Self) -> Opt[Self] {
@@ -235,8 +223,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     }
 }
 
-
-sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
+sup [cmp w: U32] SizedIntegerSigned[w] {
     !public
     !inline
     fun div_checked(self, that: Self) -> Opt[Self] {
@@ -278,7 +265,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     fun div_floor(self, that: Self) -> Self {
         let d = self / that
         let r = self % that
-        let c = intrinsics::bit_shr(self ^ that, bit_width - 1_u32)
+        let c = intrinsics::bit_shr(self ^ that, w - 1_u32)
         ret case r != Self::zero() { d + c } else { d }
     }
 
@@ -287,13 +274,19 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     fun div_ceil(self, that: Self) -> Self {
         let d = self / that
         let r = self % that
-        let c = Self::one() + intrinsics::bit_shr(self ^ that, bit_width - 1_u32)
+        let c = Self::one() + intrinsics::bit_shr(self ^ that, w - 1_u32)
         ret case r != Self::zero() { d + c } else { d }
+    }
+
+    !public
+    !inline
+    fun mod(self, that: Self) -> Self {
+        let r = self % that
+        ret case r < Self::zero() { r.add_wrapping(that.abs_wrapping()) } else { r }
     }
 }
 
-
-sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
+sup [cmp w: U32] SizedIntegerSigned[w] {
     !public
     !inline
     fun rem_checked(self, that: Self) -> Opt[Self] {
@@ -320,9 +313,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     }
 }
 
-
-
-sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
+sup [cmp w: U32] SizedIntegerSigned[w] {
     !public
     !inline
     fun pow_checked(self, that: U32) -> Opt[Self] {
@@ -395,26 +386,14 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     }
 }
 
-
-sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
-    !public
-    !inline
-    fun mod(self, that: Self) -> Self {
-        let r = self % that
-        ret case r < Self::zero() { r.add_wrapping(that.abs_wrapping()) } else { r }
-    }
-}
-
-
-sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
+sup [cmp w: U32] SizedIntegerSigned[w] {
     !public
     !inline
     !compiler_builtin
     fun neg_one() -> Self { }
 }
 
-
-sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
+sup [cmp w: U32] SizedIntegerSigned[w] {
     !public
     !inline
     fun is_positive(self) -> Bool {
@@ -446,8 +425,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     }
 }
 
-
-sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
+sup [cmp w: U32] SizedIntegerSigned[w] {
     !public
     !inline
     cmp fun neg(self) -> Self {
@@ -477,8 +455,7 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
     }
 }
 
-
-sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
+sup [cmp w: U32] SizedIntegerSigned[w] {
     !public
     !inline
     fun isqrt(self) -> Self {
@@ -504,59 +481,5 @@ sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
             <= self { Some(val=large_cand) }
             else { Some(val=small_cand) }
         }
-    }
-}
-
-
-sup [cmp bit_width: U32] SizedIntegerSigned[bit_width] {
-    !public
-    !inline
-    fun ilog(self, base: Self) -> U32 {
-        case self.ilog_checked(base) is Some[U32](val) {
-            ret val
-        }
-        std::abort::abort("ilog: base must be a positive integer")
-    }
-
-    !public
-    !inline
-    fun ilog2(self) -> U32 {
-        case self.ilog2_checked() is Some[U32](val) {
-            ret val
-        }
-        std::abort::abort("ilog2: base must be a positive integer")
-    }
-
-    !public
-    !inline
-    fun ilog10(self) -> U32 {
-        case self.ilog10_checked() is Some[U32](val) {
-            ret val
-        }
-        std::abort::abort("ilog10: base must be a positive integer")
-    }
-
-    !public
-    !inline
-    fun ilog_checked(self, base: Self) -> Opt[U32] {
-        case self <= Self::zero() or base <= Self::one() {
-            ret None()
-        }
-        ret Some(val=self.ilog2_checked()? / base.ilog2_checked()?)
-    }
-
-    !public
-    !inline
-    fun ilog2_checked(self) -> Opt[U32] {
-        ret Some(val=bit_width - 1_u32 - intrinsics::ctlz(self))
-    }
-
-    !public
-    !inline
-    fun ilog10_checked(self) -> Opt[U32] {
-        case self.ilog2_checked() of {
-            is Some[U32](val as i) { ret Some(val=sized_integer::log_10_lookup_table.index_ref(U64::from(i))@) }
-        }
-        ret None()
     }
 }
