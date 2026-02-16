@@ -9,9 +9,9 @@ use std::void::Void
 
 use std::ops::ord::Ord
 use std::ops::div::Div
-use std::ops::div_assign::DivAssign
+use std::ops::div::DivAssign
 use std::ops::rem::Rem
-use std::ops::rem_assign::RemAssign
+use std::ops::rem::RemAssign
 use std::ops::pow::Pow
 
 use std::num::sized_integer::SizedInteger
