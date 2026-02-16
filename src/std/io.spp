@@ -8,14 +8,13 @@ use std::string_view::StrView
 
 !public
 fun print(value: StrView) -> Opt[USize] {
-    let slice = Slice::from(value)
-    let val = std::console::stdout_stream::stdout.write_all(slice).ok()
-    ret val
+    let slice = Slice[U8]::from(value)
+    ret std::console::stdout_stream::stdout.write_all(slice).ok()
 }
 
 
 !public
 fun input() -> Opt[Str] {
-    let vec = std::console::stdin_stream::stdin.read_all().ok()?
-    ret Some(val=Str(data=vec))
+    let data = std::console::stdin_stream::stdin.read_all().ok()?
+    ret Some(val=Str(data))
 }
