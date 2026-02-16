@@ -33,8 +33,8 @@ sup [Rhs] Ord[Rhs] {
 
     !public
     !virtual_method
-    fun le(&self, that: &Rhs) -> Bool {
-        ret case self.lt(that) { true } else { self.eq(that) }
+    fun ge(&self, that: &Rhs) -> Bool {
+        ret case self.gt(that) { true } else { self.eq(that) }
     }
 
     !public
