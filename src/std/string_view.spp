@@ -8,7 +8,7 @@ use std::number::U16
 use std::number::U32
 use std::number::USize
 use std::option::None
-use std::option::Option
+use std::option::Opt
 use std::option::Some
 use std::ops::eq::Eq
 use std::slice::Slice
@@ -130,14 +130,14 @@ sup StrView {
     }
 
     !public
-    fun find(&self, needle: StrView) -> Option[USize] {
+    fun find(&self, needle: StrView) -> Opt[USize] {
         let index = sppc::str_str(self, needle)
         case index == -1 { ret None() }
         ret Some(USize::from(index))
     }
 
     !public
-    fun rfind(&self, needle: StrView) -> Option[USize] {
+    fun rfind(&self, needle: StrView) -> Opt[USize] {
         let index = sppc::str_rstr(self, needle)
         case index == -1 { ret None() }
         ret Some(USize::from(index))
