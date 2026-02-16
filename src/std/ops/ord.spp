@@ -39,13 +39,13 @@ sup [Rhs] Ord[Rhs] {
 
     !public
     !virtual_method
-    fun min(self, that: Rhs) -> Self {
+    fun min(self, that: Rhs) -> Rhs {
         ret case self < that { self } else { that }
     }
 
     !public
     !virtual_method
-    fun max(self, that: Rhs) -> Self {
+    fun max(self, that: Rhs) -> Rhs {
         ret case self < that { that } else { self }
     }
 }
