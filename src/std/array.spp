@@ -76,7 +76,7 @@ sup [T, cmp n: USize, A: Alloc[T]] Arr[T, n, A] {
     }
 
     fun fill(&mut self, value: T) -> Void {
-        loop i in Range::between(0_uz, n) {
+        loop i in Range[USize]::between(0_uz, n) {
             # self[i] = value.clone()
         }
     }
