@@ -1,19 +1,18 @@
 use std::boolean::Bool
 use std::boolean::Integral
 use std::copy::Copy
-use std::mem::memory::Memory
-use std::void::Void
-
+use std::number::U8
 use std::number::U32
 use std::number::USize
 use std::number::S32
-
+use std::void::Void
 use std::num::bases::Num
 use std::num::bases::Integer
 use std::num::bases::FloatingPoint
 use std::num::sized_floating_point::SizedFloatingPoint
 use std::num::sized_integer_signed::SizedIntegerSigned
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
+use std::mem::memory::Memory
 
 
 !public
