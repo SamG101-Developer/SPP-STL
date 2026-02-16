@@ -24,12 +24,12 @@ use std::ops::idx::IndexMut
 #
 # Internally, the Slice composes the Memory type, because the Memory type has impementation details that would not
 # benefit from being exposed at the Slice level, such as the take and place methods.
-cls Slice[E, A: Alloc[E, A] = GlobalAlloc[E]] {
+cls Slice[E, A: Alloc[E] = GlobalAlloc[E]] {
     mem: Memory[E, A]
     len: USize
 }
 
-sup [E, A: Alloc[E, A]] Slice[E, A] {
+sup [E, A: Alloc[E]] Slice[E, A] {
     type Element = E
     type Allocator = A
 
@@ -90,13 +90,13 @@ sup [E, A: Alloc[E, A]] Slice[E, A] {
     cor get_mut(&mut self) -> GenOnce[&mut E or None] { }
 }
 
-sup [E: Clone[E], A: Alloc[E, A]] Slice[E, A] ext Clone[Out=Self] {
+sup [E: Clone[E], A: Alloc[E]] Slice[E, A] ext Clone[Out=Self] {
     fun clone(&self) -> Self {
         ret Slice[E, A]()
     }
 }
 
-sup [E, cmp n: USize, A: Alloc[E, A]] Slice[E, A] ext From[Self, Arr[E, n, A]] {
+sup [E, cmp n: USize, A: Alloc[E]] Slice[E, A] ext From[Self, Arr[E, n, A]] {
     fun from(that: Arr[E, n, A]) -> Self {
         ret Slice[E, A](mem=Memory[A=A](ptr=that.mem.ptr, cap=n), len=n)
     }
@@ -111,29 +111,29 @@ sup Slice[U8] ext From[Self, Str] {
     }
 }
 
-sup [A: Alloc[U8, A]] Slice[U8, A] ext From[Self, StrView] {
+sup [A: Alloc[U8]] Slice[U8, A] ext From[Self, StrView] {
     !compiler_builtin
     fun from(that: StrView) -> Self { }
 }
 
-sup [E, A: Alloc[E, A]] Slice[E, A] ext From[Self, Vec[E, A]] {
+sup [E, A: Alloc[E]] Slice[E, A] ext From[Self, Vec[E, A]] {
     fun from(that: Vec[E, A]) -> Self {
         ret Slice[E, A](mem=Memory[A=A](ptr=that.buf.mem.ptr, cap=that.buf.mem.cap), len=that.buf.len)
     }
 }
 
-sup [E, A: Alloc[E, A]] Slice[E, A] ext From[Self, Memory[E, A]] {
+sup [E, A: Alloc[E]] Slice[E, A] ext From[Self, Memory[E, A]] {
     fun from(that: Memory[E, A]) -> Self {
         ret Slice[E, A](mem=that, len=that.capacity())
     }
 }
 
-sup [E, A: Alloc[E, A]] Slice[E, A] ext IndexMut[E, USize] {
+sup [E, A: Alloc[E]] Slice[E, A] ext IndexMut[E, USize] {
     !compiler_builtin
     cor index_mut(&mut self, index: USize) -> GenOnce[&mut E] { }
 }
 
-sup [E, A: Alloc[E, A]] Slice[E, A] ext IndexRef[E, USize] {
+sup [E, A: Alloc[E]] Slice[E, A] ext IndexRef[E, USize] {
     !compiler_builtin
     cor index_ref(&self, index: USize) -> GenOnce[&E] { }
 }
