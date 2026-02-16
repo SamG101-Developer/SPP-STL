@@ -7,6 +7,7 @@ use std::iterator::Iterator
 use std::mem::memory::Memory
 use std::number::USize
 use std::slice::Slice
+use std::void::Void
 use std::ops::idx::IndexMut
 use std::ops::idx::IndexRef
 
