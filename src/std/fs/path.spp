@@ -4,7 +4,6 @@ use std::iterator::Iterator
 use std::number::U8
 use std::ops::eq::Eq
 use std::ops::div::Div
-use std::ops::ne::Ne
 use std::option::None
 use std::option::Opt
 use std::option::Some
@@ -226,12 +225,5 @@ sup Path ext Div[Rhs=Path, Ret=Path] {
 sup Path ext Eq[Rhs=Path] {
     fun eq(&self, that: &Path) -> Bool {
         ret self.path.eq(&that.path)
-    }
-}
-
-
-sup Path ext Ne[Rhs=Path] {
-    fun ne(&self, that: &Path) -> Bool {
-        ret self.path.ne(&that.path)
     }
 }

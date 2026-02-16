@@ -6,7 +6,6 @@ use std::iterator::Iterator
 use std::number::U8
 use std::number::USize
 use std::ops::eq::Eq
-use std::ops::ne::Ne
 use std::slice::Slice
 use std::string::Str
 use std::fs::path::Path
@@ -33,47 +32,111 @@ sup StrView {
 
     !public
     !compiler_builtin
-    fun new_with_capacity(capacity: USize) -> StrView { }
-
-    !public
-    !compiler_builtin
     fun from_utf8(utf8: &Slice[U8]) -> StrView { }
 
     !public
-    !inline
+    fun from_utf16(utf16: &Slice[U16]) -> StrView {
+        # Convert each element into 2 U8 bytes to form a new Slice[U8]
+        let utf8 = Slice[U8]::new_with_capacity(utf16.length() * 2_uz)
+        loop unit in utf16.iter_ref() {
+            let high_byte = U8::from(unit >> 8_u16)
+            let low_byte = (unit & 0xFF_u16)
+        }
+        ret StrView::from_utf8(utf8)
+    }
+
+    !public
     !compiler_builtin
-    fun length(&self) -> USize { }
+    fun from_utf32(utf32: &Slice[U32]) -> StrView {
+        # Convert each element into 4 U8 bytes to form a new Slice[U8]
+        let utf8 = Slice[U8]::new_with_capacity(utf32.length() * 4_uz)
+        loop unit in utf32.iter_ref() {
+            let byte1 = U8::from((unit >> 24_u32) & 0xFF_u32)
+            let byte2 = U8::from((unit >> 16_u32) & 0xFF_u32)
+            let byte3 = U8::from((unit >> 8_u32) & 0xFF_u32)
+            let byte4 = U8::from(unit & 0xFF_u32)
+        }
+       ret StrView::from_utf8(utf8)
+    }
 
     !public
     !inline
+    fun length(&self) -> USize {
+        ret sppc::str_len(self)
+    }
+
+    !public
+    !inline
+    fun is_empty(&self) -> Bool {
+        ret sppc::str_empty(self) != 0
+    }
+
+    # Iterate over the UTF-8 characters in the string view, yielding each character as a unicode scalar value. The
+    # number of elements yiuelded may not necessarily be equal to the length of the string view, as some characters may
+    # be represented by multiple bytes in UTF-8 encoding.
+    !public
     !compiler_builtin
-    fun is_empty(&self) -> Bool { }
+    cor chars(&self) -> Iterator[U32] { }
+
+    # Iterate over the UTF-8 characters in reverse order, yielding each character as a unicode scalar value. Similar to
+    # `chars`, the number of elements yielded may not necessarily be equal to the length of the string view, as some
+    # characters may be represented by multiple bytes in UTF-8 encoding.
+    !public
+    !compiler_builtin
+    cor reverse_chars(&self) -> Iterator[U32] { }
+
+    # Iterate over the raw bytes of the string view, yielding each byte as a `U8`. The number of elements yielded will
+    # always be equal to the length of the string view, as each byte corresponds to a single element in the view.
+    !public
+    !compiler_builtin
+    cor bytes(&self) -> Iterator[U8] { }
+
+    # Iterate over the raw bytes of the string view in reverse order, yielding each byte as a `U8`. Similar to `bytes`,
+    # the number of elements yielded will always be equal to the length of the string view, as each byte corresponds to
+    # a single element in the view.
+    !public
+    !compiler_builtin
+    cor reverse_bytes(&self) -> Iterator[U8] { }
 }
 
 
 sup StrView {
     !public
-    !compiler_builtin
-    cor chars(&self) -> Iterator[U8] { }
+    fun starts_with(&self, needle: StrView) -> Bool {
+        case needle.length() > self.length() { ret false }
+        loop (a, b) in self.chars().zip(needle.chars()) {
+            case a != b { ret false }
+        }
+        ret true
+    }
 
     !public
-    !compiler_builtin
-    cor reverse_chars(&self) -> Iterator[U8] { }
+    fun ends_with(&self, needle: StrView) -> Bool {
+        case needle.length() > self.length() { ret false }
+        loop (a, b) in self.reverse_chars().zip(needle.reverse_chars()) {
+            case a != b { ret false }
+        }
+        ret true
+    }
 
     !public
-    !compiler_builtin
-    cor bytes(&self) -> GenOnce[&Slice[U8]] { }
-}
-
-
-sup StrView {
-    !public
-    !compiler_builtin
-    fun starts_with(&self, needle: StrView) -> Bool { }
+    fun contains(&self, needle: StrView) -> Bool {
+        ret sppc::str_str(self, needle) != -1
+    }
 
     !public
-    !compiler_builtin
-    fun ends_with(&self, needle: StrView) -> Bool { }
+    fun find(&self, needle: StrView) -> Option[USize] {
+        let index = sppc::str_str(self, needle)
+        case index == -1 { ret None() }
+        ret Some(USize::from(index))
+    }
+
+    !public
+    fun rfind(&self, needle: StrView) -> Option[USize] {
+        let index = sppc::str_rstr(self, needle)
+        case index == -1 { ret None() }
+        ret Some(USize::from(index))
+    }
 
     !public
     !compiler_builtin
@@ -82,14 +145,13 @@ sup StrView {
 
 
 sup StrView ext Eq[Rhs=StrView] {
-    !compiler_builtin
-    fun eq(&self, that: &StrView) -> Bool { }
-}
+    fun eq(&self, that: &StrView) -> Bool {
+        ret sppc::str_cmp(self, that) == 0
+    }
 
-
-sup StrView ext Ne[Rhs=StrView] {
-    !compiler_builtin
-    fun ne(&self, that: &StrView) -> Bool { }
+    fun ne(&self, that: &StrView) -> Bool {
+        ret (self == that).not
+    }
 }
 
 
