@@ -42,7 +42,7 @@ sup StrView {
     !public
     fun from_utf16(utf16: &Slice[U16]) -> StrView {
         # Convert each element into 2 U8 bytes to form a new Slice[U8]
-        let utf8 = Slice[U8]::new_with_capacity(utf16.length() * 2_uz)
+        let utf8 = Slice[U8]::new(utf16.length() * 2_uz)
         loop unit in utf16.iter_ref() {
             let high_byte = U8::from(unit >> 8_u16)
             let low_byte = (unit & 0xFF_u16)
@@ -54,7 +54,7 @@ sup StrView {
     !compiler_builtin
     fun from_utf32(utf32: &Slice[U32]) -> StrView {
         # Convert each element into 4 U8 bytes to form a new Slice[U8]
-        let utf8 = Slice[U8]::new_with_capacity(utf32.length() * 4_uz)
+        let utf8 = Slice[U8]::new(utf32.length() * 4_uz)
         loop unit in utf32.iter_ref() {
             let byte1 = U8::from((unit >> 24_u32) & 0xFF_u32)
             let byte2 = U8::from((unit >> 16_u32) & 0xFF_u32)
