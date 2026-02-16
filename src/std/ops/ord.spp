@@ -10,7 +10,7 @@ use std::number::S32
 
 sup [Rhs] Ord[Rhs] {
     !public
-    !astract_method
+    !abstract_method
     fun ord(&self, that: &Rhs) -> S32 { }
 
     !public
