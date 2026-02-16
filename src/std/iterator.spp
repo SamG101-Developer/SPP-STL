@@ -82,7 +82,7 @@ sup [T] Iterator[T] {
             let a = self.res()
             let b = that.res()
             case (a, b) of {
-                is (Some(val as a), Some(val as b)) { gen (a, b) }
+                is (Somep[T](val as a), Some[U](val as b)) { gen (a, b) }
                 else { exit }
             }
         }
