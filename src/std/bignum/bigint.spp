@@ -4,6 +4,7 @@ use std::clone::Clone
 use std::limits::Limits
 use std::number::U32
 use std::number::USize
+use std::number::S32
 use std::void::Void
 use std::bignum::biguint::BigUInt
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
