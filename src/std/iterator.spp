@@ -77,6 +77,18 @@ sup [T] Iterator[T] {
     }
 
     !public
+    cor zip[U](self, that: Iterator[U]) -> Iterator[(T, U)] {
+        loop true {
+            let a = self.res()
+            let b = that.res()
+            case (a, b) of {
+                is (Pass(val as a), Pass(val as b)) { gen (a, b) }
+                else { exit }
+            }
+        }
+    }
+
+    !public
     cor step_by(self, step: USize) -> Iterator[T] {
         let mut index = 0_uz
         loop item in self {
