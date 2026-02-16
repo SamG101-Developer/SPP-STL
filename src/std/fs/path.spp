@@ -7,7 +7,6 @@ use std::ops::div::Div
 use std::option::None
 use std::option::Opt
 use std::option::Some
-use std::process::Process
 use std::string::Str
 use std::string_view::StrView
 
@@ -37,7 +36,7 @@ sup Path {
     !public
     fun to_absolute(&self) -> Path {
         # Get the current working directory and join with self.path.
-        let cwd = Process::get_cwd()
+        let cwd = std::process::get_cwd()
         let abs_path = Path(path=cwd) / self.path
         ret abs_path
     }
