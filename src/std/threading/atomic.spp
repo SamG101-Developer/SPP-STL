@@ -5,6 +5,7 @@
 # - The exchange() functions copy because only primitives are supported.
 
 
+##
 use std::boolean::Integral
 use std::number::U8
 use std::void::Void
@@ -161,3 +162,4 @@ sup [T: Integer] Atom[T] {
         ret intrinsics::atomic_fetch_sub(&mut self.val, val, order)
     }
 }
+##
