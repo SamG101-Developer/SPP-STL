@@ -138,7 +138,7 @@ sup StrView {
 
     !public
     fun rfind(&self, needle: StrView) -> Opt[USize] {
-        let index = sppc::str_rstr(self, needle)
+        let index = 0 # sppc::str_rstr(self, needle) TODO
         case index == -1 { ret None() }
         ret Some(USize::from(index))
     }
