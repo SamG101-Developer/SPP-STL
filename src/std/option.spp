@@ -204,6 +204,7 @@ sup [T] Opt[T] ext std::ops::try::Try[Some[T], None, T] {
 }
 
 
+##
 sup [T: Eq[T]] Opt[T] ext Eq[Opt[T]] {
     fun eq(&self, that: &Opt[T]) -> Bool {
         ret case (self@, that@) of {
@@ -213,3 +214,4 @@ sup [T: Eq[T]] Opt[T] ext Eq[Opt[T]] {
         }
     }
 }
+##
