@@ -5,7 +5,7 @@
 # - The exchange() functions copy because only primitives are supported.
 
 
-##
+
 use std::boolean::Integral
 use std::number::U8
 use std::void::Void
@@ -18,6 +18,7 @@ cls Atom[T: Integral] {
 }
 
 
+##
 !public
 !compiler_builtin
 fun atomic_fence(order: U8) -> Void { }
