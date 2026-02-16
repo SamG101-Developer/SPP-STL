@@ -60,7 +60,7 @@ sup [E] Alloc[E] {
     !public
     !virtual_method
     fun allocate_zeroed[A: Alloc[E]](&self, layout: Layout) -> Res[Memory[E, A], AllocErr] {
-        let mut mem = self.allocate(layout)?
+        let mut mem = self.allocate[A](layout)?
         std::mem::ops::mem_set(&mut mem, 0_u8, layout.size * std::mem::ops::size_of[E]())
         ret Pass(val=mem)
     }
@@ -72,7 +72,7 @@ sup [E] Alloc[E] {
     !virtual_method
     fun reallocate[A: Alloc[E]](&self, mem: Memory[E, A], layout: Layout) -> Res[Memory[E, A], AllocErr] {
         self.deallocate(mem)
-        ret self.allocate(layout)
+        ret self.allocate[A](layout)
     }
 
     # Reallocates a block of memory to a new size, and initializes any new bytes to zero. This method has a default
@@ -82,7 +82,7 @@ sup [E] Alloc[E] {
     !virtual_method
     fun reallocate_zeroed[A: Alloc[E]](&self, mem: Memory[E, A], layout: Layout) -> Res[Memory[E, A], AllocErr] {
         self.deallocate(mem)
-        ret self.allocate_zeroed(layout)
+        ret self.allocate_zeroed[A](layout)
     }
 }
 
