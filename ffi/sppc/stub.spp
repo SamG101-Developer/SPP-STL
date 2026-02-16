@@ -73,7 +73,7 @@ fun str_copy(dest: &mut CCharPtr, src: &CCharPtr, dest_size: CSizeT) -> CSizeT {
 fun str_concat(dest: &mut CCharPtr, src: &CCharPtr, dest_size: CSizeT) -> CSizeT { }
 
 !ffi
-fun str_str(haystack: &CCharPtr, needle: &CCharPtr) -> CCharPtr { }
+fun str_str(haystack: &CCharPtr, needle: &CCharPtr) -> CInt { }
 
 !ffi
 fun net_sock_init(domain: CInt, type_: CInt, protocol: CInt) -> CInt { }
