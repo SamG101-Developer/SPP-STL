@@ -281,7 +281,7 @@ cmp fun scmp[T: Integer](this: &T, that: &T) -> S32 { }
 !public
 !always_inline
 !compiler_builtin
-cmp fun fcmp[T: Integer](this: &T, that: &T) -> S32 { }
+cmp fun fcmp[T: FloatingPoint](this: &T, that: &T) -> S32 { }
 
 
 # !public
