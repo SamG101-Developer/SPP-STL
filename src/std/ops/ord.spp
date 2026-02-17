@@ -22,19 +22,19 @@ sup [Rhs] Ord[Rhs] {
     !public
     !virtual_method
     fun le(&self, that: &Rhs) -> Bool {
-        ret case self.lt(that) { true } else { self.eq(that) }
+        ret self.ord(that) != gt
     }
 
     !public
     !virtual_method
     fun gt(&self, that: &Rhs) -> Bool {
-        ret that < self
+        ret self.ord(that) == gt
     }
 
     !public
     !virtual_method
     fun ge(&self, that: &Rhs) -> Bool {
-        ret case self.gt(that) { true } else { self.eq(that) }
+        ret self.ord(that) != lt
     }
 
     ##
