@@ -29,7 +29,7 @@ sup [T, A: Alloc[T]] Memory[T, A] {
 
     !public
     fun new(cap: USize, alloc: A = A()) -> Memory[T, A] {
-        ret Memory(cap, alloc)
+        ret Memory[T](cap, alloc)
     }
 
     !public
