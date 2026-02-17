@@ -39,7 +39,6 @@ sup [T, A: Alloc[T]] Memory[T, A] {
 
     !public
     fun clear(&mut self) -> Void {
-        self.alloc.deallocate(&mut self)
         self.cap = 0_uz
     }
 
@@ -70,6 +69,7 @@ sup [T: Copy, A: Alloc[T]] Memory[T, A] ext Copy { }
 
 sup [T, A: Alloc[T]] Memory[T, A] ext Del {
     fun del(&mut self) -> Void {
-        self.clear()
+        self.cap = 0_uz
+        # self.alloc.deallocate(&mut self)
     }
 }
