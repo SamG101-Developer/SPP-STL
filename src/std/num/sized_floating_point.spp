@@ -73,14 +73,6 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Ord[Rhs=Self] {
     cmp fun ge(&self, that: &Self) -> Bool {
         ret intrinsics::oge(self, that)
     }
-
-    cmp fun min(self, that: Self) -> Self {
-        ret intrinsics::float_min(self, that)
-    }
-
-    cmp fun max(self, that: Self) -> Self {
-        ret intrinsics::float_max(self, that)
-    }
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext Add[Rhs=Self, Ret=Self] {
@@ -157,6 +149,19 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Pow[Rhs=S32, Ret=Self] {
 
 sup [cmp w: U32] SizedFloatingPoint[w] {
     !public
+    !inline
+    cmp fun min(self, that: Self) -> Self {
+        ret intrinsics::float_min(self, that)
+    }
+
+    !public
+    !inline
+    cmp fun max(self, that: Self) -> Self {
+        ret intrinsics::float_max(self, that)
+    }
+
+    !public
+    !inline
     cmp fun neg(self) -> Self {
         ret intrinsics::float_neg(self)
     }

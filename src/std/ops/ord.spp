@@ -37,6 +37,7 @@ sup [Rhs] Ord[Rhs] {
         ret case self.gt(that) { true } else { self.eq(that) }
     }
 
+    ##
     !public
     !virtual_method
     fun min(self, that: Rhs) -> Rhs {
@@ -48,4 +49,5 @@ sup [Rhs] Ord[Rhs] {
     fun max(self, that: Rhs) -> Rhs {
         ret case self < that { that } else { self }
     }
+    ##
 }

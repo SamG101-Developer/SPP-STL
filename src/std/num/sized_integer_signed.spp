@@ -129,11 +129,17 @@ sup [cmp w: U32] SizedIntegerSigned[w] ext Ord[Rhs=Self] {
     cmp fun ge(&self, that: &Self) -> Bool {
         ret intrinsics::sge(self, that)
     }
+}
 
+sup [cmp w: U32] SizedIntegerSigned[w] {
+    !public
+    !inline
     cmp fun min(self, that: Self) -> Self {
         ret intrinsics::smin(self, that)
     }
 
+    !public
+    !inline
     cmp fun max(self, that: Self) -> Self {
         ret intrinsics::smax(self, that)
     }
