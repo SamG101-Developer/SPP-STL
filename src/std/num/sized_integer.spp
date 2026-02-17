@@ -287,9 +287,9 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
     !public
     !inline
     fun ilog_checked(self, base: Self) -> Opt[U32] {
-        case self <= Self::zero() or base <= Self::one() {
-            ret None()
-        }
+        # case self <= Self::zero() or base <= Self::one() { TODO: no ord on "self" (ord is on signed & unsigned)
+        #     ret None()
+        # }
         ret Some(val=self.ilog2_checked()? / base.ilog2_checked()?)
     }
 
