@@ -58,6 +58,24 @@ fun mem_dealloc[T](ptr: CVoidPtr[T]) -> CVoid { }
 fun mem_realloc[T](ptr: CVoidPtr[T], new_size: CSizeT) -> CVoidPtr[T] { }
 
 !ffi
+fun str_len(s: &CCharPtr) -> CSizeT { }
+
+!ffi
+fun str_empty(s: &CCharPtr) -> CInt { }
+
+!ffi
+fun str_cmp(s1: &CCharPtr, s2: &CCharPtr) -> CInt { }
+
+!ffi
+fun str_copy(dest: &mut CCharPtr, src: &CCharPtr, dest_size: CSizeT) -> CSizeT { }
+
+!ffi
+fun str_concat(dest: &mut CCharPtr, src: &CCharPtr, dest_size: CSizeT) -> CSizeT { }
+
+!ffi
+fun str_str(haystack: &CCharPtr, needle: &CCharPtr) -> CInt { }
+
+!ffi
 fun net_sock_init(domain: CInt, type_: CInt, protocol: CInt) -> CInt { }
 
 !ffi

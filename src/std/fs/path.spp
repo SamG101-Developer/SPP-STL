@@ -4,11 +4,9 @@ use std::iterator::Iterator
 use std::number::U8
 use std::ops::eq::Eq
 use std::ops::div::Div
-use std::ops::ne::Ne
 use std::option::None
 use std::option::Opt
 use std::option::Some
-use std::process::Process
 use std::string::Str
 use std::string_view::StrView
 
@@ -38,7 +36,7 @@ sup Path {
     !public
     fun to_absolute(&self) -> Path {
         # Get the current working directory and join with self.path.
-        let cwd = Process::get_cwd()
+        let cwd = std::process::get_cwd()
         let abs_path = Path(path=cwd) / self.path
         ret abs_path
     }
@@ -226,12 +224,5 @@ sup Path ext Div[Rhs=Path, Ret=Path] {
 sup Path ext Eq[Rhs=Path] {
     fun eq(&self, that: &Path) -> Bool {
         ret self.path.eq(&that.path)
-    }
-}
-
-
-sup Path ext Ne[Rhs=Path] {
-    fun ne(&self, that: &Path) -> Bool {
-        ret self.path.ne(&that.path)
     }
 }
