@@ -1,3 +1,0 @@
-fun main(args: std::vector::Vec[std::string::Str]) -> std::void::Void {
-    ret
-}
