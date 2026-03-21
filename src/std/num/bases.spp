@@ -1,4 +1,5 @@
 use std::copy::Copy
+use std::boolean::Integral
 
 
 # The base numeric types in the standard library.
@@ -16,8 +17,9 @@ cls Integer { }
 cls FloatingPoint { }
 
 
-# All numeric types are copyable.
+# All numeric types are copyable primitives.
 sup Num ext Copy { }
+sup Num ext Integral { }
 
 
 # The base integer type extends the base numeric type.
