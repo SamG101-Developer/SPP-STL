@@ -1,8 +1,14 @@
+use std::boolean::Bool
 use std::string_view::StrView
 use std::void::Void
-
 
 !public
 !inline
 !compiler_builtin
-fun abort(msg: StrView) -> ! { }
+fun abort(msg: StrView = "") -> ! { }
+
+!public
+!inline
+fun abort_if(condition: Bool, msg: StrView = "") -> Void {
+    case condition { abort(msg) }
+}
