@@ -25,6 +25,7 @@ sup [T] Range[T] {
 }
 
 
+##
 sup [T] Range[T] {
     !public
     fun contains(&self, value: T) -> Bool {
@@ -38,6 +39,7 @@ sup [T] Range[T] {
         ret self.start >= self.end
     }
 }
+##
 
 
 sup [T] Range[T] ext Gen[T] { }
