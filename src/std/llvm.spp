@@ -5,29 +5,29 @@ use std::void::Void
 !annotation(target=Annotation::function | Annotation::method)
 !compiler_builtin
 !public
-fun inline() -> Void { }
+cmp fun inline() -> Void { }
 
 !annotation(target=Annotation::function | Annotation::method)
 !compiler_builtin
 !public
-fun always_inline() -> Void { }
+cmp fun always_inline() -> Void { }
 
 !annotation(target=Annotation::function | Annotation::method)
 !compiler_builtin
 !public
-fun no_inline() -> Void { }
+cmp fun no_inline() -> Void { }
 
 !annotation(target=Annotation::function | Annotation::method)
 !compiler_builtin
 !public
-fun hot() -> Void { }
+cmp fun hot() -> Void { }
 
 !annotation(target=Annotation::function | Annotation::method)
 !compiler_builtin
 !public
-fun cold() -> Void { }
+cmp fun cold() -> Void { }
 
 !annotation(target=Annotation::class)
 !compiler_builtin
 !public
-fun packed() -> Void { }
+cmp fun packed() -> Void { }

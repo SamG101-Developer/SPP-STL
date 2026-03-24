@@ -16,49 +16,49 @@ sup Annotation {
 !annotation(target=Annotation::all)
 !compiler_builtin
 !public
-fun annotation(target: S32) -> Void { }
+cmp fun annotation(target: S32) -> Void { }
 
 !annotation(target=Annotation::function | Annotaton::method | Annotation::class)
 !compiler_builtin
 !public
-fun compiler_builtin() -> Void { }
+cmp fun compiler_builtin() -> Void { }
 
 !annotation(target=Annotation::all)
 !compiler_builtin
 !public
-fun public() -> Void { }
+cmp fun public() -> Void { }
 
 !annotation(target=Annotation::all)
 !compiler_builtin
 !public
-fun protected() -> Void { }
+cmp fun protected() -> Void { }
 
 !annotation(target=Annotation::all)
 !compiler_builtin
 !public
-fun private() -> Void { }
+cmp fun private() -> Void { }
 
 !annotation(target=Annotation::method)
 !compiler_builtin
 !public
-fun virtual_method() -> Void { }
+cmp fun virtual_method() -> Void { }
 
 !annotation(target=Annotation::method)
 !compiler_builtin
 !public
-fun abstract_method() -> Void { }
+cmp fun abstract_method() -> Void { }
 
 !annotation(target=Annotation::function)
 !compiler_builtin
 !public
-fun ffi(symbol: StrView) -> Void { }
+cmp fun ffi(symbol: StrView) -> Void { }
 
 !annotation(target=Annotation::class)
 !compiler_builtin
 !public
-fun extends[..Ts]() -> Void { }
+cmp fun extends[..Ts]() -> Void { }
 
 !annotation(target=Annotation::new_type)
 !compiler_builtin
 !public
-fun variant_default[T]() -> Void { }
+cmp fun variant_default[T]() -> Void { }
