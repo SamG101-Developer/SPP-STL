@@ -1,3 +1,4 @@
+use std::annotations::ffi
 use std::cffi::CBool
 use std::cffi::CChar
 use std::cffi::CCharPtr
@@ -172,7 +173,7 @@ fun proc_set_cwd(path: &CCharPtr) -> CInt { }
 fun rng_seed(seed: CULongLong) -> CVoid { }
 
 !ffi
-fun rng_next_u32() -> CULongLong { }
+fun rng_next() -> CULongLong { }
 
 !ffi
 fun rng_next_double() -> CDouble { }
