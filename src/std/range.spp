@@ -1,6 +1,8 @@
+use std::annotations::public
 use std::generator::Gen
 
 
+# Todo: Constrain T to be a comparable type.
 !public
 cls Range[T] {
     !public start: T
@@ -18,6 +20,21 @@ sup [T] Range[T] {
     !public
     fun between(start: T, end: T) -> Range[T] {
         ret Range(start=start, end=end)
+    }
+}
+
+
+sup [T] Range[T] {
+    !public
+    fun contains(&self, value: T) -> Bool {
+        ret
+            self.start <= value and value < self.end and
+            case self.step == 0 { value == self.start } else { (value - self.start) % self.step == 0 }
+    }
+
+    !public
+    fun is_empty(&self) -> Bool {
+        ret self.start >= self.end
     }
 }
 
