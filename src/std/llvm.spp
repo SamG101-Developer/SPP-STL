@@ -1,33 +1,33 @@
-use std::annotations::Annotations
+use std::annotations::Annotation
 use std::void::Void
 
 
-!annotation(target=Annotations::function | Annotations::method)
+!annotation(target=Annotation::function | Annotation::method)
 !compiler_builtin
 !public
 fun inline() -> Void { }
 
-!annotation(target=Annotations::function | Annotations::method)
+!annotation(target=Annotation::function | Annotation::method)
 !compiler_builtin
 !public
 fun always_inline() -> Void { }
 
-!annotation(target=Annotations::function | Annotations::method)
+!annotation(target=Annotation::function | Annotation::method)
 !compiler_builtin
 !public
 fun no_inline() -> Void { }
 
-!annotation(target=Annotations::function | Annotations::method)
+!annotation(target=Annotation::function | Annotation::method)
 !compiler_builtin
 !public
 fun hot() -> Void { }
 
-!annotation(target=Annotations::function | Annotations::method)
+!annotation(target=Annotation::function | Annotation::method)
 !compiler_builtin
 !public
 fun cold() -> Void { }
 
-!annotation(target=Annotations::class)
+!annotation(target=Annotation::class)
 !compiler_builtin
 !public
 fun packed() -> Void { }
