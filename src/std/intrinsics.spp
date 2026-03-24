@@ -1,6 +1,9 @@
+use std::annotations::compiler_builtin
+use std::annotations::public
 use std::boolean::Bool
 use std::boolean::Integral
 use std::copy::Copy
+use std::llvm::always_inline
 use std::number::U8
 use std::number::U32
 use std::number::USize
@@ -731,3 +734,64 @@ fun atomic_swap[T: Integral](dest: &mut T, val: T, order: U8) -> T { }
 !always_inline
 !compiler_builtin
 fun atomic_compare_exchange[T: Integral](dest: &mut T, expected: &T, desired: T, success_order: U8, failure_order: U8) -> (T, Bool) { }
+
+
+!public
+!always_inline
+!compiler_builtin
+fun volatile_fence() -> Void { }
+
+!public
+!always_inline
+!compiler_builtin
+fun volatile_load[T: Integral](src: &T) -> T { }
+
+!public
+!always_inline
+!compiler_builtin
+fun volatile_store[T: Integral](dest: &mut T, val: T) -> Void { }
+
+!public
+!always_inline
+!compiler_builtin
+fun volatile_swap[T: Integral](dest: &mut T, val: T) -> T { }
+
+!public
+!always_inline
+!compiler_builtin
+fun volatile_fetch_and[T: Integral](dest: &mut T, val: T) -> T { }
+
+!public
+!always_inline
+!compiler_builtin
+fun volatile_fetch_ior[T: Integral](dest: &mut T, val: T) -> T { }
+
+!public
+!always_inline
+!compiler_builtin
+fun volatile_fetch_xor[T: Integral](dest: &mut T, val: T) -> T { }
+
+!public
+!always_inline
+!compiler_builtin
+fun volatile_fetch_add[T: Integer](dest: &mut T, val: T) -> T { }
+
+!public
+!always_inline
+!compiler_builtin
+fun volatile_fetch_sub[T: Integer](dest: &mut T, val: T) -> T { }
+
+!public
+!always_inline
+!compiler_builtin
+fun volatile_set[](dest: &mut Bool) -> Void { }
+
+!public
+!always_inline
+!compiler_builtin
+fun volatile_clear[](dest: &mut Bool) -> Void { }
+
+!public
+!always_inline
+!compiler_builtin
+fun volatile_toggle[](dest: &mut Bool) -> Void { }
