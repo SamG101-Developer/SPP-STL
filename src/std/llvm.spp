@@ -1,3 +1,7 @@
+use std::annotations::Annotations
+use std::void::Void
+
+
 !annotation(target=Annotations::function | Annotations::method)
 !compiler_builtin
 !public

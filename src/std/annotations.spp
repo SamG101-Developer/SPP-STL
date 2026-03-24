@@ -1,4 +1,6 @@
 use std::number::S32
+use std::string::StrView
+use std::void::Void
 
 cls Annotation {}
 sup Annotation {
