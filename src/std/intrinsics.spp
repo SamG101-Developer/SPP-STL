@@ -257,6 +257,7 @@ cmp fun smax[T: Integer](this: T, that: T) -> T { }
 !compiler_builtin
 cmp fun umax[T: Integer](this: T, that: T) -> T { }
 
+
 !public
 !always_inline
 !compiler_builtin
@@ -675,6 +676,11 @@ fun fptoui[cmp this_w: U32, cmp that_w: U32](value: SizedFloatingPoint[that_w]) 
 !compiler_builtin
 fun fpclass[T: FloatingPoint](value: T, flag: S32) -> Bool { }
 
+
+!public
+!always_inline
+!compiler_builtin
+fun atomic_fence(order: U8) -> Void { }
 
 !public
 !always_inline
