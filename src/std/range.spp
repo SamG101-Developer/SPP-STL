@@ -1,4 +1,5 @@
 use std::annotations::public
+use std::boolean::Bool
 use std::generator::Gen
 
 
