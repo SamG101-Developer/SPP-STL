@@ -6,6 +6,7 @@
 
 use std::annotations::public
 use std::annotations::private
+use std::boolean::Bool
 use std::boolean::Integral
 use std::number::U8
 use std::void::Void
@@ -41,33 +42,33 @@ sup [T: Integral] Atom[T] {
 
     !public
     fun load(&self, order: U8 = mo_seq_cst) -> T {
-        case order == Self::mo_release or order == Self::mo_acq_rel {
-            std::abort::abort("Invalid memory order for load")
-        }
+        std::abort::abort_if(
+            [Self::mo_release, Self::mo_acq_rel].contains(order),
+            "Invalid memory order for load")
         ret intrinsics::atomic_load(&self.val, order)
     }
 
     !public
     fun store(&self, val: T, order: U8 = mo_seq_cst) -> Void {
-        case order == Self::mo_acquire or order == Self::mo_acq_rel {
-            std::abort::abort("Invalid memory order for store")
-        }
+        std::abort::abort_if(
+            [Self::mo_acquire, Self::mo_acq_rel].contains(order),
+            "Invalid memory order for store")
         ret intrinsics::atomic_store(&mut self.val, val, order)
     }
 
     !public
     fun compare_swap(&self, old: T, new: T, success_order: U8, failure_order: U8) -> (T, Bool) {
-        case failure_order == Self::mo_release or failure_order == Self::mo_acq_rel {
-            std::abort::abort("Invalid memory order for compare_swap failure case")
-        }
+        std::abort::abort_if(
+            [Self::mo_acquire, Self::mo_acq_rel].contains(failure_order),
+            "Invalid memory order for compare_swap success case")
         ret intrinsics::atomic_compare_swap(&mut self.val, expected, desired, success_order, failure_order)
     }
 
     !public
     fun compare_swap_weak(&self, expected: T, desired: T, success_order: U8, failure_order: U8) -> (T, Bool) {
-        case failure_order == Self::mo_release or failure_order == Self::mo_acq_rel {
-            std::abort::abort("Invalid memory order for compare_swap failure case")
-        }
+        std::abort::abort_if(
+            [Self::mo_acquire, Self::mo_acq_rel].contains(failure_order),
+            "Invalid memory order for compare_swap_weak success case")
         ret intrinsics::atomic_compare_swap_weak(&mut self.val, expected, desired, success_order, failure_order)
     }
 
@@ -165,4 +166,3 @@ sup [T: Integer] Atom[T] {
         ret intrinsics::atomic_fetch_sub(&mut self.val, val, order)
     }
 }
-##
