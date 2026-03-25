@@ -148,7 +148,7 @@ sup Atom[Bool] {
 
     !public
     !compiler_builtin
-    fun clear(&self, order: U8 = mo_seq_cst) -> Void { }
+    fun clear(&self, order: U8 = Self::mo_seq_cst) -> Void { }
 }
 
 
