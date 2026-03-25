@@ -765,6 +765,11 @@ fun atomic_compare_exchange[T: Integral](dest: &T, expected: &T, desired: T, suc
 !compiler_builtin
 fun atomic_compare_exchange_weak[T: Integral](dest: &T, expected: &T, desired: T, success_order: U8, failure_order: U8) -> (T, Bool) { }
 
+!public
+!always_inline
+!compiler_builtin
+fun atomic_exchange[T: Integral](dest: &T, val: T, order: U8) -> T { }
+
 
 !public
 !always_inline
