@@ -1,4 +1,5 @@
 use std::annotations::public
+use std::annotations::protected
 use std::boolean::Bool
 use std::iterator::Iterator
 use std::number::USize
