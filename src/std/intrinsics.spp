@@ -688,32 +688,32 @@ fun atomic_fence(order: U8) -> Void { }
 !public
 !always_inline
 !compiler_builtin
-fun atomic_fetch_add[T: Integer](dest: &mut T, val: T, order: U8) -> USize { }
+fun atomic_fetch_add[T: Integer](dest: &mut T, val: T, order: U8) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun atomic_fetch_sub[T: Integer](dest: &mut T, val: T, order: U8) -> USize { }
+fun atomic_fetch_sub[T: Integer](dest: &mut T, val: T, order: U8) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun atomic_fetch_and[T: Integral](dest: &mut T, val: T, order: U8) -> USize { }
+fun atomic_fetch_and[T: Integral](dest: &mut T, val: T, order: U8) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun atomic_fetch_or[T: Integral](dest: &mut T, val: T, order: U8) -> USize { }
+fun atomic_fetch_or[T: Integral](dest: &mut T, val: T, order: U8) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun atomic_fetch_xor[T: Integral](dest: &mut T, val: T, order: U8) -> USize { }
+fun atomic_fetch_xor[T: Integral](dest: &mut T, val: T, order: U8) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun atomic_fetch_nand[T: Integral](dest: &mut T, val: T, order: U8) -> USize { }
+fun atomic_fetch_nand[T: Integral](dest: &mut T, val: T, order: U8) -> T { }
 
 !public
 !always_inline
