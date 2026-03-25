@@ -75,6 +75,7 @@ sup [T: Integral] Atom[T] {
         ret intrinsics::atomic_swap(&mut self.val, val, order)
     }
 
+##
     !public
     fun update(&self, f: FunRef[(T), T], set_order: U8, fetch_order: U8) -> T {
         let mut prev = self.load(fetch_order)
@@ -96,6 +97,7 @@ sup [T: Integral] Atom[T] {
             }
         }
     }
+##
 
     !public
     fun fetch_and(&self, val: T, order: U8) -> T {
