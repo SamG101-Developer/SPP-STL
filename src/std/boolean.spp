@@ -20,10 +20,10 @@ use std::ops::eq::Eq
 
 !public
 cls Integral { }
+sup Integral ext Copy { }
 
 !public
 cls Bool { }
-sup Bool ext Copy { }
 sup Bool ext Integral { }
 
 sup Bool ext And[Rhs=Bool] {
