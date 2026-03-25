@@ -71,7 +71,7 @@ sup [T, cmp n: USize, A: Alloc[T]] Arr[T, n, A] {
     !public
     fun contains(&self, value: &T) -> Bool {
         loop item in self.iter_ref() {
-            case item@ == value@ { ret true }
+            case item == value@ { ret true }
         }
         ret false
     }
