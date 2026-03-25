@@ -13,6 +13,8 @@ use std::number::U8
 use std::void::Void
 use std::option::Opt
 use std::result::Res
+use std::result::Fail
+use std::result::Pass
 use std::num::bases::Integer
 
 
