@@ -13,6 +13,7 @@ use std::option::None
 use std::range::Range
 use std::slice::Slice
 use std::void::Void
+use std::ops::eq::Eq
 use std::ops::idx::IndexMut
 use std::ops::idx::IndexRef
 
