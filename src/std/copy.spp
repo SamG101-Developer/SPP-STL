@@ -1,2 +1,5 @@
+use std::annotations::public
+
+
 !public
 cls Copy { }
