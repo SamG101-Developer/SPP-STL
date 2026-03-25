@@ -688,6 +688,11 @@ fun atomic_fence(order: U8) -> Void { }
 !public
 !always_inline
 !compiler_builtin
+fun atomic_test_and_set(dest: &T, order: U8) -> Bool { }
+
+!public
+!always_inline
+!compiler_builtin
 fun atomic_fetch_add[T: Integer](dest: &T, val: T, order: U8) -> T { }
 
 !public
