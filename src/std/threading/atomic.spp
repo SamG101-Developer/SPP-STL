@@ -61,7 +61,7 @@ sup [T: Integral] Atom[T] {
         std::abort::abort_if(
             [Self::mo_acquire, Self::mo_acq_rel].contains(&order),
             "Invalid memory order for store")
-        ret intrinsics::atomic_store(&self.val, val, order)
+        intrinsics::atomic_store(&self.val, val, order)
     }
 
     !public
