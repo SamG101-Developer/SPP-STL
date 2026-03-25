@@ -21,8 +21,8 @@ use std::mem::memory::Memory
 use std::ops::add::Add
 use std::ops::add::AddAssign
 use std::ops::eq::Eq
-use std::ops::index::IndexMut
-use std::ops::index::IndexRef
+use std::ops::idx::IndexMut
+use std::ops::idx::IndexRef
 
 
 !public
