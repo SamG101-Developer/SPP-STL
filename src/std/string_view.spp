@@ -1,5 +1,6 @@
 use std::annotations::compiler_builtin
 use std::annotations::public
+use std::llvm::inline
 use std::boolean::Bool
 use std::cast::From
 use std::copy::Copy
