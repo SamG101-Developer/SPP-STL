@@ -4,8 +4,9 @@
 # - The new_zero() function is fine because of default uniform initialization.
 # - The exchange() functions copy because only primitives are supported.
 
-use std::annotations::public
+use std::annotations::compiler_builtin
 use std::annotations::private
+use std::annotations::public
 use std::boolean::Bool
 use std::boolean::Integral
 use std::number::U8
