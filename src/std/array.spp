@@ -5,6 +5,7 @@ use std::allocator::GlobalAlloc
 use std::boolean::Bool
 use std::cast::From
 use std::clone::Clone
+use std::copy::Copy
 use std::generator::GenOnce
 use std::iterator::Iterator
 use std::mem::memory::Memory
