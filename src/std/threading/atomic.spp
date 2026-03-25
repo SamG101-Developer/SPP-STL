@@ -74,11 +74,11 @@ sup [T: Integral] Atom[T] {
     }
 
     !public
-    fun compare_exchange_weak(&self, expected: T, desired: T, success_order: U8 = mo_seq_cst, failure_order: U8 = mo_seq_cst) -> Res[T, T] {
+    fun compare_exchange_weak(&self, old: T, new: T, success_order: U8 = mo_seq_cst, failure_order: U8 = mo_seq_cst) -> Res[T, T] {
         std::abort::abort_if(
             [Self::mo_acquire, Self::mo_acq_rel].contains(&failure_order),
             "Invalid memory order for compare_exchange_weak success case")
-        let (new, pass) = intrinsics::atomic_compare_exchange_weak(&self.val, expected, desired, success_order, failure_order)
+        let (new, pass) = intrinsics::atomic_compare_exchange_weak(&self.val, old, new, success_order, failure_order)
         ret case pass { Pass(val=new) } else { Fail(err=old) }
     }
 
