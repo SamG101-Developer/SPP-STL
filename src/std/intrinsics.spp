@@ -688,32 +688,57 @@ fun atomic_fence(order: U8) -> Void { }
 !public
 !always_inline
 !compiler_builtin
-fun atomic_fetch_add[T: Integer](dest: &mut T, val: T, order: U8) -> T { }
+fun atomic_fetch_add[T: Integer](dest: &T, val: T, order: U8) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun atomic_fetch_sub[T: Integer](dest: &mut T, val: T, order: U8) -> T { }
+fun atomic_fetch_sub[T: Integer](dest: &T, val: T, order: U8) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun atomic_fetch_and[T: Integral](dest: &mut T, val: T, order: U8) -> T { }
+fun atomic_fetch_neg[T: Integer](dest: &T, order: U8) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun atomic_fetch_or[T: Integral](dest: &mut T, val: T, order: U8) -> T { }
+fun atomic_fetch_abs[T: Integer](dest: &T, order: U8) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun atomic_fetch_xor[T: Integral](dest: &mut T, val: T, order: U8) -> T { }
+fun atomic_fetch_min[T: Integer](dest: &T, val: T, order: U8) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun atomic_fetch_nand[T: Integral](dest: &mut T, val: T, order: U8) -> T { }
+fun atomic_fetch_max[T: Integer](dest: &T, val: T, order: U8) -> T { }
+
+!public
+!always_inline
+!compiler_builtin
+fun atomic_fetch_clamp[T: Integer](dest: &T, val: T, order: U8) -> T { }
+
+!public
+!always_inline
+!compiler_builtin
+fun atomic_fetch_and[T: Integral](dest: &T, val: T, order: U8) -> T { }
+
+!public
+!always_inline
+!compiler_builtin
+fun atomic_fetch_or[T: Integral](dest: &T, val: T, order: U8) -> T { }
+
+!public
+!always_inline
+!compiler_builtin
+fun atomic_fetch_xor[T: Integral](dest: &T, val: T, order: U8) -> T { }
+
+!public
+!always_inline
+!compiler_builtin
+fun atomic_fetch_nand[T: Integral](dest: &T, val: T, order: U8) -> T { }
 
 !public
 !always_inline
@@ -723,17 +748,22 @@ fun atomic_load[T: Integral](src: &T, order: U8) -> T { }
 !public
 !always_inline
 !compiler_builtin
-fun atomic_store[T: Integral](dest: &mut T, val: T, order: U8) -> Void { }
+fun atomic_store[T: Integral](dest: &T, val: T, order: U8) -> Void { }
 
 !public
 !always_inline
 !compiler_builtin
-fun atomic_swap[T: Integral](dest: &mut T, val: T, order: U8) -> T { }
+fun atomic_swap[T: Integral](dest: &T, val: T, order: U8) -> T { }
 
 !public
 !always_inline
 !compiler_builtin
-fun atomic_compare_exchange[T: Integral](dest: &mut T, expected: &T, desired: T, success_order: U8, failure_order: U8) -> (T, Bool) { }
+fun atomic_compare_exchange[T: Integral](dest: &T, expected: &T, desired: T, success_order: U8, failure_order: U8) -> (T, Bool) { }
+
+!public
+!always_inline
+!compiler_builtin
+fun atomic_compare_exchange_weak[T: Integral](dest: &T, expected: &T, desired: T, success_order: U8, failure_order: U8) -> (T, Bool) { }
 
 
 !public
