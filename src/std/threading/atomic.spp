@@ -10,6 +10,7 @@ use std::boolean::Integral
 use std::number::U8
 use std::void::Void
 use std::option::Opt
+use std::num::bases::Integer
 
 
 !public
