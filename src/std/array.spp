@@ -70,7 +70,7 @@ sup [T, cmp n: USize, A: Alloc[T]] Arr[T, n, A] {
     }
 }
 
-sup [T: Eq[T], cmp n: USize, A: Alloc[T]] Arr[T, n, A] {
+sup [T: Eq[T] & Copy, cmp n: USize, A: Alloc[T]] Arr[T, n, A] {
     !public
     fun contains(&self, value: &T) -> Bool {
         loop item in self.iter_ref() {
