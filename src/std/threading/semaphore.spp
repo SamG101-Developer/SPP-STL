@@ -1,3 +1,5 @@
+use std::annotations::public
+use std::annotations::private
 use std::boolean::Bool
 use std::number::U64
 use std::result::Pass
@@ -10,9 +12,9 @@ use std::threading::mutex::Mutex
 
 !public
 cls Semaphore {
-    mutex: Mutex
-    cond_var: CondVar
-    count: U64
+    !private mutex: Mutex
+    !private cond_var: CondVar
+    !private count: U64
 }
 
 

@@ -1,3 +1,5 @@
+use std::annotations::public
+use std::annotations::private
 use std::boolean::Bool
 use std::number::S32
 use std::result::Fail
@@ -9,7 +11,7 @@ use std::threading::mutex::LockErr
 
 !public
 cls SpinLock {
-    !public id: S32
+    !private id: S32
 }
 
 

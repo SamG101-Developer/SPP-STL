@@ -4,8 +4,8 @@
 # - The new_zero() function is fine because of default uniform initialization.
 # - The exchange() functions copy because only primitives are supported.
 
-
-
+use std::annotations::public
+use std::annotations::private
 use std::boolean::Integral
 use std::number::U8
 use std::void::Void
@@ -14,15 +14,14 @@ use std::option::Opt
 
 !public
 cls Atom[T: Integral] {
-    val: T
+    !private val: T
 }
 
-
-##
 !public
 !compiler_builtin
-fun atomic_fence(order: U8) -> Void { }
-
+fun atomic_fence(order: U8) -> Void {
+    intrinsics::atomic_fence(order)
+}
 
 sup [T: Integral] Atom[T] {
     !public cmp mo_relaxed: U8 = 0_u8
