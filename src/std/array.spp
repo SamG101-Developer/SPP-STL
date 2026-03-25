@@ -2,6 +2,7 @@ use std::annotations::compiler_builtin
 use std::annotations::public
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
+use std::boolean::Bool
 use std::cast::From
 use std::clone::Clone
 use std::generator::GenOnce
