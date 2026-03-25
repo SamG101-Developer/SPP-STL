@@ -1,3 +1,4 @@
+use std::annotations::public
 use std::time::duration::Duration
 use std::result::Pass
 use std::result::Fail
@@ -12,6 +13,7 @@ cls TimeErr {
 }
 
 
+!public
 fun sleep(duration: Duration) -> Res[Void, TimeErr] {
     # Use the C function to sleep for the specified duration.
     let val = sppc::time_sleep_ns(duration.total_nanoseconds())
