@@ -44,7 +44,7 @@ sup [T: Integral] Atom[T] {
     !public
     fun load(&self, order: U8 = mo_seq_cst) -> T {
         std::abort::abort_if(
-            [Self::mo_release, Self::mo_acq_rel].contains(order),
+            [Self::mo_release, Self::mo_acq_rel].contains(&order),
             "Invalid memory order for load")
         ret intrinsics::atomic_load(&self.val, order)
     }
@@ -52,7 +52,7 @@ sup [T: Integral] Atom[T] {
     !public
     fun store(&mut self, val: T, order: U8 = mo_seq_cst) -> Void {
         std::abort::abort_if(
-            [Self::mo_acquire, Self::mo_acq_rel].contains(order),
+            [Self::mo_acquire, Self::mo_acq_rel].contains(&order),
             "Invalid memory order for store")
         ret intrinsics::atomic_store(&mut self.val, val, order)
     }
@@ -60,7 +60,7 @@ sup [T: Integral] Atom[T] {
     !public
     fun compare_swap(&mut self, old: T, new: T, success_order: U8, failure_order: U8) -> (T, Bool) {
         std::abort::abort_if(
-            [Self::mo_acquire, Self::mo_acq_rel].contains(failure_order),
+            [Self::mo_acquire, Self::mo_acq_rel].contains(&failure_order),
             "Invalid memory order for compare_swap success case")
         ret intrinsics::atomic_compare_swap(&mut self.val, expected, desired, success_order, failure_order)
     }
@@ -68,7 +68,7 @@ sup [T: Integral] Atom[T] {
     !public
     fun compare_swap_weak(&mut self, expected: T, desired: T, success_order: U8, failure_order: U8) -> (T, Bool) {
         std::abort::abort_if(
-            [Self::mo_acquire, Self::mo_acq_rel].contains(failure_order),
+            [Self::mo_acquire, Self::mo_acq_rel].contains(&failure_order),
             "Invalid memory order for compare_swap_weak success case")
         ret intrinsics::atomic_compare_swap_weak(&mut self.val, expected, desired, success_order, failure_order)
     }
