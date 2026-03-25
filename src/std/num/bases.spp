@@ -19,7 +19,6 @@ cls FloatingPoint { }
 
 
 # All numeric types are copyable primitives.
-sup Num ext Copy { }
 sup Num ext Integral { }
 
 
