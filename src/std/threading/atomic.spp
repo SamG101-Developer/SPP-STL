@@ -70,7 +70,7 @@ sup [T: Integral] Atom[T] {
             [Self::mo_acquire, Self::mo_acq_rel].contains(&failure_order),
             "Invalid memory order for compare_exchange success case")
         let (new, pass) = intrinsics::atomic_compare_exchange(&self.val, expected, desired, success_order, failure_order)
-        ret case pass { Pass(val=new) } else { Fail(val=old) }
+        ret case pass { Pass(val=new) } else { Fail(err=old) }
     }
 
     !public
@@ -79,7 +79,7 @@ sup [T: Integral] Atom[T] {
             [Self::mo_acquire, Self::mo_acq_rel].contains(&failure_order),
             "Invalid memory order for compare_exchange_weak success case")
         let (new, pass) = intrinsics::atomic_compare_exchange_weak(&self.val, expected, desired, success_order, failure_order)
-        ret case pass { Pass(val=new) } else { Fail(val=old) }
+        ret case pass { Pass(val=new) } else { Fail(err=old) }
     }
 
     !public
