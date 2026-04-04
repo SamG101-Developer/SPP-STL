@@ -21,7 +21,7 @@ sup Annotation {
 !public
 cmp fun annotation(target: S32) -> Void { }
 
-!annotation(target=Annotation::function | Annotation::method | Annotation::class)
+!annotation(target=Annotation::function | Annotation::method | Annotation::ext_method | Annotation::class)
 !compiler_builtin
 !public
 cmp fun compiler_builtin() -> Void { }
