@@ -13,7 +13,7 @@ sup Annotation {
 }
 
 
-!annotation(target=Annotation::all)
+!annotation(target=Annotation::function)
 !compiler_builtin
 !public
 cmp fun annotation(target: S32) -> Void { }
