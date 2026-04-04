@@ -9,7 +9,9 @@ sup Annotation {
     cmp class: S32 = 4
     cmp new_type: S32 = 8
     cmp constant: S32 = 16
+
     cmp all: S32 = Self::function | Self::method | Self::class | Self::new_type | Self::constant
+    cmp mod: S32 = Self::function | Self::class | Self::new_type | Self::constant
 }
 
 
@@ -23,17 +25,17 @@ cmp fun annotation(target: S32) -> Void { }
 !public
 cmp fun compiler_builtin() -> Void { }
 
-!annotation(target=Annotation::all)
+!annotation(target=Annotation::mod)
 !compiler_builtin
 !public
 cmp fun public() -> Void { }
 
-!annotation(target=Annotation::all)
+!annotation(target=Annotation::mod)
 !compiler_builtin
 !public
 cmp fun protected() -> Void { }
 
-!annotation(target=Annotation::all)
+!annotation(target=Annotation::mod)
 !compiler_builtin
 !public
 cmp fun private() -> Void { }
