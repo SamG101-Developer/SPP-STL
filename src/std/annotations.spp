@@ -6,12 +6,13 @@ cls Annotation {}
 sup Annotation {
     cmp function: S32 = 1
     cmp method: S32 = 2
-    cmp class: S32 = 4
-    cmp new_type: S32 = 8
-    cmp constant: S32 = 16
+    cmp ext_method: S32 = 4
+    cmp class: S32 = 8
+    cmp new_type: S32 = 16
+    cmp constant: S32 = 32
 
-    cmp all: S32 = Self::function | Self::method | Self::class | Self::new_type | Self::constant
-    cmp mod: S32 = Self::function | Self::class | Self::new_type | Self::constant
+    cmp all: S32 = Self::function | Self::method | Self::ext_method | Self::class | Self::new_type | Self::constant
+    cmp mod: S32 = Self::function | Self::method | Self::class | Self::new_type | Self::constant
 }
 
 
