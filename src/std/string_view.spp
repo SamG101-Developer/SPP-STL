@@ -17,6 +17,8 @@ use std::ops::eq::Eq
 use std::slice::Slice
 use std::string::Str
 use std::fs::path::Path
+use std::ops::add::Add
+use std::ops::add::AddAssign
 
 
 ##
@@ -176,4 +178,14 @@ sup StrView ext From[Self, Path] {
     fun from(that: Path) -> Self {
         ret StrView::from(that.path)
     }
+}
+
+sup StrView ext Add[StrView, StrView] {
+    !compiler_builtin
+    fun add(self, that: StrView) -> StrView { }
+}
+
+sup StrView ext AddAssign[StrView] {
+    !compiler_builtin
+    fun add_assign(&mut self, that: StrView) -> Void { }
 }
