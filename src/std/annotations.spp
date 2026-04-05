@@ -1,0 +1,67 @@
+use std::number::S32
+use std::string::StrView
+use std::void::Void
+
+cls Annotation {}
+sup Annotation {
+    cmp function: S32 = 1
+    cmp method: S32 = 2
+    cmp ext_method: S32 = 4
+    cmp class: S32 = 8
+    cmp new_type: S32 = 16
+    cmp constant: S32 = 32
+
+    cmp all: S32 = Self::function | Self::method | Self::ext_method | Self::class | Self::new_type | Self::constant
+    cmp mod: S32 = Self::function | Self::method | Self::class | Self::new_type | Self::constant
+}
+
+
+!annotation(target=Annotation::function)
+!compiler_builtin
+!public
+cmp fun annotation(target: S32) -> Void { }
+
+!annotation(target=Annotation::function | Annotation::method | Annotation::ext_method | Annotation::class)
+!compiler_builtin
+!public
+cmp fun compiler_builtin() -> Void { }
+
+!annotation(target=Annotation::mod)
+!compiler_builtin
+!public
+cmp fun public() -> Void { }
+
+!annotation(target=Annotation::mod)
+!compiler_builtin
+!public
+cmp fun protected() -> Void { }
+
+!annotation(target=Annotation::mod)
+!compiler_builtin
+!public
+cmp fun private() -> Void { }
+
+!annotation(target=Annotation::method)
+!compiler_builtin
+!public
+cmp fun virtual_method() -> Void { }
+
+!annotation(target=Annotation::method)
+!compiler_builtin
+!public
+cmp fun abstract_method() -> Void { }
+
+!annotation(target=Annotation::function)
+!compiler_builtin
+!public
+cmp fun ffi(symbol: StrView) -> Void { }
+
+!annotation(target=Annotation::class)
+!compiler_builtin
+!public
+cmp fun extends[..Ts]() -> Void { }
+
+!annotation(target=Annotation::new_type)
+!compiler_builtin
+!public
+cmp fun variant_default[T]() -> Void { }

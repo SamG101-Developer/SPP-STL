@@ -1,0 +1,36 @@
+use std::annotations::annotation
+use std::annotations::compiler_builtin
+use std::annotations::public
+use std::annotations::Annotation
+use std::void::Void
+
+
+!annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
+!compiler_builtin
+!public
+cmp fun inline() -> Void { }
+
+!annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
+!compiler_builtin
+!public
+cmp fun always_inline() -> Void { }
+
+!annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
+!compiler_builtin
+!public
+cmp fun no_inline() -> Void { }
+
+!annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
+!compiler_builtin
+!public
+cmp fun hot() -> Void { }
+
+!annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
+!compiler_builtin
+!public
+cmp fun cold() -> Void { }
+
+!annotation(target=Annotation::class)
+!compiler_builtin
+!public
+cmp fun packed() -> Void { }

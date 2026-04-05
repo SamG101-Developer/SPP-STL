@@ -1,3 +1,5 @@
+use std::annotations::public
+use std::annotations::private
 use std::number::U32
 use std::number::S32
 use std::result::Fail
@@ -9,9 +11,9 @@ use std::threading::mutex::LockErr
 
 !public
 cls Barrier {
-    !public id: S32
-    !public total: U32
-    !public count: U32
+    !private id: S32
+    !private total: U32
+    !private count: U32
 }
 
 

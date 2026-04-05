@@ -1,10 +1,12 @@
+use std::annotations::public
+use std::annotations::abstract_method
+
 !public
 cls Clone[Out] { }
 
 
 sup [Out] Clone[Out] {
     !public
-    !inline
     !abstract_method
     fun clone(&self) -> Out { }
 }

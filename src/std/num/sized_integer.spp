@@ -1,3 +1,7 @@
+use std::annotations::compiler_builtin
+use std::annotations::public
+use std::llvm::inline
+
 use std::boolean::Bool
 use std::limits::Limits
 use std::number::U8

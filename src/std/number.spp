@@ -1,3 +1,4 @@
+use std::annotations::public
 use std::cast::From
 
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned

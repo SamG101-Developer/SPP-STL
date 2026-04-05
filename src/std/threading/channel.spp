@@ -1,3 +1,5 @@
+use std::annotations::public
+use std::annotations::private
 use std::boolean::Bool
 use std::number::USize
 use std::option::Opt
@@ -11,20 +13,20 @@ use std::threading::cond_var::CondVar
 use std::threading::mutex::LockErr
 use std::threading::mutex::Mutex
 
+
 !public
 cls Sender[T] {
-    storage: Shared[Queue[T]]
-    mutex: Mutex
-    cond_var: CondVar
+    !private storage: Shared[Queue[T]]
+    !private mutex: Mutex
+    !private cond_var: CondVar
 }
 
 !public
 cls Receiver[T] {
-    storage: Shared[Queue[T]]
-    mutex: Mutex
-    cond_var: CondVar
+    !private storage: Shared[Queue[T]]
+    !private mutex: Mutex
+    !private cond_var: CondVar
 }
-
 
 !public
 fun channel[T]() -> (Sender[T], Receiver[T]) {

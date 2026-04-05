@@ -1,2 +1,4 @@
+use std::annotations::public
+
 !public
 cls Never { }

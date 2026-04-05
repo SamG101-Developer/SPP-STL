@@ -1,3 +1,5 @@
+use std::annotations::public
+use std::annotations::private
 use std::number::S32
 use std::result::Fail
 use std::result::Pass
@@ -6,23 +8,9 @@ use std::string_view::StrView
 use std::void::Void
 
 
-!public
-cls Mutex {
-    id: S32
-}
-
-
-!public
-cls MutexLockGard {
-    id: S32
-}
-
-
-!public
-cls LockErr {
-    !public msg: StrView
-}
-
+!public cls Mutex { !private id: S32 }
+!public cls MutexLockGard { !private id: S32 }
+!public cls LockErr { !public msg: StrView }
 
 sup Mutex {
     !public

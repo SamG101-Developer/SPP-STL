@@ -4,25 +4,30 @@
 # - The new_zero() function is fine because of default uniform initialization.
 # - The exchange() functions copy because only primitives are supported.
 
-
-
+use std::annotations::compiler_builtin
+use std::annotations::private
+use std::annotations::public
+use std::boolean::Bool
 use std::boolean::Integral
 use std::number::U8
 use std::void::Void
 use std::option::Opt
+use std::result::Res
+use std::result::Fail
+use std::result::Pass
+use std::num::bases::Integer
 
 
 !public
 cls Atom[T: Integral] {
-    val: T
+    !private val: T
 }
 
-
-##
 !public
 !compiler_builtin
-fun atomic_fence(order: U8) -> Void { }
-
+fun atomic_fence(order: U8) -> Void {
+    intrinsics::atomic_fence(order)
+}
 
 sup [T: Integral] Atom[T] {
     !public cmp mo_relaxed: U8 = 0_u8
@@ -38,49 +43,57 @@ sup [T: Integral] Atom[T] {
     !public
     !compiler_builtin
     fun new_zeroed() -> Atom[T] { }
+    
+    !public
+    !compiler_builtin
+    fun is_lock_free() -> Bool { }
 
     !public
-    fun load(&self, order: U8 = mo_seq_cst) -> T {
-        case order == Self::mo_release or order == Self::mo_acq_rel {
-            std::abort::abort("Invalid memory order for load")
-        }
+    fun load(&self, order: U8 = Self::mo_seq_cst) -> T {
+        std::abort::abort_if(
+            [Self::mo_release, Self::mo_acq_rel].contains(&order),
+            "Invalid memory order for load")
         ret intrinsics::atomic_load(&self.val, order)
     }
 
     !public
-    fun store(&self, val: T, order: U8 = mo_seq_cst) -> Void {
-        case order == Self::mo_acquire or order == Self::mo_acq_rel {
-            std::abort::abort("Invalid memory order for store")
-        }
-        ret intrinsics::atomic_store(&mut self.val, val, order)
+    fun store(&self, val: T, order: U8 = Self::mo_seq_cst) -> Void {
+        std::abort::abort_if(
+            [Self::mo_acquire, Self::mo_acq_rel].contains(&order),
+            "Invalid memory order for store")
+        intrinsics::atomic_store(&self.val, val, order)
     }
 
     !public
-    fun compare_swap(&self, old: T, new: T, success_order: U8, failure_order: U8) -> (T, Bool) {
-        case failure_order == Self::mo_release or failure_order == Self::mo_acq_rel {
-            std::abort::abort("Invalid memory order for compare_swap failure case")
-        }
-        ret intrinsics::atomic_compare_swap(&mut self.val, expected, desired, success_order, failure_order)
+    fun compare_exchange(&self, old: T, new: T, success_order: U8 = Self::mo_seq_cst, failure_order: U8 = Self::mo_seq_cst) -> Res[T, T] {
+        std::abort::abort_if(
+            [Self::mo_acquire, Self::mo_acq_rel].contains(&failure_order),
+            "Invalid memory order for compare_exchange success case")
+        let (new, pass) = intrinsics::atomic_compare_exchange(&self.val, old, new, success_order, failure_order)
+        ret case pass { Pass(val=new) } else { Fail(err=old) }
     }
 
     !public
-    fun compare_swap_weak(&self, expected: T, desired: T, success_order: U8, failure_order: U8) -> (T, Bool) {
-        case failure_order == Self::mo_release or failure_order == Self::mo_acq_rel {
-            std::abort::abort("Invalid memory order for compare_swap failure case")
-        }
-        ret intrinsics::atomic_compare_swap_weak(&mut self.val, expected, desired, success_order, failure_order)
+    fun compare_exchange_weak(&self, old: T, new: T, success_order: U8 = Self::mo_seq_cst, failure_order: U8 = Self::mo_seq_cst) -> Res[T, T] {
+        std::abort::abort_if(
+            [Self::mo_acquire, Self::mo_acq_rel].contains(&failure_order),
+            "Invalid memory order for compare_exchange_weak success case")
+        let (new, pass) = intrinsics::atomic_compare_exchange_weak(&self.val, old, new, success_order, failure_order)
+        ret case pass { Pass(val=new) } else { Fail(err=old) }
     }
 
     !public
-    fun swap(&self, val: T, order: U8 = mo_seq_cst) -> T {
-        ret intrinsics::atomic_swap(&mut self.val, val, order)
+    fun exchange(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
+        ret intrinsics::atomic_exchange(&self.val, val, order)
     }
+
+##
 
     !public
     fun update(&self, f: FunRef[(T), T], set_order: U8, fetch_order: U8) -> T {
         let mut prev = self.load(fetch_order)
         loop true {
-            case self.compare_swap_weak(prev, f(prev), set_order, fetch_order) of {
+            case self.compare_exchange_weak(prev, f(prev), set_order, fetch_order) of {
                 is (actual, true) { ret actual }
                 is (actual, false) { prev = actual }
             }
@@ -91,76 +104,87 @@ sup [T: Integral] Atom[T] {
     fun fetch_update(&self, f: FunRef[(T), Opt[T]], set_order: U8, fetch_order: U8) -> T {
         let mut prev = self.load(fetch_order)
         loop f(prev) is Some(val as next) {
-            case self.compare_swap_weak(prev, next, set_order, fetch_order) of {
+            case self.compare_exchange_weak(prev, next, set_order, fetch_order) of {
                 is (actual, true) { ret actual }
                 is (actual, false) { prev = actual }
             }
         }
     }
+##
+
 
     !public
-    fun fetch_and(&self, val: T, order: U8) -> T {
-        ret intrinsics::atomic_fetch_and(&mut self.val, val, order)
+    fun fetch_and(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
+        ret intrinsics::atomic_fetch_and(&self.val, val, order)
     }
 
     !public
-    fun fetch_nand(&self, val: T, order: U8) -> T {
-        ret intrinsics::atomic_fetch_nand(&mut self.val, val, order)
+    fun fetch_nand(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
+        ret intrinsics::atomic_fetch_nand(&self.val, val, order)
     }
 
     !public
-    fun fetch_or(&self, val: T, order: U8) -> T {
-        ret intrinsics::atomic_fetch_or(&mut self.val, val, order)
+    fun fetch_or(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
+        ret intrinsics::atomic_fetch_or(&self.val, val, order)
     }
 
     !public
-    fun fetch_xor(&self, val: T, order: U8) -> T {
-        ret intrinsics::atomic_fetch_xor(&mut self.val, val, order)
+    fun fetch_xor(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
+        ret intrinsics::atomic_fetch_xor(&self.val, val, order)
     }
 }
 
 
 sup Atom[Bool] {
     !public
-    fun fetch_not(&self, order: U8) -> Bool {
-        ret intrinsics::atomic_fetch_xor(&mut self.val, true, order)
+    fun fetch_not(&self, order: U8 = Self::mo_seq_cst) -> Bool {
+        ret intrinsics::atomic_fetch_xor(&self.val, true, order)
+    }
+
+    !public
+    fun test_and_set(&self, order: U8 = Self::mo_seq_cst) -> Bool {
+        ret intrinsics::atomic_test_and_set(&self.val, order)
     }
 
     !public
     !compiler_builtin
-    fun test_and_set(&self, order: U8) -> Bool {
-        ret intrinsics::atomic_test_and_set(&mut self.val, order)
-    }
-
-    !public
-    !compiler_builtin
-    fun clear(&mut self, order: U8) -> Void { }
-
-    !public
-    !compiler_builtin
-    fun is_lock_free() -> Bool { }
-
-    !public
-    !compiler_builtin
-    fun load_relaxed(&self) -> Bool { }
-
-    !public
-    !compiler_builtin
-    fun store_relaxed(&self, val: Bool) -> Void { }
+    fun clear(&self, order: U8 = Self::mo_seq_cst) -> Void { }
 }
 
 
 sup [T: Integer] Atom[T] {
     !public
-    !compiler_builtin
-    fun fetch_add(&self, val: T, order: U8) -> T {
-        ret intrinsics::atomic_fetch_add(&mut self.val, val, order)
+    fun fetch_add(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
+        ret intrinsics::atomic_fetch_add(&self.val, val, order)
     }
 
     !public
-    !compiler_builtin
-    fun fetch_sub(&self, val: T, order: U8) -> T {
-        ret intrinsics::atomic_fetch_sub(&mut self.val, val, order)
+    fun fetch_sub(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
+        ret intrinsics::atomic_fetch_sub(&self.val, val, order)
+    }
+
+    !public
+    fun fetch_neg(&self, order: U8 = Self::mo_seq_cst) -> T {
+        ret intrinsics::atomic_fetch_neg(&self.val, order)
+    }
+
+    !public
+    fun fetch_abs(&self, order: U8 = Self::mo_seq_cst) -> T {
+        ret intrinsics::atomic_fetch_abs(&self.val, order)
+    }
+    
+    !public
+    fun fetch_min(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
+        ret intrinsics::atomic_fetch_min(&self.val, val, order)
+    }
+    
+    !public
+    fun fetch_max(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
+        ret intrinsics::atomic_fetch_max(&self.val, val, order)
+    }
+
+    !public
+    fun fetch_clamp(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
+        ret intrinsics::atomic_fetch_clamp(&self.val, val, order)
     }
 }
-##

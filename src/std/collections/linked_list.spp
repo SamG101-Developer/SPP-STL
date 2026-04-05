@@ -1,3 +1,6 @@
+use std::annotations::private
+use std::annotations::protected
+use std::annotations::public
 use std::boolean::Bool
 use std::iterator::Iterator
 use std::number::USize

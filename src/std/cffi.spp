@@ -1,3 +1,5 @@
+use std::annotations::public
+
 !public type CBool = std::boolean::Bool
 !public type CChar = std::number::S8
 !public type CShort = std::number::S16

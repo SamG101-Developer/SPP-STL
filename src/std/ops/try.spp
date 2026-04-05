@@ -1,3 +1,6 @@
+use std::annotations::abstract_method
+use std::annotations::protected
+use std::annotations::public
 use std::boolean::Bool
 
 
@@ -6,12 +9,10 @@ use std::boolean::Bool
 
 sup [Output, Residual, Value] Try[Output, Residual, Value] {
     !protected
-    !inline
     !abstract_method
     fun op_is_value(&self) -> Bool { }
 
     !protected
-    !inline
     !abstract_method
     fun op_as_value(self) -> Value { }
 }

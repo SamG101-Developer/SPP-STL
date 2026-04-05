@@ -1,7 +1,11 @@
+use std::annotations::compiler_builtin
+use std::annotations::public
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
+use std::boolean::Bool
 use std::cast::From
 use std::clone::Clone
+use std::copy::Copy
 use std::generator::GenOnce
 use std::iterator::Iterator
 use std::mem::memory::Memory
@@ -10,6 +14,7 @@ use std::option::None
 use std::range::Range
 use std::slice::Slice
 use std::void::Void
+use std::ops::eq::Eq
 use std::ops::idx::IndexMut
 use std::ops::idx::IndexRef
 
@@ -63,6 +68,16 @@ sup [T, cmp n: USize, A: Alloc[T]] Arr[T, n, A] {
     !public
     fun swap(&mut self, i: USize, j: USize) -> Void {
         std::mem::ops::swap(self[mut i], self[mut j])
+    }
+}
+
+sup [T: Eq[T] & Copy, cmp n: USize, A: Alloc[T]] Arr[T, n, A] {
+    !public
+    fun contains(&self, value: &T) -> Bool {
+        loop item in self.iter_ref() {
+            case item == value@ { ret true }
+        }
+        ret false
     }
 }
 

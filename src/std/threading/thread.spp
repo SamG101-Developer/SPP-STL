@@ -1,3 +1,5 @@
+use std::annotations::public
+use std::annotations::private
 use std::boolean::Bool
 use std::function::FunRef
 use std::number::S32
@@ -13,8 +15,8 @@ use std::ops::del::Del
 
 !public
 cls Thread {
-    !public id: S32
-    !public alive: Bool
+    !private id: S32
+    !private alive: Bool
 }
 
 
