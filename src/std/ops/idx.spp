@@ -8,12 +8,14 @@ use std::generator::GenOnce
 
 
 sup [T, I] IndexMut[T, I] {
+    !public
     !abstract_method
     cor index_mut(&mut self, index: I) -> GenOnce[&mut T] { }
 }
 
 
 sup [T, I] IndexRef[T, I] {
+    !public
     !abstract_method
     cor index_ref(&self, index: I) -> GenOnce[&T] { }
 }
