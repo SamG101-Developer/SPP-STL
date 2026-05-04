@@ -8,8 +8,8 @@ use std::option::Some
 use std::string::Str
 
 
-!public cls Pass[T] { val: T }
-!public cls Fail[E] { err: E }
+!public cls Pass[T] { !public val: T }
+!public cls Fail[E] { !public err: E }
 !public type Res[T, E] = Pass[T] or Fail[E]
 
 
