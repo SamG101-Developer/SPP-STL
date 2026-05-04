@@ -1,3 +1,4 @@
+use std::annotations::package
 use std::annotations::private
 use std::annotations::protected
 use std::annotations::public
@@ -13,9 +14,9 @@ use std::void::Void
 
 
 cls LinkedListNode[T] {
-    val: T
-    prev: Opt[USize]  # Index of the previous node in the list.
-    next: Opt[USize]  # Index of the next node in the list.
+    !package val: T
+    !package prev: Opt[USize]  # Index of the previous node in the list.
+    !package next: Opt[USize]  # Index of the next node in the list.
 }
 
 
