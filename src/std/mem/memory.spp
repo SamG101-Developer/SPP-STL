@@ -52,15 +52,15 @@ sup [T, A: Alloc[T]] Memory[T, A] {
         ret self.cap == 0_uz
     }
 
-    !protected
+    !package
     !compiler_builtin
     fun take(&mut self, index: USize) -> Opt[T] { }
 
-    !protected
+    !package
     !compiler_builtin
     fun place(&mut self, index: USize, value: T) -> Void { }
 
-    !protected
+    !package
     !compiler_builtin
     fun place_mem(&mut self, index: USize, value: Memory[T]) -> Void { }
 }
