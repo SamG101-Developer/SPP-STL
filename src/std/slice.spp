@@ -1,4 +1,6 @@
 use std::annotations::compiler_builtin
+use std::annotations::package
+use std::annotations::private
 use std::annotations::public
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
