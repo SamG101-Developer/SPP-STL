@@ -27,8 +27,8 @@ use std::ops::idx::IndexMut
 # Internally, the Slice composes the Memory type, because the Memory type has impementation details that would not
 # benefit from being exposed at the Slice level, such as the take and place methods.
 cls Slice[E, A: Alloc[E] = GlobalAlloc[E]] {
-    mem: Memory[E, A]
-    len: USize
+    !package mem: Memory[E, A]
+    !private len: USize
 }
 
 sup [E, A: Alloc[E]] Slice[E, A] {

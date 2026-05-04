@@ -21,7 +21,7 @@ use std::ops::idx::IndexRef
 
 !public
 cls Arr[T, cmp n: USize, A: Alloc[T] = GlobalAlloc[T]] {
-    mem: Memory[T, A]
+    !package mem: Memory[T, A]
 }
 
 sup [T, cmp n: USize, A: Alloc[T]] Arr[T, n, A] {

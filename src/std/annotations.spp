@@ -46,11 +46,6 @@ cmp fun protected() -> Void { }
 !public
 cmp fun private() -> Void { }
 
-!annotation(target=Annotation::class)
-!compiler_builtin
-!public
-cmp fun friend[..Ts]() -> Void { }
-
 !annotation(target=Annotation::method)
 !compiler_builtin
 !public
