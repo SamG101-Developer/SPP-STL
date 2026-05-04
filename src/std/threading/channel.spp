@@ -1,3 +1,4 @@
+use std::annotations::package
 use std::annotations::public
 use std::annotations::private
 use std::boolean::Bool
@@ -12,7 +13,6 @@ use std::collections::queue::Queue
 use std::threading::cond_var::CondVar
 use std::threading::mutex::LockErr
 use std::threading::mutex::Mutex
-
 
 !public
 cls Sender[T] {
@@ -32,13 +32,17 @@ cls Receiver[T] {
 fun channel[T]() -> (Sender[T], Receiver[T]) {
     let queue = Queue[T]::new()
     let storage = Shared[Queue[T]]::new(queue)
-    let sender = Sender[T](storage=storage.clone())
-    let receiver = Receiver[T](storage=storage.clone())
+    let sender = Sender[T]::new_from_storage(storage.clone())
+    let receiver = Receiver[T]::new_from_storage(storage.clone())
     ret (sender, receiver)
 }
 
-
 sup [T] Sender[T] {
+    !package
+    fun new_from_storage(storage: Shared[Queue[T]]) -> Sender[T] {
+        ret Sender(storage=storage)
+    }
+
     !public
     fun write(&mut self, data: T) -> Res[Void, LockErr] {
         self.mutex.lock()?
@@ -48,8 +52,12 @@ sup [T] Sender[T] {
     }
 }
 
-
 sup [T] Receiver[T] {
+    !package
+    fun new_from_storage(storage: Shared[Queue[T]]) -> Receiver[T] {
+        ret Receiver(storage=storage)
+    }
+
     !public
     fun read(&mut self, len: USize) -> Res[T, LockErr] {
         self.mutex.lock()?
