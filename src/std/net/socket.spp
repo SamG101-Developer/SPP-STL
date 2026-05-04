@@ -14,18 +14,8 @@ use std::slice::Slice
 use std::vector::Vec
 use std::void::Void
 
-
-!public
-cls Socket {
-    fd: S32 = 0
-}
-
-
-!public
-cls SocketErr {
-    msg: StrView
-}
-
+!public cls Socket { fd: S32 = 0 }
+!public cls SocketErr { !public msg: StrView }
 
 sup Socket {
     !public cmp sock_stream: S32 = 1
