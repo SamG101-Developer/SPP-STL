@@ -40,7 +40,7 @@ fun channel[T]() -> (Sender[T], Receiver[T]) {
 sup [T] Sender[T] {
     !package
     fun new_from_storage(storage: Shared[Queue[T]]) -> Sender[T] {
-        ret Sender(storage=storage)
+        ret Sender(storage)
     }
 
     !public
@@ -55,7 +55,7 @@ sup [T] Sender[T] {
 sup [T] Receiver[T] {
     !package
     fun new_from_storage(storage: Shared[Queue[T]]) -> Receiver[T] {
-        ret Receiver(storage=storage)
+        ret Receiver(storage)
     }
 
     !public

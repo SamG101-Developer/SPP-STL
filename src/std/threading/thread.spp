@@ -12,19 +12,16 @@ use std::void::Void
 use std::ops::eq::Eq
 use std::ops::del::Del
 
-
 !public
 cls Thread {
-    !private id: S32
+    !package id: S32
     !private alive: Bool
 }
-
 
 !public
 cls ThreadErr {
     !public msg: StrView
 }
-
 
 sup Thread {
     !public

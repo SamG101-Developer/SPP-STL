@@ -8,9 +8,8 @@ use std::result::Res
 use std::string_view::StrView
 use std::void::Void
 
-
-!public cls Mutex { !private id: S32 }
-!public cls MutexLockGard { !private id: S32 }
+!public cls Mutex { !package id: S32 }
+!public cls MutexLockGard { !package id: S32 }
 !public cls LockErr { !public msg: StrView }
 
 sup Mutex {
@@ -44,12 +43,6 @@ sup Mutex {
         let val = sppc::mutex_unlock(self.id)
         case val != 0 { ret Fail(err=LockErr(msg="Failed to unlock mutex")) }
         ret Pass[Void]()
-    }
-
-    !package
-    fun get_id(&self) -> S32 {
-        # Other types such as the condition variable need access.
-        ret self.id
     }
 }
 

@@ -11,8 +11,7 @@ use std::void::Void
 use std::threading::mutex::LockErr
 use std::threading::mutex::Mutex
 
-
-!public cls CondVar { !private id: S32 }
+!public cls CondVar { !package id: S32 }
 
 sup CondVar {
     !public
@@ -27,7 +26,7 @@ sup CondVar {
     fun wait(&self, mutex: &Mutex, pred: FunRef[(), Bool]) -> Res[Void, LockErr] {
         # Wait on the condition variable, releasing the associated mutex.
         loop pred().not {
-            let val = sppc::condvar_wait(self.id, mutex.get_id())
+            let val = sppc::condvar_wait(self.id, mutex.id)
             case val != 0 { ret Fail(err=LockErr(msg="Failed to wait on condition variable")) }
         }
         ret Pass[Void]()
@@ -53,12 +52,6 @@ sup CondVar {
         let val = sppc::condvar_broadcast(self.id)
         case val != 0 { ret Fail(err=LockErr(msg="Failed to broadcast condition variable")) }
         ret Pass[Void]()
-    }
-
-    !package
-    fun get_id(&self) -> S32 {
-        # Other types such as the condition variable need access.
-        ret self.id
     }
 }
 
