@@ -30,7 +30,7 @@ use std::ops::idx::IndexMut
 # benefit from being exposed at the Slice level, such as the take and place methods.
 cls Slice[E, A: Alloc[E] = GlobalAlloc[E]] {
     !package mem: Memory[E, A]
-    !private len: USize
+    !package len: USize
 }
 
 sup [E, A: Alloc[E]] Slice[E, A] {
