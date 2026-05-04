@@ -14,7 +14,7 @@ use std::ops::eq::Eq
 # todo: declare a cmp constant None for NoneT (prevents having to use None() everywhere)
 
 
-!public cls Some[T] { val: T }
+!public cls Some[T] { !public val: T }
 !public cls None { }
 !public type Opt[T] = Some[T] or None
 
