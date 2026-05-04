@@ -34,12 +34,22 @@ cmp fun public() -> Void { }
 !annotation(target=Annotation::mod)
 !compiler_builtin
 !public
+cmp fun package() -> Void { }
+
+!annotation(target=Annotation::mod)
+!compiler_builtin
+!public
 cmp fun protected() -> Void { }
 
 !annotation(target=Annotation::mod)
 !compiler_builtin
 !public
 cmp fun private() -> Void { }
+
+!annotation(target=Annotation::class)
+!compiler_builtin
+!public
+cmp fun friend[..Ts]() -> Void { }
 
 !annotation(target=Annotation::method)
 !compiler_builtin
