@@ -1,5 +1,7 @@
-use std::annotations::public
+use std::annotations::package
+use std::annotations::private
 use std::annotations::protected
+use std::annotations::public
 use std::annotations::compiler_builtin
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
@@ -22,9 +24,9 @@ use std::ops::del::Del
 # field (the number of elements that can be stored in the memory). The allocator falls through to the Single pointer.
 !public
 cls Memory[T, A: Alloc[T] = GlobalAlloc[T]] {
-    ptr: Single[T, A]
-    cap: USize
-    alloc: A
+    !package ptr: Single[T, A]
+    !private cap: USize
+    !private alloc: A
 }
 
 sup [T, A: Alloc[T]] Memory[T, A] {
