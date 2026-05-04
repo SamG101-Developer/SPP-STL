@@ -7,10 +7,9 @@ use std::result::Res
 use std::void::Void
 use std::threading::mutex::LockErr
 
-
-!public cls RwReadLockGuard { !private id: S32 }
-!public cls RwWriteLockGuard { !private id: S32 }
-!public cls RwLock { !private id: S32 }
+!public cls RwReadLockGuard { !package id: S32 }
+!public cls RwWriteLockGuard { !package id: S32 }
+!public cls RwLock { !package id: S32 }
 
 sup RwLock {
     !public
@@ -61,7 +60,6 @@ sup RwLock {
         ret Pass[Void]()
     }
 }
-
 
 sup RwLock ext std::ops::del::Del {
     fun del(&mut self) -> Void {
