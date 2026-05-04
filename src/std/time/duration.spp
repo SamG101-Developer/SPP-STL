@@ -1,3 +1,4 @@
+use std::annotations::package
 use std::annotations::public
 use std::number::S64
 use std::ops::add::Add
@@ -8,8 +9,8 @@ use std::ops::div::Div
 
 !public
 cls Duration {
-    seconds: S64
-    nanoseconds: S64
+    !package seconds: S64
+    !package nanoseconds: S64
 }
 
 

@@ -3,7 +3,6 @@ use std::number::S32
 use std::number::S64
 use std::time::duration::Duration
 
-
 cls Clocks { }
 sup Clocks {
     !public cmp clock_real_time: S32 = 0_s32
@@ -19,13 +18,11 @@ sup Clocks {
     !public cmp clock_tai: S32 = 11_s32
 }
 
-
 !public
 cls TimePoint {
     !public seconds_since_epoch: S64
     !public nanoseconds: S64
 }
-
 
 sup TimePoint {
     !public
@@ -37,7 +34,6 @@ sup TimePoint {
         ret TimePoint(seconds_since_epoch, nanoseconds)
     }
 }
-
 
 sup TimePoint ext std::ops::sub::Sub[Rhs=Self, Ret=Duration] {
     fun sub(self, that: Self) -> Duration {
