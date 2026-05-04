@@ -4,15 +4,15 @@ use std::void::Void
 
 cls Annotation {}
 sup Annotation {
-    cmp function: S32 = 1
-    cmp method: S32 = 2
-    cmp ext_method: S32 = 4
-    cmp class: S32 = 8
-    cmp new_type: S32 = 16
-    cmp constant: S32 = 32
+    !public cmp function: S32 = 1
+    !public cmp method: S32 = 2
+    !public cmp ext_method: S32 = 4
+    !public cmp class: S32 = 8
+    !public cmp new_type: S32 = 16
+    !public cmp constant: S32 = 32
 
-    cmp all: S32 = Self::function | Self::method | Self::ext_method | Self::class | Self::new_type | Self::constant
-    cmp mod: S32 = Self::function | Self::method | Self::class | Self::new_type | Self::constant
+    !public cmp all: S32 = Self::function | Self::method | Self::ext_method | Self::class | Self::new_type | Self::constant
+    !public cmp mod: S32 = Self::function | Self::method | Self::class | Self::new_type | Self::constant
 }
 
 
@@ -24,7 +24,7 @@ cmp fun annotation(target: S32) -> Void { }
 !annotation(target=Annotation::function | Annotation::method | Annotation::ext_method | Annotation::class)
 !compiler_builtin
 !public
-cmp fun compiler_builtin() -> Void { }
+cmp fun compiler_builtin(llvm: StrView = "") -> Void { }
 
 !annotation(target=Annotation::mod)
 !compiler_builtin
