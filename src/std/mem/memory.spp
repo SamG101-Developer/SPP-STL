@@ -25,7 +25,7 @@ use std::ops::del::Del
 !public
 cls Memory[T, A: Alloc[T] = GlobalAlloc[T]] {
     !package ptr: Single[T, A]
-    !private cap: USize
+    !package cap: USize
     !private alloc: A
 }
 
