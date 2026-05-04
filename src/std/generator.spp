@@ -5,24 +5,25 @@ use std::boolean::Bool
 use std::option::None
 use std::void::Void
 
+# Note:
+#  - The "send" method will be private
+#  - Current analysis needs them to be public
 
 !public
 cls Gen[Yield, Send=Void] { }
 sup [Yield, Send] Gen[Yield, Send] {
-    !private
+    !public
     !compiler_builtin
     fun send(&mut self, value: Send) -> Generated[Yield or None] { }
 }
-
 
 !public
 cls GenOnce[Yield, Send=Void] { }
 sup [Yield, Send] GenOnce[Yield, Send] {
-    !private
+    !public
     !compiler_builtin
     fun send(&mut self, value: Send) -> Generated[Yield or None] { }
 }
-
 
 !private
 cls Generated[Yield] { }
