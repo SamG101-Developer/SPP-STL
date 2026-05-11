@@ -16,15 +16,12 @@ use std::streams::WritableStream
 use std::streams::StreamErr
 use std::void::Void
 
-
 !public
 cls TcpSocket {
     open: Bool = false
 }
 
-
 sup TcpSocket ext Socket { }
-
 
 sup TcpSocket {
     !public
