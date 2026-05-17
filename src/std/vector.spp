@@ -31,6 +31,8 @@ cls Vec[T, A: Alloc[T] = GlobalAlloc[T]] {
     !public buf: Slice[T, A]
 }
 
+sup [T: Copy, A: Alloc[T]] Vec[T, A] ext Copy { }
+
 sup [T, A: Alloc[T]] Vec[T, A] {
     type Element = T
     type Allocator = A
@@ -216,13 +218,6 @@ sup [T, A: Alloc[T], cmp n: USize] Vec[T, A] ext From[Self, Arr[T, n, A]] {
 }
 
 sup [T: Clone[T], A: Alloc[T]] Vec[T, A] ext Clone[Out=Self] {
-    fun clone(&self) -> Self {
-        # ret Vec[T, A](buf=self.buf.clone())
-        ret Vec[T, A]()
-    }
-}
-
-sup [T: Copy, A: Alloc[T]] Vec[T, A] ext Clone[Out=Self] {
     fun clone(&self) -> Self {
         # ret Vec[T, A](buf=self.buf.clone())
         ret Vec[T, A]()
