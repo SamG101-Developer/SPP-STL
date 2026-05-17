@@ -221,6 +221,13 @@ sup [T: Clone[T], A: Alloc[T]] Vec[T, A] ext Clone[Out=Self] {
     }
 }
 
+sup [T: Copy, A: Alloc[T]] Vec[T, A] ext Clone[Out=Self] {
+    fun clone(&self) -> Self {
+        # ret Vec[T, A](buf=self.buf.clone())
+        ret Vec[T, A]()
+    }
+}
+
 ##
 sup [T: Copy, A: Alloc[T]] Vec[T, A] {
     fun take(&mut self, index: USize) -> T {
