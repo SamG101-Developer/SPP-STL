@@ -7,6 +7,7 @@ use std::array::Arr
 use std::boolean::Bool
 use std::cast::From
 use std::clone::Clone
+use std::copy::Copy
 use std::function::FunRef
 use std::generator::Gen
 use std::generator::GenOnce
