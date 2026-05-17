@@ -94,7 +94,7 @@ sup BigUInt {
 sup BigUInt ext Clone[Self] {
     fun clone(&self) -> Self {
         let mut val = BigUInt()
-        val.data = self.data.clone()
+        val.data = self.data
         ret val
     }
 }
