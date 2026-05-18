@@ -79,7 +79,7 @@ sup Str {
 sup Str {
     !public
     cor chars(&self) -> Iterator[U8] {
-        gen with self.data.clone().iter_mov()
+        gen with self.data.iter_mov()
     }
 
     !public
