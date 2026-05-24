@@ -12,17 +12,14 @@ use std::option::Some
 use std::string::Str
 use std::string_view::StrView
 
-
 !public
 cls Path {
     !package path: Str
 }
 
-
 sup Path {
     !public cmp sep: U8 = '/'
 }
-
 
 sup Path {
     !public
@@ -57,7 +54,6 @@ sup Path {
         ret Path(path=dir_name)
     }
 }
-
 
 sup Path {
     !public
@@ -111,7 +107,6 @@ sup Path {
     }
 }
 
-
 sup Path {
     !public
     fun is_file(&self) -> Bool {
@@ -134,7 +129,6 @@ sup Path {
         ret test > 0
     }
 }
-
 
 sup Path {
     !public
@@ -180,7 +174,6 @@ sup Path {
     }
 }
 
-
 sup Path {
     !public
     cor iter_mov(self) -> Iterator[Str] {
@@ -201,29 +194,25 @@ sup Path {
     }
 }
 
-
-sup Path ext Clone[Out=Path] {
+sup Path ext Clone {
     fun clone(&self) -> Self {
         ret Path(path=self.path.clone())
     }
 }
 
-
-sup Path ext Div[Rhs=Str, Ret=Path] {
+sup Path ext Div {
     fun div(self, that: Str) -> Path {
         ret self.join(that)
     }
 }
 
-
-sup Path ext Div[Rhs=Path, Ret=Path] {
+sup Path ext Div {
     fun div(self, that: Path) -> Path {
         ret self.join(that.path)
     }
 }
 
-
-sup Path ext Eq[Rhs=Path] {
+sup Path ext Eq {
     fun eq(&self, that: &Path) -> Bool {
         ret self.path.eq(&that.path)
     }

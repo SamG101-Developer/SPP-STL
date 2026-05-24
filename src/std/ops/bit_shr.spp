@@ -2,17 +2,14 @@ use std::annotations::abstract_method
 use std::annotations::public
 use std::void::Void
 
-
-!public cls BitShr[Rhs, Ret] { }
-!public cls BitShrAssign[Rhs] { }
-
+!public cls BitShr[Rhs=Self, Ret=Self] { }
+!public cls BitShrAssign[Rhs=Self] { }
 
 sup [Rhs, Ret] BitShr[Rhs, Ret] {
     !public
     !abstract_method
     fun bit_shr(self, that: Rhs) -> Ret { }
 }
-
 
 sup [Rhs] BitShrAssign[Rhs] {
     !public

@@ -1,0 +1,61 @@
+use std::boolean::Integral
+
+!public
+fun volatile_fence() -> Void {
+    intrinsics::volatile_fence()
+}
+
+!public
+cls Vol[T: Integral] {
+    val: T
+}
+
+sup [T: Integral] Vol[T] {
+    !inline
+    !intrinsic(name="std.mem.volatile.Vol.load")
+    fun load(&self) -> T { }
+
+    !inline
+    !intrinsic(name="std.mem.volatile.Vol.store")
+    fun store(&mut self, val: T) -> Void { }
+
+    !inline
+    !intrinsic(name="std.mem.volatile.Vol.swap")
+    fun swap(&mut self, val: T) -> T { }
+
+    !inline
+    !intrinsic(name="std.mem.volatile.Vol.compare_and_swap")
+    fun fetch_and(&mut self, val: T) -> T { }
+
+    !inline
+    !intrinsic(name="std.mem.volatile.Vol.compare_and_swap")
+    fun fetch_ior(&mut self, val: T) -> T { }
+
+    !inline
+    !intrinsic(name="std.mem.volatile.Vol.compare_and_swap")
+    fun fetch_xor(&mut self, val: T) -> T { }
+}
+
+sup [T: Integer] Vol[T] {
+    !inline
+    !intrinsic(name="std.mem.volatile.Vol.compare_and_swap")
+    fun fetch_add(&mut self, val: T) -> T { }
+
+    !inline
+    !intrinsic(name="std.mem.volatile.Vol.compare_and_swap")
+    fun fetch_sub(&mut self, val: T) -> T { }
+}
+
+sup Vol[Bool] {
+    !inline
+    !intrinsic(name="std.mem.volatile.Vol.set")
+    fun set(&mut self) -> Void { }
+
+    !inline
+    !intrinsic(name="std.mem.volatile.Vol.clear")
+    fun clear(&mut self) -> Void { }
+
+    !inline
+    !intrinsic(name="std.mem.volatile.Vol.toggle")
+    fun toggle(&mut self) -> Void { }
+}

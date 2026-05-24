@@ -4,7 +4,7 @@
 # - The new_zero() function is fine because of default uniform initialization.
 # - The exchange() functions copy because only primitives are supported.
 
-use std::annotations::compiler_builtin
+use std::annotations::intrinsic
 use std::annotations::private
 use std::annotations::public
 use std::boolean::Bool
@@ -17,14 +17,13 @@ use std::result::Fail
 use std::result::Pass
 use std::num::bases::Integer
 
-
 !public
 cls Atom[T: Integral] {
     !private val: T
 }
 
 !public
-!compiler_builtin
+!intrinsic(name="std.threading.atomic.atomic_fence")
 fun atomic_fence(order: U8) -> Void {
     intrinsics::atomic_fence(order)
 }
@@ -37,15 +36,15 @@ sup [T: Integral] Atom[T] {
     !public cmp mo_seq_cst: U8 = 4_u8
 
     !public
-    !compiler_builtin
+    !intrinsic(name="std.threading.atomic.new")
     fun new(val: T) -> Atom[T] { }
 
     !public
-    !compiler_builtin
+    !intrinsic(name="std.threading.atomic.new_zeroed")
     fun new_zeroed() -> Atom[T] { }
-    
+
     !public
-    !compiler_builtin
+    !intrinsic(name="std.threading.atomic.is_lock_free")
     fun is_lock_free() -> Bool { }
 
     !public
@@ -65,21 +64,19 @@ sup [T: Integral] Atom[T] {
     }
 
     !public
-    fun compare_exchange(&self, old: T, new: T, success_order: U8 = Self::mo_seq_cst, failure_order: U8 = Self::mo_seq_cst) -> Res[T, T] {
+    fun compare_exchange(&self, old: T, new: T, success_order: U8 = Self::mo_seq_cst, failure_order: U8 = Self::mo_seq_cst) -> (T, Bool) {
         std::abort::abort_if(
             [Self::mo_acquire, Self::mo_acq_rel].contains(&failure_order),
-            "Invalid memory order for compare_exchange success case")
-        let (new, pass) = intrinsics::atomic_compare_exchange(&self.val, old, new, success_order, failure_order)
-        ret case pass { Pass(val=new) } else { Fail(err=old) }
+            "Invalid memory order for compare_exchange failure case")
+        ret intrinsics::atomic_compare_exchange(&self.val, old, new, success_order, failure_order)
     }
 
     !public
-    fun compare_exchange_weak(&self, old: T, new: T, success_order: U8 = Self::mo_seq_cst, failure_order: U8 = Self::mo_seq_cst) -> Res[T, T] {
+    fun compare_exchange_weak(&self, old: T, new: T, success_order: U8 = Self::mo_seq_cst, failure_order: U8 = Self::mo_seq_cst) -> (T, Bool) {
         std::abort::abort_if(
             [Self::mo_acquire, Self::mo_acq_rel].contains(&failure_order),
-            "Invalid memory order for compare_exchange_weak success case")
-        let (new, pass) = intrinsics::atomic_compare_exchange_weak(&self.val, old, new, success_order, failure_order)
-        ret case pass { Pass(val=new) } else { Fail(err=old) }
+            "Invalid memory order for compare_exchange_weak failure case")
+        ret intrinsics::atomic_compare_exchange_weak(&self.val, old, new, success_order, failure_order)
     }
 
     !public
@@ -147,8 +144,9 @@ sup Atom[Bool] {
     }
 
     !public
-    !compiler_builtin
-    fun clear(&self, order: U8 = Self::mo_seq_cst) -> Void { }
+    fun clear(&self, order: U8 = Self::mo_seq_cst) -> Void {
+        intrinsics::atomic_clear(&self.val, order)
+    }
 }
 
 
@@ -172,12 +170,12 @@ sup [T: Integer] Atom[T] {
     fun fetch_abs(&self, order: U8 = Self::mo_seq_cst) -> T {
         ret intrinsics::atomic_fetch_abs(&self.val, order)
     }
-    
+
     !public
     fun fetch_min(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
         ret intrinsics::atomic_fetch_min(&self.val, val, order)
     }
-    
+
     !public
     fun fetch_max(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
         ret intrinsics::atomic_fetch_max(&self.val, val, order)

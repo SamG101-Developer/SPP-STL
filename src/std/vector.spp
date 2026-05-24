@@ -1,176 +1,240 @@
-use std::annotations::public
-use std::annotations::private
-use std::algorithms::Sortable
-use std::allocator::Alloc
-use std::allocator::GlobalAlloc
-use std::array::Arr
-use std::boolean::Bool
-use std::cast::From
-use std::clone::Clone
-use std::copy::Copy
-use std::function::FunRef
-use std::generator::Gen
-use std::generator::GenOnce
-use std::iterator::Iterator
+use std::alloc::Alloc
+use std::alloc::GlobalAlloc
 use std::number::USize
-use std::option::None
-use std::option::Opt
-use std::range::Range
-use std::slice::Slice
-use std::void::Void
-use std::mem::memory::Memory
-use std::ops::add::Add
-use std::ops::add::AddAssign
-use std::ops::eq::Eq
-use std::ops::idx::IndexMut
-use std::ops::idx::IndexRef
-
+use std::mem::raw_buf::RawBuf
 
 !public
-cls Vec[T, A: Alloc[T] = GlobalAlloc[T]] {
-    !public buf: Slice[T, A]
+cls Vec[T, A: Alloc = GlobalAlloc] {
+    !package buffer: RawBuf[T, A]
+    !package length: USize
 }
 
-sup [T: Copy, A: Alloc[T]] Vec[T, A] ext Copy { }
+sup [T] Vec[T] {
+    !public
+    fun new() -> Self {
+        ret Self::new_in(GlobalAlloc)
+    }
 
-sup [T, A: Alloc[T]] Vec[T, A] {
+    !public
+    fun new_with_capacity(cap: USize) -> Self {
+        ret Self::new_with_capacity_in(cap, GlobalAlloc)
+    }
+
+    !public
+    fun new_filled(len: USize, element: T) -> Self {
+        ret Self::new_filled_in(len, element, GlobalAlloc)
+    }
+
+    !public
+    fun new_from_fun(len: USize, f: FnMut[(USize,), T]) -> Self {
+        let mut vec = Self::new_with_capacity_in(len, GlobalAlloc)
+        loop i in Range[USize]::between(0_uz, len) { vec.append_unchecked(f(i)) }
+        vec.length = len
+        ret vec
+    }
+}
+
+sup [T, A: Alloc] Vec[T, A] {
     type Element = T
     type Allocator = A
 
     !public
-    fun new() -> Vec[T, A] {
-        ret Vec[T, A]::new_with_capacity(1_uz)
+    fun new_in(alloc: A) -> Self {
+        ret Vec(RawBuf::dangling_in(alloc), 0_uz)
     }
 
     !public
-    fun new_with_capacity(capacity: USize) -> Vec[T, A] {
-        # ret Vec[T, A](buf=A::alloc(capacity))
-        ret Vec[T, A]()
+    fun new_with_capacity_in(cap: USize, alloc: A) -> Self {
+        ret Vec(RawBuf::with_capacity_in(cap, alloc), 0_uz)
     }
 
     !public
-    fun push_back(&mut self, element: T) -> Void {
-        case self.buf.len == self.buf.mem.cap { self.grow_double() }
-        self.buf.mem.place(self.buf.len, element)
-        self.buf.len += 1_uz
+    fun new_filled_in(len: USize, element: T, alloc: A) -> Self {
+        let mut vec = Self::new_with_capacity_in(len, alloc)
+        std::mem::ops::fill(vec.buffer.ptr, element, len)
+        vec.length = len
+        ret vec
     }
 
-    !public
-    fun push(&mut self, index: USize, element: T) -> Void {
-        case self.buf.len == self.buf.mem.cap { self.grow_double() }
-        # self.buf.shift(index, 1_uz)
-        self.buf.mem.place(index, element)
-        self.buf.len += 1_uz
+    # LENGTH #
+
+    !public fun cap(&self) -> USize {
+        ret self.buffer.cap()
     }
 
-    !public
-    fun push_back_vec(&mut self, that: Vec[T]) -> Void {
-        # One time growth check
-        let required_cap = self.buf.len + that.buf.len
-        loop self.capacity() < required_cap { self.grow_double() }
-        self.buf.mem.place_mem(self.buf.len, that.buf.mem)
-        self.buf.len += that.buf.len
+    !public fun capacity_reserve(&mut self, additional: USize) -> Void {
+        self.buffer.capacity_reserve(self.length, additional)
     }
 
-    !public
-    fun push_vec(&mut self, index: USize, that: Vec[T]) -> Void {
-        # One time growth check
-        let required_cap = self.buf.len + that.buf.len
-        loop self.capacity() < required_cap { self.grow_double() }
-        # self.buf.shift(index, that.buf.len)
-        self.buf.mem.place_mem(index, that.buf.mem)
-        self.buf.len += that.buf.len
+    !public fun capacity_reserve_exact(&mut self, required_cap: USize) -> Void {
+        self.buffer.capacity_reserve_exact(self.length, required_cap)
     }
 
-    !private
-    fun grow_double(&mut self) -> Void {
-        let new_cap = self.buf.mem.cap * 2_uz
-        # self.buf.mem.reallocate(&mut self.buf, new_cap) TODO
+    !public fun capacity_shrink(&mut self) -> Void {
+        self.buffer.shrink(self.length)
     }
 
-    !public
-    fun pop_back(&mut self) -> Opt[T] {
-        # Remove the last element and decrease the length.
-        self.buf.len -= 1_uz
-        ret self.buf.mem.take(self.buf.len)
+    !public fun capacity_shrink_to(&mut self, required_cap: USize) -> Void {
+        self.buffer.shrink(required_cap)
     }
 
-    !public
-    fun pop(&mut self, index: USize) -> Opt[T] {
-        # Remove the nth element and decrease the length.
-        self.buf.len -= 1_uz
-        let val = self.buf.mem.take(index)
-        # self.buf.shift_back(index, 1_uz)
-        ret val
+    # CAPACITY #
+
+    !public fun len(&self) -> USize {
+        ret self.length
     }
 
-    !public
-    cor get_head_ref(&self) -> Gen[&T or None] {
+    !public fun is_empty(&self) -> Bool {
+        ret self.length == 0_uz
+    }
+
+    !public fun truncate(&mut self, new_len: USize) -> Void {
+        case new_len >= self.length { ret }
+        self.buffer.clear_range(new_len, self.length - new_len)
+        self.length = new_len
+    }
+
+    !public fun resize(&mut self, new_len: USize, element: T) -> Void {
+        case new_len < self.length { ret self.truncate(new_len) }
+        let additional = new_len - self.length
+        case self.len() + additional <= self.cap() { ret self.append_many_unchecked(Vec::new_filled_in(additional, element)) }
+        self.capacity_reserve(additional)
+        self.append_many_unchecked(Vec::new_filled_in(additional, element))
+    }
+
+    # INFALLIBLE MUTATORS #
+
+    !public fun append(&mut self, element: T) -> Void {
+        case self.len() < self.cap() { ret self.append_unchecked(element) }
+        self.grow_one()
+        self.append_unchecked(element)
+    }
+
+    !public fun append_within_capacity(&mut self, element: T) -> Res[Void, AllocErr] {
+        case self.len() < self.cap() { ret self.append_unchecked(element) }
+        ret Fail(err=AllocErr::capacity_overflow)
+    }
+
+    !public fun append_many(&mut self, that: Vec[T]) -> Void {
+        let required_cap = self.len() + that.len()
+        case required_cap <= self.cap() { ret self.append_vec_unchecked(that) }
+        self.capacity_reserve(that.len())
+        self.append_vec_unchecked(that)
+    }
+
+    !public fun insert_at(&mut self, index: USize, element: T) -> Void {
+        case self.len() < self.cap() { ret self.insert_at_unchecked(index, element) }
+        self.grow_one()
+        self.insert_at_unchecked(index, element)
+    }
+
+    !public fun insert_many_at(&mut self, index: USize, that: Vec[T]) -> Void {
+        let required_cap = self.len() + that.len()
+        case required_cap <= self.cap() { ret self.insert_vec_at_unchecked(index, that) }
+        self.capacity_reserve(that.len())
+        self.insert_vec_at_unchecked(index, that)
+    }
+
+    # fill
+
+    !public fun take_last(&mut self) -> Opt[T] {
+        case self.is_empty() { ret None }
+        self.length -= 1_uz
+        ret self.buffer.take(self.length)
+    }
+
+    !public fun take_last_if(&mut self, f: FnMov[(&mut T,), Bool]) -> Opt[T] {
+        case self.is_empty() { ret None }
+        let last_index = self.length - 1_uz
+        case f(self[mut last_index]).not { ret None }
+        self.length -= 1_uz
+        ret self.buffer.take(last_index)
+    }
+
+    !public fun take_at(&mut self, index: USize) -> Opt[T] {
+        case index >= self.len() { ret None }
+        let element = self.buffer.take(index)
+        self.buffer.shift(index + 1_uz, index, self.len() - index - 1_uz)
+        self.length -= 1_uz
+        ret element
+    }
+
+    !public fun clear(&mut self) -> Void {
+        self.buffer.clear(self.length)
+        self.length = 0_uz
+    }
+
+    !public fun reverse(&mut self) -> Void {
+        let (l, r) = (0, self.len() - 1_uz)
+        loop l < r {
+            self.swap(l, r)
+            l += 1_uz
+            r -= 1_uz
+        }
+    }
+
+    !public fun swap(&mut self, i: USize, j: USize) -> Void {
+        std::mem::ops::swap(self[mut i], self[mut j])
+    }
+
+    # ACCESSORS #
+
+    !public cor get_head_ref(&self) -> Indexed[&T or None] {
         gen with self.get_ref(0_uz)
     }
 
-    !public
-    cor get_tail_ref(&self) -> Gen[&T or None] {
+    !public cor get_tail_ref(&self) -> Indexed[&T or None] {
         gen with self.get_ref(self.buf.len - 1_uz)
     }
 
-    !public
-    cor get_ref(&self, index: USize) -> Gen[&T or None] {
-        case index >= self.buf.len { gen None() }
-        gen self.index_ref(index)
+    !public cor get_ref(&self, index: USize) -> Indexed[&T or None] {
+        case index >= self.buf.len { ret None }
+        gen with self.index_ref(index)
     }
 
-    !public
-    cor get_head_mut(&mut self) -> Gen[&mut T or None] {
+    !public cor get_head_mut(&mut self) -> Indexed[&mut T or None] {
         gen with self.get_mut(0_uz)
     }
 
-    !public
-    cor get_tail_mut(&mut self) -> Gen[&mut T or None] {
+    !public cor get_tail_mut(&mut self) -> Indexed[&mut T or None] {
         gen with self.get_mut(self.buf.len - 1_uz)
     }
 
-    !public
-    cor get_mut(&mut self, index: USize) -> Gen[&mut T or None] {
-        case index >= self.buf.len { gen None() }
-        gen self.index_mut(index)
+    !public cor get_mut(&mut self, index: USize) -> Indexed[&mut T or None] {
+        case index >= self.buf.len { gen None }
+        gen with self.index_mut(index)
     }
 
-    !public
-    fun clear(&mut self) -> Void {
-        self.buf.mem.clear()
+    # INTERNAL MUTATORS #
+
+    !private fun append_unchecked(&mut self, element: T) -> Void {
+        self.buffer.place(self.length, element)
+        self.length += 1_uz
     }
 
-    !public
-    fun length(&self) -> USize {
-        ret self.buf.len
+    !private fun append_vec_unchecked(&mut self, that: Vec[T]) -> Void {
+        std::mem::ops::mem_copy(self.buffer.ptr, that.buffer.ptr, that.len())
+        self.length += that.len()
     }
 
-    !public
-    fun capacity(&self) -> USize {
-        ret self.buf.mem.cap
+    !private fun insert_at_unchecked(&mut self, index: USize, element: T) -> Void {
+        self.buffer.shift(index, index + 1_uz, self.len() - index)
+        self.buffer.place(index, element)
+        self.length += 1_uz
     }
 
-    !public
-    fun is_empty(&self) -> Bool {
-        ret self.buf.len == 0_uz
+    !private fun insert_vec_at_unchecked(&mut self, index: USize, that: Vec[T]) -> Void {
+        self.buffer.shift(index, index + that.len(), self.len() - index)
+        std::mem::ops::mem_copy(self.buffer.ptr, that.buffer.ptr, that.len(), index)
+        self.length += that.len()
     }
 
-    !public
-    fun resize(&mut self, new_length: USize) -> Void {
-        # self.buf.resize(new_length)
-        self.buf.len = new_length
+    !private fun grow_one(&mut self) -> Void {
+        let new_cap = case self.cap() == 0_uz { 1_uz } else { cap * 2_uz }
+        self.buffer.grow(new_cap)
     }
 
-    !public
-    fun shrink_to_fit(&mut self) -> Void {
-        # self.buf.resize(self.buf.len)
-    }
-
-    !public
-    fun swap(&mut self, i: USize, j: USize) -> Void {
-        std::mem::ops::swap(self[mut i], self[mut j])
-    }
+    # ITERATE #
 
     !public
     cor iter_mov(self) -> Iterator[T] {
@@ -203,85 +267,56 @@ sup [T, A: Alloc[T]] Vec[T, A] {
     }
 }
 
-
-sup [T, A: Alloc[T]] Vec[T, A] ext From[Self, Slice[T, A]] {
-    fun from(that: Slice[T, A]) -> Self {
-        ret Vec[T, A](buf=that)
+sup [T, A: Alloc] Vec[T, A] ext IndexMut[T, USize] {
+    fun index_mut(&mut self, index: USize) -> Indexed[&mut T] {
+        ret self.buf.index_mut(index)
     }
 }
 
-
-sup [T, A: Alloc[T], cmp n: USize] Vec[T, A] ext From[Self, Arr[T, n, A]] {
-    fun from(that: Arr[T, n, A]) -> Self {
-        ret Vec[T, A]::from(Slice[T, A]::from(that))
+sup [T, A: Alloc] Vec[T, A] ext IndexRef[T, USize] {
+    cor index_ref(&self, index: USize) -> Indexed[&T] {
+        ret self.buf.index_ref(index)
     }
 }
 
-sup [T: Clone[T], A: Alloc[T]] Vec[T, A] ext Clone[Out=Self] {
+sup [T: Clone, A: Alloc & Clone] Vec[T, A] ext Clone {
     fun clone(&self) -> Self {
-        # ret Vec[T, A](buf=self.buf.clone())
-        ret Vec[T, A]()
+        let alloc = self.buffer.alloc.clone()
+        let mut vec = Self::new_with_capacity_in(self.len(), alloc)
+        std::mem::ops::mem_copy(vec.buffer.ptr, self.buffer.ptr, self.len())
+        vec.length = self.len()
+        ret vec
     }
 }
 
-##
-sup [T: Copy, A: Alloc[T]] Vec[T, A] {
-    fun take(&mut self, index: USize) -> T {
-        # Copy a value out of the vector and return it.
-        ret self.buf.mem.take(index).unwrap_or_default()
-    }
-}
-##
-
-sup [T, A: Alloc[T]] Vec[T, A] ext IndexMut[T, USize] {
-    cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] {
-        gen with self.buf.index_mut(index)
-    }
-}
-
-sup [T, A: Alloc[T]] Vec[T, A] ext IndexRef[T, USize] {
-    cor index_ref(&self, index: USize) -> GenOnce[&T] {
-        gen with self.buf.index_ref(index)
-    }
-}
-
-sup [T, A: Alloc[T]] Vec[T, A] ext Add[Self, Ret=Self] {
+sup [T, A: Alloc] Vec[T, A] ext Add {
     fun add(self, that: Self) -> Self {
         let mut result = self
-        result.push_back_vec(that)
+        result.append_all(that)
         ret result
     }
 }
 
-
-sup [T, A: Alloc[T]] Vec[T, A] ext AddAssign[Self] {
+sup [T, A: Alloc] Vec[T, A] ext AddAssign {
     fun add_assign(&mut self, that: Self) -> Void {
-        self.push_back_vec(that)
+        self.append_all(that)
     }
 }
 
-sup [T: Eq[T], A: Alloc[T]] Vec[T, A] ext Eq[Self] {
-    fun eq(&self, that: &Vec[T]) -> Bool {
-        case self.buf.len != that.buf.len { ret false }
-        loop i in Range[USize]::between(0_uz, self.buf.len) {
-            # TODO: Compare the values.
+sup [T: Eq, A: Alloc] Vec[T, A] ext Eq {
+    fun eq(&self, that: Self) -> Bool {
+        case self.len() != that.len() { ret false }
+        loop i in Range[USize]::between(0_uz, self.len()) {
+            case self[i] != that[i] { ret false }
         }
         ret true
     }
 
-    fun ne(&self, that: &Vec[T]) -> Bool {
-        case self.buf.len != that.buf.len { ret true }
-        loop i in Range[USize]::between(0_uz, self.buf.len) {
-            # TODO: Compare the values.
+    fun ne(&self, that: Self) -> Bool {
+        case self.len() != that.len() { ret true }
+        loop i in Range[USize]::between(0_uz, self.len()) {
+            case self[i] == that[i] { ret true }
         }
         ret false
     }
 }
-
-##
-sup [T: Ord[T]] Vec[T] ext Sortable[T] {
-    fun sort(&mut self) -> Void { }
-
-    fun sort_by(&mut self, compare: FunRef[(T, T), Bool]) -> Void { }
-}
-##

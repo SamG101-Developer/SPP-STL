@@ -1,7 +1,6 @@
-use std::annotations::compiler_builtin
+use std::annotations::intrinsic
 use std::annotations::public
 use std::llvm::inline
-
 use std::boolean::Bool
 use std::cast::From
 use std::number::U32
@@ -11,18 +10,15 @@ use std::option::Opt
 use std::option::None
 use std::option::Some
 use std::void::Void
-
+use std::num::sized_integer::SizedInteger
+use std::num::sized_integer_signed::SizedIntegerSigned
+use std::num::sized_floating_point::SizedFloatingPoint
 use std::ops::ord::Ord
 use std::ops::pow::Pow
 use std::ops::rem::Rem
 use std::ops::rem::RemAssign
 use std::ops::div::Div
 use std::ops::div::DivAssign
-
-use std::num::sized_integer::SizedInteger
-use std::num::sized_integer_signed::SizedIntegerSigned
-use std::num::sized_floating_point::SizedFloatingPoint
-
 
 # Type alias the "unsigned" version of the the sized integer type.
 !public
@@ -70,7 +66,7 @@ From[Self, SizedIntegerSigned[that_w]] {
     }
 }
 
-sup [cmp w: U32] SizedIntegerUnsigned[w] ext Div[Rhs=Self, Ret=Self] {
+sup [cmp w: U32] SizedIntegerUnsigned[w] ext Div {
     cmp fun div(self, that: Self) -> Self {
         ret intrinsics::udiv(self, that)
     }
@@ -82,7 +78,7 @@ sup [cmp w: U32] SizedIntegerUnsigned[w] ext DivAssign[Rhs=Self] {
     }
 }
 
-sup [cmp w: U32] SizedIntegerUnsigned[w] ext Rem[Rhs=Self, Ret=Self] {
+sup [cmp w: U32] SizedIntegerUnsigned[w] ext Rem {
     cmp fun rem(self, that: Self) -> Self {
         ret intrinsics::urem(self, that)
     }

@@ -1,10 +1,7 @@
 use std::annotations::public
-use std::cast::From
-
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 use std::num::sized_integer_signed::SizedIntegerSigned
 use std::num::sized_floating_point::SizedFloatingPoint
-
 
 # Unsigned integers.
 !public type U8 = SizedIntegerUnsigned[8_u32]
@@ -15,7 +12,6 @@ use std::num::sized_floating_point::SizedFloatingPoint
 !public type U256 = SizedIntegerUnsigned[256_u32]
 !public type USize = SizedIntegerUnsigned[64_u32]
 
-
 # Signed integers.
 !public type S8 = SizedIntegerSigned[8_u32]
 !public type S16 = SizedIntegerSigned[16_u32]
@@ -25,14 +21,12 @@ use std::num::sized_floating_point::SizedFloatingPoint
 !public type S256 = SizedIntegerSigned[256_u32]
 !public type SSize = SizedIntegerSigned[64_u32]
 
-
 # Floating points.
 !public type F8 = SizedFloatingPoint[8_u32]
 !public type F16 = SizedFloatingPoint[16_u32]
 !public type F32 = SizedFloatingPoint[32_u32]
 !public type F64 = SizedFloatingPoint[64_u32]
 !public type F128 = SizedFloatingPoint[128_u32]
-
 
 # Can't add the FP256 until LLVM adds intrinsic support for them.
 # type F256 = SizedFloatingPoint[256_u32]

@@ -8,12 +8,10 @@ use std::result::Res
 use std::void::Void
 use std::threading::mutex::LockErr
 
-
 !public
 cls SpinLock {
     !private id: S32
 }
-
 
 sup SpinLock {
     !public

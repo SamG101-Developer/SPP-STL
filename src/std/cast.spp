@@ -1,61 +1,56 @@
 use std::annotations::abstract_method
-use std::annotations::compiler_builtin
+use std::annotations::intrinsic
 use std::annotations::public
 use std::option::None
-use std::option::Opt
-use std::option::Some
+use std::result::Res
+use std::string::StrView
 use std::generator::GenOnce
-
 
 !public cls From[This, That] { }
 !public cls TryFrom[This, That] { }
 
-
-sup [This, That] From[This, That] {
-    !public
-    !abstract_method
-    fun from(that: That) -> This { }
+!public cls ConversionErr {
+    !public msg: StrView
 }
 
-
-sup [This, That] TryFrom[This, That] {
+sup [That] From[That] {
     !public
     !abstract_method
-    fun try_from(that: That) -> Opt[This] { }
+    fun from(that: That) -> Self { }
 }
 
+sup [That] TryFrom[That, Err=ConversionErr] {
+    !public
+    !abstract_method
+    fun try_from(that: That) -> Res[Self, Err] { }
+}
 
 # The `upcast_mov` method slices an object of type `Derived` to its base type `Base` by moving it. Fields that don't
 # belong to the type `Base` are discarded, and the resulting object is of type `Base`. This is useful for converting
 # derived types to their base types when ownership is transferred.
 !public
-!compiler_builtin
+!intrinsic(name="std.cast.upcast_mov")
 fun upcast_mov[Base, Derived: Base](derived: Derived) -> Base { }
-
 
 # The `upcast_mut` method does not slice an object, but borrows part of it mutably from memory. The part it borrows
 # represents the fields over the `Base` type. This is useful for working with derived types when you need to modify the
 # base part of the object, or a method only accepts a borrow to the base type.
 !public
-!compiler_builtin
+!intrinsic(name="std.cast.upcast_mut")
 cor upcast_mut[Base, Derived: Base](derived: &mut Derived) -> GenOnce[&mut Base] { }
 
-
 !public
-!compiler_builtin
+!intrinsic(name="std.cast.upcast_ref")
 cor upcast_ref[Base, Derived: Base](derived: &Derived) -> GenOnce[&Base] { }
 
-
 !public
-!compiler_builtin
+!intrinsic(name="std.cast.downcast_mov")
 fun downcast_mov[Base, Derived: Base](base: Base) -> Derived { }
 
-
 !public
-!compiler_builtin
+!intrinsic(name="std.cast.downcast_mut")
 cor downcast_mut[Base, Derived: Base](base: &mut Base) -> GenOnce[&mut Derived or None] { }
 
-
 !public
-!compiler_builtin
+!intrinsic(name="std.cast.downcast_ref")
 cor downcast_ref[Base, Derived: Base](base: &Base) -> GenOnce[&Derived or None] { }

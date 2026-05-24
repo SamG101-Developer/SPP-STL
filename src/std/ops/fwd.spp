@@ -2,11 +2,9 @@ use std::annotations::abstract_method
 use std::annotations::public
 use std::generator::GenOnce
 
-
 !public cls FwdMov[T] { }
 !public cls FwdMut[T] { }
 !public cls FwdRef[T] { }
-
 
 sup [T] FwdMov[T] {
     !public
@@ -14,13 +12,11 @@ sup [T] FwdMov[T] {
     cor fwd_mov(self) -> GenOnce[T] { }
 }
 
-
 sup [T] FwdMut[T] {
     !public
     !abstract_method
     cor fwd_mut(&mut self) -> GenOnce[&mut T] { }
 }
-
 
 sup [T] FwdRef[T] {
     !public

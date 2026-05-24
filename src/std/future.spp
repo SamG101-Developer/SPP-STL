@@ -1,4 +1,4 @@
-use std::annotations::compiler_builtin
+use std::annotations::intrinsic
 use std::annotations::private
 use std::annotations::public
 use std::number::U8
@@ -6,20 +6,18 @@ use std::option::Opt
 use std::void::Void
 use std::threading::atomic::Atom
 
-
 !public
 cls Fut[T] {
     !private state: Atom[U8]
     !private val: Opt[T]
 }
 
-
 sup [T] Fut[T] {
     !public
-    !compiler_builtin
+    !intrinsic(name="std.future.Fut.await")
     fun await(self) -> T { }
 
     !public
-    !compiler_builtin
+    !intrinsic(name="std.future.Fut.await_all")
     fun await_all(..futures: Fut[T]) -> Void { }
 }

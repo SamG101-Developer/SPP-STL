@@ -1,0 +1,150 @@
+use std::annotations::package
+use std::annotations::private
+use std::annotations::public
+use std::allocator::Alloc
+use std::allocator::GlobalAlloc
+use std::array::Arr
+use std::cast::From
+use std::clone::Clone
+use std::iterator::Iterator
+use std::generator::GenOnce
+use std::mem::memory::Memory
+use std::number::U8
+use std::number::USize
+use std::option::None
+use std::string::Str
+use std::string_view::StrView
+use std::void::Void
+use std::ops::idx::IndexRef
+use std::ops::idx::IndexMut
+use std::mem::ops::MaybeInit
+
+# The RawBuf type is a low level container for contiguous elements in memory. It is capacity aware, but not length
+# aware. It is used as the underlying container inside a Vec. Elements are not guaranteed to be initialized, so all
+# accessors are Opt-returning.
+!package
+cls RawBuf[T, A: Alloc = GlobalAlloc] {
+    !package ptr: Ptr[T]
+    !package capacity: USize
+    !package alloc: A
+}
+
+sup [T] RawBuf[T, GlobalAlloc] {
+    !package
+    fun dangling() -> Self {
+        ret Self::new_in(GlobalAlloc)
+    }
+
+    !package
+    fun with_capacity(cap: USize) -> Self {
+        ret Self::new_with_capacity_in(cap, GlobalAlloc)
+    }
+
+    !package
+    fun with_capacity_zeroed(cap: USize) -> Self {
+        ret Self::new_with_capacity_in(cap, GlobalAlloc)
+    }
+}
+
+sup [T, A: Alloc] RawBuf[T, A] {
+    type Element = T
+    type Allocator = A
+
+    !package
+    fun dangling_in(alloc: A) -> Self {
+        let ptr = Ptr[T]::from_addr(std::mem::ops::align_of[T]())
+        ret RawBuf(ptr, 0, alloc)
+    }
+
+    !package
+    fun with_capacity_in(cap: USize, alloc: A) -> Self {
+        let ptr = alloc.allocate(Layout::new_for_array[T](cap))
+        ret RawBuf(ptr, capacity=cap, alloc)
+    }
+
+    !package
+    fun with_capacity_zeroed_in(cap: USize, alloc: A) -> Self {
+        let ptr = alloc.allocate_zeroed(Layout::new_for_array[T](cap))
+        ret RawBuf(ptr, capacity=cap, alloc)
+    }
+
+    !package
+    fun cap(&self) -> USize {
+        ret self.capacity
+    }
+
+    !package
+    fun capacity_grow(&mut self, new_cap: USize) -> Res[Void, AllocErr] {
+        self.alloc.grow(self.ptr, Layout::new_for_array[T](self.capacity), Layout::new_for_array[T](new_cap))?
+        self.capacity = new_cap
+        ret Pass[Void]()
+    }
+
+    !package fun capacity_shrink(&mut self, new_cap: USize) -> Void {
+        self.try_shrink(new_cap).expect("Shrink failed")
+    }
+
+    # Shrink the buffer to the new capacity. The new capacity must be smaller than the current capacity, and all
+    # elements above the new capacity will be dropped. This is useful for a Vec type to shrink the buffer after elements
+    # have been removed.
+    !package fun try_capacity_shrink(&mut self, new_cap: USize) -> Res[Void, AllocErr] {
+        self.alloc.shrink(self.ptr, Layout::new_for_array[T](self.capacity), Layout::new_for_array[T](new_cap))?
+        self.capacity = new_cap
+        ret Pass[Void]()
+    }
+
+    # Reserves capacity for at least "additional" more elements, checking for overflow. The "len" parameter is the
+    # number of elements that are initialized by the owning container, for example a Vec type. If the current capacity
+    # is sufficient, does nothing. Otherwise, grows the buffer to fit the required capacity.
+    !package fun capacity_reserve(&mut self, len: USize, additional: USize) -> Res[Void, AllocErr] {
+        let new_cap = len.add_checked(additional).ok_or(AllocErr::capacity_overflow)?
+        case new_cap <= self.capacity { ret Pass[Void]() }
+        self.grow(new_cap)
+    }
+
+    !package
+    !instrinsic(name="std.mem.buffer.Buffer.clear")
+    fun clear(&mut self) -> Void { }
+
+    !package
+    !instrinsic(name="std.mem.buffer.Buffer.take_at")
+    fun take_at(&mut self, index: USize) -> Opt[T] { }
+
+    !package
+    !instrinsic(name="std.mem.buffer.Buffer.place_at")
+    fun place_at(&mut self, index: USize, element: T) -> Void { }
+
+    !package
+    !intrinsic(name="std.mem.buffer.Buffer.iter_mov")
+    cor iter_mov(self) -> Iterator[T] { }
+
+    !package
+    !intrinsic(name="std.mem.buffer.Buffer.iter_mut")
+    cor iter_mut(&mut self) -> Iterator[&mut T] { }
+
+    !package
+    !intrinsic(name="std.mem.buffer.Buffer.iter_ref")
+    cor iter_ref(&self) -> Iterator[&T] { }
+
+    !public
+    !intrinsic(name="std.mem.buffer.Buffer.reverse_iter_mov")
+    cor reverse_iter_mov(self) -> Iterator[T] { }
+
+    !public
+    !intrinsic(name="std.mem.buffer.Buffer.reverse_iter_mut")
+    cor reverse_iter_mut(&mut self) -> Iterator[&mut T] { }
+
+    !public
+    !intrinsic(name="std.mem.buffer.Buffer.reverse_iter_ref")
+    cor reverse_iter_ref(&self) -> Iterator[&T] { }
+}
+
+sup [T, A: Alloc] RawBuf[T, A] ext IndexMut[T, USize] {
+    !intrinsic(name="std.mem.buffer.Buffer.index_mut")
+    cor index_mut(&mut self, index: USize) -> Indexed[&mut T or None] { }
+}
+
+sup [T, A: Alloc] RawBuf[T, A] ext IndexRef[T, USize] {
+    !intrinsic(name="std.mem.buffer.Buffer.index_ref")
+    cor index_ref(&self, index: USize) -> Indexed[&T or None] { }
+}

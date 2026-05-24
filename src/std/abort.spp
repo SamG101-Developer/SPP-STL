@@ -1,5 +1,5 @@
+use std::annotations::intrinsic
 use std::annotations::public
-use std::annotations::compiler_builtin
 use std::llvm::inline
 use std::boolean::Bool
 use std::string_view::StrView
@@ -7,7 +7,7 @@ use std::void::Void
 
 !public
 !inline
-!compiler_builtin
+!intrinsic(name="std.abort.abort")
 fun abort(msg: StrView = "") -> ! { }
 
 !public

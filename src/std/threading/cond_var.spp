@@ -10,6 +10,7 @@ use std::result::Res
 use std::void::Void
 use std::threading::mutex::LockErr
 use std::threading::mutex::Mutex
+use std::ops::del::Del
 
 !public cls CondVar { !package id: S32 }
 
@@ -56,7 +57,7 @@ sup CondVar {
 }
 
 
-sup CondVar ext std::ops::del::Del {
+sup CondVar ext Del {
     fun del(&mut self) -> Void {
         # Destroy the condition variable using the sppc threading API.
         sppc::condvar_destroy(self.id)

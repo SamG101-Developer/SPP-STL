@@ -1,18 +1,16 @@
-use std::annotations::compiler_builtin
+use std::annotations::intrinsic
 use std::annotations::public
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::shared::Shared
 
-
 !public
 cls Shadow[T, A: Alloc[T] = GlobalAlloc[T]] { }
-
 
 sup [T] Shadow[T] {
     !public type Element = T
 
     !public
-    !compiler_builtin
+    !intrinsic(name="std.shadow.Shadow.upgrade")
     fun upgrade(&self) -> Shared[T] { }
 }

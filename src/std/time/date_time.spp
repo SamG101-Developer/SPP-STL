@@ -4,7 +4,6 @@ use std::number::S32
 use std::time::time_zone::TimeZone
 use std::time::time_point::TimePoint
 
-
 !public
 cls DateTime {
     !public year: U32
@@ -16,7 +15,6 @@ cls DateTime {
     !public nanosecond: U32
     !public timezone_offset_seconds: S32
 }
-
 
 sup DateTime {
     !public

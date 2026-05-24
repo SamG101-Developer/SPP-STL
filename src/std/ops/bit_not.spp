@@ -2,17 +2,14 @@ use std::annotations::abstract_method
 use std::annotations::public
 use std::void::Void
 
-
-!public cls BitNot[Ret] { }
+!public cls BitNot[Ret=Self] { }
 !public cls BitNotAssign { }
-
 
 sup [Ret] BitNot[Ret] {
     !public
     !abstract_method
     fun bit_not(self) -> Ret { }
 }
-
 
 sup BitNotAssign {
     !public

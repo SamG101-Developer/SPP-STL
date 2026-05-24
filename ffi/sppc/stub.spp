@@ -46,16 +46,16 @@ fun fd_lock_sh(fd: CInt, non_blocking: CBool) -> CInt { }
 fun fd_unlock(fd: CInt) -> CInt { }
 
 !std::annotations::ffi(symbol="mem_alloc")
-fun mem_alloc[T](size: CSizeT) -> CVoidPtr[T] { }
+fun mem_alloc(size: CSizeT) -> CVoidPtr { }
 
 !std::annotations::ffi(symbol="mem_calloc")
-fun mem_calloc[T](num: CSizeT, size: CSizeT) -> CVoidPtr[T] { }
+fun mem_calloc(num: CSizeT, size: CSizeT) -> CVoidPtr { }
 
 !std::annotations::ffi(symbol="mem_dealloc")
-fun mem_dealloc[T](ptr: CVoidPtr[T]) -> CVoid { }
+fun mem_dealloc(ptr: &mut CVoidPtr) -> CVoid { }
 
 !std::annotations::ffi(symbol="mem_realloc")
-fun mem_realloc[T](ptr: CVoidPtr[T], new_size: CSizeT) -> CVoidPtr[T] { }
+fun mem_realloc(ptr: &mut CVoidPtr, new_size: CSizeT) -> CVoidPtr { }
 
 !std::annotations::ffi(symbol="str_len")
 fun str_len(s: &CCharPtr) -> CSizeT { }

@@ -1,4 +1,4 @@
-use std::annotations::compiler_builtin
+use std::annotations::intrinsic
 use std::annotations::public
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
@@ -13,23 +13,21 @@ use std::option::Some
 use std::shadow::Shadow
 use std::void::Void
 
-
 !public
 cls Shared[T, A: Alloc[T] = GlobalAlloc[T]] {
     shared_counter: USize
     shadow_counter: USize
 }
 
-
 sup [T] Shared[T] {
     !public type Element = T
 
     !public
-    !compiler_builtin
+    !intrinsic(name="std.shared.Shared.new")
     fun new(val: T) -> Shared[T] { }
 
     !public
-    !compiler_builtin
+    !intrinsic(name="std.shared.Shared.downgrade")
     fun downgrade(&self) -> Shadow[T] { }
 
     !public
@@ -43,20 +41,17 @@ sup [T] Shared[T] {
     }
 }
 
-
 sup [T] Shared[T] ext FwdRef[T] {
-    !compiler_builtin
+    !intrinsic(name="std.shared.Shared.fwd_ref")
     cor fwd_ref(&self) -> GenOnce[&T] { }
 }
 
-
-sup [T] Shared[T] ext Clone[Out=Self] {
-    !compiler_builtin
+sup [T] Shared[T] ext Clone {
+    !intrinsic(name="std.shared.Shared.clone")
     fun clone(&self) -> Self { }
 }
 
-
 sup [T] Shared[T] ext Del {
-    !compiler_builtin
+    # TODO
     fun del(&mut self) -> Void { }
 }

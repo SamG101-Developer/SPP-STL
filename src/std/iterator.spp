@@ -10,11 +10,13 @@ use std::option::Opt
 use std::option::Some
 use std::void::Void
 
+!public
+cls Indexed[T] { }
+sup [T] Indexed ext GenOnce[T] { }
 
 !public
 cls Iterator[T] { }
 sup [T] Iterator[T] ext Gen[T] { }
-
 
 sup [T] Iterator[T] {
     ##

@@ -1,7 +1,6 @@
-use std::annotations::compiler_builtin
+use std::annotations::intrinsic
 use std::annotations::private
 use std::annotations::public
-use std::boolean::Bool
 use std::option::None
 use std::void::Void
 
@@ -13,15 +12,15 @@ use std::void::Void
 cls Gen[Yield, Send=Void] { }
 sup [Yield, Send] Gen[Yield, Send] {
     !public
-    !compiler_builtin
+    !intrinsic(name="std.generator.Gen.send")
     fun send(&mut self, value: Send) -> Generated[Yield or None] { }
 }
 
 !public
-cls GenOnce[Yield, Send=Void] { }
-sup [Yield, Send] GenOnce[Yield, Send] {
+cls GenOnce[Yield] { }
+sup [Yield, Send] GenOnce[Yield] {
     !public
-    !compiler_builtin
+    !intrinsic(name="std.generator.GenOnce.send")
     fun send(&mut self, value: Send) -> Generated[Yield or None] { }
 }
 

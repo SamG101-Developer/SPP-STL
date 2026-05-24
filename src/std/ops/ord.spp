@@ -4,7 +4,7 @@ use std::annotations::virtual_method
 use std::boolean::Bool
 use std::number::S32
 
-!public cls Ord[Rhs] { }
+!public cls Ord[Rhs=Self] { }
 
 sup [Rhs] Ord[Rhs] {
     !public

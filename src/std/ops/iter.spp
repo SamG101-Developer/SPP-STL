@@ -1,0 +1,43 @@
+use std::annotations::abstract_method
+use std::annotations::public
+use std::iterator::Iterator
+
+!public cls IterMov[T] { }
+!public cls IterMut[T] { }
+!public cls IterRef[T] { }
+
+sup [T] IterMov[T] {
+    !public
+    !abstract_method
+    cor iter_mov(self) -> Iterator[T] { }
+}
+
+sup [T] IterMut[T] {
+    !public
+    !abstract_method
+    cor iter_mut(&mut self) -> Iterator[&mut T] { }
+}
+
+sup [T] IterRef[T] {
+    !public
+    !abstract_method
+    cor iter_ref(&self) -> Iterator[&T] { }
+}
+
+sup [T] ReverseIterMov[T] {
+    !public
+    !abstract_method
+    cor reverse_iter_mov(self) -> Iterator[T] { }
+}
+
+sup [T] ReverseIterMut[T] {
+    !public
+    !abstract_method
+    cor reverse_iter_mut(&mut self) -> Iterator[&mut T] { }
+}
+
+sup [T] ReverseIterRef[T] {
+    !public
+    !abstract_method
+    cor reverse_iter_ref(&self) -> Iterator[&T] { }
+}

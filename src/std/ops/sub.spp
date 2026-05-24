@@ -2,17 +2,14 @@ use std::annotations::abstract_method
 use std::annotations::public
 use std::void::Void
 
-
-!public cls Sub[Rhs, Ret] { }
-!public cls SubAssign[Rhs] { }
-
+!public cls Sub[Rhs=Self, Ret=Self] { }
+!public cls SubAssign[Rhs=Self] { }
 
 sup [Rhs, Ret] Sub[Rhs, Ret] {
     !public
     !abstract_method
     fun sub(self, that: Rhs) -> Ret { }
 }
-
 
 sup [Rhs] SubAssign[Rhs] {
     !public

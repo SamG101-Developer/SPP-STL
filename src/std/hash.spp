@@ -1,13 +1,30 @@
+##
+use std::annotations::abstract_method
+use std::annotations::public
 use std::number::U8
 use std::number::U64
+use std::slice::Slice
 use std::string::Str
 
-##
-cls Hash[T, Out=U64] { }
 
-sup [T, Out] Hash[T, Out] {
+cls Hasher { }
+
+sup Hasher {
     !public
     !abstract_method
-    fun hash(val: &T) -> Out { }
+    fun write(&mut self, bytes: &Slice[U8]) -> Void { }
+
+    !public
+    !abstract_method
+    fun finish(&self) -> U64 { }
+}
+
+
+cls Hash {}
+
+sup Hash {
+    !public
+    !abstract_method
+    fun hash[H: Hasher](&self, state: &mut H) -> Void { }
 }
 ##

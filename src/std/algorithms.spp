@@ -4,10 +4,8 @@ use std::boolean::Bool
 use std::function::FunRef
 use std::void::Void
 
-
 !public
 cls Sortable[T] { }
-
 
 sup [T] Sortable[T] {
     !abstract_method

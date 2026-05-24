@@ -1,7 +1,6 @@
-use std::annotations::compiler_builtin
+use std::annotations::intrinsic
 use std::annotations::public
 use std::llvm::inline
-
 use std::boolean::Bool
 use std::cast::From
 use std::number::U32
@@ -11,17 +10,15 @@ use std::option::Opt
 use std::option::None
 use std::option::Some
 use std::void::Void
-
+use std::num::sized_integer::SizedInteger
+use std::num::sized_integer_unsigned::SizedIntegerUnsigned
+use std::num::sized_floating_point::SizedFloatingPoint
 use std::ops::ord::Ord
 use std::ops::div::Div
 use std::ops::div::DivAssign
 use std::ops::rem::Rem
 use std::ops::rem::RemAssign
 use std::ops::pow::Pow
-
-use std::num::sized_integer::SizedInteger
-use std::num::sized_integer_unsigned::SizedIntegerUnsigned
-use std::num::sized_floating_point::SizedFloatingPoint
 
 
 # Type alias the "signed" version of the the sized integer type.
@@ -70,25 +67,25 @@ From[Self, SizedIntegerSigned[that_w]] {
     }
 }
 
-sup [cmp w: U32] SizedIntegerSigned[w] ext Div[Rhs=Self, Ret=Self] {
+sup [cmp w: U32] SizedIntegerSigned[w] ext Div {
     cmp fun div(self, that: Self) -> Self {
         ret intrinsics::sdiv(self, that)
     }
 }
 
-sup [cmp w: U32] SizedIntegerSigned[w] ext DivAssign[Rhs=Self] {
+sup [cmp w: U32] SizedIntegerSigned[w] ext DivAssign {
     cmp fun div_assign(&mut self, that: Self) -> Void {
         intrinsics::sdiv_assign(self, that)
     }
 }
 
-sup [cmp w: U32] SizedIntegerSigned[w] ext Rem[Rhs=Self, Ret=Self] {
+sup [cmp w: U32] SizedIntegerSigned[w] ext Rem {
     cmp fun rem(self, that: Self) -> Self {
         ret intrinsics::srem(self, that)
     }
 }
 
-sup [cmp w: U32] SizedIntegerSigned[w] ext RemAssign[Rhs=Self] {
+sup [cmp w: U32] SizedIntegerSigned[w] ext RemAssign {
     cmp fun rem_assign(&mut self, that: Self) -> Void {
         intrinsics::srem_assign(self, that)
     }
@@ -113,7 +110,7 @@ sup [cmp w: U32] SizedIntegerSigned[w] ext Pow[Rhs=U32, Ret=Self] {
     }
 }
 
-sup [cmp w: U32] SizedIntegerSigned[w] ext Ord[Rhs=Self] {
+sup [cmp w: U32] SizedIntegerSigned[w] ext Ord {
     cmp fun ord(&self, that: &Self) -> S32 {
         ret intrinsics::scmp(self, that)
     }
@@ -400,7 +397,7 @@ sup [cmp w: U32] SizedIntegerSigned[w] {
 sup [cmp w: U32] SizedIntegerSigned[w] {
     !public
     !inline
-    !compiler_builtin
+    !intrinsic(name="std.num.sized_integer_signed.neg_one")
     fun neg_one() -> Self { }
 }
 

@@ -15,58 +15,62 @@ sup Annotation {
     !public cmp mod: S32 = Self::function | Self::method | Self::class | Self::new_type | Self::constant
 }
 
-
-!annotation(target=Annotation::function)
-!compiler_builtin
 !public
+!intrinsic(name="std.annotations.annotation")
+!annotation(target=Annotation::function)
 cmp fun annotation(target: S32) -> Void { }
 
+!public
+!intrinsic(name="std.annotations.intrinsic")
 !annotation(target=Annotation::function | Annotation::method | Annotation::ext_method | Annotation::class)
-!compiler_builtin
-!public
-cmp fun compiler_builtin(llvm: StrView = "") -> Void { }
+cmp fun intrinsic(name: StrView) -> Void { }
 
-!annotation(target=Annotation::mod)
-!compiler_builtin
 !public
+!intrinsic(name="std.annotations.public")
+!annotation(target=Annotation::mod)
 cmp fun public() -> Void { }
 
-!annotation(target=Annotation::mod)
-!compiler_builtin
 !public
+!intrinsic(name="std.annotations.private")
+!annotation(target=Annotation::mod)
 cmp fun package() -> Void { }
 
-!annotation(target=Annotation::mod)
-!compiler_builtin
 !public
+!intrinsic(name="std.annotations.protected")
+!annotation(target=Annotation::mod)
 cmp fun protected() -> Void { }
 
-!annotation(target=Annotation::mod)
-!compiler_builtin
 !public
+!intrinsic(name="std.annotations.internal")
+!annotation(target=Annotation::mod)
 cmp fun private() -> Void { }
 
-!annotation(target=Annotation::method)
-!compiler_builtin
 !public
+!intrinsic(name="std.annotations.sealed")
+!annotation(target=Annotation::method)
 cmp fun virtual_method() -> Void { }
 
-!annotation(target=Annotation::method)
-!compiler_builtin
 !public
+!intrinsic(name="std.annotations.abstract_method")
+!annotation(target=Annotation::method)
 cmp fun abstract_method() -> Void { }
 
-!annotation(target=Annotation::function)
-!compiler_builtin
 !public
+!intrinsic(name="std.annotations.final_method")
+!annotation(target=Annotation::function)
 cmp fun ffi(symbol: StrView) -> Void { }
 
-!annotation(target=Annotation::class)
-!compiler_builtin
 !public
+!intrinsic(name="std.annotations.ext_method")
+!annotation(target=Annotation::class)
 cmp fun extends[..Ts]() -> Void { }
 
-!annotation(target=Annotation::new_type)
-!compiler_builtin
 !public
+!intrinsic(name="std.annotations.constant")
+!annotation(target=Annotation::new_type)
 cmp fun variant_default[T]() -> Void { }
+
+!public
+!intrinsic(name="std.annotations.zero_type")
+!annotation(target=Annotation::class)
+cmp fun zero_type() -> Void { }

@@ -1,18 +1,15 @@
-use std::annotations::compiler_builtin
+use std::annotations::intrinsic
 use std::annotations::public
 use std::llvm::inline
-
 use std::boolean::Bool
 use std::cast::From
 use std::number::U32
 use std::number::S32
 use std::limits::Limits
 use std::void::Void
-
 use std::num::sized_integer_signed::SizedIntegerSigned
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 use std::num::bases::FloatingPoint
-
 use std::ops::eq::Eq
 use std::ops::ord::Ord
 use std::ops::add::Add
@@ -32,10 +29,8 @@ use std::ops::pow::Pow
 !public
 cls SizedFloatingPoint[cmp w: U32] { }
 
-
 # The sized floating point type extends the base floating point type.
 sup [cmp w: U32] SizedFloatingPoint[w] ext FloatingPoint { }
-
 
 sup [cmp this_w: U32, cmp that_w: U32] SizedFloatingPoint[this_w] ext From[Self, SizedFloatingPoint[that_w]] {
     fun from(that: SizedFloatingPoint[that_w]) -> Self {
@@ -47,7 +42,7 @@ sup [cmp this_w: U32, cmp that_w: U32] SizedFloatingPoint[this_w] ext From[Self,
     }
 }
 
-sup [cmp w: U32] SizedFloatingPoint[w] ext Eq[Rhs=Self] {
+sup [cmp w: U32] SizedFloatingPoint[w] ext Eq {
     cmp fun eq(&self, that: &Self) -> Bool {
         ret intrinsics::oeq(self, that)
     }
@@ -57,7 +52,7 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Eq[Rhs=Self] {
     }
 }
 
-sup [cmp w: U32] SizedFloatingPoint[w] ext Ord[Rhs=Self] {
+sup [cmp w: U32] SizedFloatingPoint[w] ext Ord {
     fun ord(&self, that: &Self) -> S32 {
         ret intrinsics::fcmp(self, that)
     }
@@ -79,67 +74,67 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Ord[Rhs=Self] {
     }
 }
 
-sup [cmp w: U32] SizedFloatingPoint[w] ext Add[Rhs=Self, Ret=Self] {
+sup [cmp w: U32] SizedFloatingPoint[w] ext Add {
     cmp fun add(self, that: Self) -> Self {
         ret intrinsics::float_add(self, that)
     }
 }
 
-sup [cmp w: U32] SizedFloatingPoint[w] ext AddAssign[Rhs=Self] {
+sup [cmp w: U32] SizedFloatingPoint[w] ext AddAssign {
     cmp fun add_assign(&mut self, that: Self) -> Void {
         intrinsics::float_add_assign(self, that)
     }
 }
 
-sup [cmp w: U32] SizedFloatingPoint[w] ext Sub[Rhs=Self, Ret=Self] {
+sup [cmp w: U32] SizedFloatingPoint[w] ext Sub {
     cmp fun sub(self, that: Self) -> Self {
         ret intrinsics::float_sub(self, that)
     }
 }
 
-sup [cmp w: U32] SizedFloatingPoint[w] ext SubAssign[Rhs=Self] {
+sup [cmp w: U32] SizedFloatingPoint[w] ext SubAssign {
     cmp fun sub_assign(&mut self, that: Self) -> Void {
         intrinsics::float_sub_assign(self, that)
     }
 }
 
-sup [cmp w: U32] SizedFloatingPoint[w] ext Mul[Rhs=Self, Ret=Self] {
+sup [cmp w: U32] SizedFloatingPoint[w] ext Mul {
     cmp fun mul(self, that: Self) -> Self {
         ret intrinsics::float_mul(self, that)
     }
 }
 
-sup [cmp w: U32] SizedFloatingPoint[w] ext MulAssign[Rhs=Self] {
+sup [cmp w: U32] SizedFloatingPoint[w] ext MulAssign {
     cmp fun mul_assign(&mut self, that: Self) -> Void {
         intrinsics::float_mul_assign(self, that)
     }
 }
 
-sup [cmp w: U32] SizedFloatingPoint[w] ext Div[Rhs=Self, Ret=Self] {
+sup [cmp w: U32] SizedFloatingPoint[w] ext Div {
     cmp fun div(self, that: Self) -> Self {
         ret intrinsics::float_div(self, that)
     }
 }
 
-sup [cmp w: U32] SizedFloatingPoint[w] ext DivAssign[Rhs=Self] {
+sup [cmp w: U32] SizedFloatingPoint[w] ext DivAssign {
     cmp fun div_assign(&mut self, that: Self) -> Void {
         intrinsics::float_div_assign(self, that)
     }
 }
 
-sup [cmp w: U32] SizedFloatingPoint[w] ext Rem[Rhs=Self, Ret=Self] {
+sup [cmp w: U32] SizedFloatingPoint[w] ext Rem {
     cmp fun rem(self, that: Self) -> Self {
         ret intrinsics::float_rem(self, that)
     }
 }
 
-sup [cmp w: U32] SizedFloatingPoint[w] ext RemAssign[Rhs=Self] {
+sup [cmp w: U32] SizedFloatingPoint[w] ext RemAssign {
     cmp fun rem_assign(&mut self, that: Self) -> Void {
         intrinsics::float_rem_assign(self, that)
     }
 }
 
-sup [cmp w: U32] SizedFloatingPoint[w] ext Pow[Rhs=Self, Ret=Self] {
+sup [cmp w: U32] SizedFloatingPoint[w] ext Pow {
     fun pow(self, that: Self) -> Self {
         ret intrinsics::float_powf(self, that)
     }
@@ -404,12 +399,12 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
 sup [cmp w: U32] SizedFloatingPoint[w] {
     !public
     !inline
-    !compiler_builtin
+    !intrinsic(name="std.num.sized_floating_point.zero")
     fun zero() -> Self { }
 
     !public
     !inline
-    !compiler_builtin
+    !intrinsic(name="std.num.sized_floating_point.one")
     fun one() -> Self { }
 
     # !public

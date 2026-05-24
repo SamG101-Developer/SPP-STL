@@ -15,4 +15,4 @@ use std::annotations::public
 !public type CSSizeT = std::number::SSize
 !public type CVoid = std::void::Void
 !public type CCharPtr = std::string_view::StrView
-!public type CVoidPtr[T] = std::mem::memory::Memory[T]
+!public type CVoidPtr = std::mem::pointer::Pointer[std::number::U8]

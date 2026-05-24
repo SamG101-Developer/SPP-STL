@@ -1,36 +1,35 @@
 use std::annotations::annotation
-use std::annotations::compiler_builtin
+use std::annotations::intrinsic
 use std::annotations::public
 use std::annotations::Annotation
 use std::void::Void
 
-
-!annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
-!compiler_builtin
 !public
+!intrinsic(name="std.llvm.inline")
+!annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
 cmp fun inline() -> Void { }
 
-!annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
-!compiler_builtin
 !public
+!intrinsic(name="std.llvm.no_inline")
+!annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
 cmp fun always_inline() -> Void { }
 
-!annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
-!compiler_builtin
 !public
+!intrinsic(name="std.llvm.no_inline")
+!annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
 cmp fun no_inline() -> Void { }
 
-!annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
-!compiler_builtin
 !public
+!intrinsic(name="std.llvm.hot")
+!annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
 cmp fun hot() -> Void { }
 
-!annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
-!compiler_builtin
 !public
+!intrinsic(name="std.llvm.cold")
+!annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
 cmp fun cold() -> Void { }
 
-!annotation(target=Annotation::class)
-!compiler_builtin
 !public
+!intrinsic(name="std.llvm.packed")
+!annotation(target=Annotation::class)
 cmp fun packed() -> Void { }

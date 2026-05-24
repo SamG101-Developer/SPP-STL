@@ -1,13 +1,8 @@
 use std::annotations::public
-use std::annotations::protected
 
+!public cls Tup[..Items] { }
 
-!protected
-cls TupleLike { }
-
-
-!public
-cls Tup[..Items] { }
-
-
-# sup [..Items] Tup[Items] ext TupleLike { }
+!public cls Pair[K, V] {
+    !public key: K
+    !public val: V
+}

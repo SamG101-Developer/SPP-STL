@@ -1,0 +1,99 @@
+use std::boolean::Bool
+use std::number::Usize
+use std::memory::pointer::Ptr
+use std::ops::idx::IndexRef
+use std::ops::iter::IterRef
+use std::ops::iter::ReverseIterRef
+
+# The View type is a borrow into a collection. It is contiguous in memory and provides efficient access to the
+# underlying data. The View type is designed to be used with collections that support slicing, such as arrays and
+# strings. It allows you to create a view into a portion of a collection without copying the data, making it ideal for
+# performance-critical code where you want to avoid unnecessary allocations and copies. The View type is immutable,
+# meaning that you cannot modify the underlying data through a View. If you need to modify the data, you should use a
+# mutable reference or a different type that allows for mutation.
+cls View[T] {
+    pointer: Ptr[T]
+    length: USize
+}
+
+sup [T] View[T] {
+    !public type Element = T
+
+    !public fun len(&self) -> USize { ret self.length }
+    !public fun is_empty(&self) -> Bool { ret self.length == 0_uz }
+
+    !public cor get_ref(&self, index: USize) -> Indexed[&T or None] {
+        gen case index >= self.length { None } else { self[index] }
+    }
+
+    !public cor first_ref(&self) -> Indexed[&T or None] {
+        gen case self.is_empty() { None } else { self[0_uz] }
+    }
+
+    !public cor first_mut(&mut self) -> Indexed[&mut T or None] {
+        gen case self.is_empty() { None } else { self[mut 0_uz] }
+    }
+
+    !public cor last_ref(&self) -> Indexed[&T or None] {
+        gen case self.is_empty() { None } else { self[self.length - 1_uz] }
+    }
+
+    !public cor last_mut(&mut self) -> Indexed[&mut T or None] {
+        gen case self.is_empty() { None } else { self[mut self.length - 1_uz] }
+    }
+
+    !public
+    !intrinsic(name="std.view.View.slice")
+    fun slice(&self, start: USize, end: USize) -> View[T] { }
+
+    !public
+    !intrinsic(name="std.view.View.slice_from")
+    fun slice_from(&self, start: USize) -> View[T] { }
+
+    !public
+    !intrinsic(name="std.view.View.slice_to")
+    fun slice_to(&self, end: USize) -> View[T] { }
+
+    !public
+    !intrinsic(name="std.view.View.as_ptr")
+    fun split_at(&self, index: USize) -> (View[T], View[T]) { }
+}
+
+sup [T: Eq] View[T] {
+    !public fun find(&self, item: &T) -> Opt[USize] {
+        let mut index = 0_uz
+        loop index < self.length {
+            case self[index]@ == item { ret Some(index) }
+            index += 1_uz
+        }
+        ret None
+    }
+
+    !public fun rfind(&self, item: &T) -> Opt[USize] {
+        let mut index = self.length
+        loop index > 0_uz {
+            index -= 1_uz
+            case self[index]@ == item { ret Some(index) }
+        }
+        ret None
+    }
+
+    !public fun contains(&self, item: &T) -> Bool {
+        ret self.find(item).is_some()
+    }
+}
+
+sup [T] View[T] ext IndexRef[USize, T] {
+    !intrinsic(name="std.view.View.idx_ref")
+    cor idx_ref(&self, index: USize) -> Indexed[&T] { }
+}
+
+sup [T] View[T] ext IterRef[T] {
+    !intrinsic(name="std.view.View.iter_ref")
+    cor iter_ref(&self) -> Iterator[&T] { }
+}
+
+sup [T] View[T] ext ReverseIterRef[T] {
+    !intrinsic(name="std.view.View.reverse_iter_ref")
+    cor reverse_iter_ref(&self) -> Iterator[&T] { }
+}

@@ -1,4 +1,4 @@
-use std::annotations::compiler_builtin
+use std::annotations::intrinsic
 use std::annotations::public
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
@@ -10,45 +10,79 @@ use std::ops::fwd::FwdRef
 use std::ops::del::Del
 use std::ops::void::Void
 
-
-##
-A uniquely owned pointer on the heap.
-##
+# The Single type is a uniquely owned smart pointer, containing a heap value. It wraps a pointer value, and allows for a
+# custom allocator to be used aswell. This is an equivalent type to Rust's Box type.
 !public
-cls Single[T, A: Alloc[T] = GlobalAlloc[T]] { }
+cls Single[T, A: Alloc = GlobalAlloc] {
+    !package ptr: Ptr[T]
+    !package alloc: A
+}
 
-sup [T, A: Alloc[T]] Single[T, A] {
+sup [T] Single[T, GlobalAlloc] {
+    !public
+    fun new(val: T) -> Self {
+        ret Self::new_in(val, GlobalAlloc)
+    }
+
+    !public
+    fun try_new(val: T) -> Result[Self, AllocErr] {
+        ret Self::try_new_in(val, GlobalAlloc)
+    }
+}
+
+sup [T, A: Alloc] Single[T, A] {
     !public type Element = T
+    !public type Allocator = A
 
     !public
-    !compiler_builtin
-    fun new(value: T) -> Single[T] { }
+    fun new_in(val: T, alloc: A) -> Self {
+        let ptr = alloc.alloc(Layout::new_for_type[T]()).expect("Allocation failed")
+        ptr.write(val)
+        ret Single(ptr, alloc)
+    }
 
     !public
-    !compiler_builtin
-    cor get_ref(&self) -> GenOnce[&T] { }
+    fun try_new_in(val: T, alloc: A) -> Result[Self, AllocErr] {
+        let ptr = alloc.alloc(Layout::new_for_type[T]())?
+        ptr.write(val)
+        ret Ok(Single(ptr, alloc))
+    }
 
     !public
-    !compiler_builtin
-    cor get_mut(&mut self) -> GenOnce[&mut T] { }
+    cor get_ref(&self) -> GenOnce[&T] {
+        gen self
+    }
+
+    !public
+    cor get_mut(&mut self) -> GenOnce[&mut T] {
+        gen self
+    }
+
+    !public
+    fun read(self) -> T {
+        ret self.ptr.read()
+    }
 }
 
-sup [T] Single[T] ext FwdRef[T] {
-    !compiler_builtin
-    cor fwd_ref(&self) -> GenOnce[&T] { }
+sup [T, A: Alloc] Single[T, A] ext FwdMov[T] {
+    cor fwd_mov(self) -> GenOnce[T] {
+        gen self.ptr
+    }
 }
 
-sup [T] Single[T] ext FwdMut[T] {
-    !compiler_builtin
-    cor fwd_mut(&mut self) -> GenOnce[&mut T] { }
+sup [T, A: Alloc] Single[T, A] ext FwdMut[T] {
+    cor fwd_mut(&mut self) -> GenOnce[&mut T] {
+        gen &mut self.ptr
+    }
 }
 
-sup [T] Single[T] ext FwdMov[T] {
-    !compiler_builtin
-    cor fwd_mov(self) -> GenOnce[T] { }
+sup [T, A: Alloc] Single[T, A] ext FwdRef[T] {
+    cor fwd_ref(&self) -> GenOnce[&T] {
+        gen &self.ptr
+    }
 }
 
-sup [T] Single[T] ext Del {
-    !compiler_builtin
+sup [T, A: Alloc] Single[T, A] ext Del {
+    !intrinsic(name="std.single.Single.del")
     fun del(&mut self) -> Void { }
 }

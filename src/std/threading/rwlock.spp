@@ -7,6 +7,7 @@ use std::result::Pass
 use std::result::Res
 use std::void::Void
 use std::threading::mutex::LockErr
+use std::ops::del::Del
 
 !public cls RwReadLockGuard { !package id: S32 }
 !public cls RwWriteLockGuard { !package id: S32 }
@@ -62,7 +63,7 @@ sup RwLock {
     }
 }
 
-sup RwLock ext std::ops::del::Del {
+sup RwLock ext Del {
     fun del(&mut self) -> Void {
         # Destroy the rwlock using the sppc threading API.
         sppc::rwlock_destroy(self.id)

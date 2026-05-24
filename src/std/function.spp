@@ -4,16 +4,13 @@ use std::annotations::public
 cls FunMov[Args, Out] { }
 sup [Args, Out] FunMov[Args, Out] { }
 
-
 !public
 cls FunMut[Args, Out] { }
 sup [Args, Out] FunMut[Args, Out] { }
 
-
 !public
 cls FunRef[Args, Out] { }
 sup [Args, Out] FunRef[Args, Out] { }
-
 
 sup [Args, Out] FunRef[Args, Out] ext FunMut[Args, Out] { }
 sup [Args, Out] FunMut[Args, Out] ext FunMov[Args, Out] { }

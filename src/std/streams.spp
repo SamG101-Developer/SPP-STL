@@ -13,26 +13,75 @@ use std::string_view::StrView
 use std::vector::Vec
 use std::void::Void
 
+!public
+cls StreamErr { !public msg: StrView }
+sup StreamErr {
+    !public fun eof_error() -> StreamErr { ret StreamErr(msg="End of stream reached") }
+    !public fun interrupted_error() -> StreamErr { ret StreamErr(msg="Stream operation interrupted") }
+    !public fun would_block_error() -> StreamErr { ret StreamErr(msg="Stream operation would block") }
+    !public fun invalid_input_error() -> StreamErr { ret StreamErr(msg="Invalid input for stream operation") }
+    !public fun invalid_data_error() -> StreamErr { ret StreamErr(msg="Invalid data encountered in stream") }
+    !public fun permission_denied_error() -> StreamErr { ret StreamErr(msg="Permission denied for stream operation") }
+    !public fun not_found_error() -> StreamErr { ret StreamErr(msg="Stream not found") }
+    !public fun already_exists_error() -> StreamErr { ret StreamErr(msg="Stream already exists") }
+    !public fun write_zero_error() -> StreamErr { ret StreamErr(msg="Failed to write any data to stream") }
+    !public fun other_error(msg: StrView) -> StreamErr { ret StreamErr(msg=msg) }
+}
 
 !public
-cls StreamErr {
-    !public msg: StrView
+cls ReadableStream { }
+
+sup ReadableStream {
+    !public
+    !abstract_method
+    fun read(&mut self, buf: &mut View[U8]) -> Res[USize, StreamErr] { }
+
+    !public
+    !virtual_method
+    fun read_exact(&mut self, buf: &mut View[U8]) -> Res[Void, StreamErr] {
+        let mut total_read = 0_uz
+        loop total_read < buf.len() {
+            let mut slice = buf.slice_mut(total_read, buf.len())
+            let n = self.read(&mut slice)?
+            case n == 0_uz { ret Fail(err=StreamErr::eof_error()) }
+            total_read += n
+        }
+        ret Pass[Void]()
+    }
+
+    !public
+    !virtual_method
+    fun read_to_end(&mut self, out: &mut Vec[U8]) -> Res[Void, StreamErr] {
+        let mut buf = [0_u8; 1024]
+        loop true {
+            let n = self.read(&mut buf)?
+            case n == 0_uz { break }
+            out.append_all(&buf.slice(0, n))
+        }
+        ret Pass[Void]()
+    }
+
+    !public
+    !virtual_method
+    fun read_to_string(&mut self, out: &mut Str) -> Res[Void, StreamErr] {
+        let mut buf = [0_u8; 1024]
+        loop true {
+            let n = self.read(&mut buf)?
+            case n == 0_uz { break }
+            let s = StrView::from_utf8(&buf.slice(0, n))
+            out.append_str(s)
+        }
+        ret Pass[Void]()
+    }
 }
 
 !public
 cls WritableStream { }
 
-!public
-cls ReadableStream { }
-
-!public
-cls SeekableStream { }
-
-
 sup WritableStream {
     !public
     !abstract_method
-    fun write(&mut self, data: &Slice[U8]) -> Res[USize, StreamErr] { }
+    fun write(&mut self, buf: &View[U8]) -> Res[USize, StreamErr] { }
 
     !public
     !abstract_method
@@ -40,37 +89,25 @@ sup WritableStream {
 
     !public
     !virtual_method
-    fun write_all(&mut self, data: &Slice[U8]) -> Res[USize, StreamErr] {
-        # TODO
-
+    fun write_all(&mut self, buf: &View[U8]) -> Res[Void, StreamErr] {
         let mut total_written = 0_uz
-        loop total_written < data.length() {
-            let written = 1_uz  # self.write(&data.slice_from(total_written))?
-            total_written = total_written + written
+        loop total_written < buf.len() {
+            let n = self.write(&buf.slice(total_written, buf.len()))?
+            case n == 0_uz { ret Fail(err=StreamErr::other_error(msg="Failed to write all data to stream")) }
+            total_written += n
         }
-        ret Pass(val=total_written)
+        ret Pass[Void]()
     }
-}
-
-
-sup ReadableStream {
-    !public
-    !abstract_method
-    fun read(&mut self, len: USize) -> Res[Vec[U8], StreamErr] { }
 
     !public
     !virtual_method
-    fun read_all(&mut self) -> Res[Vec[U8], StreamErr] {
-        let mut out = Vec[U8]()
-        loop true {
-            let chunk = self.read(4096_uz)?
-            case chunk.length() == 0_uz { exit }
-            out.push_back_vec(chunk)
-        }
-        ret Pass(val=out)
+    fun write_str(&mut self, s: &StrView) -> Res[Void, StreamErr] {
+        # TODO
     }
 }
 
+!public
+cls SeekableStream { }
 
 sup SeekableStream {
     !public cmp seek_set: S32 = 0
@@ -83,7 +120,7 @@ sup SeekableStream {
 
     !public
     !abstract_method
-    fun stream_length(&mut self) -> Res[SSize, StreamErr] { }
+    fun stream_len(&mut self) -> Res[SSize, StreamErr] { }
 
     !public
     !abstract_method

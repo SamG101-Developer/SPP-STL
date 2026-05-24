@@ -1,213 +1,291 @@
 use std::annotations::public
-use std::llvm::inline
 use std::boolean::Bool
-use std::clone::Clone
 use std::copy::Copy
 use std::function::FunMov
 use std::result::Res
 use std::result::Pass
 use std::result::Fail
 use std::ops::eq::Eq
+use std::ops::try::Try
 
-# todo: superimpose Copy on None
-# todo: change None to NoneT
-# todo: declare a cmp constant None for NoneT (prevents having to use None() everywhere)
+!public
+cls Some[T] { !public val: T }
 
+!public
+!zero_type
+cls None { }
 
-!public cls Some[T] { !public val: T }
-!public cls None { }
-!public type Opt[T] = Some[T] or None
-
+!public
+type Opt[T] = Some[T] or None
 
 sup [T: Copy] Opt[T] ext Copy { }
 
-
-#sup [T: Clone[Out=T]] Opt[T] ext Clone[Out=Opt[T]] {
-#    fun clone(&self) -> Opt[T] {
-#        ret case self of {
-#            is Some[T](val) { Some[T](val.clone()) }
-#            else { None() }
-#        }
-#    }
-#}
-
-
 sup [T] Opt[T] {
-    !public
-    !inline
-    fun is_some(&self) -> Bool {
-        ret self@ is Some[T](..)
-    }
+    !public fun is_some(&self) -> Bool { ret self@ is Some[T](..) }
+    !public fun is_none(&self) -> Bool { ret self@ is None() }
 
-    !public
-    !inline
-    fun is_some_and(self, pred: FunMov[(T,), Bool]) -> Bool {
+    # If this type contains a Some value, and the predicate returns true when invoking on the moved internally wrapped
+    # value, then return true. Otherwise, return false. This is semantically equivalent to "if this optional has a
+    # value, and that value satisfies a predicate".
+    !public fun is_some_and(self, pred: FunMov[(T,), Bool]) -> Bool {
         ret case self of {
             is Some[T](val) { pred(val) }
-            else { false }
+            is None() { false }
         }
     }
 
-    !public
-    !inline
-    fun is_none(&self) -> Bool {
-        ret self@ is None()
-    }
-
-    !public
-    !inline
-    fun is_none_or(self, pred: FunMov[(T,), Bool]) -> Bool {
+    # If this type contains a None value, or the predicate returns true when invoking on the moved internally wrapped
+    # value, then return true. Otherwise, return false. This is semantically equivalent to "if this optional is either
+    # empty, or contains a value that satisfies a predicate".
+    !public fun is_none_or(self, pred: FunMov[(T,), Bool]) -> Bool {
         ret case self of {
             is Some[T](val) { pred(val) }
-            else { true }
+            is None() { true }
         }
     }
 
-    !public
-    !inline
-    fun and_[U](self, that: Opt[U]) -> Opt[U] {
+    # If this type contains a Some value, then return the other optional (eagerly evaluating it). Otherwise, return
+    # None. The AND operation is effectively a short-circuiting boolean AND, but operating on the presence of a value
+    # rather than the truth of a value.
+    !public fun and_[U](self, that: Opt[U]) -> Opt[U] {
         ret case self of {
             is Some[T](..) { that }
-            else { None() }
+            is None() { None }
         }
     }
 
-    !public
-    !inline
-    fun and_then[U](self, pred: FunMov[(T,), Opt[U]]) -> Opt[U] {
+    # If this type contains a Some value, then return the result of invoking the predicate on the moved internally
+    # wrapped value. Otherwise, return None. This is semantically equivalent to "if this optional has a value, then pass
+    # it into the optional returning predicate, and return the result".
+    !public fun and_then[U](self, pred: FunMov[(T,), Opt[U]]) -> Opt[U] {
         ret case self of {
             is Some[T](val) { pred(val) }
-            else { None() }
+            is None() { None }
         }
     }
 
-    !public
-    !inline
-    fun ior_(self, that: Opt[T]) -> Opt[T] {
+    # If this type contains a Some value, then return that. Otherwise, return the other optional (eagerly evaluating
+    # it). The OR operation is effectively a short-circuiting boolean OR, but operating on the presence of a value
+    # rather than the truth of a value.
+    !public fun ior_(self, that: Opt[T]) -> Opt[T] {
         ret case self of {
             is Some[T](..) { self }
-            else { that }
+            is None() { that }
         }
     }
 
-    !public
-    !inline
-    fun ior_else(self, that: FunMov[(), Opt[T]]) -> Opt[T] {
+    # If this type contains a Some value, then return that. Otherwise, return the result of invoking the predicate on
+    # the moved internally wrapped value. This is semantically equivalent to "if this optional has a value, then return
+    # it, otherwise the result of invoking the optional returning predicate".
+    !public fun ior_else(self, that: FunMov[(), Opt[T]]) -> Opt[T] {
         ret case self of {
             is Some[T](..) { self }
-            else { that() }
+            is None() { that() }
         }
     }
-}
 
-
-# TODO: Nesting + variants doesn't work.
-##
-sup [T] Opt[T] {
-    !public
-    !inline
-    fun xor(self, that: Opt[T]) -> Opt[T] {
+    # If exactly one of this type and the other optional contains a Some value, then return that. Otherwise, return
+    # None. This follows standard boolean logic for exclusive OR, but operating on the presence of a value rather than
+    # the truth of a value. It is semantically equivalent to "only return a value if exactly one of this optional and
+    # the other optional has a value, otherwise return None".
+    !public fun xor(self, that: Opt[T]) -> Opt[T] {
         ret case (self, that) of {
             is (Some[T](val), None()) { Some(val) }
             is (None(), Some[T](val)) { Some(val) }
-            else { None() }
+            else { None }
         }
     }
-}
-##
 
-
-sup [T] Opt[T] {
-    !public
-    !inline
-    fun map[U](self, f: FunMov[(T,), U]) -> Opt[U] {
+    # If this type contains a Some value, and the predicate returns true when invoking on the immutably borrowed
+    # internally wrapped value, then return that. Otherwise, return None. This is semantically equivalent to "if this
+    # optional has a value, and that value satisfies a predicate, then return this optional, otherwise return None".
+    !public fun filter(self, pred: FunMov[(&T,), Bool]) -> Opt[T] {
         ret case self of {
-            is Some[T](val) { Some(val=f(val)) }
-            else { None() }
+            is Some[T](val) { case pred(&val) { self } else { None } }
+            is None() { None }
         }
     }
 
-    !public
-    !inline
-    fun map_or[U](self, default: U, f: FunMov[(T,), U]) -> U {
+    # If this type contains a Some value, then return the result of invoking the predicate on the moved internally
+    # wrapped value, wrapped in Some. Otherwise, return None. This is semantically equivalent to "if this optional has a
+    # value, then pass it into the value returning predicate, and return the result wrapped in Some".
+    !public fun map[U](self, pred: FunMov[(T,), U]) -> Opt[U] {
+        ret case self of {
+            is Some[T](val) { Some(val=pred(val)) }
+            is None() { None }
+        }
+    }
+
+    # If this type contains a Some value, then return the result of invoking the predicate on the moved internally
+    # wrapped value. Otherwise, return the provided default (eagerly evaluating it). This is semantically equivalent to
+    # "if this optional has a value, then pass it into the value returning predicate, and return the result, otherwise
+    # return the default".
+    !public fun map_or[U](self, default: U, f: FunMov[(T,), U]) -> U {
         ret case self of {
             is Some[T](val) { f(val) }
             else { default }
         }
     }
 
-    !public
-    !inline
-    fun map_or_else[U](self, default: FunMov[(), U], f: FunMov[(T,), U]) -> U {
+    # If this type contains a Some value, then return the result of invoking the predicate on the moved internally
+    # wrapped value. Otherwise, return the result of invoking the default (lazily evaluating it). This is semantically
+    # equivalent to "if this optional has a value, then pass it into the value returning predicate, and return the
+    # result, otherwise return the result of default()".
+    !public fun map_or_else[U](self, default: FunMov[(), U], f: FunMov[(T,), U]) -> U {
         ret case self of {
             is Some[T](val) { f(val) }
             else { default() }
         }
     }
 
-    !public
-    !inline
-    fun ok_or[E](self, err: E) -> Res[T, E] {
+    # If this type contains a Some value, then return Pass of the moved internally wrapped value. Otherwise, return Fail
+    # of the provided error. This is a conversion from an optional type to a result type, mapping Some(val) to Pass(val)
+    # and None to Fail(err).
+    !public fun pass_or[E](self, err: E) -> Res[T, E] {
         ret case self of {
             is Some[T](val) { Pass(val) }
             else { Fail(err) }
         }
     }
 
-    !public
-    !inline
-    fun ok_or_else[E](self, err: FunMov[(), E]) -> Res[T, E] {
+    # If this type contains a Some value, then return Pass of the moved internally wrapped value. Otherwise, return Fail
+    # of the result of invoking the provided error function (lazily evaluating it). This is a conversion from an
+    # optional type to a result type, mapping Some(val) to Pass(val) and None to Fail(err()).
+    !public fun pass_or_else[E](self, err: FunMov[(), E]) -> Res[T, E] {
         ret case self of {
             is Some[T](val) { Pass(val) }
             else { Fail(err=err()) }
         }
     }
 
-    !public
-    !inline
-    fun unwrap(self) -> T {
-        ret case self of {
-            is Some[T](val) { val }
-            else { std::abort::abort("called `unwrap` on a `None` value") }
-        }
+    # If this type contains a Some value, then return the moved internally wrapped value. Otherwise, abort with the
+    # provided message. Route the panic through the "expect" method for uniform error handling.
+    !public fun unwrap(self) -> T {
+        ret self.expect("called `unwrap()` on a `None` value")
     }
 
-    !public
-    !inline
-    fun unwrap_or(self, default: T) -> T {
+    # If this type contains a Some value, then return the moved internally wrapped value. Otherwise, return the provided
+    # default. This is semantically equivalent to "if this optional has a value, return it, otherwise return default".
+    # This can never abort, unlike unwrap, and so is always safe to call.
+    !public fun unwrap_or(self, default: T) -> T {
         ret case self of {
             is Some[T](val) { val }
             else { default }
         }
     }
 
-    !public
-    !inline
-    fun unwrap_or_else(self, default: FunMov[(), T]) -> T {
+    # If this type contains a Some value, then return the moved internally wrapped value. Otherwise, return the result
+    # of invoking the default (lazily evaluating it). This is semantically equivalent to "if this optional has a value,
+    # return it, otherwise return default()". This can never abort, unlike unwrap, and so is always safe to call.
+    !public fun unwrap_or_else(self, default: FunMov[(), T]) -> T {
         ret case self of {
             is Some[T](val) { val }
             else { default() }
         }
     }
-}
 
-
-sup [T] Opt[T] ext std::ops::try::Try[Some[T], None, T] {
-    fun op_is_value(&self) -> Bool {
-        ret self@ is Some[T](..)
-    }
-
-    fun op_as_value(self) -> T {
+    # If this type contains a Some value, then return the moved internally wrapped value. Otherwise, abort with the
+    # provided message.
+    !public fun expect(self, msg: StrView) -> T {
         ret case self of {
             is Some[T](val) { val }
-            else { std::abort::abort("called `Opt::op_as_value` on a `None` value") }
+            else { std::abort::abort(msg) }
+        }
+    }
+
+    # If this type contains a Some value, then replace it with the provided value and return the original value wrapped
+    # in Some. Otherwise, set the optional to the provided value and return None. This is semantically equivalent to
+    # "replace the actual value in this optional with the provided value, returning the old value if there was one, and
+    # None if there wasn't".
+    !public fun replace(&mut self, val: T) -> Opt[T] {
+        ret case self is Some[T](old_val) {
+            self@ = Some(val)
+            Some(val=old_val)
+        }
+        else {
+            self@ = Some(val)
+            None
+        }
+    }
+
+    # If this type contains a Some value, then take it out and return it wrapped in Some, leaving a None in its place.
+    # Otherwise, return None. This is semantically equivalent to "take the value out of this optional, leaving a None
+    # in its place".
+    !public fun take(&mut self) -> Opt[T] {
+        ret case self is Some[T](val) {
+            self@ = None
+            Some(val)
+        }
+        else { None }
+    }
+
+    # If this type contains a Some value, and the predicate returns true when invoking on the immutably borrowed
+    # internally wrapped value, then take it out and return it wrapped in Some, leaving a None in its place. Otherwise,
+    # return None. This is semantically equivalent to "if this optional has a value, and that value satisfies a
+    # predicate, then take the value out of this optional and return it, otherwise return None".
+    !public fun take_if(&mut self, pred: FunMov[(&T,), Bool]) -> Opt[T] {
+        ret case self of {
+            is Some[T](val) { case pred(&val) { self.take() } else { None } }
+            else { None }
+        }
+    }
+
+    # If both this type and the other optional contain Some values, then return Some of a tuple of the moved internally
+    # wrapped values. Otherwise, return None. This only returns the two values if both optionals contain a value. It is
+    # semantically equivalent to "if this optional has a value, and the other optional has a value, then return both of
+    # those values, otherwise return None".
+    !public fun zip[U](self, that: Opt[U]) -> Opt[(T, U)] {
+        ret case (self, that) of {
+            is (Some[T](val as val1), Some[U](val as val2)) { Some((val1, val2)) }
+            else { None }
         }
     }
 }
 
+sup [T] Opt[Opt[T]] {
+    # Flatten a layered optional type into a single optional type. This only flattens a double optional, so fore more
+    # layers, chaining multiple calls to flatten is necessary. It works by extracting the inner optional and just
+    # forwarding it out of this method, no matter the state of the inner optional.
+    !public fun flatten(self) -> Opt[T] {
+        ret case self of {
+            is Some[T](val) { val }
+            else { None }
+        }
+    }
+}
 
-##
-sup [T: Eq[T]] Opt[T] ext Eq[Opt[T]] {
+sup [T] Opt[T] ext Try[Some[T], None, T] {
+    # In order to make the Opt type compatible with the "?" operator, we need to tell the compiler how to check if an
+    # optional type is in the value state or not, so it knows whether to propagate the error state or not. In this case,
+    # only if the optional is in the Some state do we have a value, so we check for that.
+    fun op_is_value(&self) -> Bool {
+        ret self@ is Some[T](..)
+    }
+
+    # In order to make the Opt type compatible with the "?" operator, we need to tell the compiler how to extract the
+    # value from the optional type, since the "?" operator needs to be able to do that in order to get the internal
+    # value for whatever binding or operation it is being used in.
+    fun op_as_value(self) -> T {
+        ret self.unwrap()
+    }
+}
+
+sup [T, U] Opt[(T, U)] {
+    # If this type contains a Some value, then return a tuple of the two moved internally wrapped values, each wrapped
+    # in Some. Otherwise, return a tuple of None.
+    !public fun unzip(self) -> (Opt[T], Opt[U]) {
+        ret case self of {
+            is Some[(T, U)](val=(val1, val2)) { (Some(val=val1), Some(val=val2)) }
+            is None() { (None, None) }
+        }
+    }
+}
+
+sup [T: Eq] Opt[T] ext Eq {
+    # In order to make the Opt type support equality comparisons, we need to tell the compiler how to compare two
+    # optional types for equality. In this case, we check if both optionals are in the Some state, and if so, compare
+    # the internal values for equality. If both optionals are in the None state, then they are equal. Otherwise, they
+    # are not equal.
     fun eq(&self, that: &Opt[T]) -> Bool {
         ret case (self@, that@) of {
             is (Some[T](val as a), Some[T](val as b)) { a == b }
@@ -215,5 +293,16 @@ sup [T: Eq[T]] Opt[T] ext Eq[Opt[T]] {
             else { false }
         }
     }
+
+    # In order to make the Opt type support inequality comparisons, we need to tell the compiler how to compare two
+    # optional types for inequality. In this case, we check if both optionals are in the Some state, and if so, compare
+    # the internal values for inequality. If both optionals are in the None state, then they are not unequal. Otherwise,
+    # they are unequal.
+    fun ne(&self, that: &Opt[T]) -> Bool {
+        ret case (self@, that@) of {
+            is (Some[T](val as a), Some[T](val as b)) { a != b }
+            is (None(), None()) { false }
+            else { true }
+        }
+    }
 }
-##

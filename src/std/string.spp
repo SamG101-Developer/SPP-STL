@@ -1,166 +1,75 @@
-use std::annotations::compiler_builtin
-use std::annotations::public
-use std::boolean::Bool
-use std::clone::Clone
-use std::cast::From
-use std::iterator::Iterator
-use std::number::U8
-use std::number::USize
-use std::ops::add::Add
-use std::ops::add::AddAssign
-use std::ops::eq::Eq
-use std::string_view::StrView
-use std::vector::Vec
-use std::void::Void
-use std::fs::path::Path
+use std::allocator::Alloc
+use std::allocator::GlobalAlloc
 
-
-##
-A string type representing a sequence of bytes. This is a "higher level" abstraction over `Vec[U8]`, compared to the
-`StrView` type which  is an immutable, static lifetime span over a pointer to bytes.
-##
-!public
-cls Str {
-    !public data: Vec[U8]
+cls Str[A: Alloc = GlobalAlloc] {
+    !package bytes: Vec[U8, A]
 }
-
 
 sup Str {
-    !public
-    fun new() -> Str {
-        ret Str(data=Vec[U8]::new())
-    }
+    !public fun new() -> Str { ret Str::new_in(GlobalAlloc) }
+    !public fun new_with_capacity(cap: USize) -> Str { ret Str::new_with_capacity_in(cap, GlobalAlloc) }
+    !public fun new_filled(len: USize, element: U8) -> Str { ret Str::new_filled_in(len, element, GlobalAlloc) }
 }
 
-
-sup Str {
-    !public
-    fun to_ascii_uppercase(&self) -> Str {
-        # ret self.data.iter_ref().map(U8::to_ascii_uppercase).collect[Str]()
-        ret Str::from("")
+sup [A: Alloc] Str[A] {
+    !public fun new_in(alloc: A = A()) -> Str[A] {
+        ret Str(bytes=Vec[U8, A]::new_in(alloc))
     }
 
-    !public
-    fun to_ascii_lowercase(&self) -> Str {
-        # ret self.data.iter_ref().map(U8::to_ascii_lowercase).collect[Str]()
-        ret Str::from("")
+    !public fun new_with_capacity_in(cap: USize, alloc: A = A()) -> Str[A] {
+        ret Str(bytes=Vec[U8, A]::new_with_capacity_in(cap, alloc))
     }
 
-    !public
-    fun split(&self, sep: U8) -> Vec[Str] {
-        let mut current: Str = Str::from("")
-        let mut strings = Vec[Str]::new()
-        
-        loop char in self.chars() {
-            case char == sep {
-                strings.push_back(current)
-                current = Str::from("")
-            }
-            else {
-                current += char
-            }
-        }
-        ret strings
+    !public fun new_filled_in(len: USize, element: U8, alloc: A = A()) -> Str[A] {
+        ret Str(bytes=Vec[U8, A]::new_filled_in(len, element, alloc))
     }
+
+    !public fun from_utf8(bytes: &View[U8]) -> Res[Str[A], Utf8Err] { }
+    !public fun from_utf8_unchecked(bytes: &View[U8]) -> Str[A] { }
+
+    !public fun append(&mut self, byte: U8) -> Void {
+        self.bytes.append(byte)
+    }
+
+    !public fun append_str(&mut self, other: &Str[A]) -> Void {
+
+    }
+
+    !public fun take_last(&mut self) -> Opt[U8] {
+
+    }
+
+    !public fun cap(&self) -> USize {
+        ret self.bytes.cap()
+    }
+
+    !public fun capacity_compact(&mut self) -> Void {
+        self.bytes.capacity_compact()
+    }
+
+    !public fun capacity_reserve(&mut self, cap: USize) -> Void {
+        self.bytes.capacity_reserve(cap)
+    }
+
+    !public cor view(&self) -> GenOnce[&StrView] { }
 }
 
-
-sup Str {
-    !public
-    !compiler_builtin
-    fun starts_with(&self, needle: StrView) -> Bool { }
-
-    !public
-    !compiler_builtin
-    fun ends_with(&self, needle: StrView) -> Bool { }
+sup [A: Alloc] Str[A] ext From[StrView] {
+    !intrinsic(name="std.string.Str.from[StrView]")
+    fun from(view: StrView) -> Str[A] { }
 }
 
-
-sup Str {
-    !public
-    cor chars(&self) -> Iterator[U8] {
-        gen with self.data.iter_mov()
-    }
-
-    !public
-    fun length(&self) -> USize {
-        ret self.data.length()
-    }
-
-    !public
-    fun is_empty(&self) -> Bool {
-        ret self.data.is_empty()
-    }
+sup [A: Alloc] Str[A] ext FwdMov[StrView] {
+    !intrinsic(name="std.string.Str.fwd_mov[StrView]")
+    cor fwd_mut(self) -> GenOnce[StrView] { }
 }
 
-
-sup Str ext From[Self, StrView] {
-    !compiler_builtin
-    fun from(that: StrView) -> Self { }
+sup [A: Alloc] Str[A] ext FwdMut[StrView] {
+    !intrinsic(name="std.string.Str.fwd_mut[StrView]")
+    cor fwd_mut(&mut self) -> GenOnce[&mut StrView] { }
 }
 
-
-sup Str ext From[Self, Path] {
-    fun from(that: Path) -> Self {
-        ret that.path.clone()
-    }
-}
-
-
-sup Str ext From[Self, U8] {
-    fun from(that: U8) -> Self {
-        # Create a Str from a single Char (U8)
-        let mut str = Str::new()
-        str += that
-        ret str
-    }
-}
-
-
-sup Str ext Eq[Rhs=Str] {
-    fun eq(&self, that: &Str) -> Bool {
-        # ret self.data.iter_ref().zip(that.data.iter_ref()).map(U8::eq).all()
-        ret false
-    }
-
-    fun ne(&self, that: &Str) -> Bool {
-        # ret self.data.iter_ref().zip(that.data.iter_ref()).map(U8::ne).any()
-        ret false
-    }
-}
-
-
-sup Str ext Clone[Out=Str] {
-    fun clone(&self) -> Self {
-        ret Str(data=self.data)
-    }
-}
-
-
-sup Str ext Add[Rhs=Str, Ret=Str] {
-    fun add(self, that: Str) -> Str {
-        ret Str(data=self.data + that.data)
-    }
-}
-
-
-sup Str ext Add[Rhs=U8, Ret=Str] {
-    fun add(self, that: U8) -> Str {
-        self.data.push_back(that)
-        ret Str(data=self.data)
-    }
-}
-
-
-sup Str ext AddAssign[Rhs=Str] {
-    fun add_assign(&mut self, that: Str) -> Void {
-        self.data += that.data
-    }
-}
-
-
-sup Str ext AddAssign[Rhs=U8] {
-    fun add_assign(&mut self, that: U8) -> Void {
-        self.data.push_back(that)
-    }
+sup [A: Alloc] Str[A] ext FwdRef[StrView] {
+    !intrinsic(name="std.string.Str.fwd_ref[StrView]")
+    cor fwd_ref(&self) -> GenOnce[&StrView] { }
 }

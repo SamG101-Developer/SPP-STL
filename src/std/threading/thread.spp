@@ -76,15 +76,13 @@ sup Thread {
     }
 }
 
-
-sup Thread ext Eq[Rhs=Thread] {
+sup Thread ext Eq {
     fun eq(&self, that: &Thread) -> Bool {
         # Compare thread IDs for equality.
         let val = sppc::thread_equal(self.id, that.id)
         ret val != 0
     }
 }
-
 
 sup Thread ext Del {
     fun del(&mut self) -> Void {

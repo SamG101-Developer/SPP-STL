@@ -3,9 +3,7 @@ use std::annotations::public
 use std::annotations::virtual_method
 use std::boolean::Bool
 
-
-!public cls Eq[Rhs] { }
-
+!public cls Eq[Rhs=Self] { }
 
 sup [Rhs] Eq[Rhs] {
     !public

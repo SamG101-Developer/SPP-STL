@@ -2,17 +2,14 @@ use std::annotations::abstract_method
 use std::annotations::public
 use std::void::Void
 
-
-!public cls Pow[Rhs, Ret] { }
-!public cls PowAssign[Rhs] { }
-
+!public cls Pow[Rhs=Self, Ret=Self] { }
+!public cls PowAssign[Rhs=Self] { }
 
 sup [Rhs, Ret] Pow[Rhs, Ret] {
     !public
     !abstract_method
     fun pow(self, that: Rhs) -> Ret { }
 }
-
 
 sup [Rhs] PowAssign[Rhs] {
     !public

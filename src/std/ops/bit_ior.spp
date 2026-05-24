@@ -2,17 +2,14 @@ use std::annotations::abstract_method
 use std::annotations::public
 use std::void::Void
 
-
-!public cls BitIor[Rhs, Ret] { }
-!public cls BitIorAssign[Rhs] { }
-
+!public cls BitIor[Rhs=Self, Ret=Self] { }
+!public cls BitIorAssign[Rhs=Self] { }
 
 sup [Rhs, Ret] BitIor[Rhs, Ret] {
     !public
     !abstract_method
     fun bit_ior(self, that: Rhs) -> Ret { }
 }
-
 
 sup [Rhs] BitIorAssign[Rhs] {
     !public
