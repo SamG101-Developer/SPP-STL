@@ -22,11 +22,11 @@ sup [T, I] IndexRef[T, I] {
 sup [T, I] SliceRef[T, I] {
     !public
     !abstract_method
-    cor slice_ref(&self, from: I, to: I) -> GenOnce[&View[T]] { }
+    cor slice_ref(&self, from: I, into: I) -> GenOnce[&View[T]] { }
 }
 
 sup [T, I] SliceMut[T, I] {
     !public
     !abstract_method
-    cor slice_mut(&mut self, from: I, to: I) -> GenOnce[&mut View[T]] { }
+    cor slice_mut(&mut self, from: I, into: I) -> GenOnce[&mut View[T]] { }
 }

@@ -50,7 +50,7 @@ sup StrView {
 
     !public fun startswith(self, needle: &StrView) -> Bool {
         case self.length < needle.length { ret false }
-        ret self[0, needle.length] == needle.view()
+        ret self[0 to needle.length] == needle.view()
     }
 
     !public fun endswith(self, needle: &StrView) -> Bool {
@@ -109,9 +109,9 @@ sup StrView {
 }
 
 sup StrView ext SliceRef[U8, USize] {
-    cor slice_ref(&self, from: USize, to: USize) -> GenOnce[&View[U8]] { }
+    cor slice_ref(&self, from: USize, into: USize) -> GenOnce[&View[U8]] { }
 }
 
 sup StrView ext SliceMut[U8, USize] {
-    cor slice_mut(&mut self, from: USize, to: USize) -> GenOnce[&mut View[U8]] { }
+    cor slice_mut(&mut self, from: USize, into: USize) -> GenOnce[&mut View[U8]] { }
 }
