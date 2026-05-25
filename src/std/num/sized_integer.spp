@@ -102,31 +102,31 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitXorAssign {
     }
 }
 
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitShl[Rhs=U32, Ret=Self] {
-    cmp fun bit_shl(self, that: Self) -> Self {
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitShl[Rhs=U32] {
+    cmp fun bit_shl(self, that: U32) -> Self {
         ret intrinsics::bit_shl(self, that)
     }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitShlAssign[Rhs=U32] {
-    cmp fun bit_shl_assign(&mut self, that: Self) -> Void {
+    cmp fun bit_shl_assign(&mut self, that: U32) -> Void {
         intrinsics::bit_shl_assign(self, that)
     }
 }
 
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitShr[Rhs=U32, Ret=Self] {
-    cmp fun bit_shr(self, that: Self) -> Self {
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitShr[Rhs=U32] {
+    cmp fun bit_shr(self, that: U32) -> Self {
         ret intrinsics::bit_shr(self, that)
     }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitShrAssign[Rhs=U32] {
-    cmp fun bit_shr_assign(&mut self, that: Self) -> Void {
+    cmp fun bit_shr_assign(&mut self, that: U32) -> Void {
         intrinsics::bit_shr_assign(self, that)
     }
 }
 
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitNot[Ret=Self] {
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitNot {
     cmp fun bit_not(self) -> Self {
         ret intrinsics::bit_not(self)
     }
