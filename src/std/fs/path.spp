@@ -213,7 +213,7 @@ sup Path ext Div[Path] {
 }
 
 sup Path ext Eq {
-    fun eq(&self, that: &Path) -> Bool {
+    fun eq(&self, that: &Self) -> Bool {
         ret self.path.eq(&that.path)
     }
 }
