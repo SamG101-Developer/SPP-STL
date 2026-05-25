@@ -5,6 +5,9 @@ use std::iterator::Iterator
 !public cls IterMov[T] { }
 !public cls IterMut[T] { }
 !public cls IterRef[T] { }
+!public cls RevIterMov[T] { }
+!public cls RevIterMut[T] { }
+!public cls RevIterRef[T] { }
 
 sup [T] IterMov[T] {
     !public
