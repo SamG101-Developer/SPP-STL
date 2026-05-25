@@ -18,7 +18,7 @@ cls BigUInt {
     data: Vec[U32]
 }
 
-sup [cmp w: U32] BigUInt ext From[Self, SizedIntegerUnsigned[w]] {
+sup [cmp w: U32] BigUInt ext From[SizedIntegerUnsigned[w]] {
     fun from(that: SizedIntegerUnsigned[w]) -> Self {
         let val = BigUInt()
         let mut temp = that

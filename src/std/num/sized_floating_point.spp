@@ -32,7 +32,7 @@ cls SizedFloatingPoint[cmp w: U32] { }
 # The sized floating point type extends the base floating point type.
 sup [cmp w: U32] SizedFloatingPoint[w] ext FloatingPoint { }
 
-sup [cmp this_w: U32, cmp that_w: U32] SizedFloatingPoint[this_w] ext From[Self, SizedFloatingPoint[that_w]] {
+sup [cmp this_w: U32, cmp that_w: U32] SizedFloatingPoint[this_w] ext From[SizedFloatingPoint[that_w]] {
     fun from(that: SizedFloatingPoint[that_w]) -> Self {
         # Destination (this) bits are less than the source (that) bits => truncate.
         case this_w < that_w { ret intrinsics::fptrunc[this_w](that) }

@@ -22,13 +22,13 @@ cls BigInt {
     data: BigUInt
 }
 
-sup [cmp w: U32] BigInt ext From[Self, SizedIntegerUnsigned[w]] {
+sup [cmp w: U32] BigInt ext From[SizedIntegerUnsigned[w]] {
     fun from(that: SizedIntegerUnsigned[w]) -> Self {
         ret BigInt(sign=false, data=BigUInt::from(that))
     }
 }
 
-sup [cmp w: U32] BigInt ext From[Self, SizedIntegerSigned[w]] {
+sup [cmp w: U32] BigInt ext From[SizedIntegerSigned[w]] {
     fun from(that: SizedIntegerSigned[w]) -> Self {
         let unsigned = SizedIntegerUnsigned[w]::from(that)
         ret BigInt(sign=that.is_negative(), data=BigUInt::from(unsigned))
