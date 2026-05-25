@@ -1,6 +1,7 @@
 use std::annotations::intrinsic
 use std::annotations::public
 use std::allocator::Alloc
+use std::allocator::AllocErr
 use std::allocator::GlobalAlloc
 use std::generator::GenOnce
 use std::number::USize
