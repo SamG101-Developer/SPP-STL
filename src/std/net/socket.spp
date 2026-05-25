@@ -12,6 +12,7 @@ use std::streams::StreamErr
 use std::streams::WritableStream
 use std::string_view::StrView
 use std::vector::Vec
+use std::view::View
 use std::void::Void
 
 !public cls Socket { !protected fd: S32 = 0 }
