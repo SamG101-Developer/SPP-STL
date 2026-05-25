@@ -7,6 +7,7 @@ use std::allocator::GlobalAlloc
 use std::array::Arr
 use std::cast::From
 use std::clone::Clone
+use std::iterator::Indexed
 use std::iterator::Iterator
 use std::generator::GenOnce
 use std::number::U8
