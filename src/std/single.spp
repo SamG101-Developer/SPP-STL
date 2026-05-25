@@ -4,6 +4,7 @@ use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::generator::GenOnce
 use std::number::USize
+use std::result::Res
 use std::mem::pointer::Ptr
 use std::ops::fwd::FwdMov
 use std::ops::fwd::FwdMut
@@ -46,7 +47,7 @@ sup [T, A: Alloc] Single[T, A] {
     fun try_new_in(val: T, alloc: A) -> Res[Self, AllocErr] {
         let ptr = alloc.alloc(Layout::new_for_type[T]())?
         ptr.write(val)
-        ret Ok(Single(ptr, alloc))
+        ret Pass(val=Single(ptr, alloc))
     }
 
     !public
