@@ -2,6 +2,7 @@ use std::annotations::intrinsic
 use std::annotations::public
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
+use std::cast::From
 use std::generator::GenOnce
 use std::option::Opt
 use std::number::U8
@@ -14,7 +15,6 @@ use std::void::Void
 use std::ops::fwd::FwdMov
 use std::ops::fwd::FwdMut
 use std::ops::fwd::FwdRef
-use std::ops::from::From
 
 cls Str[A: Alloc = GlobalAlloc] {
     !package bytes: Vec[U8, A]
