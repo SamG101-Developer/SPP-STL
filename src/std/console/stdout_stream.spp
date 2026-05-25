@@ -12,24 +12,21 @@ use std::string_view::StrView
 use std::view::View
 use std::void::Void
 
-
-!public
-cmp stdout: StdoutStream = StdoutStream()
-
-
 !private
 cmp stdout_fd: S32 = 1
 
+!public
+cmp stdout: StdoutStream = StdoutStream()
 
 !private
 cls StdoutStream { }
 
 
 sup StdoutStream ext WritableStream {
-    fun write(&mut self, data: &View[U8]) -> Res[USize, StreamErr] {
+    fun write(&mut self, buf: &View[U8]) -> Res[USize, StreamErr] {
         # Get the data length, form the stream, and write to stdout.
         let len = data.length()
-        let stream = StrView::from_utf8(data)
+        let stream = StrView::from_utf8(buf)
         let val = sppc::fd_write(&stream, 1_uz, len, stdout_fd)
 
         # Report a failed write (negative value) or return the number of bytes written.
