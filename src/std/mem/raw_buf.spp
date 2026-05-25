@@ -16,6 +16,12 @@ use std::string_view::StrView
 use std::void::Void
 use std::ops::idx::IndexRef
 use std::ops::idx::IndexMut
+use std::ops::iter::IterMov
+use std::ops::iter::IterMut
+use std::ops::iter::IterRef
+use std::ops::iter::RevIterMov
+use std::ops::iter::RevIterMut
+use std::ops::iter::RevIterRef
 use std::mem::pointer::Ptr
 
 # The RawBuf type is a low level container for contiguous elements in memory. It is capacity aware, but not length
@@ -112,28 +118,34 @@ sup [T, A: Alloc] RawBuf[T, A] {
     !package
     !instrinsic(name="std.mem.buffer.Buffer.place_at")
     fun place_at(&mut self, index: USize, element: T) -> Void { }
+}
 
-    !package
+sup [T, A: Alloc] RawBuf[T, A] ext IterMov[T] {
     !intrinsic(name="std.mem.buffer.Buffer.iter_mov")
     cor iter_mov(self) -> Iterator[T] { }
+}
 
-    !package
+sup [T, A: Alloc] RawBuf[T, A] ext IterMut[T] {
     !intrinsic(name="std.mem.buffer.Buffer.iter_mut")
     cor iter_mut(&mut self) -> Iterator[&mut T] { }
+}
 
-    !package
+sup [T, A: Alloc] RawBuf[T, A] ext IterRef[T] {
     !intrinsic(name="std.mem.buffer.Buffer.iter_ref")
     cor iter_ref(&self) -> Iterator[&T] { }
+}
 
-    !public
+sup [T, A: Alloc] RawBuf[T, A] ext RevIterMov[T] {
     !intrinsic(name="std.mem.buffer.Buffer.reverse_iter_mov")
     cor reverse_iter_mov(self) -> Iterator[T] { }
+}
 
-    !public
+sup [T, A: Alloc] RawBuf[T, A] ext RevIterMut[T] {
     !intrinsic(name="std.mem.buffer.Buffer.reverse_iter_mut")
     cor reverse_iter_mut(&mut self) -> Iterator[&mut T] { }
+}
 
-    !public
+sup [T, A: Alloc] RawBuf[T, A] ext RevIterRef[T] {
     !intrinsic(name="std.mem.buffer.Buffer.reverse_iter_ref")
     cor reverse_iter_ref(&self) -> Iterator[&T] { }
 }

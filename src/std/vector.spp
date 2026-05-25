@@ -7,6 +7,12 @@ use std::function::FunMut
 use std::number::USize
 use std::mem::raw_buf::RawBuf
 use std::ops::eq::Eq
+use std::ops::iter::IterMov
+use std::ops::iter::IterMut
+use std::ops::iter::IterRef
+use std::ops::iter::RevIterMov
+use std::ops::iter::RevIterMut
+use std::ops::iter::RevIterRef
 
 !public
 cls Vec[T, A: Alloc = GlobalAlloc] {
@@ -240,35 +246,41 @@ sup [T, A: Alloc] Vec[T, A] {
     }
 
     # ITERATE #
+}
 
-    !public
+sup [T, A: Alloc] Vec[T, A] ext IterMov[T] {
     cor iter_mov(self) -> Iterator[T] {
-        gen with self.buf.iter_mov()
+        gen with self.buffer.iter_mov()
     }
+}
 
-    !public
+sup [T, A: Alloc] Vec[T, A] ext IterMut[T] {
     cor iter_mut(&mut self) -> Iterator[&mut T] {
-        gen with self.buf.iter_mut()
+        gen with self.buffer.iter_mut()
     }
+}
 
-    !public
+sup [T, A: Alloc] Vec[T, A] ext IterRef[T] {
     cor iter_ref(&self) -> Iterator[&T] {
-        gen with self.buf.iter_ref()
+        gen with self.buffer.iter_ref()
     }
+}
 
-    !public
+sup [T, A: Alloc] Vec[T, A] ext RevIterMov[T] {
     cor reverse_iter_mov(self) -> Iterator[T] {
-        gen with self.buf.reverse_iter_mov()
+        gen with self.buffer.reverse_iter_mov()
     }
+}
 
-    !public
+sup [T, A: Alloc] Vec[T, A] ext RevIterMut[T] {
     cor reverse_iter_mut(&mut self) -> Iterator[&mut T] {
-        gen with self.buf.reverse_iter_mut()
+        gen with self.buffer.reverse_iter_mut()
     }
+}
 
-    !public
+sup [T, A: Alloc] Vec[T, A] ext RevIterRef[T] {
     cor reverse_iter_ref(&self) -> Iterator[&T] {
-        gen with self.buf.reverse_iter_ref()
+        gen with self.buffer.reverse_iter_ref()
     }
 }
 
