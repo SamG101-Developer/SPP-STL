@@ -1,5 +1,5 @@
 use std::boolean::Bool
-use std::number::Usize
+use std::number::USize
 use std::mem::pointer::Ptr
 use std::ops::idx::IndexRef
 use std::ops::iter::IterRef
