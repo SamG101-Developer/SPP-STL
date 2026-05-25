@@ -266,17 +266,17 @@ sup BigInt ext std::ops::pow::PowAssign {
 }
 
 sup BigInt ext Eq {
-    fun eq(&self, that: &BigInt) -> Bool {
+    fun eq(&self, that: &Self) -> Bool {
         ret self.sign == that.sign and self.data.eq(&that.data)
     }
 
-    fun ne(&self, that: &BigInt) -> Bool {
+    fun ne(&self, that: &Self) -> Bool {
         ret self.sign != that.sign or self.data.ne(&that.data)
     }
 }
 
 sup BigInt ext Ord {
-    fun ord(&self, that: &BigInt) -> S32 {
+    fun ord(&self, that: &Self) -> S32 {
         case self.sign != that.sign {
             ret case self.sign { -1_s32 } else { 1_s32 }
         }
