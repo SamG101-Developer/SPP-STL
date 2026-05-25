@@ -1,0 +1,60 @@
+use std::annotations::public
+use std::annotations::intrinsic
+use std::number::USize
+use std::ops::fwd::FwdMov
+use std::ops::fwd::FwdMut
+use std::ops::fwd::FwdRef
+
+# The "Ptr" type is a simple wrapper around a raw pointer. It is never used outside of the standard library, and is only
+# used internally to low level collections within the STL. The fields that have a "Ptr" type are also only internal to
+# the S++ STL.
+!package
+cls Ptr[T] { }
+
+sup [T] Ptr[T] {
+    # Alias the generic T to a type alias "Element", so that it can be used in external contexts.
+    type Element = T
+
+    # Get the address of a raw pointer. This is compiler builtin, as the "Ptr" type is known to the compiler, and the
+    # compiler adds an "addr" field to the "Ptr" type in LLVM, which "from_addr" can interact with.
+    !package
+    !intrinsic(name="spp.mem.pointer.Ptr.addr")
+    fun addr(&self) -> USize { }
+
+    # Create a raw pointer from an address. This is safe because it is never exposed to user code, and is only used
+    # internally within the STL. The compiler-added "addr" field will be used to store the address, so that the "addr"
+    # method can retrieve it later.
+    !package
+    !intrinsic(name="spp.mem.pointer.Ptr.from_addr")
+    fun from_addr(addr: USize) -> Ptr[T] { }
+
+    # Check if the pointer is aligned to a given alignment. This is compiler builtin, as it can be implemented using a
+    # single instruction in LLVM. The "align" parameter is a power of two, and the method returns true if the pointer is
+    # aligned to that alignment, and false otherwise.
+    !package
+    !intrinsic(name="spp.mem.pointer.Ptr.is_aligned")
+    fun is_aligned(&self, align: USize) -> Bool { }
+
+    !package
+    !intrinsic(name="spp.mem.pointer.Ptr.read")
+    fun read(self) -> T { }
+
+    !package
+    !intrinsic(name="spp.mem.pointer.Ptr.write")
+    fun write(self, val: T) -> Void { }
+}
+
+sup [T] Ptr[T] ext FwdMov[T] {
+    !intrinsic(name="spp.mem.pointer.Ptr.fwd_mov")
+    cor fwd_mov(self) -> GenOnce[T] { }
+}
+
+sup [T] Ptr[T] ext FwdMut[&mut T] {
+    !intrinsic(name="spp.mem.pointer.Ptr.fwd_mut")
+    cor fwd_mut(&mut self) -> GenOnce[&mut T] { }
+}
+
+sup [T] Ptr[T] ext FwdRef[&T] {
+    !intrinsic(name="spp.mem.pointer.Ptr.fwd_ref")
+    cor fwd_ref(&self) -> GenOnce[&T] { }
+}
