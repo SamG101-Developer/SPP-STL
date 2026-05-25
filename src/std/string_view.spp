@@ -5,7 +5,7 @@ use std::option::Opt
 use std::number::U8
 use std::number::USize
 use std::view::View
-use std::memory::pointer::Ptr
+use std::mem::pointer::Ptr
 use std::ops::idx::SliceMut
 use std::ops::idx::SliceRef
 

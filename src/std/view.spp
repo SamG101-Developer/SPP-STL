@@ -1,6 +1,6 @@
 use std::boolean::Bool
 use std::number::Usize
-use std::memory::pointer::Ptr
+use std::mem::pointer::Ptr
 use std::ops::idx::IndexRef
 use std::ops::iter::IterRef
 use std::ops::iter::ReverseIterRef

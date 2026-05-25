@@ -8,7 +8,6 @@ use std::cast::From
 use std::clone::Clone
 use std::iterator::Iterator
 use std::generator::GenOnce
-use std::mem::memory::Memory
 use std::number::U8
 use std::number::USize
 use std::option::None

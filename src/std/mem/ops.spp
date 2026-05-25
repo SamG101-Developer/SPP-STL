@@ -11,7 +11,6 @@ use std::option::Opt
 use std::option::None
 use std::option::Some
 use std::void::Void
-use std::mem::memory::Mem
 
 # Returns the size of a type at compile time. This is a sum of the fields of the type, including alignment padding, with
 # special type handling internal to the compiler (ie smart pointer type sizes, number sizes, etc). This is a compiletime
