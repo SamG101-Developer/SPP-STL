@@ -90,8 +90,8 @@ sup [T: Eq] View[T] {
 }
 
 sup [T] View[T] ext IndexRef[USize, T] {
-    !intrinsic(name="std.view.View.idx_ref")
-    cor idx_ref(&self, index: USize) -> Indexed[&T] { }
+    !intrinsic(name="std.view.View.index_ref")
+    cor index_ref(&self, index: USize) -> Indexed[&T] { }
 }
 
 sup [T] View[T] ext IterRef[T] {
