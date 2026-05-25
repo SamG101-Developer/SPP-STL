@@ -16,7 +16,6 @@ use std::string_view::StrView
 use std::void::Void
 use std::ops::idx::IndexRef
 use std::ops::idx::IndexMut
-use std::mem::ops::MaybeInit
 
 # The RawBuf type is a low level container for contiguous elements in memory. It is capacity aware, but not length
 # aware. It is used as the underlying container inside a Vec. Elements are not guaranteed to be initialized, so all
