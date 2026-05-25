@@ -4,6 +4,7 @@ use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::generator::GenOnce
 use std::number::USize
+use std::result::Pass
 use std::result::Res
 use std::mem::pointer::Ptr
 use std::ops::fwd::FwdMov
