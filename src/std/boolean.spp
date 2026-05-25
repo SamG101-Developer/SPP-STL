@@ -32,63 +32,63 @@ sup Bool ext Integral { }
 sup Bool ext And {
     !inline
     !intrinsic(name="std.boolean.Bool.and")
-    cmp fun and_(self, that: Bool) -> Bool { }
+    cmp fun and_(self, that: Self) -> Self { }
 }
 
 sup Bool ext Ior {
     !inline
     !intrinsic(name="std.boolean.Bool.ior")
-    cmp fun ior_(self, that: Bool) -> Bool { }
+    cmp fun ior_(self, that: Self) -> Self { }
 }
 
 sup Bool ext BitAnd {
     !inline
     !intrinsic(name="std.boolean.Bool.bit_and")
-    cmp fun bit_and(self, that: Bool) -> Bool { }
+    cmp fun bit_and(self, that: Self) -> Self { }
 }
 
 sup Bool ext BitIor {
     !inline
     !intrinsic(name="std.boolean.Bool.bit_ior")
-    cmp fun bit_ior(self, that: Bool) -> Bool { }
+    cmp fun bit_ior(self, that: Self) -> Self { }
 }
 
 sup Bool ext BitXor {
     !inline
     !intrinsic(name="std.boolean.Bool.bit_xor")
-    cmp fun bit_xor(self, that: Bool) -> Bool { }
+    cmp fun bit_xor(self, that: Self) -> Self { }
 }
 
 sup Bool ext BitNot {
     !inline
     !intrinsic(name="std.boolean.Bool.bit_not")
-    cmp fun bit_not(self) -> Bool { }
+    cmp fun bit_not(self) -> Self { }
 }
 
 sup Bool ext Eq {
     !inline
     !intrinsic(name="std.boolean.Bool.eq")
-    fun eq(&self, that: &Bool) -> Bool { }
+    fun eq(&self, that: &Self) -> Self { }
 
     !inline
     !intrinsic(name="std.boolean.Bool.ne")
-    fun ne(&self, that: &Bool) -> Bool { }
+    fun ne(&self, that: &Self) -> Self { }
 }
 
 sup [cmp n: U32] Bool ext From[SizedIntegerSigned[n]] {
-    fun from(that: SizedIntegerSigned[n]) -> Bool {
+    fun from(that: SizedIntegerSigned[n]) -> Self {
         ret that > SizedIntegerSigned[n]::zero()
     }
 }
 
 sup [cmp n: U32] Bool ext From[SizedIntegerUnsigned[n]] {
-    fun from(that: SizedIntegerUnsigned[n]) -> Bool {
+    fun from(that: SizedIntegerUnsigned[n]) -> Self {
         ret that > SizedIntegerUnsigned[n]::zero()
     }
 }
 
 sup [cmp n: U32] Bool ext From[SizedFloatingPoint[n]] {
-    fun from(that: SizedFloatingPoint[n]) -> Bool {
+    fun from(that: SizedFloatingPoint[n]) -> Self {
         ret that > SizedFloatingPoint[n]::zero()
     }
 }
