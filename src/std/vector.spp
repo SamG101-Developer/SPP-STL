@@ -4,8 +4,8 @@ use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::clone::Clone
 use std::function::FunMut
-use std::iter::Indexed
-use std::iter::Iterator
+use std::iterator::Indexed
+use std::iterator::Iterator
 use std::number::USize
 use std::void::Void
 use std::mem::raw_buf::RawBuf
