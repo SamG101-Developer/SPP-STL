@@ -11,6 +11,7 @@ use std::result::Fail
 use std::result::Pass
 use std::result::Res
 use std::vector::Vec
+use std::view::View
 use std::void::Void
 
 !public
