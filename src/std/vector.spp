@@ -1,6 +1,9 @@
+use std::annotations::package
+use std::annotations::public
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::clone::Clone
+use std::function::FunMut
 use std::number::USize
 use std::mem::raw_buf::RawBuf
 use std::ops::eq::Eq
@@ -28,7 +31,7 @@ sup [T] Vec[T] {
     }
 
     !public
-    fun new_from_fun(len: USize, f: FnMut[(USize,), T]) -> Self {
+    fun new_from_fun(len: USize, f: FunMut[(USize,), T]) -> Self {
         let mut vec = Self::new_with_capacity_in(len, GlobalAlloc)
         loop i in Range[USize]::between(0_uz, len) { vec.append_unchecked(f(i)) }
         vec.length = len
