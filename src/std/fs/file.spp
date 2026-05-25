@@ -85,11 +85,11 @@ sup File {
 
 
 sup File ext WritableStream {
-    fun write(&mut self, data: &View[U8]) -> Res[USize, StreamErr] {
+    fun write(&mut self, buf: &View[U8]) -> Res[USize, StreamErr] {
         # Get the data length and write to the file descriptor.
-        let len = data.length()
+        let len = buf.length()
         case self.open.not { ret Fail(err=StreamErr(msg="File is not open")) }
-        let val = sppc::fd_write(&StrView::from_utf8(data), 1_u64, len, self.fd)
+        let val = sppc::fd_write(&StrView::from_utf8(buf), 1_u64, len, self.fd)
 
         # Check for errors or incomplete writes.
         ret case val of {
