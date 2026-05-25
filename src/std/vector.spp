@@ -335,7 +335,7 @@ sup [T, A: Alloc] Vec[T, A] ext AddAssign {
 }
 
 sup [T: Eq, A: Alloc] Vec[T, A] ext Eq {
-    fun eq(&self, that: Self) -> Bool {
+    fun eq(&self, that: &Self) -> Bool {
         case self.len() != that.len() { ret false }
         loop i in Range[USize]::between(0_uz, self.len()) {
             case self[i] != that[i] { ret false }
@@ -343,7 +343,7 @@ sup [T: Eq, A: Alloc] Vec[T, A] ext Eq {
         ret true
     }
 
-    fun ne(&self, that: Self) -> Bool {
+    fun ne(&self, that: &Self) -> Bool {
         case self.len() != that.len() { ret true }
         loop i in Range[USize]::between(0_uz, self.len()) {
             case self[i] == that[i] { ret true }
