@@ -1,4 +1,9 @@
+use std::annotations::intrinsic
+use std::annotations::public
 use std::boolean::Integral
+use std::num::bases::Integer
+use std::boolean::Bool
+use std::void::Void
 
 !public
 fun volatile_fence() -> Void {
