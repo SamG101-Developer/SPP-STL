@@ -2,6 +2,7 @@ use std::annotations::package
 use std::annotations::private
 use std::annotations::public
 use std::allocator::Alloc
+use std::allocator::AllocErr
 use std::allocator::GlobalAlloc
 use std::array::Arr
 use std::cast::From
