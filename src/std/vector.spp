@@ -1,6 +1,7 @@
 use std::annotations::package
 use std::annotations::public
 use std::allocator::Alloc
+use std::allocator::AllocErr
 use std::allocator::GlobalAlloc
 use std::boolean::Bool
 use std::clone::Clone
