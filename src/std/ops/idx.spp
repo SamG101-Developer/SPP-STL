@@ -1,6 +1,8 @@
 use std::annotations::abstract_method
 use std::annotations::public
+use std::generator::GenOnce
 use std::iterator::Indexed
+use std::view::View
 
 !public cls IndexMut[T, I] { }
 !public cls IndexRef[T, I] { }
