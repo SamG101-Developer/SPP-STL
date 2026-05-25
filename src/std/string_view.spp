@@ -10,7 +10,7 @@ use std::ops::idx::SliceMut
 use std::ops::idx::SliceRef
 
 !public
-cls Utf8Error {
+cls Utf8Err {
     !public valid_up_to: USize
     !public error_len: Opt[USize]
 }
