@@ -18,10 +18,10 @@ sup [Yield, Send] Gen[Yield, Send] {
 
 !public
 cls GenOnce[Yield] { }
-sup [Yield, Send] GenOnce[Yield] {
+sup [Yield] GenOnce[Yield] {
     !public
     !intrinsic(name="std.generator.GenOnce.send")
-    fun send(&mut self, value: Send) -> Generated[Yield or None] { }
+    fun send(&mut self) -> Generated[Yield or None] { }
 }
 
 !private
