@@ -14,7 +14,7 @@ use std::shadow::Shadow
 use std::void::Void
 
 !public
-cls Shared[T, A: Alloc[T] = GlobalAlloc[T]] {
+cls Shared[T, A: Alloc = GlobalAlloc] {
     shared_counter: USize
     shadow_counter: USize
 }

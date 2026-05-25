@@ -5,7 +5,7 @@ use std::allocator::GlobalAlloc
 use std::shared::Shared
 
 !public
-cls Shadow[T, A: Alloc[T] = GlobalAlloc[T]] { }
+cls Shadow[T, A: Alloc = GlobalAlloc] { }
 
 sup [T] Shadow[T] {
     !public type Element = T
