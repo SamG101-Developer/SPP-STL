@@ -6,7 +6,6 @@ use std::number::S32
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
-use std::slice::Slice
 use std::streams::WritableStream
 use std::streams::StreamErr
 use std::string_view::StrView
