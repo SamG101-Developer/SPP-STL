@@ -1,5 +1,6 @@
 use std::annotations::package
 use std::annotations::public
+use std::char::Char
 use std::copy::Copy
 use std::option::Opt
 use std::number::U8

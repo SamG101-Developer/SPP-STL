@@ -1,5 +1,4 @@
 use std::boolean::Bool
-use std::char::Char
 use std::number::USize
 use std::option::None
 use std::option::Opt
