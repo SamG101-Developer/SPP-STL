@@ -27,7 +27,7 @@ type SizedIntegerSigned[cmp w: U32] = SizedInteger[w, true]
 
 sup [cmp this_w: U32, cmp that_w: U32]
 SizedIntegerSigned[this_w] ext
-From[Self, SizedIntegerUnsigned[that_w]] {
+From[SizedIntegerUnsigned[that_w]] {
     fun from(that: SizedIntegerUnsigned[that_w]) -> Self {
         # Destination (this) bits are less than the source (that) bits => truncate.
         case this_w < that_w {
@@ -48,7 +48,7 @@ From[Self, SizedIntegerUnsigned[that_w]] {
 
 sup [cmp this_w: U32, cmp that_w: U32]
 SizedIntegerSigned[this_w] ext
-From[Self, SizedIntegerSigned[that_w]] {
+From[SizedIntegerSigned[that_w]] {
     fun from(that: SizedIntegerSigned[that_w]) -> Self {
         # Destination (this) bits are less than the source (that) bits => truncate.
         case this_w < that_w {
