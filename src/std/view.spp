@@ -3,7 +3,7 @@ use std::number::Usize
 use std::mem::pointer::Ptr
 use std::ops::idx::IndexRef
 use std::ops::iter::IterRef
-use std::ops::iter::ReverseIterRef
+use std::ops::iter::RevIterRef
 
 # The View type is a borrow into a collection. It is contiguous in memory and provides efficient access to the
 # underlying data. The View type is designed to be used with collections that support slicing, such as arrays and
@@ -93,7 +93,7 @@ sup [T] View[T] ext IterRef[T] {
     cor iter_ref(&self) -> Iterator[&T] { }
 }
 
-sup [T] View[T] ext ReverseIterRef[T] {
+sup [T] View[T] ext RevIterRef[T] {
     !intrinsic(name="std.view.View.reverse_iter_ref")
     cor reverse_iter_ref(&self) -> Iterator[&T] { }
 }

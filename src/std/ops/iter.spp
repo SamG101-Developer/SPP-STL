@@ -24,19 +24,19 @@ sup [T] IterRef[T] {
     cor iter_ref(&self) -> Iterator[&T] { }
 }
 
-sup [T] ReverseIterMov[T] {
+sup [T] RevIterMov[T] {
     !public
     !abstract_method
     cor reverse_iter_mov(self) -> Iterator[T] { }
 }
 
-sup [T] ReverseIterMut[T] {
+sup [T] RevIterMut[T] {
     !public
     !abstract_method
     cor reverse_iter_mut(&mut self) -> Iterator[&mut T] { }
 }
 
-sup [T] ReverseIterRef[T] {
+sup [T] RevIterRef[T] {
     !public
     !abstract_method
     cor reverse_iter_ref(&self) -> Iterator[&T] { }
