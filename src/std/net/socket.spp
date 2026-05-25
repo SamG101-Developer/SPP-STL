@@ -105,7 +105,6 @@ sup Socket {
     !public cmp ipproto_max: S32 = 263 # ?
 }
 
-
 sup Socket {
     fun close(&mut self) -> Void {
         sppc::fd_close(self.fd)
@@ -113,19 +112,9 @@ sup Socket {
     }
 }
 
-
 sup Socket ext WritableStream {
     fun write(&mut self, buf: &View[U8]) -> Res[USize, StreamErr] {
-        # Get the data length, form the stream, and send the datagram.
-        let len = buf.length()
-        let stream = StrView::from_utf8(buf)
-        let val = sppc::fd_write(&stream, 1_uz, len, self.fd)
-
-        # Report a failed send (negative value) or return the number of bytes sent.
-        ret case val of {
-            < 0_uz { Fail(err=StreamErr(msg="Failed to write to socket")) }
-            else { Pass(val) }
-        }
+        # Todo
     }
 
     fun flush(&mut self) -> Res[Void, StreamErr] {
@@ -134,25 +123,11 @@ sup Socket ext WritableStream {
     }
 }
 
-
 sup Socket ext ReadableStream {
-    fun read(&mut self, len: USize) -> Res[Vec[U8], StreamErr] {
-        # Prepare the stream and receive the datagram.
-        let mut stream = StrView::new_with_capacity(len)
-        let val = sppc::fd_read(&mut stream, 1_uz, len, self.fd)
-
-        # Report a failed receive (negative value) or return the received data, host, and port.
-        ret case val of {
-            < 0_uz { Fail(err=StreamErr(msg="Failed to read from socket")) }
-            else {
-                # buffer.set_length(USize::from(val))
-                let vec = Vec[U8]::from(View[U8]::from(stream))
-                Pass(val=vec)
-            }
-        }
+    fun read(&mut self, buf: &mut View[U8]) -> Res[USize, StreamErr] {
+        # Todo
     }
 }
-
 
 sup Socket ext Del {
     fun del(&mut self) -> Void {
