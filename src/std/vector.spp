@@ -3,6 +3,7 @@ use std::annotations::public
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::clone::Clone
+use std::function::FunMov
 use std::function::FunMut
 use std::iterator::Indexed
 use std::iterator::Iterator
@@ -159,7 +160,7 @@ sup [T, A: Alloc] Vec[T, A] {
         ret self.buffer.take(self.length)
     }
 
-    !public fun take_last_if(&mut self, f: FnMov[(&mut T,), Bool]) -> Opt[T] {
+    !public fun take_last_if(&mut self, f: FunMov[(&mut T,), Bool]) -> Opt[T] {
         case self.is_empty() { ret None }
         let last_index = self.length - 1_uz
         case f(self[mut last_index]).not { ret None }
