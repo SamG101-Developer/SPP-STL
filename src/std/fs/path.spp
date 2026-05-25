@@ -200,13 +200,13 @@ sup Path ext Clone {
     }
 }
 
-sup Path ext Div {
+sup Path ext Div[Str] {
     fun div(self, that: Str) -> Path {
         ret self.join(that)
     }
 }
 
-sup Path ext Div {
+sup Path ext Div[Path] {
     fun div(self, that: Path) -> Path {
         ret self.join(that.path)
     }
