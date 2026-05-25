@@ -68,11 +68,11 @@ sup Bool ext BitNot {
 sup Bool ext Eq {
     !inline
     !intrinsic(name="std.boolean.Bool.eq")
-    fun eq(&self, that: &Self) -> Self { }
+    fun eq(&self, that: &Self) -> Bool { }
 
     !inline
     !intrinsic(name="std.boolean.Bool.ne")
-    fun ne(&self, that: &Self) -> Self { }
+    fun ne(&self, that: &Self) -> Bool { }
 }
 
 sup [cmp n: U32] Bool ext From[SizedIntegerSigned[n]] {
