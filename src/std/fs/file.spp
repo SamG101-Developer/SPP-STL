@@ -84,7 +84,7 @@ sup File {
 
 
 sup File ext WritableStream {
-    fun write(&mut self, data: &Slice[U8]) -> Res[USize, StreamErr] {
+    fun write(&mut self, data: &View[U8]) -> Res[USize, StreamErr] {
         # Get the data length and write to the file descriptor.
         let len = data.length()
         case self.open.not { ret Fail(err=StreamErr(msg="File is not open")) }
@@ -122,7 +122,7 @@ sup File ext ReadableStream {
         }
 
         # Resize the vector to the actual number of bytes read.
-        let vec = Vec[U8]::from(Slice[U8]::from(stream))
+        let vec = Vec[U8]::from(View[U8]::from(stream))
         vec.resize(read_bytes)
         ret Pass(val=vec)
     }

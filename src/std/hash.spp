@@ -11,7 +11,7 @@ cls Hasher { }
 sup Hasher {
     !public
     !abstract_method
-    fun write(&mut self, bytes: &Slice[U8]) -> Void { }
+    fun write(&mut self, bytes: &View[U8]) -> Void { }
 
     !public
     !abstract_method
