@@ -8,6 +8,7 @@ use std::boolean::Bool
 use std::cast::From
 use std::clone::Clone
 use std::copy::Copy
+use std::function::FunMov
 use std::iterator::Indexed
 use std::iterator::Iterator
 use std::number::USize
