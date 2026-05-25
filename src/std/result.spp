@@ -246,7 +246,7 @@ sup [T: Eq, E: Eq] Res[T, E] ext Eq {
     # types for equality. In this case, we check if both results are in the Pass state, and if so, compare the internal
     # values for equality. If both results are in the Fail state, then compare the internal errors for equality.
     # Otherwise, they are not equal.
-    fun eq(&self, that: &Res[T, E]) -> Bool {
+    fun eq(&self, that: &Self) -> Bool {
         ret case (self@, that@) of {
             is (Pass[T](val as a), Pass[T](val as b)) { a == b }
             is (Fail[E](err as a), Fail[E](err as b)) { a == b }
@@ -258,7 +258,7 @@ sup [T: Eq, E: Eq] Res[T, E] ext Eq {
     # result types for inequality. In this case, we check if both result are in the Pass state, and if so, compare the
     # internal values for inequality. If both results are in the Fail state, then compare the internal errors for
     # inequality. Otherwise, they are not equal, and thus are unequal.
-    fun ne(&self, that: &Opt[T]) -> Bool {
+    fun ne(&self, that: &Self) -> Bool {
         ret case (self@, that@) of {
             is (Pass[T](val as a), Pass[T](val as b)) { a != b }
             is (Fail[E](err as a), Fail[E](err as b)) { a != b }

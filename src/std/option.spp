@@ -287,7 +287,7 @@ sup [T: Eq] Opt[T] ext Eq {
     # optional types for equality. In this case, we check if both optionals are in the Some state, and if so, compare
     # the internal values for equality. If both optionals are in the None state, then they are equal. Otherwise, they
     # are not equal.
-    fun eq(&self, that: &Opt[T]) -> Bool {
+    fun eq(&self, that: &Self) -> Bool {
         ret case (self@, that@) of {
             is (Some[T](val as a), Some[T](val as b)) { a == b }
             is (None(), None()) { true }
@@ -299,7 +299,7 @@ sup [T: Eq] Opt[T] ext Eq {
     # optional types for inequality. In this case, we check if both optionals are in the Some state, and if so, compare
     # the internal values for inequality. If both optionals are in the None state, then they are not unequal. Otherwise,
     # they are unequal.
-    fun ne(&self, that: &Opt[T]) -> Bool {
+    fun ne(&self, that: &Self) -> Bool {
         ret case (self@, that@) of {
             is (Some[T](val as a), Some[T](val as b)) { a != b }
             is (None(), None()) { false }
