@@ -19,9 +19,9 @@ use std::ops::idx::IndexRef
 use std::ops::iter::IterMov
 use std::ops::iter::IterMut
 use std::ops::iter::IterRef
-use std::ops::iter::ReverseIterMov
-use std::ops::iter::ReverseIterMut
-use std::ops::iter::ReverseIterRef
+use std::ops::iter::RevIterMov
+use std::ops::iter::RevIterMut
+use std::ops::iter::RevIterRef
 
 
 # A fixed size, inline array of element type T. The length is a compiletime constant, so storage lives on the stack
@@ -80,17 +80,17 @@ sup [T, cmp n: USize] Arr[T, n] ext IterRef[T] {
     cor iter_ref(&self) -> Iterator[&T] { }
 }
 
-sup [T, cmp n: USize] Arr[T, n] ext ReverseIterMov[T] {
+sup [T, cmp n: USize] Arr[T, n] ext RevIterMov[T] {
     !intrinsic(name="std.array.Arr.reverse_iter_mov")
     cor reverse_iter_mov(self) -> Iterator[T] { }
 }
 
-sup [T, cmp n: USize] Arr[T, n] ext ReverseIterMut[T] {
+sup [T, cmp n: USize] Arr[T, n] ext RevIterMut[T] {
     !intrinsic(name="std.array.Arr.reverse_iter_mut")
     cor reverse_iter_mut(&mut self) -> Iterator[&mut T] { }
 }
 
-sup [T, cmp n: USize] Arr[T, n] ext ReverseIterRef[T] {
+sup [T, cmp n: USize] Arr[T, n] ext RevIterRef[T] {
     !intrinsic(name="std.array.Arr.reverse_iter_ref")
     cor reverse_iter_ref(&self) -> Iterator[&T] { }
 }
