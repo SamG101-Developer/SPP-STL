@@ -5,6 +5,7 @@ use std::function::FunMov
 use std::option::Opt
 use std::option::None
 use std::option::Some
+use std::string_view::StrView
 use std::ops::eq::Eq
 use std::ops::try::Try
 

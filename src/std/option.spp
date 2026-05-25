@@ -5,6 +5,7 @@ use std::function::FunMov
 use std::result::Res
 use std::result::Pass
 use std::result::Fail
+use std::string_view::StrView
 use std::ops::eq::Eq
 use std::ops::try::Try
 
