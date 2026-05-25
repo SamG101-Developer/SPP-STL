@@ -4,6 +4,7 @@ use std::option::None
 use std::option::Opt
 use std::option::Some
 use std::iterator::Indexed
+use std::iterator::Iterator
 use std::mem::pointer::Ptr
 use std::ops::idx::IndexRef
 use std::ops::iter::IterRef
