@@ -407,11 +407,11 @@ sup BigUInt ext std::ops::pow::PowAssign {
 }
 
 sup BigUInt ext std::ops::eq::Eq {
-    fun eq(&self, that: &BigUInt) -> Bool {
+    fun eq(&self, that: &Self) -> Bool {
         ret self.data == that.data
     }
 
-    fun ne(&self, that: &BigUInt) -> Bool {
+    fun ne(&self, that: &Self) -> Bool {
         ret self.data != that.data
     }
 }
