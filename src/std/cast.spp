@@ -7,7 +7,7 @@ use std::result::Res
 use std::string_view::StrView
 
 !public cls From[That] { }
-!public cls TryFrom[That] { }
+!public cls TryFrom[That, Err=ConversionErr] { }
 
 !public cls ConversionErr {
     !public msg: StrView
@@ -19,7 +19,7 @@ sup [That] From[That] {
     fun from(that: That) -> Self { }
 }
 
-sup [That] TryFrom[That, Err=ConversionErr] {
+sup [That, Err] TryFrom[That, Err] {
     !public
     !abstract_method
     fun try_from(that: That) -> Res[Self, Err] { }
