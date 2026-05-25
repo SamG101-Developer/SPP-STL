@@ -77,7 +77,7 @@ sup [A: Alloc] Str[A] ext From[StrView] {
 
 sup [A: Alloc] Str[A] ext FwdMov[StrView] {
     !intrinsic(name="std.string.Str.fwd_mov[StrView]")
-    cor fwd_mut(self) -> GenOnce[StrView] { }
+    cor fwd_mov(self) -> GenOnce[StrView] { }
 }
 
 sup [A: Alloc] Str[A] ext FwdMut[StrView] {
