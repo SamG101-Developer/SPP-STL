@@ -32,13 +32,13 @@ sup Bool ext Integral { }
 sup Bool ext And {
     !inline
     !intrinsic(name="std.boolean.Bool.and")
-    cmp fun and_(self, that: Self) -> Self { }
+    cmp fun and_(self, that: Self) -> Bool { }
 }
 
 sup Bool ext Ior {
     !inline
     !intrinsic(name="std.boolean.Bool.ior")
-    cmp fun ior_(self, that: Self) -> Self { }
+    cmp fun ior_(self, that: Self) -> Bool { }
 }
 
 sup Bool ext BitAnd {
