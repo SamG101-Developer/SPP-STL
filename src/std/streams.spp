@@ -8,6 +8,7 @@ use std::number::S32
 use std::number::SSize
 use std::result::Res
 use std::result::Pass
+use std::string::Str
 use std::string_view::StrView
 use std::vector::Vec
 use std::void::Void
