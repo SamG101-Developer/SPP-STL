@@ -26,7 +26,7 @@ sup [T] Single[T, GlobalAlloc] {
     }
 
     !public
-    fun try_new(val: T) -> Result[Self, AllocErr] {
+    fun try_new(val: T) -> Res[Self, AllocErr] {
         ret Self::try_new_in(val, GlobalAlloc)
     }
 }
@@ -43,7 +43,7 @@ sup [T, A: Alloc] Single[T, A] {
     }
 
     !public
-    fun try_new_in(val: T, alloc: A) -> Result[Self, AllocErr] {
+    fun try_new_in(val: T, alloc: A) -> Res[Self, AllocErr] {
         let ptr = alloc.alloc(Layout::new_for_type[T]())?
         ptr.write(val)
         ret Ok(Single(ptr, alloc))
