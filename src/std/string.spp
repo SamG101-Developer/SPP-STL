@@ -72,7 +72,7 @@ sup [A: Alloc] Str[A] {
 
 sup [A: Alloc] Str[A] ext From[StrView] {
     !intrinsic(name="std.string.Str.from[StrView]")
-    fun from(view: StrView) -> Str[A] { }
+    fun from(view: StrView) -> Self { }
 }
 
 sup [A: Alloc] Str[A] ext FwdMov[StrView] {
