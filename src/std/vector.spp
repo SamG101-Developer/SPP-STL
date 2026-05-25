@@ -1,5 +1,6 @@
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
+use std::clone::Clone
 use std::number::USize
 use std::mem::raw_buf::RawBuf
 
