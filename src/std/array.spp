@@ -116,4 +116,4 @@ sup [T, cmp n: USize] Arr[T, n] ext Eq {
 
 # A heap version of the array type, that works by storing the array in a Single pointer, with an allocator available
 # too.
-type HeapArr[T, cmp n: USize, A: Alloc] = Single[Arr[T, n], A]
+# type HeapArr[T, cmp n: USize, A: Alloc] = Single[Arr[T, n], A]
