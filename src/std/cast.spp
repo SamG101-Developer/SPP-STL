@@ -6,8 +6,8 @@ use std::option::None
 use std::result::Res
 use std::string_view::StrView
 
-!public cls From[This, That] { }
-!public cls TryFrom[This, That] { }
+!public cls From[That] { }
+!public cls TryFrom[That] { }
 
 !public cls ConversionErr {
     !public msg: StrView
