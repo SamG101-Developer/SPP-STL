@@ -89,7 +89,7 @@ sup [T: Eq] View[T] {
     }
 }
 
-sup [T] View[T] ext IndexRef[USize, T] {
+sup [T] View[T] ext IndexRef[T, USize] {
     !intrinsic(name="std.view.View.index_ref")
     cor index_ref(&self, index: USize) -> Indexed[&T] { }
 }
