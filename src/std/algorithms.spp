@@ -8,9 +8,11 @@ use std::void::Void
 cls Sortable[T] { }
 
 sup [T] Sortable[T] {
+    !public
     !abstract_method
     fun sort(&mut self) -> Void { }
 
+    !public
     !abstract_method
     fun sort_by(&mut self, compare: FunRef[(T, T), Bool]) -> Void { }
 }
