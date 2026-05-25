@@ -2,6 +2,7 @@ use std::annotations::package
 use std::annotations::public
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
+use std::boolean::Bool
 use std::clone::Clone
 use std::function::FunMov
 use std::function::FunMut
