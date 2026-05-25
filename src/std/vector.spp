@@ -299,7 +299,7 @@ sup [T, A: Alloc] Vec[T, A] ext RevIterRef[T] {
 }
 
 sup [T, A: Alloc] Vec[T, A] ext IndexMut[T, USize] {
-    fun index_mut(&mut self, index: USize) -> Indexed[&mut T] {
+    cor index_mut(&mut self, index: USize) -> Indexed[&mut T] {
         ret self.buf.index_mut(index)
     }
 }
