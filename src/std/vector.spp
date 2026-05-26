@@ -3,6 +3,8 @@ use std::annotations::public
 use std::allocator::Alloc
 use std::allocator::AllocErr
 use std::allocator::GlobalAlloc
+use std::array::Arr
+use std::cast::From
 use std::boolean::Bool
 use std::clone::Clone
 use std::function::FunMov
@@ -350,4 +352,9 @@ sup [T: Eq, A: Alloc] Vec[T, A] ext Eq {
         }
         ret false
     }
+}
+
+sup [T, cmp n: USize, A: Alloc] Vec[T, A] ext From[Arr[T, n]] {
+    !intrinsic(name="std.vector.Vec.from[Arr]")
+    fun from(that: Arr[T, n]) -> Self { }
 }
