@@ -260,8 +260,6 @@ sup [T, A: Alloc] Vec[T, A] {
         let new_cap = case self.cap() == 0_uz { 1_uz } else { cap * 2_uz }
         self.buffer.grow(new_cap)
     }
-
-    # ITERATE #
 }
 
 sup [T, A: Alloc] Vec[T, A] ext IterMov[T] {
