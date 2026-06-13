@@ -23,8 +23,8 @@ use std::annotations::public
 !public type CDouble = std::number::F64
 
 # Raw pointer (allocation/deallocation)
-!public type CVoidPtr = std::mem::pointer::Ptr[std::number::U8]
-!public type CCharPtr = std::mem::pointer::NonNull[U8]
+!public type CVoidPtr = std::mem::pointer::Ptr[CUChar]
+!public type CCharPtr = std::mem::pointer::NonNull[CUChar]
 
 # Errno helper
 cmp eperm: S32 = 1 # Operation not permitted
