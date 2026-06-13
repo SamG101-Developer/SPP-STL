@@ -6,7 +6,7 @@ use std::result::Fail
 use std::result::Pass
 use std::result::Res
 use std::void::Void
-use std::threading::mutex::LockErr
+use std::threading::thread::ThreadErr
 
 !public
 !versioned(base="1.0.0", new="1.0.0")

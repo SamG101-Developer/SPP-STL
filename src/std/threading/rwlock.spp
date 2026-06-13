@@ -7,7 +7,7 @@ use std::result::Pass
 use std::result::Res
 use std::shared::Shared
 use std::void::Void
-use std::threading::mutex::LockErr
+use std::threading::thread::ThreadErr
 use std::ops::del::Del
 
 !public cls RwLock[T] {

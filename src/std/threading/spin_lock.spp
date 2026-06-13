@@ -6,7 +6,7 @@ use std::result::Fail
 use std::result::Pass
 use std::result::Res
 use std::void::Void
-use std::threading::mutex::LockErr
+use std::threading::thread::ThreadErr
 
 !public
 cls SpinLock {
@@ -15,7 +15,7 @@ cls SpinLock {
 
 sup SpinLock {
     !public
-    fun new() -> Res[SpinLock, LockErr] {
+    fun new() -> Res[SpinLock, ThreadErr] {
         # Create a new spin lock using the sppc threading API.
         let handle = 0_u64
         sppc::spinlock_init(&mut handle)
@@ -23,34 +23,34 @@ sup SpinLock {
     }
 
     !public
-    fun lock(&self) -> Res[Void, LockErr] {
+    fun lock(&self) -> Res[Void, ThreadErr] {
         # Acquire the spin lock using the sppc threading API.
         let err = sppc::spinlock_lock(self.id)
-        case err != 0 { ret Fail(err=LockErr(msg="Failed to acquire spin lock"))  }
+        case err != 0 { ret Fail(err=ThreadErr::from_errno(err))  }
         ret Pass[Void]()
     }
     
     !public
-    fun try_lock(&self) -> Res[Void, LockErr] {
+    fun try_lock(&self) -> Res[Void, ThreadErr] {
         # Try to acquire the spin lock using the sppc threading API.
         let err = sppc::spinlock_try_lock(self.id)
-        case err != 0 { ret Fail(err=LockErr(msg="Failed to try acquire spin lock"))  }
+        case err != 0 { ret Fail(err=ThreadErr::from_errno(err))  }
         ret Pass[Void]()
     }
 
     !public
-    fun try_lock(&self) -> Res[Bool, LockErr] {
+    fun try_lock(&self) -> Res[Bool, ThreadErr] {
         # Try to acquire the spin lock using the sppc threading API.
         let err = sppc::spinlock_try_lock(self.id)
-        case err < 0 { ret Fail(err=LockErr(msg="Failed to try acquire spin lock"))  }
+        case err < 0 { ret Fail(err=ThreadErr::from_errno(err))  }
         ret Pass(val=err == 0)
     }
 
     !public
-    fun unlock(&self) -> Res[Void, LockErr] {
+    fun unlock(&self) -> Res[Void, ThreadErr] {
         # Release the spin lock using the sppc threading API.
         let err = sppc::spinlock_unlock(self.id)
-        case err == 0 { ret Fail(err=LockErr(msg="Failed to release spin lock"))  }
+        case err == 0 { ret Fail(err=ThreadErr::from_errno(err))  }
         ret Pass[Void]()
     }
 }
