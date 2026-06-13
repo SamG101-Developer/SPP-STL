@@ -1,0 +1,38 @@
+use std::annotations::intrinsic
+use std::annotations::public
+use std::copy::Copy
+use std::generator::GenOnce
+use std::void::Void
+
+
+!public
+cls Slot[T] {
+    !package val: T
+}
+
+sup [T] Slot[T] {
+    !public
+    fun new(val: T) -> Slot[T] {
+        Slot(val)
+    }
+
+    !public
+    fun set(&self, val: T) -> Void {
+        self.replace(val)
+    }
+
+    !public
+    !intrinsic(name="std.slot.Slot.replace")
+    fun replace(&self, val: T) -> T { }
+
+    !public
+    !intrinsic(name="std.slot.Slot.get_mut")
+    cor get_mut(&self) -> GenOnce[&mut T] { }
+}
+
+sup [T: Copy] Slot[T] {
+    !public
+    fun get(&self) -> T {
+        ret self.val
+    }
+}

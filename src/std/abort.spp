@@ -5,13 +5,29 @@ use std::boolean::Bool
 use std::string_view::StrView
 use std::void::Void
 
-!public
-!inline
-!intrinsic(name="std.abort.abort")
-fun abort(msg: StrView = "") -> ! { }
+!public !inline
+!versioned(base="1.0.0", new="1.0.0")
+fun abort(msg: &StrView = "") -> ! {
+    # The `abort` function is a built-in function that terminates the program immediately. It does not return and does
+    # not unwind the stack. The `msg` parameter is an optional string that can be used to provide additional information
+    # about the reason for the abort. The behavior of the `abort` is uniform across all platforms and does not depend on
+    # the operating system or environment. It is typically used in situations where the program has encountered an
+    # unrecoverable error and needs to terminate immediately, such as unwrapping a `None` value.
+    # @let ?msg: An optional string that can be used to provide additional information about the reason for the abort.
 
-!public
-!inline
-fun abort_if(condition: Bool, msg: StrView = "") -> Void {
+    std::io::eprintln(msg)
+    std::proc::abort()
+}
+
+!public !inline
+!versioned(base="1.0.0", new="1.0.0")
+fun abort_if(condition: Bool, msg: &StrView = "") -> Void {
+    # The `abort_if` function is a convenience function that checks a condition and calls `abort` if the condition is
+    # true. It is a clean wrapper around `case condition { abort(msg) }` that keeps method guard clean and allows for an
+    # optional message to be provided. The behavior of `abort_if` is the same as `abort` when the condition is true, and
+    # it does nothing when the condition is false.
+    # @let condition: A boolean condition that is checked. If it is true, the program will be aborted.
+    # @let ?msg: An optional string that can be used to provide additional information about the reason for the abort.
+
     case condition { abort(msg) }
 }

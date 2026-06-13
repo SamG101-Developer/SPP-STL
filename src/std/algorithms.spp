@@ -3,16 +3,36 @@ use std::annotations::public
 use std::boolean::Bool
 use std::function::FunRef
 use std::void::Void
+use std::ops::ord::Ord
 
 !public
-cls Sortable[T] { }
+!versioned(base="1.0.0", new="1.0.0")
+cls Sortable[T: Ord] {
+    # The `Sortable` class is an abstract class that defines the interface for sorting collections of type `T`. It
+    # provides two methods: `sort`, which sorts the collection using a default ordering, and `sort_by`, which sorts the
+    # collection using a custom comparison function. The `T` type parameter represents the type of elements in the
+    # collection that can be sorted. The actual implementation of these methods will depend on the specific collection
+    # type that implements the `Sortable` interface.
+    # @type T: An orderable type that represents the elements in the collection that can be sorted.
+}
 
-sup [T] Sortable[T] {
-    !public
-    !abstract_method
-    fun sort(&mut self) -> Void { }
+sup [T: Ord] Sortable[T] {
+    !public !abstract_method
+    !versioned(base="1.0.0", new="1.0.0")
+    fun sort(&mut self) -> Void {
+        # The `sort` method is an abstract method that sorts the collection using a default ordering. The specific
+        # sorting algorithm used will depend on the implementation of the `Sortable` interface. The method takes a
+        # mutable reference to the collection and sorts it in place.
+    }
 
-    !public
-    !abstract_method
-    fun sort_by(&mut self, compare: FunRef[(T, T), Bool]) -> Void { }
+    !public !abstract_method
+    !versioned(base="1.0.0", new="1.0.0")
+    fun sort_by[F: FunRef[(&T, &T), Bool]](&mut self, compare: F) -> Void {
+        # The `sort_by` method is an abstract method that sorts the collection using a custom comparison function. The
+        # `compare` parameter is a function reference that takes two immutable borrows to elements of type `T` and
+        # returns a boolean indicating whether the first element should be ordered before the second.
+        # @type F: A function reference type that represents the custom comparison function used for sorting the
+        # collection.
+        # @let compare: A function reference that defines the custom comparison logic for sorting the collection.
+    }
 }

@@ -9,20 +9,56 @@ use std::void::Void
 #  - Current analysis needs them to be public
 
 !public
-cls Gen[Yield, Send=Void] { }
-sup [Yield, Send] Gen[Yield, Send] {
-    !public
-    !intrinsic(name="std.generator.Gen.send")
-    fun send(&mut self, value: Send) -> Generated[Yield or None] { }
+!versioned(base="1.0.0", new="1.0.0")
+cls Gen[Yield, Send=Void] {
+    # The `Gen` class is the standard generator that coroutine will yield into. It is a compiler-known object, and is
+    # required for uniform behaviour of coroutines. Generators form the foundation of iteration.
+    # @type Yield: The type of values that the generator will yield. This is the type that the caller will receive when
+    # they call `res` on the generator. The `Yield` type can be a borrow, as long as the `gen` expression borrows the
+    # values too. For example, `gen &123` must yield to a `Gen[&S32]`, and `gen 123` must yield to a `Gen[S32]`.
+    # @type Send: The type of data sent into the generator. It can be passed as an argument into the `.res()` keyword
+    # function call, and is forwarded into the `send` method. The `Send` type must be owned. If `Send=Void`, then the
+    # `value` parameter is non-existant.
 }
 
 !public
-cls GenOnce[Yield] { }
+!versioned(base="1.0.0", new="1.0.0")
+cls GenOnce[Yield] {
+    # The `GenOnce` class is a special generator type, that automatically unwraps the first yield, by internally
+    # applying `.res()` to the generator. This is typically seen in indexing, where a borrow is retrieved, and unwrapped
+    # on the spot. Values cannot be sent into `GenOnce`, as the `.res()` is automatic, so the `Send` type is not needed.
+    # @type Yield: The same as for `Gen`, the type of values that the generator will yield. Can be a borrow, as long as
+    # the `gen` expression matches the convention.
+}
+
+sup [Yield, Send] Gen[Yield, Send] {
+    !public
+    !intrinsic(name="std.generator.Gen.send")
+    fun send(&mut self, value: Send) -> Generated[Yield or None] {
+        # Resume the generator, sending in a value of type `Send`. This method will return a `Generated[Yield or None]`,
+        # which can be pattern matched by the receiving context.
+        # @let value: The value of type `Send` that is being sent into the generator. This value is passed by move
+        # convention, and is forwarded into the `send` method of the generator. If `Send=Void`, then this parameter
+        # doesn't exist.
+        # @ret: Either the value of type `Yield` that the generator yields, wrapped in `Some`, or `None` if the
+        # generator has completed and will not yield any more values.
+    }
+}
+
 sup [Yield] GenOnce[Yield] {
     !public
     !intrinsic(name="std.generator.GenOnce.send")
-    fun send(&mut self) -> Generated[Yield or None] { }
+    fun send(&mut self) -> Generated[Yield] {
+        # Resume the generator, without sending in any value. This method is used for `GenOnce` generators,
+        # where the first yield is automatically unwrapped, so there is no need to send in a value. The method will
+        # return a `Generated[Yield]`, not `or None`, because `GenOnce` generators are guaranteed to yield at once
+        # before completing.
+        # @ret: The value of type `Yield` that the generator yields.
+    }
 }
 
 !private
-cls Generated[Yield] { }
+cls Generated[Yield] {
+    # An internal, compiler known type, requires for the safety of coroutines. This is not seen by user code.
+    # @type Yield: The type of value that the generator yields.
+}

@@ -9,16 +9,32 @@ use std::option::Some
 use std::vector::Vec
 use std::void::Void
 
-
 !public
 cls Deque[T, cmp block_size: USize = 64_uz] {
+    # A double-ended queue (deque) implementation that allows for efficient insertion and removal of elements from both
+    # ends. The deque is implemented using a vector of fixed-size arrays (blocks), where each block can hold a specified
+    # number of elements (block_size). The head and tail indices track the current positions for insertion and removal
+    # at both ends of the deque.
+    # @type T: The type of elements stored in the deque.
+    # @cmp block_size: The size of each block in the deque, which determines how many elements can be stored in each
+    # fixed-size array.
+    # @let blocks: A vector of fixed-size arrays (blocks) that store the elements of the deque. Each block can hold up
+    # to block_size elements.
+    # @let head_blk: The index of the current head block in the blocks vector, which indicates where the next element
+    # will be removed from the front of the deque.
+    # @let head_idx: The index within the current head block that indicates where the next element will be removed from
+    # the front of the deque.
+    # @let tail_blk: The index of the current tail block in the blocks vector, which indicates where the next element
+    # will be added to the back of the deque.
+    # @let tail_idx: The index within the current tail block that indicates where the next element will be added to the
+    # back of the deque.
+
     blocks: Vec[Arr[T, block_size]]
     head_blk: USize = 0_uz
     head_idx: USize = 0_uz
     tail_blk: USize = 0_uz
     tail_idx: USize = 0_uz
 }
-
 
 sup [T] Deque[T] {
     !public
@@ -44,7 +60,6 @@ sup [T] Deque[T] {
         self.blocks[mut self.head_blk][mut self.head_idx]@ = val
     }
 }
-
 
 sup [T] Deque[T] {
     !public
@@ -76,7 +91,6 @@ sup [T] Deque[T] {
     }
 }
 
-
 sup [T, cmp block_size: USize] Deque[T, block_size] {
     !public
     fun clear(&mut self) -> Void {
@@ -104,7 +118,6 @@ sup [T, cmp block_size: USize] Deque[T, block_size] {
         ret tail_pos - head_pos
     }
 }
-
 
 sup [T, cmp block_size: USize] Deque[T, block_size] {
     fun alloc_block_back(&mut self) -> Void {

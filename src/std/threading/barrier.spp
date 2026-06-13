@@ -9,32 +9,64 @@ use std::void::Void
 use std::threading::mutex::LockErr
 
 !public
+!versioned(base="1.0.0", new="1.0.0")
 cls Barrier {
-    !private id: S32
-    !private total: U32
-    !private count: U32
+    # The `Barrier` class is a parallelization primitive that allows multiple threads to synchronize at a certain point
+    # in their execution. It is initialized with a total number of threads that must call `wait` before any of them can
+    # proceed. The `wait` method blocks the calling thread until the specified number of threads have called it, at
+    # which point all waiting threads are released and can continue executing.
+    # @let handle: A handle to the underlying barrier object in the sppc threading API.
+    # @let total: The total number of threads that must call `wait` before any of them can proceed.
+    # @let count: The number of threads that have currently called `wait`. This is used to track how many threads are
+    # waiting at the barrier.
+
+    !private handle: U64
+    !private total: U64
+    !private count: U64
 }
 
 sup Barrier {
-    !public fun new(total: U32) -> Res[Barrier, LockErr] {
-        # Create a new barrier using the sppc threading API.
-        let id = sppc::barrier_create(total)
-        case id == 0 { ret Fail(err=LockErr(msg="Failed to create barrier")) }
-        ret Pass(val=Barrier(id, total=total, count=0_u32))
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun new(total: U32) -> Res[Barrier, ThreadErr] {
+        # The `new` function creates a new `Barrier` instance with the specified total number of threads. It initializes
+        # the barrier using the sppc threading API and returns a `Res` type that indicates success or failure. The `C`
+        # `errno` value is used to determine if the barrier was successfully created, and an appropriate error message
+        # is returned if it fails.
+        # @let total: The total number of threads that must call `wait` before any of them can proceed.
+        # @ret: A `Res` type containing a `Barrier` object if the barrier is successfully created, or an error message
+        # if the operation fails.
+
+        let handle = 0_u64
+        let err = sppc2::barrier_init(&mut handle, total)
+        case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
+        ret Pass(val=Barrier(handle, total=total, count=0_u64))
     }
 
-    !public fun wait(&mut self) -> Res[Void, LockErr] {
-        # Wait at the barrier until all threads have reached this point.
-        let err = sppc::barrier_wait(self.id)
-        case err != 0 { ret Fail(err=LockErr(msg="Failed to wait at barrier")) }
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun wait(&mut self) -> Res[Void, ThreadErr] {
+        # The `wait` function is called by threads to wait at the barrier. It blocks the calling thread until the
+        # specified number of threads have called `wait`, at which point all waiting threads are released and can
+        # continue executing. The function returns a `Res` type that indicates success or failure. The `C` `errno` value
+        # is used to determine if the wait operation was successful, and an appropriate error message is returned if it
+        # fails.
+        # @ret: A `Res` type containing an empty value if the wait operation is successful, or an error message if the
+        # operation fails.
+
+        let err = sppc2::barrier_wait(self.id)
+        case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
         self.count += 1_u32
         ret Pass[Void]()
     }
 }
 
 sup Barrier ext std::ops::del::Del {
+    !versioned(base="1.0.0", new="1.0.0")
     fun del(&mut self) -> Void {
-        # Destroy the barrier when it is no longer needed.
+        # When a barrier object goes out of scope, the `del` method is called to clean up the underlying barrier
+        # resources. This is important to prevent resource leaks and ensure that the system can manage barriers
+        # efficiently.
         sppc::barrier_destroy(self.id)
     }
 }

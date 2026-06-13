@@ -1,0 +1,397 @@
+cls IpV4Addr {
+    # The `IpV4Addr` class represents an IPv4 address, which consists of four octets (8-bit numbers) separated by dots.
+    # Each octet can range from 0 to 255. The class provides methods for creating an IPv4 address from a string,
+    # converting it to a string, and comparing two IPv4 addresses for equality.
+    # @let octets: An array of four unsigned 8-bit integers representing the octets of the IPv4 address.
+
+    octets: [U8; 4]
+}
+
+cls IpV6Addr {
+    # The `IpV6Addr` class represents an IPv6 address, which consists of eight groups of four hexadecimal digits
+    # separated by colons. Each group can range from 0000 to FFFF. The class provides methods for creating an IPv6
+    # address from a string, converting it to a string, and comparing two IPv6 addresses for equality.
+    # @let segments: An array of eight unsigned 16-bit integers representing the segments of the IPv6 address.
+
+    segments: [U16; 8]
+}
+
+type IpAddr = IpV4Addr or IpV6Addr
+
+sup IpV4Addr {
+    # The `IpV4Addr` class includes several predefined constants for special IPv4 addresses, such as the broadcast
+    # address, the localhost address, and the unspecified address. It also includes methods for checking if an IPv4
+    # address belongs to certain categories, such as benchmarking, broadcast, documentation, global, link-local,
+    # loopback, multicast, private, reserved, shared, and unspecified addresses.
+    # @cmp broadcast: The broadcast address is an IP address that is used to send data to all devices on a network
+    # segment.
+    # @cmp localhost: The localhost address is an IP address that points back to the same device.
+    # @cmp unspecified: The unspecified address is an IP address that has not been assigned a specific value.
+
+    cmp broadcast: Self = Self(octets=[255, 255, 255, 255])
+    cmp localhost: Self = Self(octets=[127, 0, 0, 1])
+    cmp unspecified: Self = Self(octets=[0, 0, 0, 0])
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_benchmarking(&self) -> Bool {
+        # A benchmarking address is an IP address that is reserved for use in benchmarking and performance testing
+        # scenarios. In IPv4, there is a specific range of benchmarking addresses that is reserved for these purposes.
+        # @ret: `true` if the IP address is a benchmarking address, `false` otherwise.
+
+        ret self.octets[0] == 198 and (self.octets[1] & 254) == 18
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_broadcast(&self) -> Bool {
+        # A broadcast address is an IP address that is used to send data to all devices on a network segment. In IPv4,
+        # the broadcast address is typically represented as `255.255.255.255`. When a device sends data to the broadcast
+        # address, it is delivered to all devices on the same local network segment. Broadcast addresses are used for
+        # various purposes, such as network discovery, address resolution, and other scenarios where a message needs to
+        # be sent to all devices on the network. It is important to note that broadcast addresses are not routable and
+        # cannot be used for communication across different network segments or the public internet.
+        # @ret: `true` if the IP address is a broadcast address, `false` otherwise.
+
+        ret self.octets == Self::broadcast.octets
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_documentation(&self) -> Bool {
+        # A documentation address is an IP address that is reserved for use in documentation and examples. In IPv4,
+        # there are specific ranges of documentation addresses that are set aside for these purposes. These addresses
+        # are not intended for use in real-world applications and are often used in educational materials, tutorials,
+        # and other documentation to illustrate concepts without using real IP addresses that may be in use on the
+        # internet.
+        # @ret: `true` if the IP address is a documentation address, `false` otherwise.
+
+        case self.octets of {
+            is [192, 0, 2, _] { ret true }
+            is [198, 51, 100, _] { ret true }
+            is [203, 0, 113, _] { ret true }
+            else { ret false }
+        }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_global(&self) -> Bool {
+        # A global address is an IP address that is globally routable and reachable on the public internet. In IPv4, a
+        # global address is any address that is not reserved for special purposes (e.g., private, loopback, link-local,
+        # etc.) and is not a broadcast address. Global addresses are used for communication between devices across
+        # different networks and are assigned by Internet Service Providers (ISPs) or other organizations that manage IP
+        # address allocation. A global address can be used to identify a device on the internet and allow it to
+        # communicate with other devices globally.
+        # @ret: `true` if the IP address is a global address, `false` otherwise.
+
+        ret (
+            self.is_private() or self.is_shared() or self.is_loopback() or self.is_link_local() or
+            self.is_documentation() or self.is_benchmarking() or self.is_reserved() or self.is_broadcast() or
+            self.octets is [192, 0, 0, d] and d != 9 and d != 10).not
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_link_local(&self) -> Bool {
+        # A link-local address is an IP address that is valid only within the local network segment (link) and is not
+        # routable on the wider internet. In IPv4, link-local addresses are typically represented as `169.254.xxx.xxx`,
+        # where `xxx` can be any value from 0 to 255. Link-local addresses are automatically assigned to devices when
+        # they are unable to obtain an IP address through other means (e.g., DHCP) and are used for communication
+        # between devices on the same local network segment. They are not intended for communication across different
+        # network segments or the public internet.
+        # @ret: `true` if the IP address is a link-local address, `false` otherwise.
+
+        ret self.octets[0] == 169 and self.octets[1] == 254
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_loopback(&self) -> Bool {
+        # A loopback address is an IP address that points back to the same device. In IPv4, the loopback address is
+        # typically represented as `127.xxx.xxx.xxx`, where `xxx` can be any value from 0 to 255. The most commonly used
+        # loopback address is `127.0.0.1`, which is often referred to as "localhost". Loopback addresses are used for
+        # testing and development purposes, allowing applications to communicate with themselves without sending data
+        # over the network.
+        # @ret: `true` if the IP address is a loopback address, `false` otherwise.
+
+        ret self.octets[0] == 127
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_multicast(&self) -> Bool {
+        # A multicast address is an IP address that is used to send data to a group of devices on a network. In IPv4,
+        # multicast addresses are typically represented as `224.xxx.xxx.xxx` to `239.xxx.xxx.xxx`, where `xxx` can be
+        # any value from 0 to 255. Multicast addresses are used for applications such as streaming media, online gaming,
+        # and other scenarios where data needs to be sent to multiple recipients simultaneously. Devices that are
+        # interested in receiving data sent to a multicast address can join the multicast group associated with that
+        # address, allowing them to receive the data without needing to be individually addressed.
+        # @ret: `true` if the IP address is a multicast address, `false` otherwise.
+
+        ret self.octets[0] >= 224 and self.octets[0] <= 239
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_private(&self) -> Bool {
+        # A private address is an IP address that is reserved for use within a private network and is not routable on
+        # the public internet. In IPv4, there are three ranges of private addresses.
+        # @ret: `true` if the IP address is a private address, `false` otherwise.
+
+        case self.octets of {
+            is [10, _, _, _] { ret true }
+            is [172, b, _, _] and (b >= 16 and b <= 31) { ret true }
+            is [192, 168, _, _] { ret true }
+            else { ret false }
+        }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_reserved(&self) -> Bool {
+        # A reserved address is an IP address that is reserved for specific purposes and is not intended for general
+        # use. In IPv4, there are specific ranges of reserved addresses that are set aside for various purposes, such as
+        # future use, documentation, or special functions.
+        # @ret: `true` if the IP address is a reserved address, `false` otherwise.
+
+        ret self.octets[0] & 240 == 240 and self.is_broadcast().not
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_shared(&self) -> Bool {
+        # A shared address is an IP address that is reserved for use in specific scenarios, such as testing or
+        # benchmarking, and is not intended for general use. In IPv4, there are specific ranges of shared addresses that
+        # are reserved for these purposes.
+        # @ret: `true` if the IP address is a shared address, `false` otherwise.
+
+        ret self.octets[0] == 100 and (self.octets[1] & 192) == 64
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_unspecified(&self) -> Bool {
+        # An unspecified address is an IP address that has not been assigned a specific value. In IPv4, the unspecified
+        # address is represented as `0.0.0.0`. This address is used to indicate the absence of an address or to specify
+        # that a device should obtain an address automatically (e.g., via DHCP). It is also used in routing to indicate
+        # that a route should be used for all addresses that do not have a more specific match. The unspecified address
+        # is not valid for communication and cannot be assigned to any device.
+        # @ret: `true` if the IP address is an unspecified address, `false` otherwise.
+
+        ret self.octets == [0, 0, 0, 0]
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun family(&self) -> U16 {
+        # The `family` method returns the address family of the IP address. This is used to determine whether the
+        # address is an IPv4 or IPv6 address when working with sockets and other network-related functionality. The
+        # address family for IPv4 addresses is typically represented as `AF_INET`.
+        # @ret: The address family of the IP address.
+
+        ret constants::af_inet
+    }
+}
+
+sup IpV6Addr {
+    # The `IpV6Addr` class includes several predefined constants for special IPv6 addresses, such as the loopback
+    # address and the unspecified address. It also includes methods for checking if an IPv6 address belongs to certain
+    # categories, such as documentation, global, link-local, loopback, multicast, unique local, and unspecified
+    # addresses.
+    # @cmp loopback: The loopback address is an IP address that points back to the same device. In IPv6, the loopback
+    # address is typically represented as `::1`.
+    # @cmp unspecified: The unspecified address is an IP address that has not been assigned a specific value. In IPv6,
+    # the unspecified address is represented as `::`.
+
+    cmp loopback: Self = Self(segments=[0, 0, 0, 0, 0, 0, 0, 1])
+    cmp unspecified: Self = Self(segments=[0, 0, 0, 0, 0, 0, 0, 0])
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_benchmarking(&self) -> Bool {
+        # A benchmarking address is an IP address that is reserved for use in benchmarking and performance testing
+        # scenarios. In IPv6, there is a specific range of benchmarking addresses that is reserved for these purposes.
+        # The benchmarking address range in IPv6 is defined as `2001:2::/48`, which means that any IPv6 address that
+        # starts with `2001:2` and has the remaining bits set to zero is considered a benchmarking address. These
+        # addresses are not intended for use in real-world applications and are often used in educational materials,
+        # tutorials, and other documentation to illustrate concepts without using real IP addresses that may be in use
+        # on the internet.
+        # @ret: `true` if the IP address is a benchmarking address, `false` otherwise.
+
+        ret self.segments[0] == 0x2001 and self.segments[1] == 0x2 and self.segments[2] == 0
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_documentation(&self) -> Bool {
+        # A documentation address is an IP address that is reserved for use in documentation and examples. In IPv6,
+        # there are specific ranges of documentation addresses that are set aside for these purposes. The documentation
+        # address ranges in IPv6 are defined as `2001:db8::/32`, which means that any IPv6 address that starts with
+        # `2001:db8` is considered a documentation address. These addresses are not intended for use in real-world
+        # applications and are often used in educational materials, tutorials, and other documentation to illustrate
+        # concepts without using real IP addresses that may be in use on the internet.
+        # @ret: `true` if the IP address is a documentation address, `false` otherwise.
+
+        case self.segments of {
+            is [0x2001, 0xdb8, ..] { ret true }
+            is [0x3fff, b, ..] and 0 <= b <= 0x0fff { ret true }
+            else { ret false }
+        }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_global(&self) -> Bool {
+        # A global address is an IP address that is globally routable and reachable on the public internet. In IPv6, a
+        # global address is any address that is not reserved for special purposes (e.g., unique local, loopback,
+        # link-local, etc.) and is not a multicast address. Global addresses are used for communication between devices
+        # across different networks and are assigned by Internet Service Providers (ISPs) or other organizations that
+        # manage IP address allocation. A global address can be used to identify a device on the internet and allow it
+        # to communicate with other devices globally.
+        # @ret: `true` if the IP address is a global address, `false` otherwise.
+
+        case self.is_documentation() or self.is_loopback() or self.is_unique_local() or self.is_unicast_link_local() or self.is_unspecified() {
+            ret true
+        }
+
+        ret case self.segments of {
+            is [0, 0, 0, 0, 0, 0xffff, ..] { true }
+            is [0x64, 0xff9b, 1, ..] { true }
+            is [0x100, 0, 0, 0, ..] { true }
+            is [0x2001, b, 0, 0, .., h] and b < 0x200 and case self.segments of {
+                is [0x2001, 0x0001, .., 0x0001] { true }
+                is [0x2001, 0x0001, .., 0x0002] { true }
+                is [0x2001, 0x0003, ..] { true }
+                is [0x2001, 0x0004, 0x112, ..] { true }
+                is [0x2001, b, ..] and 0x20 <= b <= 0x3f { true }
+                else { false }
+            }.not { true }
+            is [0x2002, ..] { true }
+            is [0x5f00, ..] { true }
+        }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_local(&self) -> Bool {
+        # A local address is an IP address that is valid only within a specific scope, such as a local network segment
+        # or a unique local address. In IPv6, there are two types of local addresses: link-local addresses and unique
+        # local addresses. Link-local addresses are typically represented as `fe80::/10`, while unique local addresses
+        # are typically represented as `fc00::/7`. Local addresses are not routable on the wider internet and are used
+        # for communication between devices within the same local scope.
+        # @ret: `true` if the IP address is a local address, `false` otherwise.
+
+        ret self.segments == Self::loopback.segments
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_multicast(&self) -> Bool {
+        # A multicast address is an IP address that is used to send data to a group of devices on a network. In IPv6,
+        # multicast addresses are typically represented as `ff00::/8`, where the first 8 bits are set to `11111111` (or
+        # `ff` in hexadecimal). Multicast addresses are used for applications such as streaming media, online gaming,
+        # and other scenarios where data needs to be sent to multiple recipients simultaneously. Devices that are
+        # interested in receiving data sent to a multicast address can join the multicast group associated with that
+        # address, allowing them to receive the data without needing to be individually addressed.
+        # @ret: `true` if the IP address is a multicast address, `false` otherwise.
+
+        ret self.segments[0] & 0xff00 == 0xff00
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_unicast(&self) -> Bool {
+        # A unicast address is an IP address that is used to identify a single device on a network. In IPv6, unicast
+        # addresses are any addresses that are not multicast addresses. Unicast addresses can be global, link-local, or
+        # unique local, depending on their specific range and purpose. Unicast addresses are used for communication
+        # between individual devices and can be routable on the wider internet if they are global unicast addresses.
+        # @ret: `true` if the IP address is a unicast address, `false` otherwise.
+
+        ret self.is_multicast().not
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_unicast_global(&self) -> Bool {
+        # A global unicast address is a type of unicast address that is globally routable and reachable on the public
+        # internet. In IPv6, global unicast addresses are any unicast addresses that are not reserved for special
+        # purposes (e.g., unique local, loopback, link-local, etc.) and are not multicast addresses. Global unicast
+        # addresses are used for communication between devices across different networks and are assigned by Internet
+        # Service Providers (ISPs) or other organizations that manage IP address allocation. A global unicast address
+        # can be used to identify a device on the internet and allow it to communicate with other devices globally.
+        # @ret: `true` if the IP address is a global unicast address, `false` otherwise.
+
+        ret self.is_unicast() and (
+            self.is_benchmark() or self.is_documentation() or self.is_loopback() or self.is_unique_local() or
+            self.is_unicast_link_local() or self.is_unspecified()).not
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_unicast_link_local(&self) -> Bool {
+        # A link-local unicast address is a type of unicast address that is valid only within the local network segment
+        # (link) and is not routable on the wider internet. In IPv6, link-local unicast addresses are typically
+        # represented as `fe80::/10`, which means that any IPv6 address that starts with `fe80` and has the remaining
+        # bits set to zero is considered a link-local unicast address. Link-local unicast addresses are automatically
+        # assigned to devices when they are unable to obtain an IP address through other means (e.g., DHCP) and are used
+        # for communication between devices on the same local network segment. They are not intended for communication
+        # across different network segments or the public internet.
+        # @ret: `true` if the IP address is a link-local unicast address, `false` otherwise.
+
+        ret self.segments[0] & 0xffc0 == 0xfe80
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_unique_local(&self) -> Bool {
+        # A unique local address is a type of unicast address that is valid only within a specific scope and is not
+        # routable on the wider internet. In IPv6, unique local addresses are typically represented as `fc00::/7`, which
+        # means that any IPv6 address that starts with `fc` or `fd` is considered a unique local address. Unique local
+        # addresses are used for communication between devices within the same local scope and are not intended for
+        # communication across different network segments or the public internet.
+        # @ret: `true` if the IP address is a unique local address, `false` otherwise.
+
+        ret self.segments[0] & 0xfe00 == 0xfc00
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_unspecified(&self) -> Bool {
+        # An unspecified address is an IP address that has not been assigned a specific value. In IPv6, the unspecified
+        # address is represented as `::`, which means that all segments of the address are set to zero. This address is
+        # used to indicate the absence of an address or to specify that a device should obtain an address automatically
+        # (e.g., via DHCP). It is also used in routing to indicate that a route should be used for all addresses that do
+        # not have a more specific match. The unspecified address is not valid for communication and cannot be assigned
+        # to any device.
+        # @ret: `true` if the IP address is an unspecified address, `false` otherwise.
+
+        ret self.segments == Self::unspecified.segments
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun family(&self) -> U16 {
+        # The `family` method returns the address family of the IP address. This is used to determine whether the
+        # address is an IPv4 or IPv6 address when working with sockets and other network-related functionality. The
+        # address family for IPv6 addresses is typically represented as `AF_INET6`.
+        # @ret: The address family of the IP address.
+
+        ret constants::af_inet6
+    }
+}
+
+sup IpAddr {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun family(&self) -> U16 {
+        # The `family` method returns the address family of the IP address. This is used to determine whether the
+        # address is an IPv4 or IPv6 address when working with sockets and other network-related functionality.
+        # @ret: The address family of the IP address.
+
+        case self of {
+            is IpV4Addr(..) { self.family() }
+            is IpV6Addr(..) { self.family() }
+        }
+    }
+}

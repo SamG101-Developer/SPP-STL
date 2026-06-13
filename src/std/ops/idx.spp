@@ -9,24 +9,28 @@ use std::view::View
 !public cls SliceRef[T, I] { }
 !public cls SliceMut[T, I] { }
 
+# Allow the use of the "[mut n]" operator.
 sup [T, I] IndexMut[T, I] {
     !public
     !abstract_method
     cor index_mut(&mut self, index: I) -> Indexed[&mut T] { }
 }
 
+# Allow the use of the "[n]" operator.
 sup [T, I] IndexRef[T, I] {
     !public
     !abstract_method
     cor index_ref(&self, index: I) -> Indexed[&T] { }
 }
 
+# Allow the use of the "[n to m]" operator.
 sup [T, I] SliceRef[T, I] {
     !public
     !abstract_method
     cor slice_ref(&self, from: I, into: I) -> GenOnce[&View[T]] { }
 }
 
+# Allow the use of the "[mut n to m]" operator.
 sup [T, I] SliceMut[T, I] {
     !public
     !abstract_method

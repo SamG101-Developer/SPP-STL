@@ -25,35 +25,32 @@ use std::ops::iter::RevIterMov
 use std::ops::iter::RevIterMut
 use std::ops::iter::RevIterRef
 
-
-# A fixed size, inline array of element type T. The length is a compiletime constant, so storage lives on the stack
-# with no heap allocations, and therefore no allocation generic type parameter. The layout is statically known. All
-# methods for the array type are intrinsic as the Arr[T, n] type lowers to the llvm array type, where all methods are
-# defined in llvm directly.
 !public
-cls Arr[T, cmp n: USize] { }
+!versioned(base="1.0.0", new="1.0.0")
+cls Arr[T, cmp n: USize] {
+    # A fixed size, inline array of element type T. The length is a compiletime constant, so storage lives on the stack
+    # with no heap allocations, and therefore no allocation generic type parameter. The layout is statically known. All
+    # methods for the array type are intrinsic as the Arr[T, n] type lowers to the llvm array type, where all methods are
+    # defined in llvm directly.
+    # @type T: The type of elements stored in the array. This is a generic type parameter that can be any type, there
+    # are no constraints.
+    # @cmp n: The length of the array. This is a compile-time constant that determines how many elements the array can
+    # hold. The length is fixed and cannot be changed after the array is created.
+}
 
 sup [T, cmp n: USize] Arr[T, n] {
     !public
     !intrinsic(name="std.array.Arr.new")
+    !versioned(base="1.0.0", new="1.0.0")
     fun new() -> Self { }
 
     !public
     !intrinsic(name="std.array.Arr.from_fun")
+    !versioned(base="1.0.0", new="1.0.0")
     fun from_fun(f: FunMov[(), T]) -> Self { }
-    
-    !public
-    !intrinsic(name="std.array.Arr.get_ref")
-    cor get_ref(&self) -> Indexed[&T or None] { }
 
     !public
-    !intrinsic(name="std.array.Arr.get_mut")
-    cor get_mut(&mut self) -> Indexed[&mut T or None] { }
-    
-    !public
-    cmp fun len(&self) -> USize { ret n }
-
-    !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun swap(&mut self, i: USize, j: USize) -> Void {
         std::mem::ops::swap(self[mut i], self[mut j])
     }
@@ -62,6 +59,7 @@ sup [T, cmp n: USize] Arr[T, n] {
 sup [T: Copy, cmp n: USize] Arr[T, n] {
     !public
     !intrinsic(name="std.array.Arr.new_filled")
+    !versioned(base="1.0.0", new="1.0.0")
     fun new_filled(val: T) -> Self { }
 }
 
@@ -69,52 +67,36 @@ sup [T: Copy, cmp n: USize] Arr[T, n] ext Copy { }
 
 sup [T, cmp n: USize] Arr[T, n] ext IterMov[T] {
     !intrinsic(name="std.array.Arr.iter_mov")
+    !versioned(base="1.0.0", new="1.0.0")
     cor iter_mov(self) -> Iterator[T] { }
-}
-
-sup [T, cmp n: USize] Arr[T, n] ext IterMut[T] {
-    !intrinsic(name="std.array.Arr.iter_mut")
-    cor iter_mut(&mut self) -> Iterator[&mut T] { }
-}
-
-sup [T, cmp n: USize] Arr[T, n] ext IterRef[T] {
-    !intrinsic(name="std.array.Arr.iter_ref")
-    cor iter_ref(&self) -> Iterator[&T] { }
 }
 
 sup [T, cmp n: USize] Arr[T, n] ext RevIterMov[T] {
     !intrinsic(name="std.array.Arr.reverse_iter_mov")
+    !versioned(base="1.0.0", new="1.0.0")
     cor reverse_iter_mov(self) -> Iterator[T] { }
-}
-
-sup [T, cmp n: USize] Arr[T, n] ext RevIterMut[T] {
-    !intrinsic(name="std.array.Arr.reverse_iter_mut")
-    cor reverse_iter_mut(&mut self) -> Iterator[&mut T] { }
-}
-
-sup [T, cmp n: USize] Arr[T, n] ext RevIterRef[T] {
-    !intrinsic(name="std.array.Arr.reverse_iter_ref")
-    cor reverse_iter_ref(&self) -> Iterator[&T] { }
-}
-
-sup [T, cmp n: USize] Arr[T, n] ext IndexMut[T, USize] {
-    !intrinsic(name="std.array.Arr.index_mut")
-    cor index_mut(&mut self, index: USize) -> Indexed[&mut T] { }
-}
-
-sup [T, cmp n: USize] Arr[T, n] ext IndexRef[T, USize] {
-    !intrinsic(name="std.array.Arr.index_ref")
-    cor index_ref(&self, index: USize) -> Indexed[&T] { }
 }
 
 sup [T, cmp n: USize] Arr[T, n] ext Eq {
     !intrinsic(name="std.array.Arr.eq")
+    !versioned(base="1.0.0", new="1.0.0")
     fun eq(&self, that: &Self) -> Bool { }
 
     !intrinsic(name="std.array.Arr.ne")
+    !versioned(base="1.0.0", new="1.0.0")
     fun ne(&self, that: &Self) -> Bool { }
 }
 
-# A heap version of the array type, that works by storing the array in a Single pointer, with an allocator available
-# too.
-# type HeapArr[T, cmp n: USize, A: Alloc] = Single[Arr[T, n], A]
+sup [T, cmp n: USize] Arr[T, n] ext FwdMut[View[T]] {
+    !intrinsic(name="std.array.Arr.fwd_mut[View]")
+    !versioned(base="1.0.0", new="1.0.0")
+    cor fwd_mut(&mut self) -> GenOnce[&mut View[T]] { }
+}
+
+sup [T, cmp n: USize] Arr[T, n] ext FwdRef[View[T]] {
+    !intrinsic(name="std.vec.Vec.fwd_ref[View]")
+    !versioned(base="1.0.0", new="1.0.0")
+    cor fwd_ref(&self) -> GenOnce[&View[T]] { }
+}
+
+type HeapArr[T, cmp n: USize, A: Alloc] = Single[Arr[T, n], A]

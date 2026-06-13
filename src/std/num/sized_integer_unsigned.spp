@@ -377,13 +377,19 @@ sup [cmp w: U32] SizedIntegerUnsigned[w] {
     !public
     !inline
     fun isqrt(self) -> Opt[Self] {
-        case self <= Self::one() { ret Some(val=self) }
+        let mut n = self
+        let mut result = Self::zero()
+        let mut bit = Self::one() << (w - 2_u32)
+        loop bit > n { bit >>= 2_u32 }
 
-        let small_cand = (self >> Self::two()).isqrt()? >> Self::one()
-        let large_cand = small_cand + Self::one()
-        ret case large_cand * large_cand of {
-            <= self { Some(val=large_cand) }
-            else { Some(val=small_cand) }
+        loop bit != Self::zero() {
+            case n >= result + bit {
+                n -= result + bit
+                result = (result >> 1_u32) + bit
+            }
+            result >>= 1_u32
+            bit >>= 2_u32
         }
+        ret Some(val=result)
     }
 }

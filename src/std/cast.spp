@@ -6,51 +6,91 @@ use std::option::None
 use std::result::Res
 use std::string_view::StrView
 
-!public cls From[That] { }
-!public cls TryFrom[That, Err=ConversionErr] { }
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls ConversionErr {
+    # The standard conversion error type used by the `TryFrom` trait. It is a zero-sized type that represents a generic
+    # conversion failure. This type can be used as the default error type for the `TryFrom` trait when no specific error
+    # type is needed. It serves as a placeholder for conversion errors and can be extended or replaced with more
+    # specific error types as needed.
+}
 
-!public cls ConversionErr {
-    !public msg: StrView
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls From[That] {
+    # The `From` type is a simple trait that defines a conversion from one type to another. It has a single method,
+    # `from`, which takes an object of type `That` and returns an object of the implementing type (`Self`). The `From`
+    # trait is used for infallible conversions, where the conversion is guaranteed to succeed without any possibility of
+    # failure. It can be used for generic constraints, allowing "any type that can be made from `That`". Unlike Rust,
+    # there is no corresponding `Into` trait, enforcing one way conversions.
+    # @type That: The type that can be converted into the implementing type. This is the source type for the conversion.
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls TryFrom[That, Err=ConversionErr] {
+    # The `TryFrom` type is a trait that defines a fallible conversion from one type to another. It has a single method,
+    # `try_from`, which takes an object of type `That` and returns a `Res[Self, Err]`, which is a result type that can
+    # either contain the successfully converted object of the implementing type (`Self`) or an error of type `Err` if
+    # the conversion fails. The `TryFrom` trait is used for conversions that may fail, allowing the caller to handle the
+    # possibility of failure gracefully. It can be used for generic constraints, allowing "any type that can be tried to
+    # be made from `That`". The default error type is `ConversionErr`.
+    # @type That:
+    # @type Err:
 }
 
 sup [That] From[That] {
-    !public
-    !abstract_method
-    fun from(that: That) -> Self { }
+    !public !abstract_method
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(that: That) -> Self {
+        # The `from` method is the core of the `From` trait. It defines how to convert an object of type `That` into an
+        # object of the implementing type (`Self`). This method is infallible, meaning that it is guaranteed to succeed
+        # without any possibility of failure. The implementation of this method will depend on the specific types
+        # involved in the conversion, but as it is marked abstract, it must be implemented when the `From` type is
+        # extended from.
+        # @let that: The object of type `That` that is being converted into the implementing type. This is the input for
+        # the conversion. It is pased by move convention.
+        # @ret: The created object, matching the type of the implementing type. For example, if `Str` extended
+        # `From[S32]`, then the `from` method would take an `S32` and return a `Str` that represents the string form of
+        # the integer.
+    }
 }
 
 sup [That, Err] TryFrom[That, Err] {
-    !public
-    !abstract_method
-    fun try_from(that: That) -> Res[Self, Err] { }
+    !public !abstract_method
+    !versioned(base="1.0.0", new="1.0.0")
+    fun try_from(that: That) -> Res[Self, Err] {
+        # The `try_from` method is the core of the `TryFrom` trait. It defines how to convert an object of type `That`
+        # into an object of the implementing type (`Self`), but unlike the `from` method, it is fallible, meaning that
+        # it may fail and return an error. The method returns a `Res[Self, Err]`, which is a result type that can either
+        # contain the successfully converted object of the implementing type or an error of type `Err` if the conversion
+        # fails. The implementation of this method will depend on the specific types involved in the conversion and the
+        # conditions under which the conversion may fail, but as it is marked abstract, it must be implemented when the
+        # `TryFrom` type is extended from.
+        # @let that: The object of type `That` that is being converted into the implementing type. This is the input for
+        # the conversion. It is passed by move convention.
+        # @ret: A `Res[Self, Err]` that contains either the successfully converted object of the implementing type
+        # (`Self`) or an error of type `Err` if the conversion fails. The caller can then handle the result accordingly,
+        # checking for success or failure and taking appropriate action based on the outcome of the conversion.
+    }
 }
 
-# The `upcast_mov` method slices an object of type `Derived` to its base type `Base` by moving it. Fields that don't
-# belong to the type `Base` are discarded, and the resulting object is of type `Base`. This is useful for converting
-# derived types to their base types when ownership is transferred.
-!public
-!intrinsic(name="std.cast.upcast_mov")
-fun upcast_mov[Base, Derived: Base](derived: Derived) -> Base { }
-
-# The `upcast_mut` method does not slice an object, but borrows part of it mutably from memory. The part it borrows
-# represents the fields over the `Base` type. This is useful for working with derived types when you need to modify the
-# base part of the object, or a method only accepts a borrow to the base type.
 !public
 !intrinsic(name="std.cast.upcast_mut")
+!versioned(base="1.0.0", new="1.0.0")
 cor upcast_mut[Base, Derived: Base](derived: &mut Derived) -> GenOnce[&mut Base] { }
 
 !public
 !intrinsic(name="std.cast.upcast_ref")
+!versioned(base="1.0.0", new="1.0.0")
 cor upcast_ref[Base, Derived: Base](derived: &Derived) -> GenOnce[&Base] { }
 
 !public
-!intrinsic(name="std.cast.downcast_mov")
-fun downcast_mov[Base, Derived: Base](base: Base) -> Derived { }
-
-!public
 !intrinsic(name="std.cast.downcast_mut")
+!versioned(base="1.0.0", new="1.0.0")
 cor downcast_mut[Base, Derived: Base](base: &mut Base) -> GenOnce[&mut Derived or None] { }
 
 !public
 !intrinsic(name="std.cast.downcast_ref")
+!versioned(base="1.0.0", new="1.0.0")
 cor downcast_ref[Base, Derived: Base](base: &Base) -> GenOnce[&Derived or None] { }

@@ -6,61 +6,59 @@ use std::boolean::Bool
 use std::void::Void
 
 !public
-fun volatile_fence() -> Void {
-    intrinsics::volatile_fence()
-}
+!versioned(base="1.0.0", new="1.0.0")
+cls Vol[T: Copy] {
+    # The `Vol` class is a wrapper around a value of type `T` that provides volatile access to it. This means that any
+    # read or write operations on the value will be treated as volatile, which prevents the compiler from optimizing
+    # them away or reordering them in a way that could lead to undefined behavior. This is particularly useful when
+    # working with memory-mapped I/O or shared memory, where the value may be modified by external factors and the
+    # compiler cannot make assumptions about its state.
+    # @type T: The type of the value being wrapped. It must implement the `Copy` type, which means that it can be safely
+    # copied without any special handling. This is necessary because the `Vol` class provides volatile access to the
+    # value, and the compiler needs to be able to copy it without any optimizations that could interfere with the
+    # volatile semantics.
+    # @let val: The value being wrapped. This is the actual value that will be accessed in a volatile manner. It is
+    # stored as a field in the `Vol` class, and all read and write operations will interact with this field directly,
+    # ensuring that the volatile semantics are preserved.
 
-!public
-cls Vol[T: Integral] {
     val: T
 }
 
-sup [T: Integral] Vol[T] {
+sup [T: Copy] Vol[T] {
     !inline
-    !intrinsic(name="std.mem.volatile.Vol.load")
-    fun load(&self) -> T { }
+    !intrinsic(name="std.mem.volatile.Vol.read")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun read(&self) -> T {
+        # The `read` method reads the value from the `Vol` wrapper in a volatile manner. This means that the compiler
+        # will not optimize away or reorder the read operation, ensuring that it always retrieves the most up-to-date
+        # value.
+        # @ret: The value read from the `Vol` wrapper. This is the actual value that was stored in the `val` field of
+        # the `Vol` class.
+    }
 
     !inline
-    !intrinsic(name="std.mem.volatile.Vol.store")
-    fun store(&mut self, val: T) -> Void { }
+    !intrinsic(name="std.mem.volatile.Vol.write")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun write(&mut self, val: T) -> Void {
+        # The `write` method writes a new value to the `Vol` wrapper in a volatile manner. This means that the compiler
+        # will not optimize away or reorder the write operation, ensuring that the new value is always stored correctly
+        # and can be accessed by other parts of the program that may be reading from the `Vol` wrapper.
+        # @let val: The new value to be written to the `Vol` wrapper. This is the value that will be stored in the `val`
+        # field of the `Vol` class, replacing the previous value.
+    }
 
     !inline
     !intrinsic(name="std.mem.volatile.Vol.swap")
-    fun swap(&mut self, val: T) -> T { }
-
-    !inline
-    !intrinsic(name="std.mem.volatile.Vol.compare_and_swap")
-    fun fetch_and(&mut self, val: T) -> T { }
-
-    !inline
-    !intrinsic(name="std.mem.volatile.Vol.compare_and_swap")
-    fun fetch_ior(&mut self, val: T) -> T { }
-
-    !inline
-    !intrinsic(name="std.mem.volatile.Vol.compare_and_swap")
-    fun fetch_xor(&mut self, val: T) -> T { }
-}
-
-sup [T: Integer] Vol[T] {
-    !inline
-    !intrinsic(name="std.mem.volatile.Vol.compare_and_swap")
-    fun fetch_add(&mut self, val: T) -> T { }
-
-    !inline
-    !intrinsic(name="std.mem.volatile.Vol.compare_and_swap")
-    fun fetch_sub(&mut self, val: T) -> T { }
-}
-
-sup Vol[Bool] {
-    !inline
-    !intrinsic(name="std.mem.volatile.Vol.set")
-    fun set(&mut self) -> Void { }
-
-    !inline
-    !intrinsic(name="std.mem.volatile.Vol.clear")
-    fun clear(&mut self) -> Void { }
-
-    !inline
-    !intrinsic(name="std.mem.volatile.Vol.toggle")
-    fun toggle(&mut self) -> Void { }
+    !versioned(base="1.0.0", new="1.0.0")
+    fun replace(&mut self, val: T) -> T {
+        # The `replace` method replaces the current value in the `Vol` wrapper with a new value, and returns the old
+        # value. This is done in a volatile manner, meaning that the compiler will not optimize away or reorder the read
+        # and write operations, ensuring that the new value is stored correctly and the old value is returned
+        # accurately.
+        # @let val: The new value to be written to the `Vol` wrapper. This is the value that will replace the current
+        # value stored in the `val` field of the `Vol` class.
+        # @ret: The old value that was stored in the `Vol` wrapper before it was replaced. This is the value that was
+        # previously stored in the `val` field of the `Vol` class, and it is returned after the new value has been
+        # written.
+    }
 }

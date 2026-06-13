@@ -5,6 +5,7 @@ use std::boolean::Bool
 
 !public cls Eq[Rhs=Self] { }
 
+# Allow the use of the "==", "!=" operator.
 sup [Rhs] Eq[Rhs] {
     !public
     !abstract_method

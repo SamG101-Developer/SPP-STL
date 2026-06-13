@@ -1,8 +1,24 @@
 use std::annotations::public
 
-!public cls Tup[..Items] { }
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls TupLike {
+    # The `TupLike` is a non-generic marker trait, that allows any tyuple type to be used, without having to provide
+    # generics that cause monomorphization. This is especially useful for generic constraints, as seen in the function
+    # types.
+}
 
-!public cls Pair[K, V] {
-    !public key: K
-    !public val: V
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls Tup[..Items] { }
+
+sup [..Items] Tup[Items] ext TupLike { }
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls Pair[K, V] {
+    !public
+    key: K
+    !public
+    val: V
 }

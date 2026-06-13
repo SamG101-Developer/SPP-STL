@@ -1,6 +1,7 @@
 use std::annotations::package
 use std::annotations::private
 use std::annotations::public
+use std::annotations::versioned
 use std::allocator::Alloc
 use std::allocator::AllocErr
 use std::allocator::GlobalAlloc
@@ -27,30 +28,40 @@ use std::ops::iter::IterRef
 use std::ops::iter::RevIterMov
 use std::ops::iter::RevIterMut
 use std::ops::iter::RevIterRef
-use std::mem::pointer::Ptr
+use std::mem::pointer::NonNull
 
-# The RawBuf type is a low level container for contiguous elements in memory. It is capacity aware, but not length
-# aware. It is used as the underlying container inside a Vec. Elements are not guaranteed to be initialized, so all
-# accessors are Opt-returning.
 !package
+!versioned(base="1.0.0", new="1.0.0")
 cls RawBuf[T, A: Alloc = GlobalAlloc] {
-    !package ptr: Ptr[T]
+    # The `RawBuf` type is a low level container for contiguous elements in memory. It is capacity aware, but not length
+    # aware. It is used as the underlying container inside a Vec. Elements are not guaranteed to be initialized, so all
+    # accessors are `Opt`-returning.
+    # @type T: The type of the elements in the buffer.
+    # @type A: The allocator type used to allocate and deallocate the buffer. Defaults to `GlobalAlloc`.
+    # @let ptr: A non-null pointer to the buffer memory.
+    # @let capacity: The capacity of the buffer, in number of elements.
+    # @let alloc: The allocator used to allocate and deallocate the buffer.
+
+    !package ptr: NonNull[T]
     !package capacity: USize
     !package alloc: A
 }
 
 sup [T] RawBuf[T, GlobalAlloc] {
     !package
+    !versioned(base="1.0.0", new="1.0.0")
     fun dangling() -> Self {
         ret Self::new_in(GlobalAlloc)
     }
 
     !package
+    !versioned(base="1.0.0", new="1.0.0")
     fun with_capacity(cap: USize) -> Self {
         ret Self::new_with_capacity_in(cap, GlobalAlloc)
     }
 
     !package
+    !versioned(base="1.0.0", new="1.0.0")
     fun with_capacity_zeroed(cap: USize) -> Self {
         ret Self::new_with_capacity_in(cap, GlobalAlloc)
     }
@@ -61,106 +72,149 @@ sup [T, A: Alloc] RawBuf[T, A] {
     type Allocator = A
 
     !package
+    !versioned(base="1.0.0", new="1.0.0")
     fun dangling_in(alloc: A) -> Self {
-        let ptr = Ptr[T]::from_addr(std::mem::ops::align_of[T]())
+        let ptr = NonNull[T]::from_addr(std::mem::ops::align_of[T]()).expect("Alignment must be non-zero")
         ret RawBuf(ptr, 0, alloc)
     }
 
     !package
+    !versioned(base="1.0.0", new="1.0.0")
     fun with_capacity_in(cap: USize, alloc: A) -> Self {
         let ptr = alloc.allocate(Layout::new_for_array[T](cap))
         ret RawBuf(ptr, capacity=cap, alloc)
     }
 
     !package
+    !versioned(base="1.0.0", new="1.0.0")
     fun with_capacity_zeroed_in(cap: USize, alloc: A) -> Self {
         let ptr = alloc.allocate_zeroed(Layout::new_for_array[T](cap))
         ret RawBuf(ptr, capacity=cap, alloc)
     }
 
     !package
+    !versioned(base="1.0.0", new="1.0.0")
     fun cap(&self) -> USize {
         ret self.capacity
     }
 
     !package
-    fun capacity_grow(&mut self, new_cap: USize) -> Res[Void, AllocErr] {
-        self.alloc.grow(self.ptr, Layout::new_for_array[T](self.capacity), Layout::new_for_array[T](new_cap))?
+    !versioned(base="1.0.0", new="1.0.0")
+    fun capacity_grow_to(&mut self, new_cap: USize) -> Void {
+        # The `capacity_grow_to` method grows the buffer to the new capacity. It is the non-fallible version of
+        # `try_capacity_grow_to`, and will abort if the grow fails.
+        # @let new_cap: The new capacity to grow the buffer to. Must be larger than the current capacity.
+
+        # Forward to the fallible version and abort if it fails.
+        self.try_capacity_grow_to(new_cap).expect("Grow failed")
+    }
+
+    !package
+    !versioned(base="1.0.0", new="1.0.0")
+    fun try_capacity_grow_to(&mut self, new_cap: USize) -> Res[Void, AllocErr] {
+        # The `try_capacity_grow_to` method attempts to grow the buffer to the new capacity. The new capacity must be
+        # larger than the current capacity, and the existing elements in the buffer will be preserved. This is useful
+        # for a `Vec` type to grow the buffer when elements are added and the capacity is exceeded.
+        # @let new_cap: The new capacity to grow the buffer to. Must be larger than the current capacity.
+        # @ret: `Pass()` if the grow was successful, or an `AllocErr` if the grow failed.
+
+        # Grow the buffer using the allocator's `grow` method,
+        # and propagate arrors.
+        self.ptr = self.alloc.grow(
+            self.ptr,
+            Layout::new_for_array[T](self.capacity),
+            Layout::new_for_array[T](new_cap))?
+
+        # Update the capacity if successful, returning the pass
+        # state.
         self.capacity = new_cap
         ret Pass[Void]()
     }
 
-    !package fun capacity_shrink(&mut self, new_cap: USize) -> Void {
+    !package
+    !versioned(base="1.0.0", new="1.0.0")
+    fun capacity_shrink_to(&mut self, new_cap: USize) -> Void {
+        # The `capacity_shrink_to` method shrinks the buffer to the new capacity. It is the non-fallible version of
+        # `try_capacity_shrink_to`, and will abort if the shrink fails.
+        # @let new_cap: The new capacity to shrink the buffer to. Must be smaller than the current capacity.
+
+        # Forward to the fallible version and abort if it fails.
         self.try_shrink(new_cap).expect("Shrink failed")
     }
 
-    # Shrink the buffer to the new capacity. The new capacity must be smaller than the current capacity, and all
-    # elements above the new capacity will be dropped. This is useful for a Vec type to shrink the buffer after elements
-    # have been removed.
-    !package fun try_capacity_shrink(&mut self, new_cap: USize) -> Res[Void, AllocErr] {
-        self.alloc.shrink(self.ptr, Layout::new_for_array[T](self.capacity), Layout::new_for_array[T](new_cap))?
+    !package
+    !versioned(base="1.0.0", new="1.0.0")
+    fun try_capacity_shrink_to(&mut self, new_cap: USize) -> Res[Void, AllocErr] {
+        # The `try_capacity_shrink_to` method attempts to shrink the buffer to the new capacity. The new capacity must
+        # be smaller than the current capacity, and all elements above the new capacity will be dropped. This is useful
+        # for a `Vec` type to shrink the buffer after elements have been removed.
+        # @let new_cap: The new capacity to shrink the buffer to. Must be smaller than the current capacity.
+        # @ret: `Pass()` if the shrink was successful, or an `AllocErr` if the shrink failed.
+
+        # Shrink the buffer using the allocator's `shrink` method,
+        # and propagate allocation arrors.
+        self.ptr = self.alloc.shrink(
+            self.ptr,
+            Layout::new_for_array[T](self.capacity),
+            Layout::new_for_array[T](new_cap))?
+
+        # Update the capacity if successful, returning the pass
+        # state.
         self.capacity = new_cap
         ret Pass[Void]()
     }
 
-    # Reserves capacity for at least "additional" more elements, checking for overflow. The "len" parameter is the
-    # number of elements that are initialized by the owning container, for example a Vec type. If the current capacity
-    # is sufficient, does nothing. Otherwise, grows the buffer to fit the required capacity.
-    !package fun capacity_reserve(&mut self, len: USize, additional: USize) -> Res[Void, AllocErr] {
-        let new_cap = len.add_checked(additional).ok_or(AllocErr::capacity_overflow)?
+    !package
+    !versioned(base="1.0.0", new="1.0.0")
+    fun capacity_reserve(&mut self, len: USize, additional: USize) -> Res[Void, AllocErr] {
+        # The `capacity_reserve` method reserves capacity for at least "additional" more elements, checking for
+        # overflow. If the current capacity is sufficient, does nothing. Otherwise, grows the buffer to fit the required
+        # capacity.
+        # @let len: The number of elements that are initialized by the owning container, for example a `Vec` type. This
+        # is used to calculate the required capacity.
+        # @let additional: The number of additional elements to reserve capacity for. This is added to `len` to
+        # calculate the required capacity.
+        # @ret: `Pass()` if the reservation was successful or no growth was needed, or an `AllocErr` if the reservation
+        # failed due to capacity overflow or allocation failure.
+
+        # Calculate the required capacity, checking for overflow.
+        # If the calculation overflows, return an `AllocErr`.
+        let new_cap = len.add_checked(additional).ok_or(AllocErr)?
         case new_cap <= self.capacity { ret Pass[Void]() }
         self.grow(new_cap)
     }
 
     !package
-    !instrinsic(name="std.mem.buffer.Buffer.clear")
-    fun clear(&mut self) -> Void { }
+    !intrinsic(name="std.mem.buffer.Buffer.take_at")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun take_at(&mut self, index: USize) -> Opt[T] {
+        # Takes the element at the specified index, returning `Some(element)` if it is initialized, or `None` if it is
+        # not. The slot at the index is left uninitialized after this operation, and indexing to it will subsequently
+        # return `None` too.
+        # @let index: The index of the element to take.
+        # @ret: `Some(element)` if the element at the specified index is initialized, or `None` if it is not.
+    }
 
     !package
-    !instrinsic(name="std.mem.buffer.Buffer.take_at")
-    fun take_at(&mut self, index: USize) -> Opt[T] { }
-
-    !package
-    !instrinsic(name="std.mem.buffer.Buffer.place_at")
-    fun place_at(&mut self, index: USize, element: T) -> Void { }
-}
-
-sup [T, A: Alloc] RawBuf[T, A] ext IterMov[T] {
-    !intrinsic(name="std.mem.buffer.Buffer.iter_mov")
-    cor iter_mov(self) -> Iterator[T] { }
-}
-
-sup [T, A: Alloc] RawBuf[T, A] ext IterMut[T] {
-    !intrinsic(name="std.mem.buffer.Buffer.iter_mut")
-    cor iter_mut(&mut self) -> Iterator[&mut T] { }
-}
-
-sup [T, A: Alloc] RawBuf[T, A] ext IterRef[T] {
-    !intrinsic(name="std.mem.buffer.Buffer.iter_ref")
-    cor iter_ref(&self) -> Iterator[&T] { }
-}
-
-sup [T, A: Alloc] RawBuf[T, A] ext RevIterMov[T] {
-    !intrinsic(name="std.mem.buffer.Buffer.reverse_iter_mov")
-    cor reverse_iter_mov(self) -> Iterator[T] { }
-}
-
-sup [T, A: Alloc] RawBuf[T, A] ext RevIterMut[T] {
-    !intrinsic(name="std.mem.buffer.Buffer.reverse_iter_mut")
-    cor reverse_iter_mut(&mut self) -> Iterator[&mut T] { }
-}
-
-sup [T, A: Alloc] RawBuf[T, A] ext RevIterRef[T] {
-    !intrinsic(name="std.mem.buffer.Buffer.reverse_iter_ref")
-    cor reverse_iter_ref(&self) -> Iterator[&T] { }
+    !intrinsic(name="std.mem.buffer.Buffer.place_at")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun place_at(&mut self, index: USize, element: T) -> Void {
+        # Places the element at the specified index, overwriting any existing element at that index. The slot at the
+        # index is considered initialized after this operation, and indexing to it will subsequently return
+        # `Some(val=element)`.
+        # @let index: The index at which to place the element.
+        # @let element: The element to place at the specified index.
+    }
 }
 
 sup [T, A: Alloc] RawBuf[T, A] ext IndexMut[T, USize] {
     !intrinsic(name="std.mem.buffer.Buffer.index_mut")
+    !versioned(base="1.0.0", new="1.0.0")
     cor index_mut(&mut self, index: USize) -> Indexed[&mut T or None] { }
 }
 
 sup [T, A: Alloc] RawBuf[T, A] ext IndexRef[T, USize] {
     !intrinsic(name="std.mem.buffer.Buffer.index_ref")
+    !versioned(base="1.0.0", new="1.0.0")
     cor index_ref(&self, index: USize) -> Indexed[&T or None] { }
 }

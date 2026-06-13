@@ -7,7 +7,24 @@ use std::void::Void
 use std::threading::atomic::Atom
 
 !public
+!versioned(base="1.0.0", new="1.0.0")
 cls Fut[T] {
+    # The `Fut[T]` future type wraps any type, whe a function is called as `async`. Because the `asycn` gets placed at
+    # the function call site rather than the definition, we are able to avoid the coloring problem, and remove function
+    # duplication for async vs async definitions.
+    # @type T: The type of the value that the future will eventually resolve to.
+    # @let state: The state of the future, which is used to determine whether the future has been resolved or not. The
+    # value of the state is managed internally by the async machinery, and can not be modified directly by user code.
+    # The state is represented as an atomic byte, where a value of 0 indicates that the future is still pending, and a
+    # value of 1 indicates that the future has been resolved and the value is available. The use of an atomic type
+    # ensures that the state can be safely accessed and modified across multiple threads without the need for additional
+    # synchronization mechanisms.
+    # @let val: The value of the future, which is an optional type that can either contain the resolved value of type
+    # `T` or be `None` if the future has not yet been resolved. The value is managed internally by the async machinery,
+    # and can not be modified directly by user code. When the future is resolved, the value is set to
+    # `Some(resolved_value)`, where `resolved_value` is the value of type `T` that the future resolves to. If the future
+    # is still pending, the value remains `None`.
+
     !private state: Atom[U8]
     !private val: Opt[T]
 }
@@ -15,9 +32,26 @@ cls Fut[T] {
 sup [T] Fut[T] {
     !public
     !intrinsic(name="std.future.Fut.await")
-    fun await(self) -> T { }
+    !versioned(base="1.0.0", new="1.0.0")
+    fun await(self) -> T {
+        # The `await` method is used to retrieve the resolved value of the future. This isn't typically used, because if
+        # an `async` function call needs to be waited on, it can just be called synchronously in the first place.
+        # However, if we fire off multiple `async` calls, we can use this method to wait on specific ones.
+        # @ret: The resolved value of the future. This method will block until the future has been resolved, at which
+        # point it will return the value of type `T` that the future resolves to. If the future is already resolved when
+        # this method is called, it will return the resolved value immediately without blocking.
+    }
 
     !public
     !intrinsic(name="std.future.Fut.await_all")
-    fun await_all(..futures: Fut[T]) -> Void { }
+    !versioned(base="1.0.0", new="1.0.0")
+    fun await_all(..futures: Fut[T]) -> Void {
+        # The `await_all` method is used to wait for multiple futures to resolve. It takes a variable number of futures
+        # as arguments and waits for all of them to resolve before returning. This is useful when you have multiple
+        # asynchronous operations that need to be completed before proceeding, and you want to wait for all of them to
+        # finish before moving on to the next step in your program. The method will block until all of the provided
+        # futures have resolved.
+        # @let ..futures: A variable number of futures that we want to wait on. The method will block until all of these
+        # futures have resolved.
+    }
 }

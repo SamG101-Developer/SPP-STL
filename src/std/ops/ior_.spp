@@ -4,6 +4,7 @@ use std::boolean::Bool
 
 !public cls Ior[Rhs=Self] { }
 
+# Allow the use of the "or" operator.
 sup [Rhs] Ior[Rhs] {
     !public
     !abstract_method

@@ -10,38 +10,47 @@ use std::threading::mutex::LockErr
 
 !public
 cls SpinLock {
-    !private id: S32
+    !private handle: U64
 }
 
 sup SpinLock {
     !public
     fun new() -> Res[SpinLock, LockErr] {
         # Create a new spin lock using the sppc threading API.
-        let id = sppc::spinlock_create()
-        ret Pass(val=SpinLock(id))
+        let handle = 0_u64
+        sppc::spinlock_init(&mut handle)
+        ret Pass(val=SpinLock(handle))
     }
 
     !public
     fun lock(&self) -> Res[Void, LockErr] {
         # Acquire the spin lock using the sppc threading API.
-        let spin_id = sppc::spinlock_lock(self.id)
-        case spin_id == 0 { ret Fail(err=LockErr(msg="Failed to acquire spin lock"))  }
+        let err = sppc::spinlock_lock(self.id)
+        case err != 0 { ret Fail(err=LockErr(msg="Failed to acquire spin lock"))  }
+        ret Pass[Void]()
+    }
+    
+    !public
+    fun try_lock(&self) -> Res[Void, LockErr] {
+        # Try to acquire the spin lock using the sppc threading API.
+        let err = sppc::spinlock_try_lock(self.id)
+        case err != 0 { ret Fail(err=LockErr(msg="Failed to try acquire spin lock"))  }
         ret Pass[Void]()
     }
 
     !public
     fun try_lock(&self) -> Res[Bool, LockErr] {
         # Try to acquire the spin lock using the sppc threading API.
-        let spin_id = sppc::spinlock_try_lock(self.id)
-        case spin_id == 0 { ret Fail(err=LockErr(msg="Failed to try acquire spin lock"))  }
-        ret Pass(val=spin_id == 1)
+        let err = sppc::spinlock_try_lock(self.id)
+        case err < 0 { ret Fail(err=LockErr(msg="Failed to try acquire spin lock"))  }
+        ret Pass(val=err == 0)
     }
 
     !public
     fun unlock(&self) -> Res[Void, LockErr] {
         # Release the spin lock using the sppc threading API.
-        let spin_id = sppc::spinlock_unlock(self.id)
-        case spin_id == 0 { ret Fail(err=LockErr(msg="Failed to release spin lock"))  }
+        let err = sppc::spinlock_unlock(self.id)
+        case err == 0 { ret Fail(err=LockErr(msg="Failed to release spin lock"))  }
         ret Pass[Void]()
     }
 }

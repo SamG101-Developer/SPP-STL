@@ -1,0 +1,19 @@
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp af_inet: S32 = 2
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp af_inet6: S32 = 10
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp shutdown_read: S32 = 0
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp shutdown_write: S32 = 1
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp shutdown_both: S32 = 2

@@ -1,0 +1,43 @@
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp clock_real_time: S32 = 0_s32
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp clock_monotonic: S32 = 1_s32
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp clock_high_resolution: S32 = 2_s32
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp clock_thread_specific: S32 = 3_s32
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp clock_monotonic_raw: S32 = 4_s32
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp clock_realtime_coarse: S32 = 5_s32
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp clock_monotonic_coarse: S32 = 6_s32
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp clock_boottime: S32 = 7_s32
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp clock_realtime_alarm: S32 = 8_s32
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp clock_boottime_alarm: S32 = 9_s32
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp clock_tai: S32 = 11_s32

@@ -1,0 +1,120 @@
+# A PCRE-backend regex engine, for extreme performance, and a range of regex features.
+
+cls Node { }
+
+sup Node {
+    !public
+    !abstract_method
+    fun match(&self, str: Str, i: USize) -> Vec[USize] { }
+}
+
+
+# The literal node represents a single character in the regex, such as 'a' in the regex "a(b|c)*d". It matches if the
+# character at index i in the input string is equal to the literal value, and if so, it returns a vector containing the
+# index of the next character (i + 1). Otherwise, it returns an empty vector (no matches).
+cls Literal {
+    !public val: U8
+}
+
+sup Literal ext Node {
+    !public
+    fun new(val: U8) -> Self { ret Literal(val) }
+
+    !public
+    fun match(&self, str: Str, i: USize) -> Vec[USize] {
+        ret case i < str.len() and str[i]@ == self.value { Vec::from([i + 1]) } else { Vec[USize]() }
+    }
+}
+
+
+# The char class node represents a character class in the regex, such as [a-z] or \d. It matches if the character at
+# index i in the input string is contained in the char class, and if so, it returns a vector containing the index of the
+# next character (i + 1). Otherwise, it returns an empty vector (no matches).
+cls CharClass {
+    !public chars: Vec[U8]
+}
+
+sup CharClass ext Node {
+    !public
+    fun new(chars: Vec[U8]) -> Self { ret CharClass(chars) }
+
+    !public
+    fun match(&self, str: Str, i: USize) -> Vec[USize] {
+        ret case i < str.len() and self.chars.contains(str[i]) { Vec::from([i + 1]) } else { Vec[USize]() }
+    }
+}
+
+
+# The sequence node represents a sequence of regex nodes, such as (ab)+. It matches if the sequence of nodes matches
+# starting at index i in the input string, and if so, it returns a vector containing the index of the next character
+# after the sequence. Otherwise, it returns an empty vector (no matches).
+cls Sequence {
+    !public nodes: Vec[Single[Node]]
+}
+
+sup Sequence ext Node {
+    !public
+    fun new(nodes: Vec[Node]) -> Self { ret Sequence(nodes) }
+
+    !public
+    fun match(&self, str: Str, i: USize) -> Vec[USize] {
+        let mut indices = Vec::from([i])
+        loop node in self.nodes.iter_ref() {
+            let mut new_indices = Vec[USize]()
+            loop index in indices.iter_ref() {
+                new_indices += node.match(str, index@)
+            }
+            indices = new_indices
+            case indices.is_empty() { exit }
+        }
+        ret indices
+    }
+}
+
+
+# The alternation node represents an alternation of regex nodes, such as a|b. It matches if any of the nodes in the
+# alternation matches starting at index i in the input string, and if so, it returns a vector containing the index of
+# the next character after the match. Otherwise, it returns an empty vector (no matches).
+cls Alternation {
+    !public lhs: Single[Node]
+    !public rhs: Single[Node]
+}
+
+sup Alternation ext Node {
+    !public
+    fun new(lhs: Node, rhs: Node) -> Self { ret Alternation(lhs, rhs) }
+
+    !public
+    fun match(&self, str: Str, i: USize) -> Vec[USize] {
+        ret self.lhs.match(str, i) + self.rhs.match(str, i)
+    }
+}
+
+
+# The 0-or-more quantifier node represents a regex node that can match zero or more times, such as a* or (ab)*. It
+# matches if the node matches starting at index i in the input string, and if so, it returns a vector containing the
+# index of the next character after the match, as well as the index of the next character after the match if the node
+# matches again. Otherwise, it returns a vector containing the index of the next character after the match (if the node
+# matches at least once) or an empty vector (if the node does not match at all).
+cls ZeroOrMore {
+    !public node: Single[Node]
+}
+
+sup ZeroOrMore ext Node {
+    !public
+    fun new(node: Node) -> Self { ret ZeroOrMore(node) }
+
+    !public
+    fun match(&self, str: Str, i: USize) -> Vec[USize] {
+        let mut indices = Vec::from([i])
+        loop true {
+            let mut new_indices = Vec[USize]()
+            loop index in indices.iter_ref() {
+                new_indices += self.node.match(str, index@)
+            }
+            case new_indices.is_empty() { break }
+            indices += new_indices
+        }
+        ret indices
+    }
+}

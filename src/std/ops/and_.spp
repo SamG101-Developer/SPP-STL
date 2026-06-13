@@ -4,6 +4,7 @@ use std::boolean::Bool
 
 !public cls And[Rhs=Self] { }
 
+# Allow the use of the "and" operator.
 sup [Rhs] And[Rhs] {
     !public
     !abstract_method

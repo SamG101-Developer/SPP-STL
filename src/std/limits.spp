@@ -21,9 +21,20 @@ use std::number::F128
 
 # Todo: Change the values to cmp function powers etc (formula).
 
-cls Limits[T] { }
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls Limits[T] {
+    #
+    # @type T:
+}
 
 sup Limits[U8] {
+    # Specialized limits for the `U8` type.
+    # @type SInt: The signed integer type corresponding to `U8`.
+    # @type FP: The floating-point type corresponding to `U8`.
+    # @cmp max: The maximum value of `U8`.
+    # @cmp min: The minimum value of `U8`.
+
     !public type SInt = S8
     !public type FP = F8
 

@@ -3,16 +3,41 @@ use std::annotations::abstract_method
 use std::void::Void
 
 !public
-cls Clone { }
+!versioned(base="1.0.0", new="1.0.0")
+cls Clone {
+    # The `Clone` trait is a fundamental trait in the standard library that provides a way to create a manual,
+    # customizable, copy of a value. The `clone` method is the primary method of the `Clone` trait, which creates a new
+    # instance of the type with the same value as the original. The `clone_from` method is an optional method that can
+    # be implemented to provide an efficient way to clone from an existing instance, potentially reusing resources.
+    # Unlike Rust, there is no inherent relationship between `Copy` and `Clone`. Where-as `Copy` makes all operations
+    # copy instead of move, `Clone` effectively allows the choice on a per-use basis.
+}
 
 sup Clone {
-    !public
-    !abstract_method
-    fun clone(&self) -> Self { }
+    !public !abstract_method
+    !versioned(base="1.0.0", new="1.0.0")
+    fun clone(&self) -> Self {
+        # The `clone` method is the core of the `Clone` trait. It defines how to create a new instance of the type that
+        # is a copy of the original instance. This method is typically implemented by types that have some form of heap
+        # allocation or other resources that need to be duplicated when creating a copy.
+        # @ret: A new instance of the type that is a copy of the original instance. The exact behavior of this method
+        # will depend on the specific type and how it manages its resources. For example, `Vec[T]` implements `Clone`
+        # when `T: Clone` is satisfied.
+    }
 
-    !public
-    !virtual_method
+    !public !virtual_method
+    !versioned(base="1.0.0", new="1.0.0")
     fun clone_from(&mut self, source: &Self) -> Void {
+        # The `clone_from` method is an optional method that can be implemented to provide an efficient way to clone
+        # from an existing instance. This method allows the implementer to reuse resources from the `self` instance when
+        # cloning from the `source` instance, potentially avoiding unnecessary allocations or copying. The default
+        # implementation of `clone_from` simply calls `clone` and assigns the result to `self`, but types that have more
+        # complex resource management needs can override this method to provide a more efficient implementation.
+        # @let source: A borrow to the instance that is being cloned from. This is the source of the data for the clone
+        # operation. The `source` instance is not modified by this method, and the `self` instance is updated to be a
+        # clone of the `source`.
+
+        # Set the internal value of this borrow from the source's clone.
         self@ = source.clone()
     }
 }

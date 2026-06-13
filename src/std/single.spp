@@ -7,7 +7,7 @@ use std::generator::GenOnce
 use std::number::USize
 use std::result::Pass
 use std::result::Res
-use std::mem::pointer::Ptr
+use std::mem::pointer::NonNull
 use std::ops::fwd::FwdMov
 use std::ops::fwd::FwdMut
 use std::ops::fwd::FwdRef
@@ -18,7 +18,7 @@ use std::ops::void::Void
 # custom allocator to be used aswell. This is an equivalent type to Rust's Box type.
 !public
 cls Single[T, A: Alloc = GlobalAlloc] {
-    !package ptr: Ptr[T]
+    !package ptr: NonNull[T]
     !package alloc: A
 }
 

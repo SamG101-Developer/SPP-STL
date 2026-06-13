@@ -6,14 +6,64 @@ use std::result::Res
 use std::string_view::StrView
 use std::void::Void
 
-!public
-cls TimeErr {
-    !public msg: StrView
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls TimeInvalidClockErr { }
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls TimeInvalidDurationErr { }
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls TimeOtherErr { }
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+type TimeErr = TimeInvalidClockErr or TimeInvalidDurationErr or TimeOtherErr
+
+sup TimeErr {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_errno(errno: S32) -> Self {
+        #
+        # @let errno:
+        # @ret:
+
+        case errno of {
+            == cffi::enotsup { ret TimeInvalidClockErr }
+            == cffi::einval { ret TimeInvalidDurationErr }
+            else { ret TimeOtherErr }
+        }
+    }
 }
 
-!public fun sleep(duration: Duration) -> Res[Void, TimeErr] {
-    # Use the C function to sleep for the specified duration.
-    let val = sppc::time_sleep_ns(duration.total_nanoseconds())
-    case val < 0 { ret Fail(err=TimeErr(msg="Failed to sleep for the specified duration")) }
-    ret Pass[Void]()
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun sleep(duration: Duration, clock: S32 = constants::clock_realtime) -> Void {
+    # Sleep for the specified duration using the specified clock. This function will block the current thread for at
+    # least the specified duration, but it may block for longer if the system is under heavy load or if the clock is not
+    # precise.
+    # @let duration: The amount of time to sleep for, specified as a `Duration` object.
+    # @let ?clock: The clock to use for measuring the sleep duration.
+
+    # Create the C timespec object and call the sppc clock_nanosleep
+    # function to hook into the system's sleep functionality.
+    let timespec = CTimeSpec(sec=duration.seconds, nsec=duration.nanoseconds)
+    sppc::clock_nanosleep(clock, 0, duration.total_nanoseconds()) # Ignore error
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun sleep_until(time_point: TimePoint, clock: S32 = constants::clock_realtime) -> Void {
+    # Sleep until the specified `TimePoint` using the specified clock. This function will block the current thread until
+    # the specified `TimePoint` is reached, but it may block for longer if the system is under heavy load or if the
+    # clock is not precise.
+    # @let time_point: The `TimePoint` to sleep until.
+    # @let ?clock: The clock to use for measuring the sleep duration.
+
+    # Create the C timespec object and call the sppc clock_nanosleep
+    # function to hook into the system's sleep functionality.
+    let timespec = CTimeSpec(sec=time_point.duration.seconds, nsec=time_point.duration.nanoseconds)
+    sppc::clock_nanosleep(clock, 1, time_point.duration.total_nanoseconds()) # Ignore error
 }

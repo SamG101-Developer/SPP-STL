@@ -1,0 +1,8 @@
+use std::memory::ptr::NonNull
+use std::void::Void
+
+fun call_once(func: FunMov[(), Void]) -> Void {
+    # Call the function once using the sppc threading API.
+    let func_ptr = NonNull[U8]::from_func(func)
+    sppc2::call_once(func_ptr)
+}

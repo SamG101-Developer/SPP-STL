@@ -1,0 +1,5 @@
+use std::collections::hash_map::HashMap
+use std::void::Void
+
+
+type HSet[T, A: Alloc[T] = GlobalAlloc[T]] = HashMap[T, Void, A]

@@ -1,0 +1,139 @@
+cls UdpSocket {
+    # The `UdpSocket` class represents a UDP socket, which is a connectionless protocol used for sending and receiving
+    # datagrams. It provides methods for sending and receiving data, as well as configuring socket options such as
+    # broadcast and timeouts.
+}
+
+sup UdpSocket ext Socket {
+    # The `UdpSocket` class extends the `Socket` class, which means it inherits all the properties and methods of the
+    # `Socket` class. This allows the `UdpSocket` to use common socket functionality, such as setting non-blocking mode
+    # and configuring time-to-live (TTL) values, while also providing additional methods specific to UDP communication,
+    # such as sending and receiving datagrams.
+}
+
+sup UdpSocket {
+    #
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun send_to(&mut self, buf: &Vire[U8], addr: &SockAddr) -> Res[USize, SockErr] {
+        # The `send_to` method sends data from the provided buffer to the specified socket address. It returns a `Res`
+        # type that indicates success or failure. On success, it returns the number of bytes sent.
+        # @let buf: A borrow to a buffer containing the data to be sent.
+        # @let addr: A borrow to the `SockAddr` representing the destination address to which the data will be sent.
+        # @ret: A `Res` type containing the number of bytes sent if the operation is successful, or a `SockErr` if the
+        # operation fails.
+
+        let bytes_sent = 0_uz
+        let err = sppc2::send_to(self.fd, buf, buf.len(), addr.ip().family(), addr.ip(), addr.port(), &mut bytes_sent)
+        case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass(val=bytes_sent)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun recv_from(&mut self, buf: &mut View[U8]) -> Res[(USize, SockAddr), SockErr] {
+        # The `recv_from` method receives data from the socket and stores it in the provided buffer. It also returns the
+        # source address of the received data. It returns a `Res` type that indicates success or failure. On success, it
+        # returns a tuple containing the number of bytes received and the source `SockAddr`.
+        # @let buf: A mutable reference to a buffer where the received data will be stored.
+        # @ret: A `Res` type containing a tuple of the number of bytes received and the source `SockAddr` if the
+        # operation is successful, or a `SockErr` if the operation fails.
+
+        let bytes_received = 0_uz
+        let mut addr: SockAddr = case self.local.ip().family() == af_inet { SockV4Addr() } else { SockV6Addr() }
+        let err = sppc2::recv_from(self.fd, buf, buf.len(), &mut addr.ip(), &mut addr.port(), &mut bytes_received)
+        case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass(val=(bytes_received, SockAddr::V4(addr)))
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun set_broadcast(&mut self, yes: Bool) -> Res[Void, SockErr] {
+        # The `set_broadcast` method sets the broadcast option for the socket. This allows the socket to send broadcast
+        # messages, which are messages that are sent to all devices on the local network. This is useful for
+        # applications that need to discover other devices on the network or send messages to multiple devices at once.
+        # @let yes: Whether to enable or disable the broadcast option. If true, the socket will be able to send
+        # broadcast messages. If false, the socket will not be able to send broadcast messages.
+        # @ret: A result indicating whether the operation was successful or not.
+
+        let err = sppc2::set_broadcast(self.fd, yes)
+        case err == 0 { ret Pass[Void]() }
+        ret Fail(err=SockErr::from_errno(err))
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun broadcast(&self) -> Res[Bool, SockErr] {
+        # The `broadcast` method gets the current state of the broadcast option for the socket. This is useful for
+        # checking whether the socket is currently able to send broadcast messages or not.
+        # @ret: A result containing a boolean value indicating whether the broadcast option is enabled for the socket if
+        # successful, or a `SockErr` if there was an error.
+
+        let mut yes = 0
+        let err = sppc2::get_broadcast(self.fd, &mut yes)
+        case err < 0 { ret Fail(err=SockErr::from_errno(yes)) }
+        ret Pass(val=yes != 0)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun set_read_timeout(&mut self, timeout: Duration) -> Res[Void, SockErr] {
+        # The `set_read_timeout` method sets the receive timeout for the socket. This means that if a receive operation
+        # takes longer than the specified timeout, it will return an error. This is useful for preventing the
+        # application from hanging indefinitely while waiting for data to be received.
+        # @let timeout: The amount of time to wait for a receive operation before it returns an error. If the timeout is
+        # zero, then there is no timeout and the receive operation will block indefinitely until data is received.
+        # @ret: A result indicating whether the operation was successful or not.
+
+        let timespec = CTimeSpec(sec=timeout.seconds, nsec=timeout.nanoseconds)
+        let err = sppc2::set_recv_timeout(self.fd, &timespec)
+        case err == 0 { ret SockErr::from_errno(err) }
+        ret Pass[Void]()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun read_timeout(&self) -> Res[Duration, SockErr] {
+        # The `read_timeout` method gets the receive timeout for the socket. This is useful for checking the current
+        # state of the socket, especially if you want to know how long the socket will wait for a receive operation
+        # before it returns an error.
+        # @ret: A result containing the receive timeout for the socket if successful, or a `SockErr` if there was an
+        # error.
+
+        let mut timespec = CTimeSpec()
+        let err = sppc2::get_recv_timeout(self.fd, &mut timespec)
+        case err < 0 { ret Fail(err=SockErr::from_errno(timespec)) }
+        ret Pass(val=Duration(seconds=timespec.sec, nanoseconds=timespec.nsec))
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun set_write_timeout(&mut self, timeout: Duration) -> Res[Void, SockErr] {
+        # The `set_write_timeout` method sets the send timeout for the socket. This means that if a send operation takes
+        # longer than the specified timeout, it will return an error. This is useful for preventing the application from
+        # hanging indefinitely while waiting for data to be sent.
+        # @let timeout: The amount of time to wait for a send operation before it returns an error. If the timeout is
+        # zero, then there is no timeout and the send operation will block indefinitely until data is sent.
+        # @ret: A result indicating whether the operation was successful or not.
+
+        let timespec = CTimeSpec(sec=timeout.seconds, nsec=timeout.nanoseconds)
+        let err = sppc2::set_send_timeout(self.fd, &timespec)
+        case err == 0 { ret SockErr::from_errno(err) }
+        ret Pass[Void]()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun write_timeout(&self) -> Res[Duration, SockErr] {
+        # The `write_timeout` method gets the send timeout for the socket. This is useful for checking the current state
+        # of the socket, especially if you want to know how long the socket will wait for a send operation before it
+        # returns an error.
+        # @ret: A result containing the send timeout for the socket if successful, or a `SockErr` if there was an error.
+
+        let mut timespec = CTimeSpec()
+        let err = sppc2::get_send_timeout(self.fd, &mut timespec)
+        case err < 0 { ret Fail(err=SockErr::from_errno(timespec)) }
+        ret Pass(val=Duration(seconds=timespec.sec, nanoseconds=timespec.nsec))
+    }
+}

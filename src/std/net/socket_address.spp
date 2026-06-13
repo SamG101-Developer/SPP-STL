@@ -1,0 +1,31 @@
+cls SockV4Addr {
+    !public ip: IpV4Addr
+    !public port: U16
+}
+
+cls SockV6Addr {
+    !public ip: IpV6Addr
+    !public port: U16
+}
+
+type SockAddr = SockV4Addr or SockV6Addr
+
+sup SockAddr {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun ip(&self) -> IpAddr {
+        case self of {
+            is SockV4Addr(ip, ..) { ip }
+            is SockV6Addr(ip, ..) { ip }
+        }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun port(&self) -> U16 {
+        case self of {
+            is SockV4Addr(.., port) { port }
+            is SockV6Addr(.., port) { port }
+        }
+    }
+}

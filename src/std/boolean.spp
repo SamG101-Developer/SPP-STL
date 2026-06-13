@@ -22,72 +22,153 @@ use std::ops::bit_not::BitNot
 use std::ops::eq::Eq
 
 !public
+!versioned(base="1.0.0", new="1.0.0")
 cls Integral { }
 sup Integral ext Copy { }
 
 !public
-cls Bool { }
-sup Bool ext Integral { }
+!versioned(base="1.0.0", new="1.0.0")
+cls Bool {
+    # The `Bool` type represents a boolean value, which can be either `true` or `false`. It has all the stnadard
+    # operations superimposed on it, such as logical and bitwise operations, as well as conversions from numeric types.
+    # The `Bool` type is a fundamental type in the language and is used for control flow, conditional expressions, and
+    # logical operations. It is a simple type that can be easily optimized by the compiler, and is mapped to the llvm
+    # `bool` type.
+}
+
+sup Bool ext Integral {
+    # The `Bool` type is integral, as are the number types, allowing it to be cosntrained by traits that require
+    # integral types, such as the `Atom` type. There are no additional methods from the `Integral` type; it is more of a
+    # marker trait to indicate that `Bool` is an integral type.
+}
 
 sup Bool ext And {
+    # Use the `and` keyword operator class.
+
     !inline
     !intrinsic(name="std.boolean.Bool.and")
-    cmp fun and_(self, that: Self) -> Bool { }
+    !versioned(base="1.0.0", new="1.0.0")
+    cmp fun and_(self, that: Self) -> Bool {
+        # The `and_` method allows for `true and false` to be evaluated as `try.and_(false)`, which is intrinsically
+        # mapped to the llvm `and` instruction.
+        # @let that: The right-hand side of the logical AND operation.
+        # @ret: The result of the logical AND operation between `self` and `that`.
+    }
 }
 
 sup Bool ext Ior {
+    # Use the `or` keyword operator class.
+
     !inline
     !intrinsic(name="std.boolean.Bool.ior")
-    cmp fun ior_(self, that: Self) -> Bool { }
+    !versioned(base="1.0.0", new="1.0.0")
+    cmp fun ior_(self, that: Self) -> Bool {
+        # The `ior_` method allows for `true or false` to be evaluated as `try.ior_(false)`, which is intrinsically
+        # mapped to the llvm `or` instruction.
+        # @let that: The right-hand side of the logical OR operation.
+        # @ret: The result of the logical OR operation between `self` and `that`.
+    }
 }
 
 sup Bool ext BitAnd {
+    # Use the `&` operator class.
+
     !inline
     !intrinsic(name="std.boolean.Bool.bit_and")
-    cmp fun bit_and(self, that: Self) -> Self { }
+    !versioned(base="1.0.0", new="1.0.0")
+    cmp fun bit_and(self, that: Self) -> Self {
+        # The `bit_and` method allows for `true & false` to be evaluated as `try.bit_and(false)`, which is intrinsically
+        # mapped to the llvm `and` instruction. Because a `Bool` is a single bit, the bitwise AND and logical AND
+        # operations are the same, but they are provided as separate methods to allow for better contextual usage.
+        # @let that: The right-hand side of the bitwise AND operation.
+        # @ret: The result of the bitwise AND operation between `self` and `that`.
+    }
 }
 
 sup Bool ext BitIor {
+    # Use the `|` operator class.
+
     !inline
     !intrinsic(name="std.boolean.Bool.bit_ior")
-    cmp fun bit_ior(self, that: Self) -> Self { }
+    !versioned(base="1.0.0", new="1.0.0")
+    cmp fun bit_ior(self, that: Self) -> Self {
+        # The `bit_ior` method allows for `true | false` to be evaluated as `try.bit_ior(false)`, which is intrinsically
+        # mapped to the llvm `or` instruction. Because a `Bool` is a single bit, the bitwise OR and logical OR
+        # operations are the same, but they are provided as separate methods to allow for better contextual usage.
+        # @let that: The right-hand side of the bitwise OR operation.
+        # @ret: The result of the bitwise OR operation between `self` and `that`.
+    }
 }
 
 sup Bool ext BitXor {
+    # Use the `^` operator class.
+
     !inline
     !intrinsic(name="std.boolean.Bool.bit_xor")
-    cmp fun bit_xor(self, that: Self) -> Self { }
+    !versioned(base="1.0.0", new="1.0.0")
+    cmp fun bit_xor(self, that: Self) -> Self {
+        # The `bit_xor` method allows for `true ^ false` to be evaluated as `try.bit_xor(false)`, which is intrinsically
+        # mapped to the llvm `xor` instruction. There is no equivalent logical XOR operator, so the bitwise XOR is the
+        # only way to perform an exclusive OR operation on `Bool` values.
+        # @let that: The right-hand side of the bitwise XOR operation.
+        # @ret: The result of the bitwise XOR operation between `self` and `that`.
+    }
 }
 
 sup Bool ext BitNot {
+    # Use the `~` operator class.
+
     !inline
     !intrinsic(name="std.boolean.Bool.bit_not")
-    cmp fun bit_not(self) -> Self { }
+    !versioned(base="1.0.0", new="1.0.0")
+    cmp fun bit_not(self) -> Self {
+        # The `bit_not` method allows for `true~` to be evaluated as `try.bit_not()`, which is intrinsically mapped to
+        # the llvm `not` instruction. Because a `Bool` is a single bit, the bitwise NOT and logical NOT operations are
+        # the same, but they are provided as separate methods to allow for better contextual usage.
+        # @ret: The result of the bitwise NOT operation on `self`.
+    }
 }
 
 sup Bool ext Eq {
+    # Use the `==` and `!=` operator class.
+
     !inline
     !intrinsic(name="std.boolean.Bool.eq")
-    fun eq(&self, that: &Self) -> Bool { }
+    !versioned(base="1.0.0", new="1.0.0")
+    fun eq(&self, that: &Self) -> Bool {
+        # The `eq` method allows for `true == false` to be evaluated as `try.eq(false)`, which is intrinsically mapped
+        # to the llvm `icmp eq` instruction.
+        # @let that: The right-hand side of the equality comparison.
+        # @ret: The result of the equality comparison between `self` and `that`.
+    }
 
     !inline
     !intrinsic(name="std.boolean.Bool.ne")
-    fun ne(&self, that: &Self) -> Bool { }
+    !versioned(base="1.0.0", new="1.0.0")
+    fun ne(&self, that: &Self) -> Bool {
+        # The `ne` method allows for `true != false` to be evaluated as `try.ne(false)`, which is intrinsically mapped
+        # to the llvm `icmp ne` instruction.
+        # @let that: The right-hand side of the inequality comparison.
+        # @ret: The result of the inequality comparison between `self` and `that`.
+    }
 }
 
 sup [cmp n: U32] Bool ext From[SizedIntegerSigned[n]] {
+    !versioned(base="1.0.0", new="1.0.0")
     fun from(that: SizedIntegerSigned[n]) -> Self {
         ret that > SizedIntegerSigned[n]::zero()
     }
 }
 
 sup [cmp n: U32] Bool ext From[SizedIntegerUnsigned[n]] {
+    !versioned(base="1.0.0", new="1.0.0")
     fun from(that: SizedIntegerUnsigned[n]) -> Self {
         ret that > SizedIntegerUnsigned[n]::zero()
     }
 }
 
 sup [cmp n: U32] Bool ext From[SizedFloatingPoint[n]] {
+    !versioned(base="1.0.0", new="1.0.0")
     fun from(that: SizedFloatingPoint[n]) -> Self {
         ret that > SizedFloatingPoint[n]::zero()
     }

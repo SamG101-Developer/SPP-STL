@@ -6,6 +6,7 @@ use std::number::S32
 
 !public cls Ord[Rhs=Self] { }
 
+# Allow the use of the ".ord(...)", "<", "<=", ">", ">=" operator.
 sup [Rhs] Ord[Rhs] {
     !public
     !abstract_method

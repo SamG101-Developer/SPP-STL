@@ -5,12 +5,14 @@ use std::void::Void
 !public cls BitShr[Rhs=Self, Ret=Self] { }
 !public cls BitShrAssign[Rhs=Self] { }
 
+# Allow the use of the ">>" operator.
 sup [Rhs, Ret] BitShr[Rhs, Ret] {
     !public
     !abstract_method
     fun bit_shr(self, that: Rhs) -> Ret { }
 }
 
+# Allow the use of the ">>=" operator.
 sup [Rhs] BitShrAssign[Rhs] {
     !public
     !abstract_method

@@ -1,0 +1,69 @@
+use std::number::U64
+use std::number::USize
+
+cls BitSet {
+    bits: Vec[U64]
+    len: USize
+}
+
+sup BitSet {
+    !public fun new() -> BitSet {
+        # Wrap Vec constructor, no additional logic.
+        ret BitSet()
+    }
+
+    !public fun new_with_capacity(capacity: USize) -> BitSet {
+        # Hook into Vec capacity calculation.
+        let num_u64 = (capacity + 63_uz) / 64_uz
+        ret BitSet(bits=Vec[U64]::new_with_capacity(num_u64), len=capacity)
+    }
+}
+
+sup BitSet {
+    !public fun set(&mut self, index: USize, value: Bool) -> Opt[Void] {
+        # Assert index is within bounds.
+        case index >= self.len { ret None() }
+
+        # Calculate word and bit positions.
+        let word = index / 64_uz
+        let bit = index % 64_uz
+        let mask = 1_u64 << bit
+
+        # Set or clear the bit using the mask.
+        case value of {
+            == true { self.bits[mut word] |= mask }
+            == false { self.bits[mut word] &= mask.bit_not() }
+        }
+
+        # Return the success indicator.
+        ret Some()
+    }
+
+    !public fun get(&self, index: USize) -> Opt[Bool] {
+        # Assert index is within bounds.
+        case index >= self.len { ret None() }
+
+        # Calculate word and bit positions.
+        let word = index / 64_uz
+        let bit = index % 64_uz
+
+        # Return the bit value (copy as Bool).
+        ret Some(val=(self.bits[word] >> bit) & 1_u64 == 1_u64)
+    }
+}
+
+sup BitSet {
+    !public fun append(&mut self, value: Bool) -> Void {
+        # Calculate the index for the new bit.
+        let index = self.len
+        self.len += 1_uz
+
+        # Ensure capacity in bits vector.
+        case (index % 64_uz) == 0_uz {
+            self.bits.append(0_u64)
+        }
+
+        # Set the new bit.
+        self.set(index, value)
+    }
+}

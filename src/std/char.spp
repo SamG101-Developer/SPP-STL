@@ -1,2 +1,46 @@
 !public
-cls Char { }
+cls Char {
+    # The `Char` type i a validated U32 equivalent to a Unicode scalar value. It represents a single Unicode character
+    # and is used to store and manipulate individual characters in strings. The `Char` type provides methods for
+    # encoding and decoding characters in different formats, such as UTF-8 and UTF-16, as well as methods for
+    # determining the properties of characters, such as their length in bytes when encoded in UTF-8. The `Char` type is
+    # an essential part of the standard library for working with text and strings in the programming language.
+}
+
+sup Char {
+    fun len_utf8(self) -> USize {
+        # Return the number of bytes that this character would take up in UTF-8 encoding. Fpr example, ASCII characters
+        # would return 1, while some Unicode characters might return 2, 3, or 4.
+        # @ret: The number of bytes in UTF-8 encoding for this character.
+
+        # Simple comparison against max characters representable
+        # in 1, 2, 3, or 4 bytes in UTF-8 encoding.
+        case self of {
+            <= 0x7F { 1 }
+            <= 0x7FF { 2 }
+            <= 0xFFFF { 3 }
+            else { 4 }
+        }
+    }
+
+    fun encode_utf16(&self, buffer: &mut View[U16]) -> USize {
+        # Encode this character into `UTF-16` and write it into the provided buffer. The buffer should have space for at
+        # least 2 `U16` values.
+        # @let buffer: A mutable reference to an array of 2 `U16` values where the `UTF-16` encoding will be written.
+        # @ret: The number of `U16` values written to the buffer (1 or 2).
+
+        # For chars that can be represented in a single UTF-16
+        # code unit, we can directly write the value.
+        case self <= 0xFFFF {
+            buffer[0] = U16::from(self)
+            ret 1
+        }
+
+        # For chars that require surrogate pairs, we need to
+        # calculate the high and low surrogates.
+        let code_point = self - 0x10000
+        buffer[mut 0]@ = U16::from((code_point >> 10) | 0xD800) # High surrogate
+        buffer[mut 1]@ = U16::from((code_point & 0x3FF) | 0xDC00) # Low surrogate
+        ret 2
+    }
+}

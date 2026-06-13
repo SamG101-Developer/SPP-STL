@@ -1,0 +1,84 @@
+use std::generator::Gen
+use std::generator::GenOnce
+use std::number::F64
+use std::number::U64
+use std::number::USize
+use std::range::Range
+use std::string_view::StrView
+use std::vector::Vec
+use std::void::Void
+
+
+!public
+fun set_seed(seed: U64) -> Void {
+    # Set the seed for the random number generator.
+    sppc::rng_seed(seed)
+}
+
+
+!public
+fun random_bytes(n: USize) -> Vec[U8] {
+    # Generate a vector of random bytes of the specified size.
+    let mut buffer = StrView()
+    sppc::rng_fill_bytes(&mut buffer, n)
+    ret Vec[U8]::from(buffer)
+}
+
+
+!public
+fun random_between(min: U64, max: U64) -> U64 {
+    # Generate a random number between min and max (inclusive).
+    let range = max - min + 1
+    let random_value = sppc::rng_next() % range
+    ret min + random_value
+}
+
+
+!public
+fun random_double() -> F64 {
+    # Generate a random floating-point number between 0.0 and 1.0.
+    ret sppc::rng_next_double()
+}
+
+
+!public
+fun random_u64() -> U64 {
+    # Generate a random 64-bit unsigned integer.
+    ret sppc::rng_next()
+}
+
+
+!public
+cor choice[T](options: Vec[T]) -> GenOnce[&T] {
+    # Randomly select an element from the provided vector of options.
+    let index = random_between(0, options.len() - 1)
+    gen options[index]
+}
+
+
+!public
+cor shuffle[T](items: &mut Vec[T]) -> Void {
+    # Randomly shuffle the elements of the provided vector (mutating in place).
+    let len = items.len()
+    loop i in Range::between(0, len) {
+        let j = random_between(i, len - 1)
+        items.swap(i, j)
+    }
+}
+
+
+!public
+cor sample[T](items: Vec[T], n: USize) -> Gen[&T] {
+    # Randomly sample n unique elements from the provided vector and yield them one by one.
+    let mut indices = Vec[USize]()
+    loop i in Range::between(0, items.len()) {
+        indices.push_back(i)
+    }
+
+    loop i in Range::between(0, n) {
+        let random_index = random_between(0, indices.len() - 1)
+        let item_index = indices[random_index]
+        gen items[item_index]
+        indices.pop(random_index)
+    }
+}

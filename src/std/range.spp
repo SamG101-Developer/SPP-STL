@@ -2,44 +2,24 @@ use std::annotations::public
 use std::boolean::Bool
 use std::generator::Gen
 
-
 # Todo: Constrain T to be a comparable type.
 !public
-cls Range[T] {
+cls Range[T: Ord] {
     !public start: T
     !public end: T
-    !public step: T
+    !public step: SSize
 }
 
-
-sup [T] Range[T] {
+sup [T: Ord] Range[T] {
     !public
-    fun step_by(self, step: T) -> Range[T] {
+    fun step_by(self, step: SSize) -> Range[T] {
         ret Range(start=self.start, end=self.end, step)
     }
 
     !public
     fun between(start: T, end: T) -> Range[T] {
-        ret Range(start=start, end=end)
+        ret Range(start, end)
     }
 }
 
-
-##
-sup [T] Range[T] {
-    !public
-    fun contains(&self, value: T) -> Bool {
-        ret
-            self.start <= value and value < self.end and
-            case self.step == 0 { value == self.start } else { (value - self.start) % self.step == 0 }
-    }
-
-    !public
-    fun is_empty(&self) -> Bool {
-        ret self.start >= self.end
-    }
-}
-##
-
-
-sup [T] Range[T] ext Gen[T] { }
+sup [T: Ord] Range[T] ext Gen[T] { }

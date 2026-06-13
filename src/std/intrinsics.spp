@@ -236,7 +236,6 @@ cmp fun uge[T: Num](this: &T, that: &T) -> Bool { }
 !intrinsic
 cmp fun oge[T: Num](this: &T, that: &T) -> Bool { }  # ordered greater than or equal (floats)
 
-
 !public
 !always_inline
 !intrinsic
@@ -246,7 +245,6 @@ cmp fun max_val[T: Integer]() -> T { }
 !always_inline
 !intrinsic
 cmp fun min_val[T: Integer]() -> T { }
-
 
 !public
 !always_inline
@@ -258,7 +256,6 @@ cmp fun smax[T: Integer](this: T, that: T) -> T { }
 !intrinsic
 cmp fun umax[T: Integer](this: T, that: T) -> T { }
 
-
 !public
 !always_inline
 !intrinsic
@@ -268,7 +265,6 @@ cmp fun smin[T: Integer](this: T, that: T) -> T { }
 !always_inline
 !intrinsic
 cmp fun umin[T: Integer](this: T, that: T) -> T { }
-
 
 !public
 !always_inline
@@ -285,24 +281,20 @@ cmp fun scmp[T: Integer](this: &T, that: &T) -> S32 { }
 !intrinsic
 cmp fun fcmp[T: FloatingPoint](this: &T, that: &T) -> S32 { }
 
-
 # !public
 # !always_inline
 # !intrinsic
 # fun mem_copy[T](dest: &mut Memory[T], src: &Memory[T], size: USize) -> Void { }
-
 
 # !public
 # !always_inline
 # !intrinsic
 # fun mem_move[T](dest: &mut Memory[T], src: &Memory[T], size: USize) -> Void { }
 
-
 # !public
 # !always_inline
 # !intrinsic
 # fun mem_set[T: Copy](dest: &mut Memory[T], value: T, size: USize) -> Void { }
-
 
 !public
 !always_inline
@@ -358,7 +350,6 @@ cmp fun float_rem_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
 !always_inline
 !intrinsic
 cmp fun float_neg[T: FloatingPoint](value: T) -> T { }
-
 
 !public
 !always_inline
@@ -505,7 +496,6 @@ cmp fun float_trunc[T: FloatingPoint](value: T) -> T { }
 !intrinsic
 cmp fun float_round[T: FloatingPoint](value: T) -> T { }
 
-
 !public
 !always_inline
 !intrinsic
@@ -515,7 +505,6 @@ fun bitreverse[T: Integer](value: T) -> T { }
 !always_inline
 !intrinsic
 fun ctlz[T: Integer](value: T) -> U32 { }
-
 
 !public
 !always_inline
@@ -527,7 +516,6 @@ fun sadd_overflow[T: Integer](this: T, that: T) -> (T, Bool) { }
 !intrinsic
 fun uadd_overflow[T: Integer](this: T, that: T) -> (T, Bool) { }
 
-
 !public
 !always_inline
 !intrinsic
@@ -537,7 +525,6 @@ fun ssub_overflow[T: Integer](this: T, that: T) -> (T, Bool) { }
 !always_inline
 !intrinsic
 fun usub_overflow[T: Integer](this: T, that: T) -> (T, Bool) { }
-
 
 !public
 !always_inline
@@ -549,7 +536,6 @@ fun smul_overflow[T: Integer](this: T, that: T) -> (T, Bool) { }
 !intrinsic
 fun umul_overflow[T: Integer](this: T, that: T) -> (T, Bool) { }
 
-
 !public
 !always_inline
 !intrinsic
@@ -559,7 +545,6 @@ fun sadd_saturating[T: Integer](this: T, that: T) -> T { }
 !always_inline
 !intrinsic
 fun uadd_saturating[T: Integer](this: T, that: T) -> T { }
-
 
 !public
 !always_inline
@@ -571,7 +556,6 @@ fun ssub_saturating[T: Integer](this: T, that: T) -> T { }
 !intrinsic
 fun usub_saturating[T: Integer](this: T, that: T) -> T { }
 
-
 !public
 !always_inline
 !intrinsic
@@ -581,7 +565,6 @@ fun uadd_wrapping[T: Integer](this: T, that: T) -> T { }
 !always_inline
 !intrinsic
 fun sadd_wrapping[T: Integer](this: T, that: T) -> T { }
-
 
 !public
 !always_inline
@@ -593,7 +576,6 @@ fun usub_wrapping[T: Integer](this: T, that: T) -> T { }
 !intrinsic
 fun ssub_wrapping[T: Integer](this: T, that: T) -> T { }
 
-
 !public
 !always_inline
 !intrinsic
@@ -604,7 +586,6 @@ fun umul_wrapping[T: Integer](this: T, that: T) -> T { }
 !intrinsic
 fun smul_wrapping[T: Integer](this: T, that: T) -> T { }
 
-
 !public
 !always_inline
 !intrinsic
@@ -614,7 +595,6 @@ fun sshl_saturating[T: Integer](this: T, that: T) -> T { }
 !always_inline
 !intrinsic
 fun ushl_saturating[T: Integer](this: T, that: T) -> T { }
-
 
 !public
 !always_inline
@@ -671,108 +651,10 @@ fun fptosi[cmp this_w: U32, cmp that_w: U32](value: SizedFloatingPoint[that_w]) 
 !intrinsic
 fun fptoui[cmp this_w: U32, cmp that_w: U32](value: SizedFloatingPoint[that_w]) -> SizedIntegerUnsigned[this_w] { }
 
-
 !public
 !always_inline
 !intrinsic
 fun fpclass[T: FloatingPoint](value: T, flag: S32) -> Bool { }
-
-
-!public
-!always_inline
-!intrinsic
-fun atomic_fence(order: U8) -> Void { }
-
-!public
-!always_inline
-!intrinsic
-fun atomic_test_and_set(dest: &Bool, order: U8) -> Bool { }
-
-!public
-!always_inline
-!intrinsic
-fun atomic_fetch_add[T: Integer](dest: &T, val: T, order: U8) -> T { }
-
-!public
-!always_inline
-!intrinsic
-fun atomic_fetch_sub[T: Integer](dest: &T, val: T, order: U8) -> T { }
-
-!public
-!always_inline
-!intrinsic
-fun atomic_fetch_neg[T: Integer](dest: &T, order: U8) -> T { }
-
-!public
-!always_inline
-!intrinsic
-fun atomic_fetch_abs[T: Integer](dest: &T, order: U8) -> T { }
-
-!public
-!always_inline
-!intrinsic
-fun atomic_fetch_min[T: Integer](dest: &T, val: T, order: U8) -> T { }
-
-!public
-!always_inline
-!intrinsic
-fun atomic_fetch_max[T: Integer](dest: &T, val: T, order: U8) -> T { }
-
-!public
-!always_inline
-!intrinsic
-fun atomic_fetch_clamp[T: Integer](dest: &T, val: T, order: U8) -> T { }
-
-!public
-!always_inline
-!intrinsic
-fun atomic_fetch_and[T: Integral](dest: &T, val: T, order: U8) -> T { }
-
-!public
-!always_inline
-!intrinsic
-fun atomic_fetch_or[T: Integral](dest: &T, val: T, order: U8) -> T { }
-
-!public
-!always_inline
-!intrinsic
-fun atomic_fetch_xor[T: Integral](dest: &T, val: T, order: U8) -> T { }
-
-!public
-!always_inline
-!intrinsic
-fun atomic_fetch_nand[T: Integral](dest: &T, val: T, order: U8) -> T { }
-
-!public
-!always_inline
-!intrinsic
-fun atomic_load[T: Integral](src: &T, order: U8) -> T { }
-
-!public
-!always_inline
-!intrinsic
-fun atomic_store[T: Integral](dest: &T, val: T, order: U8) -> Void { }
-
-!public
-!always_inline
-!intrinsic
-fun atomic_swap[T: Integral](dest: &T, val: T, order: U8) -> T { }
-
-!public
-!always_inline
-!intrinsic
-fun atomic_compare_exchange[T: Integral](dest: &T, expected: &T, desired: T, success_order: U8, failure_order: U8) -> (T, Bool) { }
-
-!public
-!always_inline
-!intrinsic
-fun atomic_compare_exchange_weak[T: Integral](dest: &T, expected: &T, desired: T, success_order: U8, failure_order: U8) -> (T, Bool) { }
-
-!public
-!always_inline
-!intrinsic
-fun atomic_exchange[T: Integral](dest: &T, val: T, order: U8) -> T { }
-
 
 !public
 !always_inline
