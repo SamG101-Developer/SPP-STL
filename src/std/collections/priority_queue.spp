@@ -1,4 +1,0 @@
-cls PriorityQueue[T] {
-    buf: Vec[T]
-    compare: FunRef[(&T, &T), Bool]
-}
