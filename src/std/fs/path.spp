@@ -1,3 +1,17 @@
+use std::anotations::public
+use std::anotations::versioned
+use std::anotations::zero_type
+use std::boolean::Bool
+use std::char::Char
+use std::number::USize
+use std::number::S32
+use std::result::Fail
+use std::result::Pass
+use std::result::Res
+use std::string::Str
+use std::vector::Vec
+use std::void::Void
+
 !public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
 cls PathNotFoundErr {
@@ -40,7 +54,11 @@ cls PathOtherErr {
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-type PathErr = PathNotFoundErr or PathPermissionErr or PathLoopErr or PathNameTooLongErr or PathOtherErr
+type PathErr = PathNotFoundErr
+    or PathPermissionErr
+    or PathLoopErr
+    or PathNameTooLongErr
+    or PathOtherErr
 
 sup PathErr {
     fun from_errno(errno: S32) -> Self {
@@ -368,8 +386,8 @@ sup Path {
     !versioned(base="1.0.0", new="1.0.0")
     fun rename_to(&self, new_path: &Path) -> Res[Void, PathErr] {
         # The `rename_to` method attempts to rename the file or directory at the current path to a new path. If the
-        # current path does not exist, the new path already exists, or the operation fails for any reason, an error
-        # will be returned.
+        # current path does not exist, the new path already exists, or the operation fails for any reason, an error will
+        # be returned.
         # @param new_path: The new path to rename to.
         # @ret: A `Res` type containing `Pass()` if the rename is successful, or an error message if the operation
         # fails.
