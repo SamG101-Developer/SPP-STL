@@ -496,19 +496,19 @@ sup [cmp w: U32] SizedIntegerSigned[w] {
     fun isqrt_checked(self) -> Opt[Self] {
         case self < Self::zero() { ret None }
         let mut op = self
-        let mut res = Self::zero()
+        let mut out = Self::zero()
         let mut bit = Self::one() << (w - 2_u32)
         loop bit > op {
             bit >>= 2_u32
         }
-        while bit != Self::zero() {
-            case op >= res + bit {
-                op -= res + bit
-                res += bit << 1_u32
+        loop bit != Self::zero() {
+            case op >= out + bit {
+                op -= out + bit
+                out += bit << 1_u32
             }
-            res >>= 1_u32
+            out >>= 1_u32
             bit >>= 2_u32
         }
-        ret Some(val=res)
+        ret Some(val=out)
     }
 }
