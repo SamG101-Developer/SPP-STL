@@ -99,4 +99,4 @@ sup [T, cmp n: USize] Arr[T, n] ext FwdRef[View[T]] {
     cor fwd_ref(&self) -> GenOnce[&View[T]] { }
 }
 
-type HeapArr[T, cmp n: USize, A: Alloc] = Single[Arr[T, n], A]
+# type HeapArr[T, cmp n: USize, A: Alloc] = Single[Arr[T, n], A]
