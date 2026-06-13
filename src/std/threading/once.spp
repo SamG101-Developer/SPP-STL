@@ -1,8 +1,12 @@
-use std::memory::ptr::NonNull
+use std::mem::ptr::NonNull
 use std::void::Void
 
-fun call_once(func: FunMov[(), Void]) -> Void {
-    # Call the function once using the sppc threading API.
+fun call_once[F: FunMov[(), Void]](func: F) -> Void {
+    # Calls a function once, and only once. This is typically used for initializing global state, and is thread-safe.
+    # @type F: The type of the function being called. This must be a function type that takes no arguments and returns
+    # `Void`.
+    # @let func: The function being called. This is a value of type `F.
+
     let func_ptr = NonNull[U8]::from_func(func)
     sppc2::call_once(func_ptr)
 }
