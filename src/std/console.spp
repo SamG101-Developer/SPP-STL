@@ -1,12 +1,12 @@
 use std::annotations::public
 use std::annotations::private
+use std::io::Read
+use std::io::StreamErr
 use std::number::U8
 use std::number::USize
 use std::result::Res
 use std::result::Fail
 use std::result::Pass
-use std::streams::Read
-use std::streams::StreamErr
 use std::view::View
 
 !package
