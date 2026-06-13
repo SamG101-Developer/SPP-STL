@@ -1,3 +1,6 @@
+use std::net::socket::Socket
+use std::net::socket::SockAddr
+
 cls UdpSocket {
     # The `UdpSocket` class represents a UDP socket, which is a connectionless protocol used for sending and receiving
     # datagrams. It provides methods for sending and receiving data, as well as configuring socket options such as
