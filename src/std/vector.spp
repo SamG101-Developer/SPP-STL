@@ -9,6 +9,7 @@ use std::boolean::Bool
 use std::clone::Clone
 use std::function::FunMov
 use std::function::FunMut
+use std::generator::Gen
 use std::iterator::Indexed
 use std::iterator::Iterator
 use std::number::USize
