@@ -1,5 +1,6 @@
-use std::mem::pointer::NonNull
+use std::function::FunMov
 use std::void::Void
+use std::mem::pointer::NonNull
 
 fun call_once[F: FunMov[(), Void]](func: F) -> Void {
     # Calls a function once, and only once. This is typically used for initializing global state, and is thread-safe.
