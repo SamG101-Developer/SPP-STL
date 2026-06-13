@@ -1,5 +1,13 @@
+use sppc::CTimeSpec
 use std::net::socket::Socket
 use std::net::socket::SockAddr
+use std::boolean::Bool
+use std::number::USize
+use std::result::Fail
+use std::result::Pass
+use std::result::Res
+use std::void::Void
+use std::time::duration::Duration
 
 cls UdpSocket {
     # The `UdpSocket` class represents a UDP socket, which is a connectionless protocol used for sending and receiving
