@@ -280,7 +280,7 @@ sup GlobalAlloc ext Alloc {
         # successful, the `Res` will contain a `NonNull` pointer to the allocated memory block. The `malloc` can fail if
         # the system is out of memory, in which case it returns a null pointer.
 
-        let raw_ptr = sppc2::malloc(layout.size)
+        let raw_ptr = sppc::malloc(layout.size)
         let ptr = NonNull[U8]::from_ptr(raw_ptr).map_err((e: NullptrErr) AllocOomErr)?
         ret Pass(val=ptr)
     }
@@ -298,7 +298,7 @@ sup GlobalAlloc ext Alloc {
         # result. The caller is responsible for ensuring that the pointer passed to this method was previously allocated
         # by the same allocator,
 
-        sppc2::free(ptr)
+        sppc::free(ptr)
     }
 
     !versioned(base="1.0.0", new="1.0.0")
@@ -315,7 +315,7 @@ sup GlobalAlloc ext Alloc {
         # successful, the `Res` will contain a `NonNull` pointer to the allocated and zeroed memory block. The `calloc`
         # can fail if the system is out of memory, in which case it returns a null pointer.
 
-        let raw_ptr = sppc2::calloc(1_uz, layout.size)
+        let raw_ptr = sppc::calloc(1_uz, layout.size)
         let ptr = NonNull[U8]::from_ptr(raw_ptr).map_err((e: NullptrErr) AllocOomErr)?
         ret Pass(val=ptr)
     }
@@ -336,7 +336,7 @@ sup GlobalAlloc ext Alloc {
         # block. The size is passed into the `realloc` function to indicate how much memory is needed for the new block.
         # @ret: A `Res` type that indicates whether the reallocation was successful or if it failed with an `AllocErr`.
 
-        let new_raw_ptr = sppc2::realloc(&mut old_ptr, new_layout.size)
+        let new_raw_ptr = sppc::realloc(&mut old_ptr, new_layout.size)
         let new_ptr = NonNull[U8]::from_ptr(new_raw_ptr).map_err((e: NullptrErr) AllocOomErr)?
         self.deallocate(old_ptr)
         ret Pass(val=new_ptr)

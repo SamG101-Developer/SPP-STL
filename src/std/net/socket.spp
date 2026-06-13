@@ -23,7 +23,7 @@ sup Socket {
         # non-blocking mode. If false, the socket will be set to blocking mode.
         # @ret: A result indicating whether the operation was successful or not.
 
-        let err = sppc2::set_nonblocking(self.fd, yes)
+        let err = sppc::set_nonblocking(self.fd, yes)
         case err == 0 { ret SockErr::from_errno(err) }
         ret Pass[Void]()
     }
@@ -38,7 +38,7 @@ sup Socket {
         # take before it is discarded.
         # @ret: A result indicating whether the operation was successful or not.
 
-        let err = sppc2::set_ttl(self.fd, ttl)
+        let err = sppc::set_ttl(self.fd, ttl)
         case err == 0 { ret SockErr::from_errno(err) }
         ret Pass[Void]()
     }
@@ -53,7 +53,7 @@ sup Socket {
         # error.
 
         let ttl = 0
-        let err = sppc2::get_ttl(self.fd, &mut ttl)
+        let err = sppc::get_ttl(self.fd, &mut ttl)
         case err < 0 { ret Fail(err=SockErr::from_errno(ttl)) }
         ret Pass(val=ttl)
     }

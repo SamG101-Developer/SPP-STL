@@ -36,7 +36,7 @@ cls ThreadErr {
 fun spawn[Out](function: FunMut[(), Out]) -> Res[JoinHandle[Out], ThreadErr] {
     # Spawn a new thread using the sppc threading API.
     let mut handle = 0_uz
-    let err = sppc2::thread_spawn(function, &mut handle)
+    let err = sppc::thread_spawn(function, &mut handle)
     case err != 0 { ret Fail(err=ThreadErr(msg="Failed to spawn thread")) }
     ret Pass(val=JoinHandle[Out](handle))
 }
@@ -46,14 +46,14 @@ fun current() -> ThreadId {
     # Get the current thread using the sppc threading API.
     # Todo: use a ThreadId type for equality check.
     let mut handle = 0_u64
-    sppc2::thread_current(&mut handle)
+    sppc::thread_current(&mut handle)
     ret ThreadId(handle)
 }
 
 !public
 fun yield_now() -> Void {
     # Yield the current thread using the sppc threading API.
-    sppc2::thread_yield()
+    sppc::thread_yield()
 }
 
 
@@ -61,7 +61,7 @@ sup [R] JoinHandle[R] {
     !public
     fun detach(self) -> Res[Void, ThreadErr] {
         # Detach the thread using the sppc threading API.
-        let err = sppc2::thread_detach(self.handle)
+        let err = sppc::thread_detach(self.handle)
         case err != 0 { ret Fail(err=ThreadErr(msg="Failed to detach thread")) }
         ret Pass[Void]()
     }
@@ -69,7 +69,7 @@ sup [R] JoinHandle[R] {
     !public
     fun join(self) -> Res[R, ThreadErr] {
         # Join the thread using the sppc threading API.
-        let err = sppc2::thread_join(self.handle)
+        let err = sppc::thread_join(self.handle)
         case err != 0 { ret Fail(err=ThreadErr(msg="Failed to join thread")) }
         ret Pass(val=R()) # Todo: get the value, maybe + transmute?
     }
@@ -79,7 +79,7 @@ sup [R] JoinHandle[R] {
 sup [R] JoinHandle[R] ext Eq {
     fun eq(&self, that: &Self) -> Bool {
         # Compare thread IDs for equality.
-        let err = sppc2::thread_equal(self.handle, that.handle)
+        let err = sppc::thread_equal(self.handle, that.handle)
         ret err != 0
     }
 }
@@ -88,6 +88,6 @@ sup [R] JoinHandle[R] ext Eq {
 sup [R] JoinHandle[R] ext Del {
     fun del(&mut self) -> Void {
         # Ensure the thread is detached before deletion.
-        sppc2::thread_detach(self.handle)
+        sppc::thread_detach(self.handle)
     }
 }

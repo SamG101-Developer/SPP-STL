@@ -20,12 +20,12 @@ sup TcpListener {
         # @ret: A result containing the bound TcpListener if successful, or a SockErr if there was an error.
 
         # Create the file descriptor from the address.
-        let fd = sppc2::socket(addr.ip().family(), SocketType::stream, 0)
+        let fd = sppc::socket(addr.ip().family(), SocketType::stream, 0)
         case fd < 0 { ret Fail(err=SockErr::from_errno(fd)) }
 
         # Create the `TcpListener` object with the file descriptor.
         let listener = TcpListener(fd)
-        let err = sppc2::bind(listener.fd, addr.ip().family(), addr.ip(), addr.port())
+        let err = sppc::bind(listener.fd, addr.ip().family(), addr.ip(), addr.port())
         case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
 
         # Bind information to this socket.
@@ -46,7 +46,7 @@ sup TcpListener {
 
         # Call the `listen` function from the `sppc2` module to
         # put the socket into listening mode.
-        let err = sppc2::listen(self.fd, backlog)
+        let err = sppc::listen(self.fd, backlog)
         case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass[Void]()
     }
@@ -65,7 +65,7 @@ sup TcpListener {
         # to accept an incoming connection.
         let new_fd = 0
         let addr: SockAddr = case self.local.ip().family() == constants::af_inet { SocV4Addr() } else { SockV6Addr() }
-        let err = sppc2::accept(self.fd, af, &mut self.addr.ip(), &mut self.addr.port(), &mut new_fd)
+        let err = sppc::accept(self.fd, af, &mut self.addr.ip(), &mut self.addr.port(), &mut new_fd)
         case new_fd < 0 { ret Fail(err=SockErr::from_errno(fd)) }
 
         # Create a new `TcpStream` object with the accepted
@@ -89,12 +89,12 @@ sup TcpStream {
         # @ret: A result containing the connected `TcpStream` if successful, or a `SockErr` if there was an error.
 
         # Create the file descriptor from the address.
-        let fd = sppc2::socket(addr.ip().family(), SocketType::stream, 0)
+        let fd = sppc::socket(addr.ip().family(), SocketType::stream, 0)
         case fd < 0 { ret Fail(err=SockErr::from_errno(fd)) }
 
         # Create the `TcpStream` object with the file descriptor.
         let stream = TcpStream(fd)
-        let err = sppc2::connect(stream.fd, addr.ip().family(), addr.ip(), addr.port())
+        let err = sppc::connect(stream.fd, addr.ip().family(), addr.ip(), addr.port())
         case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(stream)
     }
@@ -108,7 +108,7 @@ sup TcpStream {
         # @let how: The way to shut down the socket.
         # @ret: A result indicating whether the operation was successful or not.
 
-        let err = sppc2::shutdown(self.fd, how)
+        let err = sppc::shutdown(self.fd, how)
         case err == 0 { ret SockErr::from_errno(err) }
         ret Pass[Void]()
     }
@@ -123,7 +123,7 @@ sup TcpStream {
         # false, the socket will not be set to keep alive.
         # @ret: A result indicating whether the operation was successful or not.
 
-        let err = sppc2::set_keepalive(self.fd, yes)
+        let err = sppc::set_keepalive(self.fd, yes)
         case err == 0 { ret SockErr::from_errno(err) }
         ret Pass[Void]()
     }
@@ -137,7 +137,7 @@ sup TcpStream {
         # or a `SockErr` if there was an error.
 
         let yes = 0
-        let err = sppc2::get_keepalive(self.fd, &mut yes)
+        let err = sppc::get_keepalive(self.fd, &mut yes)
         case err < 0 { ret Fail(err=SockErr::from_errno(yes)) }
         ret Pass(val=yes != 0)
     }
@@ -153,7 +153,7 @@ sup TcpStream {
         # `Some(val=duration)`, then the socket will linger for the specified duration before closing the connection.
         # @ret: A result indicating whether the operation was successful or not.
 
-        let err = sppc2::set_linger(self.fd, timeout.is_some(), timeout.unwrap_or_default())
+        let err = sppc::set_linger(self.fd, timeout.is_some(), timeout.unwrap_or_default())
         case err == 0 { ret SockErr::from_errno(err) }
         ret Pass[Void]()
     }
@@ -171,7 +171,7 @@ sup TcpStream {
 
         let mut yes = 0
         let mut timeout = Duration()
-        let err = sppc2::get_linger(self.fd, &mut yes, &mut timeout)
+        let err = sppc::get_linger(self.fd, &mut yes, &mut timeout)
         case err < 0 { ret Fail(err=SockErr::from_errno(yes)) }
         ret Pass(val=case yes { Some(val=timeout) } else { None })
     }
@@ -186,7 +186,7 @@ sup TcpStream {
         # the socket will not be set to no delay.
         # @ret: A result indicating whether the operation was successful or not.
 
-        let err = sppc2::set_nodelay(self.fd, yes)
+        let err = sppc::set_nodelay(self.fd, yes)
         case err == 0 { ret SockErr::from_errno(err) }
         ret Pass[Void]()
     }
@@ -201,7 +201,7 @@ sup TcpStream {
         # a `SockErr` if there was an error.
 
         let yes = 0
-        let err = sppc2::get_nodelay(self.fd, &mut yes)
+        let err = sppc::get_nodelay(self.fd, &mut yes)
         case err < 0 { ret Fail(err=SockErr::from_errno(yes)) }
         ret Pass(val=yes != 0)
     }
@@ -217,7 +217,7 @@ sup TcpStream {
         # @ret: A result indicating whether the operation was successful or not.
 
         let timespec = CTimeSpec(sec=timeout.seconds, nsec=timeout.nanoseconds)
-        let err = sppc2::set_recv_timeout(self.fd, &timespec)
+        let err = sppc::set_recv_timeout(self.fd, &timespec)
         case err == 0 { ret SockErr::from_errno(err) }
         ret Pass[Void]()
     }
@@ -232,7 +232,7 @@ sup TcpStream {
         # error.
 
         let mut timespec = CTimeSpec()
-        let err = sppc2::get_recv_timeout(self.fd, &mut timespec)
+        let err = sppc::get_recv_timeout(self.fd, &mut timespec)
         case err < 0 { ret Fail(err=SockErr::from_errno(timespec)) }
         ret Pass(val=Duration(seconds=timespec.sec, nanoseconds=timespec.nsec))
     }
@@ -248,7 +248,7 @@ sup TcpStream {
         # @ret: A result indicating whether the operation was successful or not.
 
         let timespec = CTimeSpec(sec=timeout.seconds, nsec=timeout.nanoseconds)
-        let err = sppc2::set_send_timeout(self.fd, &timespec)
+        let err = sppc::set_send_timeout(self.fd, &timespec)
         case err == 0 { ret SockErr::from_errno(err) }
         ret Pass[Void]()
     }
@@ -262,7 +262,7 @@ sup TcpStream {
         # @ret: A result containing the send timeout for the socket if successful, or a `SockErr` if there was an error.
 
         let mut timespec = CTimeSpec()
-        let err = sppc2::get_send_timeout(self.fd, &mut timespec)
+        let err = sppc::get_send_timeout(self.fd, &mut timespec)
         case err < 0 { ret Fail(err=SockErr::from_errno(timespec)) }
         ret Pass(val=Duration(seconds=timespec.sec, nanoseconds=timespec.nsec))
     }
@@ -275,7 +275,7 @@ sup TcpStream {
         # @ret: A result containing the remote `SockAddr` if successful, or a `SockErr` if there was an error.
 
         let mut addr = SockAddr()
-        let err = sppc2::get_peer_addr(self.fd, &mut addr.ip(), &mut addr.port())
+        let err = sppc::get_peer_addr(self.fd, &mut addr.ip(), &mut addr.port())
         case err < 0 { ret Fail(err=SockErr::from_errno(addr)) }
         ret Pass(addr)
     }
@@ -283,7 +283,7 @@ sup TcpStream {
 
 sup TcpStream ext Read {
     fun read(&mut self, buf: &mut View[U8]) -> Res[USize, StreamErr] {
-        # The `read` method reads data from the socket into the provided buffer. It uses the sppc2::recv function to
+        # The `read` method reads data from the socket into the provided buffer. It uses the sppc::recv function to
         # perform the read operation, which allows it to handle both IPv4 and IPv6 addresses seamlessly. The method
         # returns a `Res` type that indicates success or failure. On success, it returns the number of bytes read.
         # @let buf: A mutable reference to a buffer where the read data will be stored. The buffer should be large
@@ -295,14 +295,14 @@ sup TcpStream ext Read {
         # Use the kernel "recv" function to read data from the
         # socket, into the provided buffer.
         let mut bytes_read: USize = 0
-        let err = sppc2::recv(self.fd, &mut buf.pointer, buf.size(), self.local.ip(), self.local.port(), &mut bytes_read)
+        let err = sppc::recv(self.fd, &mut buf.pointer, buf.size(), self.local.ip(), self.local.port(), &mut bytes_read)
         case err == 0 { ret Pass(val=bytes_read) } else { ret Fail(err=SocketErr::from_errno(err)) }
     }
 }
 
 sup TcpStream ext Write {
     fun write(&mut self, buf: &View[U8]) -> Res[USize, StreamErr] {
-        # The `write` method writes data from the provided buffer to the socket. It uses the sppc2::send function to
+        # The `write` method writes data from the provided buffer to the socket. It uses the sppc::send function to
         # perform the write operation, which allows it to handle both IPv4 and IPv6 addresses seamlessly. The method
         # returns a `Res` type that indicates success or failure. On success, it returns the number of bytes written.
         # @let buf: A reference to a buffer containing the data to be written to the socket. The buffer should contain
@@ -317,7 +317,7 @@ sup TcpStream ext Write {
         # Use the kernel "send" function to write data to the
         # socket, from the provided buffer.
         let mut bytes_written: USize = 0
-        let err = sppc2::send(self.fd, &buf.pointer, buf.length(), 0, &mut bytes_written)
+        let err = sppc::send(self.fd, &buf.pointer, buf.length(), 0, &mut bytes_written)
         case err == 0 { ret Pass(val=bytes_written) } else { ret Fail(err=SocketErr::from_errno(err)) }
     }
 

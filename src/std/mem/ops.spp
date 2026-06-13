@@ -70,7 +70,7 @@ fun mem_set[T](dest: &mut NonNull[T], value: U8, n: USize, dest_index: USize = 0
     # @let ?dest_index: An optional index to start writing at, in bytes. This is typically used for writing to an offset
     # within a value, such as an array.
 
-    sppc2::memset(dest, value, n, dest_index)
+    sppc::memset(dest, value, n, dest_index)
 }
 
 !package !inline
@@ -86,7 +86,7 @@ fun mem_copy[T](dest: &mut T, src: &T, n: USize, dest_index: USize = 0_uz, src_i
     # @let ?dest_index: An optional index to start writing at, in bytes.
     # @let ?src_index: An optional index to start reading from, in bytes.
 
-    sppc2::memcpy(dest, src, n, dest_index, src_index)
+    sppc::memcpy(dest, src, n, dest_index, src_index)
 }
 
 !public

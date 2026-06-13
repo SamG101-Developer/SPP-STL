@@ -26,7 +26,7 @@ sup TimePoint {
         # @ret:
 
         let time_now = CTimeSpec()
-        let err = sppc2::clock_gettime(clock, &mut time_now)
+        let err = sppc::clock_gettime(clock, &mut time_now)
         case err != 0 { ret Fail(err=TimeErr) }
         ret TimePoint::from_c_timespec(time_now)
     }

@@ -25,7 +25,7 @@ sup UdpSocket {
         # operation fails.
 
         let bytes_sent = 0_uz
-        let err = sppc2::send_to(self.fd, buf, buf.len(), addr.ip().family(), addr.ip(), addr.port(), &mut bytes_sent)
+        let err = sppc::send_to(self.fd, buf, buf.len(), addr.ip().family(), addr.ip(), addr.port(), &mut bytes_sent)
         case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(val=bytes_sent)
     }
@@ -42,7 +42,7 @@ sup UdpSocket {
 
         let bytes_received = 0_uz
         let mut addr: SockAddr = case self.local.ip().family() == af_inet { SockV4Addr() } else { SockV6Addr() }
-        let err = sppc2::recv_from(self.fd, buf, buf.len(), &mut addr.ip(), &mut addr.port(), &mut bytes_received)
+        let err = sppc::recv_from(self.fd, buf, buf.len(), &mut addr.ip(), &mut addr.port(), &mut bytes_received)
         case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(val=(bytes_received, SockAddr::V4(addr)))
     }
@@ -57,7 +57,7 @@ sup UdpSocket {
         # broadcast messages. If false, the socket will not be able to send broadcast messages.
         # @ret: A result indicating whether the operation was successful or not.
 
-        let err = sppc2::set_broadcast(self.fd, yes)
+        let err = sppc::set_broadcast(self.fd, yes)
         case err == 0 { ret Pass[Void]() }
         ret Fail(err=SockErr::from_errno(err))
     }
@@ -71,7 +71,7 @@ sup UdpSocket {
         # successful, or a `SockErr` if there was an error.
 
         let mut yes = 0
-        let err = sppc2::get_broadcast(self.fd, &mut yes)
+        let err = sppc::get_broadcast(self.fd, &mut yes)
         case err < 0 { ret Fail(err=SockErr::from_errno(yes)) }
         ret Pass(val=yes != 0)
     }
@@ -87,7 +87,7 @@ sup UdpSocket {
         # @ret: A result indicating whether the operation was successful or not.
 
         let timespec = CTimeSpec(sec=timeout.seconds, nsec=timeout.nanoseconds)
-        let err = sppc2::set_recv_timeout(self.fd, &timespec)
+        let err = sppc::set_recv_timeout(self.fd, &timespec)
         case err == 0 { ret SockErr::from_errno(err) }
         ret Pass[Void]()
     }
@@ -102,7 +102,7 @@ sup UdpSocket {
         # error.
 
         let mut timespec = CTimeSpec()
-        let err = sppc2::get_recv_timeout(self.fd, &mut timespec)
+        let err = sppc::get_recv_timeout(self.fd, &mut timespec)
         case err < 0 { ret Fail(err=SockErr::from_errno(timespec)) }
         ret Pass(val=Duration(seconds=timespec.sec, nanoseconds=timespec.nsec))
     }
@@ -118,7 +118,7 @@ sup UdpSocket {
         # @ret: A result indicating whether the operation was successful or not.
 
         let timespec = CTimeSpec(sec=timeout.seconds, nsec=timeout.nanoseconds)
-        let err = sppc2::set_send_timeout(self.fd, &timespec)
+        let err = sppc::set_send_timeout(self.fd, &timespec)
         case err == 0 { ret SockErr::from_errno(err) }
         ret Pass[Void]()
     }
@@ -132,7 +132,7 @@ sup UdpSocket {
         # @ret: A result containing the send timeout for the socket if successful, or a `SockErr` if there was an error.
 
         let mut timespec = CTimeSpec()
-        let err = sppc2::get_send_timeout(self.fd, &mut timespec)
+        let err = sppc::get_send_timeout(self.fd, &mut timespec)
         case err < 0 { ret Fail(err=SockErr::from_errno(timespec)) }
         ret Pass(val=Duration(seconds=timespec.sec, nanoseconds=timespec.nsec))
     }

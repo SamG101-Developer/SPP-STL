@@ -20,21 +20,21 @@ sup RwLock[T] {
     fun new(val: T) -> RwLock {
         # Create a new rwlock using the sppc threading API.
         let mut handle = 0_u64
-        sppc2::pthread_rwlock_init(&mut handle)
+        sppc::pthread_rwlock_init(&mut handle)
         ret RwLock(handle, Slot[T]::new(val))
     }
 
     !public
     cor read(&self) -> GenOnce[&T] {
         # Lock the rwlock for reading using the sppc threading API.
-        sppc2::pthread_rwlock_rdlock(&self.handle)
+        sppc::pthread_rwlock_rdlock(&self.handle)
         gen self.val.get_ref()
     }
 
     !public
     cor write(&self) -> GenOnce[&mut T] {
         # Lock the rwlock for writing using the sppc threading API.
-        sppc2::pthread_rwlock_wrlock(&self.handle)
+        sppc::pthread_rwlock_wrlock(&self.handle)
         gen self.val.get_mut()
     }
 
@@ -42,7 +42,7 @@ sup RwLock[T] {
     cor timed_read(&self, timeout: Duration) -> GenOnce[&T] {
         # Timed lock the rwlock for reading using the sppc threadinging API.
         let timespec = CTimeSpec(sec=timeout.seconds, nsec=timeout.nanoseconds)
-        sppc2::pthread_rwlock_timedrdlock(&self.handle, &timespec)
+        sppc::pthread_rwlock_timedrdlock(&self.handle, &timespec)
         gen self.val.get_ref()
     }
 
@@ -50,14 +50,14 @@ sup RwLock[T] {
     cor timed_write(&self, timeout: Duration) -> GenOnce[&mut T] {
         # Timed lock the rwlock for writing using the sppc threading API.
         let timespec = CTimeSpec(sec=timeout.seconds, nsec=timeout.nanoseconds)
-        sppc2::pthread_rwlock_timedwrlock(&self.handle, &timespec)
+        sppc::pthread_rwlock_timedwrlock(&self.handle, &timespec)
         gen self.val.get_mut()
     }
 
     !public
     cor try_write(&self) -> GenOnce[&mut T or WouldBlock] {
         # Try to lock the rwlock for writing using the sppc threading API.
-        let code = sppc2::pthread_rwlock_trywrlock(&self.handle)
+        let code = sppc::pthread_rwlock_trywrlock(&self.handle)
         case code == 1 { ret gen WouldBlock() }
         gen self.val.get_mut()
     }
@@ -65,7 +65,7 @@ sup RwLock[T] {
     !public
     cor try_read(&self) -> GenOnce[&T or WouldBlock] {
         # Try to lock the rwlock for reading using the sppc threading API.
-        let code = sppc2::pthread_rwlock_tryrdlock(&self.handle)
+        let code = sppc::pthread_rwlock_tryrdlock(&self.handle)
         case code == 1 { ret gen WouldBlock() }
         gen self.val.get_ref()
     }
@@ -74,6 +74,6 @@ sup RwLock[T] {
 sup RwLock[T] ext Del {
     fun del(&mut self) -> Void {
         # Destroy the rwlock using the sppc threading API.
-        sppc2::pthread_rwlock_destroy(&self.handle)
+        sppc::pthread_rwlock_destroy(&self.handle)
     }
 }

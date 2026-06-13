@@ -49,7 +49,7 @@ sup File {
         # operation fails.
 
         let mut file = File(path, options)
-        let err = sppc2::open(&self.inner.pointer, options.to_flags(), 0, &mut file.fd)
+        let err = sppc::open(&self.inner.pointer, options.to_flags(), 0, &mut file.fd)
         case err == 0 { ret Pass(val=file) } else { ret Fail(err=PathErr::from_errno(err)) }
     }
 
@@ -63,7 +63,7 @@ sup File {
         # @ret: A `Res` type containing an empty value if the synchronization is successful, or an error message if the
         # operation fails.
 
-        let err = sppc2::flush(self.fd)
+        let err = sppc::flush(self.fd)
         case err == 0 { ret Pass[Void]() } else { ret Fail(err=StreamErr::from_errno(err)) }
     }
 
@@ -78,7 +78,7 @@ sup File {
         # @ret: A `Res` type containing an empty value if the data synchronization is successful, or an error message if
         # the operation fails.
 
-        let err = sppc2::flush_data(self.fd)
+        let err = sppc::flush_data(self.fd)
         case err == 0 { ret Pass[Void]() } else { ret Fail(err=StreamErr::from_errno(err)) }
     }
 
@@ -92,7 +92,7 @@ sup File {
         # @ret: A `Res` type containing an empty value if the operation is successful, or an error message if the
         # operation fails.
 
-        let err = sppc2::truncate(self.fd, len)
+        let err = sppc::truncate(self.fd, len)
         case err == 0 { ret Pass[Void]() } else { ret Fail(err=StreamErr::from_errno(err)) }
     }
 }
@@ -106,7 +106,7 @@ sup File ext Read {
         # the operation fails.
 
         let mut bytes_read: USize = 0
-        let err = sppc2::read(&mut buf.pointer, 1_uz, self.file_size(), self.fd, &mut bytes_read)
+        let err = sppc::read(&mut buf.pointer, 1_uz, self.file_size(), self.fd, &mut bytes_read)
         case err == 0 { ret Pass(val=bytes_read) } else { ret Fail(err=StreamErr::from_errno(err)) }
     }
 }
@@ -120,7 +120,7 @@ sup File ext Write {
         # if the operation fails.
 
         let mut bytes_written: USize = 0
-        let err = sppc2::write(&buf.pointer, 1_uz, buf.length(), self.fd, &mut bytes_written)
+        let err = sppc::write(&buf.pointer, 1_uz, buf.length(), self.fd, &mut bytes_written)
         case err == 0 { ret Pass(val=bytes_written) } else { ret Fail(err=StreamErr::from_errno(err)) }
     }
 
@@ -131,26 +131,26 @@ sup File ext Write {
         # @ret: A `Res` type containing an empty value if the flush operation is successful, or an error message if the
         # operation fails.
 
-        let err = sppc2::flush(self.fd)
+        let err = sppc::flush(self.fd)
         case err == 0 { ret Pass[Void]() } else { ret Fail(err=StreamErr::from_errno(err)) }
     }
 }
 
 sup File ext Seek {
     fun seek(&mut self, offset: SSize, whence: S32) -> Res[Void, StreamErr] {
-        let err = sppc2::seek(self.fd, offset, whence)
+        let err = sppc::seek(self.fd, offset, whence)
         case err == 0 { ret Pass[Void]() } else { ret Fail(err=StreamErr::from_errno(err)) }
     }
 
     fun stream_len(&mut self) -> Res[SSize, StreamErr] {
         let mut len: SSize = 0
-        let err = sppc2::stream_len(self.fd, &mut len)
+        let err = sppc::stream_len(self.fd, &mut len)
         case err == 0 { ret Pass(val=len) } else { ret Fail(err=StreamErr::from_errno(err)) }
     }
 
     fun stream_pos(&mut self) -> Res[SSize, StreamErr] {
         let mut pos: SSize = 0
-        let err = sppc2::stream_pos(self.fd, &mut pos)
+        let err = sppc::stream_pos(self.fd, &mut pos)
         case err == 0 { ret Pass(val=pos) } else { ret Fail(err=StreamErr::from_errno(err)) }
     }
 }
@@ -161,7 +161,7 @@ sup File ext Del {
         # properly closed to free system resources. This is important for preventing resource leaks and ensuring that
         # the operating system can manage file descriptors efficiently.
 
-        case self.fd >= 0 { sppc2::close(self.fd) }
+        case self.fd >= 0 { sppc::close(self.fd) }
     }
 }
 
@@ -174,7 +174,7 @@ fun get_cwd() -> Res[Path, PathErr] {
     # message if the operation fails.
 
     let mut path = Path()
-    let err = sppc2::getcwd(&mut file.inner.ptr, path::path_max)
+    let err = sppc::getcwd(&mut file.inner.ptr, path::path_max)
     case err == 0 { ret Pass(val=file) } else { ret Fail(err=PathErr::from_errno(err)) }
 }
 
@@ -186,6 +186,6 @@ fun set_cwd(path: &Path) -> Res[Void, PathErr] {
     # @ret: A `Res` type containing an empty value if the current directory is successfully changed, or an error message
     # if the operation fails.
 
-    let err = sppc2::chdir(&path.inner.pointer)
+    let err = sppc::chdir(&path.inner.pointer)
     case err == 0 { ret Pass[Void]() } else { ret Fail(err=PathErr::from_errno(err)) }
 }

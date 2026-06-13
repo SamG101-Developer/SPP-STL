@@ -29,7 +29,7 @@ sup CondVar {
 
         # Get a conditional variable handle from C.
         let mut handle = 0_u64
-        let err = sppc2::pthread_condvar_init(&mut handle)
+        let err = sppc::pthread_condvar_init(&mut handle)
         case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
         ret Pass(val=CondVar(handle))
     }
@@ -46,7 +46,7 @@ sup CondVar {
 
         # Wait on the condition variable, releasing the
         # associated mutex, using sppc internal calls.
-        let err = sppc2::pthread_cond_wait(&self.handle, &mutex.handle)
+        let err = sppc::pthread_cond_wait(&self.handle, &mutex.handle)
         case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
         ret Pass[Void]()
     }
@@ -65,7 +65,7 @@ sup CondVar {
         # @ret: A `Res` type indicating whether the wait operation was successful or not.
 
         loop pred(&mut mutex.val) {
-            let err = sppc2::pthread_cond_wait(&self.handle, &mutex.handle)
+            let err = sppc::pthread_cond_wait(&self.handle, &mutex.handle)
             case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
         }
         ret Pass(val=true)
@@ -89,7 +89,7 @@ sup CondVar {
 
         # Build the C timespec struct for the timeout duration.
         let timespec = CTimeSpec(sec=timeout.seconds, nsec=timeout.nanoseconds)
-        let err = sppc2::pthread_cond_timedwait(&self.handle, &mutex.handle, 0, &timespec)
+        let err = sppc::pthread_cond_timedwait(&self.handle, &mutex.handle, 0, &timespec)
         case err != 0 { ret Fail(err=LockErr(msg="Failed to wait on condition variable")) }
         ret Pass[Void]()
     }
@@ -102,7 +102,7 @@ sup CondVar {
             let remaining = deadline.sub_saturating(TimePoint::now())
             case remaining.is_zero() { ret Pass(val=false) }
             let timespec = CTimeSpec(sec=remaining.seconds, nsec=remaining.nanoseconds)
-            let err = sppc2::cond_timedwait(&self.handle, &mutex.handle, 0, &timespec)
+            let err = sppc::cond_timedwait(&self.handle, &mutex.handle, 0, &timespec)
             case err != 0 { ret Fail(err=LockErr(msg="Failed to wait on condition variable")) }
         }
     }
@@ -110,7 +110,7 @@ sup CondVar {
     !public
     fun signal_one(&self) -> Res[Void, LockErr] {
         # Signal one thread waiting on the condition variable.
-        let err = sppc2::cond_signal(&self.handle)
+        let err = sppc::cond_signal(&self.handle)
         case err != 0 { ret Fail(err=LockErr(msg="Failed to signal condition variable")) }
         ret Pass[Void]()
     }
@@ -118,7 +118,7 @@ sup CondVar {
     !public
     fun signal_all(&self) -> Res[Void, LockErr] {
         # Wake up all threads waiting on the condition variable.
-        let err = sppc2::cond_broadcast(&self.handle)
+        let err = sppc::cond_broadcast(&self.handle)
         case err != 0 { ret Fail(err=LockErr(msg="Failed to broadcast condition variable")) }
         ret Pass[Void]()
     }
@@ -127,6 +127,6 @@ sup CondVar {
 sup CondVar ext Del {
     fun del(&mut self) -> Void {
         # Destroy the condition variable using the sppc threading API.
-        sppc2::cond_destroy(&self.handle)
+        sppc::cond_destroy(&self.handle)
     }
 }
