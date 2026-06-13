@@ -8,8 +8,8 @@ use std::result::Fail
 use std::result::Pass
 use std::result::Res
 use std::void::Void
-use std::threading::mutex::ThreadErr
 use std::threading::mutex::Mutex
+use std::threading::thread::ThreadErr
 use std::ops::del::Del
 
 !public
