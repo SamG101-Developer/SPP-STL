@@ -1,10 +1,22 @@
 use std::annotations::public
 use std::boolean::Bool
 use std::generator::Gen
+use std::ops::ord::Ord
 
-# Todo: Constrain T to be a comparable type.
 !public
 cls Range[T: Ord] {
+    # The `Range` class represents a range of values of type `T`, where `T` is an orderable type. It defines a range
+    # with a starting value, an ending value, and an optional step size. The range can be used to generate a sequence of
+    # values from the start to the end, incrementing by the specified step size. The `step` parameter is of type
+    # `SSize`, which represents the step size for iterating through the range.
+    # @type T: An orderable type that represents the elements in the range.
+    # @let start: The starting value of the range, which is inclusive. It represents the first value in the range.
+    # @let end: The ending value of the range, which is exclusive. It represents the value at which the range stops
+    # generating values.
+    # @let step: The step size for iterating through the range. It determines how much to increment the current value
+    # when generating the next value in the range. The default step size is 1, but it can be customized to any positive
+    # or negative value of type `SSize`.
+
     !public start: T
     !public end: T
     !public step: SSize
@@ -13,13 +25,35 @@ cls Range[T: Ord] {
 sup [T: Ord] Range[T] {
     !public
     fun step_by(self, step: SSize) -> Range[T] {
+        # The `step_by` method creates a new `Range` instance with the same starting and ending values as the current
+        # range, but with a specified step size. The `step` parameter determines how much to increment the current value
+        # when generating the next value in the range. This allows for creating ranges that skip values based on the
+        # specified step size.
+        # @let step: The step size for iterating through the new range.
+        # @ret: A new `Range` instance with the same starting and ending values as the current range, but with the
+        # specified step size.
+
+        # Remap the range fields to a step-defined range.
         ret Range(start=self.start, end=self.end, step)
     }
 
     !public
     fun between(start: T, end: T) -> Range[T] {
+        # The `between` method creates a new `Range` instance with the specified starting and ending values. The range
+        # will generate values starting from `start` and ending before `end`, with a default step size of 1. This method
+        # is useful for creating ranges that represent a specific interval of values.
+        # @let start: The starting value of the range, which is inclusive. It represents the first value in the range.
+        # @let end: The ending value of the range, which is exclusive. It represents the value at which the range stops
+        # generating
+        # @ret: A new `Range` instance with the specified starting and ending values, and a default step size of 1.
+
+        # Build a range from the start and end values.
         ret Range(start, end)
     }
 }
 
-sup [T: Ord] Range[T] ext Gen[T] { }
+sup [T: Ord] Range[T] ext Gen[T] {
+    # In order to iterate a range, we need to implement the `Gen` interface for the `Range` class. This allows us to
+    # generate a sequence of values from the range, starting from the `start` value and ending before the `end` value,
+    # incrementing by the specified `step` size.
+}
