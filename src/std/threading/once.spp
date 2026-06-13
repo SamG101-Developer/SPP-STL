@@ -1,4 +1,4 @@
-use std::mem::ptr::NonNull
+use std::mem::pointer::NonNull
 use std::void::Void
 
 fun call_once[F: FunMov[(), Void]](func: F) -> Void {
