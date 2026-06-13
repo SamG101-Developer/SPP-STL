@@ -89,6 +89,26 @@ sup [T] NonNull[T] {
         # @let align: The alignment to check against. This must be a power of two.
         # @ret: A boolean value indicating whether the pointer is aligned to the specified alignment or not.
     }
+
+    !package
+    !intrinsic(name="spp.mem.pointer.NonNull.write")
+    fun write(&mut self, value: T) -> Void {
+        # The `write` method writes a value to the memory location pointed to by the `NonNull` pointer. This is a
+        # compiler intrinsic, as it can be implemented using a single instruction in LLVM. The method takes ownership of
+        # the value being written, and it is moved into the memory location. Due to ownership rules, this is safe.
+        # @let value: The value to write to the memory location. This is a value of type `T`, which is the type of the
+        # value that the pointer points to.
+    }
+
+    !package
+    !intrinsic(name="spp.mem.pointer.NonNull.read")
+    fun read(&self) -> T {
+        # The `read` method reads a value from the memory location pointed to by the `NonNull` pointer. This is a
+        # compiler intrinsic, as it can be implemented using a single instruction in LLVM. The method returns a copy of
+        # the value being read, and it is moved out of the memory location. Due to ownership rules, this is safe.
+        # @ret: A value of type `T`, which is the type of the value that the pointer points to. This is a copy of the
+        # value that was read from the memory location.
+    }
 }
 
 sup [T] NonNull[T] ext FwdMut[&mut T] {
