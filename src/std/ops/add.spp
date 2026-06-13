@@ -2,7 +2,9 @@ use std::annotations::abstract_method
 use std::annotations::public
 use std::void::Void
 
-!public cls Add[Rhs=Self, Ret=Self] {
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls Add[Rhs=Self, Ret=Self] {
     # The `Add` class represents the ability to add two values together using the "+" operator. It is a generic class
     # that takes two type parameters: `Rhs`, which represents the type of the right-hand side operand, and `Ret`, which
     # represents the type of the result of the addition. By default, both `Rhs` and `Ret` are set to `Self`, meaning
@@ -16,7 +18,9 @@ use std::void::Void
     # allow for flexibility in the types that can be returned as a result of the addition.
 }
 
-!public cls AddAssign[Rhs=Self] {
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls AddAssign[Rhs=Self] {
     # The `AddAssign` class represents the ability to add a value to another value in place using the "+=" operator. It
     # is a generic class that takes one type parameter: `Rhs`, which represents the type of the right-hand side operand.
     # By default, `Rhs` is set to `Self`, meaning that if no specific type is provided, it will assume that the
@@ -29,8 +33,8 @@ use std::void::Void
 
 # Allow the use of the "+" operator.
 sup [Rhs, Ret] Add[Rhs, Ret] {
-    !public
-    !abstract_method
+    !public !abstract_method
+    !versioned(base="1.0.0", new="1.0.0")
     fun add(self, that: Rhs) -> Ret {
         # The `add` method defines the behavior of the "+" operator for the implementing class. It takes a value of type
         # `Rhs` as an argument, which represents the right-hand side operand in the addition operation. The method
@@ -47,8 +51,8 @@ sup [Rhs, Ret] Add[Rhs, Ret] {
 
 # Allow the use of the "+=" operator.
 sup [Rhs] AddAssign[Rhs] {
-    !public
-    !abstract_method
+    !public !abstract_method
+    !versioned(base="1.0.0", new="1.0.0")
     fun add_assign(&mut self, that: Rhs) -> Void {
         # The `add_assign` method defines the behavior of the "+=" operator for the implementing class. It takes a value
         # of type `Rhs` as an argument, which represents the right-hand side operand in the addition assignment

@@ -10,209 +10,513 @@ use std::ops::eq::Eq
 use std::ops::try::Try
 
 !public
-cls Pass[T] { !public val: T }
+!versioned(base="1.0.0", new="1.0.0")
+cls Pass[T] {
+    # The `Pass` class represents a successful result value. It is a generic class that can hold a value of any type
+    # `T`. The `Pass` class is used in conjunction with the `Fail` class to represent result values, where `Pass`
+    # indicates that an operation succeeded with a value, and `Fail` indicates that an operation failed with an error.
+    # @type T: The type of the value contained in the `Pass` instance. This can be any type, and is specified when
+    # creating a `Pass` instance.
+    # @let val: The value contained in the `Pass` instance. This is the actual value that is present, and can be
+    # accessed using the `unwrap` method. The value is of type `T`, and is specified when creating a `Pass` instance.
+
+    !public val: T
+}
 
 !public
+!versioned(base="1.0.0", new="1.0.0")
+cls Fail[E] {
+    # The `Fail` class represents a failed result value. It is a generic class that can hold an error of any type `E`.
+    # The `Fail` class is used in conjunction with the `Pass` class to represent result values, where `Fail` indicates
+    # that an operation failed with an error, and `Pass` indicates that an operation succeeded with a value.
+    # @type E: The type of the error contained in the `Fail` instance. This can be any type, and is specified when
+    # creating a `Fail` instance.
+    # @let err: The error contained in the `Fail` instance. This is the actual error that occurred, and can be accessed
+    # using the `unwrap_err` method. The error is of type `E`, and is specified when creating a `Fail` instance.
 
-cls Fail[E] { !public err: E }
+    !public err: E
+}
 
 !public
 type Res[T, E] = Pass[T] or Fail[E]
 
-sup [T: Copy, E: Copy] Res[T, E] ext Copy { }
+sup [T: Copy, E: Copy] Res[T, E] ext Copy {
+    # If the internal types of this result are both copy, then the result itself is also copy, as copying a result just
+    # involves copying the internal value if it is Pass, or copying the internal error if it is Fail.
+}
 
 sup [T, E] Res[T, E] {
-    !public fun is_pass(&self) -> Bool { ret self@ is Pass[T](..) }
-    !public fun is_fail(&self) -> Bool { ret self@ is Fail[E](..) }
+    # Multiple methods are provided for the `Res` type to allow for convenient manipulation and querying of result
+    # values. These methods include checking if the result is `Pass` or `Fail`, applying predicates to the value or
+    # error inside, chaining together multiple result computations, transforming the value or error inside the result,
+    # and converting between result and optional types.
 
-    # If this type contains a Pass value, and the predicate returns true when invoking on the moved internally wrapped
-    # value, then return true. Otherwise, return false. This is semantically equivalent to "if this result has a value,
-    # and that value satisfies a predicate".
-    !public fun is_pass_and(self, pred: FunMov[(T,), Bool]) -> Bool {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_pass(&self) -> Bool {
+        # The `is_pass` method checks if the result is in the `Pass` state. It returns `true` if the result is `Pass`,
+        # and `false` if it is `Fail`. This is a wrapper around pattern matching.
+        # @ret: Returns `true` if the result is `Pass`, and `false` if it is `Fail`.
+
+        # Simple pattern match.
+        ret self@ is Pass[T](..)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_fail(&self) -> Bool {
+        # The `is_fail` method checks if the result is in the `Fail` state. It returns `true` if the result is `Fail`,
+        # and `false` if it is `Pass`. This is a wrapper around pattern matching.
+        # @ret: Returns `true` if the result is `Fail`, and `false` if it is `Pass`.
+
+        # Simple pattern match.
+        ret self@ is Fail[E](..)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_pass_and(self, pred: FunMov[(T,), Bool]) -> Bool {
+        # The `is_pass_and` method checks if the result contains a value, and if so, applies the predicate to that
+        # value. If the result is `Fail`, or if the predicate returns false, then `is_pass_and` returns `false`. If the
+        # result contains a value and the predicate returns true, then `is_pass_and` returns `true`. This is a
+        # convenient method for checking if a result contains a value that satisfies a certain condition, without having
+        # to first check if the result is `Pass` and then apply the predicate separately.
+        #
+        # Example usage:
+        # ```
+        # let res = Pass(val=5)
+        # let is_even = res.is_pass_and(|x| x % 2 == 0)
+        # ```
+        #
+        # @let pred: The predicate function that is applied to the value inside the result if it is `Pass`. This
+        # function is called with the value of type `T` if the result is `Pass`, and should return `true` if the value
+        # satisfies the condition, or `false` otherwise.
+        # @ret: Returns `true` if the result is `Pass` and the predicate returns `true` for the value inside, otherwise
+        # returns `false`.
+
+        # Pattern match and test against the predicate.
         ret case self of {
             is Pass[T](val) { pred(val) }
             is Fail[E](..) { false }
         }
     }
 
-    # If this type contains a Fail value, and the predicate returns true when invoking on the moved internally wrapped
-    # error, then return true. Otherwise, return false. This is semantically equivalent to "if this result has an error,
-    # and that error satisfies a predicate".
-    !public fun is_fail_and(self, pred: FunMov[(E,), Bool]) -> Bool {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_fail_and(self, pred: FunMov[(E,), Bool]) -> Bool {
+        # The `is_fail_and` method checks if the result contains an error, and if so, applies the predicate to that
+        # error. If the result is `Pass`, or if the predicate returns false, then `is_fail_and` returns `false`. If the
+        # result contains an error and the predicate returns true, then `is_fail_and` returns `true`. This is a
+        # convenient method for checking if a result contains an error that satisfies a certain condition, without
+        # having to first check if the result is `Fail` and then apply the predicate separately.
+        #
+        # Example usage:
+        # ```
+        # let res = Fail(err="error")
+        # let is_long_error = res.is_fail_and(|e| e.len() > 5)
+        # ```
+        #
+        # @let pred: The predicate function that is applied to the error inside the result if it is `Fail`. This
+        # function is called with the error of type `E` if the result is `Fail`, and should return `true` if the error
+        # satisfies the condition, or `false` otherwise.
+        # @ret: Returns `true` if the result is `Fail` and the predicate returns `true` for the error inside, otherwise
+        # returns `false`.
+
+        # Pattern match and test against the predicate.
         ret case self of {
             is Fail[E](err) { pred(err) }
             is Pass[T](..) { false }
         }
     }
 
-    # If this type contains a Fail value, or the predicate returns true when invoking on the moved internally wrapped
-    # value, then return true. Otherwise, return false. This is semantically equivalent to "if this result either
-    # contains an error, or contains a value that satisfies a predicate".
-    !public fun is_fail_or(self, pred: FunMov[(T,), Bool]) -> Bool {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_fail_or(self, pred: FunMov[(T,), Bool]) -> Bool {
+        # The `is_fail_or` method checks if the result is `Fail`, or if it is `Pass` and the predicate returns true for
+        # the value inside. If the result is `Fail`, then `is_fail_or` returns `true`. If the result is `Pass` and the
+        # predicate returns true for the value inside, then `is_fail_or` returns `true`. If the result is `Pass` and the
+        # predicate returns false for the value inside, then `is_fail_or` returns `false`. This is a convenient method
+        # for checking if a result is either `Fail` or contains a value that satisfies a certain condition, without
+        # having to first check if the result is `Fail` and then apply the predicate separately.
+        #
+        # Example usage:
+        # ```
+        # let res = Pass(val=5)
+        # let is_fail_or_even = res.is_fail_or(|x| x % 2 == 0)
+        # ```
+        #
+        # @let pred: The predicate function that is applied to the value inside the result if it is `Pass`. This
+        # function is called with the value of type `T` if the result is `Pass`, and should return `true` if the value
+        # satisfies the condition, or `false` otherwise.
+        # @ret: Returns `true` if the result is `Fail`, or if it is `Pass` and the predicate returns `true` for the
+        # value inside, otherwise returns `false`.
+
+        # Pattern match and test against the predicate.
         ret case self of {
             is Pass[T](val) { pred(val) }
             is Fail[E](..) { true }
         }
     }
 
-    # If this type contains a Pass value, then return the other result (eagerly evaluating it). Otherwise, return Fail.
-    # The AND operation is effectively a short-circuiting boolean AND, but operating on the presence of a value rather
-    # than the truth of a value.
-    !public fun and_[U](self, that: Res[U, E]) -> Res[U, E] {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun and_[U](self, that: Res[U, E]) -> Res[U, E] {
+        # The `and_` method checks if this result contains a value, and if so, returns the other result. If this result
+        # is `Fail`, then `and_` returns `Fail` with the same error. This is a convenient method for chaining together
+        # multiple result computations, where you want to propagate `Fail` if any of the computations fail, but
+        # otherwise return the result of the last computation.
+        # @type U: The type of the value contained in the other result. This can be different from the type of the value
+        # in this result.
+        # @let that: The other result that is returned if this result is `Pass`. If this result is `Fail`, then `that`
+        # is not evaluated, and `Fail` is returned with the same error instead.
+        # @ret: Returns `that` if this result is `Pass`, otherwise returns `Fail` with the same error.
+
+        # Pattern match and return the other result if this is
+        # `Pass`, otherwise return `Fail` with the same error.
         ret case self of {
             is Pass[T](..) { that }
             is Fail[E](err) { Fail(err) }
         }
     }
 
-    # If this type contains a Pass value, then return the result of invoking the predicate on the moved internally
-    # wrapped value. Otherwise, return Fail. This is semantically equivalent to "if this result has a value, then pass
-    # it into the result returning predicate, and return the result".
-    !public fun and_then[U](self, pred: FunMov[(T,), Res[U, E]]) -> Res[U, E] {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun and_then[U](self, pred: FunMov[(T,), Res[U, E]]) -> Res[U, E] {
+        # The `and_then` method checks if this result contains a value, and if so, applies the predicate to that value
+        # and returns the result. If this result is `Fail`, then `and_then` returns `Fail` with the same error. This is
+        # a convenient method for chaining together multiple result computations, where you want to propagate `Fail` if
+        # any of the computations fail, but otherwise return the result of the last computation.
+        # @type U: The type of the value contained in the result returned by the predicate. This can be different from
+        # the type of the value in this result.
+        # @let pred: The predicate function that is applied to the value inside the result if it is `Pass`. This
+        # function is called with the value of type `T` if the result is `Pass`, and should return a `Res[U, E]` that is
+        # the result of the computation. If the result is `Fail`, then `pred` is not evaluated, and `Fail` is returned
+        # with the same error instead.
+        # @ret: Returns the result of `pred` if this result is `Pass`, otherwise returns `Fail` with the same error.
+
+        # Pattern match and apply the predicate to the value if
+        # this is `Pass`, otherwise return `Fail` with the same error.
         ret case self of {
             is Pass[T](val) { pred(val) }
             is Fail[E](err) { Fail(err) }
         }
     }
 
-    # If this type contains a Pass value, then return that. Otherwise, return the other result (eagerly evaluating it).
-    # The OR operation is effectively a short-circuiting boolean OR, but operating on the presence of a value rather
-    # than the truth of a value.
-    !public fun ior_[F](self, that: Res[T, F]) -> Res[T, F] {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun ior_[F](self, that: Res[T, F]) -> Res[T, F] {
+        # The `ior_` method checks if this result contains a value, and if so, returns this result. If this result is
+        # `Fail`, then `ior_` returns the other result. This is a convenient method for chaining together multiple
+        # result computations, where you want to return the first `Pass` value if there is one, but otherwise return the
+        # other result if this result failed.
+        # @type F: The type of the error contained in the other result. This can be different from the type of the error
+        # in this result.
+        # @let that: The other result that is returned if this result is `Fail`. If this result is `Pass`, then `that`
+        # is not evaluated, and this result is returned wrapped in `Pass` instead.
+        # @ret: Returns this result wrapped in `Pass` if it is `Pass`, otherwise returns `that`.
+
+        # Pattern match and return this result wrapped in `Pass` if it
+        # is `Pass`, otherwise return the other result.
         ret case self of {
             is Pass[T](val) { Pass(val) }
             is Fail[E](..) { that }
         }
     }
 
-    # If this type contains a Pass value, then return that. Otherwise, return the result of invoking the predicate on
-    # the moved internally wrapped error. This is semantically equivalent to "if this result has a value, then return
-    # it, otherwise the result of invoking the result returning predicate on the error".
-    !public fun ior_else[F](self, pred: FunMov[(E,), Res[T, F]]) -> Res[T, F] {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun ior_else[F](self, pred: FunMov[(E,), Res[T, F]]) -> Res[T, F] {
+        # The `ior_else` method checks if this result contains a value, and if so, returns this result. If this result
+        # is `Fail`, then `ior_else` returns the result of invoking the provided predicate on the moved internally
+        # wrapped error. This is a convenient method for chaining together multiple result computations, where you want
+        # to return the first `Pass` value if there is one, but otherwise recover from the error by applying the
+        # predicate to produce a new result.
+        # @type F: The type of the error contained in the result returned by the predicate. This can be different from
+        # the type of the error in this result.
+        # @let pred: A function that is invoked with the error value if this result is `Fail`. If this result is `Pass`,
+        # then `pred` is not evaluated, and this result is returned wrapped in `Pass` instead.
+        # @ret: Returns this result wrapped in `Pass` if it is `Pass`, otherwise returns the result of invoking
+        # `pred(err)`.
+
+        # Pattern match and return this result wrapped in `Pass` if it
+        # is `Pass`, otherwise return the result of invoking the
+        # provided predicate on the error.
         ret case self of {
             is Pass[T](val) { Pass(val) }
             is Fail[E](err) { pred(err) }
         }
     }
 
-    # If this type contains a Pass value, then return the result of invoking the predicate on the moved internally
-    # wrapped value, wrapped in Pass. Otherwise, return Fail. This is semantically equivalent to "if this result has a
-    # value, then pass it into the value returning predicate, and return the result wrapped in Pass".
-    !public fun map[U](self, pred: FunMov[(T,), U]) -> Res[U, E] {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun map[U](self, pred: FunMov[(T,), U]) -> Res[U, E] {
+        # The `map` method checks if this result contains a value, and if so, applies the predicate to that value and
+        # returns the result wrapped in `Pass`. If this result is `Fail`, then `map` returns `Fail` with the same error.
+        # This is a convenient method for transforming the value inside a result based on a certain function, without
+        # having to first check if the result is `Pass` and then apply the function separately.
+        # @type U: The type of the value contained in the result returned by the predicate. This can be different from
+        # the type of the value in this result.
+        # @let pred: The function that is applied to the value inside the result if it is `Pass`. This function is
+        # called with the value of type `T` if the result is `Pass`, and should return a value of type `U` that is the
+        # result of the transformation. If the result is `Fail`, then `pred` is not evaluated, and `Fail` is returned
+        # with the same error instead.
+        # @ret: Returns the result of `pred` wrapped in `Pass` if this result is `Pass`, otherwise returns `Fail` with
+        # the same error.
+
+        # Pattern match and apply the predicate to the value if
+        # this is `Pass`, otherwise return `Fail` with the same error.
         ret case self of {
             is Pass[T](val) { Pass(val=pred(val)) }
             is Fail[E](err) { Fail(err) }
         }
     }
 
-    # If this type contains a Fail value, then return the result of invoking the predicate on the moved internally
-    # wrapped error, wrapped in Fail. Otherwise, return Pass unchanged. This is semantically equivalent to "if this
-    # result has an error, then pass it into the error returning predicate, and return the result wrapped in Fail".
-    !public fun map_err[F](self, pred: FunMov[(E,), F]) -> Res[T, F] {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun map_err[F](self, pred: FunMov[(E,), F]) -> Res[T, F] {
+        # The `map_err` method checks if this result contains an error, and if so, applies the predicate to that error
+        # and returns the result wrapped in `Fail`. If this result is `Pass`, then `map_err` returns `Pass` unchanged.
+        # This is a convenient method for transforming the error inside a result based on a certain function, without
+        # having to first check if the result is `Fail` and then apply the function separately.
+        # @type F: The type of the error contained in the result returned by the predicate. This can be different from
+        # the type of the error in this result.
+        # @let pred: The function that is applied to the error inside the result if it is `Fail`. This function is
+        # called with the error of type `E` if the result is `Fail`, and should return a value of type `F` that is the
+        # result of the transformation. If the result is `Pass`, then `pred` is not evaluated, and `Pass` is returned
+        # unchanged instead.
+        # @ret: Returns `Pass` unchanged if this result is `Pass`, otherwise returns the result of `pred` wrapped in
+        # `Fail`.
+
+        # Pattern match and return `Pass` unchanged if this is `Pass`,
+        # otherwise apply the predicate to the error and return it
+        # wrapped in `Fail`.
         ret case self of {
             is Pass[T](val) { Pass(val) }
             is Fail[E](err) { Fail(err=pred(err)) }
         }
     }
 
-    # If this type contains a Pass value, then return the result of invoking the predicate on the moved internally
-    # wrapped value. Otherwise, return the provided default (eagerly evaluating it). This is semantically equivalent to
-    # "if this result has a value, then pass it into the value returning predicate, and return the result, otherwise
-    # return the default".
-    !public fun map_or[U](self, default: U, f: FunMov[(T,), U]) -> U {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun map_or[U](self, default: U, f: FunMov[(T,), U]) -> U {
+        # The `map_or` method checks if this result contains a value, and if so, applies the function to that value and
+        # returns the result. If this result is `Fail`, then `map_or` returns the provided default value. This is a
+        # convenient method for transforming the value inside a result based on a certain function, and providing a
+        # default value if the result is `Fail`, without having to first check if the result is `Pass` and then apply
+        # the function separately.
+        # @type U: The type of the value returned by the function and the default. This can be different from the type
+        # of the value in this result.
+        # @let default: The default value that is returned if this result is `Fail`. If this result is `Pass`, then
+        # `default` is not evaluated, and the result of applying `f` to the value inside is returned instead.
+        # @let f: The function that is applied to the value inside the result if it is `Pass`. This function is called
+        # with the value of type `T` if the result is `Pass`, and should return a value of type `U` that is the result
+        # of the transformation. If the result is `Fail`, then `f` is not evaluated, and `default` is returned instead.
+        # @ret: Returns the result of applying `f` to the value inside the result if this result is `Pass`, otherwise
+        # returns `default`.
+
+        # Pattern match and apply the function to the value if
+        # this is `Pass`, otherwise return the default value.
         ret case self of {
             is Pass[T](val) { f(val) }
             else { default }
         }
     }
 
-    # If this type contains a Pass value, then return the result of invoking the predicate on the moved internally
-    # wrapped value. Otherwise, return the result of invoking the default on the moved internally wrapped error (lazily
-    # evaluating it). This is semantically equivalent to "if this result has a value, then pass it into the value
-    # returning predicate, and return the result, otherwise return the result of default(err)".
-    !public fun map_or_else[U](self, default: FunMov[(E,), U], f: FunMov[(T,), U]) -> U {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun map_or_else[U](self, default: FunMov[(E,), U], f: FunMov[(T,), U]) -> U {
+        # The `map_or_else` method checks if this result contains a value, and if so, applies the function to that value
+        # and returns the result. If this result is `Fail`, then `map_or_else` returns the result of invoking the
+        # provided default function with the moved internally wrapped error. This is a convenient method for
+        # transforming the value inside a result based on a certain function, and providing a default value computed
+        # from the error if the result is `Fail`, without having to first check if the result is `Pass` and then apply
+        # the function separately.
+        # @type U: The type of the value returned by the function and the default. This can be different from the type
+        # of the value in this result.
+        # @let default: A function that is invoked with the error value if this result is `Fail` to get the default
+        # value. If this result is `Pass`, then `default` is not evaluated, and the result of applying `f` to the value
+        # inside is returned instead.
+        # @let f: The function that is applied to the value inside the result if it is `Pass`. This function is called
+        # with the value of type `T` if the result is `Pass`, and should return a value of type `U` that is the result
+        # of the transformation. If the result is `Fail`, then `f` is not evaluated, and the result of invoking
+        # `default(err)` is returned instead.
+        # @ret: Returns the result of applying `f` to the value inside the result if this result is `Pass`, otherwise
+        # returns the result of invoking `default(err)`.
+
+        # Pattern match and apply the function to the value if this is
+        # `Pass`, otherwise return the result of invoking the default
+        # function on the error.
         ret case self of {
             is Pass[T](val) { f(val) }
             is Fail[E](err) { default(err) }
         }
     }
 
-    # If this type contains a Pass value, then return Some of the moved internally wrapped value. Otherwise, return
-    # None. This is a conversion from a result type to an optional type, mapping Pass(val) to Some(val) and Fail(err)
-    # to None, discarding the error.
-    !public fun pass_opt(self) -> Opt[T] {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun pass_opt(self) -> Opt[T] {
+        # The `pass_opt` method checks if this result contains a value, and if so, returns the value wrapped in `Some`.
+        # If this result is `Fail`, then `pass_opt` returns `None`, discarding the error. This is a convenient method
+        # for converting a result into an optional, where `Pass` is mapped to `Some` and `Fail` is mapped to `None`.
+        # @ret: Returns the value inside the result wrapped in `Some` if this result is `Pass`, otherwise returns
+        # `None`.
+
+        # Pattern match and return the value wrapped in `Some` if
+        # this is `Pass`, otherwise return `None`.
         ret case self of {
             is Pass[T](val) { Some(val) }
             is Fail[E](..) { None }
         }
     }
 
-    # If this type contains a Fail value, then return Some of the moved internally wrapped error. Otherwise, return
-    # None. This is a conversion from a result type to an optional type, mapping Fail(err) to Some(err) and Pass(val)
-    # to None, discarding the value.
-    !public fun fail_opt(self) -> Opt[E] {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun fail_opt(self) -> Opt[E] {
+        # The `fail_opt` method checks if this result contains an error, and if so, returns the error wrapped in `Some`.
+        # If this result is `Pass`, then `fail_opt` returns `None`, discarding the value. This is a convenient method
+        # for converting a result into an optional, where `Fail` is mapped to `Some` and `Pass` is mapped to `None`.
+        # @ret: Returns the error inside the result wrapped in `Some` if this result is `Fail`, otherwise returns
+        # `None`.
+
+        # Pattern match and return the error wrapped in `Some` if
+        # this is `Fail`, otherwise return `None`.
         ret case self of {
             is Fail[E](err) { Some(val=err) }
             is Pass[T](..) { None }
         }
     }
 
-    # If this type contains a Pass value, then return the moved internally wrapped value. Otherwise, abort with the
-    # provided message. Route the panic through the "expect" method for uniform error handling.
-    !public fun unwrap(self) -> T {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun unwrap(self) -> T {
+        # The `unwrap` method checks if this result contains a value, and if so, returns the value. If this result is
+        # `Fail`, then `unwrap` aborts the program with a message indicating that `unwrap` was called on a `Fail` value.
+        # This is a convenient method for extracting the value inside a result, but it should be used with caution, as
+        # it can lead to runtime errors if the result is `Fail`. It is generally recommended to use `unwrap` only when
+        # you are certain that the result is `Pass`, or to use other methods like `unwrap_or` or `unwrap_or_else` to
+        # provide a default value in case the result is `Fail`.
+        # @ret: Returns the value inside the result if this result is `Pass`, otherwise aborts the program with an error
+        # message.
+
+        # Route through `expect` for uniform error handling.
         ret self.expect("called `unwrap()` on a `Fail` value")
     }
 
-    # If this type contains a Pass value, then return the moved internally wrapped value. Otherwise, return the provided
-    # default. This is semantically equivalent to "if this result has a value, return it, otherwise return default".
-    # This can never abort, unlike unwrap, and so is always safe to call.
-    !public fun unwrap_or(self, default: T) -> T {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun unwrap_or(self, default: T) -> T {
+        # The `unwrap_or` method checks if this result contains a value, and if so, returns the value. If this result is
+        # `Fail`, then `unwrap_or` returns the provided default value. This is a convenient method for extracting the
+        # value inside a result, while providing a fallback value in case the result is `Fail`.
+        # @let default: The default value that is returned if this result is `Fail`. If this result is `Pass`, then
+        # `default` is not evaluated, and the value inside is returned instead.
+        # @ret: Returns the value inside the result if this result is `Pass`, otherwise returns `default`.
+
+        # Pattern match and return the value if this is `Pass`,
+        # otherwise return the default value.
         ret case self of {
             is Pass[T](val) { val }
             else { default }
         }
     }
 
-    # If this type contains a Pass value, then return the moved internally wrapped value. Otherwise, return the result
-    # of invoking the default on the moved internally wrapped error (lazily evaluating it). This is semantically
-    # equivalent to "if this result has a value, return it, otherwise return default(err)". This can never abort,
-    # unlike unwrap, and so is always safe to call.
-    !public fun unwrap_or_else(self, default: FunMov[(E,), T]) -> T {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun unwrap_or_else(self, default: FunMov[(E,), T]) -> T {
+        # The `unwrap_or_else` method checks if this result contains a value, and if so, returns the value. If this
+        # result is `Fail`, then `unwrap_or_else` returns the result of invoking the provided default function with the
+        # moved internally wrapped error. This is a convenient method for extracting the value inside a result, while
+        # providing a fallback value computed from the error in case the result is `Fail`.
+        # @let default: A function that is invoked with the error value if this result is `Fail` to get the default
+        # value. If this result is `Pass`, then `default` is not evaluated, and the value inside is returned instead.
+        # @ret: Returns the value inside the result if this result is `Pass`, otherwise returns the result of invoking
+        # `default(err)`.
+
+        # Pattern match and return the value if this is `Pass`, otherwise
+        # return the result of invoking the provided default function on
+        # the error.
         ret case self of {
             is Pass[T](val) { val }
             is Fail[E](err) { default(err) }
         }
     }
 
-    # If this type contains a Pass value, then return the moved internally wrapped value. Otherwise, abort with the
-    # provided message.
-    !public fun expect(self, msg: StrView) -> T {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun expect(self, msg: StrView) -> T {
+        # The `expect` method checks if this result contains a value, and if so, returns the value. If this result is
+        # `Fail`, then `expect` aborts the program with the provided message. This is a convenient method for extracting
+        # the value inside a result, but it should be used with caution, as it can lead to runtime errors if the result
+        # is `Fail`. It is generally recommended to use `expect` only when you are certain that the result is `Pass`, or
+        # to use other methods like `unwrap_or` or `unwrap_or_else` to provide a default value in case the result is
+        # `Fail`.
+        # @let msg: The message that is printed to the console if this result is `Fail`. If this result is `Pass`, then
+        # `msg` is not evaluated, and the value inside is returned instead.
+        # @ret: Returns the value inside the result if this result is `Pass`, otherwise aborts the program with the
+        # provided message.
+
+        # Pattern match and return the value if this is `Pass`,
+        # otherwise abort the program with the provided message.
         ret case self of {
             is Pass[T](val) { val }
             else { std::abort::abort(msg) }
         }
     }
 
-    # If this type contains a Fail value, then return the moved internally wrapped error. Otherwise, abort with the
-    # provided message. Route the panic through the "expect_err" method for uniform error handling.
-    !public fun unwrap_err(self) -> E {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun unwrap_err(self) -> E {
+        # The `unwrap_err` method checks if this result contains an error, and if so, returns the error. If this result
+        # is `Pass`, then `unwrap_err` aborts the program with a message indicating that `unwrap_err` was called on a
+        # `Pass` value. This is a convenient method for extracting the error inside a result, but it should be used with
+        # caution, as it can lead to runtime errors if the result is `Pass`. It is generally recommended to use
+        # `unwrap_err` only when you are certain that the result is `Fail`, or to use `expect_err` to provide a custom
+        # message if the result is `Pass`.
+        # @ret: Returns the error inside the result if this result is `Fail`, otherwise aborts the program with an error
+        # message.
+
+        # Route through `expect_err` for uniform error handling.
         ret self.expect_err("called `unwrap_err()` on a `Pass` value")
     }
 
-    # If this type contains a Fail value, then return the moved internally wrapped error. Otherwise, abort with the
-    # provided message.
-    !public fun expect_err(self, msg: StrView) -> E {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun expect_err(self, msg: StrView) -> E {
+        # The `expect_err` method checks if this result contains an error, and if so, returns the error. If this result
+        # is `Pass`, then `expect_err` aborts the program with the provided message. This is a convenient method for
+        # extracting the error inside a result, but it should be used with caution, as it can lead to runtime errors if
+        # the result is `Pass`.
+        # @let msg: The message that is printed to the console if this result is `Pass`. If this result is `Fail`, then
+        # `msg` is not evaluated, and the error inside is returned instead.
+        # @ret: Returns the error inside the result if this result is `Fail`, otherwise aborts the program with the
+        # provided message.
+
+        # Pattern match and return the error if this is `Fail`,
+        # otherwise abort the program with the provided message.
         ret case self of {
             is Fail[E](err) { err }
             else { std::abort::abort(msg) }
         }
     }
 
-    # If both this type and the other result contain Pass values, then return Pass of a tuple of the moved internally
-    # wrapped values. Otherwise, return the first Fail encountered. This only returns the two values if both results
-    # contain a value. It is semantically equivalent to "if this result has a value, and the other result has a value,
-    # then return both of those values, otherwise return the first error".
-    !public fun zip[U](self, that: Res[U, E]) -> Res[(T, U), E] {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun zip[U](self, that: Res[U, E]) -> Res[(T, U), E] {
+        # The `zip` method combines this result with another result, returning a new result that contains a tuple of the
+        # values inside both results if they are both `Pass`. If either result is `Fail`, then `zip` returns the first
+        # `Fail` encountered. This is a convenient method for combining two result values into a single result value,
+        # where the result is `Pass` only if both inputs are `Pass`.
+        # @type U: The type of the value contained in the other result. This can be different from the type of the value
+        # in this result.
+        # @let that: The other result that is combined with this result. If both results are `Pass`, then the result is
+        # a new result containing a tuple of the values inside both results. If either result is `Fail`, then the first
+        # `Fail` is returned.
+        # @ret: Returns a new result containing a tuple of the values inside both results if they are both `Pass`,
+        # otherwise returns the first `Fail` encountered.
+
+        # Pattern match on both results and return a new result
+        # containing a tuple of the values if they are both `Pass`,
+        # otherwise return the first `Fail` encountered.
         ret case (self, that) of {
             is (Pass[T](val as val1), Pass[U](val as val2)) { Pass(val=(val1, val2)) }
             is (Pass[T](..),          Fail[E](err))         { Fail(err) }
@@ -221,19 +525,32 @@ sup [T, E] Res[T, E] {
     }
 }
 
-
 sup [T, E] Res[T, E] ext Try[Pass[T], Fail[E], T] {
     # In order to make the Res type compatible with the "?" operator, we need to tell the compiler how to check if a
     # result type is in the value state or not, so it knows whether to propagate the error state or not. In this case,
     # only if the result is in the Pass state do we have a value, so we check for that.
+
+    !versioned(base="1.0.0", new="1.0.0")
     fun op_is_value(&self) -> Bool {
+        # The `op_is_value` method checks if this result is in the value state, which means it contains a value wrapped
+        # in `Pass`, so we pattern match on the result and return `true` if it is `Pass`, otherwise return `false`.
+        # @ret: Returns `true` if this result is in the value state (i.e., it is `Pass`), otherwise returns `false`.
+
+        # Pattern match and return `true` if this is `Pass`, otherwise
+        # return `false`.
         ret self@ is Pass[T](..)
     }
 
-    # In order to make the Res type compatible with the "?" operator, we need to tell the compiler how to extract the
-    # value from the result type, since the "?" operator needs to be able to do that in order to get the internal
-    # value for whatever binding or operation it is being used in.
+    !versioned(base="1.0.0", new="1.0.0")
     fun op_as_value(self) -> T {
+        # The `op_as_value` method extracts the value from this result if it is in the value state. This method is used
+        # by the "?" operator to extract the value from a result when it is in the value state, and to propagate the
+        # error state if it is not. This method aborts if called on a `Fail` value, though in practice the `?` operator
+        # checks the state with `op_is_value` before calling this method.
+        # @ret: Returns the value inside the result if it is in the value state (i.e., it is `Pass`).
+
+        # Pattern match and return the value if this is `Pass`,
+        # otherwise abort the program with an error message.
         ret case self of {
             is Pass[T](val) { val }
             else { std::abort::abort("called `op_as_value` on a `Fail` value") }
@@ -242,11 +559,19 @@ sup [T, E] Res[T, E] ext Try[Pass[T], Fail[E], T] {
 }
 
 sup [T: Eq, E: Eq] Res[T, E] ext Eq {
-    # In order to make the Res type support equality comparisons, we need to tell the compiler how to compare two result
-    # types for equality. In this case, we check if both results are in the Pass state, and if so, compare the internal
-    # values for equality. If both results are in the Fail state, then compare the internal errors for equality.
-    # Otherwise, they are not equal.
+    # Additional methods for result types where both the value and error types implement the `Eq` trait, which allows
+    # for equality comparisons between results.
+
+    !versioned(base="1.0.0", new="1.0.0")
     fun eq(&self, that: &Self) -> Bool {
+        # The `eq` method checks if this result is equal to another result. Two results are considered equal if they are
+        # both `Pass` and the values inside are equal, or if they are both `Fail` and the errors inside are equal.
+        # @let that: The other result that is compared with this result.
+        # @ret: Returns `true` if this result is equal to `that`, otherwise returns `false`.
+
+        # Pattern match on both results and return `true` if they are
+        # both `Pass` with equal values, or both `Fail` with equal
+        # errors.
         ret case (self@, that@) of {
             is (Pass[T](val as a), Pass[T](val as b)) { a == b }
             is (Fail[E](err as a), Fail[E](err as b)) { a == b }
@@ -254,11 +579,16 @@ sup [T: Eq, E: Eq] Res[T, E] ext Eq {
         }
     }
 
-    # In order to make the Res type support inequality comparisons, we need to tell the compiler how to compare two
-    # result types for inequality. In this case, we check if both result are in the Pass state, and if so, compare the
-    # internal values for inequality. If both results are in the Fail state, then compare the internal errors for
-    # inequality. Otherwise, they are not equal, and thus are unequal.
+    !versioned(base="1.0.0", new="1.0.0")
     fun ne(&self, that: &Self) -> Bool {
+        # The `ne` method checks if this result is not equal to another result. Two results are considered not equal if
+        # they are not both `Pass` with equal values, or not both `Fail` with equal errors.
+        # @let that: The other result that is compared with this result.
+        # @ret: Returns `true` if this result is not equal to `that`, otherwise returns `false`.
+
+        # Pattern match on both results and return `true` if they are
+        # not both `Pass` with equal values, or not both `Fail` with
+        # equal errors.
         ret case (self@, that@) of {
             is (Pass[T](val as a), Pass[T](val as b)) { a != b }
             is (Fail[E](err as a), Fail[E](err as b)) { a != b }
