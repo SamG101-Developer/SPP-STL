@@ -1,6 +1,6 @@
-use std::anotations::public
-use std::anotations::versioned
-use std::anotations::zero_type
+use std::annotations::public
+use std::annotations::versioned
+use std::annotations::zero_type
 use std::boolean::Bool
 use std::char::Char
 use std::number::USize
