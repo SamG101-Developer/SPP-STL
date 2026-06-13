@@ -5,6 +5,7 @@ use std::annotations::public
 use std::annotations::versioned
 use std::boolean::Bool
 use std::boolean::Integral
+use std::llvm::always_inline
 use std::number::U8
 use std::void::Void
 use std::num::bases::Integer
@@ -60,7 +61,7 @@ fun atomic_load_inner(ptr: &T, order: U8) -> T {
     # @ret: The value loaded from the atomic variable.
 }
 
-!private
+!private !always_inline
 !intrinsic(name="std.threading.atomic.atomic_load_inner")
 !versioned(base="1.0.0", new="1.0.0")
 fun atomic_store_inner(ptr: &T, val: T, order: U8) -> Void {
