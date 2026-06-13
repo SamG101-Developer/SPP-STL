@@ -1,3 +1,8 @@
+use std::net::ip::IpAddr
+use std::net::ip::IpV4Addr
+use std::net::ip::IpV6Addr
+use std::number::U16
+
 cls SockV4Addr {
     !public ip: IpV4Addr
     !public port: U16
