@@ -9,6 +9,7 @@ use std::cast::From
 use std::clone::Clone
 use std::copy::Copy
 use std::function::FunMov
+use std::generator::GenOnce
 use std::iterator::Indexed
 use std::iterator::Iterator
 use std::number::USize
@@ -32,8 +33,8 @@ use std::ops::fwd::FwdMut
 cls Arr[T, cmp n: USize] {
     # A fixed size, inline array of element type T. The length is a compiletime constant, so storage lives on the stack
     # with no heap allocations, and therefore no allocation generic type parameter. The layout is statically known. All
-    # methods for the array type are intrinsic as the Arr[T, n] type lowers to the llvm array type, where all methods are
-    # defined in llvm directly.
+    # methods for the array type are intrinsic as the Arr[T, n] type lowers to the llvm array type, where all methods
+    # are defined in llvm directly.
     # @type T: The type of elements stored in the array. This is a generic type parameter that can be any type, there
     # are no constraints.
     # @cmp n: The length of the array. This is a compile-time constant that determines how many elements the array can
