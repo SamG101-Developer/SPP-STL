@@ -12,6 +12,7 @@ use std::result::Pass
 use std::result::Res
 use std::void::Void
 use std::fs::path::Path
+use std::fs::path::PathErr
 
 cls FileMode {
     !public is_read: Bool = false
