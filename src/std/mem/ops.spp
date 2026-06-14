@@ -11,6 +11,7 @@ use std::option::Opt
 use std::option::None
 use std::option::Some
 use std::void::Void
+use std::mem::pointer::NonNull
 
 !public !always_inline
 !intrinsic(name="std.mem.ops.size_of")
@@ -120,8 +121,8 @@ fun replace[T](dest: &mut T, src: T) -> T {
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun take[T](src: &mut T) -> T {
-    # The same as replace, but automatically uses the default value for a type instead of a different pre-existing value.
-    # Safety is inherited from the "replace" function.
+    # The same as replace, but automatically uses the default value for a type instead of a different pre-existing
+    # value. Safety is inherited from the "replace" function.
     # @type T: The type of the value to take.
     # @let src: A mutable reference to the value to take.
     # @ret: The old value that was taken.
