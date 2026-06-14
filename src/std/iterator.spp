@@ -139,7 +139,7 @@ sup [T] Iterator[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    cor map[U, F: FunMut[(T), U]](self, func: F) -> Iterator[U] {
+    cor map[U, F: FunMut[(T,), U]](self, func: F) -> Iterator[U] {
         # The `map` method is a coroutine that takes an iterator and a mapping function, and produces a new iterator
         # that yields the results of applying the mapping function to each item from the original iterator.
         # @type U: The type of items produced by the new iterator after applying the mapping function. This is a generic
