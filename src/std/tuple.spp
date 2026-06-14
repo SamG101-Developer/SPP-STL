@@ -1,4 +1,5 @@
 use std::annotations::public
+use std::annotations::versioned
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
@@ -17,8 +18,6 @@ sup [..Items] Tup[Items] ext TupLike { }
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls Pair[K, V] {
-    !public
-    key: K
-    !public
-    val: V
+    !public key: K
+    !public val: V
 }
