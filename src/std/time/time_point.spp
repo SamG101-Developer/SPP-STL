@@ -62,7 +62,7 @@ sup TimePoint {
 }
 
 sup TimePoint ext Add[Duration] {
-    fun add(self, duration: Duration) -> Self {
+    fun add(self, that: Duration) -> Self {
         # The `add` method adds a `Duration` to this `TimePoint`, resulting in a new `TimePoint` that represents the
         # point in time that is the specified duration after this `TimePoint`. The method performs checked addition to
         # ensure that the resulting `TimePoint` does not overflow. If the addition would overflow, it will panic with an
@@ -72,7 +72,7 @@ sup TimePoint ext Add[Duration] {
         # `TimePoint`.
 
         let new_duration = self.duration
-            .add_checked(duration)
+            .add_checked(that)
             .expect("TimePoint addition overflowed")
         ret Self(duration=new_duration)
     }
