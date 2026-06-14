@@ -20,7 +20,9 @@ cls TimeOtherErr { }
 
 !public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
-type TimeErr = TimeInvalidClockErr or TimeInvalidDurationErr or TimeOtherErr
+type TimeErr = TimeInvalidClockErr
+    or TimeInvalidDurationErr
+    or TimeOtherErr
 
 sup TimeErr {
     !public
