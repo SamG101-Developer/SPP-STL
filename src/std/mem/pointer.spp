@@ -14,7 +14,7 @@ use std::void::Void
 use std::ops::fwd::FwdMut
 use std::ops::fwd::FwdRef
 
-!public !zero_sized
+!public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
 cls NullptrErr {
     # The `NullptrErr` type is a zero sized type that is used to indicate that a null pointer was encountered when
