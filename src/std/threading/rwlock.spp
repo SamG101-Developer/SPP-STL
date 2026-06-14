@@ -16,7 +16,7 @@ use std::ops::del::Del
     !package val: Slot[T]
 }
 
-sup RwLock[T] {
+sup [T] RwLock[T] {
     !public
     fun new(val: T) -> RwLock {
         # Create a new rwlock using the sppc threading API.
