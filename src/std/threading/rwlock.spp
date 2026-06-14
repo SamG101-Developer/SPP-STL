@@ -11,6 +11,7 @@ use std::shared::Shared
 use std::slot::Slot
 use std::void::Void
 use std::threading::thread::ThreadErr
+use std::threading::mutex::WouldBlock
 use std::ops::del::Del
 
 !public
@@ -62,7 +63,7 @@ sup [T] RwLock[T] {
     cor try_write(&self) -> GenOnce[&mut T or WouldBlock] {
         # Try to lock the rwlock for writing using the sppc threading API.
         let code = sppc::pthread_rwlock_trywrlock(&self.handle)
-        case code == 1 { ret gen WouldBlock() }
+        case code == 1 { ret gen WouldBlock }
         gen self.val.get_mut()
     }
 
@@ -70,7 +71,7 @@ sup [T] RwLock[T] {
     cor try_read(&self) -> GenOnce[&T or WouldBlock] {
         # Try to lock the rwlock for reading using the sppc threading API.
         let code = sppc::pthread_rwlock_tryrdlock(&self.handle)
-        case code == 1 { ret gen WouldBlock() }
+        case code == 1 { ret gen WouldBlock }
         gen self.val.get_ref()
     }
 }
