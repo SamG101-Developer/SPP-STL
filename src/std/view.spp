@@ -8,6 +8,8 @@ use std::iterator::Iterator
 use std::mem::pointer::NonNull
 use std::ops::idx::IndexRef
 use std::ops::idx::IndexMut
+use std::ops::idx::SliceRef
+use std::ops::idx::SliceMut
 use std::ops::iter::IterRef
 use std::ops::iter::IterMut
 use std::ops::iter::RevIterRef
