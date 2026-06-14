@@ -1,6 +1,9 @@
 use sppc::CTimeSpec
 use std::net::socket::Socket
 use std::net::socket::SockAddr
+use std::net::socket::SockErr
+use std::net::socket::SockV4Addr
+use std::net::socket::SockV6Addr
 use std::boolean::Bool
 use std::number::USize
 use std::result::Fail
