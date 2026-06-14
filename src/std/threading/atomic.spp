@@ -23,7 +23,8 @@ cls Atom[T: Integral] {
     #   * When enums are supported, the memory ordering will be an enum (over U8).
     #   * Integral is only superimposed by Bool and Number => not too broad.
     #   * The `new_zeroed` function is fine because of default uniform initialization.
-    #   * The exchange functions copy because only primitives are supported, so there are no ownership or borrowing issues to
+    #   * The exchange functions copy because only primitives are supported, so there are no ownership or borrowing
+    # issues to
     #
     # @type T: The type of the value stored in the atomic variable. It must be an integral type (`Bool` or a numeric
     # type).
@@ -49,13 +50,14 @@ fun atomic_fence_inner(order: U8) -> Void {
 !private
 !intrinsic(name="std.threading.atomic.atomic_load_inner")
 !versioned(base="1.0.0", new="1.0.0")
-fun atomic_load_inner(ptr: &T, order: U8) -> T {
+fun atomic_load_inner[T: Integral](ptr: &T, order: U8) -> T {
     # The `atomic_load_inner` function is a low-level intrinsic function that implements the actual atomic load
     # operation. It is not intended to be called directly by user code, but is instead called by the public `load`
     # method of the `Atom` type after validating the memory order. The `ptr` parameter is a reference to the value to be
     # loaded, and the `order` parameter specifies the memory ordering of the load operation. The behavior of this
     # function is platform-specific and is implemented by the compiler using the appropriate atomic load instructions
     # for the target architecture.
+    # @type T: The type of the value stored in the atomic variable.
     # @let ptr: A reference to the value to be loaded from the atomic variable.
     # @let order: The validated memory ordering of the load operation. This must not be `mo_release` or `mo_acq_rel`.
     # @ret: The value loaded from the atomic variable.
@@ -64,13 +66,14 @@ fun atomic_load_inner(ptr: &T, order: U8) -> T {
 !private !always_inline
 !intrinsic(name="std.threading.atomic.atomic_load_inner")
 !versioned(base="1.0.0", new="1.0.0")
-fun atomic_store_inner(ptr: &T, val: T, order: U8) -> Void {
+fun atomic_store_inner[T: Integral](ptr: &T, val: T, order: U8) -> Void {
     # The `atomic_store_inner` function is a low-level intrinsic function that implements the actual atomic store
     # operation. It is not intended to be called directly by user code, but is instead called by the public `store`
     # method of the `Atom` type after validating the memory order. The `ptr` parameter is a reference to the value to be
     # stored in the atomic variable, the `val` parameter is the value to be stored, and the `order` parameter specifies
     # the memory ordering of the store operation. The behavior of this function is platform-specific and is implemented
     # by the compiler using the appropriate atomic store instructions for the target architecture.
+    # @type T: The type of the value stored in the atomic variable.
     # @let ptr: A reference to the value to be stored in the atomic variable.
     # @let val: The value to be stored in the atomic variable.
     # @let order: The validated memory ordering of the store operation.
@@ -79,7 +82,7 @@ fun atomic_store_inner(ptr: &T, val: T, order: U8) -> Void {
 !private
 !intrinsic(name="std.threading.atomic.compare_exchange_inner")
 !versioned(base="1.0.0", new="1.0.0")
-fun compare_exchange_inner(ptr: &T, old: T, new: T, success_order: U8, failure_order: U8) -> (T, Bool) {
+fun compare_exchange_inner[T: Integral](ptr: &T, old: T, new: T, success_order: U8, failure_order: U8) -> (T, Bool) {
     # The `compare_exchange_inner` function is a low-level intrinsic function that implements the actual
     # compare-and-exchange operation. It is not intended to be called directly by user code, but is instead called by
     # the public `compare_exchange` method of the `Atom` type after validating the memory orders. The `ptr` parameter is
@@ -88,6 +91,7 @@ fun compare_exchange_inner(ptr: &T, old: T, new: T, success_order: U8, failure_o
     # parameters specify the memory ordering of the operation in the success and failure cases, respectively. The
     # behavior of this function is platform-specific and is implemented by the compiler using the appropriate atomic
     # compare-and-exchange instructions for the target architecture.
+    # @type T: The type of the value stored in the atomic variable.
     # @let ptr: A reference to the value to be modified in the atomic variable.
     # @let old: The expected value to compare against the current value of the atomic variable.
     # @let new: The value to be stored in the atomic variable if the current value matches the expected value.
@@ -100,7 +104,7 @@ fun compare_exchange_inner(ptr: &T, old: T, new: T, success_order: U8, failure_o
 !private
 !intrinsic(name="std.threading.atomic.compare_exchange_weak_inner")
 !versioned(base="1.0.0", new="1.0.0")
-fun compare_exchange_weak_inner(ptr: &T, old: T, new: T, success_order: U8, failure_order: U8) -> (T, Bool) {
+fun compare_exchange_weak_inner[T: Integral](ptr: &T, old: T, new: T, success_order: U8, failure_order: U8) -> (T, Bool) {
     # The `compare_exchange_weak_inner` function is a low-level intrinsic function that implements the actual weak
     # compare-and-exchange operation. It is not intended to be called directly by user code, but is instead called by
     # the public `compare_exchange_weak` method of the `Atom` type after validating the memory orders. The `ptr`
@@ -111,6 +115,7 @@ fun compare_exchange_weak_inner(ptr: &T, old: T, new: T, success_order: U8, fail
     # expected value, so it is typically used in a loop to retry the operation until it succeeds or the expected value
     # no longer matches the current value. The behavior of this function is platform-specific and is implemented by the
     # compiler using the appropriate weak atomic compare-and-exchange instructions for the target architecture.
+    # @type T: The type of the value stored in the atomic variable.
     # @let ptr: A reference to the value to be modified in the atomic variable.
     # @let old: The expected value to compare against the current value of the atomic variable.
     # @let new: The value to be stored in the atomic variable if the current value matches the expected value.
