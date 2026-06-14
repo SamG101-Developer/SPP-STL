@@ -17,6 +17,7 @@ use std::option::None
 use std::option::Opt
 use std::result::Fail
 use std::result::Res
+use std::view::View
 use std::void::Void
 use std::mem::raw_buf::RawBuf
 use std::ops::add::Add
