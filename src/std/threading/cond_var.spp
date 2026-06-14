@@ -8,9 +8,9 @@ use std::result::Fail
 use std::result::Pass
 use std::result::Res
 use std::void::Void
+use std::ops::del::Del
 use std::threading::mutex::Mutex
 use std::threading::thread::ThreadErr
-use std::ops::del::Del
 
 !public
 cls CondVar {
@@ -90,12 +90,12 @@ sup CondVar {
         # Build the C timespec struct for the timeout duration.
         let timespec = CTimeSpec(sec=timeout.seconds, nsec=timeout.nanoseconds)
         let err = sppc::pthread_cond_timedwait(&self.handle, &mutex.handle, 0, &timespec)
-        case err != 0 { ret Fail(err=LockErr(msg="Failed to wait on condition variable")) }
+        case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
         ret Pass[Void]()
     }
 
     !public
-    fun wait_timeout_while[T](&self, mutex: &Mutex[T], timeout: Duration, pred: FunMut[(&mut T), Bool]) -> Res[Bool, LockErr] {
+    fun wait_timeout_while[T](&self, mutex: &Mutex[T], timeout: Duration, pred: FunMut[(&mut T), Bool]) -> Res[Bool, ThreadErr] {
         # Wait on the condition variable with a timeout, releasing the associated mutex.
         let deadline = TimePoint::now() + timeout
         loop pred(self.val.get_mut()) {
@@ -103,23 +103,23 @@ sup CondVar {
             case remaining.is_zero() { ret Pass(val=false) }
             let timespec = CTimeSpec(sec=remaining.seconds, nsec=remaining.nanoseconds)
             let err = sppc::cond_timedwait(&self.handle, &mutex.handle, 0, &timespec)
-            case err != 0 { ret Fail(err=LockErr(msg="Failed to wait on condition variable")) }
+            case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
         }
     }
 
     !public
-    fun signal_one(&self) -> Res[Void, LockErr] {
+    fun signal_one(&self) -> Res[Void, ThreadErr] {
         # Signal one thread waiting on the condition variable.
         let err = sppc::cond_signal(&self.handle)
-        case err != 0 { ret Fail(err=LockErr(msg="Failed to signal condition variable")) }
+        case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
         ret Pass[Void]()
     }
 
     !public
-    fun signal_all(&self) -> Res[Void, LockErr] {
+    fun signal_all(&self) -> Res[Void, ThreadErr] {
         # Wake up all threads waiting on the condition variable.
         let err = sppc::cond_broadcast(&self.handle)
-        case err != 0 { ret Fail(err=LockErr(msg="Failed to broadcast condition variable")) }
+        case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
         ret Pass[Void]()
     }
 }
