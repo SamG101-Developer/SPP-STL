@@ -5,10 +5,14 @@ use std::io::StreamErr
 use std::io::Write
 use std::number::U8
 use std::number::USize
+use std::option::Opt
+use std::option::None
+use std::option::Some
 use std::result::Res
 use std::result::Fail
 use std::result::Pass
 use std::string_view::StrView
+use std::string::Str
 use std::view::View
 
 !package
