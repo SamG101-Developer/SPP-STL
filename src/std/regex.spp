@@ -27,10 +27,12 @@ cls Literal {
     !public val: U8
 }
 
-sup Literal ext Node {
+sup Literal {
     !public
     fun new(val: U8) -> Self { ret Literal(val) }
+}
 
+sup Literal ext Node {
     !public
     fun match(&self, str: Str, i: USize) -> Vec[USize] {
         ret case i < str.len() and str[i]@ == self.value { Vec::from([i + 1]) } else { Vec[USize]() }
@@ -44,10 +46,12 @@ cls CharClass {
     !public chars: Vec[U8]
 }
 
-sup CharClass ext Node {
+sup CharClass {
     !public
     fun new(chars: Vec[U8]) -> Self { ret CharClass(chars) }
+}
 
+sup CharClass ext Node {
     !public
     fun match(&self, str: Str, i: USize) -> Vec[USize] {
         ret case i < str.len() and self.chars.contains(str[i]) { Vec::from([i + 1]) } else { Vec[USize]() }
@@ -61,10 +65,12 @@ cls Sequence {
     !public nodes: Vec[Single[Node]]
 }
 
-sup Sequence ext Node {
+sup Sequence {
     !public
     fun new(nodes: Vec[Node]) -> Self { ret Sequence(nodes) }
+}
 
+sup Sequence ext Node {
     !public
     fun match(&self, str: Str, i: USize) -> Vec[USize] {
         let mut indices = Vec::from([i])
@@ -88,10 +94,12 @@ cls Alternation {
     !public rhs: Single[Node]
 }
 
-sup Alternation ext Node {
+sup Alternation {
     !public
     fun new(lhs: Node, rhs: Node) -> Self { ret Alternation(lhs, rhs) }
+}
 
+sup Alternation ext Node {
     !public
     fun match(&self, str: Str, i: USize) -> Vec[USize] {
         ret self.lhs.match(str, i) + self.rhs.match(str, i)
@@ -107,10 +115,12 @@ cls ZeroOrMore {
     !public node: Single[Node]
 }
 
-sup ZeroOrMore ext Node {
+sup ZeroOrMore {
     !public
     fun new(node: Node) -> Self { ret ZeroOrMore(node) }
+}
 
+sup ZeroOrMore ext Node {
     !public
     fun match(&self, str: Str, i: USize) -> Vec[USize] {
         let mut indices = Vec::from([i])
