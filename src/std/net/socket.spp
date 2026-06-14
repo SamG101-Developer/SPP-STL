@@ -32,7 +32,7 @@ cls Socket {
     # operations that require the local address, such as binding and listening.
 
     fd: S32
-    local: SocketAddr
+    local: SockAddr
 }
 
 sup Socket {
