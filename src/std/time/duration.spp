@@ -2,6 +2,9 @@ use std::annotations::package
 use std::annotations::public
 use std::number::U32
 use std::number::U64
+use std::option::None
+use std::option::Opt
+use std::option::Some
 use std::ops::add::Add
 use std::ops::sub::Sub
 use std::ops::mul::Mul
