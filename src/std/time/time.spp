@@ -1,5 +1,6 @@
 use std::annotations::public
 use std::annotations::versioned
+use std::annotations::zero_type
 use std::number::S32
 use std::result::Pass
 use std::result::Fail
