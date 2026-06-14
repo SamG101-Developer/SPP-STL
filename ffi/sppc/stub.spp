@@ -46,6 +46,12 @@ cls CStat {
     ctim: CTimespec
 }
 
+cls CPollfd {
+    fd: CInt
+    events: CShort
+    revents: CShort
+}
+
 !std::annotations::ffi(symbol="c_pthread_create")
 fun pthread_create(start_routine: &CVoidPtr, out: &mut CULongLong) -> CInt { }
 
