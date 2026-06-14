@@ -1,6 +1,7 @@
 use std::annotations::intrinsic
 use std::annotations::package
 use std::annotations::public
+use std::annotations::private
 use std::annotations::versioned
 use std::allocator::Alloc
 use std::allocator::AllocErr
