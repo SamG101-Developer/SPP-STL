@@ -229,11 +229,11 @@ fun set_status(fd: CInt, flags: CInt) -> CInt { }
 !std::annotations::ffi(symbol="c_poll")
 fun poll(fds: &mut CPollfd, count: CInt, duration: &CTimespec, out_n: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_readv")
-fun readv(fd: CInt, iov: &CIovec, iov_count: CInt, out_n: &mut CInt) -> CInt { }
-
-!std::annotations::ffi(symbol="c_writev")
-fun writev(fd: CInt, iov: &CIovec, iov_count: CInt, out_n: &mut CInt) -> CInt { }
+# !std::annotations::ffi(symbol="c_readv")
+# fun readv(fd: CInt, iov: &CIovec, iov_count: CInt, out_n: &mut CInt) -> CInt { }
+#
+# !std::annotations::ffi(symbol="c_writev")
+# fun writev(fd: CInt, iov: &CIovec, iov_count: CInt, out_n: &mut CInt) -> CInt { }
 
 !std::annotations::ffi(symbol="c_pread")
 fun pread(fd: CInt, buffer: &mut CVoidPtr, size: CULongLong, count: CULongLong, offset: CULong, out_n: &mut CInt) -> CInt { }
