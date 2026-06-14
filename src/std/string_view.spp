@@ -15,6 +15,7 @@ use std::string::Str
 use std::view::View
 use std::void::Void
 use std::mem::pointer::NonNull
+use std::ops::eq::Eq
 use std::ops::idx::SliceMut
 use std::ops::idx::SliceRef
 
