@@ -1,4 +1,5 @@
 use std::annotations::intrinsic
+use std::annotations::package
 use std::annotations::public
 use std::annotations::versioned
 use std::copy::Copy
