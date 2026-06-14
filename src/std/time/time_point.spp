@@ -1,6 +1,9 @@
 use std::annotations::public
 use std::number::S32
 use std::number::S64
+use std::result::Fail
+use std::result::Pass
+use std::result::Res
 use std::ops::add::Add
 use std::ops::sub::Sub
 use std::time::duration::Duration
