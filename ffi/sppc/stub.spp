@@ -18,6 +18,20 @@ cls CTimeval {
     !package usec: S64
 }
 
+cls CStatvfs {
+    block_size: ULong
+    frag_size: ULong
+    blocks: ULong
+    blocks_free: ULong
+    blocks_available: ULong
+    files: ULong
+    files_free: ULong
+    files_available: ULong
+    fs_id: ULong
+    flag: ULong
+    namemax: ULong
+}
+
 !std::annotations::ffi(symbol="c_pthread_create")
 fun pthread_create(start_routine: &CVoidPtr, out: &mut CULongLong) -> CInt { }
 
