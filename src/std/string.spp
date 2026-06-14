@@ -4,6 +4,7 @@ use std::annotations::public
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::cast::From
+use std::char::Char
 use std::generator::GenOnce
 use std::option::Opt
 use std::number::U8
