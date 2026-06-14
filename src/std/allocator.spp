@@ -230,7 +230,7 @@ sup Alloc {
 
     !public !virtual_method
     !versioned(base="1.0.0", new="1.0.0")
-    fun shrink(&self, ptr: NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[NonNull[U8], AllocErr] {
+    fun shrink(&self, mut ptr: NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[NonNull[U8], AllocErr] {
         # Reallocates a block of memory to a new smaller size. This method has a default implementation that first
         # allocates a new block of the desired size, copies bytes over, and then deallocates the existing memory block.
         # The method returns a Result type, as it has to handle the possibility of allocation failure during the
