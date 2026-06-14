@@ -25,7 +25,7 @@ cls RwLock[T] {
 sup [T] RwLock[T] {
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun new(val: T) -> RwLock {
+    fun new(val: T) -> RwLock[T] {
         # Create a new rwlock using the sppc threading API.
         let mut handle = 0_u64
         sppc::pthread_rwlock_init(&mut handle)
