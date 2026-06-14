@@ -1,3 +1,11 @@
+use std::string::Str
+use std::vec::Vec
+use std::number::USize
+use std::number::U8
+use std::option::Opt
+use std::option::None
+use std::option::Some
+
 # A PCRE-backend regex engine, for extreme performance, and a range of regex features.
 
 cls Node { }
@@ -7,7 +15,6 @@ sup Node {
     !abstract_method
     fun match(&self, str: Str, i: USize) -> Vec[USize] { }
 }
-
 
 # The literal node represents a single character in the regex, such as 'a' in the regex "a(b|c)*d". It matches if the
 # character at index i in the input string is equal to the literal value, and if so, it returns a vector containing the
@@ -26,7 +33,6 @@ sup Literal ext Node {
     }
 }
 
-
 # The char class node represents a character class in the regex, such as [a-z] or \d. It matches if the character at
 # index i in the input string is contained in the char class, and if so, it returns a vector containing the index of the
 # next character (i + 1). Otherwise, it returns an empty vector (no matches).
@@ -43,7 +49,6 @@ sup CharClass ext Node {
         ret case i < str.len() and self.chars.contains(str[i]) { Vec::from([i + 1]) } else { Vec[USize]() }
     }
 }
-
 
 # The sequence node represents a sequence of regex nodes, such as (ab)+. It matches if the sequence of nodes matches
 # starting at index i in the input string, and if so, it returns a vector containing the index of the next character
@@ -71,7 +76,6 @@ sup Sequence ext Node {
     }
 }
 
-
 # The alternation node represents an alternation of regex nodes, such as a|b. It matches if any of the nodes in the
 # alternation matches starting at index i in the input string, and if so, it returns a vector containing the index of
 # the next character after the match. Otherwise, it returns an empty vector (no matches).
@@ -89,7 +93,6 @@ sup Alternation ext Node {
         ret self.lhs.match(str, i) + self.rhs.match(str, i)
     }
 }
-
 
 # The 0-or-more quantifier node represents a regex node that can match zero or more times, such as a* or (ab)*. It
 # matches if the node matches starting at index i in the input string, and if so, it returns a vector containing the
