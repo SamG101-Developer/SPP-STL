@@ -1,3 +1,5 @@
+use std::annotations::public
+use std::annotations::versioned
 use std::io::Read
 use std::io::Write
 use std::io::StreamErr
