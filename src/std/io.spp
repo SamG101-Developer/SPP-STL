@@ -28,6 +28,8 @@ cls StreamWriteZeroError { }
 cls StreamOtherError { }
 
 # Merge them all into a single StreamErr.
+!public
+!versioned(base="1.0.0", new="1.0.0")
 type StreamErr = StreamEofError
     or StreamInterruptedError
     or StreamWouldBlockError
@@ -41,6 +43,7 @@ type StreamErr = StreamEofError
 
 sup StreamErr {
     !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun from_errno(errno: S32) -> Self {
         # The from_errno function is a helper function that maps platform-specific error codes (e.g., errno values on
         # Unix-like systems) to the appropriate StreamErr variants. This allows the stream implementations to convert
@@ -57,50 +60,47 @@ sup StreamErr {
     }
 }
 
-!public cls Read {
-    # The Read type defines the interface for reading bytes
-    # from a stream. It includes an abstract method "read"
-    # that must be implemented by any type that implements
-    # this interface. Optional methods that work off of the
-    # "read" method are also provided, such as "read_exact".
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls Read {
+    # The Read type defines the interface for reading bytes from a stream. It includes an abstract method `read` that
+    # must be implemented by any type that implements this interface. Optional methods that work off of the `read`
+    # method are also provided, such as `read_exact`.
     #
-    # Examples of types that implement Read are the console's
-    # stdin input, files and sockets. The Read interface is
-    # designed as the common "byte source" interface.
+    # Examples of types that implement Read are the console's stdin input, files and sockets. The Read interface is
+    # designed as the common `byte source` interface.
 }
 
-!public cls Write {
-    # The Write type defines the interface for writing bytes
-    # to a stream. It includes an abstract method "write"
-    # that must be implemented by any type that implements
-    # this interface. Optional methods that work off of the
-    # "write" method are also provided, such as "write_all".
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls Write {
+    # The Write type defines the interface for writing bytes to a stream. It includes an abstract method `write` that
+    # must be implemented by any type that implements this interface. Optional methods that work off of the `write`
+    # method are also provided, such as `write_all`.
     #
-    # Examples of types that implement Write are the console's
-    # stdout and stderr output, files and sockets. The Write
-    # interface is designed as the common "byte sink" interface.
+    # Examples of types that implement Write are the console's stdout and stderr output, files and sockets. The Write
+    # interface is designed as the common `byte sink` interface.
 }
 
-!public cls Seek {
-    # The Seek type defines the interface for seeking within
-    # a stream. It includes an abstract method "seek",
-    # "stream_len" and "stream_pos" that must be implemented
-    # by any type that implements this interface. Optional
-    # methods that work off of the "seek" method are also
-    # provided, such as "seek_from_start", "seek_from_end",
-    # and "rewind".
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls Seek {
+    # The Seek type defines the interface for seeking within a stream. It includes an abstract method `seek`,
+    # `stream_len` and `stream_pos` that must be implemented by any type that implements this interface. Optional
+    # methods that work off of the `seek` method are also provided, such as `seek_from_start`, `seek_from_end`, and
+    # `rewind`.
     #
-    # Examples of types that implement Seek are files and sockets
-    # that support seeking. The Seek interface is designed as
-    # the common "stream position" interface, allowing for
-    # random access within a stream.
+    # Examples of types that implement Seek are files and sockets that support seeking. The Seek interface is designed
+    # as the common `stream position` interface, allowing for random access within a stream.
 }
 
-!public cls BufRead[R: Read] {
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls BufRead[R: Read] {
     # The BufRead type is a wrapper around a Read type that provides buffering capabilities. It maintains an internal
-    # buffer to store bytes read from the inner reader, and provides methods to read from the buffer, consume bytes
-    # from the buffer, and read until a certain byte is encountered. The BufRead type is designed to optimize reading
-    # from sources that may have high latency or small read sizes, by reducing the number of read systems calls.
+    # buffer to store bytes read from the inner reader, and provides methods to read from the buffer, consume bytes from
+    # the buffer, and read until a certain byte is encountered. The BufRead type is designed to optimize reading from
+    # sources that may have high latency or small read sizes, by reducing the number of read systems calls.
     # @type R: The type of the inner reader that this BufRead wraps around. It must implement the Read interface.
     # @let inner: The inner reader that this BufRead wraps around.
     # @let buf: The internal buffer that stores bytes read from the inner reader.
@@ -115,7 +115,8 @@ sup StreamErr {
     !package eof: Bool
 }
 
-!public cls BufWrite[W: Write] {
+!public
+cls BufWrite[W: Write] {
     # The BufWrite type is a wrapper around a Write type that provides buffering capabilities. It maintains an internal
     # buffer to store bytes to be written to the inner writer, and provides methods to write to the buffer, flush the
     # buffer to the inner writer, and write all bytes in the buffer. The BufWrite type is designed to optimize writing
@@ -245,8 +246,7 @@ sup Write {
     !public
     !virtual_method
     fun write_all(&mut self, buf: &View[U8]) -> Res[Void, StreamErr] {
-        # Define a byte count of how many bytes have been written so far,
-        # and the target length.
+        # Define a byte count of how many bytes have been written so far, and the target length.
         let mut written = 0_uz
         let target = buf.len()
 
@@ -296,15 +296,12 @@ sup Seek {
         # or a `StreamErr` on failure. The specific behavior of the seek method (how it handles seeking beyond the
         # bounds of the stream) is determined by the implementation in the concrete type that implements the `Seek`
         # interface.
-        # @let offset: The offset to seek by. If `whence` is:
-        #   * `seek_set`: The offset is an absolute position from the start of the stream.
-        #   * `seek_cur`: The offset is a relative position from the current position in the stream.
-        #   * `seek_end`: The offset is a relative position from the end of the stream.
+        # @let offset: The offset to seek by. If `whence` is:   * `seek_set`: The offset is an absolute position from
+        # the start of the stream.   * `seek_cur`: The offset is a relative position from the current position in the
+        # stream.   * `seek_end`: The offset is a relative position from the end of the stream.
         # @let whence: An integer indicating how to interpret the offset parameter. It should be one of the following
-        # values:
-        #   * `seek_set` (0): Seek from the start of the stream.
-        #   * `seek_cur` (1): Seek from the current position in the stream.
-        #   * `seek_end` (2): Seek from the end of the stream.
+        # values:   * `seek_set` (0): Seek from the start of the stream.   * `seek_cur` (1): Seek from the current
+        # position in the stream.   * `seek_end` (2): Seek from the end of the stream.
         # @ret:
         # @note: Once enums are supported, the whence parameter should be changed to an enum type for better type safety
         # and readability.
@@ -374,25 +371,23 @@ sup [R: Read] BufRead[R] {
 
     !public
     fun new_with_capacity(&mut self, inner: R, capacity: USize) -> Self {
-        # Create a new buffer with the specified capacity, and initialize the
-        # position, filled byte count, and EOF flag to the defaults.
+        # Create a new buffer with the specified capacity, and initialize the position, filled byte count, and EOF flag
+        # to the defaults.
         let buf = Vec::new_with_capacity(capacity)
         ret Self(inner, buf)
     }
 
     !private
     fun buffered_len(&self) -> USize {
-        # The buffer length is defined as the number of bytes that have been
-        # filled into the buffer but have not yet been consumed (i.e., the
-        # number of bytes between the current position and the filled byte count).
+        # The buffer length is defined as the number of bytes that have been filled into the buffer but have not yet
+        # been consumed (i.e., the number of bytes between the current position and the filled byte count).
         ret self.filled - self.pos
     }
 
     !private
     fun refill(&mut self) -> Res[USize, StreamErr] {
-        # The use of the refill function is to ensure that the buffer is filled
-        # with bytes from the inner reader before we attempt to read from it.
-        # This is necessary because the buffer may be empty or
+        # The use of the refill function is to ensure that the buffer is filled with bytes from the inner reader before
+        # we attempt to read from it. This is necessary because the buffer may be empty or
 
         # If there are still bytes in the buffer that have been filled but not
         # consumed, we can just return the length of those bytes. If we are at
@@ -481,7 +476,7 @@ sup [R: Read] BufRead[R] {
         }
 
         out@ = Str::from_utf8(bytes.view())
-        .map_err((s: Utf8Err) StreamInvalidDataError())?
+            .map_err((s: Utf8Err) StreamInvalidDataError())?
     }
 }
 
@@ -499,7 +494,8 @@ sup [W: Write] BufWrite[W] {
         ret Self(inner, buf)
     }
 
-    !public cor flush_buf(&mut self) -> GenOnce[Res[Void, StreamErr]] {
+    !public
+    cor flush_buf(&mut self) -> GenOnce[Res[Void, StreamErr]] {
         let mut written = 0_uz
         let target = self.buf.len()
 

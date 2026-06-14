@@ -14,6 +14,7 @@ use std::result::Pass
 use std::string::Str
 use std::string_view::StrView
 use std::view::View
+use std::void::Void
 
 !package
 !versioned(base="1.0.0", new="1.0.0")
