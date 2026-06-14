@@ -1,5 +1,6 @@
 use std::cffi::CCharPtr
 use std::cffi::CInt
+use std::cffi::CUChar
 use std::cffi::CULongLong
 use std::cffi::CVoid
 use std::cffi::CVoidPtr
