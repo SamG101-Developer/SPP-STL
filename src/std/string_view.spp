@@ -533,26 +533,26 @@ sup StrView {
 
 sup StrView ext Eq {
     !versioned(base="1.0.0", new="1.0.0")
-    fun eq(&self, other: &Self) -> Bool {
+    fun eq(&self, that: &Self) -> Bool {
         #
         # @let other:
         # @ret:
 
-        case self.length != other.length { ret false }
+        case self.length != that.length { ret false }
         let matched = false
-        sppc::strcmp(&self.ptr, other.ptr, &mut matched)
+        sppc::strcmp(&self.ptr, that.ptr, &mut matched)
         ret matched
     }
 
     !versioned(base="1.0.0", new="1.0.0")
-    fun ne(&self, other: &Self) -> Bool {
+    fun ne(&self, that: &Self) -> Bool {
         #
         # @let other:
         # @ret:
 
-        case self.length != other.length { ret true }
+        case self.length != that.length { ret true }
         let matched = false
-        sppc::strcmp(&self.ptr, other.ptr, &mut matched)
+        sppc::strcmp(&self.ptr, that.ptr, &mut matched)
         ret matched.not
     }
 }
