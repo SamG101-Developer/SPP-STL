@@ -1,6 +1,7 @@
 use std::string::Str
 use std::number::USize
 use std::number::U8
+use std::single::Single
 use std::option::Opt
 use std::option::None
 use std::option::Some
