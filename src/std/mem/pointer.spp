@@ -1,5 +1,7 @@
 use std::annotations::public
 use std::annotations::intrinsic
+use std::annotations::versioned
+use std::annotations::zero_type
 use std::boolean::Bool
 use std::function::Fun
 use std::function::FunRef
@@ -20,6 +22,7 @@ cls NullptrErr {
 }
 
 !package
+!versioned(base="1.0.0", new="1.0.0")
 cls Ptr[T] {
     # The `Ptr` type is a simple wrapper around a raw pointer. It is never used outside of the standard library, and is
     # only used internally to low level collections within the STL. The fields that have a `Ptr` type are also only
@@ -33,6 +36,7 @@ cls Ptr[T] {
 }
 
 !package
+!versioned(base="1.0.0", new="1.0.0")
 cls NonNull[T] {
     # Whilst the `Ptr` class is a raw pointer wrapper, only exposed by the sppc allocation functions, the `NonNull`
     # wrapper is used to guarantee the non-nullability of a pointer. This is used in the implementation of `Vec` and
@@ -48,6 +52,7 @@ sup [T] NonNull[T] {
     type Element = T
 
     !package
+    !versioned(base="1.0.0", new="1.0.0")
     fun from_ptr(ptr: Ptr[T]) -> Res[NonNull[T], NullptrErr] {
         # Create a `NonNull` pointer from a raw pointer. This is safe because the `NonNull` type guarantees that the
         # pointer is never null.
@@ -65,10 +70,12 @@ sup [T] NonNull[T] {
 
     !package
     !intrinsic(name="spp.mem.pointer.NonNull.from_ptr_inner")
+    !versioned(base="1.0.0", new="1.0.0")
     fun from_ptr_inner(ptr: Ptr[T]) -> NonNull[T] { }
 
     !package
     !intrinsic(name="spp.mem.pointer.NonNull.from_func")
+    !versioned(base="1.0.0", new="1.0.0")
     fun from_func[F: Fun](func: F) -> NonNull[F] {
         # Convert a function into the function pointer type associated with it. This is needed to pass functions into
         # ffi calls, which only accept function pointers. Ffi must accept `void*` as the function pointer type and cast
@@ -83,6 +90,7 @@ sup [T] NonNull[T] {
 
     !package
     !intrinsic(name="spp.mem.pointer.NonNull.is_aligned")
+    !versioned(base="1.0.0", new="1.0.0")
     fun is_aligned(&self, align: USize) -> Bool {
         # The `is_aligned` method checks if the pointer is aligned to a given alignment. This is a compiler intrinsic,
         # as it can be implemented using a single instruction in LLVM. The `align` parameter is a power of two, and the
@@ -93,6 +101,7 @@ sup [T] NonNull[T] {
 
     !package
     !intrinsic(name="spp.mem.pointer.NonNull.write")
+    !versioned(base="1.0.0", new="1.0.0")
     fun write(&mut self, value: T) -> Void {
         # The `write` method writes a value to the memory location pointed to by the `NonNull` pointer. This is a
         # compiler intrinsic, as it can be implemented using a single instruction in LLVM. The method takes ownership of
@@ -103,6 +112,7 @@ sup [T] NonNull[T] {
 
     !package
     !intrinsic(name="spp.mem.pointer.NonNull.read")
+    !versioned(base="1.0.0", new="1.0.0")
     fun read(&self) -> T {
         # The `read` method reads a value from the memory location pointed to by the `NonNull` pointer. This is a
         # compiler intrinsic, as it can be implemented using a single instruction in LLVM. The method returns a copy of
@@ -116,6 +126,7 @@ sup [T] NonNull[T] ext FwdMut[&mut T] {
     # Provide a forwarding implementation for mutable references to the inner type of the `NonNull` pointer.
 
     !intrinsic(name="spp.mem.pointer.NonNull.fwd_mut")
+    !versioned(base="1.0.0", new="1.0.0")
     cor fwd_mut(&mut self) -> GenOnce[&mut T] {
         # Allow the `NonNull` pointer type to coalesce to the inner type, allowing for simple field access and method
         # calls on the inner type without additional dereferencing required. This is the mutable variant.
@@ -127,6 +138,7 @@ sup [T] NonNull[T] ext FwdRef[&T] {
     # Provide a forwarding implementation for immutable references to the inner type of the `NonNull` pointer.
 
     !intrinsic(name="spp.mem.pointer.NonNull.fwd_ref")
+    !versioned(base="1.0.0", new="1.0.0")
     cor fwd_ref(&self) -> GenOnce[&T] {
         # Allow the `NonNull` pointer type to coalesce to the inner type, allowing for simple field access and method
         # calls on the inner type without additional dereferencing required. This is the immutable variant.
