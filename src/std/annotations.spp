@@ -88,6 +88,12 @@ cmp fun variant_default[T]() -> Void { }
 cmp fun zero_type() -> Void { }
 
 !public
+!intrinsic(name="std.annotations.zero_type")
+!annotation(target=Annotation::class)
+!versioned(base="1.0.0", new="1.0.0")
+cmp fun cfg(platform: StrView = "") -> Void { }
+
+!public
 !intrinsic(name="std.annotations.zero_sized")
 !annotation(target=Annotation::all)
 !versioned(base="1.0.0", new="1.0.0")
