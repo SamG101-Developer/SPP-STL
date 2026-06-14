@@ -1,6 +1,7 @@
 use std::annotations::public
 use std::boolean::Bool
 use std::generator::Gen
+use std::number::SSize
 use std::ops::ord::Ord
 
 !public
