@@ -1,9 +1,10 @@
 use std::abort::abort
 use std::annotations::intrinsic
 use std::annotations::public
-use std::llvm::inline
+use std::annotations::versioned
 use std::boolean::Bool
 use std::limits::Limits
+use std::llvm::inline
 use std::number::U8
 use std::number::U32
 use std::number::U64

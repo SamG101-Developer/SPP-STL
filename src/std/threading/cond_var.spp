@@ -1,6 +1,7 @@
 use std::annotations::package
 use std::annotations::public
 use std::annotations::private
+use std::annotations::versioned
 use std::boolean::Bool
 use std::function::FunMut
 use std::number::U64
@@ -14,12 +15,14 @@ use std::threading::mutex::Mutex
 use std::threading::thread::ThreadErr
 
 !public
+!versioned(base="1.0.0", new="1.0.0")
 cls CondVar {
     !package handle: U64
 }
 
 sup CondVar {
     !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun new() -> Res[CondVar, ThreadErr] {
         # The `new` function creates a new `CondVar` instance. It initializes the condition variable using the sppc
         # threading API and returns a `Res` type that indicates success or failure. The `C` `errno` value is used to
@@ -36,6 +39,7 @@ sup CondVar {
     }
 
     !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun wait[T](&self, mutex: &Mutex[T]) -> Res[Void, ThreadErr] {
         # Wait on the condition variable, releasing the associated mutex. This function will block the current thread
         # until the condition variable is signaled. The mutex must be locked before calling this function, and it will
@@ -53,6 +57,7 @@ sup CondVar {
     }
 
     !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun wait_while[T](&self, mutex: &Mutex[T], pred: FunMut[(&mut T), Bool]) -> Res[Bool, ThreadErr] {
         # Wait on the condition variable while a predicate is true, releasing the associated mutex. This function will
         # block the current thread until the condition variable is signaled and the predicate returns false. The mutex
@@ -73,6 +78,7 @@ sup CondVar {
     }
 
     !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun wait_timeout[T](&self, mutex: &Mutex[T], timeout: Duration) -> Res[Void, ThreadErr] {
         # Wait on the condition variable with a timeout, releasing the associated mutex. This function will block the
         # current thread until the condition variable is signaled or the specified timeout has elapsed. The mutex must
@@ -96,6 +102,7 @@ sup CondVar {
     }
 
     !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun wait_timeout_while[T](&self, mutex: &Mutex[T], timeout: Duration, pred: FunMut[(&mut T), Bool]) -> Res[Bool, ThreadErr] {
         # Wait on the condition variable with a timeout, releasing the associated mutex.
         let deadline = TimePoint::now() + timeout
@@ -109,6 +116,7 @@ sup CondVar {
     }
 
     !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun signal_one(&self) -> Res[Void, ThreadErr] {
         # Signal one thread waiting on the condition variable.
         let err = sppc::cond_signal(&self.handle)
@@ -117,6 +125,7 @@ sup CondVar {
     }
 
     !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun signal_all(&self) -> Res[Void, ThreadErr] {
         # Wake up all threads waiting on the condition variable.
         let err = sppc::cond_broadcast(&self.handle)
@@ -126,6 +135,7 @@ sup CondVar {
 }
 
 sup CondVar ext Del {
+    !versioned(base="1.0.0", new="1.0.0")
     fun del(&mut self) -> Void {
         # Destroy the condition variable using the sppc threading API.
         sppc::cond_destroy(&self.handle)

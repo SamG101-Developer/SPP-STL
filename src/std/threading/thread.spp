@@ -1,6 +1,7 @@
 use std::annotations::package
 use std::annotations::public
 use std::annotations::private
+use std::annotations::versioned
 use std::boolean::Bool
 use std::function::FunMut
 use std::number::U64
@@ -13,26 +14,33 @@ use std::ops::del::Del
 use std::ops::eq::Eq
 
 !public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
 cls ThreadMemoryErr {
     # Indicates an error related to thread memory management, such as stack overflow or insufficient memory for thread
     # creation. This error type can be used to represent various memory-related issues that may arise during thread
     # operations. Mapped from the `ENOMEM` error code in `C`.
 }
 
-!public cls JoinHandle[Out] {
-    !package handle: U64
-}
-
-!public cls ThreadId {
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls JoinHandle[Out] {
     !package handle: U64
 }
 
 !public
+!versioned(base="1.0.0", new="1.0.0")
+cls ThreadId {
+    !package handle: U64
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
 cls ThreadErr {
     !public msg: StrView
 }
 
 !public
+!versioned(base="1.0.0", new="1.0.0")
 fun spawn[Out](function: FunMut[(), Out]) -> Res[JoinHandle[Out], ThreadErr] {
     # Spawn a new thread using the sppc threading API.
     let mut handle = 0_uz
@@ -42,6 +50,7 @@ fun spawn[Out](function: FunMut[(), Out]) -> Res[JoinHandle[Out], ThreadErr] {
 }
 
 !public
+!versioned(base="1.0.0", new="1.0.0")
 fun current() -> ThreadId {
     # Get the current thread using the sppc threading API.
     # Todo: use a ThreadId type for equality check.
@@ -51,6 +60,7 @@ fun current() -> ThreadId {
 }
 
 !public
+!versioned(base="1.0.0", new="1.0.0")
 fun yield_now() -> Void {
     # Yield the current thread using the sppc threading API.
     sppc::thread_yield()
@@ -59,6 +69,7 @@ fun yield_now() -> Void {
 
 sup [R] JoinHandle[R] {
     !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun detach(self) -> Res[Void, ThreadErr] {
         # Detach the thread using the sppc threading API.
         let err = sppc::thread_detach(self.handle)
@@ -67,6 +78,7 @@ sup [R] JoinHandle[R] {
     }
 
     !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun join(self) -> Res[R, ThreadErr] {
         # Join the thread using the sppc threading API.
         let err = sppc::thread_join(self.handle)
@@ -77,6 +89,7 @@ sup [R] JoinHandle[R] {
 
 ##
 sup [R] JoinHandle[R] ext Eq {
+    !versioned(base="1.0.0", new="1.0.0")
     fun eq(&self, that: &Self) -> Bool {
         # Compare thread IDs for equality.
         let err = sppc::thread_equal(self.handle, that.handle)
@@ -86,6 +99,7 @@ sup [R] JoinHandle[R] ext Eq {
 ##
 
 sup [R] JoinHandle[R] ext Del {
+    !versioned(base="1.0.0", new="1.0.0")
     fun del(&mut self) -> Void {
         # Ensure the thread is detached before deletion.
         sppc::thread_detach(self.handle)
