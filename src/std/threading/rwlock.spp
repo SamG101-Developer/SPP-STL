@@ -1,6 +1,8 @@
 use std::annotations::package
 use std::annotations::public
 use std::annotations::private
+use std::annotations::versioned
+use std::generator::GenOnce
 use std::number::U64
 use std::result::Fail
 use std::result::Pass
@@ -11,7 +13,8 @@ use std::void::Void
 use std::threading::thread::ThreadErr
 use std::ops::del::Del
 
-!public cls RwLock[T] {
+!public
+cls RwLock[T] {
     !package handle: U64
     !package val: Slot[T]
 }
