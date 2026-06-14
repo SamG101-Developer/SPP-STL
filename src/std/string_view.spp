@@ -10,6 +10,7 @@ use std::option::Opt
 use std::number::U8
 use std::number::USize
 use std::result::Res
+use std::string::Str
 use std::view::View
 use std::void::Void
 use std::mem::pointer::NonNull
@@ -200,7 +201,8 @@ sup StrView {
         ret self[start to self.length]@ == needle.view()
     }
 
-    !public fun contains(self, needle: &StrView) -> Bool {
+    !public
+    fun contains(self, needle: &StrView) -> Bool {
         #
         # @let needle:
         # @ret:
