@@ -1,7 +1,7 @@
 use std::annotations::public
 use std::annotations::private
 use std::boolean::Bool
-use std::number::S32
+use std::number::U64
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
@@ -10,6 +10,12 @@ use std::threading::thread::ThreadErr
 
 !public
 cls SpinLock {
+    # The `SpinLock` type is a low-level synchronization primitive that provides mutual exclusion for concurrent
+    # threads. It is implemented using a busy-waiting mechanism, where a thread repeatedly checks if the lock is
+    # available and acquires it when it becomes free. This type is useful in scenarios where the expected wait time for
+    # acquiring the lock is short, as it avoids the overhead of context switching associated with traditional mutexes.
+    # @let handle: A unique identifier for the spin lock, represented as a 64-bit unsigned integer.
+
     !private handle: U64
 }
 
@@ -29,7 +35,7 @@ sup SpinLock {
         case err != 0 { ret Fail(err=ThreadErr::from_errno(err))  }
         ret Pass[Void]()
     }
-    
+
     !public
     fun try_lock(&self) -> Res[Void, ThreadErr] {
         # Try to acquire the spin lock using the sppc threading API.
