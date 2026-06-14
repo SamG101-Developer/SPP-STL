@@ -2,11 +2,14 @@ use std::annotations::public
 use std::annotations::private
 use std::io::Read
 use std::io::StreamErr
+use std::io::Write
 use std::number::U8
 use std::number::USize
 use std::result::Res
 use std::result::Fail
+use std::result::Fail
 use std::result::Pass
+use std::string_view::StrView
 use std::view::View
 
 !package
@@ -40,8 +43,8 @@ sup StdinStream ext Read {
         # function defined in the `sppc` library, which is very close to the `C` `read` kernel function, but locks on a
         # global stdin pthread mutex.
         # @let buf: A mutable borrow to a view of bytes that will be filled with the data read from the standard input.
-        # The method will attempt to read up to `len` bytes into the buffer, where `len` is the length of the view.
-        # The buffer is modified in-place with the data read from the standard input.
+        # The method will attempt to read up to `len` bytes into the buffer, where `len` is the length of the view. The
+        # buffer is modified in-place with the data read from the standard input.
         # @ret: The number of bytes that were successfully read into the buffer, or an error if the read operation
         # fails.
 
