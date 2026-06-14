@@ -11,8 +11,8 @@ use std::option::Some
 use std::result::Res
 use std::result::Fail
 use std::result::Pass
-use std::string_view::StrView
 use std::string::Str
+use std::string_view::StrView
 use std::view::View
 
 !package
