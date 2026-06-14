@@ -31,6 +31,8 @@ use std::ops::iter::RevIterMut
 use std::ops::iter::RevIterRef
 use std::ops::idx::IndexMut
 use std::ops::idx::IndexRef
+use std::ops::fwd::FwdRef
+use std::ops::fwd::FwdMut
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
