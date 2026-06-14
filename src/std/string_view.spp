@@ -533,7 +533,7 @@ sup StrView {
 
 sup StrView ext Eq {
     !versioned(base="1.0.0", new="1.0.0")
-    fun eq(&self, other: &StrView) -> Bool {
+    fun eq(&self, other: &Self) -> Bool {
         #
         # @let other:
         # @ret:
@@ -545,7 +545,7 @@ sup StrView ext Eq {
     }
 
     !versioned(base="1.0.0", new="1.0.0")
-    fun ne(&self, other: &StrView) -> Bool {
+    fun ne(&self, other: &Self) -> Bool {
         #
         # @let other:
         # @ret:
