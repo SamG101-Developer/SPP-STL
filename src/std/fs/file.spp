@@ -56,17 +56,21 @@ sup FileMode {
 sup File {
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun open(path: Path, options: &FileOptions) -> Res[File, PathErr] {
+    fun open(path: Path, mode: &FileMode) -> Res[File, PathErr] {
         # The `open` method attempts to open the file at the specified path and returns a `Res` type that indicates
         # success or failure. The caller must have the necessary permissions to access the file, and the file must exist
         # unless the `create` option is set. If the file is successfully opened, a `File` object containing the file
         # descriptor and mode information is returned. If the operation fails, an error message is returned indicating
         # the reason for the failure.
+        # @let path: The path to the file to be opened. This is a `Path` object that represents the location of the file
+        # in the filesystem.
+        # @let mode: A reference to a `FileMode` object that specifies the mode in which the file should be opened
+        # (e.g., read, write, append, etc.).
         # @ret: A `Res` type containing a `File` object if the file is successfully opened, or an error message if the
         # operation fails.
 
-        let mut file = File(path, options)
-        let err = sppc::open(&self.inner.pointer, options.to_flags(), 0, &mut file.fd)
+        let mut file = File(path, mode)
+        let err = sppc::open(&self.inner.pointer, mode.to_flags(), 0, &mut file.fd)
         case err == 0 { ret Pass(val=file) } else { ret Fail(err=PathErr::from_errno(err)) }
     }
 
