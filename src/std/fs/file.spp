@@ -3,6 +3,7 @@ use std::annotations::versioned
 use std::boolean::Bool
 use std::io::Read
 use std::io::Seek
+use std::io::StreamErr
 use std::io::Write
 use std::number::S32
 use std::number::SSize
