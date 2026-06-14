@@ -19,17 +19,31 @@ cls CTimeval {
 }
 
 cls CStatvfs {
-    block_size: ULong
-    frag_size: ULong
-    blocks: ULong
-    blocks_free: ULong
-    blocks_available: ULong
-    files: ULong
-    files_free: ULong
-    files_available: ULong
-    fs_id: ULong
-    flag: ULong
-    namemax: ULong
+    block_size: CULong
+    frag_size: CULong
+    blocks: CULong
+    blocks_free: CULong
+    blocks_available: CULong
+    files: CULong
+    files_free: CULong
+    files_available: CULong
+    fs_id: CULong
+    flag: CULong
+    namemax: CULong
+}
+
+cls CStat {
+    dev: CULong
+    ino: CULong
+    nlink: CULong
+    mode: CUInt
+    uid: CUInt
+    gid: CUInt
+    block_size: CLong
+    blocks: CLong
+    atim: CTimespec
+    mtim: CTimespec
+    ctim: CTimespec
 }
 
 !std::annotations::ffi(symbol="c_pthread_create")
