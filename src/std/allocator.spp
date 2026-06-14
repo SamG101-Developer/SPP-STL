@@ -47,8 +47,8 @@ cls AllocOtherErr {
 !public
 !versioned(base="1.0.0", new="1.0.0")
 type AllocErr =
-    AllocOomErr or
-    AllocAlignmentErr
+AllocOomErr or
+AllocAlignmentErr
 
 sup AllocErr {
     fun from_errno(errno: S32) -> Self {
@@ -103,7 +103,8 @@ sup Layout {
     fun new_for_array[T](n: USize) -> Self {
         # The `new_for_array` function creates a new `Layout` for an array of `n` elements of type `T`, by using the
         # `size_of` and `align_of` functions from the `std::mem::ops` module. The created layout represents a contiguous
-        # block of memory that can hold `n` instances of type `T`, with the appropriate size and alignment for the entire array.
+        # block of memory that can hold `n` instances of type `T`, with the appropriate size and alignment for the
+        # entire array.
         # @type T: The type of the elements in the array for which the layout is being created.
         # @let n: The number of elements in the array, which is used to calculate the total size of the layout by
         # multiplying it with the size of a single element of type `T`.
@@ -173,12 +174,12 @@ sup Alloc {
 
     !public !virtual_method
     !versioned(base="1.0.0", new="1.0.0")
-    fun grow(&self, ptr: NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[NonNull[U8], AllocErr] {
+    fun grow(&self, old_ptr: NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[NonNull[U8], AllocErr] {
         # Reallocates a block of memory to a new larger size. This method has a default implementation that first
         # allocates a new block of the desired size, copies bytes over, and then deallocates the existing memory block.
         # The method returns a Result type, as it has to handle the possibility of allocation failure during the
         # growing.
-        # @let ptr: A `NonNull` pointer that represents the block of memory to be reallocated. The caller is
+        # @let old_ptr: A `NonNull` pointer that represents the block of memory to be reallocated. The caller is
         # transferring ownership of the memory to the allocator for reallocation, which ensures that manual reallocation
         # is safe and prevents issues such as double frees or use-after-free errors.
         # @let old_layout: A `Layout` instance that specifies the size and alignment requirements of the existing memory
@@ -193,19 +194,19 @@ sup Alloc {
         # process.
 
         let new_ptr = self.allocate(new_layout)?
-        std::mem::ops::mem_copy(&mut new_ptr, &ptr, old_layout.size)
-        self.deallocate(ptr)
+        std::mem::ops::mem_copy(&mut new_ptr, &old_ptr, old_layout.size)
+        self.deallocate(old_ptr)
         ret Pass(val=new_ptr)
     }
 
     !public !virtual_method
     !versioned(base="1.0.0", new="1.0.0")
-    fun grow_zeroed(&self, ptr: NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[NonNull[U8], AllocErr] {
+    fun grow_zeroed(&self, old_ptr: NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[NonNull[U8], AllocErr] {
         # Reallocates a block of memory to a new larger size, and initializes any new bytes to zero. This method has a
         # default implementation that first grows the memory block using the grow method, and then uses the mem_set
         # function from sppc to set any new bytes to zero. The method returns a Result type, as it has to handle the
         # possibility of allocation failure during the growing.
-        # @let ptr: A `NonNull` pointer that represents the block of memory to be reallocated. The caller is
+        # @let old_ptr: A `NonNull` pointer that represents the block of memory to be reallocated. The caller is
         # transferring ownership of the memory to the allocator for reallocation, which ensures that manual reallocation
         # is safe and prevents issues such as double frees or use-after-free errors.
         # @let old_layout: A `Layout` instance that specifies the size and alignment requirements of the existing memory
@@ -223,20 +224,20 @@ sup Alloc {
         # have been deallocated as part of the reallocation process.
 
         let new_ptr = self.allocate_zeroed(new_layout)?
-        std::mem::ops::mem_copy(&mut new_ptr, &ptr, old_layout.size)
-        self.deallocate(ptr)
+        std::mem::ops::mem_copy(&mut new_ptr, &old_ptr, old_layout.size)
+        self.deallocate(old_ptr)
         ret Pass(val=new_ptr)
     }
 
     !public !virtual_method
     !versioned(base="1.0.0", new="1.0.0")
-    fun shrink(&self, mut ptr: NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[NonNull[U8], AllocErr] {
+    fun shrink(&self, mut old_ptr: NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[NonNull[U8], AllocErr] {
         # Reallocates a block of memory to a new smaller size. This method has a default implementation that first
         # allocates a new block of the desired size, copies bytes over, and then deallocates the existing memory block.
         # The method returns a Result type, as it has to handle the possibility of allocation failure during the
         # shrinking, although this is less likely than during growing, it can still fail if the system is under heavy
         # memory pressure and cannot fulfill the allocation request for the new smaller block.
-        # @let ptr: A `NonNull` pointer that represents the block of memory to be reallocated. The caller is
+        # @let old_ptr: A `NonNull` pointer that represents the block of memory to be reallocated. The caller is
         # transferring ownership of the memory to the allocator for reallocation, which ensures that manual reallocation
         # is safe and prevents issues such as double frees or use-after-free errors.
         # @let old_layout: A `Layout` instance that specifies the size and alignment requirements of the existing memory
@@ -253,8 +254,8 @@ sup Alloc {
         # deallocated as part of the reallocation process.
 
         let new_ptr = self.allocate(new_layout)?
-        std::mem::ops::mem_copy(&mut new_ptr, &ptr, new_layout.size)
-        self.deallocate(ptr)
+        std::mem::ops::mem_copy(&mut new_ptr, &old_ptr, new_layout.size)
+        self.deallocate(old_ptr)
         ret Pass(val=new_ptr)
     }
 }
