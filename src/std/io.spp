@@ -389,7 +389,7 @@ sup [R: Read] BufRead[R] {
     }
 
     !private
-    fun refill(&mut self) -> Res[Usize, StreamErr] {
+    fun refill(&mut self) -> Res[USize, StreamErr] {
         # The use of the refill function is to ensure that the buffer is filled
         # with bytes from the inner reader before we attempt to read from it.
         # This is necessary because the buffer may be empty or
