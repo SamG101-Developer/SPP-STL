@@ -1,5 +1,6 @@
 use std::annotations::package
 use std::annotations::public
+use std::annotations::versioned
 use std::number::U32
 use std::number::U64
 use std::option::None
