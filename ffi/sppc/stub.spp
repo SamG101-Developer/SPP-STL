@@ -533,7 +533,7 @@ fun getsockname(fd: CInt, af: CInt, out_addr: &mut CCharPtr, out_port: &mut CUSh
 fun getpeername(fd: CInt, af: CInt, out_addr: &mut CCharPtr, out_port: &mut CUShort) -> CInt { }
 
 !std::annotations::ffi(symbol="c_clockgettime")
-fun c_clockgettime(clock_id: CInt, out_tp: &mut CTimespec) -> CInt { }
+fun clockgettime(clock_id: CInt, out_tp: &mut CTimespec) -> CInt { }
 
 !std::annotations::ffi(symbol="c_clock_nanosleep")
-fun c_clock_nanosleep(clock: CInt, flags: CInt, duration: &CTimespec) -> CInt { }
+fun clock_nanosleep(clock: CInt, flags: CInt, duration: &CTimespec) -> CInt { }
