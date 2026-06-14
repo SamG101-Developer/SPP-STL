@@ -1,4 +1,5 @@
 use std::annotations::public
+use std::annotations::versioned
 use std::boolean::Bool
 use std::function::FunRef
 use std::function::FunMut

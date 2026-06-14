@@ -1,6 +1,7 @@
 use std::annotations::package
 use std::annotations::public
 use std::annotations::intrinsic
+use std::annotations::versioned
 use std::boolean::Bool
 use std::char::Char
 use std::copy::Copy

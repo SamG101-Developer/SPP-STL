@@ -1,6 +1,7 @@
 use std::annotations::annotation
 use std::annotations::intrinsic
 use std::annotations::public
+use std::annotations::versioned
 use std::annotations::Annotation
 use std::void::Void
 

@@ -1,5 +1,6 @@
 use std::annotations::intrinsic
 use std::annotations::public
+use std::annotations::versioned
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::clone::Clone
@@ -14,6 +15,7 @@ use std::shadow::Shadow
 use std::void::Void
 
 !public
+!versioned(base="1.0.0", new="1.0.0")
 cls Shared[T, A: Alloc = GlobalAlloc] {
     shared_counter: USize
     shadow_counter: USize
@@ -24,18 +26,22 @@ sup [T] Shared[T] {
 
     !public
     !intrinsic(name="std.shared.Shared.new")
+    !versioned(base="1.0.0", new="1.0.0")
     fun new(val: T) -> Shared[T] { }
 
     !public
     !intrinsic(name="std.shared.Shared.downgrade")
+    !versioned(base="1.0.0", new="1.0.0")
     fun downgrade(&self) -> Shadow[T] { }
 
     !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun shares(&self) -> USize {
         ret self.shared_counter
     }
 
     !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun shadows(&self) -> USize {
         ret self.shadow_counter
     }
@@ -43,15 +49,18 @@ sup [T] Shared[T] {
 
 sup [T] Shared[T] ext FwdRef[T] {
     !intrinsic(name="std.shared.Shared.fwd_ref")
+    !versioned(base="1.0.0", new="1.0.0")
     cor fwd_ref(&self) -> GenOnce[&T] { }
 }
 
 sup [T] Shared[T] ext Clone {
     !intrinsic(name="std.shared.Shared.clone")
+    !versioned(base="1.0.0", new="1.0.0")
     fun clone(&self) -> Self { }
 }
 
 sup [T] Shared[T] ext Del {
     # TODO
+    !versioned(base="1.0.0", new="1.0.0")
     fun del(&mut self) -> Void { }
 }

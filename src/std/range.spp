@@ -1,10 +1,12 @@
 use std::annotations::public
+use std::annotations::versioned
 use std::boolean::Bool
 use std::generator::Gen
 use std::number::SSize
 use std::ops::ord::Ord
 
 !public
+!versioned(base="1.0.0", new="1.0.0")
 cls Range[T: Ord] {
     # The `Range` class represents a range of values of type `T`, where `T` is an orderable type. It defines a range
     # with a starting value, an ending value, and an optional step size. The range can be used to generate a sequence of
@@ -25,6 +27,7 @@ cls Range[T: Ord] {
 
 sup [T: Ord] Range[T] {
     !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun step_by(self, step: SSize) -> Range[T] {
         # The `step_by` method creates a new `Range` instance with the same starting and ending values as the current
         # range, but with a specified step size. The `step` parameter determines how much to increment the current value
@@ -39,6 +42,7 @@ sup [T: Ord] Range[T] {
     }
 
     !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun between(start: T, end: T) -> Range[T] {
         # The `between` method creates a new `Range` instance with the specified starting and ending values. The range
         # will generate values starting from `start` and ending before `end`, with a default step size of 1. This method

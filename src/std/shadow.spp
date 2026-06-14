@@ -1,10 +1,12 @@
 use std::annotations::intrinsic
 use std::annotations::public
+use std::annotations::versioned
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::shared::Shared
 
 !public
+!versioned(base="1.0.0", new="1.0.0")
 cls Shadow[T, A: Alloc = GlobalAlloc] { }
 
 sup [T] Shadow[T] {
@@ -12,5 +14,6 @@ sup [T] Shadow[T] {
 
     !public
     !intrinsic(name="std.shadow.Shadow.upgrade")
+    !versioned(base="1.0.0", new="1.0.0")
     fun upgrade(&self) -> Shared[T] { }
 }

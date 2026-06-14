@@ -1,8 +1,11 @@
+use std::annotations::public
+use std::annotations::versioned
 use std::number::U16
 use std::number::USize
 use std::view::View
 
 !public
+!versioned(base="1.0.0", new="1.0.0")
 cls Char {
     # The `Char` type i a validated U32 equivalent to a Unicode scalar value. It represents a single Unicode character
     # and is used to store and manipulate individual characters in strings. The `Char` type provides methods for
@@ -12,6 +15,8 @@ cls Char {
 }
 
 sup Char {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun len_utf8(self) -> USize {
         # Return the number of bytes that this character would take up in UTF-8 encoding. Fpr example, ASCII characters
         # would return 1, while some Unicode characters might return 2, 3, or 4.
@@ -27,6 +32,8 @@ sup Char {
         }
     }
 
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun encode_utf16(&self, buffer: &mut View[U16]) -> USize {
         # Encode this character into `UTF-16` and write it into the provided buffer. The buffer should have space for at
         # least 2 `U16` values.
