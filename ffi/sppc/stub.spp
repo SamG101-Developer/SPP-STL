@@ -11,6 +11,11 @@ cls CTimespec {
     !package nsec: S64
 }
 
+cls CTimeval {
+    !package sec: S64
+    !package usec: S64
+}
+
 !std::annotations::ffi(symbol="c_pthread_create")
 fun pthread_create(start_routine: &CVoidPtr, out: &mut CULongLong) -> CInt { }
 
