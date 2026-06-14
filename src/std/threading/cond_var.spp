@@ -89,7 +89,7 @@ sup CondVar {
         # out, it will return an error indicating that the wait operation timed out.
 
         # Build the C timespec struct for the timeout duration.
-        let timespec = CTimeSpec(sec=timeout.seconds, nsec=timeout.nanoseconds)
+        let timespec = CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
         let err = sppc::pthread_cond_timedwait(&self.handle, &mutex.handle, 0, &timespec)
         case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
         ret Pass[Void]()
@@ -102,7 +102,7 @@ sup CondVar {
         loop pred(self.val.get_mut()) {
             let remaining = deadline.sub_saturating(TimePoint::now())
             case remaining.is_zero() { ret Pass(val=false) }
-            let timespec = CTimeSpec(sec=remaining.seconds, nsec=remaining.nanoseconds)
+            let timespec = CTimespec(sec=remaining.seconds, nsec=remaining.nanoseconds)
             let err = sppc::cond_timedwait(&self.handle, &mutex.handle, 0, &timespec)
             case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
         }

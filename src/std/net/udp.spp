@@ -1,4 +1,4 @@
-use sppc::CTimeSpec
+use sppc::CTimespec
 use std::net::socket::Socket
 use std::net::socket::SockAddr
 use std::net::socket::SockErr
@@ -102,7 +102,7 @@ sup UdpSocket {
         # zero, then there is no timeout and the receive operation will block indefinitely until data is received.
         # @ret: A result indicating whether the operation was successful or not.
 
-        let timespec = CTimeSpec(sec=timeout.seconds, nsec=timeout.nanoseconds)
+        let timespec = CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
         let err = sppc::set_recv_timeout(self.fd, &timespec)
         case err == 0 { ret SockErr::from_errno(err) }
         ret Pass[Void]()
@@ -117,7 +117,7 @@ sup UdpSocket {
         # @ret: A result containing the receive timeout for the socket if successful, or a `SockErr` if there was an
         # error.
 
-        let mut timespec = CTimeSpec()
+        let mut timespec = CTimespec()
         let err = sppc::get_recv_timeout(self.fd, &mut timespec)
         case err < 0 { ret Fail(err=SockErr::from_errno(timespec)) }
         ret Pass(val=Duration(seconds=timespec.sec, nanoseconds=timespec.nsec))
@@ -133,7 +133,7 @@ sup UdpSocket {
         # zero, then there is no timeout and the send operation will block indefinitely until data is sent.
         # @ret: A result indicating whether the operation was successful or not.
 
-        let timespec = CTimeSpec(sec=timeout.seconds, nsec=timeout.nanoseconds)
+        let timespec = CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
         let err = sppc::set_send_timeout(self.fd, &timespec)
         case err == 0 { ret SockErr::from_errno(err) }
         ret Pass[Void]()
@@ -147,7 +147,7 @@ sup UdpSocket {
         # returns an error.
         # @ret: A result containing the send timeout for the socket if successful, or a `SockErr` if there was an error.
 
-        let mut timespec = CTimeSpec()
+        let mut timespec = CTimespec()
         let err = sppc::get_send_timeout(self.fd, &mut timespec)
         case err < 0 { ret Fail(err=SockErr::from_errno(timespec)) }
         ret Pass(val=Duration(seconds=timespec.sec, nanoseconds=timespec.nsec))

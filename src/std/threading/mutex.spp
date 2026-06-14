@@ -55,7 +55,7 @@ sup [T] Mutex[T] {
     !versioned(base="1.0.0", new="1.0.0")
     cor timed_lock(&self, timeout: Duration) -> GenOnce[&mut T] {
         # Timed lock the mutex using the sppc threading API. Todo: Error Handling.
-        let timespec = CTimeSpec(sec=timeout.seconds, nsec=timeout.nanoseconds)
+        let timespec = CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
         sppc::mutex_timedlock(&self.handle, &timespec)
         gen &mut self.val.get_mut()
         sppc::mutex_unlock(&self.handle)
