@@ -1,5 +1,6 @@
 use std::annotations::abstract_method
 use std::annotations::package
+use std::annotations::private
 use std::annotations::public
 use std::annotations::versioned
 use std::annotations::virtual_method
