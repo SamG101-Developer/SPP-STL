@@ -1,10 +1,10 @@
 use std::string::Str
-use std::vec::Vec
 use std::number::USize
 use std::number::U8
 use std::option::Opt
 use std::option::None
 use std::option::Some
+use std::vector::Vec
 
 # A PCRE-backend regex engine, for extreme performance, and a range of regex features.
 
