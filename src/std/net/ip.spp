@@ -11,7 +11,7 @@ cls IpV4Addr {
     # converting it to a string, and comparing two IPv4 addresses for equality.
     # @let octets: An array of four unsigned 8-bit integers representing the octets of the IPv4 address.
 
-    octets: [U8; 4]
+    octets: [U8; 4_u64]
 }
 
 cls IpV6Addr {
@@ -20,7 +20,7 @@ cls IpV6Addr {
     # address from a string, converting it to a string, and comparing two IPv6 addresses for equality.
     # @let segments: An array of eight unsigned 16-bit integers representing the segments of the IPv6 address.
 
-    segments: [U16; 8]
+    segments: [U16; 8_u64]
 }
 
 type IpAddr = IpV4Addr or IpV6Addr
