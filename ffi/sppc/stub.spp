@@ -2,6 +2,7 @@ use std::cffi::CBool
 use std::cffi::CCharPtr
 use std::cffi::CInt
 use std::cffi::CUChar
+use std::cffi::CUInt
 use std::cffi::CULongLong
 use std::cffi::CULong
 use std::cffi::CUShort
