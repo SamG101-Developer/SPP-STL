@@ -1,3 +1,6 @@
+use std::number::U16
+use std::view::View
+
 !public
 cls Char {
     # The `Char` type i a validated U32 equivalent to a Unicode scalar value. It represents a single Unicode character
