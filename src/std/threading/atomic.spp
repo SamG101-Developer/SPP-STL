@@ -20,11 +20,11 @@ cls Atom[T: Integral] {
     # specified using the `order` parameter.
     #
     # Notes for the future:
-    #   * When enums are supported, the memory ordering will be an enum (over U8).
-    #   * Integral is only superimposed by Bool and Number => not too broad.
-    #   * The `new_zeroed` function is fine because of default uniform initialization.
-    #   * The exchange functions copy because only primitives are supported, so there are no ownership or borrowing
-    # issues to
+    # - When enums are supported, the memory ordering will be an enum (over U8).
+    # - Integral is only superimposed by Bool and Number => not too broad.
+    # - The `new_zeroed` function is fine because of default uniform initialization.
+    # - The exchange functions copy because only primitives are supported, so there are no ownership or borrowing issues
+    # to.
     #
     # @type T: The type of the value stored in the atomic variable. It must be an integral type (`Bool` or a numeric
     # type).
