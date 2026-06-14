@@ -1,5 +1,4 @@
 use std::boolean::Bool
-use std::number::U8
 use std::number::USize
 use std::option::None
 use std::option::Opt
@@ -221,14 +220,14 @@ sup [T] View[T] ext RevIterMut[T] {
     cor reverse_iter_mut(&mut self) -> Iterator[&mut T] { }
 }
 
-sup [T] View[T] ext SliceRef[U8, USize] {
+sup [T] View[T] ext SliceRef[T, USize] {
     !intrinsic(name="std.view.View.slice_ref")
     !versioned(base="1.0.0", new="1.0.0")
-    cor slice_ref(&self, from: USize, into: USize) -> GenOnce[&View[U8]] { }
+    cor slice_ref(&self, from: USize, into: USize) -> GenOnce[&View[T]] { }
 }
 
-sup [T] View[T] ext SliceMut[U8, USize] {
+sup [T] View[T] ext SliceMut[T, USize] {
     !intrinsic(name="std.view.View.slice_mut")
     !versioned(base="1.0.0", new="1.0.0")
-    cor slice_mut(&mut self, from: USize, into: USize) -> GenOnce[&mut View[U8]] { }
+    cor slice_mut(&mut self, from: USize, into: USize) -> GenOnce[&mut View[T]] { }
 }
