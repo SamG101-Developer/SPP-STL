@@ -85,7 +85,7 @@ sup [T] RwLock[T] {
     }
 }
 
-sup RwLock[T] ext Del {
+sup [T] RwLock[T] ext Del {
     !versioned(base="1.0.0", new="1.0.0")
     fun del(&mut self) -> Void {
         # Destroy the rwlock using the sppc threading API.
