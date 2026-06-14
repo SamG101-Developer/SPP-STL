@@ -1,8 +1,9 @@
+use std::cffi::CInt
+use std::cffi::CVoid
+
 cls CTimeSpec {
-    !package
-    sec: S64
-    !package
-    nsec: S64
+    !package sec: S64
+    !package nsec: S64
 }
 
 !std::annotations::ffi(symbol="c_pthread_create")
