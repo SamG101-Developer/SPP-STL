@@ -2,6 +2,7 @@ use std::annotations::abstract_method
 use std::annotations::intrinsic
 use std::annotations::public
 use std::annotations::versioned
+use std::annotations::zero_type
 use std::generator::GenOnce
 use std::option::None
 use std::result::Res
