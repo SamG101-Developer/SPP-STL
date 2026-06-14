@@ -7,8 +7,11 @@ use std::iterator::Indexed
 use std::iterator::Iterator
 use std::mem::pointer::NonNull
 use std::ops::idx::IndexRef
+use std::ops::idx::IndexMut
 use std::ops::iter::IterRef
+use std::ops::iter::IterMut
 use std::ops::iter::RevIterRef
+use std::ops::iter::RevIterMut
 use std::ops::eq::Eq
 
 !public
