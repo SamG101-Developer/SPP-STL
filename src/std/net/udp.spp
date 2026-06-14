@@ -32,7 +32,7 @@ sup UdpSocket {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun send_to(&mut self, buf: &Vire[U8], addr: &SockAddr) -> Res[USize, SockErr] {
+    fun send_to(&mut self, buf: &View[U8], addr: &SockAddr) -> Res[USize, SockErr] {
         # The `send_to` method sends data from the provided buffer to the specified socket address. It returns a `Res`
         # type that indicates success or failure. On success, it returns the number of bytes sent.
         # @let buf: A borrow to a buffer containing the data to be sent.
