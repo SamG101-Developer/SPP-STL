@@ -5,6 +5,7 @@ use std::result::Fail
 use std::result::Res
 use std::string_view::StrView
 use std::void::Void
+use std::time::time_point::TimePoint
 
 !public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
