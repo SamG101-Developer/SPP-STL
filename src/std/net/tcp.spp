@@ -1,8 +1,14 @@
 use std::io::Read
 use std::io::Write
+use std::io::StreamErr
+use std::boolean::Bool
+use std::number::U32
+use std::number::USize
+use std::number::S32
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
+use std::void::Void
 use std::net::socket::Socket
 use std::net::socket::SockAddr
 use std::net::socket::SockErr
