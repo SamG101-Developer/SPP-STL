@@ -1,4 +1,5 @@
 use std::annotations::public
+use std::annotations::versioned
 use std::number::S32
 use std::number::S64
 use std::result::Fail
