@@ -1,5 +1,3 @@
-use std::annotations::public
-use std::annotations::ffi
 use std::cffi::CBool
 use std::cffi::CCharPtr
 use std::cffi::CInt
