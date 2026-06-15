@@ -244,7 +244,7 @@ sup BigUInt ext std::ops::bit_shl::BitShlAssign {
         val.data.resize(self.data.len() + USize::from(word_shift) + 1_uz, 0_u32)
 
         loop i in Range[USize]::between(0_uz, self.data.len()) {
-            let shifted = U64::from(self.data[i]@) << U64::from(bit_shift)
+            let shifted = U64::from(self.data[i]@) << bit_shift
             val.data[mut i + USize::from(word_shift) + 0_uz]@ |= U32::from(shifted & 0xFFFFFFFF_u64)
             val.data[mut i + USize::from(word_shift) + 1_uz]@ |= U32::from(shifted >> 32_u64)
         }
@@ -269,7 +269,7 @@ sup BigUInt ext std::ops::bit_shr::BitShrAssign {
 
         loop i in Range[USize]::between(word_shift, self.data.len()) {
             let shifted = U64::from(self.data[i]@)
-            case i + 1_uz < self.data.len() { shifted |= U64::from(self.data[i + 1_uz]@) << 32_u64 }
+            case i + 1_uz < self.data.len() { shifted |= U64::from(self.data[i + 1_uz]@) << 32_u32 }
             shifted >>= U64::from(bit_shift)
             val.data[mut i - USize::from(word_shift)]@ = U32::from(shifted & 0xFFFFFFFF_u64)
         }
