@@ -34,6 +34,28 @@ sup UdpSocket {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
+    fun bind(addr: SockAddr) -> Res[UdpSocket, SockErr] {
+        #
+        # @let addr:
+        # @ret:
+
+        # Create the file descriptor from the address.
+        let fd = sppc::socket(addr.ip().family(), constants::sock_dgram, 0)
+        case fd < 0 { ret Fail(err=SockErr::from_errno(fd)) }
+
+        # Create the `UdpSocket` object with the file descriptor.
+        let listener = UdpSocket(fd)
+        let err = sppc::bind(listener.fd, addr.ip().family(), addr.ip(), addr.port())
+        case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+
+        # Bind information to this socket.
+        self.local = addr
+        self.fd = fd
+        ret Pass(listener)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun send_to(&mut self, buf: &View[U8], addr: &SockAddr) -> Res[USize, SockErr] {
         # The `send_to` method sends data from the provided buffer to the specified socket address. It returns a `Res`
         # type that indicates success or failure. On success, it returns the number of bytes sent.
