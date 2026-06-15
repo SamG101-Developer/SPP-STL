@@ -96,7 +96,7 @@ sup IpV4Addr {
         ret (
             self.is_private() or self.is_shared() or self.is_loopback() or self.is_link_local() or
             self.is_documentation() or self.is_benchmarking() or self.is_reserved() or self.is_broadcast() or
-            self.octets is [192_u8, 0_u8, 0_u8, d] and d != 9 and d != 10).not
+            self.octets is [192_u8, 0_u8, 0_u8, d] and d != 9_u8 and d != 10_u8).not
     }
 
     !public
