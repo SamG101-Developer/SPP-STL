@@ -270,7 +270,7 @@ sup BigUInt ext std::ops::bit_shr::BitShrAssign {
         loop i in Range[USize]::between(word_shift, self.data.len()) {
             let shifted = U64::from(self.data[i]@)
             case i + 1_uz < self.data.len() { shifted |= U64::from(self.data[i + 1_uz]@) << 32_u32 }
-            shifted >>= bit_shift
+            shifted >>= U32::from(bit_shift)
             val.data[mut i - USize::from(word_shift)]@ = U32::from(shifted & 0xFFFFFFFF_u64)
         }
 
