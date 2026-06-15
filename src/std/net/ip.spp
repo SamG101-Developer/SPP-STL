@@ -277,6 +277,7 @@ sup IpV6Addr {
             }.not { true }
             is [0x2002_u16, ..] { true }
             is [0x5f00_u16, ..] { true }
+            else { false }
         }
     }
 
