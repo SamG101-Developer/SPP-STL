@@ -396,7 +396,7 @@ sup IpAddr {
         # address is an IPv4 or IPv6 address when working with sockets and other network-related functionality.
         # @ret: The address family of the IP address.
 
-        case self of {
+        case self@ of {
             is IpV4Addr(..) { self.family() }
             is IpV6Addr(..) { self.family() }
         }
