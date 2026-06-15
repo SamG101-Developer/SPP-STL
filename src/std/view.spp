@@ -1,4 +1,5 @@
 use std::annotations::intrinsic
+use std::annotations::package
 use std::annotations::public
 use std::annotations::versioned
 use std::boolean::Bool
@@ -32,7 +33,7 @@ cls View[T] {
     # @let length: The number of elements in the view. This length is used to determine the bounds of the view and to
     # provide efficient access to the elements.
 
-    ptr: NonNull[T]
+    !package ptr: NonNull[T]
     length: USize
 }
 

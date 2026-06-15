@@ -65,7 +65,7 @@ sup UdpSocket {
         # operation fails.
 
         let mut bytes_sent = 0_uz
-        let err = sppc::sendto(self.fd, buf, buf.len(), addr.ip().family(), addr.ip(), addr.port(), &mut bytes_sent)
+        let err = sppc::sendto(self.fd, &buf.ptr, buf.len(), addr.ip().family(), addr.ip(), addr.port(), &mut bytes_sent)
         case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(val=bytes_sent)
     }
@@ -82,7 +82,7 @@ sup UdpSocket {
 
         let mut bytes_received = 0_uz
         let mut addr: SockAddr = case self.local.ip().family() == constants::af_inet { SockV4Addr() } else { SockV6Addr() }
-        let err = sppc::recvfrom(self.fd, buf, buf.len(), &mut addr.ip(), &mut addr.port(), &mut bytes_received)
+        let err = sppc::recvfrom(self.fd, &mut buf.ptr, buf.len(), &mut addr.ip(), &mut addr.port(), &mut bytes_received)
         case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(val=(bytes_received, SockAddr::V4(addr)))
     }
