@@ -36,9 +36,9 @@ sup IpV4Addr {
     # @cmp localhost: The localhost address is an IP address that points back to the same device.
     # @cmp unspecified: The unspecified address is an IP address that has not been assigned a specific value.
 
-    cmp broadcast: Self = Self(octets=[255, 255, 255, 255])
-    cmp localhost: Self = Self(octets=[127, 0, 0, 1])
-    cmp unspecified: Self = Self(octets=[0, 0, 0, 0])
+    cmp broadcast: Self = Self(octets=[255_u8, 255_u8, 255_u8, 255_u8])
+    cmp localhost: Self = Self(octets=[127_u8, 0_u8, 0_u8, 1_u8])
+    cmp unspecified: Self = Self(octets=[0_u8, 0_u8, 0_u8, 0_u8])
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
@@ -47,7 +47,7 @@ sup IpV4Addr {
         # scenarios. In IPv4, there is a specific range of benchmarking addresses that is reserved for these purposes.
         # @ret: `true` if the IP address is a benchmarking address, `false` otherwise.
 
-        ret self.octets[0] == 198 and (self.octets[1] & 254) == 18
+        ret self.octets[0] == 198_u8 and (self.octets[1] & 254_u8) == 18_u8
     }
 
     !public
@@ -75,9 +75,9 @@ sup IpV4Addr {
         # @ret: `true` if the IP address is a documentation address, `false` otherwise.
 
         case self.octets of {
-            is [192, 0, 2, _] { ret true }
-            is [198, 51, 100, _] { ret true }
-            is [203, 0, 113, _] { ret true }
+            is [192_u8, 0_u8, 2_u8, _] { ret true }
+            is [198_u8, 51_u8, 100_u8, _] { ret true }
+            is [203_u8, 0_u8, 113_u8, _] { ret true }
             else { ret false }
         }
     }
@@ -96,7 +96,7 @@ sup IpV4Addr {
         ret (
             self.is_private() or self.is_shared() or self.is_loopback() or self.is_link_local() or
             self.is_documentation() or self.is_benchmarking() or self.is_reserved() or self.is_broadcast() or
-            self.octets is [192, 0, 0, d] and d != 9 and d != 10).not
+            self.octets is [192_u8, 0_u8, 0_u8, d] and d != 9 and d != 10).not
     }
 
     !public
@@ -110,7 +110,7 @@ sup IpV4Addr {
         # network segments or the public internet.
         # @ret: `true` if the IP address is a link-local address, `false` otherwise.
 
-        ret self.octets[0] == 169 and self.octets[1] == 254
+        ret self.octets[0] == 169_u8 and self.octets[1] == 254_u8
     }
 
     !public
@@ -123,7 +123,7 @@ sup IpV4Addr {
         # over the network.
         # @ret: `true` if the IP address is a loopback address, `false` otherwise.
 
-        ret self.octets[0] == 127
+        ret self.octets[0] == 127_u8
     }
 
     !public
@@ -137,7 +137,7 @@ sup IpV4Addr {
         # address, allowing them to receive the data without needing to be individually addressed.
         # @ret: `true` if the IP address is a multicast address, `false` otherwise.
 
-        ret self.octets[0] >= 224 and self.octets[0] <= 239
+        ret self.octets[0] >= 224_u8 and self.octets[0] <= 239_u8
     }
 
     !public
@@ -148,9 +148,9 @@ sup IpV4Addr {
         # @ret: `true` if the IP address is a private address, `false` otherwise.
 
         case self.octets of {
-            is [10, _, _, _] { ret true }
-            is [172, b, _, _] and (b >= 16 and b <= 31) { ret true }
-            is [192, 168, _, _] { ret true }
+            is [10_u8, _, _, _] { ret true }
+            is [172_u8, b, _, _] and (b >= 16_u8 and b <= 31_u8) { ret true }
+            is [192_u8, 168_u8, _, _] { ret true }
             else { ret false }
         }
     }
@@ -163,7 +163,7 @@ sup IpV4Addr {
         # future use, documentation, or special functions.
         # @ret: `true` if the IP address is a reserved address, `false` otherwise.
 
-        ret self.octets[0] & 240 == 240 and self.is_broadcast().not
+        ret self.octets[0] & 240_u8 == 240_u8 and self.is_broadcast().not
     }
 
     !public
@@ -174,7 +174,7 @@ sup IpV4Addr {
         # are reserved for these purposes.
         # @ret: `true` if the IP address is a shared address, `false` otherwise.
 
-        ret self.octets[0] == 100 and (self.octets[1] & 192) == 64
+        ret self.octets[0] == 100_u8 and (self.octets[1] & 192_u8) == 64_u8
     }
 
     !public
@@ -187,7 +187,7 @@ sup IpV4Addr {
         # is not valid for communication and cannot be assigned to any device.
         # @ret: `true` if the IP address is an unspecified address, `false` otherwise.
 
-        ret self.octets == [0, 0, 0, 0]
+        ret self.octets == Self::unspecified.octets
     }
 
     !public
@@ -212,8 +212,8 @@ sup IpV6Addr {
     # @cmp unspecified: The unspecified address is an IP address that has not been assigned a specific value. In IPv6,
     # the unspecified address is represented as `::`.
 
-    cmp loopback: Self = Self(segments=[0, 0, 0, 0, 0, 0, 0, 1])
-    cmp unspecified: Self = Self(segments=[0, 0, 0, 0, 0, 0, 0, 0])
+    cmp loopback: Self = Self(segments=[0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16])
+    cmp unspecified: Self = Self(segments=[0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16])
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
@@ -227,7 +227,7 @@ sup IpV6Addr {
         # on the internet.
         # @ret: `true` if the IP address is a benchmarking address, `false` otherwise.
 
-        ret self.segments[0] == 0x2001 and self.segments[1] == 0x2 and self.segments[2] == 0
+        ret self.segments[0] == 0x2001_u16 and self.segments[1] == 0x2_u16 and self.segments[2] == 0_u16
     }
 
     !public
@@ -242,8 +242,8 @@ sup IpV6Addr {
         # @ret: `true` if the IP address is a documentation address, `false` otherwise.
 
         case self.segments of {
-            is [0x2001, 0xdb8, ..] { ret true }
-            is [0x3fff, b, ..] and 0 <= b <= 0x0fff { ret true }
+            is [0x2001_u16, 0xdb8_u16, ..] { ret true }
+            is [0x3fff_u16, b, ..] and 0_u16 <= b <= 0x0fff_u16 { ret true }
             else { ret false }
         }
     }
@@ -264,19 +264,19 @@ sup IpV6Addr {
         }
 
         ret case self.segments of {
-            is [0, 0, 0, 0, 0, 0xffff, ..] { true }
-            is [0x64, 0xff9b, 1, ..] { true }
-            is [0x100, 0, 0, 0, ..] { true }
-            is [0x2001, b, 0, 0, .., h] and b < 0x200 and case self.segments of {
-                is [0x2001, 0x0001, .., 0x0001] { true }
-                is [0x2001, 0x0001, .., 0x0002] { true }
-                is [0x2001, 0x0003, ..] { true }
-                is [0x2001, 0x0004, 0x112, ..] { true }
-                is [0x2001, b, ..] and 0x20 <= b <= 0x3f { true }
+            is [0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0xffff_u16, ..] { true }
+            is [0x64_u16, 0xff9b_u16, 1_u16, ..] { true }
+            is [0x100_u16, 0_u16, 0_u16, 0_u16, ..] { true }
+            is [0x2001_u16, b, 0_u16, 0_u16, .., h] and b < 0x200_u16 and case self.segments of {
+                is [0x2001_u16, 0x0001_u16, .., 0x0001_u16] { true }
+                is [0x2001_u16, 0x0001_u16, .., 0x0002_u16] { true }
+                is [0x2001_u16, 0x0003_u16, ..] { true }
+                is [0x2001_u16, 0x0004_u16, 0x112_u16, ..] { true }
+                is [0x2001_u16, b, ..] and 0x20_u16 <= b <= 0x3f_u16 { true }
                 else { false }
             }.not { true }
-            is [0x2002, ..] { true }
-            is [0x5f00, ..] { true }
+            is [0x2002_u16, ..] { true }
+            is [0x5f00_u16, ..] { true }
         }
     }
 
@@ -304,7 +304,7 @@ sup IpV6Addr {
         # address, allowing them to receive the data without needing to be individually addressed.
         # @ret: `true` if the IP address is a multicast address, `false` otherwise.
 
-        ret self.segments[0] & 0xff00 == 0xff00
+        ret self.segments[0] & 0xff00_u16 == 0xff00_u16
     }
 
     !public
@@ -347,7 +347,7 @@ sup IpV6Addr {
         # across different network segments or the public internet.
         # @ret: `true` if the IP address is a link-local unicast address, `false` otherwise.
 
-        ret self.segments[0] & 0xffc0 == 0xfe80
+        ret self.segments[0] & 0xffc0_u16 == 0xfe80_u16
     }
 
     !public
@@ -360,7 +360,7 @@ sup IpV6Addr {
         # communication across different network segments or the public internet.
         # @ret: `true` if the IP address is a unique local address, `false` otherwise.
 
-        ret self.segments[0] & 0xfe00 == 0xfc00
+        ret self.segments[0] & 0xfe00_u16 == 0xfc00_u16
     }
 
     !public
