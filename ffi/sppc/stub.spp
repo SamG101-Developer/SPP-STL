@@ -487,6 +487,9 @@ fun set_nonblocking(fd: CInt, non_blocking: CBool) -> CInt { }
 !ffi(symbol="c_set_ttl")
 fun set_ttl(fd: CInt, ttl: CInt) -> CInt { }
 
+!ffi(symbol="c_set_broadcast")
+fun set_broadcast(fd: CInt, broadcast: CBool) -> CInt { }
+
 !ffi(symbol="c_set_reuseaddr")
 fun set_reuseaddr(fd: CInt, reuse: CBool) -> CInt { }
 
@@ -519,6 +522,9 @@ fun get_nodelay(fd: CInt, out_nodelay: &mut CBool) -> CInt { }
 
 !ffi(symbol="c_get_ttl")
 fun get_ttl(fd: CInt, out_ttl: &mut CInt) -> CInt { }
+
+!ffi(symbol="c_get_broadcast")
+fun get_broadcast(fd: CInt, out_broadcast: &mut CBool) -> CInt { }
 
 !ffi(symbol="c_get_recv_timeout")
 fun get_recv_timeout(fd: CInt, out_timeout: &mut CTimeval) -> CInt { }
