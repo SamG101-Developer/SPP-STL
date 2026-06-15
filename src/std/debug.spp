@@ -1,6 +1,7 @@
 use std::annotations::intrinsic
 use std::annotations::public
 use std::annotations::versioned
+use std::annotations::zero_type
 use std::void::Void
 
 !public !zero_type
