@@ -282,13 +282,11 @@ sup IpV6Addr {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun is_local(&self) -> Bool {
-        # A local address is an IP address that is valid only within a specific scope, such as a local network segment
-        # or a unique local address. In IPv6, there are two types of local addresses: link-local addresses and unique
-        # local addresses. Link-local addresses are typically represented as `fe80::/10`, while unique local addresses
-        # are typically represented as `fc00::/7`. Local addresses are not routable on the wider internet and are used
-        # for communication between devices within the same local scope.
-        # @ret: `true` if the IP address is a local address, `false` otherwise.
+    fun is_loopback(&self) -> Bool {
+        # A loopback address is an IP address that points back to the same device. In IPv6, the loopback address is
+        # typically represented as `::1`. Loopback addresses are used for testing and development purposes, allowing
+        # applications to communicate with themselves without sending data over the network.
+        # @ret: `true` if the IP address is a loopback address, `false` otherwise.
 
         ret self.segments == Self::loopback.segments
     }
