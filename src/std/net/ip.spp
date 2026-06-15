@@ -405,6 +405,7 @@ sup IpAddr {
         ret case self@ of {
             is IpV4Addr(..) { self.family() }
             is IpV6Addr(..) { self.family() }
+            else { std::abort::abort() }
         }
     }
 }
