@@ -1,3 +1,5 @@
+use std::annotations::public
+use std::annotations::ffi
 use std::cffi::CBool
 use std::cffi::CCharPtr
 use std::cffi::CInt
@@ -12,13 +14,13 @@ use std::cffi::CVoid
 use std::cffi::CVoidPtr
 
 cls CTimespec {
-    !package sec: S64
-    !package nsec: S64
+    !public sec: S64
+    !public nsec: S64
 }
 
 cls CTimeval {
-    !package sec: S64
-    !package usec: S64
+    !public sec: S64
+    !public usec: S64
 }
 
 cls CStatvfs {
@@ -55,485 +57,485 @@ cls CPollfd {
     revents: CShort
 }
 
-!std::annotations::ffi(symbol="c_pthread_create")
+!ffi(symbol="c_pthread_create")
 fun pthread_create(start_routine: &CVoidPtr, out: &mut CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_join")
+!ffi(symbol="c_pthread_join")
 fun pthread_join(handle: &CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_detach")
+!ffi(symbol="c_pthread_detach")
 fun pthread_detach(handle: &CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_equal")
+!ffi(symbol="c_pthread_equal")
 fun pthread_equal(handle1: &CULongLong, handle2: &CULongLong, out: &mut CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_self")
+!ffi(symbol="c_pthread_self")
 fun pthread_self(out: &mut CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_sched_yield")
+!ffi(symbol="c_sched_yield")
 fun sched_yield() -> CVoid { }
 
-!std::annotations::ffi(symbol="c_pthread_mutex_init")
+!ffi(symbol="c_pthread_mutex_init")
 fun pthread_mutex_init(out: &mut CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_mutex_init_recursive")
+!ffi(symbol="c_pthread_mutex_init_recursive")
 fun pthread_mutex_init_recursive(out: &mut CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_mutex_lock")
+!ffi(symbol="c_pthread_mutex_lock")
 fun pthread_mutex_lock(mutex: &CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_mutex_timedlock")
+!ffi(symbol="c_pthread_mutex_timedlock")
 fun pthread_mutex_timedlock(mutex: &CULongLong, clock: CInt, duration: &CTimespec) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_mutex_trylock")
+!ffi(symbol="c_pthread_mutex_trylock")
 fun pthread_mutex_trylock(mutex: &CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_unlock")
+!ffi(symbol="c_pthread_unlock")
 fun pthread_unlock(mutex: &CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_mutex_destroy")
+!ffi(symbol="c_pthread_mutex_destroy")
 fun pthread_mutex_destroy(mutex: &CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_once")
+!ffi(symbol="c_pthread_once")
 fun pthread_once(func: &CVoidPtr) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_cond_init")
+!ffi(symbol="c_pthread_cond_init")
 fun pthread_cond_init(out: &mut CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_cond_wait")
+!ffi(symbol="c_pthread_cond_wait")
 fun pthread_cond_wait(cond: &CULongLong, mutex: &CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_cond_timedwait")
+!ffi(symbol="c_pthread_cond_timedwait")
 fun pthread_cond_timedwait(cond: &CULongLong, mutex: &CULongLong, clock: CInt, duration: &CTimespec) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_cond_signal")
+!ffi(symbol="c_pthread_cond_signal")
 fun pthread_cond_signal(cond: &CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_cond_broadcast")
+!ffi(symbol="c_pthread_cond_broadcast")
 fun pthread_cond_broadcast(cond: &CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_cond_destroy")
+!ffi(symbol="c_pthread_cond_destroy")
 fun pthread_cond_destroy(cond: &CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_rwlock_init")
+!ffi(symbol="c_pthread_rwlock_init")
 fun pthread_rwlock_init(rwlock: &mut CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_rwlock_rdlock")
+!ffi(symbol="c_pthread_rwlock_rdlock")
 fun pthread_rwlock_rdlock(rwlock: &CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_rwlock_tryrdlock")
+!ffi(symbol="c_pthread_rwlock_tryrdlock")
 fun pthread_rwlock_tryrdlock(rwlock: &CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_rwlock_clockrdlock")
+!ffi(symbol="c_pthread_rwlock_clockrdlock")
 fun pthread_rwlock_clockrdlock(rwlock: &CULongLong, clock: CInt, duration: &CTimespec) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_rwlock_wrlock")
+!ffi(symbol="c_pthread_rwlock_wrlock")
 fun pthread_rwlock_wrlock(rwlock: &mut CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_rwlock_trywrlock")
+!ffi(symbol="c_pthread_rwlock_trywrlock")
 fun pthread_rwlock_trywrlock(rwlock: &mut CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_rwlock_clockwrlock")
+!ffi(symbol="c_pthread_rwlock_clockwrlock")
 fun pthread_rwlock_clockwrlock(rwlock: &CULongLong, clock: CInt, duration: &CTimespec) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_rwlock_unlock")
+!ffi(symbol="c_pthread_rwlock_unlock")
 fun pthread_rwlock_unlock(rwlock: &CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_rwlock_destroy")
+!ffi(symbol="c_pthread_rwlock_destroy")
 fun pthread_rwlock_destroy(rwlock: &CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_barrier_init")
+!ffi(symbol="c_pthread_barrier_init")
 fun pthread_barrier_init(barrier: &mut CULongLong, count: CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_barrier_wait")
+!ffi(symbol="c_pthread_barrier_wait")
 fun pthread_barrier_wait(barrier: &CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_barrier_destroy")
+!ffi(symbol="c_pthread_barrier_destroy")
 fun pthread_barrier_destroy(barrier: &CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_spin_init")
+!ffi(symbol="c_pthread_spin_init")
 fun pthread_spin_init(spinlock: &mut CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_spin_lock")
+!ffi(symbol="c_pthread_spin_lock")
 fun pthread_spin_lock(spinlock: &CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_spin_trylock")
+!ffi(symbol="c_pthread_spin_trylock")
 fun pthread_spin_trylock(spinlock: &CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_spin_unlock")
+!ffi(symbol="c_pthread_spin_unlock")
 fun pthread_spin_unlock(spinlock: &CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pthread_spin_destroy")
+!ffi(symbol="c_pthread_spin_destroy")
 fun pthread_spin_destroy(spinlock: &CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_read")
+!ffi(symbol="c_read")
 fun read(buffer: &mut CVoidPtr, size: CULongLong, count: CULongLong, fd: CInt, out_n: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_write")
+!ffi(symbol="c_write")
 fun write(buffer: &CVoidPtr, size: CULongLong, count: CULongLong, fd: CInt, out_n: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_stdin_read")
+!ffi(symbol="c_stdin_read")
 fun stdin_read(buffer: &mut CVoidPtr, size: CULongLong, count: CULongLong, out_n: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_stdout_write")
+!ffi(symbol="c_stdout_write")
 fun stdout_write(buffer: &CVoidPtr, size: CULongLong, count: CULongLong, out_n: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_stderr_write")
+!ffi(symbol="c_stderr_write")
 fun stderr_write(buffer: &CVoidPtr, size: CULongLong, count: CULongLong, out_n: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_open")
+!ffi(symbol="c_open")
 fun open(path: &CCharPtr, flags: CInt, mode: CInt, out_fd: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_close")
+!ffi(symbol="c_close")
 fun close(fd: CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_flush")
+!ffi(symbol="c_flush")
 fun flush(fd: CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_flush_data")
+!ffi(symbol="c_flush_data")
 fun flush_data(fd: CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_seek")
+!ffi(symbol="c_seek")
 fun seek(fd: CInt, offset: CULong, whence: CInt, out_pos: &mut CULong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_tell")
+!ffi(symbol="c_tell")
 fun tell(fd: CInt, out_pos: &mut CULong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_truncate")
+!ffi(symbol="c_truncate")
 fun truncate(fd: CInt, length: CULong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_lock_ex")
+!ffi(symbol="c_lock_ex")
 fun lock_ex(fd: CInt, non_blocking: CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_lock_sh")
+!ffi(symbol="c_lock_sh")
 fun lock_sh(fd: CInt, non_blocking: CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_unlock")
+!ffi(symbol="c_unlock")
 fun unlock(fd: CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_stat")
+!ffi(symbol="c_stat")
 fun stat(fd: CInt, out: &mut CStat) -> CInt { }
 
-!std::annotations::ffi(symbol="c_dup")
+!ffi(symbol="c_dup")
 fun dup(fd: CInt, out: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_dup_into")
+!ffi(symbol="c_dup_into")
 fun dup_into(fd: CInt, target_fd: CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pipe")
+!ffi(symbol="c_pipe")
 fun pipe(out_read_fd: &mut CInt, out_write_fd: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_get_flags")
+!ffi(symbol="c_get_flags")
 fun get_flags(fd: CInt, out: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_set_flags")
+!ffi(symbol="c_set_flags")
 fun set_flags(fd: CInt, flags: CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_get_status")
+!ffi(symbol="c_get_status")
 fun get_status(fd: CInt, out: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_set_status")
+!ffi(symbol="c_set_status")
 fun set_status(fd: CInt, flags: CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_poll")
+!ffi(symbol="c_poll")
 fun poll(fds: &mut CPollfd, count: CInt, duration: &CTimespec, out_n: &mut CInt) -> CInt { }
 
-# !std::annotations::ffi(symbol="c_readv")
+# !ffi(symbol="c_readv")
 # fun readv(fd: CInt, iov: &CIovec, iov_count: CInt, out_n: &mut CInt) -> CInt { }
 #
-# !std::annotations::ffi(symbol="c_writev")
+# !ffi(symbol="c_writev")
 # fun writev(fd: CInt, iov: &CIovec, iov_count: CInt, out_n: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pread")
+!ffi(symbol="c_pread")
 fun pread(fd: CInt, buffer: &mut CVoidPtr, size: CULongLong, count: CULongLong, offset: CULong, out_n: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pwrite")
+!ffi(symbol="c_pwrite")
 fun pwrite(fd: CInt, buffer: &CVoidPtr, size: CULongLong, count: CULongLong, offset: CULong, out_n: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_mmap")
+!ffi(symbol="c_mmap")
 fun mmap(fd: CInt, length: CULongLong, prot: CInt, flags: CInt, offset: CULong, out_addr: &mut CVoidPtr, out_length: &mut CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_munmap")
+!ffi(symbol="c_munmap")
 fun munmap(addr: &mut CVoidPtr, length: &CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_msync")
+!ffi(symbol="c_msync")
 fun msync(addr: &mut CVoidPtr, length: &CULongLong, flags: CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_madvise")
+!ffi(symbol="c_madvise")
 fun madvise(addr: &mut CVoidPtr, length: &CULongLong, advice: CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_isatty")
+!ffi(symbol="c_isatty")
 fun isatty(fd: CInt, out: &mut CBool) -> CInt { }
 
-!std::annotations::ffi(symbol="c_exists")
+!ffi(symbol="c_exists")
 fun exists(path: &CCharPtr) -> CInt { }
 
-!std::annotations::ffi(symbol="c_is_file")
+!ffi(symbol="c_is_file")
 fun is_file(path: &CCharPtr, out: &mut CBool) -> CInt { }
 
-!std::annotations::ffi(symbol="c_is_dir")
+!ffi(symbol="c_is_dir")
 fun is_dir(path: &CCharPtr, out: &mut CBool) -> CInt { }
 
-!std::annotations::ffi(symbol="c_is_symlink")
+!ffi(symbol="c_is_symlink")
 fun is_symlink(path: &CCharPtr, out: &mut CBool) -> CInt { }
 
-!std::annotations::ffi(symbol="c_filesize")
+!ffi(symbol="c_filesize")
 fun filesize(path: &CCharPtr, out: &mut CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_remove")
+!ffi(symbol="c_remove")
 fun remove(path: &CCharPtr) -> CInt { }
 
-!std::annotations::ffi(symbol="c_rename")
+!ffi(symbol="c_rename")
 fun rename(old_path: &CCharPtr, new_path: &CCharPtr) -> CInt { }
 
-!std::annotations::ffi(symbol="c_mkdir")
+!ffi(symbol="c_mkdir")
 fun mkdir(path: &CCharPtr, mode: CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_rmdir")
+!ffi(symbol="c_rmdir")
 fun rmdir(path: &CCharPtr) -> CInt { }
 
-!std::annotations::ffi(symbol="c_chmod")
+!ffi(symbol="c_chmod")
 fun chmod(path: &CCharPtr, mode: CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_fsstat")
+!ffi(symbol="c_fsstat")
 fun fsstat(path: &CCharPtr, out: &mut CStat, follow_symlink: CBool) -> CInt { }
 
-!std::annotations::ffi(symbol="c_chown")
+!ffi(symbol="c_chown")
 fun chown(path: &CCharPtr, owner: CInt, group: CInt, follow_symlink: CBool) -> CInt { }
 
-!std::annotations::ffi(symbol="c_access")
+!ffi(symbol="c_access")
 fun access(path: &CCharPtr, flags: CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_touch")
+!ffi(symbol="c_touch")
 fun touch(path: &CCharPtr, flags: CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_realpath")
+!ffi(symbol="c_realpath")
 fun realpath(path: &CCharPtr, buffer: &mut CCharPtr) -> CInt { }
 
-!std::annotations::ffi(symbol="c_hardlink")
+!ffi(symbol="c_hardlink")
 fun hardlink(target: &CCharPtr, linkpath: &CCharPtr) -> CInt { }
 
-!std::annotations::ffi(symbol="c_symlink")
+!ffi(symbol="c_symlink")
 fun symlink(target: &CCharPtr, linkpath: &CCharPtr) -> CInt { }
 
-!std::annotations::ffi(symbol="c_readlink")
+!ffi(symbol="c_readlink")
 fun readlink(path: &CCharPtr, buffer: &mut CCharPtr, buffer_size: CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_mktemp")
+!ffi(symbol="c_mktemp")
 fun mktemp(path: &mut CCharPtr, out_fd: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_mktemp_dir")
+!ffi(symbol="c_mktemp_dir")
 fun mktemp_dir(path: &mut CCharPtr) -> CInt { }
 
-!std::annotations::ffi(symbol="c_statvfs")
+!ffi(symbol="c_statvfs")
 fun statvfs(path: &CCharPtr, out: &mut CStatvfs) -> CInt { }
 
-!std::annotations::ffi(symbol="c_copy_file_range")
+!ffi(symbol="c_copy_file_range")
 fun copy_file_range(fd_in: CInt, off_in: &mut CULong, fd_out: CInt, off_out: &mut CULong, len: CULongLong, flags: CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_getcwd")
+!ffi(symbol="c_getcwd")
 fun getcwd(buffer: &mut CCharPtr, size: CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_chdir")
+!ffi(symbol="c_chdir")
 fun chdir(path: &CCharPtr) -> CInt { }
 
-!std::annotations::ffi(symbol="c_malloc")
+!ffi(symbol="c_malloc")
 fun malloc(size: CULongLong) -> CVoidPtr { }
 
-!std::annotations::ffi(symbol="c_aligned_alloc")
+!ffi(symbol="c_aligned_alloc")
 fun aligned_alloc(size: CULongLong, alignment: CULongLong) -> CVoidPtr { }
 
-!std::annotations::ffi(symbol="c_calloc")
+!ffi(symbol="c_calloc")
 fun calloc(num: CULongLong, size: CULongLong) -> CVoidPtr { }
 
-!std::annotations::ffi(symbol="c_realloc")
+!ffi(symbol="c_realloc")
 fun realloc(ptr: &mut CVoidPtr, new_size: CULongLong) -> CVoidPtr { }
 
-!std::annotations::ffi(symbol="c_free")
+!ffi(symbol="c_free")
 fun free(ptr: &mut CVoidPtr) -> CVoid { }
 
-!std::annotations::ffi(symbol="c_memcpy")
+!ffi(symbol="c_memcpy")
 fun memcpy(dest: &mut CVoidPtr, src: &CVoidPtr, size: CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_memmove")
+!ffi(symbol="c_memmove")
 fun memmove(dest: &mut CVoidPtr, src: &CVoidPtr, size: CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_memset")
+!ffi(symbol="c_memset")
 fun memset(dest: &mut CVoidPtr, value: CInt, size: CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_memcmp")
+!ffi(symbol="c_memcmp")
 fun memcmp(ptr1: &CVoidPtr, ptr2: &CVoidPtr, size: CULongLong, out: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_memcmpconst")
+!ffi(symbol="c_memcmpconst")
 fun memcmpconst(ptr1: &CVoidPtr, ptr2: &CVoidPtr, size: CULongLong, out: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_memmem")
+!ffi(symbol="c_memmem")
 fun memmem(haystack: &CVoidPtr, haystack_size: CULongLong, needle: &CVoidPtr, needle_size: CULongLong, out: &mut CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_mlock")
+!ffi(symbol="c_mlock")
 fun mlock(addr: &CVoidPtr, size: CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_munlock")
+!ffi(symbol="c_munlock")
 fun munlock(addr: &CVoidPtr, size: CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_memprotect")
+!ffi(symbol="c_memprotect")
 fun memprotect(addr: &mut CVoidPtr, size: CULongLong, prot: CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_strcpy")
+!ffi(symbol="c_strcpy")
 fun strcpy(dest: &mut CCharPtr, src: &CCharPtr) -> CInt { }
 
-!std::annotations::ffi(symbol="c_strcat")
+!ffi(symbol="c_strcat")
 fun strcat(dest: &mut CCharPtr, src: &CCharPtr) -> CInt { }
 
-!std::annotations::ffi(symbol="c_strcmp")
+!ffi(symbol="c_strcmp")
 fun strcmp(str1: &CCharPtr, str2: &CCharPtr, out: &mut CBool) -> CInt { }
 
-!std::annotations::ffi(symbol="c_strcasecmp")
+!ffi(symbol="c_strcasecmp")
 fun strcasecmp(str1: &CCharPtr, str2: &CCharPtr, out: &mut CBool) -> CInt { }
 
-!std::annotations::ffi(symbol="c_strchr")
+!ffi(symbol="c_strchr")
 fun strchr(str: &CCharPtr, ch: CUChar, out_idx: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_strrchr")
+!ffi(symbol="c_strrchr")
 fun strrchr(str: &CCharPtr, ch: CUChar, out_idx: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_strstr")
+!ffi(symbol="c_strstr")
 fun strstr(haystack: &CCharPtr, needle: &CCharPtr, out_idx: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_strcasestr")
+!ffi(symbol="c_strcasestr")
 fun strcasestr(haystack: &CCharPtr, needle: &CCharPtr, out_idx: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_strpbrk")
+!ffi(symbol="c_strpbrk")
 fun strpbrk(string: &CCharPtr, accept: &CCharPtr, out_idx: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_strdup")
+!ffi(symbol="c_strdup")
 fun strdup(str: &CCharPtr) -> CVoidPtr { }
 
-!std::annotations::ffi(symbol="c_get_pid")
+!ffi(symbol="c_get_pid")
 fun get_pid(out_pid: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_get_ppid")
+!ffi(symbol="c_get_ppid")
 fun get_ppid(out_ppid: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_getenv")
+!ffi(symbol="c_getenv")
 fun getenv(key: &CCharPtr, out: &mut CCharPtr) -> CInt { }
 
-!std::annotations::ffi(symbol="c_setenv")
+!ffi(symbol="c_setenv")
 fun setenv(key: &CCharPtr, val: &CCharPtr, overwrite: CBool) -> CInt { }
 
-!std::annotations::ffi(symbol="c_unsetenv")
+!ffi(symbol="c_unsetenv")
 fun unsetenv(key: &CCharPtr) -> CInt { }
 
-!std::annotations::ffi(symbol="c_signal")
+!ffi(symbol="c_signal")
 fun signal(pid: CInt, signal: CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_is_running")
+!ffi(symbol="c_is_running")
 fun is_running(pid: CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_exit")
+!ffi(symbol="c_exit")
 fun exit_(status: CInt) -> ! { }
 
-!std::annotations::ffi(symbol="c_exit_clean")
+!ffi(symbol="c_exit_clean")
 fun exit_clean(status: CInt) -> ! { }
 
-!std::annotations::ffi(symbol="c_abort")
+!ffi(symbol="c_abort")
 fun abort() -> ! { }
 
-!std::annotations::ffi(symbol="c_hton")
+!ffi(symbol="c_hton")
 fun hton(port: CUShort, out_port: &mut CUShort) -> CInt { }
 
-!std::annotations::ffi(symbol="c_ntoh")
+!ffi(symbol="c_ntoh")
 fun ntoh(port: CUShort, out_port: &mut CUShort) -> CInt { }
 
-!std::annotations::ffi(symbol="c_pton")
+!ffi(symbol="c_pton")
 fun pton(af: CInt, src: &CCharPtr, dst: &mut CCharPtr) -> CInt { }
 
-!std::annotations::ffi(symbol="c_ntop")
+!ffi(symbol="c_ntop")
 fun ntop(af: CInt, src: &CCharPtr, dst: &mut CCharPtr, size: CULongLong) -> CInt { }
 
-!std::annotations::ffi(symbol="c_socket")
+!ffi(symbol="c_socket")
 fun socket(domain: CInt, type_: CInt, protocol: CInt, out_fd: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_shutdown")
+!ffi(symbol="c_shutdown")
 fun shutdown(fd: CInt, how: CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_connect")
+!ffi(symbol="c_connect")
 fun connect(fd: CInt, af: CInt, addr: &CCharPtr, port: CUShort) -> CInt { }
 
-!std::annotations::ffi(symbol="c_bind")
+!ffi(symbol="c_bind")
 fun bind(fd: CInt, af: CInt, addr: &CCharPtr, port: CUShort) -> CInt { }
 
-!std::annotations::ffi(symbol="c_listen")
+!ffi(symbol="c_listen")
 fun listen(fd: CInt, backlog: CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_accept")
+!ffi(symbol="c_accept")
 fun accept(fd: CInt, af: CInt, out_addr: &mut CCharPtr, out_port: &mut CUShort, out_fd: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_send")
+!ffi(symbol="c_send")
 fun send(fd: CInt, data: &CCharPtr, size: CULongLong, flags: CInt, out_n: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_recv")
+!ffi(symbol="c_recv")
 fun recv(fd: CInt, buffer: &mut CCharPtr, size: CULongLong, flags: CInt, out: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_sendto")
+!ffi(symbol="c_sendto")
 fun sendto(fd: CInt, data: &CCharPtr, size: CULongLong, af: CInt, addr: &CCharPtr, port: CUShort, out_n: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_recvfrom")
+!ffi(symbol="c_recvfrom")
 fun recvfrom(fd: CInt, buffer: &mut CCharPtr, size: CULongLong, af: CInt, out_addr: &mut CCharPtr, out_port: &mut CUShort, out_n: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_set_nonblocking")
+!ffi(symbol="c_set_nonblocking")
 fun set_nonblocking(fd: CInt, non_blocking: CBool) -> CInt { }
 
-!std::annotations::ffi(symbol="c_set_ttl")
+!ffi(symbol="c_set_ttl")
 fun set_ttl(fd: CInt, ttl: CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_set_reuseaddr")
+!ffi(symbol="c_set_reuseaddr")
 fun set_reuseaddr(fd: CInt, reuse: CBool) -> CInt { }
 
-!std::annotations::ffi(symbol="c_set_reuseport")
+!ffi(symbol="c_set_reuseport")
 fun set_reuseport(fd: CInt, reuse: CBool) -> CInt { }
 
-!std::annotations::ffi(symbol="c_set_keepalive")
+!ffi(symbol="c_set_keepalive")
 fun set_keepalive(fd: CInt, keepalive: CBool) -> CInt { }
 
-!std::annotations::ffi(symbol="c_set_linger")
+!ffi(symbol="c_set_linger")
 fun set_linger(fd: CInt, linger: CBool) -> CInt { }
 
-!std::annotations::ffi(symbol="c_set_nodelay")
+!ffi(symbol="c_set_nodelay")
 fun set_nodelay(fd: CInt, nodelay: CBool) -> CInt { }
 
-!std::annotations::ffi(symbol="c_set_recv_timeout")
+!ffi(symbol="c_set_recv_timeout")
 fun set_recv_timeout(fd: CInt, timeout: &CTimeval) -> CInt { }
 
-!std::annotations::ffi(symbol="c_set_send_timeout")
+!ffi(symbol="c_set_send_timeout")
 fun set_send_timeout(fd: CInt, timeout: &CTimeval) -> CInt { }
 
-!std::annotations::ffi(symbol="c_get_keepalive")
+!ffi(symbol="c_get_keepalive")
 fun get_keepalive(fd: CInt, out_keepalive: &mut CBool) -> CInt { }
 
-!std::annotations::ffi(symbol="c_get_linger")
+!ffi(symbol="c_get_linger")
 fun get_linger(fd: CInt, out_on: &mut CBool, out_linger: &mut CTimeval) -> CInt { }
 
-!std::annotations::ffi(symbol="c_get_nodelay")
+!ffi(symbol="c_get_nodelay")
 fun get_nodelay(fd: CInt, out_nodelay: &mut CBool) -> CInt { }
 
-!std::annotations::ffi(symbol="c_get_ttl")
+!ffi(symbol="c_get_ttl")
 fun get_ttl(fd: CInt, out_ttl: &mut CInt) -> CInt { }
 
-!std::annotations::ffi(symbol="c_get_recv_timeout")
+!ffi(symbol="c_get_recv_timeout")
 fun get_recv_timeout(fd: CInt, out_timeout: &mut CTimeval) -> CInt { }
 
-!std::annotations::ffi(symbol="c_get_send_timeout")
+!ffi(symbol="c_get_send_timeout")
 fun get_send_timeout(fd: CInt, out_timeout: &mut CTimeval) -> CInt { }
 
-!std::annotations::ffi(symbol="c_getsockname")
+!ffi(symbol="c_getsockname")
 fun getsockname(fd: CInt, af: CInt, out_addr: &mut CCharPtr, out_port: &mut CUShort) -> CInt { }
 
-!std::annotations::ffi(symbol="c_getpeername")
+!ffi(symbol="c_getpeername")
 fun getpeername(fd: CInt, af: CInt, out_addr: &mut CCharPtr, out_port: &mut CUShort) -> CInt { }
 
-!std::annotations::ffi(symbol="c_clockgettime")
+!ffi(symbol="c_clockgettime")
 fun clockgettime(clock_id: CInt, out_tp: &mut CTimespec) -> CInt { }
 
-!std::annotations::ffi(symbol="c_clock_nanosleep")
+!ffi(symbol="c_clock_nanosleep")
 fun clock_nanosleep(clock: CInt, flags: CInt, duration: &CTimespec) -> CInt { }
