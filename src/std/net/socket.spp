@@ -1,4 +1,5 @@
 use std::annotations::public
+use std::annotations::protected
 use std::annotations::versioned
 use std::annotations::zero_type
 use std::boolean::Bool
@@ -31,8 +32,8 @@ cls Socket {
     # @let local: The local address of the socket. This is the address that the socket is bound to, and is used for
     # operations that require the local address, such as binding and listening.
 
-    fd: S32
-    local: SockAddr
+    !protected fd: S32
+    !protected local: SockAddr
 }
 
 sup Socket {
