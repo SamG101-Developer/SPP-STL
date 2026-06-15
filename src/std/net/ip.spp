@@ -148,10 +148,10 @@ sup IpV4Addr {
         # @ret: `true` if the IP address is a private address, `false` otherwise.
 
         ret case self.octets of {
-            is [10_u8, _, _, _] { ret true }
-            is [172_u8, b, _, _] and (b >= 16_u8 and b <= 31_u8) { ret true }
-            is [192_u8, 168_u8, _, _] { ret true }
-            else { ret false }
+            is [10_u8, _, _, _] { true }
+            is [172_u8, b, _, _] and (b >= 16_u8 and b <= 31_u8) { true }
+            is [192_u8, 168_u8, _, _] { true }
+            else { false }
         }
     }
 
