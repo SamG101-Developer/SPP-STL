@@ -12,13 +12,13 @@ use std::cffi::CVoid
 use std::cffi::CVoidPtr
 
 cls CTimespec {
-    !public sec: S64
-    !public nsec: S64
+    !public sec: U64
+    !public nsec: U64
 }
 
 cls CTimeval {
-    !public sec: S64
-    !public usec: S64
+    !public sec: U64
+    !public usec: U64
 }
 
 cls CStatvfs {
