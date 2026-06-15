@@ -246,7 +246,7 @@ sup BigUInt ext std::ops::bit_shl::BitShlAssign {
         loop i in Range[USize]::between(0_uz, self.data.len()) {
             let shifted = U64::from(self.data[i]@) << U32::from(bit_shift)
             val.data[mut i + USize::from(word_shift) + 0_uz]@ |= U32::from(shifted & 0xFFFFFFFF_u64)
-            val.data[mut i + USize::from(word_shift) + 1_uz]@ |= U32::from(shifted >> 32_u64)
+            val.data[mut i + USize::from(word_shift) + 1_uz]@ |= U32::from(shifted >> 32_u32)
         }
 
         self.data = val.data
@@ -290,7 +290,7 @@ sup BigUInt ext std::ops::add::AddAssign {
             let b = case i < that.data.len() { that.data[i]@ } else { 0_u32 }
             let sum = U64::from(a) + U64::from(b) + carry
             self.data[mut i]@ = U32::from(sum & 0xFFFFFFFF_u64)
-            carry = sum >> 32_u64
+            carry = sum >> 32_u32
         }
 
         case carry != 0_u64 { self.data.append(U32::from(carry)) }
@@ -307,7 +307,7 @@ sup BigUInt ext std::ops::sub::SubAssign {
             let b = case i < that.data.len() { U64::from(that.data[i]@) } else { 0_u64 }
             let sub = a - b - borrow
             self.data.append(U32::from(sub & 0xFFFFFFFF_u64))
-            borrow = (sub >> 63_u64) & 0x1_u64
+            borrow = (sub >> 63_u32) & 0x1_u64
         }
 
         self.trim()
@@ -338,7 +338,7 @@ sup BigUInt ext std::ops::mul::MulAssign {
                 let existing = U64::from(val.data[i + j]@)
                 let prod = a * b + existing + carry
                 val.data[mut i + j]@ = U32::from(prod & 0xFFFFFFFF_u64)
-                carry = prod >> 32_u64
+                carry = prod >> 32_u32
             }
             case carry != 0_u64 {
                 val.data[mut i + that.data.len()]@ += U32::from(carry)
