@@ -47,7 +47,7 @@ sup IpV4Addr {
         # scenarios. In IPv4, there is a specific range of benchmarking addresses that is reserved for these purposes.
         # @ret: `true` if the IP address is a benchmarking address, `false` otherwise.
 
-        ret self.octets[0] == 198_u8 and (self.octets[1] & 254_u8) == 18_u8
+        ret self.octets[0_uz] == 198_u8 and (self.octets[1_uz] & 254_u8) == 18_u8
     }
 
     !public
@@ -110,7 +110,7 @@ sup IpV4Addr {
         # network segments or the public internet.
         # @ret: `true` if the IP address is a link-local address, `false` otherwise.
 
-        ret self.octets[0] == 169_u8 and self.octets[1] == 254_u8
+        ret self.octets[0_uz] == 169_u8 and self.octets[1_uz] == 254_u8
     }
 
     !public
@@ -123,7 +123,7 @@ sup IpV4Addr {
         # over the network.
         # @ret: `true` if the IP address is a loopback address, `false` otherwise.
 
-        ret self.octets[0] == 127_u8
+        ret self.octets[0_uz] == 127_u8
     }
 
     !public
@@ -137,7 +137,7 @@ sup IpV4Addr {
         # address, allowing them to receive the data without needing to be individually addressed.
         # @ret: `true` if the IP address is a multicast address, `false` otherwise.
 
-        ret self.octets[0] >= 224_u8 and self.octets[0] <= 239_u8
+        ret self.octets[0_uz] >= 224_u8 and self.octets[0_uz] <= 239_u8
     }
 
     !public
@@ -163,7 +163,7 @@ sup IpV4Addr {
         # future use, documentation, or special functions.
         # @ret: `true` if the IP address is a reserved address, `false` otherwise.
 
-        ret self.octets[0] & 240_u8 == 240_u8 and self.is_broadcast().not
+        ret self.octets[0_uz] & 240_u8 == 240_u8 and self.is_broadcast().not
     }
 
     !public
@@ -174,7 +174,7 @@ sup IpV4Addr {
         # are reserved for these purposes.
         # @ret: `true` if the IP address is a shared address, `false` otherwise.
 
-        ret self.octets[0] == 100_u8 and (self.octets[1] & 192_u8) == 64_u8
+        ret self.octets[0_uz] == 100_u8 and (self.octets[1_uz] & 192_u8) == 64_u8
     }
 
     !public
@@ -227,7 +227,7 @@ sup IpV6Addr {
         # on the internet.
         # @ret: `true` if the IP address is a benchmarking address, `false` otherwise.
 
-        ret self.segments[0] == 0x2001_u16 and self.segments[1] == 0x2_u16 and self.segments[2] == 0_u16
+        ret self.segments[0_uz] == 0x2001_u16 and self.segments[1_uz] == 0x2_u16 and self.segments[2_uz] == 0_u16
     }
 
     !public
@@ -347,7 +347,7 @@ sup IpV6Addr {
         # across different network segments or the public internet.
         # @ret: `true` if the IP address is a link-local unicast address, `false` otherwise.
 
-        ret self.segments[0] & 0xffc0_u16 == 0xfe80_u16
+        ret self.segments[0_uz] & 0xffc0_u16 == 0xfe80_u16
     }
 
     !public
@@ -360,7 +360,7 @@ sup IpV6Addr {
         # communication across different network segments or the public internet.
         # @ret: `true` if the IP address is a unique local address, `false` otherwise.
 
-        ret self.segments[0] & 0xfe00_u16 == 0xfc00_u16
+        ret self.segments[0_uz] & 0xfe00_u16 == 0xfc00_u16
     }
 
     !public
