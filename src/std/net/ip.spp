@@ -6,6 +6,8 @@ use std::number::U16
 use std::number::USize
 use std::number::S32
 
+!public
+!versioned(base="1.0.0", new="1.0.0")
 cls IpV4Addr {
     # The `IpV4Addr` class represents an IPv4 address, which consists of four octets (8-bit numbers) separated by dots.
     # Each octet can range from 0 to 255. The class provides methods for creating an IPv4 address from a string,
@@ -15,6 +17,8 @@ cls IpV4Addr {
     octets: [U8; 4_uz]
 }
 
+!public
+!versioned(base="1.0.0", new="1.0.0")
 cls IpV6Addr {
     # The `IpV6Addr` class represents an IPv6 address, which consists of eight groups of four hexadecimal digits
     # separated by colons. Each group can range from 0000 to FFFF. The class provides methods for creating an IPv6
@@ -24,6 +28,8 @@ cls IpV6Addr {
     segments: [U16; 8_uz]
 }
 
+!public
+!versioned(base="1.0.0", new="1.0.0")
 type IpAddr = IpV4Addr or IpV6Addr
 
 sup IpV4Addr {
@@ -391,7 +397,7 @@ sup IpV6Addr {
 sup IpAddr {
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun family(&self) -> U16 {
+    fun family(&self) -> S32 {
         # The `family` method returns the address family of the IP address. This is used to determine whether the
         # address is an IPv4 or IPv6 address when working with sockets and other network-related functionality.
         # @ret: The address family of the IP address.
