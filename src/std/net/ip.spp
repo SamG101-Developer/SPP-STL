@@ -331,7 +331,7 @@ sup IpV6Addr {
         # @ret: `true` if the IP address is a global unicast address, `false` otherwise.
 
         ret self.is_unicast() and (
-            self.is_benchmark() or self.is_documentation() or self.is_loopback() or self.is_unique_local() or
+            self.is_benchmarking() or self.is_documentation() or self.is_loopback() or self.is_unique_local() or
             self.is_unicast_link_local() or self.is_unspecified()).not
     }
 
