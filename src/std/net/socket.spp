@@ -86,7 +86,7 @@ sup Socket {
 
         let ttl = 0
         let err = sppc::get_ttl(self.fd, &mut ttl)
-        case err < 0 { ret Fail(err=SockErr::from_errno(ttl)) }
+        case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(val=ttl)
     }
 
