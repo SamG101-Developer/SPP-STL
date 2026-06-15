@@ -302,7 +302,7 @@ sup IpV6Addr {
         # address, allowing them to receive the data without needing to be individually addressed.
         # @ret: `true` if the IP address is a multicast address, `false` otherwise.
 
-        ret self.segments[0] & 0xff00_u16 == 0xff00_u16
+        ret self.segments[0_uz] & 0xff00_u16 == 0xff00_u16
     }
 
     !public
