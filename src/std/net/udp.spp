@@ -72,7 +72,7 @@ sup UdpSocket {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun recv_from(&mut self, buf: &mut View[U8]) -> Res[(USize, SockAddr), SockErr] {
+    fun recv_from(&mut self, mut buf: &mut View[U8]) -> Res[(USize, SockAddr), SockErr] {
         # The `recv_from` method receives data from the socket and stores it in the provided buffer. It also returns the
         # source address of the received data. It returns a `Res` type that indicates success or failure. On success, it
         # returns a tuple containing the number of bytes received and the source `SockAddr`.
