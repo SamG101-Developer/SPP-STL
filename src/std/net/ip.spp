@@ -379,7 +379,7 @@ sup IpV6Addr {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun family(&self) -> U16 {
+    fun family(&self) -> U32 {
         # The `family` method returns the address family of the IP address. This is used to determine whether the
         # address is an IPv4 or IPv6 address when working with sockets and other network-related functionality. The
         # address family for IPv6 addresses is typically represented as `AF_INET6`.
