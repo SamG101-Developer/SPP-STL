@@ -1,6 +1,7 @@
 use std::annotations::intrinsic
 use std::annotations::public
 use std::annotations::versioned
+use std::void::Void
 
 !public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
