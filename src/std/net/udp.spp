@@ -88,10 +88,10 @@ sup UdpSocket {
         # @ret: A result containing a boolean value indicating whether the broadcast option is enabled for the socket if
         # successful, or a `SockErr` if there was an error.
 
-        let mut yes = 0
+        let mut yes = false
         let err = sppc::get_broadcast(self.fd, &mut yes)
         case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
-        ret Pass(val=yes != 0)
+        ret Pass(val=yes)
     }
 
     !public
