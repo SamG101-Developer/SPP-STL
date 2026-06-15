@@ -74,11 +74,11 @@ sup IpV4Addr {
         # internet.
         # @ret: `true` if the IP address is a documentation address, `false` otherwise.
 
-        case self.octets of {
-            is [192_u8, 0_u8, 2_u8, _] { ret true }
-            is [198_u8, 51_u8, 100_u8, _] { ret true }
-            is [203_u8, 0_u8, 113_u8, _] { ret true }
-            else { ret false }
+        ret case self.octets of {
+            is [192_u8, 0_u8, 2_u8, _] { true }
+            is [198_u8, 51_u8, 100_u8, _] { true }
+            is [203_u8, 0_u8, 113_u8, _] { true }
+            else { false }
         }
     }
 
@@ -241,10 +241,10 @@ sup IpV6Addr {
         # concepts without using real IP addresses that may be in use on the internet.
         # @ret: `true` if the IP address is a documentation address, `false` otherwise.
 
-        case self.segments of {
-            is [0x2001_u16, 0xdb8_u16, ..] { ret true }
-            is [0x3fff_u16, b, ..] and 0_u16 <= b <= 0x0fff_u16 { ret true }
-            else { ret false }
+        ret case self.segments of {
+            is [0x2001_u16, 0xdb8_u16, ..] { true }
+            is [0x3fff_u16, b, ..] and 0_u16 <= b <= 0x0fff_u16 { true }
+            else { false }
         }
     }
 
