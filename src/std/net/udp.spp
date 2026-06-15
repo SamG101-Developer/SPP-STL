@@ -59,7 +59,7 @@ sup UdpSocket {
         # operation is successful, or a `SockErr` if the operation fails.
 
         let bytes_received = 0_uz
-        let mut addr: SockAddr = case self.local.ip().family() == af_inet { SockV4Addr() } else { SockV6Addr() }
+        let mut addr: SockAddr = case self.local.ip().family() == constants::af_inet { SockV4Addr() } else { SockV6Addr() }
         let err = sppc::recv_from(self.fd, buf, buf.len(), &mut addr.ip(), &mut addr.port(), &mut bytes_received)
         case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(val=(bytes_received, SockAddr::V4(addr)))
