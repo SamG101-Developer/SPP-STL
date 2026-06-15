@@ -147,7 +147,7 @@ sup IpV4Addr {
         # the public internet. In IPv4, there are three ranges of private addresses.
         # @ret: `true` if the IP address is a private address, `false` otherwise.
 
-        case self.octets of {
+        ret case self.octets of {
             is [10_u8, _, _, _] { ret true }
             is [172_u8, b, _, _] and (b >= 16_u8 and b <= 31_u8) { ret true }
             is [192_u8, 168_u8, _, _] { ret true }
