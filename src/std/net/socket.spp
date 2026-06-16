@@ -134,7 +134,7 @@ sup SockAddr {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun from_storage(storage: &CSockAddrStorage) -> SockAddr {
+    fun from_storage(storage: &CSockaddrStorage) -> SockAddr {
         #
         # @let storage:
         # @ret:
@@ -166,23 +166,23 @@ sup SockAddr {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun storage(&self) -> CSockAddrStorage {
+    fun storage(&self) -> CSockaddrStorage {
         #
         # @ret:
 
         ret case self of {
-            # For IpV4, create a new CSockAddrStorage and fill it with
+            # For IpV4, create a new CSockaddrStorage and fill it with
             # the octets of the IpV4Addr and the port.
             is SockV4Addr(ip, port) {
-                let mut storage = CSockAddrStorage()
+                let mut storage = CSockaddrStorage()
                 sppc::set_sockaddr_v4(&mut storage, &ip.octets, port)
                 storage
             }
 
-            # For IpV6, create a new CSockAddrStorage and fill it with
+            # For IpV6, create a new CSockaddrStorage and fill it with
             # the segments of the IpV6Addr and the port.
             is SockV6Addr(ip, port) {
-                let mut storage = CSockAddrStorage()
+                let mut storage = CSockaddrStorage()
                 sppc::set_sockaddr_v6(&mut storage, &ip.segments, port)
                 storage
             }

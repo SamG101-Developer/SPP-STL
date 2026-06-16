@@ -81,7 +81,7 @@ sup UdpSocket {
         # operation is successful, or a `SockErr` if the operation fails.
 
         let mut bytes_received = 0_uz
-        let mut storage = CSockAddrStorage()
+        let mut storage = sppc::CSockaddrStorage()
         let err = sppc::recvfrom(self.fd, &mut buf.ptr, buf.len(), &mut storage, &mut bytes_received)
         case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(val=(bytes_received, SockAddr::from_storage(&storage)))
