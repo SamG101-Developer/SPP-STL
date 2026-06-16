@@ -55,6 +55,8 @@ cls CPollfd {
     revents: CShort
 }
 
+cls CSockaddrStorage { }
+
 !ffi(symbol="c_pthread_create")
 fun pthread_create(start_routine: &CVoidPtr, out: &mut CULongLong) -> CInt { }
 
@@ -439,17 +441,20 @@ fun exit_clean(status: CInt) -> ! { }
 !ffi(symbol="c_abort")
 fun abort() -> ! { }
 
-!ffi(symbol="c_hton")
-fun hton(port: CUShort, out_port: &mut CUShort) -> CInt { }
+!ffi(symbol="c_set_sockaddr_v4")
+fun set_sockaddr_v4(octets: &CUChar, port: CUShort, out_storage: &mut CSockaddrStorage) -> CInt { }
 
-!ffi(symbol="c_ntoh")
-fun ntoh(port: CUShort, out_port: &mut CUShort) -> CInt { }
+!ffi(symbol="c_set_sockaddr_v6")
+fun set_sockaddr_v6(segments: &CUShort, port: CUShort, out_storage: &mut CSockaddrStorage) -> CInt { }
 
-!ffi(symbol="c_pton")
-fun pton(af: CInt, src: &CCharPtr, dst: &mut CCharPtr) -> CInt { }
+!ffi(symbol="c_get_sockaddr_v4")
+fun get_sockaddr_v4(storage: &CSockaddrStorage, out_octets: &mut CUChar, out_port: &mut CUShort) -> CInt { }
 
-!ffi(symbol="c_ntop")
-fun ntop(af: CInt, src: &CCharPtr, dst: &mut CCharPtr, size: CULongLong) -> CInt { }
+!ffi(symbol="c_get_sockaddr_v6")
+fun get_sockaddr_v6(storage: &CSockaddrStorage, out_segments: &mut CUShort, out_port: &mut CUShort) -> CInt { }
+
+!ffi(symbol="c_sockaddr_family")
+fun sockaddr_family(storage: &CSockaddrStorage, out_family: &mut CInt) -> CInt { }
 
 !ffi(symbol="c_socket")
 fun socket(domain: CInt, type_: CInt, protocol: CInt, out_fd: &mut CInt) -> CInt { }
@@ -458,16 +463,16 @@ fun socket(domain: CInt, type_: CInt, protocol: CInt, out_fd: &mut CInt) -> CInt
 fun shutdown(fd: CInt, how: CInt) -> CInt { }
 
 !ffi(symbol="c_connect")
-fun connect(fd: CInt, af: CInt, addr: &CCharPtr, port: CUShort) -> CInt { }
+fun connect(fd: CInt, storage: &CSockaddrStorage) -> CInt { }
 
 !ffi(symbol="c_bind")
-fun bind(fd: CInt, af: CInt, addr: &CCharPtr, port: CUShort) -> CInt { }
+fun bind(fd: CInt, storage: &CSockaddrStorage) -> CInt { }
 
 !ffi(symbol="c_listen")
 fun listen(fd: CInt, backlog: CInt) -> CInt { }
 
 !ffi(symbol="c_accept")
-fun accept(fd: CInt, af: CInt, out_addr: &mut CCharPtr, out_port: &mut CUShort, out_fd: &mut CInt) -> CInt { }
+fun accept(fd: CInt, out_storage: &mut CSockaddrStorage, out_fd: &mut CInt) -> CInt { }
 
 !ffi(symbol="c_send")
 fun send(fd: CInt, data: &CCharPtr, size: CULongLong, flags: CInt, out_n: &mut CInt) -> CInt { }
@@ -476,10 +481,10 @@ fun send(fd: CInt, data: &CCharPtr, size: CULongLong, flags: CInt, out_n: &mut C
 fun recv(fd: CInt, buffer: &mut CCharPtr, size: CULongLong, flags: CInt, out: &mut CInt) -> CInt { }
 
 !ffi(symbol="c_sendto")
-fun sendto(fd: CInt, data: &CCharPtr, size: CULongLong, af: CInt, addr: &CCharPtr, port: CUShort, out_n: &mut CInt) -> CInt { }
+fun sendto(fd: CInt, data: &CCharPtr, size: CULongLong, storage: &CSockaddrStorage, out_n: &mut CInt) -> CInt { }
 
 !ffi(symbol="c_recvfrom")
-fun recvfrom(fd: CInt, buffer: &mut CCharPtr, size: CULongLong, af: CInt, out_addr: &mut CCharPtr, out_port: &mut CUShort, out_n: &mut CInt) -> CInt { }
+fun recvfrom(fd: CInt, buffer: &mut CCharPtr, size: CULongLong, out_storage: &mut CSockaddrStorage, out_n: &mut CInt) -> CInt { }
 
 !ffi(symbol="c_set_nonblocking")
 fun set_nonblocking(fd: CInt, non_blocking: CBool) -> CInt { }
@@ -533,10 +538,10 @@ fun get_recv_timeout(fd: CInt, out_timeout: &mut CTimeval) -> CInt { }
 fun get_send_timeout(fd: CInt, out_timeout: &mut CTimeval) -> CInt { }
 
 !ffi(symbol="c_getsockname")
-fun getsockname(fd: CInt, af: CInt, out_addr: &mut CCharPtr, out_port: &mut CUShort) -> CInt { }
+fun getsockname(fd: CInt, out_storage: &mut CSockaddrStorage) -> CInt { }
 
 !ffi(symbol="c_getpeername")
-fun getpeername(fd: CInt, af: CInt, out_addr: &mut CCharPtr, out_port: &mut CUShort) -> CInt { }
+fun getpeername(fd: CInt, out_storage: &mut CSockaddrStorage) -> CInt { }
 
 !ffi(symbol="c_clockgettime")
 fun clockgettime(clock_id: CInt, out_tp: &mut CTimespec) -> CInt { }

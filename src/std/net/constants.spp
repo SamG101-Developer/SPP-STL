@@ -4,7 +4,7 @@ use std::number::S32
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-cmp af_inet: S32 = 2
+cmp af_inet4: S32 = 2
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
