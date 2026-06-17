@@ -88,7 +88,7 @@ sup TcpListener {
         let mut new_fd = 0
         let mut storage = sppc::CSockaddrStorage()
         let err = sppc::accept(self.fd, &mut storage, &mut new_fd)
-        case new_fd < 0 { ret Fail(err=SockErr::from_errno(fd)) }
+        case new_fd < 0 { ret Fail(err=SockErr::from_errno(err)) }
 
         # Create a new `TcpStream` object with the accepted
         # file descriptor.
