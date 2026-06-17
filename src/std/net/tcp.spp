@@ -239,7 +239,7 @@ sup TcpStream {
         # zero, then there is no timeout and the receive operation will block indefinitely until data is received.
         # @ret: A result indicating whether the operation was successful or not.
 
-        let timespec = CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
+        let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
         let err = sppc::set_recv_timeout(self.fd, &timespec)
         case err == 0 { ret SockErr::from_errno(err) }
         ret Pass[Void]()
@@ -254,7 +254,7 @@ sup TcpStream {
         # @ret: A result containing the receive timeout for the socket if successful, or a `SockErr` if there was an
         # error.
 
-        let mut timespec = CTimespec()
+        let mut timespec = sppc::CTimespec()
         let err = sppc::get_recv_timeout(self.fd, &mut timespec)
         case err < 0 { ret Fail(err=SockErr::from_errno(timespec)) }
         ret Pass(val=Duration(seconds=timespec.sec, nanoseconds=timespec.nsec))
@@ -270,7 +270,7 @@ sup TcpStream {
         # zero, then there is no timeout and the send operation will block indefinitely until data is sent.
         # @ret: A result indicating whether the operation was successful or not.
 
-        let timespec = CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
+        let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
         let err = sppc::set_send_timeout(self.fd, &timespec)
         case err == 0 { ret SockErr::from_errno(err) }
         ret Pass[Void]()
@@ -284,7 +284,7 @@ sup TcpStream {
         # returns an error.
         # @ret: A result containing the send timeout for the socket if successful, or a `SockErr` if there was an error.
 
-        let mut timespec = CTimespec()
+        let mut timespec = sppc::CTimespec()
         let err = sppc::get_send_timeout(self.fd, &mut timespec)
         case err < 0 { ret Fail(err=SockErr::from_errno(timespec)) }
         ret Pass(val=Duration(seconds=timespec.sec, nanoseconds=timespec.nsec))
@@ -297,7 +297,7 @@ sup TcpStream {
         # that want to know the address of the server they are connected to.
         # @ret: A result containing the remote `SockAddr` if successful, or a `SockErr` if there was an error.
 
-        let mut storage = CSockaddrStorage()
+        let mut storage = sppc::CSockaddrStorage()
         let err = sppc::getpeername(self.fd, &mut storage)
         case err < 0 { ret Fail(err=SockErr::from_errno(addr)) }
         ret Pass(val=SockAddr::from_storage(&storage))
@@ -317,7 +317,7 @@ sup TcpStream ext Read {
 
         # Use the kernel "recv" function to read data from the
         # socket, into the provided buffer.
-        let mut bytes_read: USize = 0
+        let mut bytes_read = 0_uz
         let err = sppc::recv(self.fd, &mut buf.pointer, buf.size(), self.local.ip(), self.local.port(), &mut bytes_read)
         case err == 0 { ret Pass(val=bytes_read) } else { ret Fail(err=SocketErr::from_errno(err)) }
         ret Pass(val=bytes_read)
@@ -340,7 +340,7 @@ sup TcpStream ext Write {
 
         # Use the kernel "send" function to write data to the
         # socket, from the provided buffer.
-        let mut bytes_written: USize = 0
+        let mut bytes_written = 0_uz
         let err = sppc::send(self.fd, &buf.pointer, buf.length(), 0, &mut bytes_written)
         case err == 0 { ret Pass(val=bytes_written) } else { ret Fail(err=SocketErr::from_errno(err)) }
         ret Pass(val=bytes_written)
