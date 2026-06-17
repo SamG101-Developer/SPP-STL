@@ -362,6 +362,6 @@ sup TcpStream ext Write {
 
         # No-op for TcpStream, as there is no manual buffering
         # of data in the TcpStream implementation.
-        ret
+        ret Pass[Void]()
     }
 }
