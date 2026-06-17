@@ -92,7 +92,7 @@ sup Socket {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun local_addr(&self) -> Res[SockAddr, SockErr] {
+    fun local_addr(&self) -> SockAddr {
         # The `local_addr` method returns the local address that the socket is bound to. This is used for servers that
         # want to know the address they are listening on, especially if they bound to a wildcard address.
         # @ret: A result containing the local `SockAddr` if successful, or a `SockErr` if there was an error.
