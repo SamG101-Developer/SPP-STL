@@ -181,7 +181,7 @@ sup TcpStream {
             else { sppc::CTimeval(sec=0_u64, usec=0_u64) }
         }
         let err = sppc::set_linger(self.fd, timeout.is_some(), &timeval)
-        case err == 0 { ret SockErr::from_errno(err) }
+        case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass[Void]()
     }
 
