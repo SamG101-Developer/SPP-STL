@@ -46,8 +46,8 @@ sup TcpListener {
 
         # Create the file descriptor from the address.
         let mut fd = 0
-        sppc::socket(addr.ip().family(), constants::sock_stream, constants::ipproto_tcp, &mut fd)
-        case fd < 0 { ret Fail(err=SockErr::from_errno(fd)) }
+        let err = sppc::socket(addr.ip().family(), constants::sock_stream, constants::ipproto_tcp, &mut fd)
+        case fd < 0 { ret Fail(err=SockErr::from_errno(err)) }
 
         # Create the `TcpListener` object with the file descriptor.
         let listener = TcpListener(fd, local=addr)
@@ -112,8 +112,8 @@ sup TcpStream {
 
         # Create the file descriptor from the address.
         let mut fd = 0
-        sppc::socket(addr.ip().family(), constants::sock_stream, constants::ipproto_tcp, &mut fd)
-        case fd < 0 { ret Fail(err=SockErr::from_errno(fd)) }
+        let err = sppc::socket(addr.ip().family(), constants::sock_stream, constants::ipproto_tcp, &mut fd)
+        case fd < 0 { ret Fail(err=SockErr::from_errno(err)) }
 
         # Create the `TcpStream` object with the file descriptor.
         let stream = TcpStream(fd)
@@ -161,7 +161,7 @@ sup TcpStream {
 
         let yes = 0
         let err = sppc::get_keepalive(self.fd, &mut yes)
-        case err < 0 { ret Fail(err=SockErr::from_errno(yes)) }
+        case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(val=yes != 0)
     }
 
@@ -195,7 +195,7 @@ sup TcpStream {
         let mut yes = 0
         let mut timeout = Duration()
         let err = sppc::get_linger(self.fd, &mut yes, &mut timeout)
-        case err < 0 { ret Fail(err=SockErr::from_errno(yes)) }
+        case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(val=case yes { Some(val=timeout) } else { None })
     }
 
@@ -225,7 +225,7 @@ sup TcpStream {
 
         let yes = 0
         let err = sppc::get_nodelay(self.fd, &mut yes)
-        case err < 0 { ret Fail(err=SockErr::from_errno(yes)) }
+        case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(val=yes != 0)
     }
 
@@ -256,7 +256,7 @@ sup TcpStream {
 
         let mut timeval = sppc::CTimeval()
         let err = sppc::get_recv_timeout(self.fd, &mut timeval)
-        case err < 0 { ret Fail(err=SockErr::from_errno(timeval)) }
+        case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(val=Duration(seconds=timeval.sec, nanoseconds=timeval.usec * 1000_u64))
     }
 
@@ -286,7 +286,7 @@ sup TcpStream {
 
         let mut timeval = sppc::CTimeval()
         let err = sppc::get_send_timeout(self.fd, &mut timeval)
-        case err < 0 { ret Fail(err=SockErr::from_errno(timeval)) }
+        case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(val=Duration(seconds=timeval.sec, nanoseconds=timeval.usec * 1000_u64))
     }
 
