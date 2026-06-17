@@ -57,6 +57,12 @@ cls CPollfd {
 
 cls CSockaddrStorage { }
 
+!ffi(symbol="c_init")
+fun init() -> CInt { }
+
+!ffi(symbol="c_cleanup")
+fun cleanup() -> CInt { }
+
 !ffi(symbol="c_pthread_create")
 fun pthread_create(start_routine: &CVoidPtr, out: &mut CULongLong) -> CInt { }
 
@@ -169,19 +175,19 @@ fun pthread_spin_unlock(spinlock: &CULongLong) -> CInt { }
 fun pthread_spin_destroy(spinlock: &CULongLong) -> CInt { }
 
 !ffi(symbol="c_read")
-fun read(buffer: &mut CVoidPtr, size: CULongLong, count: CULongLong, fd: CInt, out_n: &mut CInt) -> CInt { }
+fun read(buffer: &mut CVoidPtr, size: CULongLong, count: CULongLong, fd: CInt, out_n: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_write")
-fun write(buffer: &CVoidPtr, size: CULongLong, count: CULongLong, fd: CInt, out_n: &mut CInt) -> CInt { }
+fun write(buffer: &CVoidPtr, size: CULongLong, count: CULongLong, fd: CInt, out_n: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_stdin_read")
-fun stdin_read(buffer: &mut CVoidPtr, size: CULongLong, count: CULongLong, out_n: &mut CInt) -> CInt { }
+fun stdin_read(buffer: &mut CVoidPtr, size: CULongLong, count: CULongLong, out_n: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_stdout_write")
-fun stdout_write(buffer: &CVoidPtr, size: CULongLong, count: CULongLong, out_n: &mut CInt) -> CInt { }
+fun stdout_write(buffer: &CVoidPtr, size: CULongLong, count: CULongLong, out_n: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_stderr_write")
-fun stderr_write(buffer: &CVoidPtr, size: CULongLong, count: CULongLong, out_n: &mut CInt) -> CInt { }
+fun stderr_write(buffer: &CVoidPtr, size: CULongLong, count: CULongLong, out_n: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_open")
 fun open(path: &CCharPtr, flags: CInt, mode: CInt, out_fd: &mut CInt) -> CInt { }
@@ -205,10 +211,10 @@ fun tell(fd: CInt, out_pos: &mut CULong) -> CInt { }
 fun truncate(fd: CInt, length: CULong) -> CInt { }
 
 !ffi(symbol="c_lock_ex")
-fun lock_ex(fd: CInt, non_blocking: CInt) -> CInt { }
+fun lock_ex(fd: CInt, non_blocking: CBool) -> CInt { }
 
 !ffi(symbol="c_lock_sh")
-fun lock_sh(fd: CInt, non_blocking: CInt) -> CInt { }
+fun lock_sh(fd: CInt, non_blocking: CBool) -> CInt { }
 
 !ffi(symbol="c_unlock")
 fun unlock(fd: CInt) -> CInt { }
@@ -217,7 +223,7 @@ fun unlock(fd: CInt) -> CInt { }
 fun stat(fd: CInt, out: &mut CStat) -> CInt { }
 
 !ffi(symbol="c_dup")
-fun dup(fd: CInt, out: &mut CInt) -> CInt { }
+fun dup(fd: CInt, out_fd: &mut CInt) -> CInt { }
 
 !ffi(symbol="c_dup_into")
 fun dup_into(fd: CInt, target_fd: CInt) -> CInt { }
@@ -240,17 +246,17 @@ fun set_status(fd: CInt, flags: CInt) -> CInt { }
 !ffi(symbol="c_poll")
 fun poll(fds: &mut CPollfd, count: CInt, duration: &CTimespec, out_n: &mut CInt) -> CInt { }
 
-# !ffi(symbol="c_readv")
-# fun readv(fd: CInt, iov: &CIovec, iov_count: CInt, out_n: &mut CInt) -> CInt { }
-#
-# !ffi(symbol="c_writev")
-# fun writev(fd: CInt, iov: &CIovec, iov_count: CInt, out_n: &mut CInt) -> CInt { }
+!ffi(symbol="c_readv")
+fun readv(fd: CInt, iov: &CIovec, iov_count: CInt, out_n: &mut CULong) -> CInt { }
+
+!ffi(symbol="c_writev")
+fun writev(fd: CInt, iov: &CIovec, iov_count: CInt, out_n: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_pread")
-fun pread(fd: CInt, buffer: &mut CVoidPtr, size: CULongLong, count: CULongLong, offset: CULong, out_n: &mut CInt) -> CInt { }
+fun pread(fd: CInt, buffer: &mut CVoidPtr, size: CULongLong, count: CULongLong, offset: CULong, out_n: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_pwrite")
-fun pwrite(fd: CInt, buffer: &CVoidPtr, size: CULongLong, count: CULongLong, offset: CULong, out_n: &mut CInt) -> CInt { }
+fun pwrite(fd: CInt, buffer: &CVoidPtr, size: CULongLong, count: CULongLong, offset: CULong, out_n: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_mmap")
 fun mmap(fd: CInt, length: CULongLong, prot: CInt, flags: CInt, offset: CULong, out_addr: &mut CVoidPtr, out_length: &mut CULongLong) -> CInt { }
@@ -402,6 +408,9 @@ fun strrchr(str: &CCharPtr, ch: CUChar, out_idx: &mut CInt) -> CInt { }
 !ffi(symbol="c_strstr")
 fun strstr(haystack: &CCharPtr, needle: &CCharPtr, out_idx: &mut CInt) -> CInt { }
 
+!ffi(symbol="c_strrstr")
+fun strrstr(haystack: &CCharPtr, needle: &CCharPtr, out_idx: &mut CInt) -> CInt { }
+
 !ffi(symbol="c_strcasestr")
 fun strcasestr(haystack: &CCharPtr, needle: &CCharPtr, out_idx: &mut CInt) -> CInt { }
 
@@ -475,40 +484,34 @@ fun listen(fd: CInt, backlog: CInt) -> CInt { }
 fun accept(fd: CInt, out_storage: &mut CSockaddrStorage, out_fd: &mut CInt) -> CInt { }
 
 !ffi(symbol="c_send")
-fun send(fd: CInt, data: &CCharPtr, size: CULongLong, flags: CInt, out_n: &mut CInt) -> CInt { }
+fun send(fd: CInt, data: &CCharPtr, size: CULongLong, flags: CInt, out_n: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_recv")
-fun recv(fd: CInt, buffer: &mut CCharPtr, size: CULongLong, flags: CInt, out: &mut CInt) -> CInt { }
+fun recv(fd: CInt, buffer: &mut CCharPtr, size: CULongLong, flags: CInt, out: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_sendto")
-fun sendto(fd: CInt, data: &CCharPtr, size: CULongLong, storage: &CSockaddrStorage, out_n: &mut CInt) -> CInt { }
+fun sendto(fd: CInt, data: &CCharPtr, size: CULongLong, storage: &CSockaddrStorage, out_n: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_recvfrom")
-fun recvfrom(fd: CInt, buffer: &mut CCharPtr, size: CULongLong, out_storage: &mut CSockaddrStorage, out_n: &mut CInt) -> CInt { }
+fun recvfrom(fd: CInt, buffer: &mut CCharPtr, size: CULongLong, out_storage: &mut CSockaddrStorage, out_n: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_set_nonblocking")
 fun set_nonblocking(fd: CInt, non_blocking: CBool) -> CInt { }
+
+!ffi(symbol="c_set_keepalive")
+fun set_keepalive(fd: CInt, keepalive: CBool) -> CInt { }
+
+!ffi(symbol="c_set_linger")
+fun set_linger(fd: CInt, on: CBool, linger: &CTimeval) -> CInt { }
+
+!ffi(symbol="c_set_nodelay")
+fun set_nodelay(fd: CInt, nodelay: CBool) -> CInt { }
 
 !ffi(symbol="c_set_ttl")
 fun set_ttl(fd: CInt, ttl: CInt) -> CInt { }
 
 !ffi(symbol="c_set_broadcast")
 fun set_broadcast(fd: CInt, broadcast: CBool) -> CInt { }
-
-!ffi(symbol="c_set_reuseaddr")
-fun set_reuseaddr(fd: CInt, reuse: CBool) -> CInt { }
-
-!ffi(symbol="c_set_reuseport")
-fun set_reuseport(fd: CInt, reuse: CBool) -> CInt { }
-
-!ffi(symbol="c_set_keepalive")
-fun set_keepalive(fd: CInt, keepalive: CBool) -> CInt { }
-
-!ffi(symbol="c_set_linger")
-fun set_linger(fd: CInt, linger: CBool) -> CInt { }
-
-!ffi(symbol="c_set_nodelay")
-fun set_nodelay(fd: CInt, nodelay: CBool) -> CInt { }
 
 !ffi(symbol="c_set_recv_timeout")
 fun set_recv_timeout(fd: CInt, timeout: &CTimeval) -> CInt { }
@@ -543,8 +546,8 @@ fun getsockname(fd: CInt, out_storage: &mut CSockaddrStorage) -> CInt { }
 !ffi(symbol="c_getpeername")
 fun getpeername(fd: CInt, out_storage: &mut CSockaddrStorage) -> CInt { }
 
-!ffi(symbol="c_clockgettime")
-fun clockgettime(clock_id: CInt, out_tp: &mut CTimespec) -> CInt { }
+!ffi(symbol="c_clock_gettime")
+fun clock_gettime(clock_id: CInt, out_tp: &mut CTimespec) -> CInt { }
 
 !ffi(symbol="c_clock_nanosleep")
 fun clock_nanosleep(clock: CInt, flags: CInt, duration: &CTimespec) -> CInt { }

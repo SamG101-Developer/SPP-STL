@@ -64,7 +64,7 @@ sup UdpSocket {
         # @ret: A `Res` type containing the number of bytes sent if the operation is successful, or a `SockErr` if the
         # operation fails.
 
-        let mut bytes_sent = 0_uz
+        let mut bytes_sent = 0_sz
         let err = sppc::sendto(self.fd, &buf.ptr, buf.len(), addr.storage(), &mut bytes_sent)
         case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(val=bytes_sent)
@@ -80,7 +80,7 @@ sup UdpSocket {
         # @ret: A `Res` type containing a tuple of the number of bytes received and the source `SockAddr` if the
         # operation is successful, or a `SockErr` if the operation fails.
 
-        let mut bytes_received = 0_uz
+        let mut bytes_received = 0_sz
         let mut storage = sppc::CSockaddrStorage()
         let err = sppc::recvfrom(self.fd, &mut buf.ptr, buf.len(), &mut storage, &mut bytes_received)
         case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
