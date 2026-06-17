@@ -40,7 +40,8 @@ sup UdpSocket {
         # @ret:
 
         # Create the file descriptor from the address.
-        let fd = sppc::socket(addr.ip().family(), constants::sock_dgram, 0)
+        let fd = 0
+        sppc::socket(addr.ip().family(), constants::sock_dgram, constants::ipproto_udp, &mut fd)
         case fd < 0 { ret Fail(err=SockErr::from_errno(fd)) }
 
         # Create the `UdpSocket` object with the file descriptor.
