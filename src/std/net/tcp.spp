@@ -201,10 +201,10 @@ sup TcpStream {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun set_node_delay(&mut self, yes: Bool) -> Res[Void, SockErr] {
-        # The `set_node_delay` method sets the socket to no delay. This means that the socket will not delay sending
-        # data in order to wait for more data to be sent. This is useful for real-time applications, as it can help to
-        # reduce latency.
+    fun set_no_delay(&mut self, yes: Bool) -> Res[Void, SockErr] {
+        # The `set_no_delay` method sets the socket to no delay. This means that the socket will send data immediately,
+        # without waiting for the buffer to fill up. This is useful for applications that require low latency, such as
+        # real-time gaming or voice chat.
         # @let yes: Whether to set the socket to no delay or not. If true, the socket will be set to no delay. If false,
         # the socket will not be set to no delay.
         # @ret: A result indicating whether the operation was successful or not.
@@ -216,10 +216,10 @@ sup TcpStream {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun node_delay(&self) -> Res[Bool, SockErr] {
-        # The `node_delay` method gets whether the socket is set to no delay or not. This is useful for checking the
+    fun no_delay(&self) -> Res[Bool, SockErr] {
+        # The `no_delay` method gets whether the socket is set to no delay or not. This is useful for checking the
         # current state of the socket, especially if you want to know whether data is being sent immediately or if it is
-        # being delayed in order to wait for more data to be sent.
+        # being buffered.
         # @ret: A result containing a boolean indicating whether the socket is set to no delay or not if successful, or
         # a `SockErr` if there was an error.
 
