@@ -433,6 +433,24 @@ sup [T] Opt[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
+    fun unwrap_or_default(self) -> T {
+        # The `unwrap_or_default` method checks if this optional contains a value, and if so, returns the value. If this
+        # optional is `None`, then `unwrap_or_default` returns the default value for the type `T`. This is a convenient
+        # method for extracting the value inside an optional, while providing a fallback value in case the optional is
+        # `None`, and computing that fallback value using the default constructor for the type `T`.
+        # @ret: Returns the value inside the optional if this optional is `Some`, otherwise returns the default value
+        # for the type `T`.
+
+        # Pattern match and return the value if this is `Some`,
+        # otherwise return the default value for the type `T`.
+        ret case self of {
+            is Some[T](val) { val }
+            else { T() }
+        }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun unwrap_or_else[F: FunMov[(), T]](self, default: F) -> T {
         # The `unwrap_or_else` method checks if this optional contains a value, and if so, returns the value. If this
         # optional is `None`, then `unwrap_or_else` returns the result of invoking the provided default function. This
