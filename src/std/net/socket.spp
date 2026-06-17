@@ -84,7 +84,7 @@ sup Socket {
         # @ret: A result containing the time-to-live value for the socket if successful, or a `SockErr` if there was an
         # error.
 
-        let ttl = 0
+        let mut ttl = 0
         let err = sppc::get_ttl(self.fd, &mut ttl)
         case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(val=ttl)
