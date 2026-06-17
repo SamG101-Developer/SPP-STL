@@ -65,7 +65,7 @@ sup UdpSocket {
         # operation fails.
 
         let mut bytes_sent = 0_sz
-        let err = sppc::sendto(self.fd, &buf.ptr, buf.len(), addr.storage(), &mut bytes_sent)
+        let err = sppc::sendto(self.fd, &buf.ptr, buf.len(), &addr.storage(), &mut bytes_sent)
         case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(val=bytes_sent)
     }
