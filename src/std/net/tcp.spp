@@ -310,7 +310,7 @@ sup TcpStream {
 }
 
 sup TcpStream ext Read {
-    fun read(&mut self, buf: &mut View[U8]) -> Res[USize, StreamErr] {
+    fun read(&mut self, mut buf: &mut View[U8]) -> Res[USize, StreamErr] {
         # The `read` method reads data from the socket into the provided buffer. It uses the sppc::recv function to
         # perform the read operation, which allows it to handle both IPv4 and IPv6 addresses seamlessly. The method
         # returns a `Res` type that indicates success or failure. On success, it returns the number of bytes read.
