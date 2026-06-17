@@ -176,7 +176,11 @@ sup TcpStream {
         # `Some(val=duration)`, then the socket will linger for the specified duration before closing the connection.
         # @ret: A result indicating whether the operation was successful or not.
 
-        let err = sppc::set_linger(self.fd, timeout.is_some(), timeout.unwrap_or_default())
+        let timeval = case timeout of {
+            is Some(val) { sppc::CTimeval(sec=val.seconds, usec=val.nanoseconds / 1000_u64) }
+            is None() { sppc::CTimeval(sec=0, usec=0) }
+        }
+        let err = sppc::set_linger(self.fd, timeout.is_some(), timeval)
         case err == 0 { ret SockErr::from_errno(err) }
         ret Pass[Void]()
     }
