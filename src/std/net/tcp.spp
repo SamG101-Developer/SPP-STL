@@ -272,7 +272,7 @@ sup TcpStream {
 
         let timeval = sppc::CTimeval(sec=timeout.seconds, usec=timeout.nanoseconds / 1000_u64)
         let err = sppc::set_send_timeout(self.fd, &timeval)
-        case err == 0 { ret SockErr::from_errno(err) }
+        case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass[Void]()
     }
 
