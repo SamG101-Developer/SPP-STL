@@ -24,8 +24,8 @@ type SockErr = SockOtherErr
 
 sup SockErr {
     fun from_errno(errno: S32) -> Self {
-        case errno of {
-            else { ret SockOtherErr }
+        ret case errno of {
+            else { SockOtherErr }
         }
     }
 }
