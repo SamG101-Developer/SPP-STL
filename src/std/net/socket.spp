@@ -86,7 +86,7 @@ sup Socket {
         # error.
 
         let mut ttl = 0
-        let err = sppc::get_ttl(self.fd, &mut ttl)
+        let err = sppc::get_ttl(self.fd, &mut S32::from(ttl))
         case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(val=U32::from(ttl))
     }
