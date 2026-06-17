@@ -119,7 +119,7 @@ sup TcpStream {
         let stream = TcpStream(fd)
         let err = sppc::connect(stream.fd, addr.storage())
         case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
-        ret Pass(stream)
+        ret Pass(val=stream)
     }
 
     !public
