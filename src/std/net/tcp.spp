@@ -93,7 +93,7 @@ sup TcpListener {
         # Create a new `TcpStream` object with the accepted
         # file descriptor.
         let stream = TcpStream(fd=new_fd)
-        ret Pass(val=(stream, addr))
+        ret Pass(val=(stream, SockAddr::from_storage(&storage)))
     }
 }
 
