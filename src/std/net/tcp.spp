@@ -226,7 +226,7 @@ sup TcpStream {
         let mut yes = false
         let err = sppc::get_nodelay(self.fd, &mut yes)
         case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
-        ret Pass(val=yes != 0)
+        ret Pass(val=yes)
     }
 
     !public
