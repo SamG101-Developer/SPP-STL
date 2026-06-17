@@ -117,7 +117,7 @@ sup TcpStream {
 
         # Create the `TcpStream` object with the file descriptor.
         let stream = TcpStream(fd)
-        let err = sppc::connect(stream.fd, addr.storage())
+        let err = sppc::connect(stream.fd, &addr.storage())
         case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(val=stream)
     }
