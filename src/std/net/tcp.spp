@@ -85,7 +85,7 @@ sup TcpListener {
 
         # Call the `accept` function from the `sppc2` module
         # to accept an incoming connection.
-        let new_fd = 0
+        let mut new_fd = 0
         let mut storage = sppc::CSockaddrStorage()
         let err = sppc::accept(self.fd, &mut storage, &mut new_fd)
         case new_fd < 0 { ret Fail(err=SockErr::from_errno(fd)) }
@@ -111,7 +111,7 @@ sup TcpStream {
         # @ret: A result containing the connected `TcpStream` if successful, or a `SockErr` if there was an error.
 
         # Create the file descriptor from the address.
-        let fd = 0
+        let mut fd = 0
         sppc::socket(addr.ip().family(), constants::sock_stream, constants::ipproto_tcp, &mut fd)
         case fd < 0 { ret Fail(err=SockErr::from_errno(fd)) }
 
