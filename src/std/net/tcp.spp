@@ -239,8 +239,8 @@ sup TcpStream {
         # zero, then there is no timeout and the receive operation will block indefinitely until data is received.
         # @ret: A result indicating whether the operation was successful or not.
 
-        let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
-        let err = sppc::set_recv_timeout(self.fd, &timespec)
+        let timeval = sppc::CTimeval(sec=timeout.seconds, usec=timeout.nanoseconds / 1000_u64)
+        let err = sppc::set_recv_timeout(self.fd, &timeval)
         case err == 0 { ret SockErr::from_errno(err) }
         ret Pass[Void]()
     }
@@ -254,10 +254,10 @@ sup TcpStream {
         # @ret: A result containing the receive timeout for the socket if successful, or a `SockErr` if there was an
         # error.
 
-        let mut timespec = sppc::CTimespec()
-        let err = sppc::get_recv_timeout(self.fd, &mut timespec)
-        case err < 0 { ret Fail(err=SockErr::from_errno(timespec)) }
-        ret Pass(val=Duration(seconds=timespec.sec, nanoseconds=timespec.nsec))
+        let mut timeval = sppc::CTimeval()
+        let err = sppc::get_recv_timeout(self.fd, &mut timeval)
+        case err < 0 { ret Fail(err=SockErr::from_errno(timeval)) }
+        ret Pass(val=Duration(seconds=timeval.sec, nanoseconds=timeval.usec * 1000_u64))
     }
 
     !public
@@ -270,8 +270,8 @@ sup TcpStream {
         # zero, then there is no timeout and the send operation will block indefinitely until data is sent.
         # @ret: A result indicating whether the operation was successful or not.
 
-        let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
-        let err = sppc::set_send_timeout(self.fd, &timespec)
+        let timeval = sppc::CTimeval(sec=timeout.seconds, usec=timeout.nanoseconds / 1000_u64)
+        let err = sppc::set_send_timeout(self.fd, &timeval)
         case err == 0 { ret SockErr::from_errno(err) }
         ret Pass[Void]()
     }
@@ -284,10 +284,10 @@ sup TcpStream {
         # returns an error.
         # @ret: A result containing the send timeout for the socket if successful, or a `SockErr` if there was an error.
 
-        let mut timespec = sppc::CTimespec()
-        let err = sppc::get_send_timeout(self.fd, &mut timespec)
-        case err < 0 { ret Fail(err=SockErr::from_errno(timespec)) }
-        ret Pass(val=Duration(seconds=timespec.sec, nanoseconds=timespec.nsec))
+        let mut timeval = sppc::CTimeval()
+        let err = sppc::get_send_timeout(self.fd, &mut timeval)
+        case err < 0 { ret Fail(err=SockErr::from_errno(timeval)) }
+        ret Pass(val=Duration(seconds=timeval.sec, nanoseconds=timeval.usec * 1000_u64))
     }
 
     !public
