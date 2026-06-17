@@ -40,8 +40,8 @@ cls Socket {
     # @let local: The local address of the socket. This is the address that the socket is bound to, and is used for
     # operations that require the local address, such as binding and listening.
 
-    !protected fd: S32
-    !protected local: SockAddr
+    !package fd: S32
+    !package local: SockAddr
 }
 
 sup Socket {
