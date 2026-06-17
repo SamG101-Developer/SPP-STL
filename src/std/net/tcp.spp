@@ -159,10 +159,10 @@ sup TcpStream {
         # @ret: A result containing a boolean indicating whether the socket is set to keep alive or not if successful,
         # or a `SockErr` if there was an error.
 
-        let yes = 0
+        let yes = false
         let err = sppc::get_keepalive(self.fd, &mut yes)
         case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
-        ret Pass(val=yes != 0)
+        ret Pass(val=yes)
     }
 
     !public
@@ -192,7 +192,7 @@ sup TcpStream {
         # is `Some(val=duration)`, then the socket is set to linger for the specified duration before closing the
         # connection.
 
-        let mut yes = 0
+        let mut yes = false
         let mut timeout = Duration()
         let err = sppc::get_linger(self.fd, &mut yes, &mut timeout)
         case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
