@@ -87,7 +87,7 @@ sup TcpListener {
         # to accept an incoming connection.
         let new_fd = 0
         let storage = sppc::CSockaddrStorage()
-        let err = sppc::accept(self.fd, af, &mut storage, &mut new_fd)
+        let err = sppc::accept(self.fd, &mut storage, &mut new_fd)
         case new_fd < 0 { ret Fail(err=SockErr::from_errno(fd)) }
 
         # Create a new `TcpStream` object with the accepted
