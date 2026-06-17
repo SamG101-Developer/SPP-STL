@@ -111,7 +111,8 @@ sup TcpStream {
         # @ret: A result containing the connected `TcpStream` if successful, or a `SockErr` if there was an error.
 
         # Create the file descriptor from the address.
-        let fd = sppc::socket(addr.ip().family(), constants::sock_stream, constants::ipproto_tcp, 0)
+        let fd = 0
+        sppc::socket(addr.ip().family(), constants::sock_stream, constants::ipproto_tcp, &mut fd)
         case fd < 0 { ret Fail(err=SockErr::from_errno(fd)) }
 
         # Create the `TcpStream` object with the file descriptor.
