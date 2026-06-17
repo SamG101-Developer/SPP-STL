@@ -86,7 +86,7 @@ sup TcpListener {
         # Call the `accept` function from the `sppc2` module
         # to accept an incoming connection.
         let new_fd = 0
-        let storage = sppc::CSockaddrStorage()
+        let mut storage = sppc::CSockaddrStorage()
         let err = sppc::accept(self.fd, &mut storage, &mut new_fd)
         case new_fd < 0 { ret Fail(err=SockErr::from_errno(fd)) }
 
