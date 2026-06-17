@@ -159,7 +159,7 @@ sup TcpStream {
         # @ret: A result containing a boolean indicating whether the socket is set to keep alive or not if successful,
         # or a `SockErr` if there was an error.
 
-        let yes = false
+        let mut yes = false
         let err = sppc::get_keepalive(self.fd, &mut yes)
         case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(val=yes)
