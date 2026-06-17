@@ -45,7 +45,7 @@ sup UdpSocket {
         case fd < 0 { ret Fail(err=SockErr::from_errno(fd)) }
 
         # Create the `UdpSocket` object with the file descriptor.
-        let listener = UdpSocket(fd, addr)
+        let listener = UdpSocket(fd, local=addr)
         let err = sppc::bind(listener.fd, &addr.storage())
         case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(listener)
