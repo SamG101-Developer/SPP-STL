@@ -176,7 +176,7 @@ sup SockAddr {
             # the octets of the IpV4Addr and the port.
             is SockV4Addr(ip, port) {
                 let mut storage = sppc::CSockaddrStorage()
-                sppc::set_sockaddr_v4(&mut storage, &ip.octets, port)
+                sppc::set_sockaddr_v4(&ip.octets, port, &mut storage)
                 storage
             }
 
@@ -184,7 +184,7 @@ sup SockAddr {
             # the segments of the IpV6Addr and the port.
             is SockV6Addr(ip, port) {
                 let mut storage = sppc::CSockaddrStorage()
-                sppc::set_sockaddr_v6(&mut storage, &ip.segments, port)
+                sppc::set_sockaddr_v6(&ip.segments, port, &mut storage)
                 storage
             }
 
