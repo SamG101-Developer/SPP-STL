@@ -299,7 +299,7 @@ sup TcpStream {
 
         let mut storage = sppc::CSockaddrStorage()
         let err = sppc::getpeername(self.fd, &mut storage)
-        case err < 0 { ret Fail(err=SockErr::from_errno(addr)) }
+        case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(val=SockAddr::from_storage(&storage))
     }
 }
