@@ -46,7 +46,7 @@ sup TcpListener {
 
         # Create the file descriptor from the address.
         let mut fd = 0
-        let err = sppc::socket(addr.ip().family(), constants::sock_stream, constants::ipproto_tcp, &mut fd)
+        let err = sppc::socket(constants::sock_stream, constants::ipproto_tcp, &mut fd)
         case fd < 0 { ret Fail(err=SockErr::from_errno(err)) }
 
         # Create the `TcpListener` object with the file descriptor.
@@ -323,7 +323,7 @@ sup TcpStream ext Read {
         # Use the kernel "recv" function to read data from the
         # socket, into the provided buffer.
         let mut bytes_read = 0_uz
-        let err = sppc::recv(self.fd, &mut buf.pointer, buf.size(), &self.local.storage(), &mut bytes_read)
+        let err = sppc::recv(self.fd, &mut buf.ptr, buf.size(), &self.local.storage(), &mut bytes_read)
         case err == 0 { ret Pass(val=bytes_read) } else { ret Fail(err=SocketErr::from_errno(err)) }
         ret Pass(val=bytes_read)
     }
@@ -346,7 +346,7 @@ sup TcpStream ext Write {
         # Use the kernel "send" function to write data to the
         # socket, from the provided buffer.
         let mut bytes_written = 0_uz
-        let err = sppc::send(self.fd, &buf.pointer, buf.length(), 0, &mut bytes_written)
+        let err = sppc::send(self.fd, &buf.ptr, buf.length(), 0, &mut bytes_written)
         case err == 0 { ret Pass(val=bytes_written) } else { ret Fail(err=SocketErr::from_errno(err)) }
         ret Pass(val=bytes_written)
     }
