@@ -193,10 +193,10 @@ sup TcpStream {
         # connection.
 
         let mut yes = false
-        let mut timeout = Duration()
+        let mut timeout = sppc::CTimeval()
         let err = sppc::get_linger(self.fd, &mut yes, &mut timeout)
         case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
-        ret Pass(val=case yes { Some(val=timeout) } else { None })
+        ret Pass(val=case yes { Some(val=Duration(seconds=timeout.sec, nanoseconds=timeout.usec * 1000_u64)) } else { None } )
     }
 
     !public
