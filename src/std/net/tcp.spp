@@ -58,7 +58,7 @@ sup TcpListener {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun listen(&mut self, backlog: U32) -> Res[Void, SockErr] {
+    fun listen(&mut self, backlog: S32) -> Res[Void, SockErr] {
         # The `listen` method puts the socket into listening mode. This is used for servers that want to accept incoming
         # connections on the socket. The backlog parameter specifies the maximum number of pending connections that can
         # be queued up before the server starts rejecting new connections.
