@@ -62,7 +62,7 @@ sup Socket {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun set_ttl(&mut self, ttl: U8) -> Res[Void, SockErr] {
+    fun set_ttl(&mut self, ttl: U32) -> Res[Void, SockErr] {
         # The `set_ttl` method sets the time-to-live (TTL) for the socket. This is the maximum number of hops that a
         # packet can take before it is discarded. This is useful for controlling the scope of packets sent from the
         # socket, as it can help to prevent packets from being sent too far and potentially causing network congestion.
@@ -77,7 +77,7 @@ sup Socket {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun ttl(&self) -> Res[U8, SockErr] {
+    fun ttl(&self) -> Res[U32, SockErr] {
         # The `ttl` method gets the time-to-live (TTL) for the socket. This is the maximum number of hops that a packet
         # can take before it is discarded. This is useful for controlling the scope of packets sent from the socket, as
         # it can help to prevent packets from being sent too far and potentially causing network congestion.
@@ -87,7 +87,7 @@ sup Socket {
         let mut ttl = 0
         let err = sppc::get_ttl(self.fd, &mut ttl)
         case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
-        ret Pass(val=ttl)
+        ret Pass(val=U32::from(ttl))
     }
 
     !public
