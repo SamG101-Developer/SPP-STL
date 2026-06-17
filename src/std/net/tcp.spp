@@ -322,10 +322,10 @@ sup TcpStream ext Read {
 
         # Use the kernel "recv" function to read data from the
         # socket, into the provided buffer.
-        let mut bytes_read = 0_uz
+        let mut bytes_read = 0_sz
         let err = sppc::recv(self.fd, &mut buf.ptr, buf.len(), 0, &mut bytes_read)
         case err == 0 { ret Pass(val=bytes_read) } else { ret Fail(err=SocketErr::from_errno(err)) }
-        ret Pass(val=bytes_read)
+        ret Pass(val=USize::from(bytes_read))
     }
 }
 
