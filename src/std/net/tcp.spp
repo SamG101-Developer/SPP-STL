@@ -347,8 +347,8 @@ sup TcpStream ext Write {
         # socket, from the provided buffer.
         let mut bytes_written = 0_uz
         let err = sppc::send(self.fd, &buf.ptr, buf.length(), 0, &mut bytes_written)
-        case err == 0 { ret Pass(val=bytes_written) } else { ret Fail(err=SockErr::from_errno(err)) }
-        ret Pass(val=bytes_written)
+        case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass(val=USize::from(bytes_written))
     }
 
     fun flush(&mut self) -> Res[Void, StreamErr] {
