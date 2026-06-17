@@ -297,10 +297,10 @@ sup TcpStream {
         # that want to know the address of the server they are connected to.
         # @ret: A result containing the remote `SockAddr` if successful, or a `SockErr` if there was an error.
 
-        let mut addr = SockAddr()
-        let err = sppc::get_peer_addr(self.fd, &mut addr.ip(), &mut addr.port())
+        let mut storage = CSockaddrStorage()
+        let err = sppc::getpeername(self.fd, &mut storage)
         case err < 0 { ret Fail(err=SockErr::from_errno(addr)) }
-        ret Pass(addr)
+        ret Pass(val=SockAddr::from_storage(&storage))
     }
 }
 
