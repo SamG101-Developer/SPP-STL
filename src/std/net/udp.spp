@@ -84,7 +84,7 @@ sup UdpSocket {
         let mut storage = sppc::CSockaddrStorage()
         let err = sppc::recvfrom(self.fd, &mut buf.ptr, buf.len(), &mut storage, &mut bytes_received)
         case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
-        ret Pass(val=(USize::from(bytes_received), SockAddr::from_storage(&storage)))
+        ret Pass(val=USize::from(bytes_received), SockAddr::from_storage(&storage))
     }
 
     !public
