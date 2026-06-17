@@ -1,3 +1,4 @@
+use std::annotations::package
 use std::annotations::public
 use std::annotations::versioned
 use std::boolean::Bool
@@ -14,7 +15,7 @@ cls IpV4Addr {
     # converting it to a string, and comparing two IPv4 addresses for equality.
     # @let octets: An array of four unsigned 8-bit integers representing the octets of the IPv4 address.
 
-    octets: [U8; 4_uz]
+    !package octets: [U8; 4_uz]
 }
 
 !public
@@ -25,7 +26,7 @@ cls IpV6Addr {
     # address from a string, converting it to a string, and comparing two IPv6 addresses for equality.
     # @let segments: An array of eight unsigned 16-bit integers representing the segments of the IPv6 address.
 
-    segments: [U16; 8_uz]
+    !package segments: [U16; 8_uz]
 }
 
 !public
