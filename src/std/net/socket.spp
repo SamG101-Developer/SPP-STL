@@ -57,7 +57,7 @@ sup Socket {
         # @ret: A result indicating whether the operation was successful or not.
 
         let err = sppc::set_nonblocking(self.fd, yes)
-        case err == 0 { ret SockErr::from_errno(err) }
+        case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass[Void]()
     }
 
@@ -72,7 +72,7 @@ sup Socket {
         # @ret: A result indicating whether the operation was successful or not.
 
         let err = sppc::set_ttl(self.fd, S32::from(ttl))
-        case err == 0 { ret SockErr::from_errno(err) }
+        case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass[Void]()
     }
 
