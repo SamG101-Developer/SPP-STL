@@ -53,7 +53,7 @@ sup TcpListener {
         let listener = TcpListener(fd, local=addr)
         let err = sppc::bind(listener.fd, &addr.storage())
         case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
-        ret Pass(listener)
+        ret Pass(val=listener)
     }
 
     !public
