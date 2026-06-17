@@ -175,19 +175,19 @@ fun pthread_spin_unlock(spinlock: &CULongLong) -> CInt { }
 fun pthread_spin_destroy(spinlock: &CULongLong) -> CInt { }
 
 !ffi(symbol="c_read")
-fun read(buffer: &mut CVoidPtr, size: CULongLong, count: CULongLong, fd: CInt, out_n: &mut CULong) -> CInt { }
+fun read(buffer: &mut CVoidPtr, size: CULongLong, count: CULongLong, fd: CInt, out_n: &mut CLongLong) -> CInt { }
 
 !ffi(symbol="c_write")
-fun write(buffer: &CVoidPtr, size: CULongLong, count: CULongLong, fd: CInt, out_n: &mut CULong) -> CInt { }
+fun write(buffer: &CVoidPtr, size: CULongLong, count: CULongLong, fd: CInt, out_n: &mut CLongLong) -> CInt { }
 
 !ffi(symbol="c_stdin_read")
-fun stdin_read(buffer: &mut CVoidPtr, size: CULongLong, count: CULongLong, out_n: &mut CULong) -> CInt { }
+fun stdin_read(buffer: &mut CVoidPtr, size: CULongLong, count: CULongLong, out_n: &mut CLongLong) -> CInt { }
 
 !ffi(symbol="c_stdout_write")
-fun stdout_write(buffer: &CVoidPtr, size: CULongLong, count: CULongLong, out_n: &mut CULong) -> CInt { }
+fun stdout_write(buffer: &CVoidPtr, size: CULongLong, count: CULongLong, out_n: &mut CLongLong) -> CInt { }
 
 !ffi(symbol="c_stderr_write")
-fun stderr_write(buffer: &CVoidPtr, size: CULongLong, count: CULongLong, out_n: &mut CULong) -> CInt { }
+fun stderr_write(buffer: &CVoidPtr, size: CULongLong, count: CULongLong, out_n: &mut CLongLong) -> CInt { }
 
 !ffi(symbol="c_open")
 fun open(path: &CCharPtr, flags: CInt, mode: CInt, out_fd: &mut CInt) -> CInt { }
@@ -246,17 +246,11 @@ fun set_status(fd: CInt, flags: CInt) -> CInt { }
 !ffi(symbol="c_poll")
 fun poll(fds: &mut CPollfd, count: CInt, duration: &CTimespec, out_n: &mut CInt) -> CInt { }
 
-# !ffi(symbol="c_readv")
-# fun readv(fd: CInt, iov: &CIovec, iov_count: CInt, out_n: &mut CULong) -> CInt { }
-#
-# !ffi(symbol="c_writev")
-# fun writev(fd: CInt, iov: &CIovec, iov_count: CInt, out_n: &mut CULong) -> CInt { }
-
 !ffi(symbol="c_pread")
-fun pread(fd: CInt, buffer: &mut CVoidPtr, size: CULongLong, count: CULongLong, offset: CULong, out_n: &mut CULong) -> CInt { }
+fun pread(fd: CInt, buffer: &mut CVoidPtr, size: CULongLong, count: CULongLong, offset: CULong, out_n: &mut CLongLong) -> CInt { }
 
 !ffi(symbol="c_pwrite")
-fun pwrite(fd: CInt, buffer: &CVoidPtr, size: CULongLong, count: CULongLong, offset: CULong, out_n: &mut CULong) -> CInt { }
+fun pwrite(fd: CInt, buffer: &CVoidPtr, size: CULongLong, count: CULongLong, offset: CULong, out_n: &mut CLongLong) -> CInt { }
 
 !ffi(symbol="c_mmap")
 fun mmap(fd: CInt, length: CULongLong, prot: CInt, flags: CInt, offset: CULong, out_addr: &mut CVoidPtr, out_length: &mut CULongLong) -> CInt { }
@@ -484,16 +478,16 @@ fun listen(fd: CInt, backlog: CInt) -> CInt { }
 fun accept(fd: CInt, out_storage: &mut CSockaddrStorage, out_fd: &mut CInt) -> CInt { }
 
 !ffi(symbol="c_send")
-fun send(fd: CInt, data: &CCharPtr, size: CULongLong, flags: CInt, out_n: &mut CULong) -> CInt { }
+fun send(fd: CInt, data: &CCharPtr, size: CULongLong, flags: CInt, out_n: &mut CLongLong) -> CInt { }
 
 !ffi(symbol="c_recv")
-fun recv(fd: CInt, buffer: &mut CCharPtr, size: CULongLong, flags: CInt, out: &mut CULong) -> CInt { }
+fun recv(fd: CInt, buffer: &mut CCharPtr, size: CULongLong, flags: CInt, out: &mut CLongLong) -> CInt { }
 
 !ffi(symbol="c_sendto")
-fun sendto(fd: CInt, data: &CCharPtr, size: CULongLong, storage: &CSockaddrStorage, out_n: &mut CULong) -> CInt { }
+fun sendto(fd: CInt, data: &CCharPtr, size: CULongLong, storage: &CSockaddrStorage, out_n: &mut CLongLong) -> CInt { }
 
 !ffi(symbol="c_recvfrom")
-fun recvfrom(fd: CInt, buffer: &mut CCharPtr, size: CULongLong, out_storage: &mut CSockaddrStorage, out_n: &mut CULong) -> CInt { }
+fun recvfrom(fd: CInt, buffer: &mut CCharPtr, size: CULongLong, out_storage: &mut CSockaddrStorage, out_n: &mut CLongLong) -> CInt { }
 
 !ffi(symbol="c_set_nonblocking")
 fun set_nonblocking(fd: CInt, non_blocking: CBool) -> CInt { }
