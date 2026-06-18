@@ -56,11 +56,11 @@ sup AllocErr {
         # @let errno:
         # @ret:
 
-        case errno of {
-            == cffi::enomem { ret AllocOomErr }
-            == cffi::eoverflow { ret AllocOverflowErr }
-            == cffi::einval { ret AllocAlignmentErr }
-            else { ret AllocOtherErr }
+        ret case errno of {
+            == cffi::enomem { AllocOomErr }
+            == cffi::eoverflow { AllocOverflowErr }
+            == cffi::einval { AllocAlignmentErr }
+            else { AllocOtherErr }
         }
     }
 }
