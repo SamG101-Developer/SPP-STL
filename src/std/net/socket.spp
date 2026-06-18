@@ -140,7 +140,7 @@ sup SockAddr {
         # @let storage:
         # @ret:
 
-        let family = 0
+        let mut family = 0
         sppc::sockaddr_family(storage, &mut family)
         ret case family of {
             # For IpV4, fill the octets of the IpV4Addr and the
