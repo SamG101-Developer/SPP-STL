@@ -88,7 +88,7 @@ fun get_env(key: &StrView) -> Opt[Str] {
     # @ret: An `Opt` type containing the value of the environment variable if it is set, or `None` if it is not set.
 
     let val = Str::new()
-    let err = sppc::get_env(&key.ptr, &mut val.data.buffer.ptr)
+    let err = sppc::getenv(&key.ptr, &mut val.data.buffer.ptr)
     case err == 0 { ret Some(val) } else { ret None() }
 }
 
@@ -107,7 +107,7 @@ fun set_env(var_key: &StrView, var_val: &StrView, overwrite: Bool = true) -> Boo
     # @ret: A boolean value indicating whether the environment variable was successfully set. Returns `true` if the
     # operation was successful, or `false` if it failed.
 
-    let err = sppc::set_env(&var_key.ptr, &var_val.ptr, overwrite)
+    let err = sppc::setenv(&var_key.ptr, &var_val.ptr, overwrite)
     ret err == 0
 }
 
@@ -120,7 +120,7 @@ fun unset_env(var_key: &StrView) -> Bool {
     # @let var_key:
     # @ret:
 
-    let result = sppc::unset_env(var_key)
+    let result = sppc::unsetenv(var_key)
     ret result == 0
 }
 
