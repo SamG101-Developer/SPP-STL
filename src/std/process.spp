@@ -56,26 +56,26 @@ sup EnvErr {
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-fun get_proc_id() -> USize {
+fun get_proc_id() -> U32 {
     # The `get_proc_id` function retrieves the current process ID (PID) of the running program. It uses the
-    # `sppc::get_pid` function to obtain the PID and returns it as an unsigned size integer (`USize`).
-    # @ret: The current process ID (PID) as a `USize`.
+    # `sppc::get_pid` function to obtain the PID and returns it as an unsigned integer (`U32`).
+    # @ret: The current process ID (PID) as a `U32`.
 
-    let mut pid = 0
+    let mut pid = 0_s32
     sppc::get_pid(&mut pid)
-    ret pid
+    ret U32::from(pid)
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-fun get_proc_parent_id() -> USize {
+fun get_proc_parent_id() -> U32 {
     # The `get_proc_parent_id` function retrieves the parent process ID (PPID) of the current process. It uses the
-    # `sppc::get_ppid` function to obtain the PPID and returns it as an unsigned size integer (`USize`).
-    # @ret: The parent process ID (PPID) as a `USize`.
+    # `sppc::get_ppid` function to obtain the PPID and returns it as an unsigned integer (`U32`).
+    # @ret: The parent process ID (PPID) as a `U32`.
 
-    let mut ppid = 0
+    let mut ppid = 0_s32
     sppc::get_ppid(&mut ppid)
-    ret ppid
+    ret U32::from(ppid)
 }
 
 !public
