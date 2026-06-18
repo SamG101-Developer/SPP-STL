@@ -444,7 +444,7 @@ sup [T, E] Res[T, E] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun expect(self, msg: StrView) -> T {
+    fun expect(self, msg: &StrView) -> T {
         # The `expect` method checks if this result contains a value, and if so, returns the value. If this result is
         # `Fail`, then `expect` aborts the program with the provided message. This is a convenient method for extracting
         # the value inside a result, but it should be used with caution, as it can lead to runtime errors if the result
@@ -482,7 +482,7 @@ sup [T, E] Res[T, E] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun expect_err(self, msg: StrView) -> E {
+    fun expect_err(self, msg: &StrView) -> E {
         # The `expect_err` method checks if this result contains an error, and if so, returns the error. If this result
         # is `Pass`, then `expect_err` aborts the program with the provided message. This is a convenient method for
         # extracting the error inside a result, but it should be used with caution, as it can lead to runtime errors if

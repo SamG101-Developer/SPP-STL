@@ -22,6 +22,14 @@ cls ThreadMemoryErr {
     # operations. Mapped from the `ENOMEM` error code in `C`.
 }
 
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls ThreadPermissionErr {
+    # Indicates an error related to thread permissions, such as insufficient privileges to create or manage threads.
+    # This error type can be used to represent various permission-related issues that may arise during thread operations.
+    # Mapped from the `EPERM` error code in `C`.
+}
+
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls JoinHandle[Out] {
@@ -34,11 +42,9 @@ cls ThreadId {
     !package handle: U64
 }
 
-!public
+!public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
-cls ThreadErr {
-    !public msg: StrView
-}
+type ThreadErr = ThreadMemoryErr or ThreadSpawnErr
 
 !public
 !versioned(base="1.0.0", new="1.0.0")

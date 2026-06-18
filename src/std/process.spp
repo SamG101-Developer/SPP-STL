@@ -80,7 +80,7 @@ fun get_proc_parent_id() -> USize {
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-fun get_env(key: StrView) -> Opt[Str] {
+fun get_env(key: &StrView) -> Opt[Str] {
     # The `get_env` function retrieves the value of an environment variable specified by the `key` parameter. It uses
     # the `sppc::get_env` function to obtain the value of the environment variable. If the environment variable is set,
     # it returns an `Opt` type containing the value as a `Str`.
@@ -94,7 +94,7 @@ fun get_env(key: StrView) -> Opt[Str] {
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-fun set_env(var_key: StrView, var_val: StrView, overwrite: Bool = true) -> Bool {
+fun set_env(var_key: &StrView, var_val: &StrView, overwrite: Bool = true) -> Bool {
     # The `set_env` function sets the value of an environment variable specified by the `var_key` parameter to the value
     # provided in the `var_val` parameter. It uses the `sppc::set_env` function to set the environment variable. The
     # `overwrite` parameter determines whether to overwrite the existing value of the environment variable if it is
@@ -113,14 +113,14 @@ fun set_env(var_key: StrView, var_val: StrView, overwrite: Bool = true) -> Bool 
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-fun unset_env(var_key: StrView) -> Bool {
+fun unset_env(var_key: &StrView) -> Bool {
     # The `unset_env` function removes an environment variable specified by the `var_key` parameter. It uses the
     # `sppc::unset_env` function to unset the environment variable. The function returns a boolean indicating whether
     # the operation was successful.
     # @let var_key:
     # @ret:
 
-    let result = sppc::unset_env(&var_key)
+    let result = sppc::unset_env(var_key)
     ret result == 0
 }
 
