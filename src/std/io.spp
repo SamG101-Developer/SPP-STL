@@ -414,7 +414,7 @@ sup [R: Read] BufRead[R] {
 
     !public
     cor fill_buf(&mut self) -> GenOnce[&View[U8]] {
-        self.refill()?
+        self.refill().expect("Failed to refill buffer") # TODO
         ret self.buf[self.pos to self.filled]
     }
 
