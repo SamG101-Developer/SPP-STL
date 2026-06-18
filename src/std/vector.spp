@@ -7,9 +7,10 @@ use std::allocator::Alloc
 use std::allocator::AllocErr
 use std::allocator::GlobalAlloc
 use std::array::Arr
-use std::cast::From
 use std::boolean::Bool
+use std::cast::From
 use std::clone::Clone
+use std::copy::Copy
 use std::function::FunMov
 use std::function::FunMut
 use std::generator::Gen
