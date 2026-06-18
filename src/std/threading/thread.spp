@@ -26,9 +26,13 @@ cls ThreadMemoryErr {
 !versioned(base="1.0.0", new="1.0.0")
 cls ThreadPermissionErr {
     # Indicates an error related to thread permissions, such as insufficient privileges to create or manage threads.
-    # This error type can be used to represent various permission-related issues that may arise during thread operations.
-    # Mapped from the `EPERM` error code in `C`.
+    # This error type can be used to represent various permission-related issues that may arise during thread
+    # operations. Mapped from the `EPERM` error code in `C`.
 }
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+type ThreadErr = ThreadMemoryErr or ThreadSpawnErr
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
@@ -41,10 +45,6 @@ cls JoinHandle[Out] {
 cls ThreadId {
     !package handle: U64
 }
-
-!public !zero_type
-!versioned(base="1.0.0", new="1.0.0")
-type ThreadErr = ThreadMemoryErr or ThreadSpawnErr
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
@@ -59,8 +59,7 @@ fun spawn[Out](function: FunMut[(), Out]) -> Res[JoinHandle[Out], ThreadErr] {
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun current() -> ThreadId {
-    # Get the current thread using the sppc threading API.
-    # Todo: use a ThreadId type for equality check.
+    # Get the current thread using the sppc threading API. Todo: use a ThreadId type for equality check.
     let mut handle = 0_u64
     sppc::thread_current(&mut handle)
     ret ThreadId(handle)
@@ -72,7 +71,6 @@ fun yield_now() -> Void {
     # Yield the current thread using the sppc threading API.
     sppc::thread_yield()
 }
-
 
 sup [R] JoinHandle[R] {
     !public
