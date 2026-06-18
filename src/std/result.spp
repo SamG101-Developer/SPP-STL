@@ -274,7 +274,7 @@ sup [T, E] Res[T, E] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun map_err[F: FunMov[(E,), F]](self, pred: F) -> Res[T, E] {
+    fun map_err[F: FunMov[(E,), E2]](self, pred: F) -> Res[T, E2] {
         # The `map_err` method checks if this result contains an error, and if so, applies the predicate to that error
         # and returns the result wrapped in `Fail`. If this result is `Pass`, then `map_err` returns `Pass` unchanged.
         # This is a convenient method for transforming the error inside a result based on a certain function, without
