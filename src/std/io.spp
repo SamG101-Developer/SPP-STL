@@ -56,9 +56,9 @@ sup StreamErr {
         # @ret: The corresponding StreamErr variant that represents the given errno value. If the errno value does not
         # match any known error codes, a StreamOtherError with a generic message is returned.
 
-        case errno of {
+        ret case errno of {
             # Todo: map errno values to the appropriate StreamErr variants.
-            else { StreamOtherError(msg=Str::from("Unknown error")) }
+            else { StreamOtherError }
         }
     }
 }
