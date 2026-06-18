@@ -479,8 +479,8 @@ sup [R: Read] BufRead[R] {
             == b'\n' | b'\r' { bytes.truncate(bytes.len() - 1_uz) }
         }
 
-        out@ = Str::from_utf8(bytes.view())
-            .map_err((s: Utf8Err) StreamInvalidDataError())?
+        StrView::from_utf8(bytes, out)
+            .map_err((s: Utf8Err) StreamInvalidDataError)?
     }
 }
 
