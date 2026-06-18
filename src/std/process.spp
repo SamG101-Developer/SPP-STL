@@ -47,10 +47,10 @@ sup EnvErr {
         # variable operation.
         # @ret: An instance of `EnvErr` that corresponds to the provided `errno`.
 
-        case errno of {
-            == cffi::einval { ret EnvInvalidKeyErr }
-            == cffi::enomem { ret EnvOomErr }
-            else { ret EnvOtherErr }
+        ret case errno of {
+            == cffi::einval { EnvInvalidKeyErr }
+            == cffi::enomem { EnvOomErr }
+            else { EnvOtherErr }
         }
     }
 }
