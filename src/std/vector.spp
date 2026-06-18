@@ -486,6 +486,17 @@ sup [T, A: Alloc] Vec[T, A] {
     }
 }
 
+sup [T: Copy, A: Alloc] Vec[T, A] {
+    #
+    !versioned(base="1.0.0", new="1.0.0")
+    fun append_from_view(&mut self, that: &View[T]) -> Void {
+        # Append all the elements from a view, by copying the elements from the view.
+        # @let that: The view to append from.
+
+        loop i in Range[USize]::between(0_uz, that.len()) { self.append(that[i]) }
+    }
+}
+
 sup [T, A: Alloc] Vec[T, A] ext IterMov[T] {
     !versioned(base="1.0.0", new="1.0.0")
     cor iter_mov(self) -> Iterator[T] {
