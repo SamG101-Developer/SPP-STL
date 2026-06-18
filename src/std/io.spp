@@ -472,7 +472,7 @@ sup [R: Read] BufRead[R] {
         let result = self.read_until(b'\n', &mut bytes)
         case result of {
             is Fail[StreamErr](err) { ret Fail(err) }
-            is Pass[USize](val=0) { ret Pass(val=0) }
+            is Pass[USize](val=0) { ret Pass(val=0_uz) }
         }
 
         case bytes[bytes.len() - 1_uz]@ of {
