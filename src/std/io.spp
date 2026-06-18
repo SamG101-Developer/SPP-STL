@@ -378,7 +378,7 @@ sup [R: Read] BufRead[R] {
     fun new_with_capacity(&mut self, inner: R, capacity: USize) -> Self {
         # Create a new buffer with the specified capacity, and initialize the position, filled byte count, and EOF flag
         # to the defaults.
-        let buf = Vec::new_with_capacity(capacity)
+        let buf = Vec[U8]::new_with_capacity(capacity)
         ret Self(inner, buf)
     }
 
@@ -498,7 +498,7 @@ sup [W: Write] BufWrite[W] {
     !public
     fun new_with_capacity(&mut self, inner: W, capacity: USize) -> Self {
         # Create a new buffer with the specified capacity.
-        let buf = Vec::new_with_capacity(capacity)
+        let buf = Vec[U8]::new_with_capacity(capacity)
         ret Self(inner, buf)
     }
 
