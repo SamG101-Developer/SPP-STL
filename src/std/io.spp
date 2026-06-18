@@ -200,7 +200,7 @@ sup Read {
         # had no data to read).
 
         # Define a temporary chunk buffer to read into.
-        let mut chunk = Vec::new_with_capacity(4096_uz)
+        let mut chunk = Vec[U8]::new_with_capacity(4096_uz)
         let mut total = 0_uz
 
         # Loop until we encounter an EOF (0 byte read).
