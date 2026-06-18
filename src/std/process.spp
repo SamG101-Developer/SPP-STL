@@ -89,7 +89,7 @@ fun get_env(key: &StrView) -> Opt[Str] {
 
     let mut val = Str::new()
     let err = sppc::getenv(&key.ptr, &mut val.ptr)
-    case err == 0 { ret Some(val) } else { ret None() }
+    ret case err == 0 { Some(val) } else { None() }
 }
 
 !public
