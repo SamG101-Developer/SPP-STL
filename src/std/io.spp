@@ -214,7 +214,7 @@ sup Read {
             # Read the number of bytes into the chunk buffer.
             let n = try?
             case n == 0_uz { exit }
-            out.append_from_view(chunk.view()[0_uz to n])
+            out.append_from_view(chunk[0_uz to n])
             total += n
         }
 
