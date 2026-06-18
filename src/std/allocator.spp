@@ -48,9 +48,7 @@ cls AllocOtherErr {
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-type AllocErr =
-AllocOomErr or
-AllocAlignmentErr
+type AllocErr = AllocOomErr or AllocAlignmentErr or AllocOverflowErr or AllocOtherErr
 
 sup AllocErr {
     fun from_errno(errno: S32) -> Self {
