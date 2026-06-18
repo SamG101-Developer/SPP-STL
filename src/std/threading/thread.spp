@@ -32,7 +32,16 @@ cls ThreadPermissionErr {
 
 !public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
-type ThreadErr = ThreadMemoryErr or ThreadSpawnErr
+cls ThreadUnknownErr {
+    # Indicates an unknown error related to thread operations. This error type can be used to represent various
+    # unexpected issues that may arise during thread operations. Mapped from the `EAGAIN` error code in `C`, which
+    # typically indicates that a resource is temporarily unavailable or that the system is unable to create a new thread
+    # due to resource constraints.
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+type ThreadErr = ThreadMemoryErr or ThreadPermissionErr or ThreadUnknownErr
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
