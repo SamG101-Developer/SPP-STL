@@ -76,7 +76,7 @@ sup [T, E] Res[T, E] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun is_pass_and(self, pred: FunMov[(T,), Bool]) -> Bool {
+    fun is_pass_and[F: FunMov[(T,), Bool]](self, pred: F) -> Bool {
         # The `is_pass_and` method checks if the result contains a value, and if so, applies the predicate to that
         # value. If the result is `Fail`, or if the predicate returns false, then `is_pass_and` returns `false`. If the
         # result contains a value and the predicate returns true, then `is_pass_and` returns `true`. This is a
@@ -104,7 +104,7 @@ sup [T, E] Res[T, E] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun is_fail_and(self, pred: FunMov[(E,), Bool]) -> Bool {
+    fun is_fail_and[F: FunMov[(E,), Bool]](self, pred: F) -> Bool {
         # The `is_fail_and` method checks if the result contains an error, and if so, applies the predicate to that
         # error. If the result is `Pass`, or if the predicate returns false, then `is_fail_and` returns `false`. If the
         # result contains an error and the predicate returns true, then `is_fail_and` returns `true`. This is a
@@ -132,7 +132,7 @@ sup [T, E] Res[T, E] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun is_fail_or(self, pred: FunMov[(T,), Bool]) -> Bool {
+    fun is_fail_or[F: FunMov[(T,), Bool]](self, pred: F) -> Bool {
         # The `is_fail_or` method checks if the result is `Fail`, or if it is `Pass` and the predicate returns true for
         # the value inside. If the result is `Fail`, then `is_fail_or` returns `true`. If the result is `Pass` and the
         # predicate returns true for the value inside, then `is_fail_or` returns `true`. If the result is `Pass` and the
@@ -182,7 +182,7 @@ sup [T, E] Res[T, E] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun and_then[U](self, pred: FunMov[(T,), Res[U, E]]) -> Res[U, E] {
+    fun and_then[U, F: FunMov[(T,), Res[U, E]]](self, pred: F) -> Res[U, E] {
         # The `and_then` method checks if this result contains a value, and if so, applies the predicate to that value
         # and returns the result. If this result is `Fail`, then `and_then` returns `Fail` with the same error. This is
         # a convenient method for chaining together multiple result computations, where you want to propagate `Fail` if
@@ -205,12 +205,12 @@ sup [T, E] Res[T, E] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun ior_[F](self, that: Res[T, F]) -> Res[T, F] {
+    fun ior_[E](self, that: Res[T, E]) -> Res[T, E] {
         # The `ior_` method checks if this result contains a value, and if so, returns this result. If this result is
         # `Fail`, then `ior_` returns the other result. This is a convenient method for chaining together multiple
         # result computations, where you want to return the first `Pass` value if there is one, but otherwise return the
         # other result if this result failed.
-        # @type F: The type of the error contained in the other result. This can be different from the type of the error
+        # @type E: The type of the error contained in the other result. This can be different from the type of the error
         # in this result.
         # @let that: The other result that is returned if this result is `Fail`. If this result is `Pass`, then `that`
         # is not evaluated, and this result is returned wrapped in `Pass` instead.
@@ -226,7 +226,7 @@ sup [T, E] Res[T, E] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun ior_else[F](self, pred: FunMov[(E,), Res[T, F]]) -> Res[T, F] {
+    fun ior_else[F: FunMov[(E,), Res[T, F]]](self, pred: F) -> Res[T, E] {
         # The `ior_else` method checks if this result contains a value, and if so, returns this result. If this result
         # is `Fail`, then `ior_else` returns the result of invoking the provided predicate on the moved internally
         # wrapped error. This is a convenient method for chaining together multiple result computations, where you want
@@ -250,7 +250,7 @@ sup [T, E] Res[T, E] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun map[U](self, pred: FunMov[(T,), U]) -> Res[U, E] {
+    fun map[U, F: FunMov[(T,), U]](self, pred: F) -> Res[U, E] {
         # The `map` method checks if this result contains a value, and if so, applies the predicate to that value and
         # returns the result wrapped in `Pass`. If this result is `Fail`, then `map` returns `Fail` with the same error.
         # This is a convenient method for transforming the value inside a result based on a certain function, without
@@ -274,7 +274,7 @@ sup [T, E] Res[T, E] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun map_err[F](self, pred: FunMov[(E,), F]) -> Res[T, F] {
+    fun map_err[F: FunMov[(E,), F]](self, pred: F) -> Res[T, E] {
         # The `map_err` method checks if this result contains an error, and if so, applies the predicate to that error
         # and returns the result wrapped in `Fail`. If this result is `Pass`, then `map_err` returns `Pass` unchanged.
         # This is a convenient method for transforming the error inside a result based on a certain function, without
@@ -299,7 +299,7 @@ sup [T, E] Res[T, E] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun map_or[U](self, default: U, f: FunMov[(T,), U]) -> U {
+    fun map_or[U, F: FunMov[(T,), U]](self, default: U, f: F) -> U {
         # The `map_or` method checks if this result contains a value, and if so, applies the function to that value and
         # returns the result. If this result is `Fail`, then `map_or` returns the provided default value. This is a
         # convenient method for transforming the value inside a result based on a certain function, and providing a
@@ -325,7 +325,7 @@ sup [T, E] Res[T, E] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun map_or_else[U](self, default: FunMov[(E,), U], f: FunMov[(T,), U]) -> U {
+    fun map_or_else[U, D: FunMov[(E,), U], F: FunMov[(T,), U]](self, default: D, f: F) -> U {
         # The `map_or_else` method checks if this result contains a value, and if so, applies the function to that value
         # and returns the result. If this result is `Fail`, then `map_or_else` returns the result of invoking the
         # provided default function with the moved internally wrapped error. This is a convenient method for
@@ -423,7 +423,7 @@ sup [T, E] Res[T, E] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun unwrap_or_else(self, default: FunMov[(E,), T]) -> T {
+    fun unwrap_or_else[F: FunMov[(E,), T]](self, default: F) -> T {
         # The `unwrap_or_else` method checks if this result contains a value, and if so, returns the value. If this
         # result is `Fail`, then `unwrap_or_else` returns the result of invoking the provided default function with the
         # moved internally wrapped error. This is a convenient method for extracting the value inside a result, while
