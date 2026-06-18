@@ -121,6 +121,7 @@ sup SockAddr {
         ret case self of {
             is SockV4Addr(ip, ..) { ip }
             is SockV6Addr(ip, ..) { ip }
+            else { std::abort::abort("Unsupported address family") }
         }
     }
 
@@ -130,6 +131,7 @@ sup SockAddr {
         ret case self of {
             is SockV4Addr(.., port) { port }
             is SockV6Addr(.., port) { port }
+            else { std::abort::abort("Unsupported address family") }
         }
     }
 
