@@ -253,7 +253,7 @@ sup Alloc {
         # contents of the old block copied over up to the size of the new layout. The old block will have been
         # deallocated as part of the reallocation process.
 
-        let new_ptr = self.allocate(new_layout)?
+        let mut new_ptr = self.allocate(new_layout)?
         std::mem::ops::mem_copy(&mut new_ptr, &old_ptr, new_layout.size)
         self.deallocate(old_ptr)
         ret Pass(val=new_ptr)
