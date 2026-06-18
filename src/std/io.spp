@@ -176,7 +176,7 @@ sup Read {
             case try is Fail[StreamErr](err) and err is StreamInterruptedError() { skip }
 
             # Read the number of bytes into the buffer.
-            let n = try?.val
+            let n = try?
             case n == 0_uz { ret Fail(err=StreamEofError()) }
             filled += n
         }
