@@ -87,7 +87,7 @@ fun get_env(key: &StrView) -> Opt[Str] {
     # @let key: The name of the environment variable to retrieve.
     # @ret: An `Opt` type containing the value of the environment variable if it is set, or `None` if it is not set.
 
-    let val = Str::new()
+    let mut val = Str::new()
     let err = sppc::getenv(&key.ptr, &mut val.ptr)
     case err == 0 { ret Some(val) } else { ret None() }
 }
