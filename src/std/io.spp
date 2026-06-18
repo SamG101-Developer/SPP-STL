@@ -212,7 +212,7 @@ sup Read {
             case try is Fail[StreamErr](err) and err is StreamInterruptedError() { skip }
 
             # Read the number of bytes into the chunk buffer.
-            let n = try?.val
+            let n = try?
             case n == 0_uz { exit }
             out.append_from_view(chunk.view()[0_uz to n])
             total += n
@@ -265,7 +265,7 @@ sup Write {
 
             # Unwrap the number of bytes written from the buffer
             # (propagate other errors).
-            let n = try?.val
+            let n = try?
             case n == 0_uz { ret Fail(err=StreamWriteZeroError()) }
             written += n
         }
