@@ -404,7 +404,7 @@ sup [R: Read] BufRead[R] {
             let try = self.inner.read(&mut self.buf)
             case try is Fail[StreamErr](err) and err is StreamInterruptedError() { skip }
 
-            let n = try?.val
+            let n = try?
             self.pos = 0_uz
             self.filled = n
             case n == 0_uz { self.eof = true }
@@ -511,7 +511,7 @@ sup [W: Write] BufWrite[W] {
             let try = self.inner.write(self.buf[written to target])
             case try is Fail[StreamErr](err) and err is StreamInterruptedError() { skip }
 
-            let n = try?.val
+            let n = try?
             case n == 0_uz { ret Pass(val=Fail(err=StreamWriteZeroError())) }
             written += n
         }
