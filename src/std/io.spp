@@ -502,21 +502,21 @@ sup [W: Write] BufWrite[W] {
         ret Self(inner, buf)
     }
 
-#     !public # TODO: coroutine issues here with return type
-#     cor flush_buf(&mut self) -> GenOnce[Res[Void, StreamErr]] {
-#         let mut written = 0_uz
-#         let target = self.buf.len()
-#
-#         loop written < target {
-#             let try = self.inner.write(self.buf[written to target])
-#             case try is Fail[StreamErr](err) and err is StreamInterruptedError() { skip }
-#
-#             let n = try?
-#             case n == 0_uz { ret Pass(val=Fail(err=StreamWriteZeroError())) }
-#             written += n
-#         }
-#
-#         self.buf.clear()
-#         ret Pass(val=Pass[Void]())
-#     }
+    #     !public # TODO: coroutine issues here with return type
+    #     cor flush_buf(&mut self) -> GenOnce[Res[Void, StreamErr]] {
+    #         let mut written = 0_uz
+    #         let target = self.buf.len()
+    #
+    #         loop written < target {
+    #             let try = self.inner.write(self.buf[written to target])
+    #             case try is Fail[StreamErr](err) and err is StreamInterruptedError() { skip }
+    #
+    #             let n = try?
+    #             case n == 0_uz { ret Pass(val=Fail(err=StreamWriteZeroError())) }
+    #             written += n
+    #         }
+    #
+    #         self.buf.clear()
+    #         ret Pass(val=Pass[Void]())
+    #     }
 }
