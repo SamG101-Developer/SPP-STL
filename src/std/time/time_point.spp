@@ -18,7 +18,7 @@ cls TimePoint {
     # epoch (January 1, 1970).
     # @let duration: The duration of time represented by this `TimePoint`, measured in seconds and nanoseconds.
 
-    duration: Duration
+    !package duration: Duration
 }
 
 sup TimePoint ext Copy { }
