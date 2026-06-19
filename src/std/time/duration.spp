@@ -249,8 +249,8 @@ sup Duration {
 
         # Calculate the new seconds and check for overflow.
         let mut secs = self.seconds
-            .mul_checked(U32::from(rhs))?
-            .add_checked(U32::from(extra_secs))?
+            .mul_checked(U64::from(rhs))?
+            .add_checked(extra_secs)?
         ret Some(val=Duration(seconds=secs, nanoseconds=nanos))
     }
 
