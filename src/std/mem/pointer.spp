@@ -75,6 +75,16 @@ sup [T] NonNull[T] {
     fun from_ptr_inner(ptr: Ptr[T]) -> NonNull[T] { }
 
     !package
+    !intrinsic(name="spp.mem.pointer.NonNull.raw")
+    !versioned(base="1.0.0", new="1.0.0")
+    cor raw(self) -> GenOnce[Ptr[T]] {
+        # Get the raw pointer from the `NonNull` pointer. This is a compiler intrinsic, as it can be implemented using a
+        # single instruction in LLVM. The method returns a `Ptr` type that wraps the raw pointer value.
+        # @ret: A `Ptr` type that wraps the raw pointer value. This is effectively a raw pointer that can be used in ffi
+        # calls, and it is guaranteed to be non-null.
+    }
+
+    !package
     !intrinsic(name="spp.mem.pointer.NonNull.from_func")
     !versioned(base="1.0.0", new="1.0.0")
     fun from_func[F: Fun](func: F) -> NonNull[F] {
