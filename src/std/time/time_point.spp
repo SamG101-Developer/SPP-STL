@@ -95,7 +95,7 @@ sup TimePoint ext Sub[Duration] {
         # `TimePoint`.
 
         let new_duration = self.duration
-            .sub_checked(that.duration)
+            .sub_checked(that)
             .expect("TimePoint subtraction underflowed")
         ret new_duration
     }
