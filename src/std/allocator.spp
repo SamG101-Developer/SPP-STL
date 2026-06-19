@@ -381,7 +381,7 @@ sup GlobalAlloc ext Alloc {
 
         let new_raw_ptr = sppc::realloc(&mut old_ptr.raw(), new_layout.size)
         let new_ptr = NonNull[U8]::from_ptr(new_raw_ptr).map_err((e: NullptrErr) AllocOomErr)?
-        self.deallocate(ptr)
+        self.deallocate(old_ptr)
         ret Pass(val=new_ptr)
     }
 }
