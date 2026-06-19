@@ -48,7 +48,7 @@ sup TimePoint {
         # @let earlier: The earlier `TimePoint` to compare against.
         # @ret: A `Duration` representing the time elapsed between this `TimePoint` and the earlier `TimePoint`.
 
-        ret self.duration.sub_checked(earlier.duration).unwrap_or(ealier - self)
+        ret self.duration.sub_checked(earlier.duration).unwrap_or(ealier - self.clone())
     }
 
     !public
