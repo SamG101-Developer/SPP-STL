@@ -36,10 +36,10 @@ sup TimeErr {
         # @let errno:
         # @ret:
 
-        case errno of {
-            == cffi::eopnotsupp { ret TimeInvalidClockErr }
-            == cffi::einval { ret TimeInvalidDurationErr }
-            else { ret TimeOtherErr }
+        ret case errno of {
+            == cffi::eopnotsupp { TimeInvalidClockErr }
+            == cffi::einval { TimeInvalidDurationErr }
+            else { TimeOtherErr }
         }
     }
 }
