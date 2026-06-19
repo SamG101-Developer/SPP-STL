@@ -37,7 +37,7 @@ sup TimeErr {
         # @ret:
 
         case errno of {
-            == cffi::enotsup { ret TimeInvalidClockErr }
+            == cffi::eopnotsupp { ret TimeInvalidClockErr }
             == cffi::einval { ret TimeInvalidDurationErr }
             else { ret TimeOtherErr }
         }
