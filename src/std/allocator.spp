@@ -301,7 +301,7 @@ sup GlobalAlloc ext Alloc {
         # result. The caller is responsible for ensuring that the pointer passed to this method was previously allocated
         # by the same allocator,
 
-        sppc::free(ptr.raw())
+        sppc::free(&mut ptr.raw())
     }
 
     !versioned(base="1.0.0", new="1.0.0")
