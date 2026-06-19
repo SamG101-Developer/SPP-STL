@@ -1,6 +1,7 @@
 use std::annotations::package
 use std::annotations::public
 use std::annotations::versioned
+use std::clone::Clone
 use std::number::U32
 use std::number::U64
 use std::option::None
@@ -246,8 +247,8 @@ sup Duration {
 
         # Calculate the new seconds and check for overflow.
         let mut secs = self.seconds
-        .mul_checked(U64::from(rhs))?
-        .add_checked(extra_secs)?
+            .mul_checked(U64::from(rhs))?
+            .add_checked(extra_secs)?
         ret Some(val=Duration(seconds=secs, nanoseconds=nanos))
     }
 
@@ -268,6 +269,12 @@ sup Duration {
         let (mut nanos, extra_nanos) = (self.nanoseconds / U64::from(rhs), self.nanoseconds % U64::from(rhs))
         nanos += (extra_secs * 1000000000_u64 + U64::from(extra_nanos)) / U64::from(rhs)
         ret Some(val=Duration(seconds=secs, nanoseconds=nanos))
+    }
+}
+
+sup Duration ext Clone {
+    fun clone(&self) -> Self {
+        ret Self(seconds=self.seconds, nanoseconds=self.nanoseconds)
     }
 }
 

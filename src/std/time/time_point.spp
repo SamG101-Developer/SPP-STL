@@ -1,5 +1,6 @@
 use std::annotations::public
 use std::annotations::versioned
+use std::clone::Clone
 use std::number::S32
 use std::number::S64
 use std::result::Fail
@@ -59,6 +60,16 @@ sup TimePoint {
 
         let now = TimePoint::now().expect("Failed to get current time")
         ret now.duration_since(self@)
+    }
+}
+
+sup TimePoint ext Clone {
+    fun clone(&self) -> Self {
+        # The `clone` method creates a new `TimePoint` that is a copy of this `TimePoint`. It returns a new instance
+        # with the same duration value.
+        # @ret: A new `TimePoint` that is a copy of this `TimePoint`.
+
+        ret Self(duration=self.duration.clone())
     }
 }
 
