@@ -56,7 +56,7 @@ fun sleep(duration: Duration, clock: S32 = constants::clock_realtime) -> Void {
     # Create the C timespec object and call the sppc clock_nanosleep
     # function to hook into the system's sleep functionality.
     let timespec = sppc::CTimespec(sec=duration.seconds, nsec=duration.nanoseconds)
-    sppc::clock_nanosleep(clock, 0, timespec) # Ignore error
+    sppc::clock_nanosleep(clock, 0, &timespec) # Ignore error
 }
 
 !public
@@ -71,5 +71,5 @@ fun sleep_until(time_point: TimePoint, clock: S32 = constants::clock_realtime) -
     # Create the C timespec object and call the sppc clock_nanosleep
     # function to hook into the system's sleep functionality.
     let timespec = sppc::CTimespec(sec=time_point.duration.seconds, nsec=time_point.duration.nanoseconds)
-    sppc::clock_nanosleep(clock, 1, timespec) # Ignore error
+    sppc::clock_nanosleep(clock, 1, &timespec) # Ignore error
 }
