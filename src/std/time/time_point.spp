@@ -50,7 +50,7 @@ sup TimePoint {
         # @let earlier: The earlier `TimePoint` to compare against.
         # @ret: A `Duration` representing the time elapsed between this `TimePoint` and the earlier `TimePoint`.
 
-        ret self.duration.sub_checked(earlier.duration).unwrap_or(earlier - self)
+        ret self.duration.sub_checked(earlier.duration).unwrap_or(earlier - self.duration)
     }
 
     !public
@@ -71,7 +71,7 @@ sup TimePoint ext Add[Duration] {
         # point in time that is the specified duration after this `TimePoint`. The method performs checked addition to
         # ensure that the resulting `TimePoint` does not overflow. If the addition would overflow, it will panic with an
         # error message indicating that the addition overflowed.
-        # @let duration: The `Duration` to add to this `TimePoint`.
+        # @let that: The `Duration` to add to this `TimePoint`.
         # @ret: A new `TimePoint` that represents the point in time that is the specified duration after this
         # `TimePoint`.
 
