@@ -33,7 +33,7 @@ sup TimePoint {
         # @let ?clock:
         # @ret:
 
-        let time_now = CTimespec()
+        let time_now = sppc::CTimespec()
         let err = sppc::clock_gettime(clock, &mut time_now)
         case err != 0 { ret Fail(err=TimeErr) }
         ret TimePoint::from_c_timespec(time_now)
@@ -49,6 +49,7 @@ sup TimePoint {
         # swapped.
         # @let earlier: The earlier `TimePoint` to compare against.
         # @ret: A `Duration` representing the time elapsed between this `TimePoint` and the earlier `TimePoint`.
+        # @todo: Tidy this
 
         ret self.duration.sub_checked(earlier.duration).unwrap_or((earlier - self.duration).duration)
     }
