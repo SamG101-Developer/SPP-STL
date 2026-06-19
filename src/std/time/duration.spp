@@ -286,14 +286,14 @@ sup Duration ext Sub {
     }
 }
 
-sup Duration ext Mul[Rhs=U64] {
-    fun mul(self, that: U64) -> Self {
+sup Duration ext Mul[Rhs=U32] {
+    fun mul(self, that: U32) -> Self {
         ret self.mul_checked(that).expect("Duration multiplication overflow")
     }
 }
 
-sup Duration ext Div[Rhs=U64] {
-    fun div(self, that: U64) -> Self {
+sup Duration ext Div[Rhs=U32] {
+    fun div(self, that: U32) -> Self {
         ret self.div_checked(that).expect("Duration division overflow or division by zero")
     }
 }
