@@ -301,7 +301,7 @@ sup GlobalAlloc ext Alloc {
         # result. The caller is responsible for ensuring that the pointer passed to this method was previously allocated
         # by the same allocator,
 
-        sppc::free(ptr)
+        sppc::free(ptr.raw())
     }
 
     !versioned(base="1.0.0", new="1.0.0")
@@ -358,6 +358,7 @@ sup GlobalAlloc ext Alloc {
         # @let old_layout:
         # @let new_layout:
         # @ret:
+        # @note: Update docs for new method implementation.
 
         let mut new_ptr = self.allocate_zeroed(new_layout)?
         std::mem::ops::mem_copy(&mut new_ptr, &old_ptr, old_layout.size)
