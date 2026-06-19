@@ -1,6 +1,6 @@
 use std::annotations::public
 use std::annotations::versioned
-use std::clone::Clone
+use std::copy::Copy
 use std::number::S32
 use std::number::S64
 use std::result::Fail
@@ -20,6 +20,8 @@ cls TimePoint {
 
     duration: Duration
 }
+
+sup TimePoint ext Copy { }
 
 sup TimePoint {
     #
@@ -48,7 +50,7 @@ sup TimePoint {
         # @let earlier: The earlier `TimePoint` to compare against.
         # @ret: A `Duration` representing the time elapsed between this `TimePoint` and the earlier `TimePoint`.
 
-        ret self.duration.sub_checked(earlier.duration).unwrap_or(ealier - self.clone())
+        ret self.duration.sub_checked(earlier.duration).unwrap_or(ealier - self)
     }
 
     !public
@@ -59,17 +61,7 @@ sup TimePoint {
         # @ret: A `Duration` representing the time elapsed since this `TimePoint`.
 
         let now = TimePoint::now().expect("Failed to get current time")
-        ret now.duration_since(self.clone())
-    }
-}
-
-sup TimePoint ext Clone {
-    fun clone(&self) -> Self {
-        # The `clone` method creates a new `TimePoint` that is a copy of this `TimePoint`. It returns a new instance
-        # with the same duration value.
-        # @ret: A new `TimePoint` that is a copy of this `TimePoint`.
-
-        ret Self(duration=self.duration.clone())
+        ret now.duration_since(self@)
     }
 }
 

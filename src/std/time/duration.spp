@@ -1,7 +1,7 @@
 use std::annotations::package
 use std::annotations::public
 use std::annotations::versioned
-use std::clone::Clone
+use std::copy::Copy
 use std::number::U32
 use std::number::U64
 use std::option::None
@@ -28,6 +28,8 @@ cls Duration {
     !package seconds: U64
     !package nanoseconds: U64
 }
+
+sup Duration ext Copy { }
 
 sup Duration {
     #
@@ -269,12 +271,6 @@ sup Duration {
         let (mut nanos, extra_nanos) = (self.nanoseconds / U64::from(rhs), self.nanoseconds % U64::from(rhs))
         nanos += (extra_secs * 1000000000_u64 + U64::from(extra_nanos)) / U64::from(rhs)
         ret Some(val=Duration(seconds=secs, nanoseconds=nanos))
-    }
-}
-
-sup Duration ext Clone {
-    fun clone(&self) -> Self {
-        ret Self(seconds=self.seconds, nanoseconds=self.nanoseconds)
     }
 }
 
