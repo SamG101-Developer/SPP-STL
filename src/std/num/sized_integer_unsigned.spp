@@ -51,7 +51,7 @@ From[SizedIntegerUnsigned[that_w]] {
         case this_w of {
             < that_w { intrinsics::utrunc[this_w](that) }
             > that_w { intrinsics::uzext[this_w](that) }
-            else { that }
+            else { insitrincis::bit_cast[Self](that) }
         }
     }
 }
