@@ -610,17 +610,7 @@ fun uitofp[cmp this_w: U32, cmp that_w: U32](value: SizedIntegerUnsigned[that_w]
 !public
 !always_inline
 !intrinsic
-fun fptrunc[cmp this_w: U32, cmp that_w: U32](value: SizedFloatingPoint[that_w]) -> SizedFloatingPoint[this_w] { }
-
-!public
-!always_inline
-!intrinsic
-fun strunc[cmp this_w: U32, cmp that_w: U32](value: SizedIntegerSigned[that_w]) -> SizedIntegerSigned[this_w] { }
-
-!public
-!always_inline
-!intrinsic
-fun utrunc[cmp this_w: U32, cmp that_w: U32](value: SizedIntegerUnsigned[that_w]) -> SizedIntegerUnsigned[this_w] { }
+fun trunc[cmp this_w: U32, cmp that_w: U32](value: SizedIntegerSigned[that_w]) -> SizedIntegerSigned[this_w] { }
 
 !public
 !always_inline
@@ -636,6 +626,11 @@ fun uzext[cmp this_w: U32, cmp that_w: U32](value: SizedIntegerUnsigned[that_w])
 !always_inline
 !intrinsic
 fun fpext[cmp this_w: U32, cmp that_w: U32](value: SizedFloatingPoint[that_w]) -> SizedFloatingPoint[this_w] { }
+
+!public
+!always_inline
+!intrinsic
+fun fptrunc[cmp this_w: U32, cmp that_w: U32](value: SizedFloatingPoint[that_w]) -> SizedFloatingPoint[this_w] { }
 
 !public
 !always_inline
