@@ -724,6 +724,11 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
     !versioned(base="1.0.0", new="1.0.0")
     fun one() -> Self { }
 
+    !public !inline
+    !intrinsic(name="std.num.sized_floating_point.neg_one")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun neg_one() -> Self { }
+
     # !public !inline
     # !versioned(base="1.0.0", new="1.0.0")
     # fun to_bits(self) -> SizedIntegerUnsigned[w] {
