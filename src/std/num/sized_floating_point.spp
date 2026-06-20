@@ -473,6 +473,12 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
 sup [cmp w: U32] SizedFloatingPoint[w] {
     !public !inline
     !versioned(base="1.0.0", new="1.0.0")
+    fun ln(self) -> Self {
+        ret intrinsics::float_log(self)
+    }
+
+    !public !inline
+    !versioned(base="1.0.0", new="1.0.0")
     fun log2(self) -> Self {
         ret intrinsics::float_log2(self)
     }
@@ -625,7 +631,7 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
     fun acosh(self) -> Opt[Self] {
         # ln(x + sqrt(x^2 - 1)), domain x >= 1 Todo: Unchecked version? Or no check => NaN?
         case self < Self::one() { ret None }
-        ret Pass(val=(self + (self * self - Self::one()).sqrt()).ln())
+        ret Some(val=(self + (self * self - Self::one()).sqrt()).ln())
     }
 
     !public !inline
@@ -634,7 +640,7 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
         # 0.5 * ln((1 + x) / (1 - x)),  domain |x| < 1 Todo: Unchecked version? Or no check => NaN?
         case self <= Self::neg_one() or self >= Self::one() { ret None }
         let one = Self::one()
-        ret Pass(val=((one + self) / (one - self)).ln() * Self::from(0.5_f64))
+        ret Some(val=((one + self) / (one - self)).ln() * Self::from(0.5_f64))
     }
 }
 
