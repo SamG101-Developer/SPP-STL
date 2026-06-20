@@ -28,42 +28,63 @@ type SizedIntegerUnsigned[cmp w: U32] = SizedInteger[w, false]
 sup [cmp this_w: U32, cmp that_w: U32]
 SizedIntegerUnsigned[this_w] ext
 From[SizedIntegerUnsigned[that_w]] {
+    # Converting between unsigned integer types of potentially different sizes.
+
     fun from(that: SizedIntegerUnsigned[that_w]) -> Self {
-        # Destination (this) bits are less than the source (that) bits => truncate.
-        case this_w < that_w {
-            let u = intrinsics::utrunc[this_w](that)
-            ret intrinsics::bit_cast[Self](u)
-        }
+        # The `from` method defines how to convert an unsigned integer value of one size to another size. The conversion
+        # is performed based on the relationship between the bit widths of the source and target types. The following
+        # three cases are handled:
+        # 1. If the target type has fewer bits than the source type (this_w < that_w), the conversion is done by
+        # truncating the source value to fit into the smaller target type. This is typically done by discarding the most
+        # significant bits of the source value, which may result in a loss of precision.
+        # 2. If the target type has more bits than the source type (this_w > that_w), the conversion is done by
+        # extending the source value to fit into the larger target type. This is typically done by adding additional
+        # bits to the source value, which involves zero-extending the value.
+        # 3. If the target type has the same number of bits as the source type (this_w == that_w), the conversion is
+        # simply a copy of the value, as no change in precision is needed.
+        # @let that: The unsigned integer value of the source type that is being converted to the target type.
+        # @ret: The converted unsigned integer value of the target type, which may have a different precision than the
+        # source value depending on the relationship between their bit widths.
 
-        # Destination (this) bits are greater than the source (that) bits => zero-extend.
-        case this_w > that_w {
-            let u = intrinsics::uzext[this_w](that)
-            ret intrinsics::bit_cast[Self](u)
+        # If the source has more bits, truncate it.
+        # If the source has fewer bits, zero-extend it.
+        case this_w of {
+            < that_w { intrinsics::utrunc[this_w](that) }
+            > that_w { intrinsics::uzext[this_w](that) }
+            else { that }
         }
-
-        # Same bit-widths => direct conversion.
-        ret intrinsics::bit_cast[Self](that)
     }
 }
 
 sup [cmp this_w: U32, cmp that_w: U32]
 SizedIntegerUnsigned[this_w] ext
 From[SizedIntegerSigned[that_w]] {
+    # Converting from a signed integer type to an unsigned integer type of potentially different sizes.
+
     fun from(that: SizedIntegerSigned[that_w]) -> Self {
-        # Destination (this) bits are less than the source (that) bits => truncate.
-        case this_w < that_w {
-            let s = intrinsics::strunc[this_w](that)
-            ret intrinsics::bit_cast[Self](s)
-        }
+        # The `from` method defines how to convert a signed integer value to an unsigned integer type of potentially
+        # different size. The conversion is performed based on the relationship between the bit widths of the source and
+        # target types. The following three cases are handled:
+        # 1. If the target type has fewer bits than the source type (this_w < that_w), the conversion is done by
+        # truncating the source value to fit into the smaller target type. This is typically done by discarding the most
+        # significant bits of the source value, which may result in a loss of precision.
+        # 2. If the target type has more bits than the source type (this_w > that_w), the conversion is done by
+        # extending the source value to fit into the larger target type. This is typically done by adding additional
+        # bits to the source value, which involves sign-extending the value to preserve the 2's complement
+        # representation before reinterpreting as unsigned.
+        # 3. If the target type has the same number of bits as the source type (this_w == that_w), the conversion is
+        # simply a reinterpretation of the bit pattern as unsigned, with no change in precision.
+        # @let that: The signed integer value of the source type that is being converted to the unsigned target type.
+        # @ret: The converted unsigned integer value of the target type, which may have a different precision than the
+        # source value depending on the relationship between their bit widths.
 
-        # Destination (this) bits are greater than the source (that) bits => zero-extend.
-        case this_w > that_w {
-            let s = intrinsics::szext[this_w](that)
-            ret intrinsics::bit_cast[Self](s)
+        # If the source has more bits, truncate it.
+        # If the source has fewer bits, sign-extend it then reinterpret as unsigned.
+        case this_w of {
+            < that_w { intrinsics::strunc[this_w](that) }
+            > that_w { intrinsics::szext[this_w](that) }
+            else { intrinsics::bit_cast[Self](that) }
         }
-
-        # Same bit-widths => direct conversion.
-        ret intrinsics::bit_cast[Self](that)
     }
 }
 
