@@ -78,9 +78,9 @@ From[SizedFloatingPoint[that_w]] {
 
         # If the source has more bits, truncate it.
         # If the source has fewer bits, extend it.
-        case this_w of {
-            < that_w { ret intrinsics::fptrunc[this_w](that) }
-            > that_w { ret intrinsics::fpext[this_w](that) }
+        ret case this_w of {
+            < that_w { intrinsics::fptrunc[this_w](that) }
+            > that_w { intrinsics::fpext[this_w](that) }
             else { that }
         }
     }
