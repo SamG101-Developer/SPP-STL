@@ -45,7 +45,7 @@ fun random_between(min: U64, max: U64) -> U64 {
     # @let max: The maximum value (inclusive) of the range from which to generate a random number.
     # @ret: A random 64-bit unsigned integer between `min` and `max` (inclusive).
 
-    let mut num = o_u64
+    let mut num = 0_u64
     sppc::prngbetween(min, max, &mut num)
     ret num
 }
