@@ -610,17 +610,17 @@ fun uitofp[cmp this_w: U32, cmp that_w: U32](value: SizedIntegerUnsigned[that_w]
 !public
 !always_inline
 !intrinsic
-fun trunc[cmp this_w: U32, cmp that_w: U32](value: SizedIntegerSigned[that_w]) -> SizedIntegerSigned[this_w] { }
+fun trunc[T: Integer, cmp that_w: U32](value: SizedIntegerSigned[that_w]) -> T { }
 
 !public
 !always_inline
 !intrinsic
-fun szext[cmp this_w: U32, cmp that_w: U32](value: SizedIntegerSigned[that_w]) -> SizedIntegerSigned[this_w] { }
+fun szext[T: Integer, cmp that_w: U32](value: SizedIntegerSigned[that_w]) -> T { }
 
 !public
 !always_inline
 !intrinsic
-fun uzext[cmp this_w: U32, cmp that_w: U32](value: SizedIntegerUnsigned[that_w]) -> SizedIntegerUnsigned[this_w] { }
+fun uzext[T: Integer, cmp that_w: U32](value: SizedIntegerUnsigned[that_w]) -> T { }
 
 !public
 !always_inline

@@ -49,8 +49,8 @@ From[SizedIntegerUnsigned[that_w]] {
         # If the source has more bits, truncate it.
         # If the source has fewer bits, extend it.
         ret case this_w of {
-            < that_w { intrinsics::trunc[this_w](that) }
-            > that_w { intrinsics::uzext[this_w](that) }
+            < that_w { intrinsics::trunc[Self](that) }
+            > that_w { intrinsics::uzext[Self](that) }
             else { intrinsics::bit_cast[Self](that) }
         }
     }
@@ -80,8 +80,8 @@ From[SizedIntegerSigned[that_w]] {
         # If the source has more bits, truncate it.
         # If the source has fewer bits, extend it.
         ret case this_w of {
-            < that_w { intrinsics::trunc[this_w](that) }
-            > that_w { intrinsics::szext[this_w](that) }
+            < that_w { intrinsics::trunc[Self](that) }
+            > that_w { intrinsics::szext[Self](that) }
             else { intrinsics::bit_cast[Self](that) }
         }
     }
