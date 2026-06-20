@@ -610,7 +610,12 @@ fun uitofp[cmp this_w: U32, cmp that_w: U32](value: SizedIntegerUnsigned[that_w]
 !public
 !always_inline
 !intrinsic
-fun trunc[T: Integer, cmp that_w: U32](value: SizedIntegerSigned[that_w]) -> T { }
+fun strunc[T: Integer, cmp that_w: U32](value: SizedIntegerSigned[that_w]) -> T { }
+
+!public
+!always_inline
+!intrinsic
+fun utrunc[T: Integer, cmp that_w: U32](value: SizedIntegerUnsigned[that_w]) -> T { }
 
 !public
 !always_inline
