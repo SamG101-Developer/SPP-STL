@@ -546,3 +546,33 @@ fun clock_gettime(clock_id: CInt, out_tp: &mut CTimespec) -> CInt { }
 
 !ffi(symbol="c_clock_nanosleep")
 fun clock_nanosleep(clock: CInt, flags: CInt, duration: &CTimespec) -> CInt { }
+
+!ffi(symbol="c_prngseed")
+fun prngseed(seed: CULongLong) -> CInt { }
+
+!ffi(symbol="c_prngreset")
+fun prngreset() -> CInt { }
+
+!ffi(symbol="c_prngbytes")
+fun prngbytes(size: CULongLong, out: &mut CVoidPtr) -> CInt { }
+
+!ffi(symbol="c_prngu32")
+fun prngu32(out: &mut CUInt) -> CInt { }
+
+!ffi(symbol="c_prngu64")
+fun prngu64(out: &mut CULongLong) -> CInt { }
+
+!ffi(symbol="c_prngdouble")
+fun prngdouble(out: &mut CDouble) -> CInt { }
+
+!ffi(symbol="c_prngbetween")
+fun prngbetween(min: CULongLong, max: CULongLong, out: &mut CULongLong) -> CInt { }
+
+!ffi(symbol="c_csprngbytes")
+fun csprngbytes(size: CULongLong, out: &mut CVoidPtr) -> CInt { }
+
+!ffi(symbol="c_csprngu32")
+fun csprngu32(out: &mut CUInt) -> CInt { }
+
+!ffi(symbol="c_csprngu64")
+fun csprngu64(out: &mut CULongLong) -> CInt { }
