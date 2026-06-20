@@ -3,6 +3,7 @@ use std::annotations::public
 use std::annotations::versioned
 use std::boolean::Bool
 use std::cast::From
+use std::llvm::always_inline
 use std::llvm::inline
 use std::number::U32
 use std::number::U64
@@ -30,6 +31,8 @@ SizedIntegerSigned[this_w] ext
 From[SizedIntegerUnsigned[that_w]] {
     # Converting between unsigned integer types of potentially different sizes.
 
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
     fun from(that: SizedIntegerUnsigned[that_w]) -> Self {
         # The `from` method defines how to convert a unsigned integer value of one size to another size. The conversion
         # is performed based on the relationship between the bit widths of the source and target types. The following
@@ -61,6 +64,8 @@ SizedIntegerSigned[this_w] ext
 From[SizedIntegerSigned[that_w]] {
     # Converting between signed integer types of potentially different sizes.
 
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
     fun from(that: SizedIntegerSigned[that_w]) -> Self {
         # The `from` method defines how to convert a signed integer value of one size to another size. The conversion is
         # performed based on the relationship between the bit widths of the source and target types. The following three

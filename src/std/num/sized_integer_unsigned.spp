@@ -30,6 +30,8 @@ SizedIntegerUnsigned[this_w] ext
 From[SizedIntegerUnsigned[that_w]] {
     # Converting between unsigned integer types of potentially different sizes.
 
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
     fun from(that: SizedIntegerUnsigned[that_w]) -> Self {
         # The `from` method defines how to convert an unsigned integer value of one size to another size. The conversion
         # is performed based on the relationship between the bit widths of the source and target types. The following
@@ -61,6 +63,8 @@ SizedIntegerUnsigned[this_w] ext
 From[SizedIntegerSigned[that_w]] {
     # Converting from a signed integer type to an unsigned integer type of potentially different sizes.
 
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
     fun from(that: SizedIntegerSigned[that_w]) -> Self {
         # The `from` method defines how to convert a signed integer value to an unsigned integer type of potentially
         # different size. The conversion is performed based on the relationship between the bit widths of the source and

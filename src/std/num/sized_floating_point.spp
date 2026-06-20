@@ -2,13 +2,13 @@ use std::annotations::intrinsic
 use std::annotations::package
 use std::annotations::public
 use std::annotations::versioned
-use std::llvm::always_inline
-use std::llvm::inline
 use std::boolean::Bool
 use std::cast::From
+use std::limits::Limits
+use std::llvm::always_inline
+use std::llvm::inline
 use std::number::U32
 use std::number::S32
-use std::limits::Limits
 use std::option::None
 use std::option::Opt
 use std::option::Some
@@ -59,6 +59,7 @@ SizedFloatingPoint[this_w] ext
 From[SizedFloatingPoint[that_w]] {
     # Converting between floating point types of potentially different sizes.
 
+    !always_inline
     !versioned(base="1.0.0", new="1.0.0")
     fun from(that: SizedFloatingPoint[that_w]) -> Self {
         # The `from` method defines how to convert a floating point value of one size to another size. The conversion is
