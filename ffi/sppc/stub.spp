@@ -555,7 +555,7 @@ fun prngseed(seed: CULongLong) -> CInt { }
 fun prngreset() -> CInt { }
 
 !ffi(symbol="c_prngbytes")
-fun prngbytes(size: CULongLong, out: &mut CVoidPtr) -> CInt { }
+fun prngbytes(size: CULongLong, out: &mut CCharPtr) -> CInt { }
 
 !ffi(symbol="c_prngu32")
 fun prngu32(out: &mut CUInt) -> CInt { }
@@ -570,7 +570,7 @@ fun prngdouble(out: &mut CDouble) -> CInt { }
 fun prngbetween(min: CULongLong, max: CULongLong, out: &mut CULongLong) -> CInt { }
 
 !ffi(symbol="c_csprngbytes")
-fun csprngbytes(size: CULongLong, out: &mut CVoidPtr) -> CInt { }
+fun csprngbytes(size: CULongLong, out: &mut CCharPtr) -> CInt { }
 
 !ffi(symbol="c_csprngu32")
 fun csprngu32(out: &mut CUInt) -> CInt { }
