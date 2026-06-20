@@ -4,6 +4,7 @@ use std::generator::Gen
 use std::generator::GenOnce
 use std::number::F64
 use std::number::U8
+use std::number::U32
 use std::number::U64
 use std::number::USize
 use std::range::Range
