@@ -48,7 +48,7 @@ From[SizedIntegerUnsigned[that_w]] {
 
         # If the source has more bits, truncate it.
         # If the source has fewer bits, zero-extend it.
-        case this_w of {
+        ret case this_w of {
             < that_w { intrinsics::utrunc[this_w](that) }
             > that_w { intrinsics::uzext[this_w](that) }
             else { insitrincis::bit_cast[Self](that) }
@@ -79,8 +79,8 @@ From[SizedIntegerSigned[that_w]] {
         # source value depending on the relationship between their bit widths.
 
         # If the source has more bits, truncate it.
-        # If the source has fewer bits, sign-extend it then reinterpret as unsigned.
-        case this_w of {
+        # If the source has fewer bits, sign-extend it.
+        ret case this_w of {
             < that_w { intrinsics::strunc[this_w](that) }
             > that_w { intrinsics::szext[this_w](that) }
             else { intrinsics::bit_cast[Self](that) }
