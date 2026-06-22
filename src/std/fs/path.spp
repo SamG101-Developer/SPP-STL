@@ -196,7 +196,7 @@ sup Path {
     fun starts_with(&self, prefix: &Path) -> Bool {
         # The `starts_with` method checks if the path starts with the given prefix path. This is useful for determining
         # if a path is a subpath of another path or for validating that a path is within a certain directory.
-        # @param prefix: The prefix path to check against.
+        # @let prefix: The prefix path to check against.
         # @ret: `true` if the path starts with the prefix, `false` otherwise.
 
         ret self.inner.starts_with(&prefix.inner)
@@ -207,7 +207,7 @@ sup Path {
     fun ends_with(&self, suffix: &Path) -> Bool {
         # The `ends_with` method checks if the path ends with the given suffix path. This is useful for determining if a
         # path has a certain file name or extension.
-        # @param suffix: The suffix path to check against.
+        # @let suffix: The suffix path to check against.
         # @ret: `true` if the path ends with the suffix, `false` otherwise.
 
         ret self.inner.ends_with(&suffix.inner)
@@ -218,7 +218,7 @@ sup Path {
     fun join(&self, other: &Path) -> Path {
         # The `join` method concatenates the current path with another path, inserting the appropriate separator if
         # necessary. This is used to build paths in a platform-agnostic way.
-        # @param other: The path to join with the current path.
+        # @let other: The path to join with the current path.
         # @ret: A new `Path` object representing the joined path.
 
         # Get the separator and clone this path.
@@ -236,7 +236,7 @@ sup Path {
     fun with_file_name(&self, file_name: &Str) -> Path {
         # The `with_file_name` method replaces the file name component of the path with a new file name. This is useful
         # for changing the file name while keeping the same directory structure.
-        # @param file_name: The new file name to use.
+        # @let file_name: The new file name to use.
         # @ret: A new `Path` object with the updated file name.
 
         let parent = self.parent()
@@ -248,7 +248,7 @@ sup Path {
     fun with_extension(&self, extension: &Str) -> Path {
         # The `with_extension` method replaces the file extension component of the path with a new extension. This is
         # useful for changing the file type while keeping the same file name and directory structure.
-        # @param extension: The new file extension to use (without the dot).
+        # @let extension: The new file extension to use (without the dot).
         # @ret: A new `Path` object with the updated file extension.
 
         let file_stem = self.file_stem()
@@ -378,7 +378,7 @@ sup Path {
     fun remove_dir(&self, force: Bool = false) -> Res[Void, PathErr] {
         # The `remove_dir` method attempts to remove the directory at the specified path. If the path points to a file,
         # does not exist, or is not empty, an error will be returned.
-        # @param force: If `true`, the method will attempt to remove the directory and all of its contents recursively.
+        # @let force: If `true`, the method will attempt to remove the directory and all of its contents recursively.
         # If `false`, the method will only remove the directory if it is empty.
         # @ret: A `Res` type containing `Pass()` if the directory is successfully removed, or an error message if the
         # operation fails.
@@ -394,7 +394,7 @@ sup Path {
         # The `rename_to` method attempts to rename the file or directory at the current path to a new path. If the
         # current path does not exist, the new path already exists, or the operation fails for any reason, an error will
         # be returned.
-        # @param new_path: The new path to rename to.
+        # @let new_path: The new path to rename to.
         # @ret: A `Res` type containing `Pass()` if the rename is successful, or an error message if the operation
         # fails.
 
@@ -407,13 +407,14 @@ sup Path {
     fun copy_to(&self, new_path: &Path) -> Res[Void, PathErr] {
         # The `copy_to` method attempts to copy the file at the current path to a new path. If the current path does not
         # exist, the new path already exists, or the operation fails for any reason, an error will be returned.
-        # @param new_path: The new path to copy to.
+        # @let new_path: The new path to copy to.
         # @ret: A `Res` type containing `Pass()` if the copy is successful, or an error message if the operation fails.
 
         let mut file_length = 0_uz
         sppc::filesize(&self.inner.ptr, &mut file_length)
-        let file = File::open(self.clone(), &FileMode().read())?
-        let err = sppc::copy_file_range(file.fd, 0_uz, &new_path.inner.ptr, 0_uz, file_length, 0)
+        let file_in = File::open(self.clone(), &FileMode().read())?
+        let file_out = File::create(new_path.clone(), &FileMode().write())?
+        let err = sppc::copy_file_range(file_in.fd, 0, file_out.fd, 0, file_length, 0)
         ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
     }
 
@@ -423,7 +424,7 @@ sup Path {
         # The `hardlink_to` method attempts to create a hard link from the current path to a new path. If the current
         # path does not exist, the new path already exists, or the operation fails for any reason, an error will be
         # returned.
-        # @param new_path: The new path to create the hard link at.
+        # @let new_path: The new path to create the hard link at.
         # @ret: A `Res` type containing `Pass()` if the hard link is successfully created, or an error message if the
         # operation fails.
 
@@ -437,7 +438,7 @@ sup Path {
         # The `symlink_to` method attempts to create a symbolic link from the current path to a new path. If the current
         # path does not exist, the new path already exists, or the operation fails for any reason, an error will be
         # returned.
-        # @param new_path: The new path to create the symbolic link at.
+        # @let new_path: The new path to create the symbolic link at.
         # @ret: A `Res` type containing `Pass()` if the symbolic link is successfully created, or an error message if
         # the operation fails.
 
