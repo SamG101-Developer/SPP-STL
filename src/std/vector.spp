@@ -335,7 +335,7 @@ sup [T, A: Alloc] Vec[T, A] {
             ret
         }
 
-        ret Fail(err=AllocErr::capacity_overflow)
+        ret Fail(err=AllocOverflowErr)
     }
 
     !public
