@@ -349,7 +349,13 @@ sup [T, A: Alloc] Vec[T, A] {
         # @let element:
         # @ret:
 
-        case self.len() < self.cap() { ret self.insert_at_unchecked(index, element) }
+        case self.len() < self.cap() {
+            self.insert_at_unchecked(index, element)
+            ret
+        }
+
+        # Reserve enough capacity to hold the new element,
+        # then insert it.
         self.grow_one()
         self.insert_at_unchecked(index, element)
     }
