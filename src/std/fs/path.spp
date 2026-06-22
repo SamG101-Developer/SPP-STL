@@ -153,7 +153,7 @@ sup Path {
 
         let sep = Str::from(self.sep())
         let parts = self.inner.split(&sep)
-        ret Vec[Str]::from_iter(parts)
+        ret Vec[Str]::from_generator(parts)
     }
 
     !public
