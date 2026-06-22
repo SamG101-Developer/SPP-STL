@@ -101,7 +101,7 @@ sup Path {
         # @ret: The parent directory as a `Path` object.
 
         let sep = Str::from(self.sep())
-        let idx = self.inner.rfind(sep)
+        let idx = self.inner.rfind(&sep)
         case idx.is_none() { ret Path(inner=Str::from("")) }
         ret Path(inner=self.inner[0_uz to idx.unwrap()])
     }
@@ -114,7 +114,7 @@ sup Path {
         # @ret: The file name as a `Str` object.
 
         let sep = Str::from(self.sep())
-        let idx = self.inner.rfind(sep)
+        let idx = self.inner.rfind(&sep)
         case idx.is_none() { ret self.inner.clone() }
         ret Str::from(self.inner[idx.unwrap() + 1_uz to self.inner.len()])
     }
