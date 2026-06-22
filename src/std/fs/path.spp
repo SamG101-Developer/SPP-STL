@@ -103,7 +103,7 @@ sup Path {
         let sep = Str::from(self.sep())
         let idx = self.inner.rfind(&sep)
         case idx.is_none() { ret Path(inner=Str::from("")) }
-        ret Path(inner=self.inner[0_uz to idx.unwrap()])
+        ret Path(inner=Str::from(self.inner[0_uz to idx.unwrap()]))
     }
 
     !public
