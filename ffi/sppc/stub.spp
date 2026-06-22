@@ -280,7 +280,7 @@ fun is_dir(path: &CCharPtr, out: &mut CBool) -> CInt { }
 fun is_symlink(path: &CCharPtr, out: &mut CBool) -> CInt { }
 
 !ffi(symbol="c_filesize")
-fun filesize(path: &CCharPtr, out: &mut CULong) -> CInt { }
+fun filesize(path: &CCharPtr, out: &mut CLong) -> CInt { }
 
 !ffi(symbol="c_remove")
 fun remove(path: &CCharPtr) -> CInt { }
