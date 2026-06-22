@@ -333,7 +333,7 @@ sup Seek {
 
     !public
     !virtual_method
-    fun seek_from_start(&mut self, offset: USize) -> Res[Void, StreamErr] {
+    fun seek_from_start(&mut self, offset: USize) -> Res[SSize, StreamErr] {
         # The `seek_from_start` method is a wrapper for seeking for seeking with `whence` set to `seek_set`. It allows
         # the caller to seek to an absolute position from the start of the stream by just providing the offset.
         # @let offset: The absolute position from the start of the stream to seek to, in bytes. This is enforced to be
@@ -345,7 +345,7 @@ sup Seek {
 
     !public
     !virtual_method
-    fun seek_from_end(&mut self, offset: SSize) -> Res[Void, StreamErr] {
+    fun seek_from_end(&mut self, offset: SSize) -> Res[SSize, StreamErr] {
         # The `seek_from_end` method is a wrapper for seeking with `whence` set to `seek_end`. It allows the caller to
         # seek to a position relative to the end of the stream by providing an offset that is added to the end position.
         # For example, an offset of -10 would seek to 10 bytes before the end of the stream. The offset can be negative
@@ -358,7 +358,7 @@ sup Seek {
 
     !public
     !virtual_method
-    fun rewind(&mut self) -> Res[Void, StreamErr] {
+    fun rewind(&mut self) -> Res[SSize, StreamErr] {
         # The `rewind` method is a wrapper for seeking with `whence` set to `seek_set` and an offset of 0. It allows the
         # caller to seek back to the start of the stream without having to specify an offset or whence. It is a
         # convenient method for resetting the stream position back to the beginning.
