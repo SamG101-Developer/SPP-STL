@@ -258,17 +258,36 @@ sup [A: Alloc] Str[A] {
         self.bytes.capacity_reserve(cap)
     }
 
-    !public
     !versioned(base="1.0.0", new="1.0.0")
-    cor view(&self) -> GenOnce[&StrView] {
-        # The `view` method provides a view into the string's data as a `StrView`. This is the equivalent of
-        # `StrView::from(&Str)`, but due to the commonality of this operation, it is provided as a method on `Str` for
-        # convenience. This allows you to easily obtain a `StrView` that references the string's data.
-        # @ret: A generator that yields a reference to a `StrView` that provides a view into the string's data.
+    fun add(self, that: &StrView) -> Self {
+        # The `add` method concatenates the current string with another string view, creating a new `Str` instance that
+        # contains the combined data. This involves creating a new internal vector and copying the bytes from both the
+        # current string and the provided string view into it. The allocator used for the new string will be the same as
+        # the allocator used for the original string, ensuring consistent memory management.
+        # @let that: A reference to a `StrView` that contains the string data to be concatenated with the current
+        # string. The bytes from this view will be copied into the new internal vector along with the bytes from the
+        # current string.
+        # @ret: A new `Str` instance that contains the concatenated data from both the current string and the provided
+        # string view.
 
-        # Forward to the `from` method of `StrView` to create a view from
-        # this string.
-        ret StrView::from(self)
+        let mut result = Self::new_with_capacity(self.len() + other.len())
+        result.append_str(self)
+        result.append_str(that)
+        ret result
+    }
+
+    !versioned(base="1.0.0", new="1.0.0")
+    fun add_assign(&mut self, that: &StrView) -> Void {
+        # The `add_assign` method appends the contents of another string view to the current string in place. This
+        # involves copying the bytes from the provided string view into the internal vector of the current string,
+        # effectively modifying it to include the new data. The allocator used for the current string will remain the
+        # same, ensuring consistent memory management.
+        # @let that: A reference to a `StrView` that contains the string data to be appended to the current string. The
+        # bytes from this view will be copied into the internal vector of the current string.
+        # @ret: This method does not return a value; it modifies the current string in place by appending the specified
+        # string view.
+
+        self.append_str(that)
     }
 }
 
@@ -295,41 +314,5 @@ sup [A: Alloc] Str[A] ext Clone {
         # containing the same string data.
 
         ret Str(bytes=self.bytes.clone())
-    }
-}
-
-sup [A: Alloc] Str[A] ext Add[StrView] {
-    !versioned(base="1.0.0", new="1.0.0")
-    fun add(self, that: StrView) -> Self {
-        # The `add` method concatenates the current string with another string view, creating a new `Str` instance that
-        # contains the combined data. This involves creating a new internal vector and copying the bytes from both the
-        # current string and the provided string view into it. The allocator used for the new string will be the same as
-        # the allocator used for the original string, ensuring consistent memory management.
-        # @let that: A reference to a `StrView` that contains the string data to be concatenated with the current
-        # string. The bytes from this view will be copied into the new internal vector along with the bytes from the
-        # current string.
-        # @ret: A new `Str` instance that contains the concatenated data from both the current string and the provided
-        # string view.
-
-        let mut result = Self::new_with_capacity(self.len() + other.len())
-        result.append_str(self)
-        result.append_str(that)
-        ret result
-    }
-}
-
-sup [A: Alloc] Str[A] ext AddAssign[StrView] {
-    !versioned(base="1.0.0", new="1.0.0")
-    fun add_assign(&mut self, that: StrView) -> Void {
-        # The `add_assign` method appends the contents of another string view to the current string in place. This
-        # involves copying the bytes from the provided string view into the internal vector of the current string,
-        # effectively modifying it to include the new data. The allocator used for the current string will remain the
-        # same, ensuring consistent memory management.
-        # @let that: A reference to a `StrView` that contains the string data to be appended to the current string. The
-        # bytes from this view will be copied into the internal vector of the current string.
-        # @ret: This method does not return a value; it modifies the current string in place by appending the specified
-        # string view.
-
-        self.append_str(that)
     }
 }
