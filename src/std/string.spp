@@ -157,6 +157,7 @@ sup [A: Alloc] Str[A] {
         ret Str(bytes=Vec[U8]::from(view.view_bytes()))
     }
 
+    !public
     !versioned(base="1.0.0", new="1.0.0")
     fun from(that: &View[U8]) -> Self {
         # The `from` method creates a new instance of the `Str` type from a view of bytes. This involves copying the
@@ -166,6 +167,8 @@ sup [A: Alloc] Str[A] {
         # from this view will be used to initialize the internal vector of the new `Str` instance.
         # @ret: A new `Str` instance that contains a copy of the bytes from the provided view.
 
+        # Forward to the constructor of `Str`, creating a new `Vec`
+        # filled with the bytes from the provided view.
         ret Str(bytes=Vec[U8, A]::from(that))
     }
 

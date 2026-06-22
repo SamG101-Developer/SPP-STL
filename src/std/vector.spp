@@ -178,6 +178,7 @@ sup [T, A: Alloc] Vec[T, A] {
         ret vec
     }
 
+    !public
     !intrinsic(name="std.vector.Vec.from[View]")
     !versioned(base="1.0.0", new="1.0.0")
     fun from(that: &View[T]) -> Self {
