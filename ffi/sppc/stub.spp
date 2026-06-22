@@ -270,7 +270,7 @@ fun madvise(addr: &mut CVoidPtr, length: &CULongLong, advice: CInt) -> CInt { }
 fun isatty(fd: CInt, out: &mut CBool) -> CInt { }
 
 !ffi(symbol="c_exists")
-fun exists(path: &CCharPtr) -> CInt { }
+fun exists(path: &CCharPtr, out: &mut CBool) -> CInt { }
 
 !ffi(symbol="c_is_file")
 fun is_file(path: &CCharPtr, out: &mut CBool) -> CInt { }
