@@ -89,7 +89,7 @@ sup [T, A: Alloc] Single[T, A] {
 
         # Allocate the non-null pointer an ambed the value into
         # it. Wrap in the `Single` type and return.
-        let ptr = alloc.allocate(Layout::new_for_type[T]()).expect("Allocation failed")
+        let mut ptr = alloc.allocate(Layout::new_for_type[T]()).expect("Allocation failed").cast[T]()
         ptr.write(val)
         ret Single(ptr, alloc)
     }
@@ -108,7 +108,7 @@ sup [T, A: Alloc] Single[T, A] {
 
         # Allocate the non-null pointer and embed the value into
         # it. Wrap in the `Single` type and return.
-        let ptr = alloc.allocate(Layout::new_for_type[T]())?
+        let mut ptr = alloc.allocate(Layout::new_for_type[T]())?.cast[T]()
         ptr.write(val)
         ret Pass(val=Single(ptr, alloc))
     }
@@ -172,6 +172,6 @@ sup [T, A: Alloc] Single[T, A] ext Del {
         # cleaned up and that there are no memory leaks. The `Del` trait allows for custom cleanup logic to be defined
         # for types, and this implementation ensures that the `Single` type behaves correctly when it goes out of scope.
 
-        self.alloc.dealloc(self.ptr, Layout::new_for_type[T]())
+        self.alloc.deallocate(self.ptr.cast[U8]())
     }
 }

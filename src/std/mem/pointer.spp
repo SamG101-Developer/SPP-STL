@@ -100,6 +100,16 @@ sup [T] NonNull[T] {
     }
 
     !package
+    !intrinsic(name="spp.mem.pointer.NonNull.cast")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun cast[U](self) -> NonNull[U] {
+        # Reinterpret this pointer as a pointer to type `U`. The underlying address is unchanged; only the type changes.
+        # Used to convert between `NonNull[U8]` (returned by allocators) and typed `NonNull[T]` pointers.
+        # @type U: The target type to reinterpret the pointer as.
+        # @ret: A `NonNull[U]` with the same address as `self`.
+    }
+
+    !package
     !intrinsic(name="spp.mem.pointer.NonNull.is_aligned")
     !versioned(base="1.0.0", new="1.0.0")
     fun is_aligned(&self, align: USize) -> Bool {
