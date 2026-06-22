@@ -2,11 +2,11 @@ use std::cffi::CBool
 use std::cffi::CCharPtr
 use std::cffi::CInt
 use std::cffi::CLong
-use std::cffi::CLongLong
+use std::cffi::CLong
 use std::cffi::CShort
 use std::cffi::CUChar
 use std::cffi::CUInt
-use std::cffi::CULongLong
+use std::cffi::CULong
 use std::cffi::CULong
 use std::cffi::CUShort
 use std::cffi::CDouble
@@ -65,131 +65,132 @@ fun init() -> CInt { }
 !ffi(symbol="c_cleanup")
 fun cleanup() -> CInt { }
 
+
 !ffi(symbol="c_pthread_create")
-fun pthread_create(start_routine: &CVoidPtr, out: &mut CULongLong) -> CInt { }
+fun pthread_create(start_routine: &CVoidPtr, out: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_join")
-fun pthread_join(handle: &CULongLong) -> CInt { }
+fun pthread_join(handle: &CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_detach")
-fun pthread_detach(handle: &CULongLong) -> CInt { }
+fun pthread_detach(handle: &CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_equal")
-fun pthread_equal(handle1: &CULongLong, handle2: &CULongLong, out: &mut CULongLong) -> CInt { }
+fun pthread_equal(handle1: &CULong, handle2: &CULong, out: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_self")
-fun pthread_self(out: &mut CULongLong) -> CInt { }
+fun pthread_self(out: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_sched_yield")
 fun sched_yield() -> CVoid { }
 
 !ffi(symbol="c_pthread_mutex_init")
-fun pthread_mutex_init(out: &mut CULongLong) -> CInt { }
+fun pthread_mutex_init(out: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_mutex_init_recursive")
-fun pthread_mutex_init_recursive(out: &mut CULongLong) -> CInt { }
+fun pthread_mutex_init_recursive(out: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_mutex_lock")
-fun pthread_mutex_lock(mutex: &CULongLong) -> CInt { }
+fun pthread_mutex_lock(mutex: &CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_mutex_timedlock")
-fun pthread_mutex_timedlock(mutex: &CULongLong, clock: CInt, duration: &CTimespec) -> CInt { }
+fun pthread_mutex_timedlock(mutex: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
 
 !ffi(symbol="c_pthread_mutex_trylock")
-fun pthread_mutex_trylock(mutex: &CULongLong) -> CInt { }
+fun pthread_mutex_trylock(mutex: &CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_unlock")
-fun pthread_unlock(mutex: &CULongLong) -> CInt { }
+fun pthread_unlock(mutex: &CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_mutex_destroy")
-fun pthread_mutex_destroy(mutex: &CULongLong) -> CInt { }
+fun pthread_mutex_destroy(mutex: &CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_once")
 fun pthread_once(func: &CVoidPtr) -> CInt { }
 
 !ffi(symbol="c_pthread_cond_init")
-fun pthread_cond_init(out: &mut CULongLong) -> CInt { }
+fun pthread_cond_init(out: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_cond_wait")
-fun pthread_cond_wait(cond: &CULongLong, mutex: &CULongLong) -> CInt { }
+fun pthread_cond_wait(cond: &CULong, mutex: &CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_cond_timedwait")
-fun pthread_cond_timedwait(cond: &CULongLong, mutex: &CULongLong, clock: CInt, duration: &CTimespec) -> CInt { }
+fun pthread_cond_timedwait(cond: &CULong, mutex: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
 
 !ffi(symbol="c_pthread_cond_signal")
-fun pthread_cond_signal(cond: &CULongLong) -> CInt { }
+fun pthread_cond_signal(cond: &CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_cond_broadcast")
-fun pthread_cond_broadcast(cond: &CULongLong) -> CInt { }
+fun pthread_cond_broadcast(cond: &CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_cond_destroy")
-fun pthread_cond_destroy(cond: &CULongLong) -> CInt { }
+fun pthread_cond_destroy(cond: &CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_rwlock_init")
-fun pthread_rwlock_init(rwlock: &mut CULongLong) -> CInt { }
+fun pthread_rwlock_init(rwlock: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_rwlock_rdlock")
-fun pthread_rwlock_rdlock(rwlock: &CULongLong) -> CInt { }
+fun pthread_rwlock_rdlock(rwlock: &CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_rwlock_tryrdlock")
-fun pthread_rwlock_tryrdlock(rwlock: &CULongLong) -> CInt { }
+fun pthread_rwlock_tryrdlock(rwlock: &CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_rwlock_clockrdlock")
-fun pthread_rwlock_clockrdlock(rwlock: &CULongLong, clock: CInt, duration: &CTimespec) -> CInt { }
+fun pthread_rwlock_clockrdlock(rwlock: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
 
 !ffi(symbol="c_pthread_rwlock_wrlock")
-fun pthread_rwlock_wrlock(rwlock: &mut CULongLong) -> CInt { }
+fun pthread_rwlock_wrlock(rwlock: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_rwlock_trywrlock")
-fun pthread_rwlock_trywrlock(rwlock: &mut CULongLong) -> CInt { }
+fun pthread_rwlock_trywrlock(rwlock: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_rwlock_clockwrlock")
-fun pthread_rwlock_clockwrlock(rwlock: &CULongLong, clock: CInt, duration: &CTimespec) -> CInt { }
+fun pthread_rwlock_clockwrlock(rwlock: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
 
 !ffi(symbol="c_pthread_rwlock_unlock")
-fun pthread_rwlock_unlock(rwlock: &CULongLong) -> CInt { }
+fun pthread_rwlock_unlock(rwlock: &CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_rwlock_destroy")
-fun pthread_rwlock_destroy(rwlock: &CULongLong) -> CInt { }
+fun pthread_rwlock_destroy(rwlock: &CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_barrier_init")
-fun pthread_barrier_init(barrier: &mut CULongLong, count: CULongLong) -> CInt { }
+fun pthread_barrier_init(barrier: &mut CULong, count: CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_barrier_wait")
-fun pthread_barrier_wait(barrier: &CULongLong) -> CInt { }
+fun pthread_barrier_wait(barrier: &CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_barrier_destroy")
-fun pthread_barrier_destroy(barrier: &CULongLong) -> CInt { }
+fun pthread_barrier_destroy(barrier: &CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_spin_init")
-fun pthread_spin_init(spinlock: &mut CULongLong) -> CInt { }
+fun pthread_spin_init(spinlock: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_spin_lock")
-fun pthread_spin_lock(spinlock: &CULongLong) -> CInt { }
+fun pthread_spin_lock(spinlock: &CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_spin_trylock")
-fun pthread_spin_trylock(spinlock: &CULongLong) -> CInt { }
+fun pthread_spin_trylock(spinlock: &CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_spin_unlock")
-fun pthread_spin_unlock(spinlock: &CULongLong) -> CInt { }
+fun pthread_spin_unlock(spinlock: &CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_spin_destroy")
-fun pthread_spin_destroy(spinlock: &CULongLong) -> CInt { }
+fun pthread_spin_destroy(spinlock: &CULong) -> CInt { }
 
 !ffi(symbol="c_read")
-fun read(buffer: &mut CVoidPtr, size: CULongLong, count: CULongLong, fd: CInt, out_n: &mut CLongLong) -> CInt { }
+fun read(buffer: &mut CVoidPtr, size: CULong, count: CULong, fd: CInt, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="c_write")
-fun write(buffer: &CVoidPtr, size: CULongLong, count: CULongLong, fd: CInt, out_n: &mut CLongLong) -> CInt { }
+fun write(buffer: &CVoidPtr, size: CULong, count: CULong, fd: CInt, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="c_stdin_read")
-fun stdin_read(buffer: &mut CVoidPtr, size: CULongLong, count: CULongLong, out_n: &mut CLongLong) -> CInt { }
+fun stdin_read(buffer: &mut CVoidPtr, size: CULong, count: CULong, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="c_stdout_write")
-fun stdout_write(buffer: &CVoidPtr, size: CULongLong, count: CULongLong, out_n: &mut CLongLong) -> CInt { }
+fun stdout_write(buffer: &CVoidPtr, size: CULong, count: CULong, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="c_stderr_write")
-fun stderr_write(buffer: &CVoidPtr, size: CULongLong, count: CULongLong, out_n: &mut CLongLong) -> CInt { }
+fun stderr_write(buffer: &CVoidPtr, size: CULong, count: CULong, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="c_open")
 fun open(path: &CCharPtr, flags: CInt, mode: CInt, out_fd: &mut CInt) -> CInt { }
@@ -249,22 +250,22 @@ fun set_status(fd: CInt, flags: CInt) -> CInt { }
 fun poll(fds: &mut CPollfd, count: CInt, duration: &CTimespec, out_n: &mut CInt) -> CInt { }
 
 !ffi(symbol="c_pread")
-fun pread(fd: CInt, buffer: &mut CVoidPtr, size: CULongLong, count: CULongLong, offset: CULong, out_n: &mut CLongLong) -> CInt { }
+fun pread(fd: CInt, buffer: &mut CVoidPtr, size: CULong, count: CULong, offset: CULong, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="c_pwrite")
-fun pwrite(fd: CInt, buffer: &CVoidPtr, size: CULongLong, count: CULongLong, offset: CULong, out_n: &mut CLongLong) -> CInt { }
+fun pwrite(fd: CInt, buffer: &CVoidPtr, size: CULong, count: CULong, offset: CULong, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="c_mmap")
-fun mmap(fd: CInt, length: CULongLong, prot: CInt, flags: CInt, offset: CULong, out_addr: &mut CVoidPtr, out_length: &mut CULongLong) -> CInt { }
+fun mmap(fd: CInt, length: CULong, prot: CInt, flags: CInt, offset: CULong, out_addr: &mut CVoidPtr, out_length: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_munmap")
-fun munmap(addr: &mut CVoidPtr, length: &CULongLong) -> CInt { }
+fun munmap(addr: &mut CVoidPtr, length: &CULong) -> CInt { }
 
 !ffi(symbol="c_msync")
-fun msync(addr: &mut CVoidPtr, length: &CULongLong, flags: CInt) -> CInt { }
+fun msync(addr: &mut CVoidPtr, length: &CULong, flags: CInt) -> CInt { }
 
 !ffi(symbol="c_madvise")
-fun madvise(addr: &mut CVoidPtr, length: &CULongLong, advice: CInt) -> CInt { }
+fun madvise(addr: &mut CVoidPtr, length: &CULong, advice: CInt) -> CInt { }
 
 !ffi(symbol="c_isatty")
 fun isatty(fd: CInt, out: &mut CBool) -> CInt { }
@@ -282,7 +283,7 @@ fun is_dir(path: &CCharPtr, out: &mut CBool) -> CInt { }
 fun is_symlink(path: &CCharPtr, out: &mut CBool) -> CInt { }
 
 !ffi(symbol="c_filesize")
-fun filesize(path: &CCharPtr, out: &mut CULongLong) -> CInt { }
+fun filesize(path: &CCharPtr, out: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_remove")
 fun remove(path: &CCharPtr) -> CInt { }
@@ -321,7 +322,7 @@ fun hardlink(target: &CCharPtr, linkpath: &CCharPtr) -> CInt { }
 fun symlink(target: &CCharPtr, linkpath: &CCharPtr) -> CInt { }
 
 !ffi(symbol="c_readlink")
-fun readlink(path: &CCharPtr, buffer: &mut CCharPtr, buffer_size: CULongLong) -> CInt { }
+fun readlink(path: &CCharPtr, buffer: &mut CCharPtr, buffer_size: CULong) -> CInt { }
 
 !ffi(symbol="c_mktemp")
 fun mktemp(path: &mut CCharPtr, out_fd: &mut CInt) -> CInt { }
@@ -333,55 +334,55 @@ fun mktemp_dir(path: &mut CCharPtr) -> CInt { }
 fun statvfs(path: &CCharPtr, out: &mut CStatvfs) -> CInt { }
 
 !ffi(symbol="c_copyfile")
-fun copyfile(fd_in: CInt, fd_out: CInt, len: CULongLong, flags: CInt) -> CInt { }
+fun copyfile(fd_in: CInt, fd_out: CInt, len: CULong, flags: CInt) -> CInt { }
 
 !ffi(symbol="c_getcwd")
-fun getcwd(buffer: &mut CCharPtr, size: CULongLong) -> CInt { }
+fun getcwd(buffer: &mut CCharPtr, size: CULong) -> CInt { }
 
 !ffi(symbol="c_chdir")
 fun chdir(path: &CCharPtr) -> CInt { }
 
 !ffi(symbol="c_malloc")
-fun malloc(size: CULongLong) -> CVoidPtr { }
+fun malloc(size: CULong) -> CVoidPtr { }
 
 !ffi(symbol="c_aligned_alloc")
-fun aligned_alloc(size: CULongLong, alignment: CULongLong) -> CVoidPtr { }
+fun aligned_alloc(size: CULong, alignment: CULong) -> CVoidPtr { }
 
 !ffi(symbol="c_calloc")
-fun calloc(num: CULongLong, size: CULongLong) -> CVoidPtr { }
+fun calloc(num: CULong, size: CULong) -> CVoidPtr { }
 
 !ffi(symbol="c_realloc")
-fun realloc(ptr: &mut CVoidPtr, new_size: CULongLong) -> CVoidPtr { }
+fun realloc(ptr: &mut CVoidPtr, new_size: CULong) -> CVoidPtr { }
 
 !ffi(symbol="c_free")
 fun free(ptr: &mut CVoidPtr) -> CVoid { }
 
 !ffi(symbol="c_memcpy")
-fun memcpy(dest: &mut CVoidPtr, src: &CVoidPtr, size: CULongLong) -> CInt { }
+fun memcpy(dest: &mut CVoidPtr, src: &CVoidPtr, size: CULong) -> CInt { }
 
 !ffi(symbol="c_memmove")
-fun memmove(dest: &mut CVoidPtr, src: &CVoidPtr, size: CULongLong) -> CInt { }
+fun memmove(dest: &mut CVoidPtr, src: &CVoidPtr, size: CULong) -> CInt { }
 
 !ffi(symbol="c_memset")
-fun memset(dest: &mut CVoidPtr, value: CInt, size: CULongLong) -> CInt { }
+fun memset(dest: &mut CVoidPtr, value: CInt, size: CULong) -> CInt { }
 
 !ffi(symbol="c_memcmp")
-fun memcmp(ptr1: &CVoidPtr, ptr2: &CVoidPtr, size: CULongLong, out: &mut CInt) -> CInt { }
+fun memcmp(ptr1: &CVoidPtr, ptr2: &CVoidPtr, size: CULong, out: &mut CInt) -> CInt { }
 
 !ffi(symbol="c_memcmpconst")
-fun memcmpconst(ptr1: &CVoidPtr, ptr2: &CVoidPtr, size: CULongLong, out: &mut CInt) -> CInt { }
+fun memcmpconst(ptr1: &CVoidPtr, ptr2: &CVoidPtr, size: CULong, out: &mut CInt) -> CInt { }
 
 !ffi(symbol="c_memmem")
-fun memmem(haystack: &CVoidPtr, haystack_size: CULongLong, needle: &CVoidPtr, needle_size: CULongLong, out: &mut CULongLong) -> CInt { }
+fun memmem(haystack: &CVoidPtr, haystack_size: CULong, needle: &CVoidPtr, needle_size: CULong, out: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_mlock")
-fun mlock(addr: &CVoidPtr, size: CULongLong) -> CInt { }
+fun mlock(addr: &CVoidPtr, size: CULong) -> CInt { }
 
 !ffi(symbol="c_munlock")
-fun munlock(addr: &CVoidPtr, size: CULongLong) -> CInt { }
+fun munlock(addr: &CVoidPtr, size: CULong) -> CInt { }
 
 !ffi(symbol="c_memprotect")
-fun memprotect(addr: &mut CVoidPtr, size: CULongLong, prot: CInt) -> CInt { }
+fun memprotect(addr: &mut CVoidPtr, size: CULong, prot: CInt) -> CInt { }
 
 !ffi(symbol="c_strcpy")
 fun strcpy(dest: &mut CCharPtr, src: &CCharPtr) -> CInt { }
@@ -480,16 +481,16 @@ fun listen(fd: CInt, backlog: CInt) -> CInt { }
 fun accept(fd: CInt, out_storage: &mut CSockaddrStorage, out_fd: &mut CInt) -> CInt { }
 
 !ffi(symbol="c_send")
-fun send(fd: CInt, data: &CCharPtr, size: CULongLong, flags: CInt, out_n: &mut CLongLong) -> CInt { }
+fun send(fd: CInt, data: &CCharPtr, size: CULong, flags: CInt, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="c_recv")
-fun recv(fd: CInt, buffer: &mut CCharPtr, size: CULongLong, flags: CInt, out: &mut CLongLong) -> CInt { }
+fun recv(fd: CInt, buffer: &mut CCharPtr, size: CULong, flags: CInt, out: &mut CLong) -> CInt { }
 
 !ffi(symbol="c_sendto")
-fun sendto(fd: CInt, data: &CCharPtr, size: CULongLong, storage: &CSockaddrStorage, out_n: &mut CLongLong) -> CInt { }
+fun sendto(fd: CInt, data: &CCharPtr, size: CULong, storage: &CSockaddrStorage, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="c_recvfrom")
-fun recvfrom(fd: CInt, buffer: &mut CCharPtr, size: CULongLong, out_storage: &mut CSockaddrStorage, out_n: &mut CLongLong) -> CInt { }
+fun recvfrom(fd: CInt, buffer: &mut CCharPtr, size: CULong, out_storage: &mut CSockaddrStorage, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="c_set_nonblocking")
 fun set_nonblocking(fd: CInt, non_blocking: CBool) -> CInt { }
@@ -549,31 +550,31 @@ fun clock_gettime(clock_id: CInt, out_tp: &mut CTimespec) -> CInt { }
 fun clock_nanosleep(clock: CInt, flags: CInt, duration: &CTimespec) -> CInt { }
 
 !ffi(symbol="c_prngseed")
-fun prngseed(seed: CULongLong) -> CInt { }
+fun prngseed(seed: CULong) -> CInt { }
 
 !ffi(symbol="c_prngreset")
 fun prngreset() -> CInt { }
 
 !ffi(symbol="c_prngbytes")
-fun prngbytes(size: CULongLong, out: &mut CCharPtr) -> CInt { }
+fun prngbytes(size: CULong, out: &mut CCharPtr) -> CInt { }
 
 !ffi(symbol="c_prngu32")
 fun prngu32(out: &mut CUInt) -> CInt { }
 
 !ffi(symbol="c_prngu64")
-fun prngu64(out: &mut CULongLong) -> CInt { }
+fun prngu64(out: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_prngdouble")
 fun prngdouble(out: &mut CDouble) -> CInt { }
 
 !ffi(symbol="c_prngbetween")
-fun prngbetween(min: CULongLong, max: CULongLong, out: &mut CULongLong) -> CInt { }
+fun prngbetween(min: CULong, max: CULong, out: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_csprngbytes")
-fun csprngbytes(size: CULongLong, out: &mut CCharPtr) -> CInt { }
+fun csprngbytes(size: CULong, out: &mut CCharPtr) -> CInt { }
 
 !ffi(symbol="c_csprngu32")
 fun csprngu32(out: &mut CUInt) -> CInt { }
 
 !ffi(symbol="c_csprngu64")
-fun csprngu64(out: &mut CULongLong) -> CInt { }
+fun csprngu64(out: &mut CULong) -> CInt { }
