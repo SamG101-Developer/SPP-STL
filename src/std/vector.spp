@@ -6,6 +6,7 @@ use std::annotations::versioned
 use std::allocator::Alloc
 use std::allocator::AllocErr
 use std::allocator::GlobalAlloc
+use std::alloc::AllocOverflowErr
 use std::array::Arr
 use std::boolean::Bool
 use std::cast::From
