@@ -275,7 +275,7 @@ sup Path {
 
         let exists = false
         let err = sppc::exists(&self.inner.ptr, &mut exists)
-        case err == 0 { ret Pass(val=exists) } else { ret Fail(err=PathErr::from_errno(err)) }
+        ret case err == 0 { Pass(val=exists) } else { Fail(err=PathErr::from_errno(err)) }
     }
 
     !public
@@ -287,7 +287,7 @@ sup Path {
 
         let is_file = false
         let err = sppc::is_file(&self.inner.ptr, &mut is_file)
-        case err == 0 { ret is_file } else { false }
+        ret case err == 0 { is_file } else { false }
     }
 
     !public
@@ -299,7 +299,7 @@ sup Path {
 
         let is_dir = false
         let err = sppc::is_dir(&self.inner.ptr, &mut is_dir)
-        case err == 0 { ret is_dir } else { false }
+        ret case err == 0 { is_dir } else { false }
     }
 
     !public
@@ -311,7 +311,7 @@ sup Path {
 
         let is_symlink = false
         let err = sppc::is_symlink(&self.inner.ptr, &mut is_symlink)
-        case err == 0 { ret is_symlink } else { false }
+        ret case err == 0 { is_symlink } else { false }
     }
 
     !public
@@ -324,7 +324,7 @@ sup Path {
         let mut canonical_path = Str::new_with_capacity(path_max)
         let err = sppc::realpath(&self.inner.ptr, &mut canonical_path.ptr)
         canonical_path.capacity_shrink()
-        case err == 0 { ret Pass(val=Path(inner=canonical_path)) } else { ret Fail(err=PathErr::from_errno(err)) }
+        ret case err == 0 { Pass(val=Path(inner=canonical_path)) } else { Fail(err=PathErr::from_errno(err)) }
     }
 
     !public
@@ -336,7 +336,7 @@ sup Path {
         # operation fails.
 
         let err = sppc::mkdir(&self.inner.ptr, FileMode().create().to_flags())
-        case err == 0 { ret Pass[Void]() } else { ret Fail(err=PathErr::from_errno(err)) }
+        ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
     }
 
     !public
@@ -355,6 +355,7 @@ sup Path {
             let err = sppc::mkdir(&current_path.inner.ptr, FileMode().create().to_flags())
             case err == 0 { skip } else { ret Fail(err=PathErr::from_errno(err)) }
         }
+        ret Pass[Void]()
     }
 
     !public
@@ -366,7 +367,7 @@ sup Path {
         # operation fails.
 
         let err = sppc::remove(&self.inner.ptr)
-        case err == 0 { ret Pass[Void]() } else { ret Fail(err=PathErr::from_errno(err)) }
+        ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
     }
 
     !public
@@ -381,7 +382,7 @@ sup Path {
         # @todo: Implement the `force` parameter to recursively remove non-empty directories.
 
         let err = sppc::rmdir(&self.inner.ptr)
-        case err == 0 { ret Pass[Void]() } else { ret Fail(err=PathErr::from_errno(err)) }
+        ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
     }
 
     !public
@@ -395,7 +396,7 @@ sup Path {
         # fails.
 
         let err = sppc::rename(&self.inner.ptr, &new_path.inner.ptr)
-        case err == 0 { ret Pass[Void]() } else { ret Fail(err=PathErr::from_errno(err)) }
+        ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
     }
 
     !public
@@ -409,7 +410,7 @@ sup Path {
         let mut file_length = 0_uz
         sppc::filesize(&self.inner.ptr, &mut file_length)
         let err = sppc::copy_file_range(&self.inner.ptr, 0_uz, &new_path.inner.ptr, 0_uz, file_length)
-        case err == 0 { ret Pass[Void]() } else { ret Fail(err=PathErr::from_errno(err)) }
+        ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
     }
 
     !public
@@ -423,7 +424,7 @@ sup Path {
         # operation fails.
 
         let err = sppc::link(&self.inner.ptr, &new_path.inner.ptr)
-        case err == 0 { ret Pass[Void]() } else { ret Fail(err=PathErr::from_errno(err)) }
+        ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
     }
 
     !public
@@ -437,6 +438,6 @@ sup Path {
         # the operation fails.
 
         let err = sppc::symlink(&self.inner.ptr, &new_path.inner.ptr)
-        case err == 0 { ret Pass[Void]() } else { ret Fail(err=PathErr::from_errno(err)) }
+        ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
     }
 }
