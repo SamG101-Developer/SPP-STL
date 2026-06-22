@@ -300,7 +300,10 @@ sup [T, A: Alloc] Vec[T, A] {
 
         case new_len < self.len() { ret self.truncate(new_len) }
         let additional = new_len - self.len()
-        case self.len() + additional <= self.cap() { ret self.append_many_unchecked(Vec::new_filled_in(additional, element)) }
+        case self.len() + additional <= self.cap() {
+            self.append_many_unchecked(Vec::new_filled_in(additional, element))
+            ret
+        }
         self.capacity_reserve(additional)
         self.append_many_unchecked(Vec::new_filled_in(additional, element))
     }
@@ -312,7 +315,10 @@ sup [T, A: Alloc] Vec[T, A] {
         # @let element:
         # @ret:
 
-        case self.len() < self.cap() { ret self.append_unchecked(element) }
+        case self.len() < self.cap() {
+            self.append_unchecked(element)
+            ret
+        }
         self.grow_one()
         self.append_unchecked(element)
     }
@@ -324,7 +330,11 @@ sup [T, A: Alloc] Vec[T, A] {
         # @let element:
         # @ret:
 
-        case self.len() < self.cap() { ret self.append_unchecked(element) }
+        case self.len() < self.cap() {
+            self.append_unchecked(element)
+            ret
+        }
+
         ret Fail(err=AllocErr::capacity_overflow)
     }
 
@@ -336,7 +346,13 @@ sup [T, A: Alloc] Vec[T, A] {
         # @ret:
 
         let required_cap = self.len() + that.len()
-        case required_cap <= self.cap() { ret self.append_vec_unchecked(that) }
+        case required_cap <= self.cap() {
+            self.append_vec_unchecked(that)
+            ret
+        }
+
+        # Reserve enough capacity to hold the new elements,
+        # then append them.
         self.capacity_reserve(that.len())
         self.append_vec_unchecked(that)
     }
