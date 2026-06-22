@@ -340,7 +340,7 @@ sup [T, A: Alloc] Vec[T, A] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun append_many(&mut self, that: &Vec[T]) -> Void {
+    fun append_many(&mut self, that: Vec[T]) -> Void {
         #
         # @let that:
         # @ret:
