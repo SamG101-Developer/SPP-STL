@@ -120,7 +120,7 @@ sup File {
         # @ret: A `Res` type containing an empty value if the operation is successful, or an error message if the
         # operation fails.
 
-        let err = sppc::truncate(self.fd, len)
+        let err = sppc::truncate(self.fd, SSize::from(len))
         ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
     }
 
