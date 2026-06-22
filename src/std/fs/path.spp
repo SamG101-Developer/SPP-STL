@@ -178,7 +178,8 @@ sup Path {
         # @ret: `true` if the path is absolute, `false` otherwise.
         # @todo: Implement platform-specific logic for Windows paths.
 
-        ret self.inner.starts_with(self.sep())
+        let sep = Str::from(self.sep())
+        ret self.inner.starts_with(&sep)
     }
 
     !public
