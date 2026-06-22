@@ -298,9 +298,9 @@ sup [A: Alloc] Str[A] ext Clone {
     }
 }
 
-sup [A: Alloc] Str[A] ext Add[&StrView] {
+sup [A: Alloc] Str[A] ext Add[StrView] {
     !versioned(base="1.0.0", new="1.0.0")
-    fun add(self, that: &StrView) -> Self {
+    fun add(self, that: StrView) -> Self {
         # The `add` method concatenates the current string with another string view, creating a new `Str` instance that
         # contains the combined data. This involves creating a new internal vector and copying the bytes from both the
         # current string and the provided string view into it. The allocator used for the new string will be the same as
