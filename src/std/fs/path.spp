@@ -116,7 +116,7 @@ sup Path {
         let sep = self.sep()
         let idx = self.inner.rfind(sep)
         case idx.is_none() { ret self.inner.clone() }
-        ret Str::from(self.inner[idx.unwrap() + 1_uz to self.inner.length()])
+        ret Str::from(self.inner[idx.unwrap() + 1_uz to self.inner.len()])
     }
 
     !public
@@ -142,7 +142,7 @@ sup Path {
         let file_name = self.file_name()
         let idx = file_name.rfind(&Str::from('.'))
         case idx.is_none() { ret Str::from("") }
-        ret Str::from(file_name[idx.unwrap() + 1_uz to file_name.length()])
+        ret Str::from(file_name[idx.unwrap() + 1_uz to file_name.len()])
     }
 
     !public

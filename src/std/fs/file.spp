@@ -145,7 +145,7 @@ sup File ext Write {
         # if the operation fails.
 
         let mut bytes_written: USize = 0
-        let err = sppc::write(&buf.ptr, 1_uz, buf.length(), self.fd, &mut bytes_written)
+        let err = sppc::write(&buf.ptr, 1_uz, buf.len(), self.fd, &mut bytes_written)
         case err == 0 { ret Pass(val=bytes_written) } else { ret Fail(err=StreamErr::from_errno(err)) }
     }
 
