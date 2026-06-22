@@ -460,7 +460,7 @@ sup [T, A: Alloc] Vec[T, A] {
         # @let that:
         # @ret:
 
-        std::mem::ops::mem_copy(self.buffer.ptr, that.buffer.ptr, that.len())
+        std::mem::ops::mem_copy(&mut self.buffer.ptr, &that.buffer.ptr, that.len())
         self.length += that.len()
     }
 
