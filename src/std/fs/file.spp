@@ -123,6 +123,20 @@ sup File {
         let err = sppc::truncate(self.fd, len)
         ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
     }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun file_size(&self) -> USize {
+        # The `file_size` method retrieves the size of the file in bytes. It returns the size as a `USize` value. This
+        # method does not perform any error checking, so it is assumed that the file descriptor is valid and the file
+        # exists. If the file does not exist or the file descriptor is invalid, the behavior of this method is
+        # undefined.
+        # @ret: The size of the file in bytes as a `USize` value.
+
+        let mut size = 0_uz
+        sppc::file_size(self.fd, &mut size)
+        ret size
+    }
 }
 
 sup File ext Read {
