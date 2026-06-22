@@ -180,7 +180,7 @@ sup File ext Write {
 
 sup File ext Seek {
     fun seek(&mut self, offset: SSize, whence: S32) -> Res[SSize, StreamErr] {
-        let pos = 0_sz
+        let mut pos = 0_sz
         let err = sppc::seek(self.fd, offset, whence, &mut pos)
         ret case err == 0 { Pass(val=pos) } else { Fail(err=StreamErr::from_errno(err)) }
     }
