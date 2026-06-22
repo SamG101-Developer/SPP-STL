@@ -151,8 +151,8 @@ sup Path {
         # separator.
         # @ret: A vector of path components as `Str` objects.
 
-        let sep = self.sep()
-        let parts = self.inner.split(sep)
+        let sep = Str::from(self.sep())
+        let parts = self.inner.split(&sep)
         ret Vec::from_iter(parts)
     }
 
