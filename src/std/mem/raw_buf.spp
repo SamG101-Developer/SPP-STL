@@ -206,6 +206,17 @@ sup [T, A: Alloc] RawBuf[T, A] {
         # @let index: The index at which to place the element.
         # @let element: The element to place at the specified index.
     }
+
+    !package
+    !intrinsic(name="std.mem.buffer.Buffer.shift")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun shift(&mut self, from: USize, into: USize, count: USize) -> Void {
+        # Moves `count` elements starting at index `from` to starting at index `to`. Handles overlapping regions
+        # correctly (behaves like memmove). Used by Vec to open or close gaps when inserting or removing elements.
+        # @let from: The index of the first element to move.
+        # @let into: The destination index for the first element.
+        # @let count: The number of elements to move.
+    }
 }
 
 sup [T, A: Alloc] RawBuf[T, A] ext IndexMut[T, USize] {
