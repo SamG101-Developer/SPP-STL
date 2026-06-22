@@ -413,7 +413,7 @@ sup [T, A: Alloc] Vec[T, A] {
         #
         # @ret:
 
-        self.buffer.clear(self.len())
+        # self.buffer.clear(self.len()) # todo
         self.length = 0_uz
     }
 
