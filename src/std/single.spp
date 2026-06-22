@@ -89,7 +89,7 @@ sup [T, A: Alloc] Single[T, A] {
 
         # Allocate the non-null pointer an ambed the value into
         # it. Wrap in the `Single` type and return.
-        let ptr = alloc.allocate(Layout::new_for_type[T]()).expect("Allocation failed")
+        let ptr = alloc.alloc(Layout::new_for_type[T]()).expect("Allocation failed")
         ptr.write(val)
         ret Single(ptr, alloc)
     }
