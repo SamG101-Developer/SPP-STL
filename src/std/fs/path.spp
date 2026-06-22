@@ -142,7 +142,7 @@ sup Path {
         let file_name = self.file_name()
         let idx = file_name.rfind(&Str::from('.'))
         case idx.is_none() { ret Str::from("") }
-        ret Str::from(file_name[idx.unwrap() + 1 to file_name.length()])
+        ret Str::from(file_name[idx.unwrap() + 1_uz to file_name.length()])
     }
 
     !public
