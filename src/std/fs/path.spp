@@ -12,6 +12,7 @@ use std::result::Fail
 use std::result::Pass
 use std::result::Res
 use std::string::Str
+use std::string_view::StrView
 use std::vector::Vec
 use std::void::Void
 use std::fs::file::File
