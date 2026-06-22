@@ -152,7 +152,9 @@ sup Path {
         # @ret: A vector of path components as `Str` objects.
 
         let sep = Str::from(self.sep())
-        let parts = self.inner.split(&sep)
+        let parts = self.inner
+            .split(&sep)
+            .map((part: &StrView) Str::from(part))
         ret Vec[Str]::from_generator(parts)
     }
 
