@@ -224,7 +224,7 @@ sup Path {
         # @ret: A new `Path` object representing the joined path.
 
         # Get the separator and clone this path.
-        let sep = self.sep()
+        let sep = Str::from(self.sep())
         let mut new_path = self.inner.clone()
 
         # Only add the separator if neither part has it.
