@@ -16,7 +16,7 @@ fun abort(msg: &StrView = "") -> ! {
     # unrecoverable error and needs to terminate immediately, such as unwrapping a `None` value.
     # @let ?msg: An optional string that can be used to provide additional information about the reason for the abort.
 
-    std::io::eprintln(msg)
+    std::console::eprintln(msg)
     std::proc::abort()
 }
 
