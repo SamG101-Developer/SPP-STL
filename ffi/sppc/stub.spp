@@ -63,7 +63,6 @@ fun init() -> CInt { }
 !ffi(symbol="c_cleanup")
 fun cleanup() -> CInt { }
 
-
 !ffi(symbol="c_pthread_create")
 fun pthread_create(start_routine: &CVoidPtr, out: &mut CULong) -> CInt { }
 
@@ -203,13 +202,13 @@ fun flush(fd: CInt) -> CInt { }
 fun flush_data(fd: CInt) -> CInt { }
 
 !ffi(symbol="c_seek")
-fun seek(fd: CInt, offset: CULong, whence: CInt, out_pos: &mut CULong) -> CInt { }
+fun seek(fd: CInt, offset: CLong, whence: CInt, out_pos: &mut CLong) -> CInt { }
 
 !ffi(symbol="c_tell")
-fun tell(fd: CInt, out_pos: &mut CULong) -> CInt { }
+fun tell(fd: CInt, out_pos: &mut CLong) -> CInt { }
 
 !ffi(symbol="c_truncate")
-fun truncate(fd: CInt, length: CULong) -> CInt { }
+fun truncate(fd: CInt, length: CLong) -> CInt { }
 
 !ffi(symbol="c_lock_ex")
 fun lock_ex(fd: CInt, non_blocking: CBool) -> CInt { }
@@ -248,13 +247,13 @@ fun set_status(fd: CInt, flags: CInt) -> CInt { }
 fun poll(fds: &mut CPollfd, count: CInt, duration: &CTimespec, out_n: &mut CInt) -> CInt { }
 
 !ffi(symbol="c_pread")
-fun pread(fd: CInt, buffer: &mut CVoidPtr, size: CULong, count: CULong, offset: CULong, out_n: &mut CLong) -> CInt { }
+fun pread(fd: CInt, buffer: &mut CVoidPtr, size: CULong, count: CULong, offset: CLong, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="c_pwrite")
-fun pwrite(fd: CInt, buffer: &CVoidPtr, size: CULong, count: CULong, offset: CULong, out_n: &mut CLong) -> CInt { }
+fun pwrite(fd: CInt, buffer: &CVoidPtr, size: CULong, count: CULong, offset: CLong, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="c_mmap")
-fun mmap(fd: CInt, length: CULong, prot: CInt, flags: CInt, offset: CULong, out_addr: &mut CVoidPtr, out_length: &mut CULong) -> CInt { }
+fun mmap(fd: CInt, length: CULong, prot: CInt, flags: CInt, offset: CLong, out_addr: &mut CVoidPtr, out_length: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_munmap")
 fun munmap(addr: &mut CVoidPtr, length: &CULong) -> CInt { }
