@@ -157,6 +157,18 @@ sup [A: Alloc] Str[A] {
         ret Str(bytes=Vec[U8]::from(view.view_bytes()))
     }
 
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(that: &View[U8]) -> Self {
+        # The `from` method creates a new instance of the `Str` type from a view of bytes. This involves copying the
+        # bytes from the provided view into a new internal vector. The allocator used for the new string will be the
+        # default allocator for the `Str` type, ensuring consistent memory management.
+        # @let that: A reference to a view of bytes that contains the data to be copied into the new string. The bytes
+        # from this view will be used to initialize the internal vector of the new `Str` instance.
+        # @ret: A new `Str` instance that contains a copy of the bytes from the provided view.
+
+        ret Str(bytes=Vec[U8, A]::from(that))
+    }
+
     !public
     !versioned(base="1.0.0", new="1.0.0")
     fun append(&mut self, char: Char) -> Void {
@@ -321,9 +333,9 @@ sup [A: Alloc] Str[A] ext From[Char] {
     !versioned(base="1.0.0", new="1.0.0")
     fun from(that: Char) -> Self {
         # The `from` method creates a new instance of the `Str` type from a single character. This involves encoding the
-        # character into its UTF-8 byte representation and then creating a new internal vector to hold those bytes.
-        # The allocator used for the new string will be the default allocator for the `Str` type, ensuring consistent
-        # memory management.
+        # character into its UTF-8 byte representation and then creating a new internal vector to hold those bytes. The
+        # allocator used for the new string will be the default allocator for the `Str` type, ensuring consistent memory
+        # management.
         # @let that: The character to be converted into a string. This can be any valid Unicode character, and it will
         # be encoded into UTF-8 bytes before being stored in the new string.
         # @ret: A new `Str` instance that contains the UTF-8 encoded bytes of the provided character.
@@ -331,19 +343,5 @@ sup [A: Alloc] Str[A] ext From[Char] {
         let mut result = Self::new_with_capacity(that.len_utf8())
         result.append(that)
         ret result
-    }
-}
-
-sup [A: Alloc] Str[A] ext From[&View[U8]] {
-    !versioned(base="1.0.0", new="1.0.0")
-    fun from(that: &View[U8]) -> Self {
-        # The `from` method creates a new instance of the `Str` type from a view of bytes. This involves copying the
-        # bytes from the provided view into a new internal vector. The allocator used for the new string will be the
-        # default allocator for the `Str` type, ensuring consistent memory management.
-        # @let that: A reference to a view of bytes that contains the data to be copied into the new string. The bytes
-        # from this view will be used to initialize the internal vector of the new `Str` instance.
-        # @ret: A new `Str` instance that contains a copy of the bytes from the provided view.
-
-        ret Str(bytes=Vec[U8, A]::from(that))
     }
 }

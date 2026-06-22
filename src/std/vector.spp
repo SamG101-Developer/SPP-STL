@@ -178,6 +178,14 @@ sup [T, A: Alloc] Vec[T, A] {
         ret vec
     }
 
+    !intrinsic(name="std.vector.Vec.from[View]")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(that: &View[T]) -> Self {
+        #
+        # @let that:
+        # @ret:
+    }
+
     !public
     !versioned(base="1.0.0", new="1.0.0")
     fun cap(&self) -> USize {
@@ -588,16 +596,6 @@ sup [T, cmp n: USize, A: Alloc] Vec[T, A] ext From[Arr[T, n]] {
     !intrinsic(name="std.vector.Vec.from[Arr]")
     !versioned(base="1.0.0", new="1.0.0")
     fun from(that: Arr[T, n]) -> Self {
-        #
-        # @let that:
-        # @ret:
-    }
-}
-
-sup [T, A: Alloc] Vec[T, A] ext From[View[T]] {
-    !intrinsic(name="std.vector.Vec.from[View]")
-    !versioned(base="1.0.0", new="1.0.0")
-    fun from(that: &View[T]) -> Self {
         #
         # @let that:
         # @ret:
