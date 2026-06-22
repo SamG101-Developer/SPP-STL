@@ -2,6 +2,7 @@ use std::annotations::package
 use std::annotations::public
 use std::annotations::versioned
 use std::boolean::Bool
+use std::copy::Copy
 use std::io::Read
 use std::io::Seek
 use std::io::StreamErr
@@ -28,11 +29,7 @@ cls FileMode {
     !public is_exclusive: Bool = false
 }
 
-cls File {
-    !package fd: S32
-    !package mode: FileMode
-    !package path: Path
-}
+sup FileMode ext Copy { }
 
 sup FileMode {
     fun read(self, yes: Bool = true) -> Self { ret Self(is_read=yes, ..self) }
@@ -57,10 +54,16 @@ sup FileMode {
     }
 }
 
+cls File {
+    !package fd: S32
+    !package mode: FileMode
+    !package path: Path
+}
+
 sup File {
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun open(path: Path, mode: &FileMode) -> Res[File, PathErr] {
+    fun open(path: Path, mode: FileMode) -> Res[File, PathErr] {
         # The `open` method attempts to open the file at the specified path and returns a `Res` type that indicates
         # success or failure. The caller must have the necessary permissions to access the file, and the file must exist
         # unless the `create` option is set. If the file is successfully opened, a `File` object containing the file
