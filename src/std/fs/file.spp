@@ -126,7 +126,7 @@ sup File {
 }
 
 sup File ext Read {
-    fun read(&mut self, buf: &mut View[U8]) -> Res[USize, StreamErr] {
+    fun read(&mut self, mut buf: &mut View[U8]) -> Res[USize, StreamErr] {
         # The `read` method reads data from the file into the provided buffer. It returns a `Res` type that indicates
         # success or failure. On success, it returns the number of bytes read.
         # @let buf: A mutable reference to a buffer where the read data will be stored.
