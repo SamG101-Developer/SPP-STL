@@ -284,7 +284,7 @@ sup [A: Alloc] Str[A] ext FwdRef[StrView] {
 
 sup [A: Alloc] Str[A] ext Clone {
     !versioned(base="1.0.0", new="1.0.0")
-    fun clone(&self) -> Str {
+    fun clone(&self) -> Self {
         # The `clone` method creates a new instance of the `Str` type that is a copy of the current instance. This
         # involves creating a new internal vector and copying the bytes from the current string into it. The allocator
         # used for the new string will be the same as the allocator used for the original string, ensuring that memory
