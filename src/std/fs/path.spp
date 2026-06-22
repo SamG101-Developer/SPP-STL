@@ -228,7 +228,7 @@ sup Path {
         let mut new_path = self.inner.clone()
 
         # Only add the separator if neither part has it.
-        case new_path.ends_with(&sep).not and other.inner.starts_with(&sep).not { new_path.push(sep) }
+        case new_path.ends_with(&sep).not and other.inner.starts_with(&sep).not { new_path.append_str(&sep) }
         new_path.push_str(&other.inner)
         ret Path(inner=new_path)
     }
