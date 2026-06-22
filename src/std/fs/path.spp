@@ -127,7 +127,7 @@ sup Path {
         # @ret: The file stem as a `Str` object.
 
         let file_name = self.file_name()
-        let idx = file_name.rfind('.')
+        let idx = file_name.rfind(&Str::from('.'))
         case idx.is_none() { ret file_name }
         ret Str::from(file_name[0 to idx.unwrap()])
     }
@@ -140,7 +140,7 @@ sup Path {
         # @ret: The file extension as a `Str` object.
 
         let file_name = self.file_name()
-        let idx = file_name.rfind('.')
+        let idx = file_name.rfind(&Str::from('.'))
         case idx.is_none() { ret Str::from("") }
         ret Str::from(file_name[idx.unwrap() + 1 to file_name.length()])
     }
