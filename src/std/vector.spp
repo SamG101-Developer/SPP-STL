@@ -376,7 +376,7 @@ sup [T, A: Alloc] Vec[T, A] {
 
         case self.is_empty() { ret None }
         self.length -= 1_uz
-        ret self.buffer.take(self.len())
+        ret self.buffer.take_at(self.len())
     }
 
     !public
@@ -390,7 +390,7 @@ sup [T, A: Alloc] Vec[T, A] {
         let last_index = self.len() - 1_uz
         case f(self[mut last_index]).not { ret None }
         self.length -= 1_uz
-        ret self.buffer.take(last_index)
+        ret self.buffer.take_at(last_index)
     }
 
     !public
@@ -401,7 +401,7 @@ sup [T, A: Alloc] Vec[T, A] {
         # @ret:
 
         case index >= self.len() { ret None }
-        let element = self.buffer.take(index)
+        let element = self.buffer.take_at(index)
         self.buffer.shift(index + 1_uz, index, self.len() - index - 1_uz)
         self.length -= 1_uz
         ret element
@@ -518,7 +518,7 @@ sup [T, A: Alloc] Vec[T, A] ext IterMov[T] {
         #
         # @ret:
 
-        loop i in Range[USize]::between(0_uz, self.len()) { gen self.buffer.take(i) }
+        loop i in Range[USize]::between(0_uz, self.len()) { gen self.buffer.take_at(i) }
     }
 }
 
@@ -528,7 +528,7 @@ sup [T, A: Alloc] Vec[T, A] ext RevIterMov[T] {
         #
         # @ret:
 
-        loop i in Range[USize]::between(self.len(), 0_uz, -1) { gen self.buffer.take(i) }
+        loop i in Range[USize]::between(self.len(), 0_uz, -1) { gen self.buffer.take_at(i) }
     }
 }
 
