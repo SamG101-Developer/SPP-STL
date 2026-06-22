@@ -77,7 +77,7 @@ sup File {
         # operation fails.
 
         let mut file = File(path, mode)
-        let err = sppc::open(&self.inner.ptr, mode.to_flags(), 0, &mut file.fd)
+        let err = sppc::open(&self.path.inner.ptr, mode.to_flags(), 0, &mut file.fd)
         ret case err == 0 { Pass(val=file) } else { Fail(err=PathErr::from_errno(err)) }
     }
 
