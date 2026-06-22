@@ -199,8 +199,8 @@ fun get_cwd() -> Res[Path, PathErr] {
     # message if the operation fails.
 
     let mut path = Path()
-    let err = sppc::getcwd(&mut file.inner.ptr, path::path_max)
-    ret case err == 0 { Pass(val=file) } else { Fail(err=PathErr::from_errno(err)) }
+    let err = sppc::getcwd(&mut path.inner.ptr, path::path_max)
+    ret case err == 0 { Pass(val=path) } else { Fail(err=PathErr::from_errno(err)) }
 }
 
 !public
