@@ -17,7 +17,7 @@ fun abort(msg: &StrView = "") -> ! {
     # @let ?msg: An optional string that can be used to provide additional information about the reason for the abort.
 
     std::console::eprintln(msg)
-    std::proc::abort()
+    std::process::abort()
 }
 
 !public !inline
