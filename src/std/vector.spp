@@ -118,15 +118,18 @@ sup [T] Vec[T] {
     !public
     !versioned(base="1.0.0", new="1.0.0")
     fun from_generator[G: Gen[T]](generator: G) -> Self {
-        #
-        # @type G:
-        # @let generator:
-        # @ret:
+        # Build a new `Vec` from a generator. The generator is expected to yield elements of type `T`, and the function
+        # will collect these elements into a new `Vec`. The function will continue to call the generator until it
+        # returns `None`, indicating that there are no more elements to yield. The resulting `Vec` will contain all the
+        # elements produced by the generator, in the order they were generated.
+        # @type G: The type of the generator that produces elements of type `T`. It must implement the `Gen[T]` trait.
+        # @let generator: The generator instance that will be used to produce elements for the new `Vec`.
+        # @ret: A new `Vec` instance containing all the elements produced by the generator.
 
+        # Create the vector and yield all the elements
+        # from the generator into it.
         let mut vec = Self::new_in(GlobalAlloc)
-        loop vec.res() is Some(val) {
-            vec.append_unchecked(val)
-        }
+        loop generator.res() is Some(val) { vec.append_unchecked(val) }
         ret vec
     }
 }
