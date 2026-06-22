@@ -5,6 +5,7 @@ use std::annotations::versioned
 use std::annotations::zero_type
 use std::boolean::Bool
 use std::char::Char
+use std::clone::Clone
 use std::number::USize
 use std::number::S32
 use std::result::Fail
@@ -442,5 +443,17 @@ sup Path {
 
         let err = sppc::symlink(&self.inner.ptr, &new_path.inner.ptr)
         ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
+    }
+}
+
+sup Path ext Clone {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun clone(&self) -> Self {
+        # The `clone` method creates a new `Path` instance that is a copy of the current instance. This is useful for
+        # creating independent copies of paths that can be modified without affecting the original.
+        # @ret: A new `Path` object that is a copy of the current instance.
+
+        ret Path(inner=self.inner.clone())
     }
 }

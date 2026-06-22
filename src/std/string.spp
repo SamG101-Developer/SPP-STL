@@ -6,6 +6,7 @@ use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::cast::From
 use std::char::Char
+use std::clone::Clone
 use std::generator::GenOnce
 use std::option::Opt
 use std::number::U8
@@ -279,4 +280,18 @@ sup [A: Alloc] Str[A] ext FwdRef[StrView] {
     !intrinsic(name="std.string.Str.fwd_ref[StrView]")
     !versioned(base="1.0.0", new="1.0.0")
     cor fwd_ref(&self) -> GenOnce[&StrView] { }
+}
+
+sup [A: Alloc] Str[A] ext Clone {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun clone(&self) -> Str {
+        # The `clone` method creates a new instance of the `Str` type that is a copy of the current instance. This
+        # involves creating a new internal vector and copying the bytes from the current string into it. The allocator
+        # used for the new string will be the same as the allocator used for the original string, ensuring that memory
+        # management is consistent between the two instances.
+        # @ret: A new `Str` instance that is a clone of the current instance, with its own separate internal buffer
+        # containing the same string data.
+
+        ret Str(bytes=self.bytes.clone())
+    }
 }
