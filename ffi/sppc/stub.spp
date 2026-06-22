@@ -333,7 +333,7 @@ fun mktemp_dir(path: &mut CCharPtr) -> CInt { }
 fun statvfs(path: &CCharPtr, out: &mut CStatvfs) -> CInt { }
 
 !ffi(symbol="c_copyfile")
-fun c_copyfile(fd_in: CInt, fd_out: CInt, len: CULongLong, flags: CInt) -> CInt { }
+fun copyfile(fd_in: CInt, fd_out: CInt, len: CULongLong, flags: CInt) -> CInt { }
 
 !ffi(symbol="c_getcwd")
 fun getcwd(buffer: &mut CCharPtr, size: CULongLong) -> CInt { }
