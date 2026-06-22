@@ -198,9 +198,9 @@ fun get_cwd() -> Res[Path, PathErr] {
     # @ret: A `Res` type containing a `File` object if the current directory is successfully retrieved, or an error
     # message if the operation fails.
 
-    let mut path = Path()
-    let err = sppc::getcwd(&mut path.inner.ptr, path::path_max)
-    ret case err == 0 { Pass(val=path) } else { Fail(err=PathErr::from_errno(err)) }
+    let mut cwd = Path()
+    let err = sppc::getcwd(&mut cwd.inner.ptr, path::path_max)
+    ret case err == 0 { Pass(val=cwd) } else { Fail(err=PathErr::from_errno(err)) }
 }
 
 !public
