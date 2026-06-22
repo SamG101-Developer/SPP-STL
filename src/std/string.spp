@@ -154,7 +154,7 @@ sup [A: Alloc] Str[A] {
 
         # Forward to the constructor of `Str`, creating a new `Vec`
         # filled with the bytes from the provided string view.
-        ret Str(bytes=Vec[U8]::from(view.view_bytes()))
+        ret Str(bytes=Vec[U8, A]::from(view.view_bytes()))
     }
 
     !public
