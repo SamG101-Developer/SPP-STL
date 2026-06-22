@@ -5,6 +5,7 @@ use std::annotations::versioned
 use std::allocator::Alloc
 use std::allocator::AllocErr
 use std::allocator::GlobalAlloc
+use std::allocator::Layout
 use std::generator::GenOnce
 use std::number::USize
 use std::result::Pass
