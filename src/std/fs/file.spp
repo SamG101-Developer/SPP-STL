@@ -74,7 +74,7 @@ sup File {
         # operation fails.
 
         let mut file = File(path, mode)
-        let err = sppc::open(&self.inner.pointer, mode.to_flags(), 0, &mut file.fd)
+        let err = sppc::open(&self.inner.ptr, mode.to_flags(), 0, &mut file.fd)
         case err == 0 { ret Pass(val=file) } else { ret Fail(err=PathErr::from_errno(err)) }
     }
 
@@ -131,7 +131,7 @@ sup File ext Read {
         # the operation fails.
 
         let mut bytes_read: USize = 0
-        let err = sppc::read(&mut buf.pointer, 1_uz, self.file_size(), self.fd, &mut bytes_read)
+        let err = sppc::read(&mut buf.ptr, 1_uz, self.file_size(), self.fd, &mut bytes_read)
         case err == 0 { ret Pass(val=bytes_read) } else { ret Fail(err=StreamErr::from_errno(err)) }
     }
 }
@@ -145,7 +145,7 @@ sup File ext Write {
         # if the operation fails.
 
         let mut bytes_written: USize = 0
-        let err = sppc::write(&buf.pointer, 1_uz, buf.length(), self.fd, &mut bytes_written)
+        let err = sppc::write(&buf.ptr, 1_uz, buf.length(), self.fd, &mut bytes_written)
         case err == 0 { ret Pass(val=bytes_written) } else { ret Fail(err=StreamErr::from_errno(err)) }
     }
 
@@ -211,6 +211,6 @@ fun set_cwd(path: &Path) -> Res[Void, PathErr] {
     # @ret: A `Res` type containing an empty value if the current directory is successfully changed, or an error message
     # if the operation fails.
 
-    let err = sppc::chdir(&path.inner.pointer)
+    let err = sppc::chdir(&path.inner.ptr)
     case err == 0 { ret Pass[Void]() } else { ret Fail(err=PathErr::from_errno(err)) }
 }
