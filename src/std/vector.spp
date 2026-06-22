@@ -594,6 +594,16 @@ sup [T, cmp n: USize, A: Alloc] Vec[T, A] ext From[Arr[T, n]] {
     }
 }
 
+sup [T, A: Alloc] Vec[T, A] ext From[View[T]] {
+    !intrinsic(name="std.vector.Vec.from[View]")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(that: &View[T]) -> Self {
+        #
+        # @let that:
+        # @ret:
+    }
+}
+
 sup [T, A: Alloc] Vec[T, A] ext FwdMut[View[T]] {
     !intrinsic(name="std.vector.Vec.fwd_mut[View]")
     !versioned(base="1.0.0", new="1.0.0")

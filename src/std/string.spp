@@ -333,3 +333,17 @@ sup [A: Alloc] Str[A] ext From[Char] {
         ret result
     }
 }
+
+sup [A: Alloc] Str[A] ext From[&View[U8]] {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(that: &View[U8]) -> Self {
+        # The `from` method creates a new instance of the `Str` type from a view of bytes. This involves copying the
+        # bytes from the provided view into a new internal vector. The allocator used for the new string will be the
+        # default allocator for the `Str` type, ensuring consistent memory management.
+        # @let that: A reference to a view of bytes that contains the data to be copied into the new string. The bytes
+        # from this view will be used to initialize the internal vector of the new `Str` instance.
+        # @ret: A new `Str` instance that contains a copy of the bytes from the provided view.
+
+        ret Str(bytes=Vec[U8, A]::from(that))
+    }
+}
