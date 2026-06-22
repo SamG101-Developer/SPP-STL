@@ -265,7 +265,7 @@ sup Path {
         # file or directory is present before attempting to access it.
         # @ret: `true` if the path exists, `false` otherwise.
 
-        let exists = false
+        let mut exists = false
         let err = sppc::exists(&self.inner.ptr, &mut exists)
         ret case err == 0 { exists } else { false }
     }
@@ -278,7 +278,7 @@ sup Path {
         # @ret: A `Res` type containing `true` if the path exists, `false` if it does not exist, or an error message if
         # the check fails.
 
-        let exists = false
+        let mut exists = false
         let err = sppc::exists(&self.inner.ptr, &mut exists)
         ret case err == 0 { Pass(val=exists) } else { Fail(err=PathErr::from_errno(err)) }
     }
@@ -290,7 +290,7 @@ sup Path {
         # distinguishing between files and directories.
         # @ret: `true` if the path is a regular file, `false` otherwise.
 
-        let is_file = false
+        let mut is_file = false
         let err = sppc::is_file(&self.inner.ptr, &mut is_file)
         ret case err == 0 { is_file } else { false }
     }
@@ -302,7 +302,7 @@ sup Path {
         # distinguishing between files and directories.
         # @ret: `true` if the path is a directory, `false` otherwise.
 
-        let is_dir = false
+        let mut is_dir = false
         let err = sppc::is_dir(&self.inner.ptr, &mut is_dir)
         ret case err == 0 { is_dir } else { false }
     }
@@ -314,7 +314,7 @@ sup Path {
         # identifying symbolic links and handling them appropriately.
         # @ret: `true` if the path is a symbolic link, `false` otherwise.
 
-        let is_symlink = false
+        let mut is_symlink = false
         let err = sppc::is_symlink(&self.inner.ptr, &mut is_symlink)
         ret case err == 0 { is_symlink } else { false }
     }
