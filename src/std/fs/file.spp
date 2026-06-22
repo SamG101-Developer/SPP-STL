@@ -134,7 +134,7 @@ sup File {
         # @ret: The size of the file in bytes as a `USize` value.
 
         let mut size = 0_uz
-        sppc::filesize(self.path, &mut size)
+        sppc::filesize(self.path.inner.ptr, &mut size)
         ret size
     }
 }
