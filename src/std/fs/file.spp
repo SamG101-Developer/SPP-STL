@@ -75,7 +75,7 @@ sup File {
 
         let mut file = File(path, mode)
         let err = sppc::open(&self.inner.ptr, mode.to_flags(), 0, &mut file.fd)
-        case err == 0 { ret Pass(val=file) } else { ret Fail(err=PathErr::from_errno(err)) }
+        ret case err == 0 { Pass(val=file) } else { Fail(err=PathErr::from_errno(err)) }
     }
 
     !public
@@ -89,7 +89,7 @@ sup File {
         # operation fails.
 
         let err = sppc::flush(self.fd)
-        case err == 0 { ret Pass[Void]() } else { ret Fail(err=StreamErr::from_errno(err)) }
+        ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
     }
 
     !public
@@ -104,7 +104,7 @@ sup File {
         # the operation fails.
 
         let err = sppc::flush_data(self.fd)
-        case err == 0 { ret Pass[Void]() } else { ret Fail(err=StreamErr::from_errno(err)) }
+        ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
     }
 
     !public
@@ -118,7 +118,7 @@ sup File {
         # operation fails.
 
         let err = sppc::truncate(self.fd, len)
-        case err == 0 { ret Pass[Void]() } else { ret Fail(err=StreamErr::from_errno(err)) }
+        ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
     }
 }
 
@@ -132,7 +132,7 @@ sup File ext Read {
 
         let mut bytes_read: USize = 0
         let err = sppc::read(&mut buf.ptr, 1_uz, self.file_size(), self.fd, &mut bytes_read)
-        case err == 0 { ret Pass(val=bytes_read) } else { ret Fail(err=StreamErr::from_errno(err)) }
+        ret case err == 0 { Pass(val=bytes_read) } else { Fail(err=StreamErr::from_errno(err)) }
     }
 }
 
@@ -146,7 +146,7 @@ sup File ext Write {
 
         let mut bytes_written: USize = 0
         let err = sppc::write(&buf.ptr, 1_uz, buf.len(), self.fd, &mut bytes_written)
-        case err == 0 { ret Pass(val=bytes_written) } else { ret Fail(err=StreamErr::from_errno(err)) }
+        ret case err == 0 { Pass(val=bytes_written) } else { Fail(err=StreamErr::from_errno(err)) }
     }
 
     fun flush(&mut self) -> Res[Void, StreamErr] {
@@ -157,26 +157,26 @@ sup File ext Write {
         # operation fails.
 
         let err = sppc::flush(self.fd)
-        case err == 0 { ret Pass[Void]() } else { ret Fail(err=StreamErr::from_errno(err)) }
+        ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
     }
 }
 
 sup File ext Seek {
     fun seek(&mut self, offset: SSize, whence: S32) -> Res[Void, StreamErr] {
         let err = sppc::seek(self.fd, offset, whence)
-        case err == 0 { ret Pass[Void]() } else { ret Fail(err=StreamErr::from_errno(err)) }
+        ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
     }
 
     fun stream_len(&mut self) -> Res[SSize, StreamErr] {
         let mut len: SSize = 0
         let err = sppc::stream_len(self.fd, &mut len)
-        case err == 0 { ret Pass(val=len) } else { ret Fail(err=StreamErr::from_errno(err)) }
+        ret case err == 0 { Pass(val=len) } else { Fail(err=StreamErr::from_errno(err)) }
     }
 
     fun stream_pos(&mut self) -> Res[SSize, StreamErr] {
         let mut pos: SSize = 0
         let err = sppc::stream_pos(self.fd, &mut pos)
-        case err == 0 { ret Pass(val=pos) } else { ret Fail(err=StreamErr::from_errno(err)) }
+        ret case err == 0 { Pass(val=pos) } else { Fail(err=StreamErr::from_errno(err)) }
     }
 }
 
@@ -200,7 +200,7 @@ fun get_cwd() -> Res[Path, PathErr] {
 
     let mut path = Path()
     let err = sppc::getcwd(&mut file.inner.ptr, path::path_max)
-    case err == 0 { ret Pass(val=file) } else { ret Fail(err=PathErr::from_errno(err)) }
+    ret case err == 0 { Pass(val=file) } else { Fail(err=PathErr::from_errno(err)) }
 }
 
 !public
@@ -212,5 +212,5 @@ fun set_cwd(path: &Path) -> Res[Void, PathErr] {
     # if the operation fails.
 
     let err = sppc::chdir(&path.inner.ptr)
-    case err == 0 { ret Pass[Void]() } else { ret Fail(err=PathErr::from_errno(err)) }
+    ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
 }
