@@ -208,7 +208,7 @@ sup [T, A: Alloc] Vec[T, A] {
         # @let additional:
         # @ret:
 
-        self.buffer.capacity_reserve(self.length, additional)
+        self.buffer.capacity_reserve(self.len(), additional)
     }
 
     !public
@@ -218,7 +218,7 @@ sup [T, A: Alloc] Vec[T, A] {
         # @let additional:
         # @ret:
 
-        ret self.buffer.try_capacity_reserve(self.length, additional)
+        ret self.buffer.try_capacity_reserve(self.len(), additional)
     }
 
     !public
@@ -228,7 +228,7 @@ sup [T, A: Alloc] Vec[T, A] {
         # @let required_cap:
         # @ret:
 
-        self.buffer.capacity_reserve_exact(self.length, required_cap)
+        self.buffer.capacity_reserve_exact(self.len(), required_cap)
     }
 
     !public
@@ -237,7 +237,7 @@ sup [T, A: Alloc] Vec[T, A] {
         # @let required_cap:
         # @ret:
 
-        ret self.buffer.try_capacity_reserve_exact(self.length, required_cap)
+        ret self.buffer.try_capacity_reserve_exact(self.len(), required_cap)
     }
 
     !public
@@ -266,7 +266,7 @@ sup [T, A: Alloc] Vec[T, A] {
         #
         # @ret:
 
-        self.buffer.shrink_to_fit(self.length)
+        self.buffer.shrink_to_fit(self.len())
     }
 
     !public
@@ -275,7 +275,7 @@ sup [T, A: Alloc] Vec[T, A] {
         #
         # @ret:
 
-        ret self.buffer.try_shrink_to(self.length)
+        ret self.buffer.try_shrink_to(self.len())
     }
 
     !public
@@ -285,8 +285,8 @@ sup [T, A: Alloc] Vec[T, A] {
         # @let new_len:
         # @ret:
 
-        case new_len >= self.length { ret }
-        self.buffer.clear_range(new_len, self.length - new_len)
+        case new_len >= self.len() { ret }
+        self.buffer.clear_range(new_len, self.len() - new_len)
         self.length = new_len
     }
 
@@ -298,8 +298,8 @@ sup [T, A: Alloc] Vec[T, A] {
         # @let element:
         # @ret:
 
-        case new_len < self.length { ret self.truncate(new_len) }
-        let additional = new_len - self.length
+        case new_len < self.len() { ret self.truncate(new_len) }
+        let additional = new_len - self.len()
         case self.len() + additional <= self.cap() { ret self.append_many_unchecked(Vec::new_filled_in(additional, element)) }
         self.capacity_reserve(additional)
         self.append_many_unchecked(Vec::new_filled_in(additional, element))
@@ -376,7 +376,7 @@ sup [T, A: Alloc] Vec[T, A] {
 
         case self.is_empty() { ret None }
         self.length -= 1_uz
-        ret self.buffer.take(self.length)
+        ret self.buffer.take(self.len())
     }
 
     !public
@@ -387,7 +387,7 @@ sup [T, A: Alloc] Vec[T, A] {
         # @ret:
 
         case self.is_empty() { ret None }
-        let last_index = self.length - 1_uz
+        let last_index = self.len() - 1_uz
         case f(self[mut last_index]).not { ret None }
         self.length -= 1_uz
         ret self.buffer.take(last_index)
@@ -413,7 +413,7 @@ sup [T, A: Alloc] Vec[T, A] {
         #
         # @ret:
 
-        self.buffer.clear(self.length)
+        self.buffer.clear(self.len())
         self.length = 0_uz
     }
 
@@ -423,7 +423,7 @@ sup [T, A: Alloc] Vec[T, A] {
         #
         # @ret:
 
-        let (l, r) = (0, self.len() - 1_uz)
+        let (l, r) = (0_uz, self.len() - 1_uz)
         loop l < r {
             self.swap(l, r)
             l += 1_uz
@@ -449,7 +449,7 @@ sup [T, A: Alloc] Vec[T, A] {
         # @let element:
         # @ret:
 
-        self.buffer.place_at(self.length, element)
+        self.buffer.place_at(self.len(), element)
         self.length += 1_uz
     }
 
