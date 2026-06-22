@@ -130,7 +130,7 @@ sup [T] Vec[T] {
         # Create the vector and yield all the elements
         # from the generator into it.
         let mut vec = Self::new_in(GlobalAlloc)
-        loop generator.res() is Some[T](val) { vec.append(val) }
+        loop generator.res() is T() { vec.append(val) }
         ret vec
     }
 }
