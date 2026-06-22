@@ -409,7 +409,7 @@ sup Path {
 
         let mut file_length = 0_uz
         sppc::filesize(&self.inner.ptr, &mut file_length)
-        let err = sppc::copy_file_range(&self.inner.ptr, 0_uz, &new_path.inner.ptr, 0_uz, file_length, 0)
+        let err = sppc::copy_file_range(self.fd, 0_uz, &new_path.inner.ptr, 0_uz, file_length, 0)
         ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
     }
 
