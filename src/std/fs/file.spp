@@ -109,7 +109,7 @@ sup File {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun set_len(&self, len: SSize) -> Res[Void, StreamErr] {
+    fun set_len(&self, len: USize) -> Res[Void, StreamErr] {
         # The `set_len` method sets the length of the file to the specified value. If the new length is greater than the
         # current length, the file is extended and the new space is filled with zeros. If the new length is less than
         # the current length, the file is truncated.
