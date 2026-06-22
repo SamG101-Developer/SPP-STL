@@ -133,7 +133,7 @@ sup File ext Read {
         # @ret: A `Res` type containing the number of bytes read if the operation is successful, or an error message if
         # the operation fails.
 
-        let mut bytes_read: USize = 0
+        let mut bytes_read = 0_uz
         let err = sppc::read(&mut buf.ptr, 1_uz, self.file_size(), self.fd, &mut bytes_read)
         ret case err == 0 { Pass(val=bytes_read) } else { Fail(err=StreamErr::from_errno(err)) }
     }
@@ -147,7 +147,7 @@ sup File ext Write {
         # @ret: A `Res` type containing the number of bytes written if the operation is successful, or an error message
         # if the operation fails.
 
-        let mut bytes_written: USize = 0
+        let mut bytes_written = 0_uz
         let err = sppc::write(&buf.ptr, 1_uz, buf.len(), self.fd, &mut bytes_written)
         ret case err == 0 { Pass(val=bytes_written) } else { Fail(err=StreamErr::from_errno(err)) }
     }
