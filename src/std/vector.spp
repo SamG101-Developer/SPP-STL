@@ -299,12 +299,17 @@ sup [T, A: Alloc] Vec[T, A] {
         # @let element:
         # @ret:
 
-        case new_len < self.len() { ret self.truncate(new_len) }
+        case new_len < self.len() {
+            self.truncate(new_len)
+            ret
+        }
+
         let additional = new_len - self.len()
         case self.len() + additional <= self.cap() {
             self.append_many_unchecked(Vec::new_filled_in(additional, element))
             ret
         }
+
         self.capacity_reserve(additional)
         self.append_many_unchecked(Vec::new_filled_in(additional, element))
     }
