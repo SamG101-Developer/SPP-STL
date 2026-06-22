@@ -185,13 +185,13 @@ sup File ext Seek {
     }
 
     fun stream_len(&mut self) -> Res[SSize, StreamErr] {
-        let mut len: SSize = 0
+        let mut len = 0_sz
         let err = sppc::stream_len(self.fd, &mut len)
         ret case err == 0 { Pass(val=len) } else { Fail(err=StreamErr::from_errno(err)) }
     }
 
     fun stream_pos(&mut self) -> Res[SSize, StreamErr] {
-        let mut pos: SSize = 0
+        let mut pos = 0_sz
         let err = sppc::stream_pos(self.fd, &mut pos)
         ret case err == 0 { Pass(val=pos) } else { Fail(err=StreamErr::from_errno(err)) }
     }
