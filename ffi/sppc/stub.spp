@@ -176,19 +176,19 @@ fun pthread_spin_unlock(spinlock: &CULong) -> CInt { }
 fun pthread_spin_destroy(spinlock: &CULong) -> CInt { }
 
 !ffi(symbol="c_read")
-fun read(buffer: &mut CVoidPtr, size: CULong, count: CULong, fd: CInt, out_n: &mut CLong) -> CInt { }
+fun read(buffer: &mut CCharPtr, size: CULong, count: CULong, fd: CInt, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="c_write")
-fun write(buffer: &CVoidPtr, size: CULong, count: CULong, fd: CInt, out_n: &mut CLong) -> CInt { }
+fun write(buffer: &CCharPtr, size: CULong, count: CULong, fd: CInt, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="c_stdin_read")
-fun stdin_read(buffer: &mut CVoidPtr, size: CULong, count: CULong, out_n: &mut CLong) -> CInt { }
+fun stdin_read(buffer: &mut CCharPtr, size: CULong, count: CULong, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="c_stdout_write")
-fun stdout_write(buffer: &CVoidPtr, size: CULong, count: CULong, out_n: &mut CLong) -> CInt { }
+fun stdout_write(buffer: &CCharPtr, size: CULong, count: CULong, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="c_stderr_write")
-fun stderr_write(buffer: &CVoidPtr, size: CULong, count: CULong, out_n: &mut CLong) -> CInt { }
+fun stderr_write(buffer: &CCharPtr, size: CULong, count: CULong, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="c_open")
 fun open(path: &CCharPtr, flags: CInt, mode: CInt, out_fd: &mut CInt) -> CInt { }
