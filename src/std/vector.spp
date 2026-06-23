@@ -155,7 +155,7 @@ sup [T, A: Alloc] Vec[T, A] {
         # @let alloc:
         # @ret:
 
-        ret Vec(RawBuf::dangling_in(alloc), 0_uz)
+        ret Vec(buffer=RawBuf::dangling_in(alloc), length=0_uz)
     }
 
     !public
@@ -166,7 +166,7 @@ sup [T, A: Alloc] Vec[T, A] {
         # @let alloc:
         # @ret:
 
-        ret Vec(RawBuf::with_capacity_in(cap, alloc), 0_uz)
+        ret Vec(buffer=RawBuf::with_capacity_in(cap, alloc), length=0_uz)
     }
 
     !public
