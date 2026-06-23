@@ -39,9 +39,9 @@ sup Char {
         # Simple comparison against max characters representable
         # in 1, 2, 3, or 4 bytes in UTF-8 encoding.
         case self of {
-            <= Char::from(0x7F_u32).unwrap() { 1 }
-            <= Char::from(0x7FF_u32).unwrap() { 2 }
-            <= Char::from(0xFFFF_u32).unwrap() { 3 }
+            <= Char::from(0x7F_u32) { 1 }
+            <= Char::from(0x7FF_u32) { 2 }
+            <= Char::from(0xFFFF_u32) { 3 }
             else { 4 }
         }
     }
@@ -57,7 +57,7 @@ sup Char {
 
         # For chars that can be represented in a single UTF-16
         # code unit, we can directly write the value.
-        case self <= Char::from(0xFFFF_u32).unwrap() {
+        case self <= Char::from(0xFFFF_u32) {
             buffer[0] = U16::from(self)
             ret 1
         }
