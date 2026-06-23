@@ -1,6 +1,8 @@
 use std::annotations::public
 use std::annotations::versioned
 use std::boolean::Bool
+use std::cast::From
+use std::cast::TryFrom
 use std::number::S32
 use std::number::U16
 use std::number::U32
@@ -97,5 +99,34 @@ sup Char ext Ord {
         # @ret: An `Ordering` value indicating the result of the comparison.
 
         ret intrinsics::ucmp(self, that)
+    }
+}
+
+sup Char ext TryFrom[U32] {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun try_from(that: U32) -> Opt[Self] {
+        # Attempt to convert a `U32` value to a `Char`, if it represents a valid Unicode scalar value. If the value is
+        # not a valid Unicode scalar value, return `None`.
+        # @let that: The `U32` value to convert to a `Char`.
+        # @ret: A `Opt[Char]` containing the corresponding `Char` if the value is valid, or `None` if it is not.
+
+        # Check if the value is a valid Unicode scalar value.
+        case that of {
+            <= 0xD7FF_u32 { Some(Char::from(that)) }
+            <= 0x10FFFF_u32 and that >= 0xE000_u32 { Some(Char::from(that)) }
+            else { None }
+        }
+    }
+}
+
+sup Char ext From[U32] {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(value: U32) -> Self {
+        # Convert a `U32` value to a `Char`, if it represents a valid Unicode scalar value. If the value is not a valid
+        # Unicode scalar value, error.
+        # @let value: The `U32` value to convert to a `Char`.
+        # @ret: The corresponding `Char` if the value is valid, or an error if it is not.
+
+        ret self.try_from(value).expect("Invalid Unicode scalar value for Char conversion")
     }
 }
