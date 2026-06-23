@@ -243,27 +243,27 @@ sup [T, A: Alloc] Vec[T, A] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun capacity_shrink(&mut self, min_capacity: USize) -> Void {
+    fun capacity_shrink_to(&mut self, min_capacity: USize) -> Void {
         #
         # @let min_capacity:
         # @ret:
 
-        self.buffer.shrink(min_capacity)
+        self.buffer.capacity_shrink_to(min_capacity)
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun try_capacity_shrink(&mut self, min_capacity: USize) -> Res[Void, AllocErr] {
+    fun try_capacity_shrink_to(&mut self, min_capacity: USize) -> Res[Void, AllocErr] {
         #
         # @let min_capacity:
         # @ret:
 
-        ret self.buffer.try_capacity_shrink(min_capacity)
+        ret self.buffer.try_capacity_shrink_to(min_capacity)
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun capacity_shrink_to(&mut self) -> Void {
+    fun capacity_shrink(&mut self) -> Void {
         #
         # @ret:
 
@@ -272,7 +272,7 @@ sup [T, A: Alloc] Vec[T, A] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun try_capacity_shrink_to(&mut self) -> Res[Void, AllocErr] {
+    fun try_capacity_shrink(&mut self) -> Res[Void, AllocErr] {
         #
         # @ret:
 
