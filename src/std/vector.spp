@@ -578,7 +578,7 @@ sup [T: Clone, A: Alloc & Clone] Vec[T, A] ext Clone {
 
         let alloc = self.buffer.alloc.clone()
         let mut vec = Self::new_with_capacity_in(self.len(), alloc)
-        std::mem::ops::mem_copy(vec.buffer.ptr, self.buffer.ptr, self.len())
+        std::mem::ops::mem_copy(&mut vec.buffer.ptr, &self.buffer.ptr, self.len())
         vec.length = self.len()
         ret vec
     }
