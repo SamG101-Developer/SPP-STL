@@ -531,7 +531,7 @@ sup [T, A: Alloc] Vec[T, A] {
         # @ret:
 
         let new_cap = case self.cap() == 0_uz { 1_uz } else { self.cap() * 2_uz }
-        self.buffer.capacity_grow_to(new_cap)
+        self.buffer.try_capacity_grow_to(new_cap).expect("Failed to grow capacity for Vec")
     }
 }
 
