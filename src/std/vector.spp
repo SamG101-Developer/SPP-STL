@@ -179,7 +179,7 @@ sup [T, A: Alloc] Vec[T, A] {
         # @ret:
 
         let mut vec = Self::new_with_capacity_in(len, alloc)
-        std::mem::ops::fill(vec.buffer.ptr, element, len)
+        # std::mem::ops::mem_set(&mut vec.buffer.ptr, element, len) # todo
         vec.length = len
         ret vec
     }
