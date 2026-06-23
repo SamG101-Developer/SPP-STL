@@ -37,7 +37,7 @@ sup Char {
 
         # Simple comparison against max characters representable
         # in 1, 2, 3, or 4 bytes in UTF-8 encoding.
-        case self.inner of {
+        ret case self.inner of {
             <= 0x7F_u32 { 1_u32 }
             <= 0x7FF_u32 { 2_u32 }
             <= 0xFFFF_u32 { 3_u32 }
