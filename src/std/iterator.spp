@@ -139,7 +139,7 @@ sup [T] Iterator[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    cor map[U, F: FunMut[(T,), U]](self, func: F) -> Iterator[U] {
+    cor map[U, F: FunMut[(T,), U]](self, f: F) -> Iterator[U] {
         # The `map` method is a coroutine that takes an iterator and a mapping function, and produces a new iterator
         # that yields the results of applying the mapping function to each item from the original iterator.
         # @type U: The type of items produced by the new iterator after applying the mapping function. This is a generic
@@ -147,15 +147,15 @@ sup [T] Iterator[T] {
         # @type F: A function type that represents the mapping function used for transforming the items. This is a
         # generic type parameter that must implement the `FunMut[(T), U]` interface, meaning it must be a mutable
         # function that takes an item of type `T` and returns a value of type `U`.
-        # @let func: The mapping function that transforms each item from the original iterator (`self`) into a new
-        # value. The method will call this function for each item produced by the original iterator, and will yield the
-        # result of the mapping function in the new iterator.
+        # @let f: The mapping function that transforms each item from the original iterator (`self`) into a new value.
+        # The method will call this function for each item produced by the original iterator, and will yield the result
+        # of the mapping function in the new iterator.
         # @ret: A new iterator of type `Iterator[U]` that produces the results of applying the mapping function to each
         # item from the original iterator.
 
         # Yield the results of applying the mapping function to
         # each item.
-        loop item in self { gen mapper(item) }
+        loop item in self { gen f(item) }
     }
 
     !public
@@ -190,8 +190,8 @@ sup [T] Iterator[T] {
         # yields every `step`-th item from the original iterator. The method uses a loop to iterate through the items of
         # the original iterator, and only yields items at indices that are multiples of the specified step size.
         # @let step: The step size for the iteration. The method will yield items from the original iterator at indices
-        # that are multiples of this step size. For example, if `step` is 2, the method will yield items at indices
-        # `0, 2, 4`, etc., effectively skipping every other item from the original iterator.
+        # that are multiples of this step size. For example, if `step` is 2, the method will yield items at indices `0,
+        # 2, 4`, etc., effectively skipping every other item from the original iterator.
         # @ret: A new iterator of type `Iterator[T]` that produces every `step`-th item from the original iterator.
 
         # Only yield items at indices that are multiples of the
@@ -286,9 +286,9 @@ sup [T] Iterator[T] {
         # type parameter that must implement the `FunMut[(T,), Bool]` interface, meaning it must be a mutable function
         # that takes an item of type `T` and returns a boolean indicating whether the item satisfies the condition
         # defined by the predicate.
-        # @let f: The predicate function that tests each item from the iterator. The method will call this
-        # function for each item produced by the original iterator, and will return `true` if the predicate returns
-        # `true` for any item.
+        # @let f: The predicate function that tests each item from the iterator. The method will call this function for
+        # each item produced by the original iterator, and will return `true` if the predicate returns `true` for any
+        # item.
         # @ret: A boolean value that indicates whether the predicate function returns `true` for at least one item
         # produced by the iterator. The cumulative result of applying the predicate to all items.
 
