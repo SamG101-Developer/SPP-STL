@@ -7,6 +7,9 @@ use std::number::S32
 use std::number::U16
 use std::number::U32
 use std::number::USize
+use std::option::None
+use std::option::Opt
+use std::option::Some
 use std::view::View
 use std::num::bases::Num
 use std::ops::eq::Eq
@@ -112,8 +115,8 @@ sup Char ext TryFrom[U32] {
 
         # Check if the value is a valid Unicode scalar value.
         case that of {
-            <= 0xD7FF_u32 { Some(Char::from(that)) }
-            <= 0x10FFFF_u32 and that >= 0xE000_u32 { Some(Char::from(that)) }
+            <= 0xD7FF_u32 { Some(val=Char::from(that)) }
+            <= 0x10FFFF_u32 and that >= 0xE000_u32 { Some(val=Char::from(that)) }
             else { None }
         }
     }

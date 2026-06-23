@@ -66,23 +66,3 @@ sup [That] TryFrom[That] {
         # checking for success or failure and taking appropriate action based on the outcome of the conversion.
     }
 }
-
-!public
-!intrinsic(name="std.cast.upcast_mut")
-!versioned(base="1.0.0", new="1.0.0")
-cor upcast_mut[Base, Derived: Base](derived: &mut Derived) -> GenOnce[&mut Base] { }
-
-!public
-!intrinsic(name="std.cast.upcast_ref")
-!versioned(base="1.0.0", new="1.0.0")
-cor upcast_ref[Base, Derived: Base](derived: &Derived) -> GenOnce[&Base] { }
-
-!public
-!intrinsic(name="std.cast.downcast_mut")
-!versioned(base="1.0.0", new="1.0.0")
-cor downcast_mut[Base, Derived: Base](base: &mut Base) -> GenOnce[&mut Derived or None] { }
-
-!public
-!intrinsic(name="std.cast.downcast_ref")
-!versioned(base="1.0.0", new="1.0.0")
-cor downcast_ref[Base, Derived: Base](base: &Base) -> GenOnce[&Derived or None] { }
