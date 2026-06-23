@@ -306,12 +306,12 @@ sup [T, A: Alloc] Vec[T, A] {
 
         let additional = new_len - self.len()
         case self.len() + additional <= self.cap() {
-            self.append_many_unchecked(Vec::new_filled_in(additional, element))
+            self.append_many_unchecked(Vec[T, A]::new_filled(additional, element))
             ret
         }
 
         self.capacity_reserve(additional)
-        self.append_many_unchecked(Vec::new_filled_in(additional, element))
+        self.append_many_unchecked(Vec[T, A]::new_filled(additional, element))
     }
 
     !public
