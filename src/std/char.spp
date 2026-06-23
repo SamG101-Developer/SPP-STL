@@ -11,7 +11,6 @@ use std::option::None
 use std::option::Opt
 use std::option::Some
 use std::view::View
-use std::num::bases::Num
 use std::ops::eq::Eq
 use std::ops::ord::Ord
 
@@ -23,9 +22,9 @@ cls Char {
     # encoding and decoding characters in different formats, such as UTF-8 and UTF-16, as well as methods for
     # determining the properties of characters, such as their length in bytes when encoded in UTF-8. The `Char` type is
     # an essential part of the standard library for working with text and strings in the programming language.
-}
 
-sup Char ext Num { }
+    inner: U32
+}
 
 sup Char {
     !public
@@ -38,10 +37,10 @@ sup Char {
 
         # Simple comparison against max characters representable
         # in 1, 2, 3, or 4 bytes in UTF-8 encoding.
-        case self of {
-            <= Char::from(0x7F_u32) { 1 }
-            <= Char::from(0x7FF_u32) { 2 }
-            <= Char::from(0xFFFF_u32) { 3 }
+        case self.inner of {
+            <= 0x7F_u32 { 1 }
+            <= 0x7FF_u32 { 2 }
+            <= 0xFFFF_u32 { 3 }
             else { 4 }
         }
     }
@@ -57,14 +56,14 @@ sup Char {
 
         # For chars that can be represented in a single UTF-16
         # code unit, we can directly write the value.
-        case self <= Char::from(0xFFFF_u32) {
-            buffer[0_uz] = U16::from(self)
+        case self.inner <= 0xFFFF_u32 {
+            buffer[0_uz] = U16::from(self.inner)
             ret 1
         }
 
         # For chars that require surrogate pairs, we need to
         # calculate the high and low surrogates.
-        let code_point = self - Char::from(0x10000_u32).unwrap()
+        let code_point = self.inner - 0x10000_u32
         buffer[mut 0_uz]@ = U16::from((code_point >> 10) | 0xD800) # High surrogate
         buffer[mut 1_uz]@ = U16::from((code_point & 0x3FF) | 0xDC00) # Low surrogate
         ret 2
@@ -79,17 +78,7 @@ sup Char ext Eq {
         # @let that: A reference to another `Char` to compare with.
         # @ret: `true` if the characters are equal, `false` otherwise.
 
-        ret intrinsics::eq(self, that)
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun ne(&self, that: &Self) -> Bool {
-        # Check if this character is not equal to another character.
-        # @let that: A reference to another `Char` to compare with.
-        # @ret: `true` if the characters are not equal, `false` otherwise.
-
-        ret intrinsics::ne(self, that)
+        ret self.inner == that.inner
     }
 }
 
@@ -101,7 +90,7 @@ sup Char ext Ord {
         # @let that: A reference to another `Char` to compare with.
         # @ret: An `Ordering` value indicating the result of the comparison.
 
-        ret intrinsics::ucmp(self, that)
+        ret self.inner.ord(&that.inner)
     }
 }
 
@@ -115,8 +104,8 @@ sup Char ext TryFrom[U32] {
 
         # Check if the value is a valid Unicode scalar value.
         case that of {
-            <= 0xD7FF_u32 { Some(val=Char::from(that)) }
-            <= 0x10FFFF_u32 and that >= 0xE000_u32 { Some(val=Char::from(that)) }
+            <= 0xD7FF_u32 { Some(val=Char(inner=that)) }
+            <= 0x10FFFF_u32 and that >= 0xE000_u32 { Some(val=Char(inner=that)) }
             else { None }
         }
     }
