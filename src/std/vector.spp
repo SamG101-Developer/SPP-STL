@@ -209,7 +209,7 @@ sup [T, A: Alloc] Vec[T, A] {
         # @let additional:
         # @ret:
 
-        self.buffer.capacity_reserve(self.len(), additional)
+        self.try_capacity_reserve(additional).expect("Failed to reserve capacity for Vec")
     }
 
     !public
@@ -229,7 +229,7 @@ sup [T, A: Alloc] Vec[T, A] {
         # @let required_cap:
         # @ret:
 
-        self.buffer.capacity_reserve_exact(self.len(), required_cap)
+        self.try_capacity_reserve_exact(required_cap).expect("Failed to reserve exact capacity for Vec")
     }
 
     !public
@@ -248,7 +248,7 @@ sup [T, A: Alloc] Vec[T, A] {
         # @let min_capacity:
         # @ret:
 
-        self.buffer.capacity_shrink_to(min_capacity)
+        self.try_capacity_shrink_to(min_capacity).expect("Failed to shrink capacity for Vec")
     }
 
     !public
@@ -267,7 +267,7 @@ sup [T, A: Alloc] Vec[T, A] {
         #
         # @ret:
 
-        self.buffer.capacity_shrink_to(self.len())
+        self.try_capacity_shrink().expect("Failed to shrink capacity for Vec")
     }
 
     !public

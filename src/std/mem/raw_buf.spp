@@ -101,17 +101,6 @@ sup [T, A: Alloc] RawBuf[T, A] {
 
     !package
     !versioned(base="1.0.0", new="1.0.0")
-    fun capacity_grow_to(&mut self, new_cap: USize) -> Void {
-        # The `capacity_grow_to` method grows the buffer to the new capacity. It is the non-fallible version of
-        # `try_capacity_grow_to`, and will abort if the grow fails.
-        # @let new_cap: The new capacity to grow the buffer to. Must be larger than the current capacity.
-
-        # Forward to the fallible version and abort if it fails.
-        self.try_capacity_grow_to(new_cap).expect("Grow failed")
-    }
-
-    !package
-    !versioned(base="1.0.0", new="1.0.0")
     fun try_capacity_grow_to(&mut self, new_cap: USize) -> Res[Void, AllocErr] {
         # The `try_capacity_grow_to` method attempts to grow the buffer to the new capacity. The new capacity must be
         # larger than the current capacity, and the existing elements in the buffer will be preserved. This is useful
@@ -130,17 +119,6 @@ sup [T, A: Alloc] RawBuf[T, A] {
         # state.
         self.capacity = new_cap
         ret Pass[Void]()
-    }
-
-    !package
-    !versioned(base="1.0.0", new="1.0.0")
-    fun capacity_shrink_to(&mut self, new_cap: USize) -> Void {
-        # The `capacity_shrink_to` method shrinks the buffer to the new capacity. It is the non-fallible version of
-        # `try_capacity_shrink_to`, and will abort if the shrink fails.
-        # @let new_cap: The new capacity to shrink the buffer to. Must be smaller than the current capacity.
-
-        # Forward to the fallible version and abort if it fails.
-        self.try_shrink(new_cap).expect("Shrink failed")
     }
 
     !package
@@ -167,16 +145,26 @@ sup [T, A: Alloc] RawBuf[T, A] {
 
     !package
     !versioned(base="1.0.0", new="1.0.0")
-    fun capacity_reserve(&mut self, len: USize, additional: USize) -> Res[Void, AllocErr] {
-        # The `capacity_reserve` method reserves capacity for at least "additional" more elements, checking for
-        # overflow. If the current capacity is sufficient, does nothing. Otherwise, grows the buffer to fit the required
-        # capacity.
-        # @let len: The number of elements that are initialized by the owning container, for example a `Vec` type. This
-        # is used to calculate the required capacity.
-        # @let additional: The number of additional elements to reserve capacity for. This is added to `len` to
-        # calculate the required capacity.
-        # @ret: `Pass()` if the reservation was successful or no growth was needed, or an `AllocErr` if the reservation
-        # failed due to capacity overflow or allocation failure.
+    fun try_capacity_reserve(&mut self, len: USize, additional: USize) -> Res[Void, AllocErr] {
+        #
+        # @let len:
+        # @let additional:
+        # @ret:
+
+        # Calculate the required capacity, checking for overflow.
+        # If the calculation overflows, return an `AllocErr`.
+        let new_cap = len.add_checked(additional).ok_or(AllocErr)?
+        case new_cap <= self.capacity { ret Pass[Void]() }
+        self.grow(new_cap)
+    }
+
+    !package
+    !versioned(base="1.0.0", new="1.0.0")
+    fun try_capacity_reserve_exact(&mut self, len: USize, additional: USize) -> Res[Void, AllocErr] {
+        #
+        # @let len:
+        # @let additional:
+        # @ret:
 
         # Calculate the required capacity, checking for overflow.
         # If the calculation overflows, return an `AllocErr`.
