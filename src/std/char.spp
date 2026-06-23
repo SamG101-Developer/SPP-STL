@@ -1,8 +1,12 @@
 use std::annotations::public
 use std::annotations::versioned
 use std::number::U16
+use std::number::U32
 use std::number::USize
 use std::view::View
+use std::num::bases::Num
+use std::ops::eq::Eq
+use std::ops::ord::Ord
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
@@ -14,6 +18,8 @@ cls Char {
     # an essential part of the standard library for working with text and strings in the programming language.
 }
 
+sup Char ext Num { }
+
 sup Char {
     !public
     !versioned(base="1.0.0", new="1.0.0")
@@ -21,13 +27,14 @@ sup Char {
         # Return the number of bytes that this character would take up in UTF-8 encoding. Fpr example, ASCII characters
         # would return 1, while some Unicode characters might return 2, 3, or 4.
         # @ret: The number of bytes in UTF-8 encoding for this character.
+        # @todo: Make the comparison values constants.
 
         # Simple comparison against max characters representable
         # in 1, 2, 3, or 4 bytes in UTF-8 encoding.
         case self of {
-            <= 0x7F { 1 }
-            <= 0x7FF { 2 }
-            <= 0xFFFF { 3 }
+            <= Char::from(0x7F_u32).unwrap() { 1 }
+            <= Char::from(0x7FF_u32).unwrap() { 2 }
+            <= Char::from(0xFFFF_u32).unwrap() { 3 }
             else { 4 }
         }
     }
@@ -39,19 +46,54 @@ sup Char {
         # least 2 `U16` values.
         # @let buffer: A mutable reference to an array of 2 `U16` values where the `UTF-16` encoding will be written.
         # @ret: The number of `U16` values written to the buffer (1 or 2).
+        # @todo: Make the comparison values constants.
 
         # For chars that can be represented in a single UTF-16
         # code unit, we can directly write the value.
-        case self <= 0xFFFF {
+        case self <= Char::from(0xFFFF_u32).unwrap() {
             buffer[0] = U16::from(self)
             ret 1
         }
 
         # For chars that require surrogate pairs, we need to
         # calculate the high and low surrogates.
-        let code_point = self - 0x10000
+        let code_point = self - Char::from(0x10000_u32).unwrap()
         buffer[mut 0]@ = U16::from((code_point >> 10) | 0xD800) # High surrogate
         buffer[mut 1]@ = U16::from((code_point & 0x3FF) | 0xDC00) # Low surrogate
         ret 2
+    }
+}
+
+sup Char ext Eq {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun eq(&self, other: &Self) -> Bool {
+        # Check if this character is equal to another character.
+        # @let other: A reference to another `Char` to compare with.
+        # @ret: `true` if the characters are equal, `false` otherwise.
+
+        ret intrinsics::eq(self, other)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun ne(&self, other: &Self) -> Bool {
+        # Check if this character is not equal to another character.
+        # @let other: A reference to another `Char` to compare with.
+        # @ret: `true` if the characters are not equal, `false` otherwise.
+
+        ret intrinsics::ne(self, other)
+    }
+}
+
+sup Char ext Ord {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun ord(&self, other: &Self) -> S32 {
+        # Compare this character with another character.
+        # @let other: A reference to another `Char` to compare with.
+        # @ret: An `Ordering` value indicating the result of the comparison.
+
+        ret intrinsics::ucmp(self, other)
     }
 }
