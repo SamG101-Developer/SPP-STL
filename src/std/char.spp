@@ -103,11 +103,8 @@ sup Char ext TryFrom[U32] {
         # @ret: A `Opt[Char]` containing the corresponding `Char` if the value is valid, or `None` if it is not.
 
         # Check if the value is a valid Unicode scalar value.
-        case that of {
-            <= 0xD7FF_u32 { Some(val=Char(inner=that)) }
-            <= 0x10FFFF_u32 and that >= 0xE000_u32 { Some(val=Char(inner=that)) }
-            else { None }
-        }
+        let valid = that <= 0xD7FF_u32 or (0xE000_u32 <= that <= 0x10FFFF_u32)
+        ret case valid { Some(val=Char(inner=that)) } else { None }
     }
 }
 
