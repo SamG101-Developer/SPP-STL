@@ -325,7 +325,7 @@ sup [T] Iterator[T] {
         # to each item, returning the index when a match is found.
         let mut index = 0_uz
         loop item in self {
-            case predicate(&item) { ret index }
+            case predicate(&item) { ret Some(val=index) }
             index += 1_uz
         }
         ret None
