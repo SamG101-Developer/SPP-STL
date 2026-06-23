@@ -124,12 +124,12 @@ sup Char ext TryFrom[U32] {
 
 sup Char ext From[U32] {
     !versioned(base="1.0.0", new="1.0.0")
-    fun from(value: U32) -> Self {
+    fun from(that: U32) -> Self {
         # Convert a `U32` value to a `Char`, if it represents a valid Unicode scalar value. If the value is not a valid
         # Unicode scalar value, error.
-        # @let value: The `U32` value to convert to a `Char`.
+        # @let that: The `U32` value to convert to a `Char`.
         # @ret: The corresponding `Char` if the value is valid, or an error if it is not.
 
-        ret self.try_from(value).expect("Invalid Unicode scalar value for Char conversion")
+        ret self.try_from(that).expect("Invalid Unicode scalar value for Char conversion")
     }
 }
