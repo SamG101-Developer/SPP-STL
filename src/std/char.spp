@@ -29,7 +29,7 @@ cls Char {
 sup Char {
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun len_utf8(self) -> USize {
+    fun len_utf8(self) -> U32 {
         # Return the number of bytes that this character would take up in UTF-8 encoding. Fpr example, ASCII characters
         # would return 1, while some Unicode characters might return 2, 3, or 4.
         # @ret: The number of bytes in UTF-8 encoding for this character.
@@ -38,16 +38,16 @@ sup Char {
         # Simple comparison against max characters representable
         # in 1, 2, 3, or 4 bytes in UTF-8 encoding.
         case self.inner of {
-            <= 0x7F_u32 { 1 }
-            <= 0x7FF_u32 { 2 }
-            <= 0xFFFF_u32 { 3 }
-            else { 4 }
+            <= 0x7F_u32 { 1_u32 }
+            <= 0x7FF_u32 { 2_u32 }
+            <= 0xFFFF_u32 { 3_u32 }
+            else { 4_u32 }
         }
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun encode_utf16(&self, buffer: &mut View[U16]) -> USize {
+    fun encode_utf16(&self, buffer: &mut View[U16]) -> U32 {
         # Encode this character into `UTF-16` and write it into the provided buffer. The buffer should have space for at
         # least 2 `U16` values.
         # @let buffer: A mutable reference to an array of 2 `U16` values where the `UTF-16` encoding will be written.
@@ -58,7 +58,7 @@ sup Char {
         # code unit, we can directly write the value.
         case self.inner <= 0xFFFF_u32 {
             buffer[0_uz]@ = U16::from(self.inner)
-            ret 1
+            ret 1_u32
         }
 
         # For chars that require surrogate pairs, we need to
@@ -66,7 +66,7 @@ sup Char {
         let code_point = self.inner - 0x10000_u32
         buffer[mut 0_uz]@ = U16::from((code_point >> 10) | 0xD800) # High surrogate
         buffer[mut 1_uz]@ = U16::from((code_point & 0x3FF) | 0xDC00) # Low surrogate
-        ret 2
+        ret 2_u32
     }
 }
 
