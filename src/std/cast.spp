@@ -21,15 +21,14 @@ cls From[That] {
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-cls TryFrom[That, Err=ConversionErr] {
+cls TryFrom[That] {
     # The `TryFrom` type is a trait that defines a fallible conversion from one type to another. It has a single method,
     # `try_from`, which takes an object of type `That` and returns a `Res[Self, Err]`, which is a result type that can
     # either contain the successfully converted object of the implementing type (`Self`) or an error of type `Err` if
     # the conversion fails. The `TryFrom` trait is used for conversions that may fail, allowing the caller to handle the
     # possibility of failure gracefully. It can be used for generic constraints, allowing "any type that can be tried to
     # be made from `That`". The default error type is `ConversionErr`.
-    # @type That:
-    # @type Err:
+    # @type That: The type that can be converted into the implementing type. This is the source type for the conversion.
 }
 
 sup [That] From[That] {
@@ -49,7 +48,7 @@ sup [That] From[That] {
     }
 }
 
-sup [That, Err] TryFrom[That, Err] {
+sup [That] TryFrom[That] {
     !public !abstract_method
     !versioned(base="1.0.0", new="1.0.0")
     fun try_from(that: That) -> Opt[Self] {
