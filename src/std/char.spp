@@ -57,7 +57,7 @@ sup Char {
         # For chars that can be represented in a single UTF-16
         # code unit, we can directly write the value.
         case self.inner <= 0xFFFF_u32 {
-            buffer[0_uz] = U16::from(self.inner)
+            buffer[0_uz]@ = U16::from(self.inner)
             ret 1
         }
 
