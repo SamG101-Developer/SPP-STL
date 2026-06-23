@@ -58,15 +58,15 @@ sup Char {
         # For chars that can be represented in a single UTF-16
         # code unit, we can directly write the value.
         case self <= Char::from(0xFFFF_u32) {
-            buffer[0] = U16::from(self)
+            buffer[0_uz] = U16::from(self)
             ret 1
         }
 
         # For chars that require surrogate pairs, we need to
         # calculate the high and low surrogates.
         let code_point = self - Char::from(0x10000_u32).unwrap()
-        buffer[mut 0]@ = U16::from((code_point >> 10) | 0xD800) # High surrogate
-        buffer[mut 1]@ = U16::from((code_point & 0x3FF) | 0xDC00) # Low surrogate
+        buffer[mut 0_uz]@ = U16::from((code_point >> 10) | 0xD800) # High surrogate
+        buffer[mut 1_uz]@ = U16::from((code_point & 0x3FF) | 0xDC00) # Low surrogate
         ret 2
     }
 }
