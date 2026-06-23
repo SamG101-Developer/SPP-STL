@@ -267,7 +267,7 @@ sup [T, A: Alloc] Vec[T, A] {
         #
         # @ret:
 
-        self.buffer.shrink_to_fit(self.len())
+        self.buffer.capacity_shrink_to_fit(self.len())
     }
 
     !public
