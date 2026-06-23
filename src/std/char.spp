@@ -64,8 +64,8 @@ sup Char {
         # For chars that require surrogate pairs, we need to
         # calculate the high and low surrogates.
         let code_point = self.inner - 0x10000_u32
-        buffer[mut 0_uz]@ = U16::from((code_point >> 10) | 0xD800) # High surrogate
-        buffer[mut 1_uz]@ = U16::from((code_point & 0x3FF) | 0xDC00) # Low surrogate
+        buffer[mut 0_uz]@ = U16::from((code_point >> 10_u32) | 0xD800) # High surrogate
+        buffer[mut 1_uz]@ = U16::from((code_point & 0x3FF_u32) | 0xDC00) # Low surrogate
         ret 2_u32
     }
 }
