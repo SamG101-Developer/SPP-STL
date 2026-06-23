@@ -69,33 +69,33 @@ sup Char {
 sup Char ext Eq {
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun eq(&self, other: &Self) -> Bool {
+    fun eq(&self, that: &Self) -> Bool {
         # Check if this character is equal to another character.
-        # @let other: A reference to another `Char` to compare with.
+        # @let that: A reference to another `Char` to compare with.
         # @ret: `true` if the characters are equal, `false` otherwise.
 
-        ret intrinsics::eq(self, other)
+        ret intrinsics::eq(self, that)
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun ne(&self, other: &Self) -> Bool {
+    fun ne(&self, that: &Self) -> Bool {
         # Check if this character is not equal to another character.
-        # @let other: A reference to another `Char` to compare with.
+        # @let that: A reference to another `Char` to compare with.
         # @ret: `true` if the characters are not equal, `false` otherwise.
 
-        ret intrinsics::ne(self, other)
+        ret intrinsics::ne(self, that)
     }
 }
 
 sup Char ext Ord {
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun ord(&self, other: &Self) -> S32 {
+    fun ord(&self, that: &Self) -> S32 {
         # Compare this character with another character.
-        # @let other: A reference to another `Char` to compare with.
+        # @let that: A reference to another `Char` to compare with.
         # @ret: An `Ordering` value indicating the result of the comparison.
 
-        ret intrinsics::ucmp(self, other)
+        ret intrinsics::ucmp(self, that)
     }
 }
