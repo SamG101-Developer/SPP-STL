@@ -552,7 +552,9 @@ sup [T, A: Alloc] Vec[T, A] ext IterMov[T] {
         #
         # @ret:
 
-        loop i in Range[USize]::between(0_uz, self.len()) { gen self.buffer.take_at(i) }
+        loop i in Range[USize]::between(0_uz, self.len()) {
+            gen self.buffer.take_at(i).unwrap()
+        }
     }
 }
 
@@ -562,7 +564,9 @@ sup [T, A: Alloc] Vec[T, A] ext RevIterMov[T] {
         #
         # @ret:
 
-        loop i in Range[USize]::between(self.len(), 0_uz, -1) { gen self.buffer.take_at(i) }
+        loop i in Range[USize]::between(self.len(), 0_uz, -1) {
+            gen self.buffer.take_at(i).unwrap()
+        }
     }
 }
 
