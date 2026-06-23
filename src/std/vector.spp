@@ -353,14 +353,14 @@ sup [T, A: Alloc] Vec[T, A] {
 
         let required_cap = self.len() + that.len()
         case required_cap <= self.cap() {
-            self.append_vec_unchecked(that)
+            self.append_many_unchecked(that)
             ret
         }
 
         # Reserve enough capacity to hold the new elements,
         # then append them.
         self.capacity_reserve(that.len())
-        self.append_vec_unchecked(that)
+        self.append_many_unchecked(that)
     }
 
     !public
@@ -489,7 +489,7 @@ sup [T, A: Alloc] Vec[T, A] {
 
     !private
     !versioned(base="1.0.0", new="1.0.0")
-    fun append_vec_unchecked(&mut self, that: Vec[T]) -> Void {
+    fun append_many_unchecked(&mut self, that: Vec[T]) -> Void {
         #
         # @let that:
         # @ret:
