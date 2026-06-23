@@ -270,7 +270,7 @@ sup [T] Iterator[T] {
         # Check if the predicate returns true for all items by iterating
         # through the entire iterator and applying the predicate to each
         # item, short-circuiting on a `false` result.
-        loop item in self { case predicate(item).not { ret false } }
+        loop item in self { case f(item).not { ret false } }
         ret true
     }
 
@@ -295,7 +295,7 @@ sup [T] Iterator[T] {
         # Check if the predicate returns true for any item by iterating
         # through the entire iterator and applying the predicate to each
         # item, short-circuiting on a `true` result.
-        loop item in self { case predicate(item) { ret true } }
+        loop item in self { case f(item) { ret true } }
         ret false
     }
 
