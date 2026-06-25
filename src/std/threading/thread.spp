@@ -44,7 +44,7 @@ cls ThreadUnknownErr {
 !versioned(base="1.0.0", new="1.0.0")
 type ThreadErr = ThreadMemoryErr or ThreadPermissionErr or ThreadUnknownErr
 
-sup ThreadErr ext StrView {
+sup ThreadErr {
     !public
     !versioned(base="1.0.0", new="1.0.0")
     fun from_errno(errno: S32) -> Self {
