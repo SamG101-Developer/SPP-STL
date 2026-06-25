@@ -29,16 +29,16 @@ sup TimePoint {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun now(clock: S32 = 0) -> Res[TimePoint, TimeErr] {
+    fun now(clock: S32 = 0) -> TimePoint {
         #
         # @let ?clock:
         # @ret:
 
         let mut time_now = sppc::CTimespec()
         let err = sppc::clock_gettime(clock, &mut time_now)
-        case err != 0 { ret Fail(err=TimeErr) }
+        case err != 0 { std::abort::abort("Failed to get current time") }
         let duration = Duration(seconds=time_now.sec, nanoseconds=time_now.nsec)
-        ret Pass(val=TimePoint(duration))
+        ret TimePoint(duration)
     }
 
     !public
