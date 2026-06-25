@@ -17,7 +17,7 @@ sup [T] Slot[T] {
     !public
     !versioned(base="1.0.0", new="1.0.0")
     fun new(val: T) -> Slot[T] {
-        Slot(val)
+        ret Slot(val)
     }
 
     !public

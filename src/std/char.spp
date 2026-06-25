@@ -117,6 +117,6 @@ sup Char ext From[U32] {
         # @ret: The corresponding `Char` if the value is valid, or an error if it is not.
 
         let opt = Char::try_from(that)
-        ret opt.unwrap() # expect("Invalid Unicode scalar value for Char conversion")
+        ret opt.expect("Invalid Unicode scalar value for Char conversion")
     }
 }
