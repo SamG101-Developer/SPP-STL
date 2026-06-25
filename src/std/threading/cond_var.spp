@@ -48,6 +48,7 @@ sup CondVar {
         # @let mutex: A reference to the `Mutex` that is associated with the condition variable. The mutex must be
         # locked before calling this function, and it will be automatically re-acquired when the wait is over.
         # @ret: A `Res` type indicating whether the wait operation was successful or not.
+        # @todo: Rework will include compile-time known mutex state. Currently controlled with returned result type.
 
         # Wait on the condition variable, releasing the
         # associated mutex, using sppc internal calls.
@@ -69,6 +70,7 @@ sup CondVar {
         # boolean indicating whether to continue waiting. The predicate is evaluated while the mutex is locked, and the
         # wait will continue as long as the predicate returns true.
         # @ret: A `Res` type indicating whether the wait operation was successful or not.
+        # @todo: Rework will include compile-time known mutex state. Currently controlled with returned result type.
 
         loop pred(&mut mutex.val) {
             let err = sppc::pthread_cond_wait(&self.handle, &mutex.handle)
@@ -93,6 +95,7 @@ sup CondVar {
         # operation timed out.
         # @ret: A `Res` type indicating whether the wait operation was successful or not. If the wait operation times
         # out, it will return an error indicating that the wait operation timed out.
+        # @todo: Rework will include compile-time known mutex state. Currently controlled with returned result type.
 
         # Build the C timespec struct for the timeout duration.
         let timespec = CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
@@ -104,13 +107,31 @@ sup CondVar {
     !public
     !versioned(base="1.0.0", new="1.0.0")
     fun wait_timeout_while[T](&self, mutex: &Mutex[T], timeout: Duration, pred: FunMut[(&mut T), Bool]) -> Res[Bool, ThreadErr] {
-        # Wait on the condition variable with a timeout, releasing the associated mutex.
+        # Wait on the condition variable with a timeout while a predicate is true, releasing the associated mutex. This
+        # function will block the current thread until the condition variable is signaled, the specified timeout has
+        # elapsed, or the predicate returns false. The mutex must be locked before calling this function, and it will be
+        # automatically re-acquired when the wait is over. If the timeout elapses before the condition variable is
+        # signaled and the predicate returns false, the function will return an error indicating that the wait operation
+        # timed out.
+        # @type T: The type of the value protected by the mutex.
+        # @let mutex: A reference to the `Mutex` that is associated with the condition variable. The mutex must be
+        # locked before calling this function, and it will be automatically re-acquired when the wait is over.
+        # @let timeout: The duration to wait for the condition variable to be signaled before timing out. If the timeout
+        # elapses before the condition variable is signaled and the predicate returns false, the function will return an
+        # error indicating that the wait operation timed out.
+        # @let pred: A mutable function that takes a mutable reference to the value protected by the mutex and returns a
+        # boolean indicating whether to continue waiting. The predicate is evaluated while the mutex is locked, and the
+        # wait will continue as long as the predicate returns true.
+        # @ret: A `Res` type indicating whether the wait operation was successful or not. If the wait operation times
+        # out, it will return an error indicating that the wait operation timed out.
+        # @todo: Rework will include compile-time known mutex state. Currently controlled with returned result type.
+
         let deadline = TimePoint::now() + timeout
         loop pred(self.val.get_mut()) {
             let remaining = deadline.sub_saturating(TimePoint::now())
             case remaining.is_zero() { ret Pass(val=false) }
             let timespec = CTimespec(sec=remaining.seconds, nsec=remaining.nanoseconds)
-            let err = sppc::cond_timedwait(&self.handle, &mutex.handle, 0, &timespec)
+            let err = sppc::pthread_cond_timedwait(&self.handle, &mutex.handle, 0, &timespec)
             case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
         }
     }
@@ -118,8 +139,13 @@ sup CondVar {
     !public
     !versioned(base="1.0.0", new="1.0.0")
     fun signal_one(&self) -> Res[Void, ThreadErr] {
-        # Signal one thread waiting on the condition variable.
-        let err = sppc::cond_signal(&self.handle)
+        # Wake up one thread waiting on the condition variable. This function will unblock one of the threads that are
+        # currently waiting on the condition variable. If no threads are waiting, the function has no effect. The
+        # function returns a `Res` type indicating whether the signal operation was successful or not.
+        # @ret: A `Res` type indicating whether the signal operation was successful or not. If the signal operation
+        # fails, it will return an error indicating the reason for the failure.
+
+        let err = sppc::pthread_cond_signal(&self.handle)
         case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
         ret Pass[Void]()
     }
@@ -127,8 +153,13 @@ sup CondVar {
     !public
     !versioned(base="1.0.0", new="1.0.0")
     fun signal_all(&self) -> Res[Void, ThreadErr] {
-        # Wake up all threads waiting on the condition variable.
-        let err = sppc::cond_broadcast(&self.handle)
+        # Wake up all threads waiting on the condition variable. This function will unblock all of the threads that are
+        # currently waiting on the condition variable. If no threads are waiting, the function has no effect. The
+        # function returns a `Res` type indicating whether the signal operation was successful or not.
+        # @ret: A `Res` type indicating whether the signal operation was successful or not. If the signal operation
+        # fails, it will return an error indicating the reason for the failure.
+
+        let err = sppc::pthread_cond_broadcast(&self.handle)
         case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
         ret Pass[Void]()
     }
@@ -137,7 +168,11 @@ sup CondVar {
 sup CondVar ext Del {
     !versioned(base="1.0.0", new="1.0.0")
     fun del(&mut self) -> Void {
-        # Destroy the condition variable using the sppc threading API.
-        sppc::cond_destroy(&self.handle)
+        # Destroy the condition variable. This function is called when the `CondVar` instance is dropped, and it cleans
+        # up any resources associated with the condition variable. The function does not return a value, but it may
+        # panic if the destruction of the condition variable fails. It is important to ensure that no threads are
+        # waiting on the condition variable when it is destroyed, as this can lead to undefined behavior.
+
+        sppc::pthread_cond_destroy(&self.handle)
     }
 }
