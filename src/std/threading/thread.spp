@@ -6,6 +6,7 @@ use std::annotations::zero_type
 use std::boolean::Bool
 use std::function::FunMut
 use std::number::U64
+use std::number::S32
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
