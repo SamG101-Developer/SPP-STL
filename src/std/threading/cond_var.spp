@@ -128,7 +128,7 @@ sup CondVar {
         # @todo: Rework will include compile-time known mutex state. Currently controlled with returned result type.
 
         let deadline = TimePoint::now() + timeout
-        loop pred(self.val.get_mut()) {
+        loop pred(mutex.val.get_mut()) {
             let remaining = deadline.sub_saturating(TimePoint::now())
             case remaining.is_zero() { ret Pass(val=false) }
             let timespec = CTimespec(sec=remaining.seconds, nsec=remaining.nanoseconds)
