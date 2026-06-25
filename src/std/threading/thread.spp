@@ -43,6 +43,22 @@ cls ThreadUnknownErr {
 !versioned(base="1.0.0", new="1.0.0")
 type ThreadErr = ThreadMemoryErr or ThreadPermissionErr or ThreadUnknownErr
 
+sup ThreadErr ext StrView {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_errno(errno: S32) -> Self {
+        #
+        # @let errno:
+        # @ret:
+
+        ret case errno of {
+            == cffi::enomem { ThreadMemoryErr() }
+            == cffi::eperm { ThreadPermissionErr() }
+            else { ThreadUnknownErr() }
+        }
+    }
+}
+
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls JoinHandle[Out] {
