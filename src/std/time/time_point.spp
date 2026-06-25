@@ -63,7 +63,7 @@ sup TimePoint {
         # representing the amount of time that has passed from this `TimePoint` to the current time.
         # @ret: A `Duration` representing the time elapsed since this `TimePoint`.
 
-        let now = TimePoint::now().expect("Failed to get current time")
+        let now = TimePoint::now()
         ret now.duration_since(self@)
     }
 }
