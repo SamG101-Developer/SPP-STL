@@ -95,7 +95,7 @@ fun current() -> ThreadId {
 !versioned(base="1.0.0", new="1.0.0")
 fun yield_now() -> Void {
     # Yield the current thread using the sppc threading API.
-    sppc::thread_yield()
+    sppc::sched_yield()
 }
 
 sup [R] JoinHandle[R] {
