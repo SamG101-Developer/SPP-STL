@@ -41,7 +41,7 @@ sup [T] Mutex[T] {
         # Create a new mutex using the sppc threading API. Todo: Error Handling.
         let mut handle = 0_u64
         sppc::pthread_mutex_init(&mut handle)
-        ret Mutex(handle, Slot[T]::new(val))
+        ret Mutex(handle, val=Slot[T]::new(val))
     }
 
     !public
