@@ -27,7 +27,7 @@ sup SpinLock {
     !versioned(base="1.0.0", new="1.0.0")
     fun new() -> Res[SpinLock, ThreadErr] {
         # Create a new spin lock using the sppc threading API.
-        let handle = 0_u64
+        let mut handle = 0_u64
         sppc::pthread_spin_init(&mut handle)
         ret Pass(val=SpinLock(handle))
     }
