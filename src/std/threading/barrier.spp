@@ -30,7 +30,7 @@ cls Barrier {
 sup Barrier {
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun new(total: U32) -> Res[Barrier, ThreadErr] {
+    fun new(total: U64) -> Res[Barrier, ThreadErr] {
         # The `new` function creates a new `Barrier` instance with the specified total number of threads. It initializes
         # the barrier using the sppc threading API and returns a `Res` type that indicates success or failure. The `C`
         # `errno` value is used to determine if the barrier was successfully created, and an appropriate error message
