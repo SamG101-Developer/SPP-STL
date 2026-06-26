@@ -196,6 +196,18 @@ sup Duration {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
+    fun is_zero(&self) -> Bool {
+        # The `is_zero` method checks if the duration is zero, meaning both the seconds and nanoseconds fields are zero.
+        # It returns `true` if both fields are zero, indicating that the duration represents no time, and `false`
+        # otherwise.
+        # @ret: A boolean value indicating whether the duration is zero. Returns `true` if both seconds and nanoseconds
+        # are zero, and `false` otherwise.
+
+        ret self.seconds == 0_u64 and self.nanoseconds == 0_u64
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun add_checked(self, rhs: Duration) -> Opt[Duration] {
         #
         # @let rhs:
