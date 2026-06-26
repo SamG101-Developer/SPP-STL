@@ -3,8 +3,9 @@ use std::annotations::public
 use std::annotations::private
 use std::annotations::versioned
 use std::generator::GenOnce
-use std::number::U64
+use std::number::S32
 use std::number::U32
+use std::number::U64
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
@@ -54,7 +55,7 @@ sup [T] RwLock[T] {
     cor timed_read(&self, timeout: Duration, clock: U32 = 1) -> GenOnce[&T] {
         # Timed lock the rwlock for reading using the sppc threadinging API.
         let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
-        sppc::pthread_rwlock_clockrdlock(&self.handle, clock, &timespec)
+        sppc::pthread_rwlock_clockrdlock(&self.handle, S32::from(clock), &timespec)
         gen self.val.get_ref()
     }
 
@@ -63,7 +64,7 @@ sup [T] RwLock[T] {
     cor timed_write(&self, timeout: Duration, clock: U32 = 1) -> GenOnce[&mut T] {
         # Timed lock the rwlock for writing using the sppc threading API.
         let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
-        sppc::pthread_rwlock_clockwrlock(&self.handle, clock, &timespec)
+        sppc::pthread_rwlock_clockwrlock(&self.handle, S32::from(clock), &timespec)
         gen self.val.get_mut()
     }
 
