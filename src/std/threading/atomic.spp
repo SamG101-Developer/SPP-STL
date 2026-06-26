@@ -135,8 +135,9 @@ fun atomic_fence(order: U8) -> Void {
     # the internal `atomic_fence_inner` function to perform the actual fence operation.
     # @let order: The memory ordering of the fence. This must not be `mo_release`.
 
-    # Perform the validation of the memory order before calling the intrinsic function.
-    abort_if(order == Self::mo_release, "Cannot use release memory order for atomic fence")
+    # Perform the validation of the memory order before
+    # calling the intrinsic function.
+    abort_if(order == Atom[Bool]::mo_release, "Cannot use release memory order for atomic fence")
     atomic_fence_inner(order)
 }
 
