@@ -13,6 +13,5 @@ fun call_once[F: FunMov[(), Void]](func: F) -> Void {
     # `Void`.
     # @let func: The function being called. This is a value of type `F.
 
-    let func_ptr = NonNull[U8]::from_func(func)
-    sppc::pthread_once(func_ptr)
+    sppc::pthread_once(func)
 }
