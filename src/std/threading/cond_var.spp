@@ -100,7 +100,7 @@ sup CondVar {
 
         # Build the C timespec struct for the timeout duration.
         let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
-        let err = sppc::pthread_cond_timedwait(&self.handle, &mutex.handle, 0, &timespec)
+        let err = sppc::pthread_cond_clockwait(&self.handle, &mutex.handle, 0, &timespec)
         case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
         ret Pass[Void]()
     }

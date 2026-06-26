@@ -90,8 +90,8 @@ fun pthread_mutex_init_recursive(out: &mut CULong) -> CInt { }
 !ffi(symbol="c_pthread_mutex_lock")
 fun pthread_mutex_lock(mutex: &CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_mutex_timedlock")
-fun pthread_mutex_timedlock(mutex: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
+!ffi(symbol="c_pthread_mutex_clocklock")
+fun pthread_mutex_clocklock(mutex: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
 
 !ffi(symbol="c_pthread_mutex_trylock")
 fun pthread_mutex_trylock(mutex: &CULong) -> CInt { }
@@ -111,8 +111,8 @@ fun pthread_cond_init(out: &mut CULong) -> CInt { }
 !ffi(symbol="c_pthread_cond_wait")
 fun pthread_cond_wait(cond: &CULong, mutex: &CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_cond_timedwait")
-fun pthread_cond_timedwait(cond: &CULong, mutex: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
+!ffi(symbol="c_pthread_cond_clockwait")
+fun pthread_cond_clockwait(cond: &CULong, mutex: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
 
 !ffi(symbol="c_pthread_cond_signal")
 fun pthread_cond_signal(cond: &CULong) -> CInt { }
