@@ -76,7 +76,7 @@ cls ThreadId {
 !versioned(base="1.0.0", new="1.0.0")
 fun spawn[Out, F: FunMut[(), Out]](function: F) -> Res[JoinHandle[Out], ThreadErr] {
     # Spawn a new thread using the sppc threading API.
-    let mut handle = 0_uz
+    let mut handle = 0_u64
     let err = sppc::pthread_create(function, &mut handle)
     case err != 0 { ret Fail(err=ThreadErr(msg="Failed to spawn thread")) }
     ret Pass(val=JoinHandle[Out](handle))
