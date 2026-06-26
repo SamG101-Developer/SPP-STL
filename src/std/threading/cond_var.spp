@@ -34,7 +34,7 @@ sup CondVar {
 
         # Get a conditional variable handle from C.
         let mut handle = 0_u64
-        let err = sppc::pthread_condvar_init(&mut handle)
+        let err = sppc::pthread_cond_init(&mut handle)
         case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
         ret Pass(val=CondVar(handle))
     }
