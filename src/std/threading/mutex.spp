@@ -76,7 +76,7 @@ sup [T] Mutex[T] {
     fun take(self) -> T {
         # Take the value out of the mutex, consuming the mutex. Because "self" is being moved, it requires exclusive
         # access to the mutex, so we can safely consume the mutex and take the value out without locking it.
-        ret self.val
+        ret self.val.take()
     }
 
     !private
