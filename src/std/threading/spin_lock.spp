@@ -65,7 +65,7 @@ sup SpinLock ext Del {
     !versioned(base="1.0.0", new="1.0.0")
     fun del(&mut self) -> Void {
         # Destroy the spin lock using the sppc threading API.
-        sppc::pthread_spin_destroy(&self.handle)
+        let err = sppc::pthread_spin_destroy(&self.handle)
         case err != 0 { std::abort::abort("Failed to destroy spin lock") }
     }
 }
