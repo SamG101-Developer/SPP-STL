@@ -39,7 +39,7 @@ sup Barrier {
         # @ret: A `Res` type containing a `Barrier` object if the barrier is successfully created, or an error message
         # if the operation fails.
 
-        let handle = 0_u64
+        let mut handle = 0_u64
         let err = sppc::pthread_barrier_init(&mut handle, total)
         case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
         ret Pass(val=Barrier(handle, total=total, count=0_u64))
