@@ -136,10 +136,10 @@ fun pthread_rwlock_tryrdlock(rwlock: &CULong) -> CInt { }
 fun pthread_rwlock_clockrdlock(rwlock: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
 
 !ffi(symbol="c_pthread_rwlock_wrlock")
-fun pthread_rwlock_wrlock(rwlock: &mut CULong) -> CInt { }
+fun pthread_rwlock_wrlock(rwlock: &CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_rwlock_trywrlock")
-fun pthread_rwlock_trywrlock(rwlock: &mut CULong) -> CInt { }
+fun pthread_rwlock_trywrlock(rwlock: &CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_rwlock_clockwrlock")
 fun pthread_rwlock_clockwrlock(rwlock: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
