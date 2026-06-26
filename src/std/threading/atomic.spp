@@ -82,7 +82,7 @@ fun atomic_store_inner[T: Integral](ptr: &T, val: T, order: U8) -> Void {
 !private
 !intrinsic(name="std.threading.atomic.compare_exchange_inner")
 !versioned(base="1.0.0", new="1.0.0")
-fun compare_exchange_inner[T: Integral](ptr: &T, old: T, new: T, success_order: U8, failure_order: U8) -> (T, Bool) {
+fun atomic_compare_exchange_inner[T: Integral](ptr: &T, old: T, new: T, success_order: U8, failure_order: U8) -> (T, Bool) {
     # The `compare_exchange_inner` function is a low-level intrinsic function that implements the actual
     # compare-and-exchange operation. It is not intended to be called directly by user code, but is instead called by
     # the public `compare_exchange` method of the `Atom` type after validating the memory orders. The `ptr` parameter is
@@ -104,7 +104,7 @@ fun compare_exchange_inner[T: Integral](ptr: &T, old: T, new: T, success_order: 
 !private
 !intrinsic(name="std.threading.atomic.compare_exchange_weak_inner")
 !versioned(base="1.0.0", new="1.0.0")
-fun compare_exchange_weak_inner[T: Integral](ptr: &T, old: T, new: T, success_order: U8, failure_order: U8) -> (T, Bool) {
+fun atomic_compare_exchange_weak_inner[T: Integral](ptr: &T, old: T, new: T, success_order: U8, failure_order: U8) -> (T, Bool) {
     # The `compare_exchange_weak_inner` function is a low-level intrinsic function that implements the actual weak
     # compare-and-exchange operation. It is not intended to be called directly by user code, but is instead called by
     # the public `compare_exchange_weak` method of the `Atom` type after validating the memory orders. The `ptr`
