@@ -8,6 +8,7 @@ use std::result::Pass
 use std::result::Res
 use std::void::Void
 use std::threading::thread::ThreadErr
+use std::ops::del::Del
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
@@ -51,19 +52,20 @@ sup SpinLock {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun try_lock(&self) -> Res[Bool, ThreadErr] {
-        # Try to acquire the spin lock using the sppc threading API.
-        let err = sppc::pthread_spin_trylock(&self.handle)
-        case err < 0 { ret Fail(err=ThreadErr::from_errno(err))  }
-        ret Pass(val=err == 0)
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
     fun unlock(&self) -> Res[Void, ThreadErr] {
         # Release the spin lock using the sppc threading API.
         let err = sppc::pthread_spin_unlock(&self.handle)
         case err == 0 { ret Fail(err=ThreadErr::from_errno(err))  }
         ret Pass[Void]()
+    }
+}
+
+sup SpinLock ext Del {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun del(self) -> Void {
+        # Destroy the spin lock using the sppc threading API.
+        sppc::pthread_spin_destroy(&self.handle)
+        case err != 0 { std::abort::abort("Failed to destroy spin lock") }
     }
 }
