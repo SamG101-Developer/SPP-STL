@@ -135,6 +135,7 @@ sup CondVar {
             let err = sppc::pthread_cond_timedwait(&self.handle, &mutex.handle, 0, &timespec)
             case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
         }
+        ret Pass(val=true)
     }
 
     !public
