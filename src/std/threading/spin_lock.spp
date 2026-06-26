@@ -27,7 +27,7 @@ sup SpinLock {
     fun new() -> Res[SpinLock, ThreadErr] {
         # Create a new spin lock using the sppc threading API.
         let handle = 0_u64
-        sppc::pthread_spinlock_init(&mut handle)
+        sppc::pthread_spin_init(&mut handle)
         ret Pass(val=SpinLock(handle))
     }
 
@@ -44,7 +44,7 @@ sup SpinLock {
     !versioned(base="1.0.0", new="1.0.0")
     fun try_lock(&self) -> Res[Void, ThreadErr] {
         # Try to acquire the spin lock using the sppc threading API.
-        let err = sppc::pthread_spinlock_try_lock(self.id)
+        let err = sppc::pthread_spin_try_lock(self.id)
         case err != 0 { ret Fail(err=ThreadErr::from_errno(err))  }
         ret Pass[Void]()
     }
@@ -53,7 +53,7 @@ sup SpinLock {
     !versioned(base="1.0.0", new="1.0.0")
     fun try_lock(&self) -> Res[Bool, ThreadErr] {
         # Try to acquire the spin lock using the sppc threading API.
-        let err = sppc::pthread_spinlock_try_lock(self.id)
+        let err = sppc::pthread_spin_try_lock(self.id)
         case err < 0 { ret Fail(err=ThreadErr::from_errno(err))  }
         ret Pass(val=err == 0)
     }
@@ -62,7 +62,7 @@ sup SpinLock {
     !versioned(base="1.0.0", new="1.0.0")
     fun unlock(&self) -> Res[Void, ThreadErr] {
         # Release the spin lock using the sppc threading API.
-        let err = sppc::pthread_spinlock_unlock(self.id)
+        let err = sppc::pthread_spin_unlock(self.id)
         case err == 0 { ret Fail(err=ThreadErr::from_errno(err))  }
         ret Pass[Void]()
     }
