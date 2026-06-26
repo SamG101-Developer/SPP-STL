@@ -38,7 +38,7 @@ sup [T] Mutex[T] {
     fun new(val: T) -> Mutex[T] {
         # Create a new mutex using the sppc threading API. Todo: Error Handling.
         let mut handle = 0_u64
-        sppc::mutex_create(&mut handle)
+        sppc::pthread_mutex_create(&mut handle)
         ret Mutex(handle, Slot[T]::new(val))
     }
 
@@ -46,9 +46,9 @@ sup [T] Mutex[T] {
     !versioned(base="1.0.0", new="1.0.0")
     cor lock(&self) -> GenOnce[&mut T] {
         # Lock the mutex using the sppc threading API. Todo: Error Handling.
-        sppc::mutex_lock(&self.handle)
+        sppc::pthread_mutex_lock(&self.handle)
         gen &mut self.val.get_mut()
-        sppc::mutex_unlock(&self.handle)
+        sppc::pthread_mutex_unlock(&self.handle)
     }
 
     !public
@@ -56,19 +56,19 @@ sup [T] Mutex[T] {
     cor timed_lock(&self, timeout: Duration) -> GenOnce[&mut T] {
         # Timed lock the mutex using the sppc threading API. Todo: Error Handling.
         let timespec = CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
-        sppc::mutex_timedlock(&self.handle, &timespec)
+        sppc::pthread_mutex_timedlock(&self.handle, &timespec)
         gen &mut self.val.get_mut()
-        sppc::mutex_unlock(&self.handle)
+        sppc::pthread_mutex_unlock(&self.handle)
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
     cor try_lock(&self) -> GenOnce[&mut T or WouldBlock] {
         # Try to lock the mutex using the sppc threading API. Todo: Error Handling.
-        let code = sppc::mutex_try_lock(&self.handle)
+        let code = sppc::pthread_mutex_try_lock(&self.handle)
         case code == 1 { ret gen WouldBlock }
         gen &mut self.val.get_mut()
-        sppc::mutex_unlock(&self.handle)
+        sppc::pthread_mutex_unlock(&self.handle)
     }
 
     !public
@@ -83,7 +83,7 @@ sup [T] Mutex[T] {
     !versioned(base="1.0.0", new="1.0.0")
     fun unlock(&mut self) -> Void {
         # Unlock the mutex using the sppc threading API. Todo: Error Handling.
-        sppc::mutex_unlock(&self.handle)
+        sppc::pthread_mutex_unlock(&self.handle)
     }
 }
 
@@ -91,6 +91,6 @@ sup [T] Mutex[T] ext Del {
     !versioned(base="1.0.0", new="1.0.0")
     fun del(&mut self) -> Void {
         # Destroy the mutex using the sppc threading API. Todo: Error Handling.
-        sppc::mutex_destroy(&self.handle)
+        sppc::pthread_mutex_destroy(&self.handle)
     }
 }
