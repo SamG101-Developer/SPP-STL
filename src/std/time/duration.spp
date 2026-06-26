@@ -212,6 +212,22 @@ sup Duration {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
+    fun add_saturating(self, rhs: Duration) -> Duration {
+        #
+        # @let rhs:
+        # @ret:
+
+        let mut secs = self.seconds.add_saturating(rhs.seconds)
+        let mut nanos = self.nanoseconds + rhs.nanoseconds
+        case nanos >= 1000000000_u64 {
+            secs = secs.add_saturating(1_u64)
+            nanos -= 1000000000_u64
+        }
+        ret Duration(seconds=secs, nanoseconds=nanos)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun sub_checked(self, rhs: Duration) -> Opt[Duration] {
         #
         # @let rhs:
@@ -225,6 +241,23 @@ sup Duration {
         }
         nanos = nanos - rhs.nanoseconds
         ret Some(val=Duration(seconds=secs, nanoseconds=nanos))
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun sub_saturating(self, rhs: Duration) -> Duration {
+        #
+        # @let rhs:
+        # @ret:
+
+        let mut secs = self.seconds.sub_saturating(rhs.seconds)
+        let mut nanos = self.nanoseconds
+        case nanos < rhs.nanoseconds {
+            secs = secs.sub_saturating(1_u64)
+            nanos += 1000000000_u64
+        }
+        nanos = nanos - rhs.nanoseconds
+        ret Duration(seconds=secs, nanoseconds=nanos)
     }
 
     !public

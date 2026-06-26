@@ -58,6 +58,20 @@ sup TimePoint {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
+    fun duration_since_saturating(&self, earlier: TimePoint) -> Duration {
+        # The `duration_since_saturating` method calculates the duration between this `TimePoint` and an earlier
+        # `TimePoint`, returning a `Duration` that represents the amount of time that has elapsed between the two points
+        # in time. If the earlier `TimePoint` is actually later than this `TimePoint`, the method will return a
+        # `Duration` of zero, effectively saturating the result at zero instead of returning a negative duration.
+        # @let earlier: The earlier `TimePoint` to compare against.
+        # @ret: A `Duration` representing the time elapsed between this `TimePoint` and the earlier `TimePoint`, or zero
+        # if the earlier `TimePoint` is later than this one.
+
+        ret self.duration.sub_saturating(earlier.duration)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun elapsed(&self) -> Duration {
         # The `elapsed` method calculates the duration that has elapsed since this `TimePoint`. It returns a `Duration`
         # representing the amount of time that has passed from this `TimePoint` to the current time.
