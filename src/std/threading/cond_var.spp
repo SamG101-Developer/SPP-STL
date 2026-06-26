@@ -129,7 +129,7 @@ sup CondVar {
 
         let deadline = TimePoint::now() + timeout
         loop pred(mutex.val.get_mut()) {
-            let remaining = deadline.sub_saturating(TimePoint::now())
+            let remaining = deadline.duration_since_saturating(TimePoint::now())
             case remaining.is_zero() { ret Pass(val=false) }
             let timespec = CTimespec(sec=remaining.seconds, nsec=remaining.nanoseconds)
             let err = sppc::pthread_cond_timedwait(&self.handle, &mutex.handle, 0, &timespec)
