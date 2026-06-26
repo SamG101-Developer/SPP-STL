@@ -40,6 +40,15 @@ sup [T] Slot[T] {
     !intrinsic(name="std.slot.Slot.get_ref")
     !versioned(base="1.0.0", new="1.0.0")
     cor get_ref(&self) -> GenOnce[&T] { }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun take(self) -> T {
+        #
+        # @ret:
+
+        ret self.val
+    }
 }
 
 sup [T: Copy] Slot[T] {
