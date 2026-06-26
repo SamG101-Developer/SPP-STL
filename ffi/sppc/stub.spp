@@ -96,8 +96,8 @@ fun pthread_mutex_timedlock(mutex: &CULong, clock: CInt, duration: &CTimespec) -
 !ffi(symbol="c_pthread_mutex_trylock")
 fun pthread_mutex_trylock(mutex: &CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_unlock")
-fun pthread_unlock(mutex: &CULong) -> CInt { }
+!ffi(symbol="c_pthread_mutex_unlock")
+fun pthread_mutex_unlock(mutex: &CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_mutex_destroy")
 fun pthread_mutex_destroy(mutex: &CULong) -> CInt { }
