@@ -103,7 +103,7 @@ fun pthread_unlock(mutex: &CULong) -> CInt { }
 fun pthread_mutex_destroy(mutex: &CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_once")
-fun c_pthread_once[F0: FunRef[(), CVoid]](func: F0) -> CInt { }
+fun pthread_once[F0: FunRef[(), CVoid]](func: F0) -> CInt { }
 
 !ffi(symbol="c_pthread_cond_init")
 fun pthread_cond_init(out: &mut CULong) -> CInt { }
