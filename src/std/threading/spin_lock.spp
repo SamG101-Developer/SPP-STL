@@ -45,7 +45,7 @@ sup SpinLock {
     !versioned(base="1.0.0", new="1.0.0")
     fun try_lock(&self) -> Res[Void, ThreadErr] {
         # Try to acquire the spin lock using the sppc threading API.
-        let err = sppc::pthread_spin_try_lock(&self.handle)
+        let err = sppc::pthread_spin_trylock(&self.handle)
         case err != 0 { ret Fail(err=ThreadErr::from_errno(err))  }
         ret Pass[Void]()
     }
