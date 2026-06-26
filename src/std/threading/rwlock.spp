@@ -31,7 +31,7 @@ sup [T] RwLock[T] {
         # Create a new rwlock using the sppc threading API.
         let mut handle = 0_u64
         sppc::pthread_rwlock_init(&mut handle)
-        ret RwLock(handle, Slot[T]::new(val))
+        ret RwLock(handle, val=Slot[T]::new(val))
     }
 
     !public
