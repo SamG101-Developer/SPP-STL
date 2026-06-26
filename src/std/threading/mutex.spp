@@ -68,7 +68,7 @@ sup [T] Mutex[T] {
     cor try_lock(&self) -> GenOnce[&mut T or WouldBlock] {
         # Try to lock the mutex using the sppc threading API. Todo: Error Handling.
         let code = sppc::pthread_mutex_trylock(&self.handle)
-        case code == 1 { ret gen WouldBlock }
+        case code == 1 { gen WouldBlock }
         gen &mut self.val.get_mut()
         sppc::pthread_mutex_unlock(&self.handle)
     }
