@@ -64,7 +64,7 @@ fun init() -> CInt { }
 fun cleanup() -> CInt { }
 
 !ffi(symbol="c_pthread_create")
-fun pthread_create(start_routine: &CVoidPtr, out: &mut CULong) -> CInt { }
+fun pthread_create[F0: FunRef[(), CVoid]](start_routine: F0, out: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_pthread_join")
 fun pthread_join(handle: &CULong) -> CInt { }
