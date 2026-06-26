@@ -42,7 +42,7 @@ sup Barrier {
         let mut handle = 0_u64
         let err = sppc::pthread_barrier_init(&mut handle, total)
         case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
-        ret Pass(val=Barrier(handle, total=total, count=0_u64))
+        ret Pass(val=Barrier(handle, total, count=0_u64))
     }
 
     !public
