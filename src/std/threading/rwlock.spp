@@ -70,7 +70,7 @@ sup [T] RwLock[T] {
     !versioned(base="1.0.0", new="1.0.0")
     cor try_write(&self) -> GenOnce[&mut T or WouldBlock] {
         # Try to lock the rwlock for writing using the sppc threading API.
-        let code = sppc::pthread_rwlock_trywrlock(&mut self.handle)
+        let code = sppc::pthread_rwlock_trywrlock(&self.handle)
         case code == 1 { gen WouldBlock }
         gen self.val.get_mut()
     }
