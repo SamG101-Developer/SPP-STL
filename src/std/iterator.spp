@@ -145,7 +145,7 @@ sup [T] Iterator[T] {
         # @type U: The type of items produced by the new iterator after applying the mapping function. This is a generic
         # type parameter that can be any type, depending on the output of the mapping function.
         # @type F: A function type that represents the mapping function used for transforming the items. This is a
-        # generic type parameter that must implement the `FunMut[(T), U]` interface, meaning it must be a mutable
+        # generic type parameter that must implement the `FunMut[(T,), U]` interface, meaning it must be a mutable
         # function that takes an item of type `T` and returns a value of type `U`.
         # @let f: The mapping function that transforms each item from the original iterator (`self`) into a new value.
         # The method will call this function for each item produced by the original iterator, and will yield the result

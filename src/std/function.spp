@@ -37,19 +37,19 @@ cls FunRef[Args: TupLike, Out] {
     # @type Out:
 }
 
-sup [Args: TupLike, Out] FunMov[Args, Out] ext Fun {
+sup [Args: TupLike, Out] FunRef[Args, Out] ext Fun {
     # Ensure all variations of functional types are able to be used with `Fun`, so that a generic constraint of `Fun`
     # can accept any functional type.
 }
 
-sup [Args: TupLike, Out] FunMut[Args, Out] ext FunMov[Args, Out] {
-    # A `FunMut` can be used wherever a `FunMov` is expected, as it can be called at least once. This extension allows
-    # for generic constraints to accept either `FunMut` to `FunMov`, so that a `FunMut` can be passed to a function that
-    # also accepts a `FunMov`.
-}
-
-sup [Args: TupLike, Out] FunRef[Args, Out] ext FunMut[Args, Out] {
+sup [Args: TupLike, Out] FunMut[Args, Out] ext FunRef[Args, Out] {
     # A `FunRef` can be used wherever a `FunMut` is expected, as it can be called multiple times. This extension allows
     # for generic constraints to accept either `FunRef` to `FunMut`, so that a `FunRef` can be passed to a function that
     # also accepts a `FunMut`.
+}
+
+sup [Args: TupLike, Out] FunMov[Args, Out] ext FunMut[Args, Out] {
+    # A `FunMut` can be used wherever a `FunMov` is expected, as it can be called at least once. This extension allows
+    # for generic constraints to accept either `FunMut` to `FunMov`, so that a `FunMut` can be passed to a function that
+    # also accepts a `FunMov`.
 }
