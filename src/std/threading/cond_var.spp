@@ -60,7 +60,7 @@ sup CondVar {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun wait_while[T](&self, mutex: &Mutex[T], pred: FunMut[(&mut T,), Bool]) -> Res[Bool, ThreadErr] {
+    fun wait_while[T](&self, mut mutex: &Mutex[T], pred: FunMut[(&mut T,), Bool]) -> Res[Bool, ThreadErr] {
         # Wait on the condition variable while a predicate is true, releasing the associated mutex. This function will
         # block the current thread until the condition variable is signaled and the predicate returns false. The mutex
         # must be locked before calling this function, and it will be automatically re-acquired when the wait is over.
