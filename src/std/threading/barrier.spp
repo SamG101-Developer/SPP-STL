@@ -58,7 +58,7 @@ sup Barrier {
 
         let err = sppc::pthread_barrier_wait(&self.handle)
         case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
-        self.count += 1_u32
+        self.count += 1_u64
         ret Pass[Void]()
     }
 }
