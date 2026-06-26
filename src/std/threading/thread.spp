@@ -87,7 +87,7 @@ fun spawn[Out](function: FunMut[(), Out]) -> Res[JoinHandle[Out], ThreadErr] {
 fun current() -> ThreadId {
     # Get the current thread using the sppc threading API. Todo: use a ThreadId type for equality check.
     let mut handle = 0_u64
-    sppc::thread_current(&mut handle)
+    sppc::pthread_self(&mut handle)
     ret ThreadId(handle)
 }
 
