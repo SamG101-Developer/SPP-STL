@@ -99,7 +99,7 @@ sup CondVar {
         # @todo: Rework will include compile-time known mutex state. Currently controlled with returned result type.
 
         # Build the C timespec struct for the timeout duration.
-        let timespec = CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
+        let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
         let err = sppc::pthread_cond_timedwait(&self.handle, &mutex.handle, 0, &timespec)
         case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
         ret Pass[Void]()
@@ -131,7 +131,7 @@ sup CondVar {
         loop pred(mutex.val.get_mut()) {
             let remaining = deadline.duration_since_saturating(TimePoint::now())
             case remaining.is_zero() { ret Pass(val=false) }
-            let timespec = CTimespec(sec=remaining.seconds, nsec=remaining.nanoseconds)
+            let timespec = sppc::CTimespec(sec=remaining.seconds, nsec=remaining.nanoseconds)
             let err = sppc::pthread_cond_timedwait(&self.handle, &mutex.handle, 0, &timespec)
             case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
         }
