@@ -109,7 +109,7 @@ fun yield_now() -> Void {
 sup [R] JoinHandle[R] {
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun detach(self) -> Res[Void, ThreadErr] {
+    fun detach(mut self) -> Res[Void, ThreadErr] {
         # Detach the thread using the sppc threading API.
         let err = sppc::pthread_detach(&self.handle)
         case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
