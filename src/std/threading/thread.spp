@@ -119,7 +119,7 @@ sup [R] JoinHandle[R] {
     !versioned(base="1.0.0", new="1.0.0")
     fun join(self) -> Res[R, ThreadErr] {
         # Join the thread using the sppc threading API.
-        let err = sppc::thread_join(self.handle)
+        let err = sppc::pthread_join(self.handle)
         case err != 0 { ret Fail(err=ThreadErr(msg="Failed to join thread")) }
         ret Pass(val=R()) # Todo: get the value, maybe + transmute?
     }
@@ -130,7 +130,7 @@ sup [R] JoinHandle[R] ext Eq {
     !versioned(base="1.0.0", new="1.0.0")
     fun eq(&self, that: &Self) -> Bool {
         # Compare thread IDs for equality.
-        let err = sppc::thread_equal(self.handle, that.handle)
+        let err = sppc::pthread_equal(self.handle, that.handle)
         ret err != 0
     }
 }
@@ -140,6 +140,6 @@ sup [R] JoinHandle[R] ext Del {
     !versioned(base="1.0.0", new="1.0.0")
     fun del(&mut self) -> Void {
         # Ensure the thread is detached before deletion.
-        sppc::thread_detach(self.handle)
+        sppc::pthread_detach(self.handle)
     }
 }
