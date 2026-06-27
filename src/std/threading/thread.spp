@@ -112,7 +112,7 @@ sup [R] JoinHandle[R] {
     fun detach(self) -> Res[Void, ThreadErr] {
         # Detach the thread using the sppc threading API.
         let err = sppc::pthread_detach(&self.handle)
-        case err != 0 { ret Fail(err=ThreadErr(msg="Failed to detach thread")) }
+        case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
         self.detached = true
         ret Pass[Void]()
     }
@@ -122,7 +122,7 @@ sup [R] JoinHandle[R] {
     fun join(self) -> Res[R, ThreadErr] {
         # Join the thread using the sppc threading API.
         let err = sppc::pthread_join(&self.handle)
-        case err != 0 { ret Fail(err=ThreadErr(msg="Failed to join thread")) }
+        case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
         ret Pass(val=R()) # Todo: get the value, maybe + transmute?
     }
 }
