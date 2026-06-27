@@ -85,7 +85,7 @@ fun spawn[Out, F: FunMut[(), Void]](function: F) -> Res[JoinHandle[Out], ThreadE
 
     let mut handle = 0_u64
     let err = sppc::pthread_create(function, &mut handle)
-    case err != 0 { ret Fail(err=ThreadErr(msg="Failed to spawn thread")) }
+    case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
     ret Pass(val=JoinHandle[Out](handle))
 }
 
