@@ -64,6 +64,7 @@ sup ThreadErr {
 !versioned(base="1.0.0", new="1.0.0")
 cls JoinHandle[Out] {
     !package handle: U64
+    !private detached: Bool
 }
 
 !public
@@ -112,6 +113,7 @@ sup [R] JoinHandle[R] {
         # Detach the thread using the sppc threading API.
         let err = sppc::pthread_detach(&self.handle)
         case err != 0 { ret Fail(err=ThreadErr(msg="Failed to detach thread")) }
+        self.detached = true
         ret Pass[Void]()
     }
 
@@ -140,6 +142,6 @@ sup [R] JoinHandle[R] ext Del {
     !versioned(base="1.0.0", new="1.0.0")
     fun del(&mut self) -> Void {
         # Ensure the thread is detached before deletion.
-        sppc::pthread_detach(&self.handle)
+        case self.detached.not { sppc::pthread_detach(&self.handle) }
     }
 }
