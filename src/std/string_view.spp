@@ -497,7 +497,7 @@ sup StrView {
         case self.is_empty() { ret }
 
         let mut idx = self.len()
-        loop idx > 0 {
+        loop idx > 0_uz {
             let c = self.chars().nth(idx)
 
             # Flow type the C from Opt[Char] into Char, and set the
