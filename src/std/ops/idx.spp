@@ -6,8 +6,8 @@ use std::view::View
 
 !public cls IndexMut[T, I] { }
 !public cls IndexRef[T, I] { }
-!public cls SliceRef[I] { }
-!public cls SliceMut[I] { }
+!public cls SliceRef[V, I] { }
+!public cls SliceMut[V, I] { }
 
 # Allow the use of the "[mut n]" operator.
 sup [T, I] IndexMut[T, I] {
@@ -24,15 +24,15 @@ sup [T, I] IndexRef[T, I] {
 }
 
 # Allow the use of the "[n to m]" operator.
-sup [I] SliceRef[I] {
+sup [V, I] SliceRef[V, I] {
     !public
     !abstract_method
-    cor slice_ref(&self, from: I, into: I) -> GenOnce[&Self] { }
+    cor slice_ref(&self, from: I, into: I) -> GenOnce[&V] { }
 }
 
 # Allow the use of the "[mut n to m]" operator.
-sup [I] SliceMut[I] {
+sup [V, I] SliceMut[V, I] {
     !public
     !abstract_method
-    cor slice_mut(&mut self, from: I, into: I) -> GenOnce[&mut Self] { }
+    cor slice_mut(&mut self, from: I, into: I) -> GenOnce[&mut V] { }
 }

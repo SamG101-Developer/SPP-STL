@@ -560,16 +560,16 @@ sup StrView ext Eq {
     }
 }
 
-sup StrView ext SliceRef[USize] {
+sup StrView ext SliceRef[StrView, USize] {
     !intrinsic(name="std.string_view.StrView.slice_ref")
     !versioned(base="1.0.0", new="1.0.0")
-    cor slice_ref(&self, from: USize, into: USize) -> GenOnce[&Self] { }
+    cor slice_ref(&self, from: USize, into: USize) -> GenOnce[&StrView] { }
 }
 
-sup StrView ext SliceMut[USize] {
+sup StrView ext SliceMut[StrView, USize] {
     !intrinsic(name="std.string_view.StrView.slice_mut")
     !versioned(base="1.0.0", new="1.0.0")
-    cor slice_mut(&mut self, from: USize, into: USize) -> GenOnce[&Self] { }
+    cor slice_mut(&mut self, from: USize, into: USize) -> GenOnce[&mut StrView] { }
 }
 
 sup U8 {
