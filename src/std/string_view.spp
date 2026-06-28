@@ -5,6 +5,7 @@ use std::annotations::versioned
 use std::boolean::Bool
 use std::char::Char
 use std::copy::Copy
+use std::function::FunRef
 use std::generator::Gen
 use std::generator::GenOnce
 use std::iterator::Iterator
