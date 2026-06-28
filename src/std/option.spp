@@ -506,7 +506,8 @@ sup [T] Opt[T] {
 
         # Pattern match and replace the value if this is `Some`,
         # otherwise set the value to `Some(val)` and return `None`.
-        ret case self is Some[T](&mut val as old_val) {
+        # todo: test if this errors when missing "mut" on "val" in the pattern match.
+        ret case self is Some[T](mut val as old_val) {
             std::mem::ops::swap(&mut old_val, &mut val)
             Some(val=old_val)
         }
