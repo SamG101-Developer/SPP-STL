@@ -83,7 +83,7 @@ sup StrView {
 
         # Loop forwards until we find a valid character boundary.
         loop idx < self.length {
-            case self.view()[i].is_utf8_char_boundary() { ret idx }
+            case self[i].is_utf8_char_boundary() { ret idx }
             idx += 1_uz
         }
     }
@@ -122,6 +122,25 @@ sup StrView {
         # characters, but they are not guaranteed to be valid UTF-8 on their own. This is the same as iterating over a
         # `Vec[U8]` type, for example.
         # @ret: An iterator over the bytes of this `StrView`.
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    !intrinsic(name="std.string_view.StrView.bytes_ref")
+    cor bytes_ref(&self) -> Iterator[&U8] {
+        # The `bytes_ref` method returns an iterator over immutable borrows of the bytes of this `StrView`. This method
+        # will not typically be used, but is provided as the mirror of `bytes_mut`, which will often be used.
+        # @ret: An iterator over immutable borrows to the bytes of this `StrView`.
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    !intrinsic(name="std.string_view.StrView.bytes_mut")
+    cor bytes_mut(&mut self) -> Iterator[&mut U8] {
+        # The `bytes_mut` method returns an iterator over mutable borrows of the bytes of this `StrView`. This method
+        # will be used when mutating the bytes of the string, such as when converting to uppercase or lowercase
+        # in-place.
+        # @ret: An iterator over mutable borrows to the bytes of this `StrView`.
     }
 
     !public
@@ -419,7 +438,7 @@ sup StrView {
         # The `make_uppercase` method converts this `StrView` to uppercase in-place. This is a mutator method, and it
         # modifies the string directly.
 
-        loop byte in self.view_mut_bytes() {
+        loop byte in self.bytes_mut() {
             byte.make_ascii_uppercase()
         }
     }
@@ -430,7 +449,7 @@ sup StrView {
         # The `make_lowercase` method converts this `StrView` to lowercase in-place. This is a mutator method, and it
         # modifies the string directly.
 
-        loop byte in self.view_mut_bytes() {
+        loop byte in self.bytes_mut() {
             byte.make_ascii_lowercase()
         }
     }
@@ -446,29 +465,29 @@ sup StrView {
         # @ret: A new `Str` with all occurrences of `from` replaced with `into`.
         # @todo: Implement this (issue with view/strview)
 
-#         # Build the initial string with capacity.
-#         let mut result = Str::new_with_capacity(self.length)
-#         let mut start = 0_uz
-#
-#         # Loop until we run out of occurrences of `from`.
-#         loop true {
-#
-#             # Create a substring slice, and find the next `from` instance.
-#             let substr = self[start to self.length]
-#             let idx = substr.find(from)
-#             case idx.is_none() { exit }
-#
-#             # Append the part of the string before the `from` instance,
-#             # then the `into` string, and then update the start position.
-#             let pos = idx.unwrap()
-#             result.append_str(self[start to start + pos])
-#             result.append_str(into)
-#             start += pos + from.length
-#         }
-#
-#         # Append the remainder of the string after the last `from` instance.
-#         result.append_str(self[start to self.length])
-#         ret result
+        #         # Build the initial string with capacity.
+        #         let mut result = Str::new_with_capacity(self.length)
+        #         let mut start = 0_uz
+        #
+        #         # Loop until we run out of occurrences of `from`.
+        #         loop true {
+        #
+        #             # Create a substring slice, and find the next `from` instance.
+        #             let substr = self[start to self.length]
+        #             let idx = substr.find(from)
+        #             case idx.is_none() { exit }
+        #
+        #             # Append the part of the string before the `from` instance,
+        #             # then the `into` string, and then update the start position.
+        #             let pos = idx.unwrap()
+        #             result.append_str(self[start to start + pos])
+        #             result.append_str(into)
+        #             start += pos + from.length
+        #         }
+        #
+        #         # Append the remainder of the string after the last `from` instance.
+        #         result.append_str(self[start to self.length])
+        #         ret result
         ret Str::from("")
     }
 
