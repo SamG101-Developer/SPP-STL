@@ -498,7 +498,7 @@ sup StrView {
 
         let mut idx = self.len()
         loop idx > 0_uz {
-            let c = self.chars().nth(idx)
+            let c = self.chars().nth(idx).unwrap()
 
             # Flow type the C from Opt[Char] into Char, and set the
             # characters into their inverted positions.
