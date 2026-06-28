@@ -333,7 +333,7 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    cor trim(&self) -> GenOnce[&View[U8]] {
+    cor trim(&self) -> GenOnce[&StrView] {
         #
         # @ret:
 
@@ -344,7 +344,7 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun trim_start(&self) -> GenOnce[&View[U8]] {
+    fun trim_start(&self) -> GenOnce[&StrView] {
         # The `trim_start` method returns a view of this `StrView` with all leading whitespace removed. This is a
         # non-mutating method, and it does not modify the original string.
         # @ret: A view of this `StrView` with all leading whitespace removed.
@@ -355,7 +355,7 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun trim_end(&self) -> GenOnce[&View[U8]] {
+    fun trim_end(&self) -> GenOnce[&StrView] {
         # The `trim_end` method returns a view of this `StrView` with all trailing whitespace removed. This is a
         # non-mutating method, and it does not modify the original string.
         # @ret: A view of this `StrView` with all trailing whitespace removed.
@@ -366,7 +366,7 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    cor trim_prefix(&self, prefix: &StrView) -> GenOnce[&View[U8]] {
+    cor trim_prefix(&self, prefix: &StrView) -> GenOnce[&StrView] {
         # If this `StrView` starts with the given `prefix`, return a view of this string with the prefix removed.
         # Otherwise, return this string unchanged.
         # @let prefix: The `StrView` prefix to remove from this string if it is present.
@@ -378,7 +378,7 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    cor trim_suffix(&self, suffix: &StrView) -> GenOnce[&View[U8]] {
+    cor trim_suffix(&self, suffix: &StrView) -> GenOnce[&StrView] {
         # If this `StrView` ends with the given `suffix`, return a view of this string with the suffix removed.
         # Otherwise, return this string unchanged.
         # @let suffix: The `StrView` suffix to remove from this string if it is present.
@@ -390,7 +390,7 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    cor trim_circumfix(&self, prefix: &StrView, suffix: &StrView) -> GenOnce[&View[U8]] {
+    cor trim_circumfix(&self, prefix: &StrView, suffix: &StrView) -> GenOnce[&StrView] {
         # If this `StrView` starts with the given `prefix` and ends with the given `suffix`, return a view of this
         # string with both the prefix and suffix removed. Otherwise, return this string unchanged.
         # @let prefix: The `StrView` prefix to remove from this string if it is present at the start.
@@ -560,16 +560,16 @@ sup StrView ext Eq {
     }
 }
 
-sup StrView ext SliceRef[U8, USize] {
+sup StrView ext SliceRef[USize] {
     !intrinsic(name="std.string_view.StrView.slice_ref")
     !versioned(base="1.0.0", new="1.0.0")
-    cor slice_ref(&self, from: USize, into: USize) -> GenOnce[&View[U8]] { }
+    cor slice_ref(&self, from: USize, into: USize) -> GenOnce[&Self] { }
 }
 
-sup StrView ext SliceMut[U8, USize] {
+sup StrView ext SliceMut[USize] {
     !intrinsic(name="std.string_view.StrView.slice_mut")
     !versioned(base="1.0.0", new="1.0.0")
-    cor slice_mut(&mut self, from: USize, into: USize) -> GenOnce[&mut View[U8]] { }
+    cor slice_mut(&mut self, from: USize, into: USize) -> GenOnce[&Self] { }
 }
 
 sup U8 {

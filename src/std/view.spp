@@ -240,14 +240,14 @@ sup [T] View[T] ext RevIterMut[T] {
     cor reverse_iter_mut(&mut self) -> Iterator[&mut T] { }
 }
 
-sup [T] View[T] ext SliceRef[T, USize] {
+sup [T] View[T] ext SliceRef[USize] {
     !intrinsic(name="std.view.View.slice_ref")
     !versioned(base="1.0.0", new="1.0.0")
-    cor slice_ref(&self, from: USize, into: USize) -> GenOnce[&View[T]] { }
+    cor slice_ref(&self, from: USize, into: USize) -> GenOnce[&Self] { }
 }
 
-sup [T] View[T] ext SliceMut[T, USize] {
+sup [T] View[T] ext SliceMut[USize] {
     !intrinsic(name="std.view.View.slice_mut")
     !versioned(base="1.0.0", new="1.0.0")
-    cor slice_mut(&mut self, from: USize, into: USize) -> GenOnce[&mut View[T]] { }
+    cor slice_mut(&mut self, from: USize, into: USize) -> GenOnce[&mut Self] { }
 }
