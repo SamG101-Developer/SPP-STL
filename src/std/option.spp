@@ -570,7 +570,7 @@ sup [T] Opt[T] {
         # containing a tuple of the values if they are both `Some`,
         # otherwise return `None`.
         ret case (self, that) of {
-            is (Some[T](val as val1), Some[U](val as val2)) { Some((val1, val2)) }
+            is (Some[T](val as val1), Some[U](val as val2)) { Some(val=(val1, val2)) }
             else { None }
         }
     }
