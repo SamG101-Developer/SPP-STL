@@ -160,7 +160,7 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun find_if[F: FunRef[(Char), Bool]](&self, predicate: F) -> Opt[USize] {
+    fun find_if[F: FunRef[(Char,), Bool]](&self, predicate: F) -> Opt[USize] {
         # The `find_if` method searches for the first character in this `StrView` that satisfies the given predicate and
         # returns the byte index of that character if found, or `None` if not found.
         # @type F: The type of the predicate function. It must be a function type that takes a `Char` and returns a
@@ -192,7 +192,7 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun rfind_if[F: FunRef[(Char), Bool]](&self, predicate: F) -> Opt[USize] {
+    fun rfind_if[F: FunRef[(Char,), Bool]](&self, predicate: F) -> Opt[USize] {
         #
         # @type F:
         # @let predicate:
