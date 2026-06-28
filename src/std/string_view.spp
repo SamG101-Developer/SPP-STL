@@ -362,7 +362,7 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    cor lines(&self) -> Iterator[&StrView] {
+    fun lines(&self) -> Iterator[&StrView] {
         #
         # @ret:
 
