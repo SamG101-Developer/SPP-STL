@@ -495,7 +495,7 @@ sup [T] Opt[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun replace(&mut self, val: T) -> Opt[T] {
+    fun replace(&mut self, mut val: T) -> Opt[T] {
         # The `replace` method replaces the value inside this optional with the provided value, and returns the old
         # value wrapped in `Some`. If this optional is `None`, then `replace` simply sets the value to `Some(val)` and
         # returns `None`. This is a convenient method for updating the value inside an optional, while also retrieving
