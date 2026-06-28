@@ -546,7 +546,7 @@ sup [T] Opt[T] {
         # Pattern match and take the value if this is `Some` and
         # the predicate returns true, otherwise return `None`.
         ret case self of {
-            is Some[T](val) { case pred(&val) { self.take() } else { None } }
+            is Some[T](val) { case pred(&val) { val } else { None } }
             else { None }
         }
     }
