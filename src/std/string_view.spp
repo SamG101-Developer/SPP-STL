@@ -375,7 +375,7 @@ sup StrView {
 
         let start = self.find_if((c: Char) c.is_whitespace().not).unwrap_or(self.length)
         let end = self.rfind_if((c: Char) c.is_whitespace().not).map((i: USize) i + 1_uz).unwrap_or(start)
-        ret self[start to end]
+        gen self[start to end]
     }
 
     !public
@@ -386,7 +386,7 @@ sup StrView {
         # @ret: A view of this `StrView` with all leading whitespace removed.
 
         let start = self.find_if((c: Char) c.is_whitespace().not).unwrap_or(self.length)
-        ret self[start to self.length]
+        gen self[start to self.length]
     }
 
     !public
@@ -397,7 +397,7 @@ sup StrView {
         # @ret: A view of this `StrView` with all trailing whitespace removed.
 
         let end = self.rfind_if((c: Char) c.is_whitespace().not).map((i: USize) i + 1_uz).unwrap_or(0_uz)
-        ret self[0_uz to end]
+        gen self[0_uz to end]
     }
 
     !public
