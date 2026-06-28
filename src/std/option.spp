@@ -649,7 +649,7 @@ sup [T, U] Opt[(T, U)] {
         # each value from the tuple inside the optional.
         ret case self of {
             is Some[(T, U)](val=(val1, val2)) { (Some(val=val1), Some(val=val2)) }
-            is None() { (None, None) }
+            else { (None, None) }
         }
     }
 }
