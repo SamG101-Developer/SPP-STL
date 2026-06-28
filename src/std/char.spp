@@ -47,6 +47,43 @@ sup Char {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
+    fun encode_utf8(&self, buffer: &mut View[U8]) -> U32 {
+        # Encode this character into `UTF-8` and write it into the provided buffer. The buffer should have space for at
+        # least 4 `U8` values.
+        # @let buffer: A mutable reference to an array of 4 `U8` values where the `UTF-8` encoding will be written.
+        # @ret: The number of `U8` values written to the buffer (1, 2, 3, or 4).
+
+        # Handle the 1-byte UTF-8 encoding case.
+        case self.inner <= 0x7F_u32 {
+            buffer[0_uz]@ = U8::from(self.inner)
+            ret 1_u32
+        }
+
+        # Handle the 2-byte UTF-8 encoding case.
+        case self.inner <= 0x7FF_u32 {
+            buffer[mut 0_uz]@ = U8::from((self.inner >> 6_u32) | 0xC0_u32)
+            buffer[mut 1_uz]@ = U8::from((self.inner & 0x3F_u32) | 0x80_u32)
+            ret 2_u32
+        }
+
+        # Handle the 3-byte UTF-8 encoding case.
+        case self.inner <= 0xFFFF_u32 {
+            buffer[mut 0_uz]@ = U8::from((self.inner >> 12_u32) | 0xE0_u32)
+            buffer[mut 1_uz]@ = U8::from(((self.inner >> 6_u32) & 0x3F_u32) | 0x80_u32)
+            buffer[mut 2_uz]@ = U8::from((self.inner & 0x3F_u32) | 0x80_u32)
+            ret 3_u32
+        }
+
+        # Handle the 4-byte UTF-8 encoding case.
+        buffer[mut 0_uz]@ = U8::from((self.inner >> 18_u32) | 0xF0_u32)
+        buffer[mut 1_uz]@ = U8::from(((self.inner >> 12_u32) & 0x3F_u32) | 0x80_u32)
+        buffer[mut 2_uz]@ = U8::from(((self.inner >> 6_u32) & 0x3F_u32) | 0x80_u32)
+        buffer[mut 3_uz]@ = U8::from((self.inner & 0x3F_u32) | 0x80_u32)
+        ret 4_u32
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun encode_utf16(&self, buffer: &mut View[U16]) -> U32 {
         # Encode this character into `UTF-16` and write it into the provided buffer. The buffer should have space for at
         # least 2 `U16` values.

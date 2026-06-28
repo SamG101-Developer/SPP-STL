@@ -505,7 +505,7 @@ sup StrView {
             case c is Char(..) {
                 let char_len = USize::from(c.len_utf8())
                 let start = self.len() - idx
-                self[start to start + char_len]@ = c.encode_utf8()
+                c.encode_utf8(self[mut start to start + char_len])
                 idx -= char_len
             }
         }
