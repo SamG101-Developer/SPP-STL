@@ -526,11 +526,20 @@ sup StrView {
             case c is Char(..) {
                 let char_len = USize::from(c.len_utf8())
                 let start = self.len() - idx
-                c.encode_utf8(self[mut start to start + char_len])
+                c.encode_utf8(self[mut start to start + char_len].view())
                 idx -= char_len
             }
         }
+    }
 
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    !intrinsic(name="std.string_view.StrView.view")
+    cor view(&self) -> GenOnce[View[U8]] {
+        # The `view` method returns a view of the bytes of this `StrView`. This is a non-mutating method, and it does not
+        # modify the original string. The returned view is valid for the lifetime of this `StrView`, and it is guaranteed
+        # to be null-terminated.
+        # @ret: A view of the bytes of this `StrView`.
     }
 }
 
