@@ -380,7 +380,7 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun trim_start(&self) -> GenOnce[&StrView] {
+    cor trim_start(&self) -> GenOnce[&StrView] {
         # The `trim_start` method returns a view of this `StrView` with all leading whitespace removed. This is a
         # non-mutating method, and it does not modify the original string.
         # @ret: A view of this `StrView` with all leading whitespace removed.
@@ -391,7 +391,7 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun trim_end(&self) -> GenOnce[&StrView] {
+    cor trim_end(&self) -> GenOnce[&StrView] {
         # The `trim_end` method returns a view of this `StrView` with all trailing whitespace removed. This is a
         # non-mutating method, and it does not modify the original string.
         # @ret: A view of this `StrView` with all trailing whitespace removed.
