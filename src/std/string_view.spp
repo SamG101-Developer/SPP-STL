@@ -446,7 +446,7 @@ sup StrView {
         # @ret: A new `Str` with all occurrences of `from` replaced with `into`.
 
         # Build the initial string with capacity.
-        let mut result = Str::with_capacity(self.length)
+        let mut result = Str::new_with_capacity(self.length)
         let mut start = 0_uz
 
         # Loop until we run out of occurrences of `from`.
@@ -480,7 +480,7 @@ sup StrView {
 
         # Create a string with capacity, and continuously insert
         # the characters at the start of the string.
-        let mut result = Str::with_capacity(self.length)
+        let mut result = Str::new_with_capacity(self.length)
         result.make_reverse()
         ret result
     }
