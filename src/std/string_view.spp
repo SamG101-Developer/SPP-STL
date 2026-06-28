@@ -319,7 +319,7 @@ sup StrView {
         # @ret:
 
         let start = self.chars().position((c: Char) c.is_whitespace().not).unwrap_or(self.length)
-        let end = self.chars().rposition((c: Char) c.is_whitespace().not).map((i: USize) i + 1).unwrap_or(start)
+        let end = self.chars().rposition((c: Char) c.is_whitespace().not).map((i: USize) i + 1_uz).unwrap_or(start)
         ret self[start to end]
     }
 
@@ -341,7 +341,7 @@ sup StrView {
         # non-mutating method, and it does not modify the original string.
         # @ret: A view of this `StrView` with all trailing whitespace removed.
 
-        let end = self.chars().rposition((c: Char) c.is_whitespace().not).map((i: USize) i + 1).unwrap_or(0_uz)
+        let end = self.chars().rposition((c: Char) c.is_whitespace().not).map((i: USize) i + 1_uz).unwrap_or(0_uz)
         ret self[0_uz to end]
     }
 
