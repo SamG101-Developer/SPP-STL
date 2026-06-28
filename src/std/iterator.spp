@@ -349,4 +349,31 @@ sup [T] Iterator[T] {
         # iterator and calling the function for each item.
         loop item in self { func(&item) }
     }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun nth(self, n: USize) -> Opt[T] {
+        # The `nth` method is a function that takes an iterator and an index `n`, and returns an optional value of the
+        # item produced by the iterator at the specified index. The method uses a loop to iterate through the items of
+        # the original iterator, and keeps track of the current index. If the current index matches the specified index
+        # `n`, the method returns `Some(val=item)`, where `item` is the value produced by the iterator at that index. If
+        # the loop completes without reaching the specified index, the method returns `None`.
+        # @let n: The zero-based index of the item to retrieve from the iterator. The method will iterate through the
+        # items produced by the original iterator until it reaches this index, and will return the item at that index if
+        # it exists.
+        # @ret: An optional value of type `Opt[T]` that contains the item produced by the iterator at the specified
+        # index. If such an item exists, the method returns `Some(val=item)`, where `item` is the value produced by the
+        # iterator at that index. If no such item exists (i.e., if `n` is greater than or equal to the number of items
+        # produced by the iterator), the method returns `None`.
+
+        # Retrieve the item at the specified index by iterating through
+        # the entire iterator and keeping track of the current index,
+        # returning the item when a match is found.
+        let mut index = 0_uz
+        loop item in self {
+            case index == n { ret Some(val=item) }
+            index += 1_uz
+        }
+        ret None
+    }
 }
