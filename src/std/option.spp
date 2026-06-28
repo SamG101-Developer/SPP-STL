@@ -317,7 +317,7 @@ sup [T] Opt[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun map_or_else[U, D: FunMov[(), U], F: FunMov[(T,), U]](self, default: D, func: F) -> U {
+    fun map_or_else[U, D: FunMov[(), U], F: FunMov[(T,), U]](self, default: D, f: F) -> U {
         # The `map_or_else` method checks if this optional contains a value, and if so, applies the function to that
         # value and returns the result. If this optional is `None`, then `map_or_else` returns the result of invoking
         # the provided default function to get the default value. This is a convenient method for transforming the value
