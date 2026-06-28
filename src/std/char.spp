@@ -4,6 +4,7 @@ use std::boolean::Bool
 use std::cast::From
 use std::cast::TryFrom
 use std::number::S32
+use std::number::U8
 use std::number::U16
 use std::number::U32
 use std::number::USize
