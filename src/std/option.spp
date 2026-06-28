@@ -506,7 +506,7 @@ sup [T] Opt[T] {
 
         # Pattern match and replace the value if this is `Some`,
         # otherwise set the value to `Some(val)` and return `None`.
-        ret case self is Some[T](old_val) {
+        ret case self is Some[T](val as old_val) {
             self@ = Some(val)
             Some(val=old_val)
         }
@@ -527,7 +527,7 @@ sup [T] Opt[T] {
         # Pattern match and take the value if this is `Some`, otherwise
         # return `None`.
         ret case self of {
-            is Some[T](val) { self }
+            is Some[T](..) { self }
             else { None }
         }
     }
