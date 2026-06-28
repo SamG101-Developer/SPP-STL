@@ -333,7 +333,7 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    cor trim(&self) -> GenOnce[&StrView] {
+    cor trim(&self) -> GenOnce[&View[U8]] {
         #
         # @ret:
 
@@ -532,21 +532,6 @@ sup StrView {
         }
 
     }
-
-    !public
-    !intrinsic(name="std.string_view.StrView.view")
-    !versioned(base="1.0.0", new="1.0.0")
-    cor view(self) -> GenOnce[&View[Char]] { }
-
-    !public
-    !intrinsic(name="std.string_view.StrView.view_bytes")
-    !versioned(base="1.0.0", new="1.0.0")
-    cor view_bytes(self) -> GenOnce[&View[U8]] { }
-
-    !public
-    !intrinsic(name="std.string_view.StrView.view_mut_bytes")
-    !versioned(base="1.0.0", new="1.0.0")
-    cor view_mut_bytes(&mut self) -> GenOnce[&mut View[U8]] { }
 }
 
 sup StrView ext Eq {
