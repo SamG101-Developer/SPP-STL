@@ -502,7 +502,7 @@ sup StrView {
 
             # Flow type the C from Opt[Char] into Char, and set the
             # characters into their inverted positions.
-            case c is Char() {
+            case c is Char(..) {
                 let char_len = c.len_utf8()
                 let start = self.len() - idx
                 self[start to start + char_len]@ = c.encode_utf8()
