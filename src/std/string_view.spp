@@ -444,30 +444,32 @@ sup StrView {
         # @let from: The `StrView` to replace in this `StrView`.
         # @let into: The `StrView` to replace `from` with in this `StrView`.
         # @ret: A new `Str` with all occurrences of `from` replaced with `into`.
+        # @todo: Implement this (issue with view/strview)
 
-        # Build the initial string with capacity.
-        let mut result = Str::new_with_capacity(self.length)
-        let mut start = 0_uz
-
-        # Loop until we run out of occurrences of `from`.
-        loop true {
-
-            # Create a substring slice, and find the next `from` instance.
-            let substr = self[start to self.length]
-            let idx = substr.find(from)
-            case idx.is_none() { exit }
-
-            # Append the part of the string before the `from` instance,
-            # then the `into` string, and then update the start position.
-            let pos = idx.unwrap()
-            result.append_str(self[start to start + pos])
-            result.append_str(into)
-            start += pos + from.length
-        }
-
-        # Append the remainder of the string after the last `from` instance.
-        result.append_str(self[start to self.length])
-        ret result
+#         # Build the initial string with capacity.
+#         let mut result = Str::new_with_capacity(self.length)
+#         let mut start = 0_uz
+#
+#         # Loop until we run out of occurrences of `from`.
+#         loop true {
+#
+#             # Create a substring slice, and find the next `from` instance.
+#             let substr = self[start to self.length]
+#             let idx = substr.find(from)
+#             case idx.is_none() { exit }
+#
+#             # Append the part of the string before the `from` instance,
+#             # then the `into` string, and then update the start position.
+#             let pos = idx.unwrap()
+#             result.append_str(self[start to start + pos])
+#             result.append_str(into)
+#             start += pos + from.length
+#         }
+#
+#         # Append the remainder of the string after the last `from` instance.
+#         result.append_str(self[start to self.length])
+#         ret result
+        ret Str::from("")
     }
 
     !public
