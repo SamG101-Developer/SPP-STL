@@ -595,7 +595,7 @@ sup [T] Opt[Opt[T]] {
         # Pattern match and return the value inside the inner optional if
         # the outer optional is `Some`, otherwise return `None`.
         ret case self of {
-            is Some[T](val) { val }
+            is Some[Some[T]](val) { val }
             else { None }
         }
     }
