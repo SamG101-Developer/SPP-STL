@@ -94,7 +94,7 @@ sup [T] Opt[T] {
         # Pattern match and test against the predicate.
         ret case self of {
             is Some[T](val) { pred(val) }
-            is None() { false }
+            else { false }
         }
     }
 
@@ -125,7 +125,7 @@ sup [T] Opt[T] {
         # Pattern match and test against the predicate.
         ret case self of {
             is Some[T](val) { pred(val) }
-            is None() { true }
+            else { true }
         }
     }
 
@@ -146,7 +146,7 @@ sup [T] Opt[T] {
         # `Some`, otherwise return `None`.
         ret case self of {
             is Some[T](..) { that }
-            is None() { None }
+            else { None }
         }
     }
 
@@ -171,7 +171,7 @@ sup [T] Opt[T] {
         # this is `Some`, otherwise return `None`.
         ret case self of {
             is Some[T](val) { pred(val) }
-            is None() { None }
+            else { None }
         }
     }
 
@@ -190,7 +190,7 @@ sup [T] Opt[T] {
         # otherwise return the other optional.
         ret case self of {
             is Some[T](..) { self }
-            is None() { that }
+            else { that }
         }
     }
 
@@ -210,7 +210,7 @@ sup [T] Opt[T] {
         # otherwise return the result of invoking the provided function.
         ret case self of {
             is Some[T](..) { self }
-            is None() { that() }
+            else { that() }
         }
     }
 
@@ -259,7 +259,7 @@ sup [T] Opt[T] {
         # the value if this is `Some`.
         ret case self of {
             is Some[T](val) { case pred(&val) { self } else { None } }
-            is None() { None }
+            else { None }
         }
     }
 
@@ -284,7 +284,7 @@ sup [T] Opt[T] {
         # if this is `Some`, otherwise return `None`.
         ret case self of {
             is Some[T](val) { Some(val=func(val)) }
-            is None() { None }
+            else { None }
         }
     }
 
@@ -332,7 +332,7 @@ sup [T] Opt[T] {
         # @let default: A function that is invoked to get the default value if this optional is `None`. If this optional
         # is `Some`, then `default` is not evaluated, and the result of applying `func` to the value inside is returned
         # instead.
-        # @let func: The function that is applied to the value inside the optional if it is `Some`. This function is
+        # @let f: The function that is applied to the value inside the optional if it is `Some`. This function is
         # called with the value of type `T` if the optional is `Some`, and should return a value of type `U` that is the
         # result of the transformation. If the optional is `None`, then `func` is not evaluated, and the result of
         # invoking `default()` is returned instead.
