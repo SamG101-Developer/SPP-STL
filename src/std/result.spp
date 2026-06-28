@@ -99,7 +99,7 @@ sup [T, E] Res[T, E] {
         # Pattern match and test against the predicate.
         ret case self of {
             is Pass[T](val) { pred(val) }
-            is Fail[E](..) { false }
+            else { false }
         }
     }
 
@@ -128,7 +128,7 @@ sup [T, E] Res[T, E] {
         # Pattern match and test against the predicate.
         ret case self of {
             is Fail[E](err) { pred(err) }
-            is Pass[T](..) { false }
+            else { false }
         }
     }
 
@@ -158,7 +158,7 @@ sup [T, E] Res[T, E] {
         # Pattern match and test against the predicate.
         ret case self of {
             is Pass[T](val) { pred(val) }
-            is Fail[E](..) { true }
+            else { true }
         }
     }
 
@@ -178,8 +178,8 @@ sup [T, E] Res[T, E] {
         # Pattern match and return the other result if this is
         # `Pass`, otherwise return `Fail` with the same error.
         ret case self of {
-            is Pass[T](..) { that }
             is Fail[E](err) { Fail(err) }
+            else { that }
         }
     }
 
@@ -205,6 +205,7 @@ sup [T, E] Res[T, E] {
         ret case self of {
             is Pass[T](val) { pred(val) }
             is Fail[E](err) { Fail(err) }
+            else { std::abort::unreachable() }
         }
     }
 
@@ -225,7 +226,7 @@ sup [T, E] Res[T, E] {
         # is `Pass`, otherwise return the other result.
         ret case self of {
             is Pass[T](val) { Pass(val) }
-            is Fail[E](..) { that }
+            else { that }
         }
     }
 
@@ -250,6 +251,7 @@ sup [T, E] Res[T, E] {
         ret case self of {
             is Pass[T](val) { Pass(val) }
             is Fail[E](err) { pred(err) }
+            else { std::abort::unreachable() }
         }
     }
 
@@ -274,6 +276,7 @@ sup [T, E] Res[T, E] {
         ret case self of {
             is Pass[T](val) { Pass(val=pred(val)) }
             is Fail[E](err) { Fail(err) }
+            else { std::abort::unreachable() }
         }
     }
 
@@ -299,6 +302,7 @@ sup [T, E] Res[T, E] {
         ret case self of {
             is Pass[T](val) { Pass(val) }
             is Fail[E](err) { Fail(err=pred(err)) }
+            else { std::abort::unreachable() }
         }
     }
 
@@ -355,6 +359,7 @@ sup [T, E] Res[T, E] {
         ret case self of {
             is Pass[T](val) { f(val) }
             is Fail[E](err) { default(err) }
+            else { std::abort::unreachable() }
         }
     }
 
@@ -372,6 +377,7 @@ sup [T, E] Res[T, E] {
         ret case self of {
             is Pass[T](val) { Some(val) }
             is Fail[E](..) { None }
+            else { std::abort::unreachable() }
         }
     }
 
@@ -389,6 +395,7 @@ sup [T, E] Res[T, E] {
         ret case self of {
             is Fail[E](err) { Some(val=err) }
             is Pass[T](..) { None }
+            else { std::abort::unreachable() }
         }
     }
 
@@ -444,6 +451,7 @@ sup [T, E] Res[T, E] {
         ret case self of {
             is Pass[T](val) { val }
             is Fail[E](err) { default(err) }
+            else { std::abort::unreachable() }
         }
     }
 
