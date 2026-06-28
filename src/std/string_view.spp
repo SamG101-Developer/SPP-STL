@@ -205,7 +205,7 @@ sup StrView {
 
         case self.length < needle.length { ret false }
         let end = needle.length
-        ret self[0 to end]@ == needle.view()
+        ret self[0_uz to end]@ == needle.view()
     }
 
     !public
@@ -246,7 +246,7 @@ sup StrView {
 
         # Get the position and yield each part of the string.
         let pos = self.find(sep).unwrap()
-        gen self[0 to pos]
+        gen self[0_uz to pos]
         gen self[pos + sep.length to self.length]
     }
 
@@ -385,7 +385,7 @@ sup StrView {
         # @ret: A view of this string with the suffix removed if it ends with the suffix.
 
         case self.ends_with(suffix).not { gen self }
-        gen self[0 to self.length - suffix.length]
+        gen self[0_uz to self.length - suffix.length]
     }
 
     !public
