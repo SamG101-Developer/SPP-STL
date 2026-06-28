@@ -547,7 +547,7 @@ sup StrView ext Eq {
     !versioned(base="1.0.0", new="1.0.0")
     fun eq(&self, that: &Self) -> Bool {
         #
-        # @let other:
+        # @let that:
         # @ret:
 
         case self.length != that.length { ret false }
@@ -559,7 +559,7 @@ sup StrView ext Eq {
     !versioned(base="1.0.0", new="1.0.0")
     fun ne(&self, that: &Self) -> Bool {
         #
-        # @let other:
+        # @let that:
         # @ret:
 
         case self.length != that.length { ret true }
