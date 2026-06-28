@@ -1,3 +1,4 @@
+use std::annotations::private
 use std::annotations::public
 use std::annotations::versioned
 use std::boolean::Bool
@@ -24,10 +25,18 @@ cls Char {
     # determining the properties of characters, such as their length in bytes when encoded in UTF-8. The `Char` type is
     # an essential part of the standard library for working with text and strings in the programming language.
 
-    inner: U32
+    !private inner: U32
 }
 
 sup Char {
+    #
+    !private
+    !versioned(base="1.0.0", new="1.0.0")
+    cmp whitespace: [U32; 1] = [
+        0x0009_u32, 0x000A_u32, 0x000B_u32, 0x000C_u32, 0x000D_u32, 0x0020_u32, 0x0085_u32, 0x00A0_u32, 0x1680_u32,
+        0x2000_u32, 0x2001_u32, 0x2002_u32, 0x2003_u32, 0x2004_u32, 0x2005_u32, 0x2006_u32, 0x2007_u32, 0x2008_u32,
+        0x2009_u32, 0x200A_u32, 0x2028_u32, 0x2029_u32, 0x202F_u32, 0x205F_u32, 0x3000_u32]
+
     !public
     !versioned(base="1.0.0", new="1.0.0")
     fun len_utf8(self) -> U32 {
@@ -105,6 +114,13 @@ sup Char {
         buffer[mut 0_uz]@ = U16::from((code_point >> 10_u32) | 0xD800_u32) # High surrogate
         buffer[mut 1_uz]@ = U16::from((code_point & 0x3FF_u32) | 0xDC00_u32) # Low surrogate
         ret 2_u32
+    }
+
+    fun is_whitespace(&self) -> Bool {
+        # Check if this character is a whitespace character.
+        # @ret: `true` if the character is a whitespace character, `false` otherwise.
+
+        ret Self::whitespace.contains(&self.inner)
     }
 }
 
