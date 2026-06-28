@@ -526,11 +526,10 @@ sup [T] Opt[T] {
 
         # Pattern match and take the value if this is `Some`, otherwise
         # return `None`.
-        ret case self is Some[T](val) {
-            self@ = None
-            Some(val)
+        ret case self of {
+            is Some[T](val) { self }
+            else { None }
         }
-        else { None }
     }
 
     !public
