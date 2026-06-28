@@ -48,6 +48,10 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
+    fun from_utf8_unchecked(bytes: &View[U8], str: &mut StrView) -> Void { }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun len(self) -> USize {
         # The `len` method gets length of this string in bytes. This is not necessarily the number of characters, as
         # some characters may be multiple bytes in UTF-8 encoding.
@@ -358,13 +362,13 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    cor lines(&self) -> Iterator[StrView] {
+    cor lines(&self) -> Iterator[&StrView] {
         #
         # @ret:
 
         # Map to splitting by all "\n" and then trim the trailing "\r" from each line.
-        let sep = StrView::from_utf8_unchecked(b"\n")
-        ret self.split_all(sep).map((line: Str) line.trim_end())
+        let mut sep = "\n"
+        ret self.split(sep).map((line: Str) line.trim_end())
     }
 
     !public
