@@ -89,6 +89,7 @@ sup [T, E] Res[T, E] {
         # let is_even = res.is_pass_and(|x| x % 2 == 0)
         # ```
         #
+        # @type F: The type of the predicate function that is applied to the value inside the result if it is `Pass`.
         # @let pred: The predicate function that is applied to the value inside the result if it is `Pass`. This
         # function is called with the value of type `T` if the result is `Pass`, and should return `true` if the value
         # satisfies the condition, or `false` otherwise.
@@ -117,6 +118,7 @@ sup [T, E] Res[T, E] {
         # let is_long_error = res.is_fail_and(|e| e.len() > 5)
         # ```
         #
+        # @type F: The type of the predicate function that is applied to the error inside the result if it is `Fail`.
         # @let pred: The predicate function that is applied to the error inside the result if it is `Fail`. This
         # function is called with the error of type `E` if the result is `Fail`, and should return `true` if the error
         # satisfies the condition, or `false` otherwise.
@@ -146,6 +148,7 @@ sup [T, E] Res[T, E] {
         # let is_fail_or_even = res.is_fail_or(|x| x % 2 == 0)
         # ```
         #
+        # @type F: The type of the predicate function that is applied to the value inside the result if it is `Pass`.
         # @let pred: The predicate function that is applied to the value inside the result if it is `Pass`. This
         # function is called with the value of type `T` if the result is `Pass`, and should return `true` if the value
         # satisfies the condition, or `false` otherwise.
@@ -189,6 +192,8 @@ sup [T, E] Res[T, E] {
         # any of the computations fail, but otherwise return the result of the last computation.
         # @type U: The type of the value contained in the result returned by the predicate. This can be different from
         # the type of the value in this result.
+        # @type F: The type of the predicate function that is applied to the value inside the result if it is `Pass`.
+        # This must be a function type that takes a single argument of type `T` and returns a `Res[U, E]`.
         # @let pred: The predicate function that is applied to the value inside the result if it is `Pass`. This
         # function is called with the value of type `T` if the result is `Pass`, and should return a `Res[U, E]` that is
         # the result of the computation. If the result is `Fail`, then `pred` is not evaluated, and `Fail` is returned
@@ -520,8 +525,9 @@ sup [T, E] Res[T, E] {
         # otherwise return the first `Fail` encountered.
         ret case (self, that) of {
             is (Pass[T](val as val1), Pass[U](val as val2)) { Pass(val=(val1, val2)) }
-            is (Pass[T](..),          Fail[E](err))         { Fail(err) }
-            is (Fail[E](err),         ..)                   { Fail(err) }
+            is (Pass[T](..), Fail[E](err)) { Fail(err) }
+            is (Fail[E](err), ..) { Fail(err) }
+            else { std::abort::unreachable() }
         }
     }
 }

@@ -32,3 +32,16 @@ fun abort_if(condition: Bool, msg: &StrView = "") -> Void {
 
     case condition { abort(msg) }
 }
+
+!public !inline
+!versioned(base="1.0.0", new="1.0.0")
+fun unreachable() -> ! {
+    # The `unreachable` function is a built-in function that indicates that a certain point in the code should never be
+    # reached. It is typically used in situations where the programmer knows that a certain branch of code will never be
+    # executed, such as after a `case` statement that covers all possible cases. If the `unreachable` function is
+    # called, it will terminate the program immediately, similar to `abort`. The `msg` parameter is an optional string
+    # that can be used to provide additional information about the reason for the unreachable code.
+    # @note: Once the type inference is better with case block "exhaustion checking", this will becomes a lot less used.
+
+    std::process::abort()
+}
