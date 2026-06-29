@@ -355,7 +355,7 @@ fun realloc(ptr: &mut CVoidPtr, new_size: CULong) -> CVoidPtr { }
 fun free(ptr: &mut CVoidPtr) -> CVoid { }
 
 !ffi(symbol="c_memcpy")
-fun memcpy(dest: &mut CVoidPtr, src: &CVoidPtr, size: CULong) -> CInt { }
+fun memcpy(dest: &mut CVoidPtr, src: &CVoidPtr, size: CULong, dest_index: CULong, src_index: CULong) -> CInt { }
 
 !ffi(symbol="c_memmove")
 fun memmove(dest: &mut CVoidPtr, src: &CVoidPtr, size: CULong) -> CInt { }
