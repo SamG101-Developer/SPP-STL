@@ -146,7 +146,7 @@ sup [T] View[T] {
     }
 }
 
-sup [T: Eq] View[T] {
+sup [T: Eq & Copy] View[T] {
     # The following methods require that the type `T` implements the `Eq` trait, which allows for equality comparisons.
     # These methods provide functionality for finding elements in the view or checking for their presence.
 
