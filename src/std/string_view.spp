@@ -93,6 +93,7 @@ sup StrView {
             case self.bytes().nth(idx).unwrap().is_utf8_char_boundary() { ret idx }
             idx += 1_uz
         }
+        ret self.length
     }
 
     !public
