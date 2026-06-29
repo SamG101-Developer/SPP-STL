@@ -214,7 +214,7 @@ sup StrView {
         # @ret:
 
         let mut idx = self.length
-        loop c in self.chars().rev() {
+        loop c in self.to_reverse().chars() {
             idx -= c.len_utf8()
             case predicate(c) { ret Some(val=idx) }
         }
