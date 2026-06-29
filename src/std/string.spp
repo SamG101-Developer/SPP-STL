@@ -154,7 +154,7 @@ sup [A: Alloc] Str[A] {
 
         # Forward to the constructor of `Str`, creating a new `Vec`
         # filled with the bytes from the provided string view.
-        ret Str(bytes=Vec[U8, A]::from(view.view_bytes()))
+        ret Str(bytes=Vec[U8, A]::from(view.view_ref()))
     }
 
     !public
@@ -209,7 +209,7 @@ sup [A: Alloc] Str[A] {
         # Reserve capacity in the internal vector to accommodate the
         # new bytes from the other string view.
         self.capacity_reserve(other.len())
-        self.bytes.append_many(other.view_bytes())
+        self.bytes.append_many(other.view_ref())
     }
 
     !public
