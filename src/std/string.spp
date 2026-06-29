@@ -194,7 +194,7 @@ sup [A: Alloc] Str[A] {
         # Encode the character into UTF-8 bytes and append them to the
         # internal vector.
         let mut buf = [0_u8; 4_u64]
-        let bytes_written = char.encode_utf8(&mut buf)
+        let bytes_written = USize::from(char.encode_utf8(&mut buf))
         self.bytes.append_many(buf[0_uz to bytes_written])
     }
 
