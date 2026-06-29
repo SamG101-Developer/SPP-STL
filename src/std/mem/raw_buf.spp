@@ -153,7 +153,7 @@ sup [T, A: Alloc] RawBuf[T, A] {
         # @ret:
 
         # Round up "additional" to the nearest power of two.
-        additional = additional.next_power_of_two()
+        additional = additional.next_pow_of_two()
 
         # Calculate the required capacity, checking for overflow.
         # If the calculation overflows, return an `AllocErr`.
