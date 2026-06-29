@@ -28,5 +28,7 @@ use std::num::sized_floating_point::SizedFloatingPoint
 !public type F64 = SizedFloatingPoint[64_u32]
 !public type F128 = SizedFloatingPoint[128_u32]
 
-# Can't add the FP256 until LLVM adds intrinsic support for them.
+# Todo: Can't add the FP256 until LLVM adds intrinsic support for them.
 # type F256 = SizedFloatingPoint[256_u32]
+
+# Todo: Maybe add "PSize" for pointer size?
