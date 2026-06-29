@@ -84,14 +84,14 @@ sup [T, A: Alloc] RawBuf[T, A] {
     !package
     !versioned(base="1.0.0", new="1.0.0")
     fun new_with_capacity_in(cap: USize, alloc: A) -> Self {
-        let ptr = alloc.allocate(Layout::new_for_array[T](cap))
+        let ptr = alloc.allocate(Layout::new_for_array[T](cap)).expect("Allocation failed")
         ret RawBuf(ptr, capacity=cap, alloc)
     }
 
     !package
     !versioned(base="1.0.0", new="1.0.0")
     fun new_with_capacity_zeroed_in(cap: USize, alloc: A) -> Self {
-        let ptr = alloc.allocate_zeroed(Layout::new_for_array[T](cap))
+        let ptr = alloc.allocate_zeroed(Layout::new_for_array[T](cap)).expect("Allocation failed")
         ret RawBuf(ptr, capacity=cap, alloc)
     }
 
