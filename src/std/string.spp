@@ -195,7 +195,7 @@ sup [A: Alloc] Str[A] {
         # internal vector.
         let mut buf = [0_u8; 4_u64]
         let bytes_written = char.encode_utf8(&mut buf)
-        self.bytes.append_many(buf[0 to bytes_written])
+        self.bytes.append_many(buf[0_uz to bytes_written])
     }
 
     !public
