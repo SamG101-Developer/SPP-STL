@@ -282,7 +282,7 @@ sup [A: Alloc] Str[A] {
         # @ret: A new `Str` instance that contains the concatenated data from both the current string and the provided
         # string view.
 
-        let mut result = Str()
+        let mut result = Self()
         result.append_str(&self)
         result.append_str(that)
         ret result
@@ -341,7 +341,7 @@ sup [A: Alloc] Str[A] ext From[Char] {
         # @ret: A new `Str` instance that contains the UTF-8 encoded bytes of the provided character.
 
         let length = USize::from(that.len_utf8())
-        let mut result = Str()
+        let mut result = Self()
         result.append(that)
         ret result
     }
