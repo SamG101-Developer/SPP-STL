@@ -241,17 +241,17 @@ sup [A: Alloc] Str[A] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun capacity_shrink_to_fit(&mut self) -> Void {
-        # The `capacity_shrink_to_fit` method reduces the capacity of the string's internal buffer to match its current
-        # length. This is useful for optimizing memory usage after a string has been constructed or modified, especially
-        # if it has been resized down from a larger capacity. By calling this method, any excess capacity that is not
+    fun capacity_shrink(&mut self) -> Void {
+        # The `capacity_shrink` method reduces the capacity of the string's internal buffer to match its current length.
+        # This is useful for optimizing memory usage after a string has been constructed or modified, especially if it
+        # has been resized down from a larger capacity. By calling this method, any excess capacity that is not
         # currently being used to store the string's bytes will be released, potentially freeing up memory. This can
         # help improve the efficiency of memory usage in cases where a string has been built up to a certain size and
         # then reduced, or when the final size of the string is known and there is no need for additional capacity.
 
-        # Forward to the `shrink_to_fit` method of the internal vector to
-        # reduce the capacity to match the current length.
-        self.bytes.capacity_shrink_to_fit()
+        # Forward to the `capacity_shrink_to` method of the internal
+        # vector to reduce the capacity to match the current length.
+        self.bytes.capacity_shrink()
     }
 
     !public

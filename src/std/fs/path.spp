@@ -334,7 +334,7 @@ sup Path {
 
         let mut canonical_path = Str::new_with_capacity(path_max)
         let err = sppc::realpath(&self.inner.ptr, &mut canonical_path.ptr)
-        canonical_path.capacity_shrink_to_fit()
+        canonical_path.capacity_shrink()
         ret case err == 0 { Pass(val=Path(inner=canonical_path)) } else { Fail(err=PathErr::from_errno(err)) }
     }
 
