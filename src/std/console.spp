@@ -3,6 +3,7 @@ use std::annotations::public
 use std::annotations::private
 use std::annotations::versioned
 use std::io::Read
+use std::io::BufRead
 use std::io::StreamErr
 use std::io::Write
 use std::number::U8
