@@ -168,7 +168,7 @@ sup [T, A: Alloc] RawBuf[T, A] {
 
         # Calculate the required capacity, checking for overflow.
         # If the calculation overflows, return an `AllocErr`.
-        let new_cap = len.add_checked(additional).pass_or(AllocErr)?
+        let new_cap = len.add_checked(additional).pass_or(AllocOverflowErr)?
         case new_cap <= self.capacity { ret Pass[Void]() }
         self.grow(new_cap)
     }
