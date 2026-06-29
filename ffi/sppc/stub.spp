@@ -394,22 +394,22 @@ fun strcmp(str1: &CCharPtr, str2: &CCharPtr, out: &mut CBool) -> CInt { }
 fun strcasecmp(str1: &CCharPtr, str2: &CCharPtr, out: &mut CBool) -> CInt { }
 
 !ffi(symbol="c_strchr")
-fun strchr(str: &CCharPtr, ch: CUChar, out_idx: &mut CInt) -> CInt { }
+fun strchr(str: &CCharPtr, ch: CUChar, out_idx: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_strrchr")
-fun strrchr(str: &CCharPtr, ch: CUChar, out_idx: &mut CInt) -> CInt { }
+fun strrchr(str: &CCharPtr, ch: CUChar, out_idx: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_strstr")
-fun strstr(haystack: &CCharPtr, needle: &CCharPtr, out_idx: &mut CInt) -> CInt { }
+fun strstr(haystack: &CCharPtr, needle: &CCharPtr, out_idx: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_strrstr")
-fun strrstr(haystack: &CCharPtr, needle: &CCharPtr, out_idx: &mut CInt) -> CInt { }
+fun strrstr(haystack: &CCharPtr, needle: &CCharPtr, out_idx: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_strcasestr")
-fun strcasestr(haystack: &CCharPtr, needle: &CCharPtr, out_idx: &mut CInt) -> CInt { }
+fun strcasestr(haystack: &CCharPtr, needle: &CCharPtr, out_idx: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_strpbrk")
-fun strpbrk(string: &CCharPtr, accept: &CCharPtr, out_idx: &mut CInt) -> CInt { }
+fun strpbrk(string: &CCharPtr, accept: &CCharPtr, out_idx: &mut CULong) -> CInt { }
 
 !ffi(symbol="c_strdup")
 fun strdup(str: &CCharPtr) -> CVoidPtr { }
