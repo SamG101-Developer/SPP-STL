@@ -209,7 +209,7 @@ sup [A: Alloc] Str[A] {
         # Reserve capacity in the internal vector to accommodate the
         # new bytes from the other string view.
         self.capacity_reserve(other.len())
-        self.bytes.append_many(other.view())
+        self.bytes.append_many(other.view_bytes())
     }
 
     !public
