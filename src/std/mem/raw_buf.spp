@@ -52,7 +52,7 @@ sup [T] RawBuf[T, GlobalAlloc] {
     !package
     !versioned(base="1.0.0", new="1.0.0")
     fun dangling() -> Self {
-        ret Self::new_in(GlobalAlloc)
+        ret Self::dangling_in(GlobalAlloc)
     }
 
     !package
