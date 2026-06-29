@@ -646,7 +646,7 @@ sup U8 {
         # not have the same properties as ASCII characters.
         # @ret: `true` if this byte is an ASCII character, `false` otherwise.
 
-        ret self@ < 128
+        ret self@ < 128_u8
     }
 
     !public
