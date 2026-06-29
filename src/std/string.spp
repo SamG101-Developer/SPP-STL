@@ -285,7 +285,7 @@ sup [A: Alloc] Str[A] {
         # @ret: A new `Str` instance that contains the concatenated data from both the current string and the provided
         # string view.
 
-        let mut result = Self::new_with_capacity(self.len() + other.len())
+        let mut result = Self::new_with_capacity(self.len() + that.len())
         result.append_str(self)
         result.append_str(that)
         ret result
