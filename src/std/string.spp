@@ -222,7 +222,7 @@ sup [A: Alloc] Str[A] {
 
         # Use the `pop` method of the internal vector to remove and
         # return the last byte, if it exists.
-        ret self.bytes.pop()
+        ret self.bytes.take_last()
     }
 
     !public
