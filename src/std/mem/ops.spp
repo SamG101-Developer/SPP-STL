@@ -62,11 +62,10 @@ fun align_of_val[T](value: &T) -> USize {
 
 !package !inline
 !versioned(base="1.0.0", new="1.0.0")
-fun mem_set[T](dest: &mut NonNull[T], value: U8, n: USize, dest_index: USize = 0_uz) -> Void {
+fun mem_set(dest: &mut NonNull[U8], value: U8, n: USize, dest_index: USize = 0_uz) -> Void {
     # Writes a byte value into a block of memory. This is typically used for zeroing out memory, or setting it to a
     # specific value. Whilst this might be considered "unsafe", it is never exposed to the user, as it is hidden under
     # allocators and the memory api.
-    # @type T: The type of the value to write to.
     # @let dest: A mutable reference to the value to write to.
     # @let value: The byte value to write to the memory.
     # @let n: The number of bytes to write to the memory.
