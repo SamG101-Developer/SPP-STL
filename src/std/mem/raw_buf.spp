@@ -53,12 +53,6 @@ cls RawBuf[T, A: Alloc = GlobalAlloc] {
 sup [T] RawBuf[T, GlobalAlloc] {
     !package
     !versioned(base="1.0.0", new="1.0.0")
-    fun dangling() -> Self {
-        ret Self::dangling_in(GlobalAlloc)
-    }
-
-    !package
-    !versioned(base="1.0.0", new="1.0.0")
     fun new_with_capacity(cap: USize) -> Self {
         ret Self::new_with_capacity_in(cap, GlobalAlloc)
     }
@@ -73,15 +67,6 @@ sup [T] RawBuf[T, GlobalAlloc] {
 sup [T, A: Alloc] RawBuf[T, A] {
     type Element = T
     type Allocator = A
-
-    !package
-    !versioned(base="1.0.0", new="1.0.0")
-    fun dangling_in(alloc: A) -> Self {
-        let ptr = NonNull[T]::from_addr(std::mem::ops::align_of[T]())
-            .expect("Alignment must be non-zero")
-            .cast[T]()
-        ret RawBuf(ptr, 0, alloc)
-    }
 
     !package
     !versioned(base="1.0.0", new="1.0.0")
