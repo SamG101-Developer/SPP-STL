@@ -112,8 +112,8 @@ sup [T, A: Alloc] RawBuf[T, A] {
 
         # Grow the buffer using the allocator's `grow` method,
         # and propagate arrors.
-        self.ptr = self.alloc.grow(
-            self.ptr,
+        self.alloc.grow(
+            &mut self.ptr,
             Layout::new_for_array[T](self.capacity),
             Layout::new_for_array[T](new_cap))?
 
