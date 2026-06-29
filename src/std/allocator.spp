@@ -315,7 +315,7 @@ sup GlobalAlloc ext Alloc {
         # @ret: `Pass()` if the reallocation succeeded, or an `AllocErr` on failure.
 
         let new_raw = sppc::realloc(&mut ptr.raw(), new_layout.size)
-        let new_ptr = NonNull[U8]::from_ptr(new_raw).map_err((e: NullptrErr) AllocOomErr)?
+        let mut new_ptr = NonNull[U8]::from_ptr(new_raw).map_err((e: NullptrErr) AllocOomErr)?
         std::mem::ops::mem_set(&mut new_ptr, 0_u8, new_layout.size - old_layout.size, old_layout.size)
         ptr@ = new_ptr
         ret Pass[Void]()
