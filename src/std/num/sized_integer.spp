@@ -5,6 +5,7 @@ use std::annotations::versioned
 use std::boolean::Bool
 use std::cast::From
 use std::limits::Limits
+use std::llvm::always_inline
 use std::llvm::inline
 use std::number::U8
 use std::number::U32
