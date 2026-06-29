@@ -401,7 +401,7 @@ sup [cmp w: U32] SizedIntegerUnsigned[w] {
 
     !public
     !inline
-    fun next_pow_of_2(self) -> Self {
+    fun next_pow_of_two(self) -> Self {
         case self == Self::zero() { ret Self::one() }
 
         let mut n = self - Self::one()
