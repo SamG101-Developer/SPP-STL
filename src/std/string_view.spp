@@ -215,7 +215,7 @@ sup StrView {
 
         let mut idx = self.length
         loop c in self.to_reverse().chars() {
-            idx -= c.len_utf8()
+            idx -= USize::from(c.len_utf8())
             case predicate(c) { ret Some(val=idx) }
         }
         ret None
