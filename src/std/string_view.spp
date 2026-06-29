@@ -183,6 +183,17 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
+    fun find_char(&self, needle: Char) -> Opt[USize] {
+        #
+        # @let needle:
+        # @ret:
+
+        let str = Str::from(needle)
+        ret self.find(&str)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun rfind(&self, needle: &StrView) -> Opt[USize] {
         #
         # @let needle:
@@ -212,28 +223,13 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun find_char(&self, needle: Char) -> Opt[USize] {
-        #
-        # @let needle:
-        # @ret:
-
-        let mut idx = 0_uz
-        let err = sppc::strstr(&self.ptr, &Str::from(needle), &mut idx)
-        case err != 0 { ret None }
-        ret Some(val=idx)
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
     fun rfind_char(&self, needle: Char) -> Opt[USize] {
         #
         # @let needle:
         # @ret:
 
-        let mut idx = 0_uz
-        let err = sppc::strrstr(&self.ptr, &Str::from(needle), &mut idx)
-        case err != 0 { ret None }
-        ret Some(val=idx)
+        let str = Str::from(needle)
+        ret self.rfind(&str)
     }
 
     !public
