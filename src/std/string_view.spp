@@ -722,7 +722,7 @@ sup U8 {
         # Check if this byte is an ASCII control character (between 0 and 31, or 127).
         # @ret: `true` if this byte is an ASCII control character, `false` otherwise.
 
-        ret self@ < 32 or self@ == 127
+        ret self@ < 32_u8 or self@ == 127_u8
     }
 
     !public
