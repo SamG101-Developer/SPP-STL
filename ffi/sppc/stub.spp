@@ -361,7 +361,7 @@ fun memcpy(dest: &mut CVoidPtr, src: &CVoidPtr, size: CULong, dest_index: CULong
 fun memmove(dest: &mut CVoidPtr, src: &CVoidPtr, size: CULong) -> CInt { }
 
 !ffi(symbol="c_memset")
-fun memset(dest: &mut CVoidPtr, value: CInt, size: CULong) -> CInt { }
+fun memset(dest: &mut CVoidPtr, value: CInt, size: CULong, dest_index: CULong) -> CInt { }
 
 !ffi(symbol="c_memcmp")
 fun memcmp(ptr1: &CVoidPtr, ptr2: &CVoidPtr, size: CULong, out: &mut CInt) -> CInt { }
