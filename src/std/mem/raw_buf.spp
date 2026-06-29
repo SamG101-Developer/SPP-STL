@@ -134,8 +134,8 @@ sup [T, A: Alloc] RawBuf[T, A] {
 
         # Shrink the buffer using the allocator's `shrink` method,
         # and propagate allocation arrors.
-        self.ptr = self.alloc.shrink(
-            self.ptr,
+        self.alloc.shrink(
+            &mut self.ptr,
             Layout::new_for_array[T](self.capacity),
             Layout::new_for_array[T](new_cap))?
 
