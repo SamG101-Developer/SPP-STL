@@ -65,7 +65,7 @@ sup [T] NonNull[T] {
 
         # Check if the ptr is null (addr = 0). If it is, return the
         # `Fail` state, otherwise call the inner function.
-        case ptr.addr == 0 { ret Fail(err=NullptrErr) }
+        case ptr.addr == 0_uz { ret Fail(err=NullptrErr) }
         ret Pass(val=Self::from_ptr_inner(ptr))
     }
 
