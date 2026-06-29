@@ -90,7 +90,7 @@ sup StrView {
 
         # Loop forwards until we find a valid character boundary.
         loop idx < self.length {
-            case self.bytes().nth(idx).is_utf8_char_boundary() { ret idx }
+            case self.bytes().nth(idx).unwrap().is_utf8_char_boundary() { ret idx }
             idx += 1_uz
         }
     }
