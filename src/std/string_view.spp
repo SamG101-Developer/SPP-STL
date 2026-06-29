@@ -218,7 +218,7 @@ sup StrView {
         # @ret:
 
         let mut idx = 0_uz
-        let err = sppc::strstr(&self.ptr, Str::from(needle), &mut idx)
+        let err = sppc::strstr(&self.ptr, &Str::from(needle), &mut idx)
         case err != 0 { ret None }
         ret Some(val=idx)
     }
@@ -231,7 +231,7 @@ sup StrView {
         # @ret:
 
         let mut idx = 0_uz
-        let err = sppc::strrstr(&self.ptr, Str::from(needle), &mut idx)
+        let err = sppc::strrstr(&self.ptr, &Str::from(needle), &mut idx)
         case err != 0 { ret None }
         ret Some(val=idx)
     }
@@ -267,7 +267,7 @@ sup StrView {
         # @ret:
 
         let mut idx = 0_uz
-        let err = sppc::strstr(&self.ptr, needle.ptr, &mut idx)
+        let err = sppc::strstr(&self.ptr, &needle.ptr, &mut idx)
         ret err == 0
     }
 
