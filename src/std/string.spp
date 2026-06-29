@@ -271,7 +271,7 @@ sup [A: Alloc] Str[A] {
     }
 
     !versioned(base="1.0.0", new="1.0.0")
-    fun add(self, that: &StrView) -> Str {
+    fun add(self, that: &StrView) -> Self {
         # The `add` method concatenates the current string with another string view, creating a new `Str` instance that
         # contains the combined data. This involves creating a new internal vector and copying the bytes from both the
         # current string and the provided string view into it. The allocator used for the new string will be the same as
@@ -282,7 +282,7 @@ sup [A: Alloc] Str[A] {
         # @ret: A new `Str` instance that contains the concatenated data from both the current string and the provided
         # string view.
 
-        let mut result = Self::new_with_capacity(self.len() + that.len())
+        let mut result = Str()
         result.append_str(&self)
         result.append_str(that)
         ret result
@@ -341,7 +341,7 @@ sup [A: Alloc] Str[A] ext From[Char] {
         # @ret: A new `Str` instance that contains the UTF-8 encoded bytes of the provided character.
 
         let length = USize::from(that.len_utf8())
-        let mut result = Self::new_with_capacity(length)
+        let mut result = Str()
         result.append(that)
         ret result
     }
