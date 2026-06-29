@@ -761,7 +761,7 @@ sup U8 {
         # (0x20). For non-ASCII bytes, we return the byte unchanged.
         # @ret: The lowercase version of this byte if it is ASCII, or the original byte if it is not ASCII.
 
-        ret self@ | U8::from(self.is_ascii_lowercase()) * 0x20
+        ret self@ | U8::from(self.is_ascii_lowercase()) * 0x20_u8
     }
 
     !public
@@ -771,7 +771,7 @@ sup U8 {
         # (0x20). For non-ASCII bytes, we return the byte unchanged.
         # @ret: The uppercase version of this byte if it is ASCII, or the original byte if it is not ASCII.
 
-        ret self@ ^ U8::from(self.is_ascii_uppercase()) * 0x20
+        ret self@ ^ U8::from(self.is_ascii_uppercase()) * 0x20_u8
     }
 
     !public
