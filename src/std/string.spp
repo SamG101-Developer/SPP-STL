@@ -188,7 +188,7 @@ sup [A: Alloc] Str[A] {
 
         # Determine the character's byt length and reserve capacity in
         # the internal vector to accommodate the new character's bytes.
-        let ch_len = char.len_utf8()
+        let ch_len = USize::from(char.len_utf8())
         self.capacity_reserve(ch_len)
 
         # Encode the character into UTF-8 bytes and append them to the
