@@ -286,7 +286,7 @@ sup [A: Alloc] Str[A] {
         # string view.
 
         let mut result = Self::new_with_capacity(self.len() + that.len())
-        result.append_str(self)
+        result.append_str(&self)
         result.append_str(that)
         ret result
     }
