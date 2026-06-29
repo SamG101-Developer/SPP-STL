@@ -1,6 +1,6 @@
+use std::annotations::intrinsic
 use std::annotations::package
 use std::annotations::public
-use std::annotations::intrinsic
 use std::annotations::versioned
 use std::annotations::zero_type
 use std::boolean::Bool
@@ -33,7 +33,7 @@ cls Ptr[T] {
     # @let addr: The address of the pointer. This is a compiler-added field that is used to store the raw pointer value,
     # and ise only used for the `NonNull` construction method.
 
-    addr: USize
+    !package addr: USize
 }
 
 !package
