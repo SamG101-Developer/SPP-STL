@@ -398,6 +398,20 @@ sup [cmp w: U32] SizedIntegerUnsigned[w] {
             else { intrinsics::max_val[Self]() }
         }
     }
+
+    !public
+    !inline
+    fun next_pow_of_2(self) -> Self {
+        case self == Self::zero() { ret Self::one() }
+
+        let mut n = self - Self::one()
+        let mut shift = 1_u32
+        loop shift < w {
+            n |= n >> shift
+            shift <<= 1_u32
+        }
+        ret n + Self::one()
+    }
 }
 
 sup [cmp w: U32] SizedIntegerUnsigned[w] {

@@ -146,11 +146,14 @@ sup [T, A: Alloc] RawBuf[T, A] {
 
     !package
     !versioned(base="1.0.0", new="1.0.0")
-    fun try_capacity_reserve(&mut self, len: USize, additional: USize) -> Res[Void, AllocErr] {
+    fun try_capacity_reserve(&mut self, len: USize, mut additional: USize) -> Res[Void, AllocErr] {
         #
         # @let len:
         # @let additional:
         # @ret:
+
+        # Round up "additional" to the nearest power of two.
+        additional = additional.next_power_of_two()
 
         # Calculate the required capacity, checking for overflow.
         # If the calculation overflows, return an `AllocErr`.
