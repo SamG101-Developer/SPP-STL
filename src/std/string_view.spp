@@ -368,7 +368,7 @@ sup StrView {
 
         # Map to splitting by all "\n" and then trim the trailing "\r" from each line.
         let mut sep = "\n"
-        ret self.split(sep).map((line: Str) line.trim_end())
+        ret self.split(sep).map((line: &StrView) line.trim_end())
     }
 
     !public
