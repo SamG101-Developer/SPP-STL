@@ -12,6 +12,7 @@ use std::iterator::Iterator
 use std::option::None
 use std::option::Opt
 use std::option::Some
+use std::number::S8
 use std::number::U8
 use std::number::USize
 use std::result::Res
@@ -751,7 +752,7 @@ sup U8 {
         # indicate character boundaries.
         # @ret: `true` if this byte is a valid UTF-8 character boundary, `false` otherwise.
 
-        ret S8::from(self@) >= -0x40
+        ret S8::from(self@) >= -0x40_s8
     }
 
     !public
