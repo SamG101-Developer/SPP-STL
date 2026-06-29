@@ -129,7 +129,7 @@ fun take[T](src: &mut T) -> T {
     # @let src: A mutable reference to the value to take.
     # @ret: The old value that was taken.
 
-    replace(src, T())
+    ret replace(src, T())
 }
 
 !public
