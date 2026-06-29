@@ -143,6 +143,7 @@ sup [A: Alloc] Str[A] {
     }
 
     !public
+    !intrinsic(name="std.string.Str.from[StrView]")
     !versioned(base="1.0.0", new="1.0.0")
     fun from(view: &StrView) -> Str {
         # The `from` method creates a new instance of the `Str` type from a given `StrView`. This involves copying the
@@ -151,12 +152,6 @@ sup [A: Alloc] Str[A] {
         # @let view: A reference to a `StrView` that contains the string data to be copied. The bytes from this view
         # will be used to initialize the internal vector of the new `Str` instance.
         # @ret: A new `Str` instance that contains a copy of the bytes from the provided `StrView`.
-
-        # Forward to the constructor of `Str`, creating a new `Vec`
-        # filled with the bytes from the provided string view.
-        let vec = Vec[U8, A]::new_with_capacity(view.len())
-        vec.append_from_view(view)
-        ret Str(bytes=vec)
     }
 
     !public
