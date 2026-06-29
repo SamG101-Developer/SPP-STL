@@ -603,7 +603,7 @@ sup StrView ext Eq {
 
         case self.length != that.length { ret false }
         let mut matched = false
-        sppc::strcmp(&self.ptr, that.ptr, &mut matched)
+        sppc::strcmp(&self.ptr, &that.ptr, &mut matched)
         ret matched
     }
 
@@ -615,7 +615,7 @@ sup StrView ext Eq {
 
         case self.length != that.length { ret true }
         let mut matched = false
-        sppc::strcmp(&self.ptr, that.ptr, &mut matched)
+        sppc::strcmp(&self.ptr, &that.ptr, &mut matched)
         ret matched.not
     }
 }
