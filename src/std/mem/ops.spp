@@ -72,7 +72,7 @@ fun mem_set(dest: &mut NonNull[U8], value: U8, n: USize, dest_index: USize = 0_u
     # @let ?dest_index: An optional index to start writing at, in bytes. This is typically used for writing to an offset
     # within a value, such as an array.
 
-    sppc::memset(&mut dest.raw(), value, n, dest_index)
+    sppc::memset(&mut dest.raw(), S32::from(value), n, dest_index)
 }
 
 !package !inline
