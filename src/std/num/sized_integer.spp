@@ -176,6 +176,25 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext MulAssign {
     }
 }
 
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext From[Bool] {
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(that: Bool) -> Self {
+        # The `from` method defines how to convert a boolean value to an unsigned integer type of potentially different
+        # sizes. The conversion is performed by mapping the boolean value to an unsigned integer representation. The
+        # following mapping is used:
+        # - If the boolean value is `true`, it is converted to the unsigned integer value `1`.
+        # - If the boolean value is `false`, it is converted to the unsigned integer value `0`.
+        # This conversion is useful when a boolean value needs to be represented as an unsigned integer for various
+        # purposes, such as bit manipulation or arithmetic operations.
+        # @let that: The boolean value that is being converted to the unsigned integer type.
+        # @ret: The converted unsigned integer value of the target type, which will be either `1` for `true` or `0` for
+        # `false`.
+
+        ret case that { Self::one() } else { Self::zero() }
+    }
+}
+
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
     !public
     !inline
