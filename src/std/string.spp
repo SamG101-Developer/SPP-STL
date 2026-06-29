@@ -325,7 +325,7 @@ sup [A: Alloc] Str[A] ext Clone {
         # @ret: A new `Str` instance that is a clone of the current instance, with its own separate internal buffer
         # containing the same string data.
 
-        ret Str(bytes=self.bytes.clone())
+        ret Str(bytes=self.bytes)
     }
 }
 
@@ -340,7 +340,8 @@ sup [A: Alloc] Str[A] ext From[Char] {
         # be encoded into UTF-8 bytes before being stored in the new string.
         # @ret: A new `Str` instance that contains the UTF-8 encoded bytes of the provided character.
 
-        let mut result = Self::new_with_capacity(that.len_utf8())
+        let length = USize::from(that.len_utf8())
+        let mut result = Self::new_with_capacity(length)
         result.append(that)
         ret result
     }
