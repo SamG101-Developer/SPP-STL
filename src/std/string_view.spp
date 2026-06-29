@@ -117,7 +117,7 @@ sup StrView {
         let mut idx = 0_uz
         loop c in self.chars() {
             gen (idx, c)
-            idx += c.len_utf8()
+            idx += USize::from(c.len_utf8())
         }
     }
 
@@ -178,7 +178,7 @@ sup StrView {
         let mut idx = 0_uz
         loop c in self.chars() {
             case predicate(c) { ret Some(val=idx) }
-            idx += c.len_utf8()
+            idx += USize::from(c.len_utf8())
         }
         ret None
     }
