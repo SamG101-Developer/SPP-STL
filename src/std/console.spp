@@ -131,13 +131,13 @@ sup StderrStream ext Write {
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-fun print(str: &StrView) -> Opt[Void] {
+fun print(str: &StrView) -> Opt[USize] {
     # The `print` function writes the provided string to the standard output stream without a newline. It creates a new
     # `StdoutStream` instance and uses its `write_str` method to write the string to the standard output. Generally, a
     # `print` won't fail unless the stdout stream is in a very bad state, so we use `Opt` here for simplicity.
     # @let str: The string to be printed to the standard output.
-    # @ret: An `Opt[Void]` that is `Some(Void)` if the string was successfully written to the standard output, or `None`
-    # if the write operation failed.
+    # @ret: An `Opt[USize]` that is `Some(USize)` containing the number of bytes successfully written to the standard
+    # error, or `None` if the write operation failed.
 
     # Create a new `StdoutStream` instance and write the
     # string to the standard output.
@@ -147,14 +147,14 @@ fun print(str: &StrView) -> Opt[Void] {
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-fun println(str: &StrView) -> Opt[Void] {
+fun println(str: &StrView) -> Opt[USize] {
     # The `println` function writes the provided string to the standard output stream followed by a newline. It creates
     # a new `StdoutStream` instance and uses its `write_str` method to write the string followed by a newline character
     # to the standard output. Generally, a `println` won't fail unless the stdout stream is in a very bad state, so we
     # use `Opt` here for simplicity.
     # @let str: The string to be printed to the standard output, followed by a newline.
-    # @ret: An `Opt[Void]` that is `Some(Void)` if the string was successfully written to the standard output, or `None`
-    # if the write operation failed.
+    # @ret: An `Opt[USize]` that is `Some(USize)` containing the number of bytes successfully written to the standard
+    # error, or `None` if the write operation failed.
 
     # Create a new `StdoutStream` instance and write the
     # string followed by a newline to the standard output.
@@ -165,13 +165,13 @@ fun println(str: &StrView) -> Opt[Void] {
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-fun eprint(str: &StrView) -> Opt[Void] {
+fun eprint(str: &StrView) -> Opt[USize] {
     # The `eprint` function writes the provided string to the standard error stream without a newline. It creates a new
     # `StderrStream` instance and uses its `write_str` method to write the string to the standard error. Generally, an
     # `eprint` won't fail unless the stderr stream is in a very bad state, so we use `Opt` here for simplicity.
     # @let str: The string to be printed to the standard error.
-    # @ret: An `Opt[Void]` that is `Some(Void)` if the string was successfully written to the standard error, or `None`
-    # if the write operation failed.
+    # @ret: An `Opt[USize]` that is `Some(USize)` containing the number of bytes successfully written to the standard
+    # error, or `None` if the write operation failed.
 
     # Create a new `StderrStream` instance and write the
     # string to the standard error.
@@ -181,20 +181,20 @@ fun eprint(str: &StrView) -> Opt[Void] {
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-fun eprintln(str: &StrView) -> Opt[Void] {
+fun eprintln(str: &StrView) -> Opt[USize] {
     # The `eprintln` function writes the provided string to the standard error stream followed by a newline. It creates
     # a new `StderrStream` instance and uses its `write_str` method to write the string followed by a newline character
     # to the standard error. Generally, an `eprintln` won't fail unless the stderr stream is in a very bad state, so we
     # use `Opt` here for simplicity.
     # @let str: The string to be printed to the standard error, followed by a newline.
-    # @ret: An `Opt[Void]` that is `Some(Void)` if the string was successfully written to the standard error, or `None`
-    # if the write operation failed.
+    # @ret: An `Opt[USize]` that is `Some(USize)` containing the number of bytes successfully written to the standard
+    # error, or `None` if the write operation failed.
 
     # Create a new `StderrStream` instance and write the
     # string followed by a newline to the standard error.
     let mut out = StderrStream()
     out.write_all(str.view_ref()).pass_opt()?
-    ret out.write_all(b"\n")
+    ret out.write_all(b"\n").pass_opt()
 }
 
 !public
