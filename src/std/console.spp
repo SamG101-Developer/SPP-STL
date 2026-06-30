@@ -56,10 +56,10 @@ sup StdinStream ext Read {
         # fails.
 
         # Read from the standard input fd, lockingthe global stdin mutex.
-        let mut filled = 0_uz
+        let mut filled = 0_sz
         let err = sppc::stdin_read(&mut buf.ptr, 1_uz, buf.len(), &mut filled)
         case err != 0 { ret Fail(err=StreamErr::from_errno(err)) }
-        ret Pass(val=filled)
+        ret Pass(val=USize::from(filled))
     }
 }
 
@@ -77,10 +77,10 @@ sup StdoutStream ext Write {
 
         # Write to the standard output fd, locking the global
         # stdout mutex.
-        let mut written = 0_uz
+        let mut written = 0_sz
         let err = sppc::stdout_write(&buf, 1_uz, len, &mut written)
         case err != 0 { ret Fail(err=StreamErr::from_errno(err)) }
-        ret Pass(val=written)
+        ret Pass(val=USize::from(written))
     }
 
     !versioned(base="1.0.0", new="1.0.0")
