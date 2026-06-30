@@ -67,7 +67,7 @@ use std::annotations::public
 !public cmp enosys: CInt = 38 # Invalid system call number
 !public cmp enotempty: CInt = 39 # Directory not empty
 !public cmp eloop: CInt = 40 # Too many symbolic links encountered
-!public cmp ewouldblock: CInt = EAGAIN # Operation would block
+!public cmp ewouldblock: CInt = eagain # Operation would block
 !public cmp enomsg: CInt = 42 # No message of desired type
 !public cmp eidrm: CInt = 43 # Identifier removed
 !public cmp echrng: CInt = 44 # Channel number out of range
