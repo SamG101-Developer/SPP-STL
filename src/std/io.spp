@@ -250,7 +250,7 @@ sup Write {
 
     !public
     !virtual_method
-    fun write_all(&mut self, buf: &View[U8]) -> Res[Void, StreamErr] {
+    fun write_all(&mut self, buf: &View[U8]) -> Res[USize, StreamErr] {
         # Define a byte count of how many bytes have been written so far, and the target length.
         let mut written = 0_uz
         let target = buf.len()
@@ -273,7 +273,7 @@ sup Write {
 
         # No errors have been encountered, and all bytes in the buffer
         # have been written.
-        ret Pass[Void]()
+        ret Pass(val=written)
     }
 }
 
