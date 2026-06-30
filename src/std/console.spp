@@ -111,7 +111,7 @@ sup StderrStream ext Write {
         # Write to the standard error fd, locking the global
         # stderr mutex.
         let mut written = 0_sz
-        let err = sppc::stderr_write(&buf.ptr, 1_uz, buf.len(), 2, &mut written)
+        let err = sppc::stderr_write(&buf.ptr, 1_uz, buf.len(), &mut written)
         case err != 0 { ret Fail(err=StreamErr::from_errno(err)) }
         ret Pass(val=USize::from(written))
     }
