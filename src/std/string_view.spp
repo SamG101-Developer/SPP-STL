@@ -57,7 +57,7 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun len(self) -> USize {
+    fun len(&self) -> USize {
         # The `len` method gets length of this string in bytes. This is not necessarily the number of characters, as
         # some characters may be multiple bytes in UTF-8 encoding.
         # @ret: The length of this string in bytes.
@@ -67,7 +67,7 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun is_empty(self) -> Bool {
+    fun is_empty(&self) -> Bool {
         # The `is_empty` method checks if this `StrView` is empty, meaning it has a length of 0 bytes. An empty string
         # is a valid UTF-8 string, and it is represented by a null-terminated string with no characters before the null
         # terminator.
