@@ -4,6 +4,7 @@ use std::annotations::versioned
 use std::boolean::Bool
 use std::cast::From
 use std::cast::TryFrom
+use std::copy::Copy
 use std::number::S32
 use std::number::U8
 use std::number::U16
@@ -28,6 +29,8 @@ cls Char {
     !private inner: U32
 }
 
+sup Char ext Copy { }
+
 sup Char {
     #
     !private
@@ -41,7 +44,7 @@ sup Char {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun len_utf8(self) -> U32 {
+    fun len_utf8(&self) -> U32 {
         # Return the number of bytes that this character would take up in UTF-8 encoding. Fpr example, ASCII characters
         # would return 1, while some Unicode characters might return 2, 3, or 4.
         # @ret: The number of bytes in UTF-8 encoding for this character.
