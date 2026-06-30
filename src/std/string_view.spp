@@ -281,13 +281,13 @@ sup StrView {
         # @ret:
 
         # For an empty separator, or an unfound separator, yield this string.
-        case sep.is_empty() or self.find(sep).is_none() {
+        case sep.is_empty() or self.find(&sep).is_none() {
             gen self
             ret
         }
 
         # Get the position and yield each part of the string.
-        let pos = self.find(sep).unwrap()
+        let pos = self.find(&sep).unwrap()
         gen self[0_uz to pos]
         gen self[pos + sep.length to self.length]
     }
