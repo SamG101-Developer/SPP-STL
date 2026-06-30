@@ -45,7 +45,7 @@ cls StderrStream {
 
 sup StdinStream ext Read {
     !versioned(base="1.0.0", new="1.0.0")
-    fun read(&mut self, buf: &mut View[U8]) -> Res[USize, StreamErr] {
+    fun read(&mut self, mut buf: &mut View[U8]) -> Res[USize, StreamErr] {
         # The `read` method reads data from the standard input stream into the provided buffer. It uses a special `C`
         # function defined in the `sppc` library, which is very close to the `C` `read` kernel function, but locks on a
         # global stdin pthread mutex.
