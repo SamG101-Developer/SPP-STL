@@ -120,7 +120,7 @@ sup [T] Iterator[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    cor filter[P: FunMut[(&T,), Bool]](self, predicate: P) -> Iterator[T] {
+    cor filter[P: FunMut[(&T,), Bool]](self, mut predicate: P) -> Iterator[T] {
         # The `filter` method is a coroutine that takes an iterator and a predicate function, and produces a new
         # iterator that yields only the items from the original iterator that satisfy the predicate.
         # @type P: A function type that represents the predicate function used for filtering the items. This is a
@@ -139,7 +139,7 @@ sup [T] Iterator[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    cor map[U, F: FunMut[(T,), U]](self, f: F) -> Iterator[U] {
+    cor map[U, F: FunMut[(T,), U]](self, mut f: F) -> Iterator[U] {
         # The `map` method is a coroutine that takes an iterator and a mapping function, and produces a new iterator
         # that yields the results of applying the mapping function to each item from the original iterator.
         # @type U: The type of items produced by the new iterator after applying the mapping function. This is a generic
@@ -251,7 +251,7 @@ sup [T] Iterator[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun all[F: FunMut[(T,), Bool]](self, f: F) -> Bool {
+    fun all[F: FunMut[(T,), Bool]](self, mut f: F) -> Bool {
         # The `all` method is a function that takes an iterator and a predicate function, and returns `true` if the
         # predicate returns `true` for all items produced by the iterator, and `false` otherwise. The method uses a loop
         # to iterate through the items of the original iterator, and applies the predicate function to each item. If the
@@ -276,7 +276,7 @@ sup [T] Iterator[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun any[F: FunMut[(T,), Bool]](self, f: F) -> Bool {
+    fun any[F: FunMut[(T,), Bool]](self, mut f: F) -> Bool {
         # The `any` method is a function that takes an iterator and a predicate function, and returns `true` if the
         # predicate returns `true` for at least one item produced by the iterator, and `false` otherwise. The method
         # uses a loop to iterate through the items of the original iterator, and applies the predicate function to each
@@ -301,7 +301,7 @@ sup [T] Iterator[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun find[P: FunMut[(&T,), Bool]](self, predicate: P) -> Opt[USize] {
+    fun find[P: FunMut[(&T,), Bool]](self, mut predicate: P) -> Opt[USize] {
         # The `find` method is a function that takes an iterator and a predicate function, and returns an optional index
         # of the first item produced by the iterator that satisfies the predicate. The method uses a loop to iterate
         # through the items of the original iterator, and applies the predicate function to each item. If the predicate
