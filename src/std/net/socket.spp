@@ -143,13 +143,13 @@ sup SockAddr {
         # @ret:
 
         let mut family = 0
-        sppc::sockaddr_family(storage, &mut family)
+        sppc::sockaddr_family(&storage, &mut family)
         ret case family of {
             # For IpV4, fill the octets of the IpV4Addr and the
             # port from the storage.
             == constants::af_inet4 {
                 let mut socket_address = SockV4Addr()
-                sppc::get_sockaddr_v4(storage, &mut socket_address.ip.octets.ptr, &mut socket_address.port)
+                sppc::get_sockaddr_v4(&storage, &mut socket_address.ip.octets.ptr, &mut socket_address.port)
                 socket_address
             }
 
@@ -157,7 +157,7 @@ sup SockAddr {
             # port from the storage.
             == constants::af_inet6 {
                 let mut socket_address = SockV6Addr()
-                sppc::get_sockaddr_v6(storage, &mut socket_address.ip.segments.ptr, &mut socket_address.port)
+                sppc::get_sockaddr_v6(&storage, &mut socket_address.ip.segments.ptr, &mut socket_address.port)
                 socket_address
             }
 
