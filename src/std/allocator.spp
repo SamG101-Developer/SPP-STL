@@ -185,7 +185,7 @@ sup Alloc {
         # @ret: `Pass()` if the reallocation succeeded, or an `AllocErr` on failure.
 
         let mut new_ptr = self.allocate(new_layout)?
-        std::mem::ops::mem_copy(&mut new_ptr, ptr, old_layout.size)
+        std::mem::ops::mem_copy(&mut new_ptr, &ptr, old_layout.size)
         let old_ptr = std::mem::ops::replace(ptr, new_ptr)
         self.deallocate(old_ptr)
         ret Pass[Void]()
@@ -203,7 +203,7 @@ sup Alloc {
         # @ret: `Pass()` if the reallocation succeeded, or an `AllocErr` on failure.
 
         let mut new_ptr = self.allocate_zeroed(new_layout)?
-        std::mem::ops::mem_copy(&mut new_ptr, ptr, old_layout.size)
+        std::mem::ops::mem_copy(&mut new_ptr, &ptr, old_layout.size)
         let old_ptr = std::mem::ops::replace(ptr, new_ptr)
         self.deallocate(old_ptr)
         ret Pass[Void]()
