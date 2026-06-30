@@ -160,7 +160,7 @@ fun println(str: &StrView) -> Opt[USize] {
     # string followed by a newline to the standard output.
     let mut out = StdoutStream()
     out.write_all(str.view_ref()).pass_opt()?
-    ret out.write_all(b"\n")
+    ret out.write_all(b"\n").pass_opt()
 }
 
 !public
