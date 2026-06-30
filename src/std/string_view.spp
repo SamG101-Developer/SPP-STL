@@ -337,7 +337,7 @@ sup StrView {
         # @ret:
 
         # For an empty separator, or an unfound separator, yield this string.
-        case sep.is_empty() or self.find(sep).is_none() {
+        case sep.is_empty() or self.find(&sep).is_none() {
             gen self
             ret
         }
@@ -349,7 +349,7 @@ sup StrView {
         loop true {
             # Get the substring starting at `start` and find the next separator.
             let substr = self[start to self.length]
-            let idx = substr.find(sep)
+            let idx = substr.find(&sep)
             case idx.is_none() { exit }
 
             # Get the position and yield the part of the string before the separator.
