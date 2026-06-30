@@ -214,5 +214,7 @@ fun input(prompt: &StrView = "") -> Opt[Str] {
     # Create a new `StdinStream` instance and read a line of
     # input from the standard input.
     let mut stdin = BufRead[StdinStream]()
-    ret stdin.read_line().ok()
+    let mut out = Str::new()
+    stdin.read_line(&mut out).pass_opt()?
+    ret Some(val=out)
 }
