@@ -76,7 +76,7 @@ sup File {
         # @ret: A `Res` type containing a `File` object if the file is successfully opened, or an error message if the
         # operation fails.
 
-        let mut file = File(path, mode)
+        let mut file = File(path.clone(), mode)
         let err = sppc::open(&path.inner.ptr, mode.to_flags(), 0, &mut file.fd)
         ret case err == 0 { Pass(val=file) } else { Fail(err=PathErr::from_errno(err)) }
     }
