@@ -57,7 +57,7 @@ sup StdinStream ext Read {
 
         # Read from the standard input fd, lockingthe global stdin mutex.
         let mut filled = 0_uz
-        let err = sppc::stdin_read(&mut buf, 1_uz, buf.len(), &mut filled)
+        let err = sppc::stdin_read(&mut buf.ptr, 1_uz, buf.len(), &mut filled)
         case err != 0 { ret Fail(err=StreamErr::from_errno(err)) }
         ret Pass(val=filled)
     }
