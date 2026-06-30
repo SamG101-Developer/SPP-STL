@@ -106,7 +106,7 @@ sup [T] Vec[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun new_from_fun(len: USize, f: FunMut[(USize,), T]) -> Self {
+    fun new_from_fun(len: USize, mut f: FunMut[(USize,), T]) -> Self {
         #
         # @let len:
         # @let f:
