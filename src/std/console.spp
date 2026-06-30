@@ -176,7 +176,7 @@ fun eprint(str: &StrView) -> Opt[Void] {
     # Create a new `StderrStream` instance and write the
     # string to the standard error.
     let mut out = StderrStream()
-    ret out.write_str(&str).pass_opt()
+    ret out.write_all(str.view_ref()).pass_opt()
 }
 
 !public
