@@ -333,7 +333,7 @@ sup [T] Iterator[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun for_each[F: FunMut[(&T,), Void]](self, func: F) -> Void {
+    fun for_each[F: FunMut[(&T,), Void]](self, mut func: F) -> Void {
         # The `for_each` method is a function that takes an iterator and a function, and applies the function to each
         # item produced by the iterator. The method uses a loop to iterate through the items of the original iterator,
         # and applies the provided function to each item. The function is expected to have side effects, as the
