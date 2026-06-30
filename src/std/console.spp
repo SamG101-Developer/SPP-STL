@@ -142,7 +142,7 @@ fun print(str: &StrView) -> Opt[Void] {
     # Create a new `StdoutStream` instance and write the
     # string to the standard output.
     let mut out = StdoutStream()
-    ret out.write_str(str).ok()
+    ret out.write_all(str.view_ref()).pass_opt()
 }
 
 !public
@@ -159,7 +159,8 @@ fun println(str: &StrView) -> Opt[Void] {
     # Create a new `StdoutStream` instance and write the
     # string followed by a newline to the standard output.
     let mut out = StdoutStream()
-    ret out.write_str(str + "\n").ok()
+    out.write_all(str.view_ref()).pass_opt()?
+    ret out.write_all(b"\n")
 }
 
 !public
@@ -175,7 +176,7 @@ fun eprint(str: &StrView) -> Opt[Void] {
     # Create a new `StderrStream` instance and write the
     # string to the standard error.
     let mut out = StderrStream()
-    ret out.write_str(&str).ok()
+    ret out.write_str(&str).pass_opt()
 }
 
 !public
@@ -192,7 +193,8 @@ fun eprintln(str: &StrView) -> Opt[Void] {
     # Create a new `StderrStream` instance and write the
     # string followed by a newline to the standard error.
     let mut out = StderrStream()
-    ret out.write_str(str + "\n").ok()
+    out.write_all(str.view_ref()).pass_opt()?
+    ret out.write_all(b"\n")
 }
 
 !public
