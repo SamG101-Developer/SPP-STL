@@ -456,7 +456,6 @@ sup Path {
 }
 
 sup Path ext Clone {
-    !public
     !versioned(base="1.0.0", new="1.0.0")
     fun clone(&self) -> Self {
         # The `clone` method creates a new `Path` instance that is a copy of the current instance. This is useful for
@@ -468,7 +467,6 @@ sup Path ext Clone {
 }
 
 sup Path ext Div {
-    !public
     !versioned(base="1.0.0", new="1.0.0")
     fun div(self, that: Self) -> Self {
         # The `div` method allows for using the division operator (`/`) to join two paths together. This provides a
@@ -481,7 +479,6 @@ sup Path ext Div {
 }
 
 sup Path ext DivAssign {
-    !public
     !versioned(base="1.0.0", new="1.0.0")
     fun div_assign(&mut self, that: Self) -> Void {
         # The `div_assign` method allows for using the division assignment operator (`/=`) to join a path with another
