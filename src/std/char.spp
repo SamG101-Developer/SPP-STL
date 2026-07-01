@@ -130,7 +130,6 @@ sup Char {
 }
 
 sup Char ext Eq {
-    !public
     !versioned(base="1.0.0", new="1.0.0")
     fun eq(&self, that: &Self) -> Bool {
         # Check if this character is equal to another character.
@@ -142,7 +141,6 @@ sup Char ext Eq {
 }
 
 sup Char ext Ord {
-    !public
     !versioned(base="1.0.0", new="1.0.0")
     fun ord(&self, that: &Self) -> S32 {
         # Compare this character with another character.
