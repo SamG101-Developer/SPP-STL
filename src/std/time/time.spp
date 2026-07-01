@@ -22,7 +22,7 @@ cls TimeInvalidDurationErr { }
 !versioned(base="1.0.0", new="1.0.0")
 cls TimeOtherErr { }
 
-!public !zero_type
+!public
 !versioned(base="1.0.0", new="1.0.0")
 type TimeErr = TimeInvalidClockErr
     or TimeInvalidDurationErr
