@@ -2,18 +2,17 @@ use std::annotations::abstract_method
 use std::annotations::public
 use std::void::Void
 
+!public cls BitAnd[Rhs=Self, Ret=Self] { }
+!public cls BitAndAssign[Rhs=Self] { }
 
-!public cls BitAnd[Rhs, Ret] { }
-!public cls BitAndAssign[Rhs] { }
-
-
+# Allow the use of the "&" operator.
 sup [Rhs, Ret] BitAnd[Rhs, Ret] {
     !public
     !abstract_method
     fun bit_and(self, that: Rhs) -> Ret { }
 }
 
-
+# Allow the use of the "&=" operator.
 sup [Rhs] BitAndAssign[Rhs] {
     !public
     !abstract_method

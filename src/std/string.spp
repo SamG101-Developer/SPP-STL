@@ -1,166 +1,348 @@
-use std::annotations::compiler_builtin
+use std::annotations::intrinsic
+use std::annotations::package
 use std::annotations::public
-use std::boolean::Bool
-use std::clone::Clone
+use std::annotations::versioned
+use std::allocator::Alloc
+use std::allocator::GlobalAlloc
 use std::cast::From
-use std::iterator::Iterator
+use std::char::Char
+use std::clone::Clone
+use std::generator::GenOnce
+use std::option::Opt
 use std::number::U8
 use std::number::USize
+use std::result::Res
+use std::vector::Vec
+use std::string_view::StrView
+use std::string_view::Utf8Err
+use std::view::View
+use std::void::Void
+use std::ops::fwd::FwdMut
+use std::ops::fwd::FwdRef
 use std::ops::add::Add
 use std::ops::add::AddAssign
-use std::ops::eq::Eq
-use std::string_view::StrView
-use std::vector::Vec
-use std::void::Void
-use std::fs::path::Path
 
+cls Str[A: Alloc = GlobalAlloc] {
+    # The `Str` type represents a mutable string that can be allocated using a specified allocator. It is designed to be
+    # flexible and efficient for various use cases, allowing for dynamic resizing and manipulation of string data. The
+    # internal representation of the string is based on a vector of bytes, which allows for efficient storage and
+    # operations on the string content.
+    # @type A: The allocator type used for managing the memory of the string. By default, it uses `GlobalAlloc`, which
+    # is a global allocator that can be used for general-purpose memory management. Users can specify their own
+    # allocator type if they need custom memory management behavior. Using stateful allocators is supported, because the
+    # `Vec` composes a `RawBuf`, that cans store allocators. The allocator instance must be passed in at the constuction
+    # of the string.
+    # @let bytes: The internal representation of the string as a vector of bytes.
 
-##
-A string type representing a sequence of bytes. This is a "higher level" abstraction over `Vec[U8]`, compared to the
-`StrView` type which  is an immutable, static lifetime span over a pointer to bytes.
-##
-!public
-cls Str {
-    !public data: Vec[U8]
+    !package bytes: Vec[U8, A]
 }
-
 
 sup Str {
     !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun new() -> Str {
-        ret Str(data=Vec[U8]::new())
-    }
-}
+        # The `new` method create a new insteance of the `Str` type on the heap, using the global allocator. This
+        # prevents it having to be specified every time a string is made, liks `Str::new_in(GlobalAlloc)`.
+        # @ret: A new empty `Str` instance.
 
-
-sup Str {
-    !public
-    fun to_ascii_uppercase(&self) -> Str {
-        # ret self.data.iter_ref().map(U8::to_ascii_uppercase).collect[Str]()
-        ret Str::from("")
+        # Forward to the more general `new_in` method,
+        # using the global allocator as the default.
+        ret Str::new_in(GlobalAlloc)
     }
 
     !public
-    fun to_ascii_lowercase(&self) -> Str {
-        # ret self.data.iter_ref().map(U8::to_ascii_lowercase).collect[Str]()
-        ret Str::from("")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun new_with_capacity(cap: USize) -> Str {
+        # The `new_with_capacity` method creates a new instance of the `Str` type with a specified initial capacity,
+        # using the global allocator. This allows for efficient string construction when the final size is known in
+        # advance, and no specific allocator is needed.
+        # @let cap: The initial capacity for the string, in bytes. This is the amount of memory that will be allocated
+        # for the string's internal buffer, and it can grow as needed when appending characters.
+        # @ret: A new `Str` instance with the specified initial capacity.
+
+        # Forward to the more general `new_with_capacity_in`
+        # method, using the global allocator as the default.
+        ret Str::new_with_capacity_in(cap, GlobalAlloc)
     }
 
     !public
-    fun split(&self, sep: U8) -> Vec[Str] {
-        let mut current: Str = Str::from("")
-        let mut strings = Vec[Str]::new()
-        
-        loop char in self.chars() {
-            case char == sep {
-                strings.push_back(current)
-                current = Str::from("")
-            }
-            else {
-                current += char
-            }
-        }
-        ret strings
+    !versioned(base="1.0.0", new="1.0.0")
+    fun new_filled(len: USize, element: U8) -> Str {
+        # The `new_filled` method creates a new instance of the `Str` type with a specified length, where all bytes are
+        # initialized to a given value. This is useful for creating strings that need to be filled with a specific
+        # character or byte value, and it uses the global allocator by default.
+        # @let len: The length of the string in bytes. This determines how many bytes will be allocated and initialized
+        # in the string's internal buffer.
+        # @let element: The byte value that will be used to fill the string. Each byte in the resulting string will be
+        # set to this value.
+        # @ret: A new `Str` instance of the specified length, with all bytes initialized to the given element.
+
+        # Forward to the more general `new_filled_in` method,
+        # using the global allocator as the default.
+        ret Str::new_filled_in(len, element, GlobalAlloc)
     }
 }
 
-
-sup Str {
+sup [A: Alloc] Str[A] {
     !public
-    !compiler_builtin
-    fun starts_with(&self, needle: StrView) -> Bool { }
+    !versioned(base="1.0.0", new="1.0.0")
+    fun new_in(alloc: A = A()) -> Str[A] {
+        # The `new_in` method creates a new instance of the `Str` type using a specified allocator. This allows for
+        # greater flexibility in memory management, as users can choose an allocator that best suits their needs.
+        # @let ?alloc: An optional allocator instance that will be used for managing the memory of the string. If not
+        # provided, a default instance of the allocator type `A` will be used. This allows for both stateless and
+        # stateful allocators to be utilized when creating a new string.
+        # @ret: A new empty `Str` instance that uses the specified allocator for memory management.
 
-    !public
-    !compiler_builtin
-    fun ends_with(&self, needle: StrView) -> Bool { }
-}
-
-
-sup Str {
-    !public
-    cor chars(&self) -> Iterator[U8] {
-        gen with self.data.iter_mov()
-    }
-
-    !public
-    fun length(&self) -> USize {
-        ret self.data.length()
+        # Forward to the more general `new_with_capacity_in`
+        # method with a default capacity of 0, using the
+        # provided allocator.
+        ret Str(bytes=Vec[U8, A]::new_in(alloc))
     }
 
     !public
-    fun is_empty(&self) -> Bool {
-        ret self.data.is_empty()
+    !versioned(base="1.0.0", new="1.0.0")
+    fun new_with_capacity_in(cap: USize, alloc: A = A()) -> Str[A] {
+        # The `new_with_capacity_in` method creates a new instance of the `Str` type with a specified initial capacity,
+        # using a specified allocator. This is useful for efficient string construction when the final size is known in
+        # advance, and it allows for custom memory management through the use of different allocators.
+        # @let cap: The initial capacity for the string, in bytes. This is the amount of memory that will be allocated
+        # for the string's internal buffer, and it can grow as needed when appending characters. Specifying the capacity
+        # can help improve performance by reducing the number of reallocations needed as the string grows.
+        # @let ?alloc: An optional allocator instance that will be used for managing the memory of the string. If not
+        # provided, a default instance of the allocator type `A` will be used. This allows for both stateless and
+        # stateful allocators to be utilized when creating a new string with a specified capacity.
+        # @ret: A new `Str` instance with the specified initial capacity, using the specified allocator for memory
+        # management.
+
+        # Forward to the constructor of `Str`, creating a new `Vec`
+        # with the specified capacity and allocator.
+        ret Str(bytes=Vec[U8, A]::new_with_capacity_in(cap, alloc))
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun new_filled_in(len: USize, element: U8, alloc: A = A()) -> Str[A] {
+        # The `new_filled_in` method creates a new instance of the `Str` type with a specified length, where all bytes
+        # are initialized to a given value, using a specified allocator. This is useful for creating strings that need
+        # to be filled with a specific character or byte value, and it allows for custom memory management through the
+        # use of different allocators.
+        # @let len: The length of the string in bytes. This determines how many bytes will be allocated and initialized
+        # in the string's internal buffer.
+        # @let element: The byte value that will be used to fill the string. Each byte in the resulting string will be
+        # set to this value.
+        # @let ?alloc: An optional allocator instance that will be used for managing the memory of the string. If not
+        # provided, a default instance of the allocator type `A` will be used. This allows for both stateless and
+        # stateful allocators to be utilized when creating a new filled string.
+        # @ret: A new `Str` instance of the specified length, with all bytes initialized to the given element, using the
+        # specified allocator for memory management.
+
+        # Forward to the constructor of `Str`, creating a new `Vec`
+        # filled with the specified length, element, and allocator.
+        ret Str(bytes=Vec[U8, A]::new_filled_in(len, element, alloc))
+    }
+
+    !public
+    !intrinsic(name="std.string.Str.from[StrView]")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(view: &StrView) -> Str {
+        # The `from` method creates a new instance of the `Str` type from a given `StrView`. This involves copying the
+        # bytes from the provided string view into a new internal vector. This method allows for easy conversion from a
+        # string view to a mutable string, enabling further modifications to the string data after it has been created.
+        # @let view: A reference to a `StrView` that contains the string data to be copied. The bytes from this view
+        # will be used to initialize the internal vector of the new `Str` instance.
+        # @ret: A new `Str` instance that contains a copy of the bytes from the provided `StrView`.
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(that: &View[U8]) -> Self {
+        # The `from` method creates a new instance of the `Str` type from a view of bytes. This involves copying the
+        # bytes from the provided view into a new internal vector. The allocator used for the new string will be the
+        # default allocator for the `Str` type, ensuring consistent memory management.
+        # @let that: A reference to a view of bytes that contains the data to be copied into the new string. The bytes
+        # from this view will be used to initialize the internal vector of the new `Str` instance.
+        # @ret: A new `Str` instance that contains a copy of the bytes from the provided view.
+
+        # Forward to the constructor of `Str`, creating a new `Vec`
+        # filled with the bytes from the provided view.
+        ret Str(bytes=Vec[U8, A]::from(that))
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun append(&mut self, char: Char) -> Void {
+        # The `append` method appends a single character to the end of the string. This involves encoding the character
+        # into its UTF-8 byte representation and then adding those bytes to the internal vector. This method allows for
+        # efficient construction of strings by appending characters one at a time, and it handles the necessary encoding
+        # and resizing of the internal buffer as needed.
+        # @let char: The character to be appended to the string. This can be any valid Unicode character, and it will be
+        # encoded into UTF-8 bytes before being added to the string.
+        # @ret: This method does not return a value; it modifies the string in place by appending the specified
+        # character.
+
+        # Determine the character's byt length and reserve capacity in
+        # the internal vector to accommodate the new character's bytes.
+        let ch_len = USize::from(char.len_utf8())
+        self.capacity_reserve(ch_len)
+
+        # Encode the character into UTF-8 bytes and append them to the
+        # internal vector.
+        let mut buf = [0_u8; 4_u64]
+        let bytes_written = USize::from(char.encode_utf8(&mut buf))
+        self.bytes.append_from_view(buf[0_uz to bytes_written])
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun append_str(&mut self, other: &StrView) -> Void {
+        # The `append_str` method appends the contents of another string view to the end of this string. This involves
+        # copying the bytes from the provided string view into the internal vector of this string. This method allows
+        # for efficient concatenation of strings. Because `Str` can foward to `StrView`, this method can also be used to
+        # append the contents of another `Str` instance.
+        # @let other: A reference to a `StrView` that contains the string data to be appended. The bytes from this view
+        # will be copied into the internal vector of this string.
+
+        # Reserve capacity in the internal vector to accommodate the
+        # new bytes from the other string view.
+        self.capacity_reserve(other.len())
+        self.bytes.append_from_view(other.view_ref())
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun take_last(&mut self) -> Opt[U8] {
+        # The `take_last` method removes and returns the last byte from the string, if it exists. This is equivalent to
+        # a pop operation from a lot of other languages. If the string is empty, it returns `None`.
+        # @ret: An `Opt[U8]` that contains the last byte of the string if it exists, or `None` if the string is empty.
+        # This allows for safe handling of the case where there are no bytes to take, without risking a runtime error.
+
+        # Use the `pop` method of the internal vector to remove and
+        # return the last byte, if it exists.
+        ret self.bytes.take_last()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun cap(&self) -> USize {
+        # The `cap` method returns the current capacity of the string, which is the total amount of memory allocated for
+        # the string's internal buffer. This is not necessarily the same as the length of the string, which is the
+        # number of bytes currently used. The capacity can be greater than or equal to the length, and it indicates how
+        # much additional data can be appended to the string without needing to allocate more memory.
+        # @ret: The current capacity of the string in bytes.
+
+        # Forward to the `cap` method of the internal vector to get
+        # the current capacity.
+        ret self.bytes.cap()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun capacity_shrink(&mut self) -> Void {
+        # The `capacity_shrink` method reduces the capacity of the string's internal buffer to match its current length.
+        # This is useful for optimizing memory usage after a string has been constructed or modified, especially if it
+        # has been resized down from a larger capacity. By calling this method, any excess capacity that is not
+        # currently being used to store the string's bytes will be released, potentially freeing up memory. This can
+        # help improve the efficiency of memory usage in cases where a string has been built up to a certain size and
+        # then reduced, or when the final size of the string is known and there is no need for additional capacity.
+
+        # Forward to the `capacity_shrink_to` method of the internal
+        # vector to reduce the capacity to match the current length.
+        self.bytes.capacity_shrink()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun capacity_reserve(&mut self, cap: USize) -> Void {
+        # The `capacity_reserve` method ensures that the string's internal buffer has at least the specified capacity.
+        # This is useful for optimizing performance when you know in advance how much additional capacity will be needed
+        # for appending data to the string. By reserving capacity ahead of time, you can reduce the number of
+        # reallocations that may occur as the string grows, which can improve efficiency.
+        # @let cap: The minimum capacity that the string's internal buffer should have after this method is called. If
+        # the current capacity is already greater than or equal to this value, no changes will be made. If the current
+        # capacity is less than this value, the internal buffer will be resized to meet or exceed the specified
+        # capacity.
+        # @ret: This method does not return a value; it modifies the string in place by ensuring that the internal
+        # buffer has at least the specified capacity.
+
+        # Forward to the `reserve` method of the internal vector to ensure
+        # that the capacity is at least the specified value.
+        self.bytes.capacity_reserve(cap)
+    }
+
+    !versioned(base="1.0.0", new="1.0.0")
+    fun add(self, that: &StrView) -> Self {
+        # The `add` method concatenates the current string with another string view, creating a new `Str` instance that
+        # contains the combined data. This involves creating a new internal vector and copying the bytes from both the
+        # current string and the provided string view into it. The allocator used for the new string will be the same as
+        # the allocator used for the original string, ensuring consistent memory management.
+        # @let that: A reference to a `StrView` that contains the string data to be concatenated with the current
+        # string. The bytes from this view will be copied into the new internal vector along with the bytes from the
+        # current string.
+        # @ret: A new `Str` instance that contains the concatenated data from both the current string and the provided
+        # string view.
+
+        let mut result = Self()
+        result.append_str(&self)
+        result.append_str(that)
+        ret result
+    }
+
+    !versioned(base="1.0.0", new="1.0.0")
+    fun add_assign(&mut self, that: &StrView) -> Void {
+        # The `add_assign` method appends the contents of another string view to the current string in place. This
+        # involves copying the bytes from the provided string view into the internal vector of the current string,
+        # effectively modifying it to include the new data. The allocator used for the current string will remain the
+        # same, ensuring consistent memory management.
+        # @let that: A reference to a `StrView` that contains the string data to be appended to the current string. The
+        # bytes from this view will be copied into the internal vector of the current string.
+        # @ret: This method does not return a value; it modifies the current string in place by appending the specified
+        # string view.
+
+        self.append_str(that)
     }
 }
 
-
-sup Str ext From[Self, StrView] {
-    !compiler_builtin
-    fun from(that: StrView) -> Self { }
+sup [A: Alloc] Str[A] ext FwdMut[StrView] {
+    !intrinsic(name="std.string.Str.fwd_mut[StrView]")
+    !versioned(base="1.0.0", new="1.0.0")
+    cor fwd_mut(&mut self) -> GenOnce[&mut StrView] { }
 }
 
-
-sup Str ext From[Self, Path] {
-    fun from(that: Path) -> Self {
-        ret that.path.clone()
-    }
+sup [A: Alloc] Str[A] ext FwdRef[StrView] {
+    !intrinsic(name="std.string.Str.fwd_ref[StrView]")
+    !versioned(base="1.0.0", new="1.0.0")
+    cor fwd_ref(&self) -> GenOnce[&StrView] { }
 }
 
-
-sup Str ext From[Self, U8] {
-    fun from(that: U8) -> Self {
-        # Create a Str from a single Char (U8)
-        let mut str = Str::new()
-        str += that
-        ret str
-    }
-}
-
-
-sup Str ext Eq[Rhs=Str] {
-    fun eq(&self, that: &Str) -> Bool {
-        # ret self.data.iter_ref().zip(that.data.iter_ref()).map(U8::eq).all()
-        ret false
-    }
-
-    fun ne(&self, that: &Str) -> Bool {
-        # ret self.data.iter_ref().zip(that.data.iter_ref()).map(U8::ne).any()
-        ret false
-    }
-}
-
-
-sup Str ext Clone[Out=Str] {
+sup [A: Alloc] Str[A] ext Clone {
+    !versioned(base="1.0.0", new="1.0.0")
     fun clone(&self) -> Self {
-        ret Str(data=self.data)
+        # The `clone` method creates a new instance of the `Str` type that is a copy of the current instance. This
+        # involves creating a new internal vector and copying the bytes from the current string into it. The allocator
+        # used for the new string will be the same as the allocator used for the original string, ensuring that memory
+        # management is consistent between the two instances.
+        # @ret: A new `Str` instance that is a clone of the current instance, with its own separate internal buffer
+        # containing the same string data.
+
+        ret Str(bytes=self.bytes)
     }
 }
 
+sup [A: Alloc] Str[A] ext From[Char] {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(that: Char) -> Self {
+        # The `from` method creates a new instance of the `Str` type from a single character. This involves encoding the
+        # character into its UTF-8 byte representation and then creating a new internal vector to hold those bytes. The
+        # allocator used for the new string will be the default allocator for the `Str` type, ensuring consistent memory
+        # management.
+        # @let that: The character to be converted into a string. This can be any valid Unicode character, and it will
+        # be encoded into UTF-8 bytes before being stored in the new string.
+        # @ret: A new `Str` instance that contains the UTF-8 encoded bytes of the provided character.
 
-sup Str ext Add[Rhs=Str, Ret=Str] {
-    fun add(self, that: Str) -> Str {
-        ret Str(data=self.data + that.data)
-    }
-}
-
-
-sup Str ext Add[Rhs=U8, Ret=Str] {
-    fun add(self, that: U8) -> Str {
-        self.data.push_back(that)
-        ret Str(data=self.data)
-    }
-}
-
-
-sup Str ext AddAssign[Rhs=Str] {
-    fun add_assign(&mut self, that: Str) -> Void {
-        self.data += that.data
-    }
-}
-
-
-sup Str ext AddAssign[Rhs=U8] {
-    fun add_assign(&mut self, that: U8) -> Void {
-        self.data.push_back(that)
+        let length = USize::from(that.len_utf8())
+        let mut result = Self()
+        result.append(that)
+        ret result
     }
 }

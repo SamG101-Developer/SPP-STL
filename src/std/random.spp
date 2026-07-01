@@ -1,0 +1,85 @@
+use std::annotations::public
+use std::annotations::versioned
+use std::generator::Gen
+use std::generator::GenOnce
+use std::number::F64
+use std::number::U8
+use std::number::U32
+use std::number::U64
+use std::number::USize
+use std::range::Range
+use std::string_view::StrView
+use std::vector::Vec
+use std::void::Void
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun set_seed(seed: U64) -> Void {
+    # Set the seed for the pseudo-random number generator (PRNG) to ensure reproducibility of random sequences.
+    # @let seed: The seed value used to initialize the PRNG.
+
+    # Hook into the C function.
+    sppc::prngseed(seed)
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun random_bytes(n: USize) -> Vec[U8] {
+    # The `random_bytes` function generates a vector of `n` random bytes using the pseudo-random number generator
+    # (PRNG). It writes them into a vector of bytes.
+    # @let n: The number of random bytes to generate.
+    # @ret: A vector containing `n` random bytes.
+
+    let mut buffer = Vec[U8]::new_with_capacity(n)
+    sppc::prngbytes(n, &mut buffer.ptr)
+    ret buffer
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun random_between(min: U64, max: U64) -> U64 {
+    # The `random_between` function generates a random 64-bit unsigned integer between the specified `min` and `max`
+    # values (inclusive). "Lemire method" is used to ensure uniform distribution of the generated random number within
+    # the specified range, preventing modulo bias.
+    # @let min: The minimum value (inclusive) of the range from which to generate a random number.
+    # @let max: The maximum value (inclusive) of the range from which to generate a random number.
+    # @ret: A random 64-bit unsigned integer between `min` and `max` (inclusive).
+
+    let mut num = 0_u64
+    sppc::prngbetween(min, max, &mut num)
+    ret num
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun random_u32() -> U32 {
+    # Generate a random 32-bit unsigned integer using the pseudo-random number generator (PRNG).
+    # @ret: A random 32-bit unsigned integer.
+
+    let mut num = 0_u32
+    sppc::prngu32(&mut num)
+    ret num
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun random_u64() -> U64 {
+    # Generate a random 64-bit unsigned integer using the pseudo-random number generator (PRNG).
+    # @ret: A random 64-bit unsigned integer.
+
+    let mut num = 0_u64
+    sppc::prngu64(&mut num)
+    ret num
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun random_double() -> F64 {
+    # Generate a random double-precision floating-point number in the range [0.0, 1.0) using the pseudo-random number
+    # generator (PRNG).
+    # @ret: A random double-precision floating-point number in the range [0.0, 1.0).
+
+    let mut num = 0.0_f64
+    sppc::prngdouble(&mut num)
+    ret num
+}

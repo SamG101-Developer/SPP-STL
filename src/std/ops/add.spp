@@ -1,24 +1,67 @@
 use std::annotations::abstract_method
 use std::annotations::public
+use std::annotations::versioned
 use std::void::Void
 
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls Add[Rhs=Self, Ret=Self] {
+    # The `Add` class represents the ability to add two values together using the "+" operator. It is a generic class
+    # that takes two type parameters: `Rhs`, which represents the type of the right-hand side operand, and `Ret`, which
+    # represents the type of the result of the addition. By default, both `Rhs` and `Ret` are set to `Self`, meaning
+    # that if no specific types are provided, it will assume that both operands and the result are of the same type as
+    # the implementing class.
+    # @type Rhs: The type of the right-hand side operand in the addition operation. This is the type of the value that
+    # will be added to the left-hand side operand (the instance of the class that implements `Add`). It can be any type,
+    # and it is specified as a generic parameter to allow for flexibility in the types that can be added together.
+    # @type Ret: The type of the result of the addition operation. This is the type of the value that will be returned
+    # when the "+" operator is used to add two values together. Like `Rhs`, it is specified as a generic parameter to
+    # allow for flexibility in the types that can be returned as a result of the addition.
+}
 
-!public cls Add[Rhs, Ret] { }
-!public cls AddAssign[Rhs] { }
-
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls AddAssign[Rhs=Self] {
+    # The `AddAssign` class represents the ability to add a value to another value in place using the "+=" operator. It
+    # is a generic class that takes one type parameter: `Rhs`, which represents the type of the right-hand side operand.
+    # By default, `Rhs` is set to `Self`, meaning that if no specific type is provided, it will assume that the
+    # right-hand side operand is of the same type as the implementing class.
+    # @type Rhs: The type of the right-hand side operand in the addition assignment operation. This is the type of the
+    # value that will be added to the left-hand side operand (the instance of the class that implements `AddAssign`). It
+    # can be any type, and it is specified as a generic parameter to allow for flexibility in the types that can be
+    # added together using the "+=" operator.
+}
 
 # Allow the use of the "+" operator.
 sup [Rhs, Ret] Add[Rhs, Ret] {
-    !public
-    !abstract_method
-    fun add(self, that: Rhs) -> Ret { }
+    !public !abstract_method
+    !versioned(base="1.0.0", new="1.0.0")
+    fun add(self, that: Rhs) -> Ret {
+        # The `add` method defines the behavior of the "+" operator for the implementing class. It takes a value of type
+        # `Rhs` as an argument, which represents the right-hand side operand in the addition operation. The method
+        # returns a value of type `Ret`, which represents the result of the addition. The specific behavior of the
+        # addition operation is determined by the implementation of this method in the class that implements `Add`.
+        # @let that: The right-hand side operand in the addition operation. This is the value that will be added to the
+        # left-hand side operand (the instance of the class that implements `Add`). It is of type `Rhs`, which is a
+        # generic parameter that can be specified when implementing the `Add` class.
+        # @ret: The result of the addition operation. This is the value that will be returned when the "+" operator is
+        # used to add two values together. It is of type `Ret`, which is a generic parameter that can be specified when
+        # implementing the `Add` class.
+    }
 }
-
 
 # Allow the use of the "+=" operator.
 sup [Rhs] AddAssign[Rhs] {
-    !public
-    !abstract_method
-    fun add_assign(&mut self, that: Rhs) -> Void { }
+    !public !abstract_method
+    !versioned(base="1.0.0", new="1.0.0")
+    fun add_assign(&mut self, that: Rhs) -> Void {
+        # The `add_assign` method defines the behavior of the "+=" operator for the implementing class. It takes a value
+        # of type `Rhs` as an argument, which represents the right-hand side operand in the addition assignment
+        # operation. The method modifies the left-hand side operand (the instance of the class that implements
+        # `AddAssign`) in place by adding the value of `that` to it. The method does not return a value, as the result
+        # of the addition assignment is stored directly in the left-hand side operand.
+        # @let that: The right-hand side operand in the addition assignment operation. This is the value that will be
+        # added to the left-hand side operand (the instance of the class that implements `AddAssign`). It is of type
+        # `Rhs`, which is a generic parameter that can be specified when implementing the `AddAssign` class.
+    }
 }
-

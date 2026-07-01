@@ -1,0 +1,17 @@
+use std::annotations::public
+use std::annotations::versioned
+use std::function::FunRef
+use std::number::U8
+use std::void::Void
+use std::mem::pointer::NonNull
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun call_once[F: FunRef[(), Void]](func: F) -> Void {
+    # Calls a function once, and only once. This is typically used for initializing global state, and is thread-safe.
+    # @type F: The type of the function being called. This must be a function type that takes no arguments and returns
+    # `Void`.
+    # @let func: The function being called. This is a value of type `F.
+
+    sppc::pthread_once(func)
+}

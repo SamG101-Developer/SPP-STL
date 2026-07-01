@@ -1,21 +1,38 @@
 use std::annotations::abstract_method
 use std::annotations::public
 use std::generator::GenOnce
-
+use std::iterator::Indexed
+use std::view::View
 
 !public cls IndexMut[T, I] { }
 !public cls IndexRef[T, I] { }
+!public cls SliceRef[V, I] { }
+!public cls SliceMut[V, I] { }
 
-
+# Allow the use of the "[mut n]" operator.
 sup [T, I] IndexMut[T, I] {
     !public
     !abstract_method
-    cor index_mut(&mut self, index: I) -> GenOnce[&mut T] { }
+    cor index_mut(&mut self, index: I) -> Indexed[&mut T] { }
 }
 
-
+# Allow the use of the "[n]" operator.
 sup [T, I] IndexRef[T, I] {
     !public
     !abstract_method
-    cor index_ref(&self, index: I) -> GenOnce[&T] { }
+    cor index_ref(&self, index: I) -> Indexed[&T] { }
+}
+
+# Allow the use of the "[n to m]" operator.
+sup [V, I] SliceRef[V, I] {
+    !public
+    !abstract_method
+    cor slice_ref(&self, from: I, into: I) -> GenOnce[&V] { }
+}
+
+# Allow the use of the "[mut n to m]" operator.
+sup [V, I] SliceMut[V, I] {
+    !public
+    !abstract_method
+    cor slice_mut(&mut self, from: I, into: I) -> GenOnce[&mut V] { }
 }

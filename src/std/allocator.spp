@@ -1,121 +1,334 @@
 use std::annotations::abstract_method
 use std::annotations::public
+use std::annotations::versioned
 use std::annotations::virtual_method
+use std::annotations::zero_type
+use std::copy::Copy
+use std::number::U8
 use std::number::USize
+use std::number::S32
 use std::result::Pass
 use std::result::Res
 use std::string_view::StrView
 use std::void::Void
-use std::mem::memory::Memory
+use std::mem::pointer::NonNull
+use std::mem::pointer::NullptrErr
 
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls AllocOomErr {
+    # The `AllocOomErr` type represents an out-of-memory error that can occur during memory allocation. This type is
+    # used to indicate that the system has run out of memory and cannot fulfill the allocation request. Mapped from the
+    # ENOMEM error code in C.
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls AllocOverflowErr {
+    # The `AllocOverflowErr` type represents an error that can occur when there is valid resources available to
+    # allocate, but the requested memory layout exceeds the maximum supported capacity for the target platform. This
+    # type is used to indicate that the requested allocation size is too large to be handled by the allocator, even if
+    # there is technically enough memory available. Mapped from the EOVERFLOW error code in C.
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls AllocAlignmentErr {
+    # The `AllocAlignmentErr` type represents an error that can occur when the requested memory layout has invalid
+    # alignment requirements. This type is used to indicate that the specified alignment is not a power of two, or is
+    # greater than the maximum supported alignment for the target platform. Mapped from the EINVAL error code in C.
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls AllocOtherErr {
+    # The `AllocOtherErr` type represents any other kind of error that can occur during memory allocation that does not
+    # fit into the specific categories of out-of-memory, capacity overflow, or invalid alignment. This type is used as a
+    # catch-all for any unexpected errors that may arise during allocation.
+}
 
 !public
-cls AllocErr {
-    !public msg: StrView
-}
+!versioned(base="1.0.0", new="1.0.0")
+type AllocErr = AllocOomErr or AllocAlignmentErr or AllocOverflowErr or AllocOtherErr
 
 sup AllocErr {
-    !public
-    fun new(msg: StrView) -> Self { ret Self(msg) }
+    fun from_errno(errno: S32) -> Self {
+        #
+        # @let errno:
+        # @ret:
+
+        ret case errno of {
+            == cffi::enomem { AllocOomErr }
+            == cffi::eoverflow { AllocOverflowErr }
+            == cffi::einval { AllocAlignmentErr }
+            else { AllocOtherErr }
+        }
+    }
 }
 
 !public
+!versioned(base="1.0.0", new="1.0.0")
 cls Layout {
+    # The `Layout` type is a simple data structure that encapsulates the size and alignment requirements for a block of
+    # memory. It is used as an argument in the allocation methods of the `Alloc` type, to specify how much memory is
+    # needed and how it should be aligned.
+    # @let size: The number of bytes needed for the allocation.
+    # @let align: The alignment requirement for the allocation, which must be a power of two and less than or equal to
+    # the maximum supported alignment for the target platform.
+
     !public size: USize
     !public align: USize
 }
 
+sup Layout ext Copy {
+    # The `Layout` type implements the `Copy` trait, which means that it can be duplicated by simply copying its bits.
+    # This allows for efficient passing of `Layout` values by value, without needing to worry about ownership or
+    # borrowing.
+}
 
-!public
-cls Alloc[E] { }
-
-
-# The Alloc implementation defines the interface for memory allocation, deallocation, and reallocation. It is designed
-# to be extended by specific allocator implementations, such as GlobalAlloc. The methods in Alloc are abstract, meaning
-# that they must be implemented by any subclass that extends Alloc. This allows for flexibility in how memory is
-# managed, while still providing a consistent interface for allocation operations.
-#
-# The required methods are the allocate and de-allocate methods, which handle the basic memory management tasks. The
-# other methods can be implemented but have stable default behaviour by using the required allocation methods, and other
-# memory utilities, particularly from sppc.
-sup [E] Alloc[E] {
-    type Element = E
-
-    # Allocates a block of memory for the specified layout. The method returns a Result type, which can either be a
-    # successful allocation (Pass) containing the allocated memory, or an error (Err) containing an AllocErr with a
-    # message describing the failure. The only error that can occur in this method is a failure to allocate memory,
-    # which is typically due to insufficient system resources.
+sup Layout {
     !public
-    !abstract_method
-    fun allocate[A: Alloc[E]](&self, layout: Layout) -> Res[Memory[E, A], AllocErr] { }
+    !versioned(base="1.0.0", new="1.0.0")
+    fun new_for_type[T]() -> Self {
+        # The `new_for_type` function creates a new `Layout` for a given type `T`, by using the `size_of` and `align_of`
+        # functions from the `std::mem::ops` module. The created layout represents a single instance of the type `T`.
+        # @type T: The type for which the layout is being created.
+        # @ret: A `Layout` instance that encapsulates the size and alignment requirements for an instance of type `T`.
 
-    # Deallocates a previously allocated block of memory. This method is abstract and must be implemented by any
-    # subclass that extends Alloc. The method takes a Memory object as an argument, by move, which means that the caller
-    # is transferring ownership of the memory to the allocator for deallocation. This makes manual de-allocation safe.
-    !public
-    !abstract_method
-    fun deallocate[A: Alloc[E]](&self, mem: Memory[E, A]) -> Void { }
-
-    # Allocates a block of memory for the specified layout, and initializes all bytes to zero. This method has a default
-    # implementation that uses the allocate method to get a block of memory, and then uses the mem_set function from
-    # sppc to set all bytes to zero. The method returns a Result type, as it has to handle the possibility of allocation
-    # failure.
-    !public
-    !virtual_method
-    fun allocate_zeroed[A: Alloc[E]](&self, layout: Layout) -> Res[Memory[E, A], AllocErr] {
-        let size = layout.size * std::mem::ops::size_of[E]()
-        let mut mem = self.allocate[A](layout)?
-        std::mem::ops::mem_set(&mut mem, 0_u8, size)
-        ret Pass(val=mem)
+        let size = std::mem::ops::size_of[T]()
+        let align = std::mem::ops::align_of[T]()
+        ret Self(size, align)
     }
 
-    # Reallocates a block of memory to a new size. This method has a default implementation that first deallocates the
-    # existing memory block, and then allocates a new block of the desired size. The method returns a Result type, as it
-    # has to handle the possibility of allocation failure during the new allocation.
     !public
-    !virtual_method
-    fun reallocate[A: Alloc[E]](&self, mem: Memory[E, A], layout: Layout) -> Res[Memory[E, A], AllocErr] {
-        self.deallocate(mem)
-        ret self.allocate[A](layout)
-    }
+    fun new_for_array[T](n: USize) -> Self {
+        # The `new_for_array` function creates a new `Layout` for an array of `n` elements of type `T`, by using the
+        # `size_of` and `align_of` functions from the `std::mem::ops` module. The created layout represents a contiguous
+        # block of memory that can hold `n` instances of type `T`, with the appropriate size and alignment for the
+        # entire array.
+        # @type T: The type of the elements in the array for which the layout is being created.
+        # @let n: The number of elements in the array, which is used to calculate the total size of the layout by
+        # multiplying it with the size of a single element of type `T`.
+        # @ret: A `Layout` instance that encapsulates the size and alignment requirements for an array of `n` elements
+        # of type `T`.
 
-    # Reallocates a block of memory to a new size, and initializes any new bytes to zero. This method has a default
-    # implementation that first deallocates the existing memory block, and then allocates a new block of the desired
-    # size using the allocate_zeroed method.
-    !public
-    !virtual_method
-    fun reallocate_zeroed[A: Alloc[E]](&self, mem: Memory[E, A], layout: Layout) -> Res[Memory[E, A], AllocErr] {
-        self.deallocate(mem)
-        ret self.allocate_zeroed[A](layout)
+        let size = std::mem::ops::size_of[T]() * n
+        let align = std::mem::ops::align_of[T]()
+        ret Self(size, align)
     }
 }
 
-
 !public
-cls GlobalAlloc[E] { }
+!versioned(base="1.0.0", new="1.0.0")
+cls Alloc {
+    # The `Alloc` implementation defines the interface for memory allocation, deallocation, and reallocation. It is
+    # designed to be extended by specific allocator implementations, such as `GlobalAlloc`. The methods in `Alloc` are
+    # abstract, meaning that they must be implemented by any subclass that extends `Alloc`. This allows for flexibility
+    # in how memory is managed, while still providing a consistent interface for allocation operations. The required
+    # methods are the allocate and de-allocate methods, which handle the basic memory management tasks. The other
+    # methods can be implemented but have stable default behaviour by using the required allocation methods, and other
+    # memory utilities, particularly from sppc.
+}
 
-
-sup [E] GlobalAlloc[E] ext Alloc[E] {
-
-    fun allocate[A: Alloc[E]](&self, layout: Layout) -> Res[Memory[E, A], AllocErr] {
-        # let mem = std::mem::ops::malloc[E](layout.size).ok_or_else(AllocErr::new)?
-        let mem = Memory[E, A]()
-        ret Pass(val=mem)
+sup Alloc {
+    !public !abstract_method
+    !versioned(base="1.0.0", new="1.0.0")
+    fun allocate(&self, layout: Layout) -> Res[NonNull[U8], AllocErr] {
+        # The `allocate` method allocates a block of memory for the specified layout. The method returns a `Res` type,
+        # which can either be a successful allocation containing the allocated memory, or an failure containing an
+        # `AllocErr` with a message describing the failure. The only error that can occur in this method is a failure to
+        # allocate memory, which is typically due to insufficient system resources.
+        # @let layout: A `Layout` instance that specifies the size and alignment requirements for the memory allocation.
+        # @ret: A `Res` type that indicates whether the allocation was successful or if it failed with an `AllocErr`.
     }
 
-    fun deallocate[A: Alloc[E]](&self, mem: Memory[E, A]) -> Void {
-        std::mem::ops::free(mem)
+    !public !abstract_method
+    !versioned(base="1.0.0", new="1.0.0")
+    fun deallocate(&self, ptr: NonNull[U8]) -> Void {
+        # The `deallocate` method deallocates a previously allocated block of memory. The method takes a `NonNull`
+        # pointer as an argument, which represents the memory block to be deallocated. The method does not return any
+        # value, as it is expected to perform the deallocation and not return any result. This cannot fail because the
+        # pointers gicen to it are moved, so cannot be double freed, and `NonNull` can only be constructed from
+        # allocatos, proving the validity of the pointer.
+        # @let ptr: A `NonNull` pointer that represents the block of memory to be deallocated. The caller is
+        # transferring ownership of the memory to the allocator for deallocation, which ensures that manual deallocation
+        # is safe and prevents issues such as double frees or use-after-free errors.
     }
 
-    fun allocate_zeroed[A: Alloc[E]](&self, layout: Layout) -> Res[Memory[E, A], AllocErr] {
-        # let mem = std::mem::ops::calloc[E](layout.size).ok_or_else(AllocErr::new)?
-        let mem = Memory[E, A]()
-        ret Pass(val=mem)
+    !public !virtual_method
+    !versioned(base="1.0.0", new="1.0.0")
+    fun allocate_zeroed(&self, layout: Layout) -> Res[NonNull[U8], AllocErr] {
+        # The `allocate_zeroed` method allocates a block of memory for the specified layout and initializes all bytes to
+        # zero. The method has a default implementation that first calls the `allocate` method to get a block of memory,
+        # and then uses the `mem_set` function from the `sppc` library to set all bytes in the allocated memory to zero.
+        # @let layout: A `Layout` instance that specifies the size and alignment requirements for the memory allocation.
+        # The same layout is used for both the allocation and the zeroing, as the entire allocated block needs to be
+        # initialized to zero.
+        # @ret: A `Res` type that indicates whether the allocation and zeroing were successful or if they failed with an
+        # `AllocErr`. If successful, the `Res` will contain a `NonNull` pointer to the allocated and zeroed memory
+        # block, forwarded from the `allocate` method.
+
+        let mut ptr = self.allocate(layout)?
+        std::mem::ops::mem_set(&mut ptr, 0_u8, layout.size)
+        ret Pass(val=ptr)
     }
 
-    fun reallocate[A: Alloc[E]](&self, mem: Memory[E, A], layout: Layout) -> Res[Memory[E, A], AllocErr] {
-        # let mem = std::mem::ops::realloc(mem, layout.size).ok_or_else(AllocErr::new)?
-        let mem = Memory[E, A]()
-        ret Pass(val=mem)
+    !public !virtual_method
+    !versioned(base="1.0.0", new="1.0.0")
+    fun grow(&self, ptr: &mut NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[Void, AllocErr] {
+        # Reallocates a block of memory to a new larger size, updating the pointer in-place. The default implementation
+        # allocates a new block, copies bytes over, then deallocates the old block. On allocation failure, `ptr` is left
+        # unchanged so the caller retains a valid pointer.
+        # @let ptr: A mutable reference to the pointer to reallocate. Updated in-place on success.
+        # @let old_layout: A `Layout` instance specifying the size and alignment of the existing memory block.
+        # @let new_layout: A `Layout` instance specifying the size and alignment of the new memory block.
+        # @ret: `Pass()` if the reallocation succeeded, or an `AllocErr` on failure.
+
+        let mut new_ptr = self.allocate(new_layout)?
+        std::mem::ops::mem_copy(&mut new_ptr, &ptr, old_layout.size)
+        let old_ptr = std::mem::ops::replace(ptr, new_ptr)
+        self.deallocate(old_ptr)
+        ret Pass[Void]()
+    }
+
+    !public !virtual_method
+    !versioned(base="1.0.0", new="1.0.0")
+    fun grow_zeroed(&self, ptr: &mut NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[Void, AllocErr] {
+        # Reallocates a block of memory to a new larger size, initializing any new bytes to zero, and updating the
+        # pointer in-place. The default implementation allocates a zeroed new block (so only old bytes need copying),
+        # then deallocates the old block. On allocation failure, `ptr` is left unchanged.
+        # @let ptr: A mutable reference to the pointer to reallocate. Updated in-place on success.
+        # @let old_layout: A `Layout` instance specifying the size and alignment of the existing memory block.
+        # @let new_layout: A `Layout` instance specifying the size and alignment of the new memory block.
+        # @ret: `Pass()` if the reallocation succeeded, or an `AllocErr` on failure.
+
+        let mut new_ptr = self.allocate_zeroed(new_layout)?
+        std::mem::ops::mem_copy(&mut new_ptr, &ptr, old_layout.size)
+        let old_ptr = std::mem::ops::replace(ptr, new_ptr)
+        self.deallocate(old_ptr)
+        ret Pass[Void]()
+    }
+
+    !public !virtual_method
+    !versioned(base="1.0.0", new="1.0.0")
+    fun shrink(&self, ptr: &mut NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[Void, AllocErr] {
+        # Reallocates a block of memory to a new smaller size, updating the pointer in-place. The default implementation
+        # allocates a new block, copies only `new_layout.size` bytes (truncating the rest), then deallocates the old
+        # block. On allocation failure, `ptr` is left unchanged.
+        # @let ptr: A mutable reference to the pointer to reallocate. Updated in-place on success.
+        # @let old_layout: A `Layout` instance specifying the size and alignment of the existing memory block.
+        # @let new_layout: A `Layout` instance specifying the size and alignment of the new memory block.
+        # @ret: `Pass()` if the reallocation succeeded, or an `AllocErr` on failure.
+
+        let mut new_ptr = self.allocate(new_layout)?
+        std::mem::ops::mem_copy(&mut new_ptr, &ptr, new_layout.size)
+        let old_ptr = std::mem::ops::replace(ptr, new_ptr)
+        self.deallocate(old_ptr)
+        ret Pass[Void]()
+    }
+}
+
+!public !zero_type
+cls GlobalAlloc {
+    # The GlobalAllocator is the default allocator used for all stl containers, including arrays, slices, vectors, and
+    # the smart pointers. The allocator uses the C functions malloc, calloc, realloc and free, mapped under the sppc
+    # bindings. The methods in GlobalAlloc override the abstract methods defined in Alloc, providing concrete
+    # implementations.
+}
+
+sup GlobalAlloc ext Alloc {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun allocate(&self, layout: Layout) -> Res[NonNull[U8], AllocErr] {
+        # The default way to allocate memory in the global allocator, is to use the C malloc function. This is
+        # interfaced via the sppc library. Additional safety measures are taken to check if the allocation was
+        # successful, by checking if the returned pointer is null. If the pointer is null, an error is returned.
+        # Otherwise, a NonNull object is created from the raw pointer, and returned as a successful allocation.
+        # @let layout: A `Layout` instance that specifies the size and alignment requirements for the memory allocation.
+        # The `malloc` function in C does not take an alignment argument, so in this case the alignment is ignored, but
+        # the size is still used to determine how much memory to allocate.
+        # @ret: A `Res` type that indicates whether the allocation was successful or if it failed with an `AllocErr`. If
+        # successful, the `Res` will contain a `NonNull` pointer to the allocated memory block. The `malloc` can fail if
+        # the system is out of memory, in which case it returns a null pointer.
+
+        let raw_ptr = sppc::malloc(layout.size)
+        let ptr = NonNull[U8]::from_ptr(raw_ptr).map_err((e: NullptrErr) AllocOomErr)?
+        ret Pass(val=ptr)
+    }
+
+    !versioned(base="1.0.0", new="1.0.0")
+    fun deallocate(&self, ptr: NonNull[U8]) -> Void {
+        # The default way to deallocate memory in the global allocator, is to use the C free function. This is
+        # interfaced via the sppc library. The method takes a NonNull object as an argument, by move, which means that
+        # the caller is transferring ownership of the memory to the allocator for deallocation. The sppc library maps
+        # the `mem_deallocate` to the `free` function in `C`, and no value is returned, so Void is used as the return
+        # type.
+        # @let ptr: A `NonNull` pointer that represents the block of memory to be deallocated. The `free` function in
+        # `C` does not take a size or alignment argument, so only the pointer is needed to perform the deallocation.
+        # @ret: The method does not return any value, as it is expected to perform the deallocation and not return any
+        # result. The caller is responsible for ensuring that the pointer passed to this method was previously allocated
+        # by the same allocator,
+
+        sppc::free(&mut ptr.raw())
+    }
+
+    !versioned(base="1.0.0", new="1.0.0")
+    fun allocate_zeroed(&self, layout: Layout) -> Res[NonNull[U8], AllocErr] {
+        # The default way to allocate zeroed memory in the global allocator, is to use the C calloc function. This is
+        # interfaced via the sppc library. This is safe because the "0" values are hidden under the NonNull type. Common
+        # safety measures are again taken to check if the allocation was successful, by checking if the returned pointer
+        # is null.
+        # @let layout: A `Layout` instance that specifies the size and alignment requirements for the memory allocation.
+        # The `calloc` function in `C` takes two arguments: the number of elements and the size of each element. In this
+        # case, the number of elements is set to 1, and the size of each element is set to the total size specified in
+        # the layout. The alignment is ignored, as `calloc` does not take an alignment argument.
+        # @ret: A `Res` type that indicates whether the allocation was successful or if it failed with an `AllocErr`. If
+        # successful, the `Res` will contain a `NonNull` pointer to the allocated and zeroed memory block. The `calloc`
+        # can fail if the system is out of memory, in which case it returns a null pointer.
+
+        let raw_ptr = sppc::calloc(1_uz, layout.size)
+        let ptr = NonNull[U8]::from_ptr(raw_ptr).map_err((e: NullptrErr) AllocOomErr)?
+        ret Pass(val=ptr)
+    }
+
+    !versioned(base="1.0.0", new="1.0.0")
+    fun grow(&self, ptr: &mut NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[Void, AllocErr] {
+        # Uses `realloc` to grow the allocation, updating the pointer in-place. `realloc` internally frees the old
+        # block, so no explicit `deallocate` call is needed. On failure, `ptr` is left unchanged.
+        # @let ptr: A mutable reference to the pointer to reallocate. Updated in-place on success.
+        # @let old_layout: A `Layout` instance specifying the size and alignment of the existing memory block.
+        # @let new_layout: A `Layout` instance specifying the size and alignment of the new memory block.
+        # @ret: `Pass()` if the reallocation succeeded, or an `AllocErr` on failure.
+
+        let new_raw = sppc::realloc(&mut ptr.raw(), new_layout.size)
+        let new_ptr = NonNull[U8]::from_ptr(new_raw).map_err((e: NullptrErr) AllocOomErr)?
+        ptr@ = new_ptr
+        ret Pass[Void]()
+    }
+
+    !versioned(base="1.0.0", new="1.0.0")
+    fun grow_zeroed(&self, ptr: &mut NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[Void, AllocErr] {
+        # Uses `realloc` to grow the allocation, then zeros the newly added tail bytes. `realloc` internally frees the
+        # old block, so no explicit `deallocate` call is needed. On failure, `ptr` is left unchanged.
+        # @let ptr: A mutable reference to the pointer to reallocate. Updated in-place on success.
+        # @let old_layout: A `Layout` instance specifying the size and alignment of the existing memory block.
+        # @let new_layout: A `Layout` instance specifying the size and alignment of the new memory block.
+        # @ret: `Pass()` if the reallocation succeeded, or an `AllocErr` on failure.
+
+        let new_raw = sppc::realloc(&mut ptr.raw(), new_layout.size)
+        let mut new_ptr = NonNull[U8]::from_ptr(new_raw).map_err((e: NullptrErr) AllocOomErr)?
+        std::mem::ops::mem_set(&mut new_ptr, 0_u8, new_layout.size - old_layout.size, old_layout.size)
+        ptr@ = new_ptr
+        ret Pass[Void]()
+    }
+
+    !versioned(base="1.0.0", new="1.0.0")
+    fun shrink(&self, ptr: &mut NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[Void, AllocErr] {
+        # `realloc` handles both growing and shrinking, so this delegates directly to `grow`.
+        # @let ptr: A mutable reference to the pointer to reallocate. Updated in-place on success.
+        # @let old_layout: A `Layout` instance specifying the size and alignment of the existing memory block.
+        # @let new_layout: A `Layout` instance specifying the size and alignment of the new memory block.
+        # @ret: `Pass()` if the reallocation succeeded, or an `AllocErr` on failure.
+
+        ret self.grow(ptr, old_layout, new_layout)
     }
 }

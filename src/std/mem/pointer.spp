@@ -1,0 +1,170 @@
+use std::annotations::intrinsic
+use std::annotations::package
+use std::annotations::public
+use std::annotations::versioned
+use std::annotations::zero_type
+use std::boolean::Bool
+use std::function::Fun
+use std::function::FunRef
+use std::function::FunMov
+use std::function::FunMut
+use std::generator::GenOnce
+use std::number::USize
+use std::result::Fail
+use std::result::Pass
+use std::result::Res
+use std::void::Void
+use std::ops::fwd::FwdMut
+use std::ops::fwd::FwdRef
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls NullptrErr {
+    # The `NullptrErr` type is a zero sized type that is used to indicate that a null pointer was encountered when
+    # trying to create a `NonNull` pointer from a raw pointer.
+}
+
+!package
+!versioned(base="1.0.0", new="1.0.0")
+cls Ptr[T] {
+    # The `Ptr` type is a simple wrapper around a raw pointer. It is never used outside of the standard library, and is
+    # only used internally to low level collections within the STL. The fields that have a `Ptr` type are also only
+    # internal to the S++ STL. Every use of `Ptr` is immediately wrapped  with `NonNull`, but `NonNull` can't be used
+    # from malloc API, because it malloc can legitamely return a null pointer.
+    # @type T: The type of the value that the pointer points to.
+    # @let addr: The address of the pointer. This is a compiler-added field that is used to store the raw pointer value,
+    # and ise only used for the `NonNull` construction method.
+
+    !package addr: USize
+}
+
+!package
+!versioned(base="1.0.0", new="1.0.0")
+cls NonNull[T] {
+    # Whilst the `Ptr` class is a raw pointer wrapper, only exposed by the sppc allocation functions, the `NonNull`
+    # wrapper is used to guarantee the non-nullability of a pointer. This is used in the implementation of `Vec` and
+    # `Str` to guarantee that the pointer to the heap allocation is never null, as the `Vec` and `Str` types have a
+    # non-null invariant. The `NonNull` type is never exposed to user code, and is only used internally within the STL.
+    # @type T: The type of the value that the pointer points to.
+}
+
+sup [T] NonNull[T] {
+    # Some basic construction methods to make ffi a lot easier, as well as a method to check pointer alignment.
+    # @type Element: The type of the value that the pointer points to. This is a type alias for `T`.
+
+    type Element = T
+
+    !package
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_ptr(ptr: Ptr[T]) -> Res[NonNull[T], NullptrErr] {
+        # Create a `NonNull` pointer from a raw pointer. This is safe because the `NonNull` type guarantees that the
+        # pointer is never null.
+        # @let ptr: The raw pointer that is being converted to a `NonNull` pointer. This is a `Ptr` type that wraps a
+        # raw pointer value.
+        # @ret: A `Res` type that indicates whether the conversion was successful or not. If the raw pointer is null,
+        # the function returns a `Fail` state with a `NullptrErr`. If the raw pointer is non-null, the function returns
+        # a `Pass` state with the newly created `NonNull` pointer.
+
+        # Check if the ptr is null (addr = 0). If it is, return the
+        # `Fail` state, otherwise call the inner function.
+        case ptr.addr == 0_uz { ret Fail(err=NullptrErr) }
+        ret Pass(val=Self::from_ptr_inner(ptr))
+    }
+
+    !package
+    !intrinsic(name="spp.mem.pointer.NonNull.from_ptr_inner")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_ptr_inner(ptr: Ptr[T]) -> NonNull[T] { }
+
+    !package
+    !intrinsic(name="spp.mem.pointer.NonNull.raw")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun raw(&self) -> Ptr[T] {
+        # Get the raw pointer from the `NonNull` pointer. This is a compiler intrinsic, as it can be implemented using a
+        # single instruction in LLVM. The method returns a `Ptr` type that wraps the raw pointer value.
+        # @ret: A `Ptr` type that wraps the raw pointer value. This is effectively a raw pointer that can be used in ffi
+        # calls, and it is guaranteed to be non-null.
+    }
+
+    !package
+    !intrinsic(name="spp.mem.pointer.NonNull.from_func")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_func[F: Fun](func: F) -> NonNull[F] {
+        # Convert a function into the function pointer type associated with it. This is needed to pass functions into
+        # ffi calls, which only accept function pointers. Ffi must accept `void*` as the function pointer type and cast
+        # it internally, because NonNull is effectively a `void*` with respect to cffi.
+        # @type F: The type of the function being converted. This must be a function type, as the generic is constrained
+        # to the base `Fun` trait.
+        # @let func: The function being converted into a function pointer. This is a value of type `F`, which is any
+        # functional object.
+        # @ret: A `NonNull` pointer that points to the function. This is effectively a function pointer that can be
+        # passed into ffi calls, and it is guaranteed to be non-null.
+    }
+
+    !package
+    !intrinsic(name="spp.mem.pointer.NonNull.cast")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun cast[U](self) -> NonNull[U] {
+        # Reinterpret this pointer as a pointer to type `U`. The underlying address is unchanged; only the type changes.
+        # Used to convert between `NonNull[U8]` (returned by allocators) and typed `NonNull[T]` pointers.
+        # @type U: The target type to reinterpret the pointer as.
+        # @ret: A `NonNull[U]` with the same address as `self`.
+    }
+
+    !package
+    !intrinsic(name="spp.mem.pointer.NonNull.is_aligned")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_aligned(&self, align: USize) -> Bool {
+        # The `is_aligned` method checks if the pointer is aligned to a given alignment. This is a compiler intrinsic,
+        # as it can be implemented using a single instruction in LLVM. The `align` parameter is a power of two, and the
+        # method returns true if the pointer is aligned to that alignment, and false otherwise.
+        # @let align: The alignment to check against. This must be a power of two.
+        # @ret: A boolean value indicating whether the pointer is aligned to the specified alignment or not.
+    }
+
+    !package
+    !intrinsic(name="spp.mem.pointer.NonNull.write")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun write(&mut self, value: T) -> Void {
+        # The `write` method writes a value to the memory location pointed to by the `NonNull` pointer. This is a
+        # compiler intrinsic, as it can be implemented using a single instruction in LLVM. The method takes ownership of
+        # the value being written, and it is moved into the memory location. Due to ownership rules, this is safe.
+        # @let value: The value to write to the memory location. This is a value of type `T`, which is the type of the
+        # value that the pointer points to.
+    }
+
+    !package
+    !intrinsic(name="spp.mem.pointer.NonNull.read")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun read(&self) -> T {
+        # The `read` method reads a value from the memory location pointed to by the `NonNull` pointer. This is a
+        # compiler intrinsic, as it can be implemented using a single instruction in LLVM. The method returns a copy of
+        # the value being read, and it is moved out of the memory location. Due to ownership rules, this is safe.
+        # @ret: A value of type `T`, which is the type of the value that the pointer points to. This is a copy of the
+        # value that was read from the memory location.
+    }
+}
+
+sup [T] NonNull[T] ext FwdMut[&mut T] {
+    # Provide a forwarding implementation for mutable references to the inner type of the `NonNull` pointer.
+
+    !intrinsic(name="spp.mem.pointer.NonNull.fwd_mut")
+    !versioned(base="1.0.0", new="1.0.0")
+    cor fwd_mut(&mut self) -> GenOnce[&mut T] {
+        # Allow the `NonNull` pointer type to coalesce to the inner type, allowing for simple field access and method
+        # calls on the inner type without additional dereferencing required. This is the mutable variant.
+        # @ret: The inner value of the `NonNull` pointer, borrowed mutably.
+    }
+}
+
+sup [T] NonNull[T] ext FwdRef[&T] {
+    # Provide a forwarding implementation for immutable references to the inner type of the `NonNull` pointer.
+
+    !intrinsic(name="spp.mem.pointer.NonNull.fwd_ref")
+    !versioned(base="1.0.0", new="1.0.0")
+    cor fwd_ref(&self) -> GenOnce[&T] {
+        # Allow the `NonNull` pointer type to coalesce to the inner type, allowing for simple field access and method
+        # calls on the inner type without additional dereferencing required. This is the immutable variant.
+        # @ret: The inner value of the `NonNull` pointer, borrowed immutably.
+    }
+}

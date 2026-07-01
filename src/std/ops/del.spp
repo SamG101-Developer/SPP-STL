@@ -2,10 +2,9 @@ use std::annotations::abstract_method
 use std::annotations::public
 use std::void::Void
 
-
 !public cls Del { }
 
-
+# Allow the use of the destructor operation.
 sup Del {
     !public
     !abstract_method

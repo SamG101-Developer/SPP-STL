@@ -1,230 +1,492 @@
+use std::annotations::cfg
 use std::annotations::package
 use std::annotations::public
+use std::annotations::versioned
+use std::annotations::zero_type
 use std::boolean::Bool
+use std::char::Char
 use std::clone::Clone
-use std::iterator::Iterator
-use std::number::U8
-use std::ops::eq::Eq
-use std::ops::div::Div
-use std::option::None
-use std::option::Opt
-use std::option::Some
+use std::number::USize
+use std::number::S32
+use std::result::Fail
+use std::result::Pass
+use std::result::Res
 use std::string::Str
 use std::string_view::StrView
+use std::vector::Vec
+use std::void::Void
+use std::fs::file::File
+use std::fs::file::FileMode
+use std::ops::div::Div
+use std::ops::div::DivAssign
 
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls PathNotFoundErr {
+    # The `PathNotFoundErr` type represents an error that occurs when a specified path cannot be found in the
+    # filesystem. This error is typically returned by methods that attempt to access or manipulate a path that does not
+    # exist, such as `is_file`.
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls PathPermissionErr {
+    # The `PathPermissionErr` type represents an error that occurs when the program does not have the necessary
+    # permissions to access or manipulate a specified path in the filesystem. This error is typically returned when
+    # paths are locked down by the operating system or when trying to access protected directories or files.
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls PathLoopErr {
+    # The `PathLoopErr` type represents an error that occurs when a path contains a symbolic link that creates a loop in
+    # the filesystem. This can lead to infinite recursion when trying to resolve the path, and is typically returned by
+    # methods that attempt to resolve symbolic links or canonicalize paths.
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls PathNameTooLongErr {
+    # The `PathNameTooLongErr` type represents an error that occurs when a specified path exceeds the maximum length
+    # allowed by the operating system. This error is typically encountered when creating a path, whose combined file and
+    # directory path exceeds the system-defined limit (e.g., 255 characters on many filesystems).
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls PathOtherErr {
+    # The `PathOtherErr` type represents a generic error that can occur when working with paths in the filesystem. This
+    # error is used to capture any other types of errors that do not fit into the specific categories defined by the
+    # other error types, such as unexpected I/O errors or platform-specific issues.
+}
 
 !public
+!versioned(base="1.0.0", new="1.0.0")
+type PathErr = PathNotFoundErr
+    or PathPermissionErr
+    or PathLoopErr
+    or PathNameTooLongErr
+    or PathOtherErr
+
+sup PathErr {
+    fun from_errno(errno: S32) -> Self {
+        ret case errno of {
+            == cffi::enoent { PathNotFoundErr }
+            == cffi::eacces { PathPermissionErr }
+            == cffi::eloop { PathLoopErr }
+            == cffi::enametoolong { PathNameTooLongErr }
+            else { PathOtherErr }
+        }
+    }
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp path_max: USize = 4096_uz
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
 cls Path {
-    !package path: Str
+    # The `Path` type is used to represent filepaths in a platform-agnostic way. It provides methods for manipulating
+    # and querying paths, such as joining paths, extracting file names, and iterating over path components.
+    # @let inner: The inner path stored as a string.
+
+    !package inner: Str
 }
-
-
-sup Path {
-    !public cmp sep: U8 = '/'
-}
-
 
 sup Path {
     !public
-    fun is_absolute(&self) -> Bool {
-        ret self.path.starts_with(StrView::from(self.sep))
+    !versioned(base="1.0.0", new="1.0.0")
+    fun parent(&self) -> Path {
+        # The `parent` method returns the parent directory of the path (left of the right-most separator). If the path
+        # has no parent, it returns an empty path.
+        # @ret: The parent directory as a `Path` object.
+
+        let sep = Str::from(self.sep())
+        let idx = self.inner.rfind(&sep)
+        case idx.is_none() { ret Path(inner=Str::from("")) }
+        ret Path(inner=Str::from(self.inner[0_uz to idx.unwrap()]))
     }
 
     !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun file_name(&self) -> Str {
+        # The `file_name` method returns the file name component of the path (right of the right-most separator). If the
+        # path has no file name, it returns the entire path as a string.
+        # @ret: The file name as a `Str` object.
+
+        let sep = Str::from(self.sep())
+        let idx = self.inner.rfind(&sep)
+        case idx.is_none() { ret self.inner.clone() }
+        ret Str::from(self.inner[idx.unwrap() + 1_uz to self.inner.len()])
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun file_stem(&self) -> Str {
+        # The `file_stem` method returns the file stem component of the path (the file name without the extension). If
+        # the file name has no extension, it returns the entire file name.
+        # @ret: The file stem as a `Str` object.
+
+        let file_name = self.file_name()
+        let idx = file_name.rfind(&Str::from('.'))
+        case idx.is_none() { ret file_name }
+        ret Str::from(file_name[0_uz to idx.unwrap()])
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun extension(&self) -> Str {
+        # The `extension` method returns the file extension component of the path (the substring after the last dot in
+        # the file name). If the file name has no extension, it returns an empty string.
+        # @ret: The file extension as a `Str` object.
+
+        let file_name = self.file_name()
+        let idx = file_name.rfind(&Str::from('.'))
+        case idx.is_none() { ret Str::from("") }
+        ret Str::from(file_name[idx.unwrap() + 1_uz to file_name.len()])
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun components(&self) -> Vec[Str] {
+        # The `components` method returns a vector of the individual components of the path, split by the path
+        # separator.
+        # @ret: A vector of path components as `Str` objects.
+
+        let sep = Str::from(self.sep())
+        let parts = self.inner
+            .split(&sep)
+            .map((part: &StrView) Str::from(part))
+        ret Vec[Str]::from_generator(parts)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    !cfg(platform="Unix")
+    fun sep(&self) -> Char {
+        # The `sep` method returns the path separator character for the current platform. This is used to split and join
+        # paths in a platform-agnostic way. On Windows, the separator is '\\', while on Unix-like systems, it's '/'.
+        # @ret: The path separator as a `Char` object.
+        # @todo: Implement platform-specific logic for Windows paths.
+
+        ret '/'
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    !cfg(platform="Unix")
+    fun is_absolute(&self) -> Bool {
+        # The `is_absolute` method checks if the path is an absolute path. An absolute path starts with the root
+        # directory (e.g., '/' on Unix or 'C:\\' on Windows). This method provides a simple way to determine if a path
+        # is absolute or relative.
+        # @ret: `true` if the path is absolute, `false` otherwise.
+        # @todo: Implement platform-specific logic for Windows paths.
+
+        let sep = Str::from(self.sep())
+        ret self.inner.starts_with(&sep)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    !cfg(platform="Unix")
     fun is_relative(&self) -> Bool {
+        # The `is_relative` method checks if the path is a relative path. A relative path does not start with the root
+        # directory and is interpreted relative to the current working directory. This method provides a simple way to
+        # determine if a path is relative or absolute.
+        # @ret: `true` if the path is relative, `false` otherwise.
+
         ret self.is_absolute().not
     }
 
     !public
-    fun to_absolute(&self) -> Path {
-        # Get the current working directory and join with self.path.
-        let cwd = std::process::get_cwd()
-        let abs_path = Path(path=cwd) / self.path
-        ret abs_path
+    !versioned(base="1.0.0", new="1.0.0")
+    fun starts_with(&self, prefix: &Path) -> Bool {
+        # The `starts_with` method checks if the path starts with the given prefix path. This is useful for determining
+        # if a path is a subpath of another path or for validating that a path is within a certain directory.
+        # @let prefix: The prefix path to check against.
+        # @ret: `true` if the path starts with the prefix, `false` otherwise.
+
+        ret self.inner.starts_with(&prefix.inner)
     }
 
     !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun ends_with(&self, suffix: &Path) -> Bool {
+        # The `ends_with` method checks if the path ends with the given suffix path. This is useful for determining if a
+        # path has a certain file name or extension.
+        # @let suffix: The suffix path to check against.
+        # @ret: `true` if the path ends with the suffix, `false` otherwise.
+
+        ret self.inner.ends_with(&suffix.inner)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun join(&self, other: &Path) -> Path {
+        # The `join` method concatenates the current path with another path, inserting the appropriate separator if
+        # necessary. This is used to build paths in a platform-agnostic way.
+        # @let other: The path to join with the current path.
+        # @ret: A new `Path` object representing the joined path.
+
+        # Get the separator and clone this path.
+        let sep = Str::from(self.sep())
+        let mut new_path = self.inner.clone()
+
+        # Only add the separator if neither part has it.
+        case new_path.ends_with(&sep).not and other.inner.starts_with(&sep).not { new_path.append_str(&sep) }
+        new_path.append_str(&other.inner)
+        ret Path(inner=new_path)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun with_file_name(&self, file_name: &Str) -> Path {
+        # The `with_file_name` method replaces the file name component of the path with a new file name. This is useful
+        # for changing the file name while keeping the same directory structure.
+        # @let file_name: The new file name to use.
+        # @ret: A new `Path` object with the updated file name.
+
+        let parent = self.parent()
+        ret parent.join(&Path(inner=file_name.clone()))
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun with_extension(&self, extension: &Str) -> Path {
+        # The `with_extension` method replaces the file extension component of the path with a new extension. This is
+        # useful for changing the file type while keeping the same file name and directory structure.
+        # @let extension: The new file extension to use (without the dot).
+        # @ret: A new `Path` object with the updated file extension.
+
+        let file_stem = self.file_stem()
+        let new_file_name = case extension.is_empty() { file_stem } else { file_stem + "." + extension }
+        ret self.with_file_name(&new_file_name)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun exists(&self) -> Bool {
-        # Check if the path exists in the filesystem (ignore C error).
-        let found = sppc::fs_exists(&StrView::from(self.path.clone()))
-        ret found > 0
+        # The `exists` method checks if the path exists in the filesystem. This is a common operation to verify that a
+        # file or directory is present before attempting to access it.
+        # @ret: `true` if the path exists, `false` otherwise.
+
+        let mut exists = false
+        let err = sppc::exists(&self.inner.ptr, &mut exists)
+        ret case err == 0 { exists } else { false }
     }
 
     !public
-    fun parent(&self) -> Path {
-        # Get the parent directory of the path (which is the dir_name).
-        let dir_name = self.dir_name()
-        ret Path(path=dir_name)
-    }
-}
+    !versioned(base="1.0.0", new="1.0.0")
+    fun try_exists(&self) -> Res[Bool, PathErr] {
+        # The `try_exists` method checks if the path exists in the filesystem, returning a `Res` type that indicates
+        # success or failure. This allows the caller to handle errors more gracefully compared to the `exists` method.
+        # @ret: A `Res` type containing `true` if the path exists, `false` if it does not exist, or an error message if
+        # the check fails.
 
-
-sup Path {
-    !public
-    fun file_name(&self) -> Opt[Str] {
-        let parts = self.path.split(self.sep)
-        # ret case parts.len() == 0_uz { None() } else { Some(val=parts.get_tail_ref().clone()) }
-        ret None()
+        let mut exists = false
+        let err = sppc::exists(&self.inner.ptr, &mut exists)
+        ret case err == 0 { Pass(val=exists) } else { Fail(err=PathErr::from_errno(err)) }
     }
 
     !public
-    fun file_stem(&self) -> Opt[Str] {
-        let file_name = self.file_name()
-        # ret file_name.map(|name: Str| name.split('.')[0].clone())
-        ret None()
-    }
-
-    !public
-    fun extension(&self) -> Opt[Str] {
-        let file_name = self.file_name()
-        ret None()
-        #ret file_name.map(|name: Str| {
-        #    let parts = name.split('.')
-        #    case parts.len() > 1 { Some(val=parts[parts.len() - 1]) } else { None() }
-        #})
-    }
-
-    !public
-    fun dir_name(&self) -> Str {
-        # let parts = self.path.split(self.sep)
-        # let parts = parts.iter_mov().take(parts.len() - 1)
-        # ret Str::join(parts, self.sep)
-        ret Str::from("")
-    }
-
-    !public
-    fun split(&self) -> (Opt[Path], Opt[Path]) {
-        let temp0: Opt[Path] = None()
-        let temp1: Opt[Path] = None()
-        ret (temp0, temp1)
-        #ret (
-            #self.dir_name().map(|dir: Str| Path(path=dir)),
-            #self.file_name().map(|file: Str| Path(path=file)))
-    }
-
-    !public
-    fun split_ext(&self) -> (Path, Opt[Str]) {
-        let parts = self.path.split('.')
-        # ret (Path(path=parts[0_uz]), case parts.len() > 1 { Some(val=parts.index_ref(1).clone()) } else { None() })
-        let dummy: Opt[Str] = Some(val=Str())
-        ret (Path(), dummy)
-    }
-}
-
-
-sup Path {
-    !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun is_file(&self) -> Bool {
-        # Check if the path is a file in the filesystem (ignore C error).
-        let test = sppc::fs_is_file(&StrView::from(self.path.clone()))
-        ret test > 0
+        # The `is_file` method checks if the path points to a regular file in the filesystem. This is useful for
+        # distinguishing between files and directories.
+        # @ret: `true` if the path is a regular file, `false` otherwise.
+
+        let mut is_file = false
+        let err = sppc::is_file(&self.inner.ptr, &mut is_file)
+        ret case err == 0 { is_file } else { false }
     }
 
     !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun is_dir(&self) -> Bool {
-        # Check if the path is a directory in the filesystem (ignore C error).
-        let test = sppc::fs_is_dir(&StrView::from(self.path.clone()))
-        ret test > 0
+        # The `is_dir` method checks if the path points to a directory in the filesystem. This is useful for
+        # distinguishing between files and directories.
+        # @ret: `true` if the path is a directory, `false` otherwise.
+
+        let mut is_dir = false
+        let err = sppc::is_dir(&self.inner.ptr, &mut is_dir)
+        ret case err == 0 { is_dir } else { false }
     }
 
     !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun is_symlink(&self) -> Bool {
-        # Check if the path is a symlink in the filesystem (ignore C error).
-        let test = sppc::fs_is_symlink(&StrView::from(self.path.clone()))
-        ret test > 0
+        # The `is_symlink` method checks if the path points to a symbolic link in the filesystem. This is useful for
+        # identifying symbolic links and handling them appropriately.
+        # @ret: `true` if the path is a symbolic link, `false` otherwise.
+
+        let mut is_symlink = false
+        let err = sppc::is_symlink(&self.inner.ptr, &mut is_symlink)
+        ret case err == 0 { is_symlink } else { false }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun canonicalize(&self) -> Res[Path, PathErr] {
+        # The `canonicalize` method returns the canonical, absolute form of the path, resolving any symbolic links and
+        # relative path components. This is useful for obtaining a standardized path representation.
+        # @ret: A `Res` type containing the canonicalized `Path` on success, or an error message if the operation fails.
+
+        let mut canonical_path = Str::new_with_capacity(path_max)
+        let err = sppc::realpath(&self.inner.ptr, &mut canonical_path.ptr)
+        canonical_path.capacity_shrink()
+        ret case err == 0 { Pass(val=Path(inner=canonical_path)) } else { Fail(err=PathErr::from_errno(err)) }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun create_dir(&self) -> Res[Void, PathErr] {
+        # The `create_dir` method attempts to create a new directory at the specified path. As it only creates the
+        # topmost directory, it assumes that the parent directory exists. If it doesn't, an error will be returned.
+        # @ret: A `Res` type containing `Pass()` if the directory is successfully created, or an error message if the
+        # operation fails.
+
+        let err = sppc::mkdir(&self.inner.ptr, FileMode().create().to_flags())
+        ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun create_dir_all(&self) -> Res[Void, PathErr] {
+        # The `create_dir_all` method attempts to create a new directory at the specified path, along with any necessary
+        # parent directories. It recursivelt checks each component, creating directories as needed.
+        # @ret: A `Res` type containing `Pass(())` if the directories are successfully created, or an error message if
+        # the operation fails.
+
+        let components = self.components()
+        let mut current_path = Path()
+        loop component in components.iter_ref() {
+            current_path /= Path(inner=component.clone())
+            case current_path.exists() { skip }
+            let err = sppc::mkdir(&current_path.inner.ptr, FileMode().create().to_flags())
+            case err == 0 { skip } else { ret Fail(err=PathErr::from_errno(err)) }
+        }
+        ret Pass[Void]()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun remove_file(&self) -> Res[Void, PathErr] {
+        # The `remove_file` method attempts to remove the file at the specified path. If the path points to a directory
+        # or does not exist, an error will be returned.
+        # @ret: A `Res` type containing `Pass()` if the file is successfully removed, or an error message if the
+        # operation fails.
+
+        let err = sppc::remove(&self.inner.ptr)
+        ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun remove_dir(&self, force: Bool = false) -> Res[Void, PathErr] {
+        # The `remove_dir` method attempts to remove the directory at the specified path. If the path points to a file,
+        # does not exist, or is not empty, an error will be returned.
+        # @let force: If `true`, the method will attempt to remove the directory and all of its contents recursively. If
+        # `false`, the method will only remove the directory if it is empty.
+        # @ret: A `Res` type containing `Pass()` if the directory is successfully removed, or an error message if the
+        # operation fails.
+        # @todo: Implement the `force` parameter to recursively remove non-empty directories.
+
+        let err = sppc::rmdir(&self.inner.ptr)
+        ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun rename_to(&self, new_path: &Path) -> Res[Void, PathErr] {
+        # The `rename_to` method attempts to rename the file or directory at the current path to a new path. If the
+        # current path does not exist, the new path already exists, or the operation fails for any reason, an error will
+        # be returned.
+        # @let new_path: The new path to rename to.
+        # @ret: A `Res` type containing `Pass()` if the rename is successful, or an error message if the operation
+        # fails.
+
+        let err = sppc::rename(&self.inner.ptr, &new_path.inner.ptr)
+        ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun copy_to(&self, new_path: &Path) -> Res[Void, PathErr] {
+        # The `copy_to` method attempts to copy the file at the current path to a new path. If the current path does not
+        # exist, the new path already exists, or the operation fails for any reason, an error will be returned.
+        # @let new_path: The new path to copy to.
+        # @ret: A `Res` type containing `Pass()` if the copy is successful, or an error message if the operation fails.
+
+        let mut file_length = 0_sz
+        sppc::filesize(&self.inner.ptr, &mut file_length)
+        let file_in = File::open(self.clone(), FileMode().read())?
+        let file_out = File::open(new_path.clone(), FileMode().write())?
+        let err = sppc::copyfile(file_in.fd, file_out.fd, USize::from(file_length), 0)
+        ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun hardlink_to(&self, new_path: &Path) -> Res[Void, PathErr] {
+        # The `hardlink_to` method attempts to create a hard link from the current path to a new path. If the current
+        # path does not exist, the new path already exists, or the operation fails for any reason, an error will be
+        # returned.
+        # @let new_path: The new path to create the hard link at.
+        # @ret: A `Res` type containing `Pass()` if the hard link is successfully created, or an error message if the
+        # operation fails.
+
+        let err = sppc::hardlink(&self.inner.ptr, &new_path.inner.ptr)
+        ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun symlink_to(&self, new_path: &Path) -> Res[Void, PathErr] {
+        # The `symlink_to` method attempts to create a symbolic link from the current path to a new path. If the current
+        # path does not exist, the new path already exists, or the operation fails for any reason, an error will be
+        # returned.
+        # @let new_path: The new path to create the symbolic link at.
+        # @ret: A `Res` type containing `Pass()` if the symbolic link is successfully created, or an error message if
+        # the operation fails.
+
+        let err = sppc::symlink(&self.inner.ptr, &new_path.inner.ptr)
+        ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
     }
 }
 
-
-sup Path {
-    !public
-    fun join(&self, other: Str) -> Path {
-        let mut new_path = self.path.clone()
-        case new_path.ends_with(StrView::from(self.sep)).not {
-            new_path += Str::from(self.sep)
-        }
-        new_path += other
-        ret Path(path=new_path)
-    }
-
-    !public
-    fun with_added_extension(&self, ex: Str) -> Path {
-        let mut new_path = self.path.clone()
-        case ex.length() > 0_uz {
-            new_path += Str::from('.')
-            new_path += ex
-        }
-        ret Path(path=new_path)
-    }
-
-    !public
-    fun with_extension(&self, ex: Str) -> Path {
-        let (base_path, _) = self.split_ext()
-        let mut new_path = base_path.path.clone()
-        case ex.length() > 0_uz {
-            new_path += Str::from('.')
-            new_path += ex
-        }
-        ret Path(path=new_path)
-    }
-
-    !public
-    fun with_file_name(&self, name: Str) -> Path {
-        let dir = self.dir_name()
-        let mut new_path = dir.clone()
-        case new_path.ends_with(StrView::from(self.sep)).not {
-            new_path += Str::from(self.sep)
-        }
-        new_path += name
-        ret Path(path=new_path)
-    }
-}
-
-
-sup Path {
-    !public
-    cor iter_mov(self) -> Iterator[Str] {
-        let parts = self.path.split(self.sep)
-        gen with parts.iter_mov()
-    }
-
-    !public
-    cor iter_mut(&mut self) -> Iterator[&mut Str] {
-        let parts = self.path.split(self.sep)
-        gen with parts.iter_mut()
-    }
-
-    !public
-    cor iter_ref(&self) -> Iterator[&Str] {
-        let parts = self.path.split(self.sep)
-        gen with parts.iter_ref()
-    }
-}
-
-
-sup Path ext Clone[Out=Path] {
+sup Path ext Clone {
+    !versioned(base="1.0.0", new="1.0.0")
     fun clone(&self) -> Self {
-        ret Path(path=self.path.clone())
+        # The `clone` method creates a new `Path` instance that is a copy of the current instance. This is useful for
+        # creating independent copies of paths that can be modified without affecting the original.
+        # @ret: A new `Path` object that is a copy of the current instance.
+
+        ret Path(inner=self.inner.clone())
     }
 }
 
+sup Path ext Div {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun div(self, that: Self) -> Self {
+        # The `div` method allows for using the division operator (`/`) to join two paths together. This provides a
+        # convenient syntax for building paths in a platform-agnostic way.
+        # @let that: The right-hand side path to join with the left-hand side path.
+        # @ret: A new `Path` object representing the joined path.
 
-sup Path ext Div[Rhs=Str, Ret=Path] {
-    fun div(self, that: Str) -> Path {
-        ret self.join(that)
+        ret self.join(&that)
     }
 }
 
+sup Path ext DivAssign {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun div_assign(&mut self, that: Self) -> Void {
+        # The `div_assign` method allows for using the division assignment operator (`/=`) to join a path with another
+        # path and assign the result back to the original path variable. This provides a convenient syntax for building
+        # paths in a platform-agnostic way.
+        # @let that: The right-hand side path to join with the left-hand side path.
+        # @ret: The original `Path` object is modified to represent the joined path.
 
-sup Path ext Div[Rhs=Path, Ret=Path] {
-    fun div(self, that: Path) -> Path {
-        ret self.join(that.path)
-    }
-}
-
-
-sup Path ext Eq[Rhs=Path] {
-    fun eq(&self, that: &Path) -> Bool {
-        ret self.path.eq(&that.path)
+        self@ = self.join(&that)
     }
 }

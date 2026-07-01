@@ -3,10 +3,9 @@ use std::annotations::protected
 use std::annotations::public
 use std::boolean::Bool
 
-
 !public cls Try[Output, Residual, Value] { }
 
-
+# Allow the use of the "?" operator.
 sup [Output, Residual, Value] Try[Output, Residual, Value] {
     !protected
     !abstract_method

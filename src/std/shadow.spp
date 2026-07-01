@@ -1,18 +1,19 @@
-use std::annotations::compiler_builtin
+use std::annotations::intrinsic
 use std::annotations::public
+use std::annotations::versioned
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::shared::Shared
 
-
 !public
-cls Shadow[T, A: Alloc[T] = GlobalAlloc[T]] { }
-
+!versioned(base="1.0.0", new="1.0.0")
+cls Shadow[T, A: Alloc = GlobalAlloc] { }
 
 sup [T] Shadow[T] {
     !public type Element = T
 
     !public
-    !compiler_builtin
+    !intrinsic(name="std.shadow.Shadow.upgrade")
+    !versioned(base="1.0.0", new="1.0.0")
     fun upgrade(&self) -> Shared[T] { }
 }

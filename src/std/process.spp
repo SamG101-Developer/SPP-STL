@@ -1,5 +1,9 @@
 use std::annotations::public
+use std::annotations::versioned
+use std::annotations::zero_type
 use std::boolean::Bool
+use std::number::S32
+use std::number::U32
 use std::number::USize
 use std::option::None
 use std::option::Opt
@@ -7,44 +11,151 @@ use std::option::Some
 use std::string::Str
 use std::string_view::StrView
 
-
-!public
-fun get_cwd() -> Str {
-    # Return the current working directory as a string.
-    let mut cwd = StrView()
-    sppc::proc_get_cwd(&mut cwd)
-    ret Str::from(cwd)
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls EnvInvalidKeyErr {
+    # The `EnvInvalidKeyErr` class represents an error that occurs when an invalid key is provided for environment
+    # variable operations. This error is typically raised when the key does not conform to the expected format for
+    # environment variable names, such as containing invalid characters or being empty.
 }
 
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls EnvOomErr {
+    # The `EnvOomError` class represents an error that occurs when the system runs out of memory while trying to set an
+    # environment variable. This error is typically raised when there is insufficient memory available to allocate for
+    # the new environment variable or its value.
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls EnvOtherErr {
+    # The `EnvOtherErr` class represents a generic error that can occur during environment variable operations that do
+    # not fall into the specific categories of `EnvInvalidKeyErr` or `EnvOomErr`.
+}
 
 !public
-fun set_cwd(path: StrView) -> Bool {
-    # Set the current working directory to the specified path.
-    let result = sppc::proc_set_cwd(&path)
+!versioned(base="1.0.0", new="1.0.0")
+type EnvErr = EnvInvalidKeyErr or EnvOomErr or EnvOtherErr
+
+sup EnvErr {
+    fun from_errno(errno: S32) -> Self {
+        # The `from_errno` function is a static method that takes an error number (`errno`) as input and returns an
+        # instance of the appropriate error class based on the value of `errno`. It uses a `case` statement to match the
+        # `errno` value against known error codes for invalid keys and out-of-memory conditions.
+        # @let errno: The error number (errno) that indicates the type of error that occurred during an environment
+        # variable operation.
+        # @ret: An instance of `EnvErr` that corresponds to the provided `errno`.
+
+        ret case errno of {
+            == cffi::einval { EnvInvalidKeyErr }
+            == cffi::enomem { EnvOomErr }
+            else { EnvOtherErr }
+        }
+    }
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun get_proc_id() -> U32 {
+    # The `get_proc_id` function retrieves the current process ID (PID) of the running program. It uses the
+    # `sppc::get_pid` function to obtain the PID and returns it as an unsigned integer (`U32`).
+    # @ret: The current process ID (PID) as a `U32`.
+
+    let mut pid = 0_s32
+    sppc::get_pid(&mut pid)
+    ret U32::from(pid)
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun get_proc_parent_id() -> U32 {
+    # The `get_proc_parent_id` function retrieves the parent process ID (PPID) of the current process. It uses the
+    # `sppc::get_ppid` function to obtain the PPID and returns it as an unsigned integer (`U32`).
+    # @ret: The parent process ID (PPID) as a `U32`.
+
+    let mut ppid = 0_s32
+    sppc::get_ppid(&mut ppid)
+    ret U32::from(ppid)
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun get_env(key: &StrView) -> Opt[Str] {
+    # The `get_env` function retrieves the value of an environment variable specified by the `key` parameter. It uses
+    # the `sppc::get_env` function to obtain the value of the environment variable. If the environment variable is set,
+    # it returns an `Opt` type containing the value as a `Str`.
+    # @let key: The name of the environment variable to retrieve.
+    # @ret: An `Opt` type containing the value of the environment variable if it is set, or `None` if it is not set.
+
+    let mut val = Str::new()
+    let err = sppc::getenv(&key.ptr, &mut val.ptr)
+    ret case err == 0 { Some(val) } else { None() }
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun set_env(var_key: &StrView, var_val: &StrView, overwrite: Bool = true) -> Bool {
+    # The `set_env` function sets the value of an environment variable specified by the `var_key` parameter to the value
+    # provided in the `var_val` parameter. It uses the `sppc::set_env` function to set the environment variable. The
+    # `overwrite` parameter determines whether to overwrite the existing value of the environment variable if it is
+    # already set. If `overwrite` is `true`, the existing value will be replaced; if `false`, the existing value will
+    # remain unchanged. The function returns a boolean indicating whether the operation was successful.
+    # @let var_key: The name of the environment variable to set.
+    # @let var_val: The value to assign to the environment variable.
+    # @let ?overwrite: An optional boolean parameter that determines whether to overwrite the existing value of the
+    # environment variable if it is already set. Defaults to `true`.
+    # @ret: A boolean value indicating whether the environment variable was successfully set. Returns `true` if the
+    # operation was successful, or `false` if it failed.
+
+    let err = sppc::setenv(&var_key.ptr, &var_val.ptr, overwrite)
+    ret err == 0
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun unset_env(var_key: &StrView) -> Bool {
+    # The `unset_env` function removes an environment variable specified by the `var_key` parameter. It uses the
+    # `sppc::unset_env` function to unset the environment variable. The function returns a boolean indicating whether
+    # the operation was successful.
+    # @let var_key:
+    # @ret:
+
+    let result = sppc::unsetenv(&var_key.ptr)
     ret result == 0
 }
 
-
 !public
-fun get_env(var_key: StrView) -> Opt[Str] {
-    # Get the value of an environment variable.
-    let env_val = sppc::proc_get_env(&var_key)
-    case env_val.is_empty() { ret None() }
-    ret Some(val=Str::from(env_val))
+!versioned(base="1.0.0", new="1.0.0")
+fun exit_checked(status: S32) -> ! {
+    # The `exit_checked` function cleanly terminates the current process with the specified exit status. It uses the
+    # `sppc::exit_clean` function to perform the exit operation. The function does not return a value, as it is intended
+    # to terminate the process, but does clean up resources, such as the std streams, before exiting.
+    # @let status: The exit status code to be returned when the process terminates.
+
+    sppc::exit_clean(status)
 }
 
-
 !public
-fun set_env(var_key: StrView, var_val: StrView, overwrite: Bool = true) -> Bool {
-    # Set the value of an environment variable.
-    let result = sppc::proc_set_env(&var_key, &var_val, overwrite)
-    ret result == 0
+!versioned(base="1.0.0", new="1.0.0")
+fun exit_unchecked(status: S32) -> ! {
+    # The `exit_unchecked` function forcefully terminates the current process with the specified exit status. It uses
+    # the `sppc::exit_` function to perform the exit operation. This function does not perform any cleanup of resources,
+    # such as flushing std streams, and is intended for use in situations where an immediate exit is necessary without
+    # concern for resource management.
+    # @let status: The exit status code to be returned when the process terminates.
+
+    sppc::exit_(status)
 }
 
-
 !public
-fun unset_env(var_key: StrView) -> Bool {
-    # Unset an environment variable.
-    let result = sppc::proc_unset_env(&var_key)
-    ret result == 0
+!versioned(base="1.0.0", new="1.0.0")
+fun abort() -> ! {
+    # The `abort` function immediately terminates the current process without performing any cleanup. It uses the
+    # `sppc::abort` function to perform the abort operation. This function is typically used in situations where the
+    # program encounters a critical error and needs to terminate immediately without concern for resource management or
+    # cleanup. The more common `std::abort::abort` function is a wrapper around this function that also prints an error
+    # message to stderr before aborting.
+
+    sppc::abort()
 }

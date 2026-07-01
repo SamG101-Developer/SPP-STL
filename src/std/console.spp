@@ -1,0 +1,222 @@
+use std::annotations::package
+use std::annotations::public
+use std::annotations::private
+use std::annotations::versioned
+use std::io::Read
+use std::io::BufRead
+use std::io::StreamErr
+use std::io::Write
+use std::number::U8
+use std::number::USize
+use std::option::Opt
+use std::option::None
+use std::option::Some
+use std::result::Res
+use std::result::Fail
+use std::result::Pass
+use std::string::Str
+use std::string_view::StrView
+use std::view::View
+use std::void::Void
+
+!package
+!versioned(base="1.0.0", new="1.0.0")
+cls StdinStream {
+    # The `StdinStream` class represents the standard input stream. It provides methods for reading data from the
+    # standard input, which is used to input data in the terminal/console. The `StdinStream` class extends the `Read`
+    # trait, which defines the interface for reading data from a stream.
+}
+
+!package
+!versioned(base="1.0.0", new="1.0.0")
+cls StdoutStream {
+    # The `StdoutStream` class represents the standard output stream. It provides methods for writing data to the
+    # standard output, which is used to display data in the terminal/console. The `StdoutStream` class extends the
+    # `Write` trait, which defines the interface for writing data to a stream.
+}
+
+!package
+!versioned(base="1.0.0", new="1.0.0")
+cls StderrStream {
+    # The `StderrStream` class represents the standard error stream. It provides methods for writing data to the
+    # standard error, which is used to display error messages in the terminal/console. The `StderrStream` class extends
+    # the `Write` trait, which defines the interface for writing data to a stream.
+}
+
+sup StdinStream ext Read {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun read(&mut self, mut buf: &mut View[U8]) -> Res[USize, StreamErr] {
+        # The `read` method reads data from the standard input stream into the provided buffer. It uses a special `C`
+        # function defined in the `sppc` library, which is very close to the `C` `read` kernel function, but locks on a
+        # global stdin pthread mutex.
+        # @let buf: A mutable borrow to a view of bytes that will be filled with the data read from the standard input.
+        # The method will attempt to read up to `len` bytes into the buffer, where `len` is the length of the view. The
+        # buffer is modified in-place with the data read from the standard input.
+        # @ret: The number of bytes that were successfully read into the buffer, or an error if the read operation
+        # fails.
+
+        # Read from the standard input fd, lockingthe global stdin mutex.
+        let mut filled = 0_sz
+        let err = sppc::stdin_read(&mut buf.ptr, 1_uz, buf.len(), &mut filled)
+        case err != 0 { ret Fail(err=StreamErr::from_errno(err)) }
+        ret Pass(val=USize::from(filled))
+    }
+}
+
+sup StdoutStream ext Write {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun write(&mut self, buf: &View[U8]) -> Res[USize, StreamErr] {
+        # The `write` method writes data from the provided buffer to the standard output stream. It uses a special `C`
+        # function defined in the `sppc` library, which is very close to the `C` `write` kernel function, but locks on a
+        # global stdout pthread mutex.
+        # @let buf: A borrow to a view of bytes that contains the data to be written to the standard output. The method
+        # will attempt to write up to `len` bytes from the buffer, where `len` is the length of the view. The buffer is
+        # not modified by this method.
+        # @ret: The number of bytes that were successfully written from the buffer to the standard output, or an error
+        # if the write operation fails.
+
+        # Write to the standard output fd, locking the global
+        # stdout mutex.
+        let mut written = 0_sz
+        let err = sppc::stdout_write(&buf.ptr, 1_uz, buf.len(), &mut written)
+        case err != 0 { ret Fail(err=StreamErr::from_errno(err)) }
+        ret Pass(val=USize::from(written))
+    }
+
+    !versioned(base="1.0.0", new="1.0.0")
+    fun flush(&mut self) -> Res[Void, StreamErr] {
+        # The `flush` method flushes the standard output stream, ensuring that all buffered data is written out. It uses
+        # the `C` `flush` method - no special behaviour is needed for the stdout stream, vs any other streams.
+        # @ret: An empty success value if the flush operation was successful, or an error if the flush operation fails.
+
+        # Flush the standard output stream.
+        let err = sppc::flush(1)
+        case err != 0 { ret Fail(err=StreamErr::from_errno(err)) }
+        ret Pass[Void]()
+    }
+}
+
+sup StderrStream ext Write {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun write(&mut self, buf: &View[U8]) -> Res[USize, StreamErr] {
+        # The `write` method writes data from the provided buffer to the standard error stream. It uses a special `C`
+        # function defined in the `sppc` library, which is very close to the `C` `write` kernel function, but locks on a
+        # global stderr pthread mutex.
+        # @let buf: A borrow to a view of bytes that contains the data to be written to the standard error. The method
+        # will attempt to write up to `len` bytes from the buffer, where `len` is the length of the view. The buffer is
+        # not modified by this method.
+        # @ret: The number of bytes that were successfully written from the buffer to the standard error, or an error if
+        # the write operation fails.
+
+        # Write to the standard error fd, locking the global
+        # stderr mutex.
+        let mut written = 0_sz
+        let err = sppc::stderr_write(&buf.ptr, 1_uz, buf.len(), &mut written)
+        case err != 0 { ret Fail(err=StreamErr::from_errno(err)) }
+        ret Pass(val=USize::from(written))
+    }
+
+    !versioned(base="1.0.0", new="1.0.0")
+    fun flush(&mut self) -> Res[Void, StreamErr] {
+        # The `flush` method flushes the standard error stream, ensuring that all buffered data is written out. It uses
+        # the `C` `flush` method - no special behaviour is needed for the stderr stream, vs any other streams.
+        # @ret: An empty success value if the flush operation was successful, or an error if the flush operation fails.
+
+        # Flush the standard error stream.
+        let err = sppc::flush(2)
+        case err != 0 { ret Fail(err=StreamErr::from_errno(err)) }
+        ret Pass[Void]()
+    }
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun print(str: &StrView) -> Opt[USize] {
+    # The `print` function writes the provided string to the standard output stream without a newline. It creates a new
+    # `StdoutStream` instance and uses its `write_str` method to write the string to the standard output. Generally, a
+    # `print` won't fail unless the stdout stream is in a very bad state, so we use `Opt` here for simplicity.
+    # @let str: The string to be printed to the standard output.
+    # @ret: An `Opt[USize]` that is `Some(USize)` containing the number of bytes successfully written to the standard
+    # error, or `None` if the write operation failed.
+
+    # Create a new `StdoutStream` instance and write the
+    # string to the standard output.
+    let mut out = StdoutStream()
+    ret out.write_all(str.view_ref()).pass_opt()
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun println(str: &StrView) -> Opt[USize] {
+    # The `println` function writes the provided string to the standard output stream followed by a newline. It creates
+    # a new `StdoutStream` instance and uses its `write_str` method to write the string followed by a newline character
+    # to the standard output. Generally, a `println` won't fail unless the stdout stream is in a very bad state, so we
+    # use `Opt` here for simplicity.
+    # @let str: The string to be printed to the standard output, followed by a newline.
+    # @ret: An `Opt[USize]` that is `Some(USize)` containing the number of bytes successfully written to the standard
+    # error, or `None` if the write operation failed.
+
+    # Create a new `StdoutStream` instance and write the
+    # string followed by a newline to the standard output.
+    let mut out = StdoutStream()
+    out.write_all(str.view_ref()).pass_opt()?
+    ret out.write_all(b"\n").pass_opt()
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun eprint(str: &StrView) -> Opt[USize] {
+    # The `eprint` function writes the provided string to the standard error stream without a newline. It creates a new
+    # `StderrStream` instance and uses its `write_str` method to write the string to the standard error. Generally, an
+    # `eprint` won't fail unless the stderr stream is in a very bad state, so we use `Opt` here for simplicity.
+    # @let str: The string to be printed to the standard error.
+    # @ret: An `Opt[USize]` that is `Some(USize)` containing the number of bytes successfully written to the standard
+    # error, or `None` if the write operation failed.
+
+    # Create a new `StderrStream` instance and write the
+    # string to the standard error.
+    let mut out = StderrStream()
+    ret out.write_all(str.view_ref()).pass_opt()
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun eprintln(str: &StrView) -> Opt[USize] {
+    # The `eprintln` function writes the provided string to the standard error stream followed by a newline. It creates
+    # a new `StderrStream` instance and uses its `write_str` method to write the string followed by a newline character
+    # to the standard error. Generally, an `eprintln` won't fail unless the stderr stream is in a very bad state, so we
+    # use `Opt` here for simplicity.
+    # @let str: The string to be printed to the standard error, followed by a newline.
+    # @ret: An `Opt[USize]` that is `Some(USize)` containing the number of bytes successfully written to the standard
+    # error, or `None` if the write operation failed.
+
+    # Create a new `StderrStream` instance and write the
+    # string followed by a newline to the standard error.
+    let mut out = StderrStream()
+    out.write_all(str.view_ref()).pass_opt()?
+    ret out.write_all(b"\n").pass_opt()
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun input(prompt: &StrView = "") -> Opt[Str] {
+    # The `input` function reads a line of input from the standard input stream. It optionally takes a `prompt` string
+    # that is printed to the standard output before reading the input. The function creates a new `StdinStream` instance
+    # and uses its `read_line` method to read a line of input from the standard input. Generally, an `input` won't fail
+    # unless the stdin stream is in a very bad state, so we use `Opt` here for simplicity.
+    # @let ?prompt: An optional string that is printed to the standard output before reading the input. If provided, the
+    # prompt is displayed to the user to indicate that input is expected.
+    # @ret: An `Opt[Str]` that is `Some(Str)` containing the line of input read from the standard input, or `None` if
+    # the read operation failed.
+
+    # If a prompt is provided, print it to the standard output
+    # before reading the input.
+    print(prompt)
+
+    # Create a new `StdinStream` instance and read a line of
+    # input from the standard input.
+    let mut stdin = BufRead[StdinStream]()
+    let mut out = Str::new()
+    stdin.read_line(&mut out).pass_opt()?
+    ret Some(val=out)
+}

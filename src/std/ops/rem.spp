@@ -2,18 +2,17 @@ use std::annotations::abstract_method
 use std::annotations::public
 use std::void::Void
 
+!public cls Rem[Rhs=Self, Ret=Self] { }
+!public cls RemAssign[Rhs=Self] { }
 
-!public cls Rem[Rhs, Ret] { }
-!public cls RemAssign[Rhs] { }
-
-
+# Allow the use of the "%" operator.
 sup [Rhs, Ret] Rem[Rhs, Ret] {
     !public
     !abstract_method
     fun rem(self, that: Rhs) -> Ret { }
 }
 
-
+# Allow the use of the "%=" operator.
 sup [Rhs] RemAssign[Rhs] {
     !public
     !abstract_method

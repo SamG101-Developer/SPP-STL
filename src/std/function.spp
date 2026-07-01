@@ -1,19 +1,55 @@
 use std::annotations::public
+use std::annotations::versioned
+use std::tuple::TupLike
 
 !public
-cls FunMov[Args, Out] { }
-sup [Args, Out] FunMov[Args, Out] { }
-
-
-!public
-cls FunMut[Args, Out] { }
-sup [Args, Out] FunMut[Args, Out] { }
-
+!versioned(base="1.0.0", new="1.0.0")
+cls Fun {
+    # The `Fun` type is a non-generic marker trait for all functions. This allows another function to accept a function
+    # parameter, wihout having to monomorphize when the args types or return type isn't needed.
+}
 
 !public
-cls FunRef[Args, Out] { }
-sup [Args, Out] FunRef[Args, Out] { }
+!versioned(base="1.0.0", new="1.0.0")
+cls FunMov[Args: TupLike, Out] {
+    # A `FunMov` is a function that contains by-val captures, and therefore can only be called once. Calling the
+    # function consumes it, meaning it is no loner intialized; the ownership analyser detects this and prevents a second
+    # call to the function.
+    # @type Args: A tuple of the argument types of the function. If the function takes no arguments, it is be `()`.
+    # @type Out: The return type of the function. If the function returns nothing, it is `Void`.
+}
 
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls FunMut[Args: TupLike, Out] {
+    # A `FunMut` is a function that contains mutable borrow captures, and therefore can be called multiple times, but
+    # only through a mutable reference.
+    # @type Args: A tuple of the argument types of the function. If the function takes no arguments, it is be `()`.
+    # @type Out: The return type of the function. If the function returns nothing, it is `Void`.
+}
 
-sup [Args, Out] FunRef[Args, Out] ext FunMut[Args, Out] { }
-sup [Args, Out] FunMut[Args, Out] ext FunMov[Args, Out] { }
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls FunRef[Args: TupLike, Out] {
+    # A `FunRef` is a function that contains only by-ref captures, and therefore can be called multiple times, and
+    # through either mutable or immutable references.
+    # @type Args:
+    # @type Out:
+}
+
+sup [Args: TupLike, Out] FunMov[Args, Out] ext Fun {
+    # Ensure all variations of functional types are able to be used with `Fun`, so that a generic constraint of `Fun`
+    # can accept any functional type.
+}
+
+sup [Args: TupLike, Out] FunMut[Args, Out] ext FunMov[Args, Out] {
+    # A `FunMut` can be used wherever a `FunMov` is expected, as it can be called at least once. This extension allows
+    # for generic constraints to accept either `FunMut` to `FunMov`, so that a `FunMut` can be passed to a function that
+    # also accepts a `FunMov`.
+}
+
+sup [Args: TupLike, Out] FunRef[Args, Out] ext FunMut[Args, Out] {
+    # A `FunRef` can be used wherever a `FunMut` is expected, as it can be called multiple times. This extension allows
+    # for generic constraints to accept either `FunRef` to `FunMut`, so that a `FunRef` can be passed to a function that
+    # also accepts a `FunMut`.
+}

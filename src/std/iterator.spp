@@ -1,4 +1,5 @@
 use std::annotations::public
+use std::annotations::versioned
 use std::boolean::Bool
 use std::function::FunRef
 use std::function::FunMut
@@ -10,32 +11,85 @@ use std::option::Opt
 use std::option::Some
 use std::void::Void
 
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls Indexed[T] {
+    # The `Indexed` class is used for the result of `[index]` indexing operations. Whilst it currently does not extend
+    # add methods beyond what `GenOnce` provides, it is used for easy extension in the future, and to provide a clear
+    # return type for indexing operations. It is a generator that produces a single item of type `T`, and then exhausts.
+    # @type T:
+}
+
+sup [T] Indexed[T] ext GenOnce[T] {
+    # In order to make the `Indexed` type work with corotines, it needs to extend the generator type `GenOnce`, so that
+    # it can be used as a generator that produces a single item of type `T`. This allows indexing operations to be
+    # seamlessly integrated with the generator system in S++, enabling features like lazy evaluation and composition
+    # with other generators.
+}
 
 !public
-cls Iterator[T] { }
-sup [T] Iterator[T] ext Gen[T] { }
+!versioned(base="1.0.0", new="1.0.0")
+cls Iterator[T] {
+    # The base iterator class for all S++ iteration. It will extend the `Gen` type, allowing it to be used seamlessly
+    # with coroutines. It contains a number of methods to manipulate the iterator, or produce values by consuming it.
+    # @type T: The element type that the iterator is iterating over.
+}
 
+sup [T] Iterator[T] ext Gen[T] {
+    # In order to make iterators work with corotines, it needs to extend the geernator type `Gen`, so that it can be
+    # used as a generator that produces items of type `T`.
+}
 
 sup [T] Iterator[T] {
-    ##
-    Concatenate this iterator with another iterator of the same element type. Iterate out of all elements from this
-    iterator, then all elements from the other iterator.
-    ##
+    # A collection of all the iterator methods that can transform the iterator into another iterator, or consume the
+    # iterator to produce a value. All methods that produce a new iterator are coroutines, and all methods that consume
+    # the iterator are functions. The `Iterator` class extends the `Gen[T]` interface, which means that it can be used
+    # as a generator that produces items of type `T`.
+
     !public
-    cor concat(self, other: Iterator[T]) -> Iterator[T] {
+    !versioned(base="1.0.0", new="1.0.0")
+    cor concat[G: Gen[T]](self, other: G) -> Iterator[T] {
+        # The `concat` method is a coroutine that takes two iterators of the same type `T` and produces a new iterator
+        # that yields all the items from the first iterator (`self`) followed by all the items from the second iterator
+        # (`other`). The method uses the `gen with` syntax, so exhaust the generators.
+        # @type G: A generator type that produces items of type `T`. This is a generic type parameter that must
+        # implement the `Gen[T]` interface, meaning it must be a generator that yields items of type `T`.
+        # @let other: The second iterator of type `Iterator[T]` that will be concatenated with the first iterator
+        # (`self`). The method will yield all items from `self` first, and then yield all items from `other`.
+        # @ret: A new iterator of type `Iterator[T]` that produces the concatenated sequence of items from both
+        # iterators.
+
+        # Yield from the two generators.
         gen with self
         gen with other
     }
 
     !public
+    !versioned(base="1.0.0", new="1.0.0")
     cor cycle(self) -> Iterator[T] {
-        loop true {
-            gen with self
-        }
+        # The `cycle` method is a coroutine that takes an iterator and produces a new iterator that yields the items
+        # from the original iterator in an infinite loop. The method uses the `gen with` syntax to exhaust the
+        # generator, and then repeats the process indefinitely.
+        # @ret: A new iterator of type `Iterator[T]` that produces an infinite sequence of items by repeatedly yielding
+        # the items from the original iterator (`self`).
+
+        # Yield from the generator in an infinite loop.
+        loop true { gen with self }
     }
 
     !public
+    !versioned(base="1.0.0", new="1.0.0")
     cor drop(self, count: USize) -> Iterator[T] {
+        # The `drop` method is a coroutine that takes an iterator and a count, and produces a new iterator that yields
+        # the items from the original iterator after skipping the first `count` items. The method uses a loop to iterate
+        # through the items of the original iterator, and only yields items after the specified count has been skipped.
+        # @let count: The number of items to skip from the original iterator (`self`) before yielding items. The method
+        # will ignore the first `count` items produced by the original iterator, and will only yield items starting from
+        # the `(count + 1)`-th item.
+        # @ret: A new iterator of type `Iterator[T]` that produces the items from the original iterator after skipping
+        # the first `count` items.
+
+        # Only yield items after skipping the specified count.
         let mut index = 0_uz
         loop item in self {
             case index >= count { gen item }
@@ -44,55 +98,104 @@ sup [T] Iterator[T] {
     }
 
     !public
-    cor filter(self, predicate: FunRef[(&T,), Bool]) -> Iterator[T] {
-        loop item in self {
-            case predicate(&item) { gen item }
-        }
-    }
-
-    !public
+    !versioned(base="1.0.0", new="1.0.0")
     cor take(self, count: USize) -> Iterator[T] {
+        # The `take` method is a coroutine that takes an iterator and a count, and produces a new iterator that yields
+        # only the first `count` items from the original iterator. The method uses a loop to iterate through the items
+        # of the original iterator, and only yields items until the specified count has been reached.
+        # @let count: The number of items to yield from the original iterator (`self`). The method will yield only the
+        # first `count` items produced by the original iterator, and will stop yielding items once the count has been
+        # reached.
+        # @ret: A new iterator of type `Iterator[T]` that produces only the first `count` items from the original
+        # iterator.
+
+        # Only yield items until the specified count is reached.
         let mut index = 0_uz
         loop item in self {
-            case index < count {
-                gen item
-                index += 1_uz
-                skip
-            }
-            exit
-        }
-    }
-
-    !public
-    cor map[U](self, mapper: FunRef[(T,), U]) -> Iterator[U] {
-        loop item in self { gen mapper(item) }
-    }
-
-    !public
-    cor slice(self, start: USize, end: USize) -> Iterator[T] {
-        let mut index = 0_uz
-        loop item in self {
-            case index >= start and index < end { gen item }
+            case index < count { gen item }
+            else { exit }
             index += 1_uz
         }
     }
 
-    ##
     !public
-    cor zip[U](self, that: Iterator[U]) -> Iterator[(T, U)] {
-        loop true {
-            let a = self.res()
-            let b = that.res()
-            case (a, b) of {
-                is (Some[T](val as a), Some[U](val as b)) { gen (a, b) }
-                else { exit }
-            }
-        }
+    !versioned(base="1.0.0", new="1.0.0")
+    cor filter[P: FunMut[(&T,), Bool]](self, mut predicate: P) -> Iterator[T] {
+        # The `filter` method is a coroutine that takes an iterator and a predicate function, and produces a new
+        # iterator that yields only the items from the original iterator that satisfy the predicate.
+        # @type P: A function type that represents the predicate function used for filtering the items. This is a
+        # generic type parameter that must implement the `FunMut[(&T,), Bool]` interface, meaning it must be a mutable
+        # function that takes an immutable borrow of an item of type `T` and returns a boolean indicating whether the
+        # item satisfies the predicate.
+        # @let predicate: The predicate function that determines which items from the original iterator (`self`) will be
+        # yielded in the new iterator. The method will call this function for each item produced by the original
+        # iterator, and will only yield items for which the predicate returns `true`.
+        # @ret: A new iterator of type `Iterator[T]` that produces only the items from the original iterator that
+        # satisfy the predicate.
+
+        # Only yield items that satisfy the predicate.
+        loop item in self { case predicate(&item) { gen item } }
     }
-    ##
 
     !public
+    !versioned(base="1.0.0", new="1.0.0")
+    cor map[U, F: FunMut[(T,), U]](self, mut f: F) -> Iterator[U] {
+        # The `map` method is a coroutine that takes an iterator and a mapping function, and produces a new iterator
+        # that yields the results of applying the mapping function to each item from the original iterator.
+        # @type U: The type of items produced by the new iterator after applying the mapping function. This is a generic
+        # type parameter that can be any type, depending on the output of the mapping function.
+        # @type F: A function type that represents the mapping function used for transforming the items. This is a
+        # generic type parameter that must implement the `FunMut[(T,), U]` interface, meaning it must be a mutable
+        # function that takes an item of type `T` and returns a value of type `U`.
+        # @let f: The mapping function that transforms each item from the original iterator (`self`) into a new value.
+        # The method will call this function for each item produced by the original iterator, and will yield the result
+        # of the mapping function in the new iterator.
+        # @ret: A new iterator of type `Iterator[U]` that produces the results of applying the mapping function to each
+        # item from the original iterator.
+
+        # Yield the results of applying the mapping function to
+        # each item.
+        loop item in self { gen f(item) }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    cor slice(self, start: USize, end: USize) -> Iterator[T] {
+        # The `slice` method is a coroutine that takes an iterator and two indices, `start` and `end`, and produces a
+        # new iterator that yields the items from the original iterator starting from the `start` index up to, but not
+        # including, the `end` index. The method uses a loop to iterate through the items of the original iterator, and
+        # only yields items that fall within the specified range of indices.
+        # @let start: The starting index for the slice. The method will skip items from the original iterator until it
+        # reaches this index, and will start yielding items from this index onward.
+        # @let end: The ending index for the slice. The method will yield items from the original iterator until it
+        # reaches this index, and will stop yielding items once it reaches the `end` index. The `end` index is
+        # exclusive, meaning that the item at the `end` index will not be yielded.
+        # @ret: A new iterator of type `Iterator[T]` that produces the items from the original iterator starting from
+        # the `start` index up to, but not including, the `end` index.
+
+        # Only yield items that fall within the specified range
+        # of indices.
+        let mut index = 0_uz
+        loop item in self {
+            case index >= start and index < end { gen item }
+            case index >= end { exit }
+            index += 1_uz
+        }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
     cor step_by(self, step: USize) -> Iterator[T] {
+        # The `step_by` method is a coroutine that takes an iterator and a step size, and produces a new iterator that
+        # yields every `step`-th item from the original iterator. The method uses a loop to iterate through the items of
+        # the original iterator, and only yields items at indices that are multiples of the specified step size.
+        # @let step: The step size for the iteration. The method will yield items from the original iterator at indices
+        # that are multiples of this step size. For example, if `step` is 2, the method will yield items at indices `0,
+        # 2, 4`, etc., effectively skipping every other item from the original iterator.
+        # @ret: A new iterator of type `Iterator[T]` that produces every `step`-th item from the original iterator.
+
+        # Only yield items at indices that are multiples of the
+        # specified step size.
         let mut index = 0_uz
         loop item in self {
             case index % step == 0_uz { gen item }
@@ -101,65 +204,176 @@ sup [T] Iterator[T] {
     }
 
     !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun count(self) -> USize {
+        # The `count` method is a function that takes an iterator and returns the number of items produced by the
+        # iterator. The iterator will collapse, and be consumed by this method, as it iterates through all the items to
+        # count them.
+        # @ret: The number of items produced by the iterator.
+
+        # Count the number of items by iterating through the entire
+        # iterator and incrementing a counter for each item.
         let mut count = 0_uz
         loop item in self { count += 1_uz }
         ret count
     }
 
     !public
-    fun fold[U](self, initial: U, reducer: FunRef[(U, &T), U]) -> U {
+    fun fold[U, F: FunRef[(U, &T), U]](self, initial: U, reducer: F) -> U {
+        # The `fold` method is a function that takes an iterator, an initial value, and a reducer function, and returns
+        # a single value that is the result of applying the reducer function cumulatively to the items produced by the
+        # iterator, starting with the initial value. The method uses a loop to iterate through the items of the original
+        # iterator, and applies the reducer function to the accumulated value and each item, updating the accumulated
+        # value at each step.
+        # @type U: The type of the accumulated value produced by the fold operation. This is a generic type parameter
+        # that can be any type, depending on the output of the reducer function.
+        # @type F: A function type that represents the reducer function used for folding the items. This is a generic
+        # type parameter that must implement the `FunRef[(U, &T), U]` interface, meaning it must be a function that
+        # takes the current accumulated value of type `U` and an immutable borrow of an item of type `T`, and returns a
+        # new accumulated value of type `U`.
+        # @let initial: The initial value for the fold operation. This is the starting point for the accumulation, and
+        # the reducer function will be applied to this initial value and the first item produced by the iterator to
+        # produce the first accumulated value.
+        # @let reducer: The reducer function that defines how to combine the accumulated value with each item from the
+        # iterator. The method will call this function for each item produced by the original iterator, passing in the
+        # current accumulated value and the item, and will update the accumulated value with the result of the reducer
+        # function.
+        # @ret: The final accumulated value of type `U` that results from applying the reducer function cumulatively to
+        # all the items produced by the iterator, starting with the initial value.
+
+        # Fold the items by iterating through the entire iterator and
+        # applying the reducer function to the accumulated value and
+        # each item.
         let mut acc = initial
         loop item in self { acc = reducer(acc, item) }
         ret acc
     }
 
     !public
-    fun all(self, predicate: FunRef[(T,), Bool]) -> Bool {
-        loop item in self {
-            case predicate(item).not { ret false }
-        }
+    !versioned(base="1.0.0", new="1.0.0")
+    fun all[F: FunMut[(T,), Bool]](self, mut f: F) -> Bool {
+        # The `all` method is a function that takes an iterator and a predicate function, and returns `true` if the
+        # predicate returns `true` for all items produced by the iterator, and `false` otherwise. The method uses a loop
+        # to iterate through the items of the original iterator, and applies the predicate function to each item. If the
+        # predicate returns `false` for any item, the method returns `false` immediately. If the loop completes without
+        # the predicate returning `false`, the method returns `true`.
+        # @type F: A function type that represents the predicate function used for testing the items. This is a generic
+        # type parameter that must implement the `FunMut[(T,), Bool]` interface, meaning it must be a mutable function
+        # that takes an item of type `T` and returns a boolean indicating whether the item satisfies the condition
+        # defined by the predicate.
+        # @let f: The predicate function that tests each item from the iterator. The method will call this function for
+        # each item produced by the original iterator, and will return `false` if the predicate returns `false` for any
+        # item.
+        # @ret: A boolean value that indicates whether the predicate function returns `true` for all items produced by
+        # the iterator. The cumulative result of applying the predicate to all items.
+
+        # Check if the predicate returns true for all items by iterating
+        # through the entire iterator and applying the predicate to each
+        # item, short-circuiting on a `false` result.
+        loop item in self { case f(item).not { ret false } }
         ret true
     }
 
     !public
-    fun any(self, predicate: FunRef[(T,), Bool]) -> Bool {
-        loop item in self {
-            case predicate(item) { ret true }
-        }
+    !versioned(base="1.0.0", new="1.0.0")
+    fun any[F: FunMut[(T,), Bool]](self, mut f: F) -> Bool {
+        # The `any` method is a function that takes an iterator and a predicate function, and returns `true` if the
+        # predicate returns `true` for at least one item produced by the iterator, and `false` otherwise. The method
+        # uses a loop to iterate through the items of the original iterator, and applies the predicate function to each
+        # item. If the predicate returns `true` for any item, the method returns `true` immediately. If the loop
+        # completes without the predicate returning `true`, the method returns `false`.
+        # @type F: A function type that represents the predicate function used for testing the items. This is a generic
+        # type parameter that must implement the `FunMut[(T,), Bool]` interface, meaning it must be a mutable function
+        # that takes an item of type `T` and returns a boolean indicating whether the item satisfies the condition
+        # defined by the predicate.
+        # @let f: The predicate function that tests each item from the iterator. The method will call this function for
+        # each item produced by the original iterator, and will return `true` if the predicate returns `true` for any
+        # item.
+        # @ret: A boolean value that indicates whether the predicate function returns `true` for at least one item
+        # produced by the iterator. The cumulative result of applying the predicate to all items.
+
+        # Check if the predicate returns true for any item by iterating
+        # through the entire iterator and applying the predicate to each
+        # item, short-circuiting on a `true` result.
+        loop item in self { case f(item) { ret true } }
         ret false
     }
 
-    ##
-    The "find" method searches through each element in this iterator, and applies the predicate function to the element.
-    If the result of this is "true", then the predicate is satisfied and a matching element has been found. This element
-    is returned inside an optional type, as the elememt may have not been found, and "None" is needed instead.
-    ##
     !public
-    fun find(self, predicate: FunRef[(&T,), Bool]) -> Opt[T] {  # todo: this should fail (could be Opt[&T] i think)
+    !versioned(base="1.0.0", new="1.0.0")
+    fun find[P: FunMut[(&T,), Bool]](self, mut predicate: P) -> Opt[USize] {
+        # The `find` method is a function that takes an iterator and a predicate function, and returns an optional index
+        # of the first item produced by the iterator that satisfies the predicate. The method uses a loop to iterate
+        # through the items of the original iterator, and applies the predicate function to each item. If the predicate
+        # returns `true` for an item, the method returns `Some(val=index)`, where `index` is the zero-based index of the
+        # item in the sequence produced by the iterator. If the loop completes without the predicate returning `true`
+        # for any item, the method returns `None`.
+        # @type P: A function type that represents the predicate function used for testing the items. This is a generic
+        # type parameter that must implement the `FunMut[(&T,), Bool]` interface, meaning it must be a mutable function
+        # that takes an immutable borrow of an item of type `T` and returns a boolean indicating whether the item
+        # satisfies the condition defined by the predicate.
+        # @let predicate: The predicate function that tests each item from the iterator. The method will call this
+        # function for each item produced by the original iterator, and will return the index of the first item for
+        # which the predicate returns `true`.
+        # @ret: An optional value of type `Opt[USize]` that contains the index of the first item produced by the =
+        # iterator that satisfies the predicate. If such an item is found, the method returns `Some(val=index)`, where
+        # `index` is the zero-based index of the item in the sequence produced by the iterator. If no such item is
+        # found, the method returns `None`.
+
+        # Find the index of the first item that satisfies the predicate by
+        # iterating through the entire iterator and applying the predicate
+        # to each item, returning the index when a match is found.
+        let mut index = 0_uz
         loop item in self {
-            case predicate(&item) { ret Some(val=item) }
+            case predicate(&item) { ret Some(val=index) }
+            index += 1_uz
         }
-        ret None()
+        ret None
     }
 
-    ##
-    Apply a method to every element of the iterator as an immutable borrow. This will convert the elements to a borrow
-    no matter their inner state, and pass them into the action function. This is equivalent to a for loop semantically,
-    but without skip/exit semantics because of the internal closure state.
-    ##
     !public
-    fun for_each(self, action: FunRef[(&T,), Void]) -> Void {
-        loop item in self { action(&item) }
+    !versioned(base="1.0.0", new="1.0.0")
+    fun for_each[F: FunMut[(&T,), Void]](self, mut func: F) -> Void {
+        # The `for_each` method is a function that takes an iterator and a function, and applies the function to each
+        # item produced by the iterator. The method uses a loop to iterate through the items of the original iterator,
+        # and applies the provided function to each item. The function is expected to have side effects, as the
+        # `for_each` method itself does not return any value.
+        # @type F: A function type that represents the function used for processing the items. This is a generic type
+        # parameter that must implement the `FunMut[(&T,), Void]` interface, meaning it must be a mutable function that
+        # takes an immutable borrow of an item of type `T` and returns `Void`.
+        # @let func: The function that is applied to each item from the iterator. The method will call this function for
+        # each item produced by the original iterator, and the function is expected to perform some side effect with the
+        # item, as the `for_each` method itself does not return any value.
+
+        # Apply the function to each item by iterating through the entire
+        # iterator and calling the function for each item.
+        loop item in self { func(&item) }
     }
 
-    ##
-    Apply a method to every element of the iterator as a mutable borrow. This will convert the elements to a borrow no
-    matter their inner state, and pass them into the action function. This is equivalent to a for loop semantically, but
-    without skip/exit semantics because of the internal closure state.
-    ##
     !public
-    fun for_each(self, mut action: FunMut[(&mut T,), Void]) -> Void {
-        loop mut item in self { action(&mut item) }
+    !versioned(base="1.0.0", new="1.0.0")
+    fun nth(self, n: USize) -> Opt[T] {
+        # The `nth` method is a function that takes an iterator and an index `n`, and returns an optional value of the
+        # item produced by the iterator at the specified index. The method uses a loop to iterate through the items of
+        # the original iterator, and keeps track of the current index. If the current index matches the specified index
+        # `n`, the method returns `Some(val=item)`, where `item` is the value produced by the iterator at that index. If
+        # the loop completes without reaching the specified index, the method returns `None`.
+        # @let n: The zero-based index of the item to retrieve from the iterator. The method will iterate through the
+        # items produced by the original iterator until it reaches this index, and will return the item at that index if
+        # it exists.
+        # @ret: An optional value of type `Opt[T]` that contains the item produced by the iterator at the specified
+        # index. If such an item exists, the method returns `Some(val=item)`, where `item` is the value produced by the
+        # iterator at that index. If no such item exists (i.e., if `n` is greater than or equal to the number of items
+        # produced by the iterator), the method returns `None`.
+
+        # Retrieve the item at the specified index by iterating through
+        # the entire iterator and keeping track of the current index,
+        # returning the item when a match is found.
+        let mut index = 0_uz
+        loop item in self {
+            case index == n { ret Some(val=item) }
+            index += 1_uz
+        }
+        ret None
     }
 }

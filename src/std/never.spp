@@ -1,4 +1,18 @@
 use std::annotations::public
+use std::annotations::versioned
 
 !public
-cls Never { }
+!versioned(base="1.0.0", new="1.0.0")
+cls Never {
+    # The `Never` type represents a value that can never exist. It has no fields or methods, and cannot be instantiated.
+    # It is used as a return type for functions that never return, such as those that always panic or enter an infinite
+    # loop. It serves as a marker for functions that do not return normally, and can be used in type signatures to
+    # indicate that a function will never return a value. It is different from `Void`, which represents the absence of a
+    # value.
+    #
+    # The `Never` type should never be used by type name, because it loses some special compiler behaviour. Instead, the
+    # `!` symbol should be used, which is representative of the `Never` type. The reason for this, is that otherwise,
+    # for every single type check done, we would have to condider the special `Never` type rules, adding multiple checks
+    # by comping the two types being compared, to `Never` themselves. If we use `!`, we can set a flag at instantiation,
+    # which is a lot faster to check.
+}

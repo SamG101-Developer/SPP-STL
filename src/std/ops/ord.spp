@@ -4,8 +4,9 @@ use std::annotations::virtual_method
 use std::boolean::Bool
 use std::number::S32
 
-!public cls Ord[Rhs] { }
+!public cls Ord[Rhs=Self] { }
 
+# Allow the use of the ".ord(...)", "<", "<=", ">", ">=" operator.
 sup [Rhs] Ord[Rhs] {
     !public
     !abstract_method
@@ -34,18 +35,4 @@ sup [Rhs] Ord[Rhs] {
     fun ge(&self, that: &Rhs) -> Bool {
         ret self.ord(that) != -1
     }
-
-    ##
-    !public
-    !virtual_method
-    fun min(self, that: Rhs) -> Rhs {
-        ret case self < that { self } else { that }
-    }
-
-    !public
-    !virtual_method
-    fun max(self, that: Rhs) -> Rhs {
-        ret case self < that { that } else { self }
-    }
-    ##
 }

@@ -1,5 +1,6 @@
-use std::annotations::compiler_builtin
+use std::annotations::intrinsic
 use std::annotations::public
+use std::annotations::versioned
 use std::boolean::Bool
 use std::boolean::Integral
 use std::copy::Copy
@@ -15,823 +16,703 @@ use std::num::bases::FloatingPoint
 use std::num::sized_floating_point::SizedFloatingPoint
 use std::num::sized_integer_signed::SizedIntegerSigned
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
-use std::mem::memory::Memory
-
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic(name="std.intrinsics.add")
 cmp fun add[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic(name="std.intrinsics.add_assign")
 cmp fun add_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic(name="std.intrinsics.sub")
 cmp fun sub[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic(name="std.intrinsics.sub_assign")
 cmp fun sub_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic(name="std.intrinsics.mul")
 cmp fun mul[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic(name="std.intrinsics.mul_assign")
 cmp fun mul_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic(name="std.intrinsics.sdiv")
 cmp fun sdiv[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic(name="std.intrinsics.sdiv_assign")
 cmp fun sdiv_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
-!compiler_builtin
-cmp fun udiv_assign[T: Integer](this: &mut T, that: T) -> Void { }
-
-!public
-!always_inline
-!compiler_builtin
+!intrinsic(name="std.intrinsics.udiv")
 cmp fun udiv[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
-cmp fun srem_assign[T: Integer](this: &mut T, that: T) -> Void { }
+!intrinsic(name="std.intrinsics.udiv_assign")
+cmp fun udiv_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic(name="std.intrinsics.srem")
 cmp fun srem[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
-cmp fun urem_assign[T: Integer](this: &mut T, that: T) -> Void { }
+!intrinsic(name="std.intrinsics.srem_assign")
+cmp fun srem_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic(name="std.intrinsics.urem")
 cmp fun urem[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic(name="std.intrinsics.urem_assign")
+cmp fun urem_assign[T: Integer](this: &mut T, that: T) -> Void { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.sneg")
 cmp fun sneg[T: Integer](value: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic(name="std.intrinsics.bit_shl")
 cmp fun bit_shl[T: Integer, U: Integer](this: T, by: U) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic(name="std.intrinsics.bit_shl_assign")
 cmp fun bit_shl_assign[T: Integer, U: Integer](this: &mut T, by: U) -> Void { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic(name="std.intrinsics.bit_shr")
 cmp fun bit_shr[T: Integer, U: Integer](this: T, by: U) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic(name="std.intrinsics.bit_shr_assign")
 cmp fun bit_shr_assign[T: Integer, U: Integer](this: &mut T, by: U) -> Void { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun bit_ior[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun bit_ior_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun bit_and[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun bit_and_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun bit_xor[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun bit_xor_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun bit_not[T: Integer](value: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun bit_not_assign[T: Integer](this: &mut T) -> Void { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun abs[T: Integer](this: T, that: T) -> T { }  # todo: not being used anywhere atm
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun eq[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun oeq[T: Num](this: &T, that: &T) -> Bool { }  # ordered equal (floats)
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun ne[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun one[T: Num](this: &T, that: &T) -> Bool { }  # ordered not equal (floats)
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun slt[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun ult[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun olt[T: Num](this: &T, that: &T) -> Bool { }  # ordered less than (floats)
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun sle[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun ule[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun ole[T: Num](this: &T, that: &T) -> Bool { }  # ordered less than or equal (floats)
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun sgt[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun ugt[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun ogt[T: Num](this: &T, that: &T) -> Bool { }  # ordered greater than (floats)
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun sge[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun uge[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun oge[T: Num](this: &T, that: &T) -> Bool { }  # ordered greater than or equal (floats)
-
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun max_val[T: Integer]() -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun min_val[T: Integer]() -> T { }
-
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun smax[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun umax[T: Integer](this: T, that: T) -> T { }
-
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun smin[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun umin[T: Integer](this: T, that: T) -> T { }
-
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun ucmp[T: Integer](this: &T, that: &T) -> S32 { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun scmp[T: Integer](this: &T, that: &T) -> S32 { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun fcmp[T: FloatingPoint](this: &T, that: &T) -> S32 { }
 
-
 # !public
 # !always_inline
-# !compiler_builtin
+# !intrinsic
 # fun mem_copy[T](dest: &mut Memory[T], src: &Memory[T], size: USize) -> Void { }
 
-
 # !public
 # !always_inline
-# !compiler_builtin
+# !intrinsic
 # fun mem_move[T](dest: &mut Memory[T], src: &Memory[T], size: USize) -> Void { }
 
-
 # !public
 # !always_inline
-# !compiler_builtin
+# !intrinsic
 # fun mem_set[T: Copy](dest: &mut Memory[T], value: T, size: USize) -> Void { }
-
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun float_add[T: FloatingPoint](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun float_add_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun float_sub[T: FloatingPoint](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun float_sub_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun float_mul[T: FloatingPoint](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun float_mul_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun float_div[T: FloatingPoint](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun float_div_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun float_rem[T: FloatingPoint](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun float_rem_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun float_neg[T: FloatingPoint](value: T) -> T { }
-
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun float_sqrt[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun float_powi[T: FloatingPoint](base: T, exponent: S32) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun float_powf[T: FloatingPoint](base: T, exponent: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun float_sin[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun float_cos[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun float_tan[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun float_asin[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun float_acos[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun float_atan[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun float_atan2[T: FloatingPoint](y: T, x: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun float_sinh[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun float_cosh[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun float_tanh[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun float_exp[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun float_exp2[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun float_exp10[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
-fun float_ln[T: FloatingPoint](value: T) -> T { }
+!intrinsic
+fun float_log[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun float_log2[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun float_log10[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun float_abs[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun float_max_val[T: FloatingPoint]() -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun float_min_val[T: FloatingPoint]() -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun float_max[T: FloatingPoint](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun float_min[T: FloatingPoint](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun float_copysign[T: FloatingPoint](value: T, sign: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun float_floor[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun float_ceil[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun float_trunc[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 cmp fun float_round[T: FloatingPoint](value: T) -> T { }
-
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun bitreverse[T: Integer](value: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun ctlz[T: Integer](value: T) -> U32 { }
-
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun sadd_overflow[T: Integer](this: T, that: T) -> (T, Bool) { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun uadd_overflow[T: Integer](this: T, that: T) -> (T, Bool) { }
-
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun ssub_overflow[T: Integer](this: T, that: T) -> (T, Bool) { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun usub_overflow[T: Integer](this: T, that: T) -> (T, Bool) { }
-
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun smul_overflow[T: Integer](this: T, that: T) -> (T, Bool) { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun umul_overflow[T: Integer](this: T, that: T) -> (T, Bool) { }
-
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun sadd_saturating[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun uadd_saturating[T: Integer](this: T, that: T) -> T { }
-
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun ssub_saturating[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun usub_saturating[T: Integer](this: T, that: T) -> T { }
-
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun uadd_wrapping[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun sadd_wrapping[T: Integer](this: T, that: T) -> T { }
-
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun usub_wrapping[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun ssub_wrapping[T: Integer](this: T, that: T) -> T { }
-
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun umul_wrapping[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun smul_wrapping[T: Integer](this: T, that: T) -> T { }
-
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun sshl_saturating[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun ushl_saturating[T: Integer](this: T, that: T) -> T { }
-
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun sitofp[cmp this_w: U32, cmp that_w: U32](value: SizedIntegerSigned[that_w]) -> SizedFloatingPoint[this_w] { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun uitofp[cmp this_w: U32, cmp that_w: U32](value: SizedIntegerUnsigned[that_w]) -> SizedFloatingPoint[this_w] { }
 
 !public
 !always_inline
-!compiler_builtin
-fun fptrunc[cmp this_w: U32, cmp that_w: U32](value: SizedFloatingPoint[that_w]) -> SizedFloatingPoint[this_w] { }
+!intrinsic
+fun strunc[T: Integer, cmp that_w: U32](value: SizedIntegerSigned[that_w]) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
-fun strunc[cmp this_w: U32, cmp that_w: U32](value: SizedIntegerSigned[that_w]) -> SizedIntegerSigned[this_w] { }
+!intrinsic
+fun utrunc[T: Integer, cmp that_w: U32](value: SizedIntegerUnsigned[that_w]) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
-fun utrunc[cmp this_w: U32, cmp that_w: U32](value: SizedIntegerUnsigned[that_w]) -> SizedIntegerUnsigned[this_w] { }
+!intrinsic
+fun szext[T: Integer, cmp that_w: U32](value: SizedIntegerSigned[that_w]) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
-fun szext[cmp this_w: U32, cmp that_w: U32](value: SizedIntegerSigned[that_w]) -> SizedIntegerSigned[this_w] { }
+!intrinsic
+fun uzext[T: Integer, cmp that_w: U32](value: SizedIntegerUnsigned[that_w]) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
-fun uzext[cmp this_w: U32, cmp that_w: U32](value: SizedIntegerUnsigned[that_w]) -> SizedIntegerUnsigned[this_w] { }
-
-!public
-!always_inline
-!compiler_builtin
+!intrinsic
 fun fpext[cmp this_w: U32, cmp that_w: U32](value: SizedFloatingPoint[that_w]) -> SizedFloatingPoint[this_w] { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
+fun fptrunc[cmp this_w: U32, cmp that_w: U32](value: SizedFloatingPoint[that_w]) -> SizedFloatingPoint[this_w] { }
+
+!public
+!always_inline
+!intrinsic
 fun bit_cast[T, U](value: U) -> T { }  # Identity function (type hint to change U32 to S32 etc - same bit width)
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun fptosi[cmp this_w: U32, cmp that_w: U32](value: SizedFloatingPoint[that_w]) -> SizedIntegerSigned[this_w] { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun fptoui[cmp this_w: U32, cmp that_w: U32](value: SizedFloatingPoint[that_w]) -> SizedIntegerUnsigned[this_w] { }
 
-
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun fpclass[T: FloatingPoint](value: T, flag: S32) -> Bool { }
 
-
 !public
 !always_inline
-!compiler_builtin
-fun atomic_fence(order: U8) -> Void { }
-
-!public
-!always_inline
-!compiler_builtin
-fun atomic_test_and_set(dest: &Bool, order: U8) -> Bool { }
-
-!public
-!always_inline
-!compiler_builtin
-fun atomic_fetch_add[T: Integer](dest: &T, val: T, order: U8) -> T { }
-
-!public
-!always_inline
-!compiler_builtin
-fun atomic_fetch_sub[T: Integer](dest: &T, val: T, order: U8) -> T { }
-
-!public
-!always_inline
-!compiler_builtin
-fun atomic_fetch_neg[T: Integer](dest: &T, order: U8) -> T { }
-
-!public
-!always_inline
-!compiler_builtin
-fun atomic_fetch_abs[T: Integer](dest: &T, order: U8) -> T { }
-
-!public
-!always_inline
-!compiler_builtin
-fun atomic_fetch_min[T: Integer](dest: &T, val: T, order: U8) -> T { }
-
-!public
-!always_inline
-!compiler_builtin
-fun atomic_fetch_max[T: Integer](dest: &T, val: T, order: U8) -> T { }
-
-!public
-!always_inline
-!compiler_builtin
-fun atomic_fetch_clamp[T: Integer](dest: &T, val: T, order: U8) -> T { }
-
-!public
-!always_inline
-!compiler_builtin
-fun atomic_fetch_and[T: Integral](dest: &T, val: T, order: U8) -> T { }
-
-!public
-!always_inline
-!compiler_builtin
-fun atomic_fetch_or[T: Integral](dest: &T, val: T, order: U8) -> T { }
-
-!public
-!always_inline
-!compiler_builtin
-fun atomic_fetch_xor[T: Integral](dest: &T, val: T, order: U8) -> T { }
-
-!public
-!always_inline
-!compiler_builtin
-fun atomic_fetch_nand[T: Integral](dest: &T, val: T, order: U8) -> T { }
-
-!public
-!always_inline
-!compiler_builtin
-fun atomic_load[T: Integral](src: &T, order: U8) -> T { }
-
-!public
-!always_inline
-!compiler_builtin
-fun atomic_store[T: Integral](dest: &T, val: T, order: U8) -> Void { }
-
-!public
-!always_inline
-!compiler_builtin
-fun atomic_swap[T: Integral](dest: &T, val: T, order: U8) -> T { }
-
-!public
-!always_inline
-!compiler_builtin
-fun atomic_compare_exchange[T: Integral](dest: &T, expected: &T, desired: T, success_order: U8, failure_order: U8) -> (T, Bool) { }
-
-!public
-!always_inline
-!compiler_builtin
-fun atomic_compare_exchange_weak[T: Integral](dest: &T, expected: &T, desired: T, success_order: U8, failure_order: U8) -> (T, Bool) { }
-
-!public
-!always_inline
-!compiler_builtin
-fun atomic_exchange[T: Integral](dest: &T, val: T, order: U8) -> T { }
-
-
-!public
-!always_inline
-!compiler_builtin
+!intrinsic
 fun volatile_fence() -> Void { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun volatile_load[T: Integral](src: &T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun volatile_store[T: Integral](dest: &mut T, val: T) -> Void { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun volatile_swap[T: Integral](dest: &mut T, val: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun volatile_fetch_and[T: Integral](dest: &mut T, val: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun volatile_fetch_ior[T: Integral](dest: &mut T, val: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun volatile_fetch_xor[T: Integral](dest: &mut T, val: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun volatile_fetch_add[T: Integer](dest: &mut T, val: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun volatile_fetch_sub[T: Integer](dest: &mut T, val: T) -> T { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun volatile_set[](dest: &mut Bool) -> Void { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun volatile_clear[](dest: &mut Bool) -> Void { }
 
 !public
 !always_inline
-!compiler_builtin
+!intrinsic
 fun volatile_toggle[](dest: &mut Bool) -> Void { }

@@ -1,45 +1,117 @@
+use std::annotations::package
 use std::annotations::public
+use std::annotations::versioned
+use std::copy::Copy
 use std::number::S32
 use std::number::S64
+use std::result::Fail
+use std::result::Pass
+use std::result::Res
+use std::ops::add::Add
+use std::ops::sub::Sub
 use std::time::duration::Duration
-
-cls Clocks { }
-sup Clocks {
-    !public cmp clock_real_time: S32 = 0_s32
-    !public cmp clock_monotonic: S32 = 1_s32
-    !public cmp clock_high_resolution: S32 = 2_s32
-    !public cmp clock_thread_specific: S32 = 3_s32
-    !public cmp clock_monotonic_raw: S32 = 4_s32
-    !public cmp clock_realtime_coarse: S32 = 5_s32
-    !public cmp clock_monotonic_coarse: S32 = 6_s32
-    !public cmp clock_boottime: S32 = 7_s32
-    !public cmp clock_realtime_alarm: S32 = 8_s32
-    !public cmp clock_boottime_alarm: S32 = 9_s32
-    !public cmp clock_tai: S32 = 11_s32
-}
+use std::time::time::TimeErr
 
 !public
+!versioned(base="1.0.0", new="1.0.0")
 cls TimePoint {
-    !public seconds_since_epoch: S64
-    !public nanoseconds: S64
+    # The `TimePoint` class represents a specific point in time, measured as seconds and nanoseconds since the Unix
+    # epoch (January 1, 1970).
+    # @let duration: The duration of time represented by this `TimePoint`, measured in seconds and nanoseconds.
+
+    !package duration: Duration
 }
 
+sup TimePoint ext Copy { }
+
 sup TimePoint {
+    #
+
     !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun now(clock: S32 = 0) -> TimePoint {
-        # Platform-specific implementation to get the current time.
-        let time_now = sppc::time_now_ns(clock)
-        let seconds_since_epoch = time_now / 1000000000_s64
-        let nanoseconds = time_now % 1000000000_s64
-        ret TimePoint(seconds_since_epoch, nanoseconds)
+        #
+        # @let ?clock:
+        # @ret:
+
+        let mut time_now = sppc::CTimespec()
+        let err = sppc::clock_gettime(clock, &mut time_now)
+        case err != 0 { std::abort::abort("Failed to get current time") }
+        let duration = Duration(seconds=time_now.sec, nanoseconds=time_now.nsec)
+        ret TimePoint(duration)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun duration_since(&self, earlier: TimePoint) -> Duration {
+        # The `duration_since` method calculates the duration between this `TimePoint` and an earlier `TimePoint`. It
+        # returns a `Duration` representing the amount of time that has elapsed between the two points in time. If the
+        # earlier `TimePoint` is actually later than this `TimePoint`, the method will return a `Duration` representing
+        # the absolute value of the negative duration, effectively treating the two `TimePoint`s as if they were
+        # swapped.
+        # @let earlier: The earlier `TimePoint` to compare against.
+        # @ret: A `Duration` representing the time elapsed between this `TimePoint` and the earlier `TimePoint`.
+        # @todo: Tidy this
+
+        ret self.duration.sub_checked(earlier.duration).unwrap_or((earlier - self.duration).duration)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun duration_since_saturating(&self, earlier: TimePoint) -> Duration {
+        # The `duration_since_saturating` method calculates the duration between this `TimePoint` and an earlier
+        # `TimePoint`, returning a `Duration` that represents the amount of time that has elapsed between the two points
+        # in time. If the earlier `TimePoint` is actually later than this `TimePoint`, the method will return a
+        # `Duration` of zero, effectively saturating the result at zero instead of returning a negative duration.
+        # @let earlier: The earlier `TimePoint` to compare against.
+        # @ret: A `Duration` representing the time elapsed between this `TimePoint` and the earlier `TimePoint`, or zero
+        # if the earlier `TimePoint` is later than this one.
+
+        ret self.duration.sub_saturating(earlier.duration)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun elapsed(&self) -> Duration {
+        # The `elapsed` method calculates the duration that has elapsed since this `TimePoint`. It returns a `Duration`
+        # representing the amount of time that has passed from this `TimePoint` to the current time.
+        # @ret: A `Duration` representing the time elapsed since this `TimePoint`.
+
+        let now = TimePoint::now()
+        ret now.duration_since(self@)
     }
 }
 
-sup TimePoint ext std::ops::sub::Sub[Rhs=Self, Ret=Duration] {
-    fun sub(self, that: Self) -> Duration {
-        # The difference between two TimePoints results in a Duration.
-        let sec_diff = self.seconds_since_epoch - that.seconds_since_epoch
-        let nsec_diff = self.nanoseconds - that.nanoseconds
-        ret Duration(seconds=sec_diff, nanoseconds=nsec_diff)
+sup TimePoint ext Add[Duration] {
+    fun add(self, that: Duration) -> Self {
+        # The `add` method adds a `Duration` to this `TimePoint`, resulting in a new `TimePoint` that represents the
+        # point in time that is the specified duration after this `TimePoint`. The method performs checked addition to
+        # ensure that the resulting `TimePoint` does not overflow. If the addition would overflow, it will panic with an
+        # error message indicating that the addition overflowed.
+        # @let that: The `Duration` to add to this `TimePoint`.
+        # @ret: A new `TimePoint` that represents the point in time that is the specified duration after this
+        # `TimePoint`.
+
+        let new_duration = self.duration
+            .add_checked(that)
+            .expect("TimePoint addition overflowed")
+        ret Self(duration=new_duration)
+    }
+}
+
+sup TimePoint ext Sub[Duration] {
+    fun sub(self, that: Duration) -> Self {
+        # The `sub` method subtracts a `Duration` from this `TimePoint`, resulting in a new `TimePoint` that represents
+        # the point in time that is the specified duration before this `TimePoint`. The method performs checked
+        # subtraction to ensure that the resulting `TimePoint` does not underflow. If the subtraction would underflow,
+        # it will panic with an error message indicating that the subtraction underflowed.
+        # @let that: The `Duration` to subtract from this `TimePoint`.
+        # @ret: A new `TimePoint` that represents the point in time that is the specified duration before this
+        # `TimePoint`.
+
+        let new_duration = self.duration
+            .sub_checked(that)
+            .expect("TimePoint subtraction underflowed")
+        ret Self(duration=new_duration)
     }
 }

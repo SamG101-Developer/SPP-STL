@@ -1,49 +1,70 @@
 use std::annotations::public
 use std::annotations::private
+use std::annotations::versioned
 use std::boolean::Bool
-use std::number::S32
+use std::number::U64
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
 use std::void::Void
-use std::threading::mutex::LockErr
-
+use std::threading::thread::ThreadErr
+use std::ops::del::Del
 
 !public
+!versioned(base="1.0.0", new="1.0.0")
 cls SpinLock {
-    !private id: S32
-}
+    # The `SpinLock` type is a low-level synchronization primitive that provides mutual exclusion for concurrent
+    # threads. It is implemented using a busy-waiting mechanism, where a thread repeatedly checks if the lock is
+    # available and acquires it when it becomes free. This type is useful in scenarios where the expected wait time for
+    # acquiring the lock is short, as it avoids the overhead of context switching associated with traditional mutexes.
+    # @let handle: A unique identifier for the spin lock, represented as a 64-bit unsigned integer.
 
+    !private handle: U64
+}
 
 sup SpinLock {
     !public
-    fun new() -> Res[SpinLock, LockErr] {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun new() -> Res[SpinLock, ThreadErr] {
         # Create a new spin lock using the sppc threading API.
-        let id = sppc::spinlock_create()
-        ret Pass(val=SpinLock(id))
+        let mut handle = 0_u64
+        sppc::pthread_spin_init(&mut handle)
+        ret Pass(val=SpinLock(handle))
     }
 
     !public
-    fun lock(&self) -> Res[Void, LockErr] {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun lock(&self) -> Res[Void, ThreadErr] {
         # Acquire the spin lock using the sppc threading API.
-        let spin_id = sppc::spinlock_lock(self.id)
-        case spin_id == 0 { ret Fail(err=LockErr(msg="Failed to acquire spin lock"))  }
+        let err = sppc::pthread_spin_lock(&self.handle)
+        case err != 0 { ret Fail(err=ThreadErr::from_errno(err))  }
         ret Pass[Void]()
     }
 
     !public
-    fun try_lock(&self) -> Res[Bool, LockErr] {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun try_lock(&self) -> Res[Void, ThreadErr] {
         # Try to acquire the spin lock using the sppc threading API.
-        let spin_id = sppc::spinlock_try_lock(self.id)
-        case spin_id == 0 { ret Fail(err=LockErr(msg="Failed to try acquire spin lock"))  }
-        ret Pass(val=spin_id == 1)
+        let err = sppc::pthread_spin_trylock(&self.handle)
+        case err != 0 { ret Fail(err=ThreadErr::from_errno(err))  }
+        ret Pass[Void]()
     }
 
     !public
-    fun unlock(&self) -> Res[Void, LockErr] {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun unlock(&self) -> Res[Void, ThreadErr] {
         # Release the spin lock using the sppc threading API.
-        let spin_id = sppc::spinlock_unlock(self.id)
-        case spin_id == 0 { ret Fail(err=LockErr(msg="Failed to release spin lock"))  }
+        let err = sppc::pthread_spin_unlock(&self.handle)
+        case err == 0 { ret Fail(err=ThreadErr::from_errno(err))  }
         ret Pass[Void]()
+    }
+}
+
+sup SpinLock ext Del {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun del(&mut self) -> Void {
+        # Destroy the spin lock using the sppc threading API.
+        let err = sppc::pthread_spin_destroy(&self.handle)
+        case err != 0 { std::abort::abort("Failed to destroy spin lock") }
     }
 }

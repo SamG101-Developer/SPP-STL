@@ -1,0 +1,367 @@
+use std::annotations::public
+use std::annotations::versioned
+use std::io::Read
+use std::io::Write
+use std::io::StreamErr
+use std::boolean::Bool
+use std::number::U8
+use std::number::U32
+use std::number::USize
+use std::number::S32
+use std::option::None
+use std::option::Opt
+use std::option::Some
+use std::result::Fail
+use std::result::Pass
+use std::result::Res
+use std::view::View
+use std::void::Void
+use std::net::socket::Socket
+use std::net::socket::SockAddr
+use std::net::socket::SockErr
+use std::net::socket::SockV4Addr
+use std::net::socket::SockV6Addr
+use std::time::duration::Duration
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls TcpListener { }
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls TcpStream { }
+
+sup TcpListener ext Socket { }
+
+sup TcpListener {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun bind(addr: SockAddr) -> Res[TcpListener, SockErr] {
+        # The `bind` method binds the socket to a specific address. This is used for servers that want to listen for
+        # incoming connections on a specific address and port. The address can be either an IPv4 or IPv6 address, and
+        # the port can be any valid port number.
+        # @let addr: The address to bind the socket to. This can be either an IPv4 or IPv6 address, and must include the
+        # port number as well.
+        # @ret: A result containing the bound TcpListener if successful, or a SockErr if there was an error.
+
+        # Create the file descriptor from the address.
+        let mut fd = 0
+        let err = sppc::socket(addr.ip().family(), constants::sock_stream, constants::ipproto_tcp, &mut fd)
+        case fd < 0 { ret Fail(err=SockErr::from_errno(err)) }
+
+        # Create the `TcpListener` object with the file descriptor.
+        let listener = TcpListener(fd, local=addr)
+        let err = sppc::bind(listener.fd, &addr.storage())
+        case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass(val=listener)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun listen(&mut self, backlog: S32) -> Res[Void, SockErr] {
+        # The `listen` method puts the socket into listening mode. This is used for servers that want to accept incoming
+        # connections on the socket. The backlog parameter specifies the maximum number of pending connections that can
+        # be queued up before the server starts rejecting new connections.
+        # @let backlog: The maximum number of pending connections that can be queued up before the server starts
+        # rejecting new connections.
+        # @ret: A result indicating whether the operation was successful or not.
+
+        # Call the `listen` function from the `sppc2` module to
+        # put the socket into listening mode.
+        let err = sppc::listen(self.fd, backlog)
+        case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass[Void]()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun accept(&mut self) -> Res[(TcpStream, SockAddr), SockErr] {
+        # The `accept` method accepts an incoming connection on the socket. This is used for servers that want to accept
+        # incoming connections from clients. The method will block until a connection is available, and then return a
+        # new `TcpStream` object representing the accepted connection, along with the address of the client that
+        # connected.
+        # @ret: A result containing a tuple of the accepted `TcpStream` and the client's `SockAddr` if successful, or a
+        # `SockErr` if there was an error.
+
+        # Call the `accept` function from the `sppc2` module
+        # to accept an incoming connection.
+        let mut new_fd = 0
+        let mut storage = sppc::CSockaddrStorage()
+        let err = sppc::accept(self.fd, &mut storage, &mut new_fd)
+        case new_fd < 0 { ret Fail(err=SockErr::from_errno(err)) }
+
+        # Create a new `TcpStream` object with the accepted
+        # file descriptor.
+        let stream = TcpStream(fd=new_fd)
+        ret Pass(val=(stream, SockAddr::from_storage(&storage)))
+    }
+}
+
+sup TcpStream ext Socket { }
+
+sup TcpStream {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun connect(addr: SockAddr) -> Res[TcpStream, SockErr] {
+        # The `connect` method connects the socket to a remote address. This is used for clients that want to establish
+        # a connection to a server. The method will block until the connection is established, or return an error if the
+        # connection fails.
+        # @let addr: The remote address to connect to. This can be either an IPv4 or IPv6 address, and must include the
+        # port number as well.
+        # @ret: A result containing the connected `TcpStream` if successful, or a `SockErr` if there was an error.
+
+        # Create the file descriptor from the address.
+        let mut fd = 0
+        let err = sppc::socket(addr.ip().family(), constants::sock_stream, constants::ipproto_tcp, &mut fd)
+        case fd < 0 { ret Fail(err=SockErr::from_errno(err)) }
+
+        # Create the `TcpStream` object with the file descriptor.
+        let stream = TcpStream(fd)
+        let err = sppc::connect(stream.fd, &addr.storage())
+        case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass(val=stream)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun shutdown(&mut self, how: S32) -> Res[Void, SockErr] {
+        # The `shutdown` method shuts down the socket in one or more ways. This is used for both clients and servers
+        # that want to gracefully close a connection. The `how` parameter specifies how the socket should be shut down,
+        # such as shutting down the read side, the write side, or both sides of the connection.
+        # @let how: The way to shut down the socket.
+        # @ret: A result indicating whether the operation was successful or not.
+
+        let err = sppc::shutdown(self.fd, how)
+        case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass[Void]()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun set_keep_alive(&mut self, yes: Bool) -> Res[Void, SockErr] {
+        # The `set_keep_alive` method sets the socket to keep alive. This means that the socket will send keep-alive
+        # packets to the other end of the connection to keep the connection alive. This is useful for long-lived
+        # connections, as it can help to prevent the connection from being closed due to inactivity.
+        # @let yes: Whether to set the socket to keep alive or not. If true, the socket will be set to keep alive. If
+        # false, the socket will not be set to keep alive.
+        # @ret: A result indicating whether the operation was successful or not.
+
+        let err = sppc::set_keepalive(self.fd, yes)
+        case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass[Void]()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun keep_alive(&self) -> Res[Bool, SockErr] {
+        # The `keep_alive` method gets whether the socket is set to keep alive or not. This is useful for checking the
+        # current state of the socket, especially if you want to know whether keep-alive packets are being sent or not.
+        # @ret: A result containing a boolean indicating whether the socket is set to keep alive or not if successful,
+        # or a `SockErr` if there was an error.
+
+        let mut yes = false
+        let err = sppc::get_keepalive(self.fd, &mut yes)
+        case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass(val=yes)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun set_linger(&mut self, timeout: Opt[Duration]) -> Res[Void, SockErr] {
+        # The `set_linger` method sets the socket to linger. This means that when the socket is closed, it will wait for
+        # a certain amount of time before actually closing the connection. This is useful for ensuring that all data is
+        # sent before the connection is closed.
+        # @let timeout: The amount of time to wait for the socket to linger before closing the connection. If the
+        # timeout is `None`, then the socket will not linger and will close immediately when closed. If the timeout is
+        # `Some(val=duration)`, then the socket will linger for the specified duration before closing the connection.
+        # @ret: A result indicating whether the operation was successful or not.
+
+        let timeval = case timeout of {
+            is Some[Duration](val) { sppc::CTimeval(sec=val.seconds, usec=val.nanoseconds / 1000_u64) }
+            else { sppc::CTimeval(sec=0_u64, usec=0_u64) }
+        }
+        let err = sppc::set_linger(self.fd, timeout.is_some(), &timeval)
+        case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass[Void]()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun linger(&self) -> Res[Opt[Duration], SockErr] {
+        # The `linger` method gets the linger state of the socket. This is useful for checking the current state of the
+        # socket, especially if you want to know whether the socket is set to linger or not, and if so, how long it will
+        # linger for before closing the connection.
+        # @ret: A result containing an optional `Duration` indicating the linger state of the socket if successful, or a
+        # `SockErr` if there was an error. If the result is `None`, then the socket is not set to linger. If the result
+        # is `Some(val=duration)`, then the socket is set to linger for the specified duration before closing the
+        # connection.
+
+        let mut yes = false
+        let mut timeout = sppc::CTimeval()
+        let err = sppc::get_linger(self.fd, &mut yes, &mut timeout)
+        case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
+        let duration: Opt[Duration] = case yes { Some(val=Duration(seconds=timeout.sec, nanoseconds=timeout.usec * 1000_u64)) } else { None }
+        ret Pass(val=duration)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun set_no_delay(&mut self, yes: Bool) -> Res[Void, SockErr] {
+        # The `set_no_delay` method sets the socket to no delay. This means that the socket will send data immediately,
+        # without waiting for the buffer to fill up. This is useful for applications that require low latency, such as
+        # real-time gaming or voice chat.
+        # @let yes: Whether to set the socket to no delay or not. If true, the socket will be set to no delay. If false,
+        # the socket will not be set to no delay.
+        # @ret: A result indicating whether the operation was successful or not.
+
+        let err = sppc::set_nodelay(self.fd, yes)
+        case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass[Void]()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun no_delay(&self) -> Res[Bool, SockErr] {
+        # The `no_delay` method gets whether the socket is set to no delay or not. This is useful for checking the
+        # current state of the socket, especially if you want to know whether data is being sent immediately or if it is
+        # being buffered.
+        # @ret: A result containing a boolean indicating whether the socket is set to no delay or not if successful, or
+        # a `SockErr` if there was an error.
+
+        let mut yes = false
+        let err = sppc::get_nodelay(self.fd, &mut yes)
+        case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass(val=yes)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun set_read_timeout(&mut self, timeout: Duration) -> Res[Void, SockErr] {
+        # The `set_read_timeout` method sets the receive timeout for the socket. This means that if a receive operation
+        # takes longer than the specified timeout, it will return an error. This is useful for preventing the
+        # application from hanging indefinitely while waiting for data to be received.
+        # @let timeout: The amount of time to wait for a receive operation before it returns an error. If the timeout is
+        # zero, then there is no timeout and the receive operation will block indefinitely until data is received.
+        # @ret: A result indicating whether the operation was successful or not.
+
+        let timeval = sppc::CTimeval(sec=timeout.seconds, usec=timeout.nanoseconds / 1000_u64)
+        let err = sppc::set_recv_timeout(self.fd, &timeval)
+        case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass[Void]()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun read_timeout(&self) -> Res[Duration, SockErr] {
+        # The `read_timeout` method gets the receive timeout for the socket. This is useful for checking the current
+        # state of the socket, especially if you want to know how long the socket will wait for a receive operation
+        # before it returns an error.
+        # @ret: A result containing the receive timeout for the socket if successful, or a `SockErr` if there was an
+        # error.
+
+        let mut timeval = sppc::CTimeval()
+        let err = sppc::get_recv_timeout(self.fd, &mut timeval)
+        case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass(val=Duration(seconds=timeval.sec, nanoseconds=timeval.usec * 1000_u64))
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun set_write_timeout(&mut self, timeout: Duration) -> Res[Void, SockErr] {
+        # The `set_write_timeout` method sets the send timeout for the socket. This means that if a send operation takes
+        # longer than the specified timeout, it will return an error. This is useful for preventing the application from
+        # hanging indefinitely while waiting for data to be sent.
+        # @let timeout: The amount of time to wait for a send operation before it returns an error. If the timeout is
+        # zero, then there is no timeout and the send operation will block indefinitely until data is sent.
+        # @ret: A result indicating whether the operation was successful or not.
+
+        let timeval = sppc::CTimeval(sec=timeout.seconds, usec=timeout.nanoseconds / 1000_u64)
+        let err = sppc::set_send_timeout(self.fd, &timeval)
+        case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass[Void]()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun write_timeout(&self) -> Res[Duration, SockErr] {
+        # The `write_timeout` method gets the send timeout for the socket. This is useful for checking the current state
+        # of the socket, especially if you want to know how long the socket will wait for a send operation before it
+        # returns an error.
+        # @ret: A result containing the send timeout for the socket if successful, or a `SockErr` if there was an error.
+
+        let mut timeval = sppc::CTimeval()
+        let err = sppc::get_send_timeout(self.fd, &mut timeval)
+        case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass(val=Duration(seconds=timeval.sec, nanoseconds=timeval.usec * 1000_u64))
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun peer_addr(&self) -> Res[SockAddr, SockErr] {
+        # The `peer_addr` method returns the remote address that the socket is connected to. This is used for clients
+        # that want to know the address of the server they are connected to.
+        # @ret: A result containing the remote `SockAddr` if successful, or a `SockErr` if there was an error.
+
+        let mut storage = sppc::CSockaddrStorage()
+        let err = sppc::getpeername(self.fd, &mut storage)
+        case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass(val=SockAddr::from_storage(&storage))
+    }
+}
+
+sup TcpStream ext Read {
+    fun read(&mut self, mut buf: &mut View[U8]) -> Res[USize, StreamErr] {
+        # The `read` method reads data from the socket into the provided buffer. It uses the sppc::recv function to
+        # perform the read operation, which allows it to handle both IPv4 and IPv6 addresses seamlessly. The method
+        # returns a `Res` type that indicates success or failure. On success, it returns the number of bytes read.
+        # @let buf: A mutable reference to a buffer where the read data will be stored. The buffer should be large
+        # enough to hold the expected amount of data to be read from the socket.
+        # @ret: A `Res` type containing the number of bytes read if the operation is successful, or a `StreamErr` if the
+        # operation fails. The number of bytes read may be less than the size of the buffer if there is less data
+        # available to read from the socket at the time of the call.
+
+        # Use the kernel "recv" function to read data from the
+        # socket, into the provided buffer.
+        let mut bytes_read = 0_sz
+        let err = sppc::recv(self.fd, &mut buf.ptr, buf.len(), 0, &mut bytes_read)
+        case err != 0 { ret Fail(err=StreamErr::from_errno(err)) }
+        ret Pass(val=USize::from(bytes_read))
+    }
+}
+
+sup TcpStream ext Write {
+    fun write(&mut self, buf: &View[U8]) -> Res[USize, StreamErr] {
+        # The `write` method writes data from the provided buffer to the socket. It uses the sppc::send function to
+        # perform the write operation, which allows it to handle both IPv4 and IPv6 addresses seamlessly. The method
+        # returns a `Res` type that indicates success or failure. On success, it returns the number of bytes written.
+        # @let buf: A reference to a buffer containing the data to be written to the socket. The buffer should contain
+        # the data that you want to send to the remote peer. The method will attempt to write the entire contents of the
+        # buffer to the socket, but it may write fewer bytes if the socket's send buffer is full or if there is an error
+        # during the write operation. In such cases, the method will return the number of bytes that were successfully
+        # written, which may be less than the size of the buffer.
+        # @ret: A `Res` type containing the number of bytes written if the operation is successful, or a `StreamErr` if
+        # the operation fails. The number of bytes written may be less than the size of the buffer if the socket's send
+        # buffer is full or if there is an error during the write operation.
+
+        # Use the kernel "send" function to write data to the
+        # socket, from the provided buffer.
+        let mut bytes_written = 0_sz
+        let err = sppc::send(self.fd, &buf.ptr, buf.len(), 0, &mut bytes_written)
+        case err != 0 { ret Fail(err=StreamErr::from_errno(err)) }
+        ret Pass(val=USize::from(bytes_written))
+    }
+
+    fun flush(&mut self) -> Res[Void, StreamErr] {
+        # The `flush` method is a no-op for `TcpStream` because there is no manual buffering of data in the `TcpStream`
+        # implementation. The underlying socket handles buffering internally, and data is sent immediately when the
+        # `write` method is called. Therefore, there is no need for a separate flush operation to ensure that data is
+        # sent to the remote peer. The method simply returns a successful result to indicate that the flush operation
+        # was "performed", even though it doesn't actually do anything in this context.
+        # @ret: A `Res` type containing an empty value if the flush operation is successful, or a `StreamErr` if there
+        # was an error. In this case, since the flush operation is a no-op, it will always return a successful result.
+
+        # No-op for TcpStream, as there is no manual buffering
+        # of data in the TcpStream implementation.
+        ret Pass[Void]()
+    }
+}

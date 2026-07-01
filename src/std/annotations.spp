@@ -1,8 +1,8 @@
 use std::number::S32
-use std::string::StrView
+use std::string_view::StrView
 use std::void::Void
 
-cls Annotation {}
+cls Annotation { }
 sup Annotation {
     !public cmp function: S32 = 1
     !public cmp method: S32 = 2
@@ -15,58 +15,95 @@ sup Annotation {
     !public cmp mod: S32 = Self::function | Self::method | Self::class | Self::new_type | Self::constant
 }
 
-
-!annotation(target=Annotation::function)
-!compiler_builtin
 !public
+!intrinsic(name="std.annotations.annotation")
+!annotation(target=Annotation::function)
+!versioned(base="1.0.0", new="1.0.0")
 cmp fun annotation(target: S32) -> Void { }
 
+!public
+!intrinsic(name="std.annotations.intrinsic")
 !annotation(target=Annotation::function | Annotation::method | Annotation::ext_method | Annotation::class)
-!compiler_builtin
-!public
-cmp fun compiler_builtin(llvm: StrView = "") -> Void { }
+!versioned(base="1.0.0", new="1.0.0")
+cmp fun intrinsic(name: &StrView = "") -> Void { }
 
-!annotation(target=Annotation::mod)
-!compiler_builtin
 !public
+!intrinsic(name="std.annotations.public")
+!annotation(target=Annotation::mod)
+!versioned(base="1.0.0", new="1.0.0")
 cmp fun public() -> Void { }
 
-!annotation(target=Annotation::mod)
-!compiler_builtin
 !public
+!intrinsic(name="std.annotations.private")
+!annotation(target=Annotation::mod)
+!versioned(base="1.0.0", new="1.0.0")
 cmp fun package() -> Void { }
 
-!annotation(target=Annotation::mod)
-!compiler_builtin
 !public
+!intrinsic(name="std.annotations.protected")
+!annotation(target=Annotation::mod)
+!versioned(base="1.0.0", new="1.0.0")
 cmp fun protected() -> Void { }
 
-!annotation(target=Annotation::mod)
-!compiler_builtin
 !public
+!intrinsic(name="std.annotations.internal")
+!annotation(target=Annotation::mod)
+!versioned(base="1.0.0", new="1.0.0")
 cmp fun private() -> Void { }
 
-!annotation(target=Annotation::method)
-!compiler_builtin
 !public
+!intrinsic(name="std.annotations.sealed")
+!annotation(target=Annotation::method)
+!versioned(base="1.0.0", new="1.0.0")
 cmp fun virtual_method() -> Void { }
 
-!annotation(target=Annotation::method)
-!compiler_builtin
 !public
+!intrinsic(name="std.annotations.abstract_method")
+!annotation(target=Annotation::method)
+!versioned(base="1.0.0", new="1.0.0")
 cmp fun abstract_method() -> Void { }
 
+!public
+!intrinsic(name="std.annotations.final_method")
 !annotation(target=Annotation::function)
-!compiler_builtin
-!public
-cmp fun ffi(symbol: StrView) -> Void { }
+!versioned(base="1.0.0", new="1.0.0")
+cmp fun ffi(symbol: &StrView) -> Void { }
 
-!annotation(target=Annotation::class)
-!compiler_builtin
 !public
+!intrinsic(name="std.annotations.ext_method")
+!annotation(target=Annotation::class)
+!versioned(base="1.0.0", new="1.0.0")
 cmp fun extends[..Ts]() -> Void { }
 
-!annotation(target=Annotation::new_type)
-!compiler_builtin
 !public
+!intrinsic(name="std.annotations.constant")
+!annotation(target=Annotation::new_type)
+!versioned(base="1.0.0", new="1.0.0")
 cmp fun variant_default[T]() -> Void { }
+
+!public
+!intrinsic(name="std.annotations.zero_type")
+!annotation(target=Annotation::class)
+!versioned(base="1.0.0", new="1.0.0")
+cmp fun zero_type() -> Void { }
+
+!public
+!intrinsic(name="std.annotations.zero_type")
+!annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
+!versioned(base="1.0.0", new="1.0.0")
+cmp fun cfg(platform: &StrView = "") -> Void { }
+
+!public
+!intrinsic(name="std.annotations.zero_sized")
+!annotation(target=Annotation::all)
+!versioned(base="1.0.0", new="1.0.0")
+cmp fun versioned(base: &StrView, new: &StrView) -> Void {
+    # The `versioned` annotation is used to indicate the version that a function/class etc was introduced into the
+    # standard library, and when it was last updated. For example, `!versioned(base="1.0.0", new="1.1.0")` indicates
+    # that the annotated item was introduced in version `1.0.0` of the standard library, and was last updated in version
+    # `1.1.0`. This information can be used by tools and documentation generators to provide versioning information
+    # about the standard library.
+    # @let base: A string that represents the version of the STL when the annotated item was first introduced.
+    # @let new: A string that represents the version of the STL when the annotated item was last updated. This can be
+    # the same as `base` if the item has not been updated since it was introduced.
+}

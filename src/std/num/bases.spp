@@ -1,29 +1,54 @@
-use std::annotations::protected
+use std::annotations::package
+use std::annotations::versioned
 use std::boolean::Integral
 
+!package
+!versioned(base="1.0.0", new="1.0.0")
+cls Num {
+    # The `Num` type represents all numeric types in the standard library. It is a marker type that is used to indicate
+    # that a type is numeric. It does not have any fields or methods, and it cannot be instantiated directly. Instead,
+    # it is extended by other types that represent specific kinds of numeric types, such as integers and floating point
+    # numbers. Typically used to constrain generics in the `intrinsics` module.
+}
 
-# The base numeric types in the standard library.
-!protected
-cls Num { }
+!package
+!versioned(base="1.0.0", new="1.0.0")
+cls Integer {
+    # The `Integer` type represents all integer types in the standard library. It is a marker type that is used to
+    # indicate that a type is an integer. It does not have any fields or methods, and it cannot be instantiated
+    # directly. Instead, it is extended by other types that represent specific kinds of integer types, such as signed
+    # and unsigned integers of various sizes. Typically used to constrain generics in the `intrinsics` module.
+}
 
+!package
+!versioned(base="1.0.0", new="1.0.0")
+cls FloatingPoint {
+    # The `FloatingPoint` type represents all floating point types in the standard library. It is a marker type that is
+    # used to indicate that a type is a floating point number. It does not have any fields or methods, and it cannot be
+    # instantiated directly. Instead, it is extended by other types that represent specific kinds of floating point
+    # types, such as single and double precision floating point numbers. Typically used to constrain generics in the
+    # `intrinsics` module.
+}
 
-# The base integer type that is numeric.
-!protected
-cls Integer { }
+sup Num ext Integral {
+    # The `Num` type extends the `Integral` type, which means that all numeric types are also integral types. An
+    # `Integral` type is either numeric or boolean, and it is a copyable primitive type. This means that all numeric
+    # types can be copied and are considered primitive types in the language. This allows for efficient copying and
+    # manipulation of numeric values without the overhead of reference counting or heap allocation.
+}
 
+sup Integer ext Num {
+    # The `Integer` type extends the `Num` type, which means that all integer types are also numeric types. This allows
+    # integer types to be used in contexts where a numeric type is expected, such as in mathematical operations or
+    # generic functions that operate on numeric types. By extending `Num`, the `Integer` type inherits any properties or
+    # behaviors associated with numeric types, while also providing additional functionality specific to integers, such
+    # as support for integer-specific operations and traits.
+}
 
-# The base floating point type that is numeric.
-!protected
-cls FloatingPoint { }
-
-
-# All numeric types are copyable primitives.
-sup Num ext Integral { }
-
-
-# The base integer type extends the base numeric type.
-sup Integer ext Num { }
-
-
-# The base floating point type extends the base numeric type.
-sup FloatingPoint ext Num { }
+sup FloatingPoint ext Num {
+    # The `FloatingPoint` type extends the `Num` type, which means that all floating point types are also numeric types.
+    # This allows floating point types to be used in contexts where a numeric type is expected, such as in mathematical
+    # operations or generic functions that operate on numeric types. By extending `Num`, the `FloatingPoint` type
+    # inherits any properties or behaviors associated with numeric types, while also providing additional functionality
+    # specific to floating point numbers, such as support for floating point-specific operations and traits.
+}

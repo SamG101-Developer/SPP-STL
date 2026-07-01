@@ -1,0 +1,39 @@
+use std::annotations::public
+use std::annotations::versioned
+use std::number::S32
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp af_inet4: S32 = 2
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp af_inet6: S32 = 10
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp shutdown_read: S32 = 0
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp shutdown_write: S32 = 1
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp shutdown_both: S32 = 2
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp sock_stream: S32 = 1
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp sock_dgram: S32 = 2
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp ipproto_tcp: S32 = 6
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cmp ipproto_udp: S32 = 17

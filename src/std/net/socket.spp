@@ -1,161 +1,202 @@
+use std::annotations::package
 use std::annotations::public
-use std::annotations::protected
-use std::number::U8
-use std::number::USize
+use std::annotations::versioned
+use std::annotations::zero_type
+use std::boolean::Bool
 use std::number::S32
-use std::ops::del::Del
+use std::number::U8
+use std::number::U16
+use std::number::U32
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
-use std::streams::ReadableStream
-use std::streams::StreamErr
-use std::streams::WritableStream
-use std::string_view::StrView
-use std::slice::Slice
-use std::vector::Vec
 use std::void::Void
+use std::net::ip::IpAddr
+use std::net::ip::IpV4Addr
+use std::net::ip::IpV6Addr
 
-!public cls Socket { !protected fd: S32 = 0 }
-!public cls SocketErr { !public msg: StrView }
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls SockOtherErr { }
 
-sup Socket {
-    !public cmp sock_stream: S32 = 1
-    !public cmp sock_dgram: S32 = 2
-    !public cmp sock_raw: S32 = 3
-    !public cmp sock_rdm: S32 = 4
-    !public cmp sock_seqpacket: S32 = 5
-    !public cmp sock_dccp: S32 = 6
-    !public cmp sock_pkt: S32 = 10
+!public
+!versioned(base="1.0.0", new="1.0.0")
+type SockErr = SockOtherErr
 
-    !public cmp af_unspec: S32 = 0
-    !public cmp af_local: S32 = 1
-    !public cmp af_inet: S32 = 2
-    !public cmp af_ax25: S32 = 3
-    !public cmp af_ipx: S32 = 4
-    !public cmp af_appletalk: S32 = 5
-    !public cmp af_netrom: S32 = 6
-    !public cmp af_bridge: S32 = 7
-    !public cmp af_atmpvc: S32 = 8
-    !public cmp af_x25: S32 = 9
-    !public cmp af_inet6: S32 = 10
-    !public cmp af_rose: S32 = 11
-    !public cmp af_decnet: S32 = 12
-    !public cmp af_netbeui: S32 = 13
-    !public cmp af_security: S32 = 14
-    !public cmp af_key: S32 = 15
-    !public cmp af_netlink: S32 = 16
-    !public cmp af_packet: S32 = 17
-    !public cmp af_ash: S32 = 18
-    !public cmp af_econet: S32 = 19
-    !public cmp af_atmsvc: S32 = 20
-    !public cmp af_rds: S32 = 21
-    !public cmp af_sna: S32 = 22
-    !public cmp af_irda: S32 = 23
-    !public cmp af_pppox: S32 = 24
-    !public cmp af_wanpipe: S32 = 25
-    !public cmp af_llc: S32 = 26
-    !public cmp af_ib: S32 = 27
-    !public cmp af_mpls: S32 = 28
-    !public cmp af_can: S32 = 29
-    !public cmp af_tipc: S32 = 30
-    !public cmp af_bluetooth: S32 = 31
-    !public cmp af_iucv: S32 = 32
-    !public cmp af_rxrpc: S32 = 33
-    !public cmp af_isdn: S32 = 34
-    !public cmp af_phonet: S32 = 35
-    !public cmp af_ieee802154: S32 = 36
-    !public cmp af_caif: S32 = 37
-    !public cmp af_alg: S32 = 38
-    !public cmp af_nfc: S32 = 39
-    !public cmp af_vsock: S32 = 40
-    !public cmp af_kcm: S32 = 41
-    !public cmp af_qipcrtr: S32 = 42
-    !public cmp af_smc: S32 = 43
-    !public cmp af_xdp: S32 = 44
-    !public cmp af_mctp: S32 = 45
-    !public cmp af_max: S32 = 46
-
-    !public cmp ipproto_ip: S32 = 0
-    !public cmp ipproto_icmp: S32 = 1
-    !public cmp ipproto_igmp: S32 = 2
-    !public cmp ipproto_ipip: S32 = 4
-    !public cmp ipproto_tcp: S32 = 6
-    !public cmp ipproto_egp: S32 = 8
-    !public cmp ipproto_pup: S32 = 12
-    !public cmp ipproto_udp: S32 = 17
-    !public cmp ipproto_idp: S32 = 22
-    !public cmp ipproto_tp: S32 = 29
-    !public cmp ipproto_dccp: S32 = 33
-    !public cmp ipproto_ipv6: S32 = 41
-    !public cmp ipproto_rsvp: S32 = 46
-    !public cmp ipproto_gre: S32 = 47
-    !public cmp ipproto_esp: S32 = 50
-    !public cmp ipproto_ah: S32 = 51
-    !public cmp ipproto_mtp: S32 = 92
-    !public cmp ipproto_beetph: S32 = 94
-    !public cmp ipproto_encap: S32 = 98
-    !public cmp ipproto_pim: S32 = 103
-    !public cmp ipproto_comp: S32 = 108
-    !public cmp ipproto_sctp: S32 = 132
-    !public cmp ipproto_udplite: S32 = 136
-    !public cmp ipproto_mpls: S32 = 137
-    !public cmp ipproto_ethernet: S32 = 143
-    !public cmp ipproto_raw: S32 = 255
-    !public cmp ipproto_mptcp: S32 = 262
-    !public cmp ipproto_max: S32 = 263 # ?
-}
-
-
-sup Socket {
-    fun close(&mut self) -> Void {
-        sppc::fd_close(self.fd)
-        self.fd = 0
+sup SockErr {
+    fun from_errno(errno: S32) -> Self {
+        ret case errno of {
+            else { SockOtherErr }
+        }
     }
 }
 
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls Socket {
+    # The basic socket class. This is the base for all socket types, and contains the common functionality for all
+    # sockets.
+    # @let fd: The file descriptor for the socket. This is used to identify the socket in the operating system, and is
+    # used for all socket operations.
+    # @let local: The local address of the socket. This is the address that the socket is bound to, and is used for
+    # operations that require the local address, such as binding and listening.
 
-sup Socket ext WritableStream {
-    fun write(&mut self, data: &Slice[U8]) -> Res[USize, StreamErr] {
-        # Get the data length, form the stream, and send the datagram.
-        let len = data.length()
-        let stream = StrView::from_utf8(data)
-        let val = sppc::fd_write(&stream, 1_uz, len, self.fd)
+    !package fd: S32
+    !package local: SockAddr
+}
 
-        # Report a failed send (negative value) or return the number of bytes sent.
-        ret case val of {
-            < 0_uz { Fail(err=StreamErr(msg="Failed to write to socket")) }
-            else { Pass(val) }
+sup Socket {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun set_non_blocking(&mut self, yes: Bool) -> Res[Void, SockErr] {
+        # The `set_non_blocking` method sets the socket to non-blocking mode. This means that all operations on the
+        # socket will return immediately, even if they would normally block. This is useful for asynchronous
+        # programming, as it allows you to perform other tasks while waiting for the socket to become ready.
+        # @let yes: Whether to set the socket to non-blocking mode or not. If true, the socket will be set to
+        # non-blocking mode. If false, the socket will be set to blocking mode.
+        # @ret: A result indicating whether the operation was successful or not.
+
+        let err = sppc::set_nonblocking(self.fd, yes)
+        case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass[Void]()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun set_ttl(&mut self, ttl: U8) -> Res[Void, SockErr] {
+        # The `set_ttl` method sets the time-to-live (TTL) for the socket. This is the maximum number of hops that a
+        # packet can take before it is discarded. This is useful for controlling the scope of packets sent from the
+        # socket, as it can help to prevent packets from being sent too far and potentially causing network congestion.
+        # @let ttl: The time-to-live value to set for the socket. This is the maximum number of hops that a packet can
+        # take before it is discarded.
+        # @ret: A result indicating whether the operation was successful or not.
+
+        let err = sppc::set_ttl(self.fd, S32::from(ttl))
+        case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass[Void]()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun ttl(&self) -> Res[U32, SockErr] {
+        # The `ttl` method gets the time-to-live (TTL) for the socket. This is the maximum number of hops that a packet
+        # can take before it is discarded. This is useful for controlling the scope of packets sent from the socket, as
+        # it can help to prevent packets from being sent too far and potentially causing network congestion.
+        # @ret: A result containing the time-to-live value for the socket if successful, or a `SockErr` if there was an
+        # error.
+
+        let mut ttl = 0
+        let err = sppc::get_ttl(self.fd, &mut S32::from(ttl))
+        case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass(val=U32::from(ttl))
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun local_addr(&self) -> SockAddr {
+        # The `local_addr` method returns the local address that the socket is bound to. This is used for servers that
+        # want to know the address they are listening on, especially if they bound to a wildcard address.
+        # @ret: A result containing the local `SockAddr` if successful, or a `SockErr` if there was an error.
+
+        ret self.local
+    }
+}
+
+cls SockV4Addr {
+    !public ip: IpV4Addr
+    !public port: U16
+}
+
+cls SockV6Addr {
+    !public ip: IpV6Addr
+    !public port: U16
+}
+
+type SockAddr = SockV4Addr or SockV6Addr
+
+sup SockAddr {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun ip(&self) -> IpAddr {
+        ret case self of {
+            is SockV4Addr(ip, ..) { ip }
+            is SockV6Addr(ip, ..) { ip }
+            else { std::abort::abort("Unsupported address family") }
         }
     }
 
-    fun flush(&mut self) -> Res[Void, StreamErr] {
-        # No-op for sockets (there is no buffering at this level).
-        ret Pass[Void]()
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun port(&self) -> U16 {
+        ret case self of {
+            is SockV4Addr(.., port) { port }
+            is SockV6Addr(.., port) { port }
+            else { std::abort::abort("Unsupported address family") }
+        }
     }
-}
 
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_storage(storage: &sppc::CSockaddrStorage) -> SockAddr {
+        #
+        # @let storage:
+        # @ret:
 
-sup Socket ext ReadableStream {
-    fun read(&mut self, len: USize) -> Res[Vec[U8], StreamErr] {
-        # Prepare the stream and receive the datagram.
-        let mut stream = StrView::new_with_capacity(len)
-        let val = sppc::fd_read(&mut stream, 1_uz, len, self.fd)
+        let mut family = 0
+        sppc::sockaddr_family(&storage, &mut family)
+        ret case family of {
+            # For IpV4, fill the octets of the IpV4Addr and the
+            # port from the storage.
+            == constants::af_inet4 {
+                let mut socket_address = SockV4Addr()
+                sppc::get_sockaddr_v4(&storage, &mut socket_address.ip.octets.ptr, &mut socket_address.port)
+                socket_address
+            }
 
-        # Report a failed receive (negative value) or return the received data, host, and port.
-        ret case val of {
-            < 0_uz { Fail(err=StreamErr(msg="Failed to read from socket")) }
+            # For IpV6, fill the segments of the IpV6Addr and the
+            # port from the storage.
+            == constants::af_inet6 {
+                let mut socket_address = SockV6Addr()
+                sppc::get_sockaddr_v6(&storage, &mut socket_address.ip.segments.ptr, &mut socket_address.port)
+                socket_address
+            }
+
+            # For any other address family, abort the program with
+            # an error message.
             else {
-                # buffer.set_length(USize::from(val))
-                let vec = Vec[U8]::from(Slice[U8]::from(stream))
-                Pass(val=vec)
+                std::abort::abort("Unsupported address family")
             }
         }
     }
-}
 
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun storage(&self) -> sppc::CSockaddrStorage {
+        #
+        # @ret:
 
-sup Socket ext Del {
-    fun del(&mut self) -> Void {
-        sppc::fd_close(self.fd)
+        ret case self of {
+            # For IpV4, create a new CSockaddrStorage and fill it with
+            # the octets of the IpV4Addr and the port.
+            is SockV4Addr(ip, port) {
+                let mut storage = sppc::CSockaddrStorage()
+                sppc::set_sockaddr_v4(&ip.octets.ptr, port, &mut storage)
+                storage
+            }
+
+            # For IpV6, create a new CSockaddrStorage and fill it with
+            # the segments of the IpV6Addr and the port.
+            is SockV6Addr(ip, port) {
+                let mut storage = sppc::CSockaddrStorage()
+                sppc::set_sockaddr_v6(&ip.segments.ptr, port, &mut storage)
+                storage
+            }
+
+            # For any other address family, abort the program with an
+            # error message.
+            else {
+                std::abort::abort("Unsupported address family")
+            }
+        }
     }
 }

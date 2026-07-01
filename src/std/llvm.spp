@@ -1,36 +1,75 @@
 use std::annotations::annotation
-use std::annotations::compiler_builtin
+use std::annotations::intrinsic
 use std::annotations::public
+use std::annotations::versioned
 use std::annotations::Annotation
 use std::void::Void
 
-
-!annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
-!compiler_builtin
 !public
-cmp fun inline() -> Void { }
-
+!intrinsic(name="std.llvm.inline")
+!versioned(base="1.0.0", new="1.0.0")
 !annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
-!compiler_builtin
-!public
-cmp fun always_inline() -> Void { }
+cmp fun inline() -> Void {
+    # The `inline` annotation is a hint to the compiler that the annotated function should be inlined at the call site.
+    # This does not guarantee that the function will be inlined, as the compiler may choose to ignore the hint based on
+    # its own heuristics and optimization strategies. However, it can be used to suggest that a function is a good
+    # candidate for inlining, such as small functions or functions that are called frequently. The behavior of the
+    # `inline` annotation is uniform across all platforms and does not depend on the operating system or environment.
+}
 
+!public
+!intrinsic(name="std.llvm.no_inline")
+!versioned(base="1.0.0", new="1.0.0")
 !annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
-!compiler_builtin
-!public
-cmp fun no_inline() -> Void { }
+cmp fun always_inline() -> Void {
+    # The `always_inline` annotation is a hint to the compiler that the annotated function must be inlined at the call
+    # site. This is a stronger hint than `inline`, as it indicates that the function should be inlined regardless of the
+    # compiler's heuristics or optimization strategies. It guarantees that the function will be inlined, and if the
+    # compiler cannot inline the function for some reason, it will generate a compile-time error. The behavior of the
+    # `always_inline` annotation is uniform across all platforms and does not depend on the operating system or
+    # environment.
+}
 
+!public
+!intrinsic(name="std.llvm.no_inline")
+!versioned(base="1.0.0", new="1.0.0")
 !annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
-!compiler_builtin
-!public
-cmp fun hot() -> Void { }
+cmp fun no_inline() -> Void {
+    # The `no_inline` annotation is a hint to the compiler that the annotated function must not be inlined at the call
+    # site. This indicates that the function should not be inlined regardless of the compiler's heuristics or
+    # optimization strategies. It guarantees that the function will not be inlined, and if the compiler attempts to
+    # inline the function for some reason, it will generate a compile-time error. The behavior of the `no_inline`
+    # annotation is uniform across all platforms and does not depend on the operating system or environment.
+}
 
+!public
+!intrinsic(name="std.llvm.hot")
+!versioned(base="1.0.0", new="1.0.0")
 !annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
-!compiler_builtin
-!public
-cmp fun cold() -> Void { }
+cmp fun hot() -> Void {
+    # The `hot` annotation is a hint to the compiler that the annotated function is expected to be called frequently,
+    # and therefore should be optimized for performance. This can influence the compiler's optimization decisions,
+    # such as inlining the function or optimizing it for speed. The compiler cannot always detect hot functions
+    # acccurately, due to loops calling functions for example.
+}
 
+!public
+!intrinsic(name="std.llvm.cold")
+!versioned(base="1.0.0", new="1.0.0")
+!annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
+cmp fun cold() -> Void {
+    # The `cold` annotation is a hint to the compiler that the annotated function is expected to be called infrequently,
+    # and therefore should be optimized for size rather than performance. This can influence the compiler's optimization
+    # decisions, such as not inlining the function and optimizing it for size.
+}
+
+!public
+!intrinsic(name="std.llvm.packed")
+!versioned(base="1.0.0", new="1.0.0")
 !annotation(target=Annotation::class)
-!compiler_builtin
-!public
-cmp fun packed() -> Void { }
+cmp fun packed() -> Void {
+    # The `packed` annotation is a hint to the compiler that the annotated class should have a packed memory layout,
+    # meaning that there should be no padding between the fields of the class. This can be useful for certain low-level
+    # programming scenarios where memory layout is important, such as when interfacing with hardware or when working
+    # with binary data formats.
+}

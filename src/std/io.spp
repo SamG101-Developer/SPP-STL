@@ -1,22 +1,522 @@
+use std::annotations::abstract_method
+use std::annotations::package
+use std::annotations::private
 use std::annotations::public
+use std::annotations::versioned
+use std::annotations::virtual_method
+use std::boolean::Bool
+use std::generator::GenOnce
+use std::number::S32
+use std::number::SSize
 use std::number::U8
 use std::number::USize
-use std::option::Opt
-use std::option::Some
-use std::slice::Slice
+use std::result::Fail
+use std::result::Pass
+use std::result::Res
 use std::string::Str
 use std::string_view::StrView
+use std::string_view::Utf8Err
+use std::vector::Vec
+use std::view::View
+use std::void::Void
 
+# All the individual possible streaming errors.
+cls StreamEofError { }
+cls StreamInterruptedError { }
+cls StreamWouldBlockError { }
+cls StreamInvalidInputError { }
+cls StreamInvalidDataError { }
+cls StreamPermissionDeniedError { }
+cls StreamNotFoundError { }
+cls StreamAlreadyExistsError { }
+cls StreamWriteZeroError { }
+cls StreamOtherError { }
 
+# Merge them all into a single StreamErr.
 !public
-fun print(value: StrView) -> Opt[USize] {
-    let slice = Slice[U8]::from(value)
-    ret std::console::stdout_stream::stdout.write_all(&slice).ok()
+!versioned(base="1.0.0", new="1.0.0")
+type StreamErr = StreamEofError
+    or StreamInterruptedError
+    or StreamWouldBlockError
+    or StreamInvalidInputError
+    or StreamInvalidDataError
+    or StreamPermissionDeniedError
+    or StreamNotFoundError
+    or StreamAlreadyExistsError
+    or StreamWriteZeroError
+    or StreamOtherError
+
+sup StreamErr {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_errno(errno: S32) -> Self {
+        # The from_errno function is a helper function that maps platform-specific error codes (e.g., errno values on
+        # Unix-like systems) to the appropriate StreamErr variants. This allows the stream implementations to convert
+        # system errors into the unified StreamErr type used by the Read, Write, and Seek interfaces.
+        # @let errno: The C error code that we want to convert into a StreamErr. This is typically obtained from a
+        # system call that set errno on failure.
+        # @ret: The corresponding StreamErr variant that represents the given errno value. If the errno value does not
+        # match any known error codes, a StreamOtherError with a generic message is returned.
+
+        ret case errno of {
+            # Todo: map errno values to the appropriate StreamErr variants.
+            else { StreamOtherError }
+        }
+    }
 }
 
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls Read {
+    # The Read type defines the interface for reading bytes from a stream. It includes an abstract method `read` that
+    # must be implemented by any type that implements this interface. Optional methods that work off of the `read`
+    # method are also provided, such as `read_exact`.
+    #
+    # Examples of types that implement Read are the console's stdin input, files and sockets. The Read interface is
+    # designed as the common `byte source` interface.
+}
 
 !public
-fun input() -> Opt[Str] {
-    let data = std::console::stdin_stream::stdin.read_all().ok()?
-    ret Some(val=Str(data))
+!versioned(base="1.0.0", new="1.0.0")
+cls Write {
+    # The Write type defines the interface for writing bytes to a stream. It includes an abstract method `write` that
+    # must be implemented by any type that implements this interface. Optional methods that work off of the `write`
+    # method are also provided, such as `write_all`.
+    #
+    # Examples of types that implement Write are the console's stdout and stderr output, files and sockets. The Write
+    # interface is designed as the common `byte sink` interface.
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls Seek {
+    # The Seek type defines the interface for seeking within a stream. It includes an abstract method `seek`,
+    # `stream_len` and `stream_pos` that must be implemented by any type that implements this interface. Optional
+    # methods that work off of the `seek` method are also provided, such as `seek_from_start`, `seek_from_end`, and
+    # `rewind`.
+    #
+    # Examples of types that implement Seek are files and sockets that support seeking. The Seek interface is designed
+    # as the common `stream position` interface, allowing for random access within a stream.
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls BufRead[R: Read] {
+    # The BufRead type is a wrapper around a Read type that provides buffering capabilities. It maintains an internal
+    # buffer to store bytes read from the inner reader, and provides methods to read from the buffer, consume bytes from
+    # the buffer, and read until a certain byte is encountered. The BufRead type is designed to optimize reading from
+    # sources that may have high latency or small read sizes, by reducing the number of read systems calls.
+    # @type R: The type of the inner reader that this BufRead wraps around. It must implement the Read interface.
+    # @let inner: The inner reader that this BufRead wraps around.
+    # @let buf: The internal buffer that stores bytes read from the inner reader.
+    # @let pos: The current position in the buffer (how many bytes have been consumed).
+    # @let filled: The number of bytes that have been filled into the buffer from the inner reader.
+    # @let eof: A flag indicating whether we've reached EOF on the inner reader.
+
+    !package inner: R
+    !package buf: Vec[U8]
+    !package pos: USize
+    !package filled: USize
+    !package eof: Bool
+}
+
+!public
+cls BufWrite[W: Write] {
+    # The BufWrite type is a wrapper around a Write type that provides buffering capabilities. It maintains an internal
+    # buffer to store bytes to be written to the inner writer, and provides methods to write to the buffer, flush the
+    # buffer to the inner writer, and write all bytes in the buffer. The BufWrite type is designed to optimize writing
+    # to sinks that may have high latency or small write sizes, by reducing the number of write system calls.
+    # @type W: The type of the inner writer that this BufWrite wraps around. It must implement the Write interface.
+    # @let inner: The inner writer that this BufWrite wraps around.
+    # @let buf: The internal buffer that stores bytes to be written to the inner writer.
+    # @let cap: The capacity of the internal buffer (how many bytes it can hold before needing to flush).
+
+    !package inner: W
+    !package buf: Vec[U8]
+    !package cap: USize
+}
+
+sup Read {
+    !public
+    !abstract_method
+    fun read(&mut self, buf: &mut View[U8]) -> Res[USize, StreamErr] {
+        # The read method is an abstract method that must be implemented by any type that implements the Read interface.
+        # It takes a mutable view of a byte buffer and attempts to read bytes from the stream into the buffer. It
+        # returns a Res indicating the number of bytes read on success, or a StreamErr on failure.
+        # @let buf: A mutable view of a byte buffer to read data into. The method should attempt to fill this buffer
+        # with bytes read from the stream.
+        # @ret: A Res indicating the number of bytes read on success, or a StreamErr on failure. The number of bytes
+        # read may be less than the length of the buffer, and a return value of 0 bytes indicates that EOF has been
+        # reached.
+    }
+
+    !public
+    !virtual_method
+    fun read_exact(&mut self, len: USize, buf: &mut View[U8]) -> Res[Void, StreamErr] {
+        # The read_exact method is a virtual method that provides a default implementation for reading an exact number
+        # of bytes from the stream into a buffer. It uses the read method to fill the buffer, and handles cases where
+        # the read may return fewer bytes than requested (e.g., due to interruptions or partial reads). It loops until
+        # the buffer is filled with the target number of bytes, or returns an error if EOF is reached before filling the
+        # buffer.
+        # @let len: The number of bytes to read from the stream. This should be less than or equal to the length of the
+        # buffer.
+        # @let buf: A mutable view of a byte buffer to read data into. The method will attempt to fill the first 'len'
+        # bytes of this buffer with bytes read from the stream.
+        # @ret: A Res indicating success (with Void value) if the buffer was successfully filled with 'len' bytes, or a
+        # StreamErr on failure. If EOF is reached before filling the buffer, a StreamEofError is returned.
+
+        # Define that no bytes have been filled yet.
+        let mut filled = 0_uz
+        let target = buf.len()
+
+        # Loop until all the bytes are filled.
+        loop filled < target {
+
+            # Ignore interruption errors and conintue.
+            let try = self.read(buf[mut filled to target])
+            case try is Fail[StreamErr](err) and err is StreamInterruptedError() { skip }
+
+            # Read the number of bytes into the buffer.
+            let n = try?
+            case n == 0_uz { ret Fail(err=StreamEofError()) }
+            filled += n
+        }
+
+        # No errors have been encountered => successful read.
+        ret Pass[Void]()
+    }
+
+    !public
+    !virtual_method
+    fun read_to_end(&mut self, out: &mut Vec[U8]) -> Res[USize, StreamErr] {
+        # The read_to_end method is a virtual method that provides a default implementation for reading bytes from the
+        # stream until EOF is reached, and appending those bytes to an output buffer. It uses the read method to fill a
+        # temporary chunk buffer, and appends the bytes read into the output buffer until EOF is reached (indicated by
+        # read returning 0 bytes). It also handles cases where the read may be interrupted, by ignoring interruption
+        # errors and continuing to read until EOF is reached or another error occurs.
+        # @let out: A mutable reference to a Vec[U8] that will have the bytes read from the stream appended to it. The
+        # method will read bytes from the stream and append them to this buffer until EOF is reached. The buffer may
+        # already contain data, and the new bytes will be appended to the end of it.
+        # @ret: A Res indicating the total number of bytes read and appended to the output buffer on success, or a
+        # StreamErr on failure. A return value of 0 bytes indicates that EOF was reached immediately (i.e., the stream
+        # had no data to read).
+
+        # Define a temporary chunk buffer to read into.
+        let mut chunk = Vec[U8]::new_with_capacity(4096_uz)
+        let mut total = 0_uz
+
+        # Loop until we encounter an EOF (0 byte read).
+        loop true {
+
+            # Ignore interruption errors and continue.
+            let try = self.read(&mut chunk)
+            case try is Fail[StreamErr](err) and err is StreamInterruptedError() { skip }
+
+            # Read the number of bytes into the chunk buffer.
+            let n = try?
+            case n == 0_uz { exit }
+            out.append_from_view(chunk[0_uz to n])
+            total += n
+        }
+
+        # No errors have been encountered => successful read.
+        ret Pass(val=total)
+    }
+}
+
+sup Write {
+    !public
+    !abstract_method
+    fun write(&mut self, buf: &View[U8]) -> Res[USize, StreamErr] {
+        # The write method is an abstract method that must be implemented by any type that implements the Write
+        # interface. It takes a view of a byte buffer and attempts to write bytes from the buffer to the stream. It
+        # returns a Res indicating the number of bytes written on success, or a StreamErr on failure. The number of
+        # bytes written may be less than the length of the buffer, and a return value of 0 bytes indicates that the
+        # stream is no longer able to accept bytes (e.g., it may be closed or have encountered an error).
+        # @let buf: A view of a byte buffer containing the data to be written to the stream. The method should attempt
+        # to write bytes from this buffer to the stream.
+        # @ret: A Res indicating the number of bytes written on success, or a StreamErr on failure.
+    }
+
+    !public
+    !abstract_method
+    fun flush(&mut self) -> Res[Void, StreamErr] {
+        # The flush method is an abstract method that must be implemented by any type that implements the Write
+        # interface. It attempts to flush any buffered data to the underlying stream. This is necessary for types that
+        # buffer data before writing it to the stream, to ensure that all data is actually sent to the stream. It
+        # returns a Res indicating success (with Void value) or a StreamErr on failure.
+        # @ret: A Res indicating success (with Void value) if the flush was successful, or a StreamErr on failure.
+    }
+
+    !public
+    !virtual_method
+    fun write_all(&mut self, buf: &View[U8]) -> Res[USize, StreamErr] {
+        # Define a byte count of how many bytes have been written so far, and the target length.
+        let mut written = 0_uz
+        let target = buf.len()
+
+        # Loop until the number of bytes written is equal to the target
+        # length.
+        loop written < target {
+
+            # If the write was interrupted, we just ignore
+            # the error and try again.
+            let try = self.write(buf[written to target])
+            case try is Fail[StreamErr](err) and err is StreamInterruptedError() { skip }
+
+            # Unwrap the number of bytes written from the buffer
+            # (propagate other errors).
+            let n = try?
+            case n == 0_uz { ret Fail(err=StreamWriteZeroError()) }
+            written += n
+        }
+
+        # No errors have been encountered, and all bytes in the buffer
+        # have been written.
+        ret Pass(val=written)
+    }
+}
+
+sup Seek {
+    # This superimposition holds the constants for the seek method's whence parameter, as well as the abstract and
+    # virtual methods that define the `Seek` interface. The `seek` method is the core method that must be implemented by
+    # any type that implements the `Seek` interface, while the `stream_len` and `stream_pos` methods provide additional
+    # functionality for determining the length of the stream and the current position within the stream. The
+    # `seek_from_start`, `seek_from_end`, and `rewind` methods are virtual methods that provide convenient wrappers
+    # around the core seek method for common seeking operations.
+    # @cmp seek_set: Seek from the start of the stream.
+    # @cmp seek_cur: Seek from the current position in the stream.
+    # @cmp seek_end: Seek from the end of the stream.
+
+    !public cmp seek_set: S32 = 0
+    !public cmp seek_cur: S32 = 1
+    !public cmp seek_end: S32 = 2
+
+    !public
+    !abstract_method
+    fun seek(&mut self, offset: SSize, whence: S32) -> Res[SSize, StreamErr] {
+        # The `seek` method is an abstract method that must be implemented by any type that implements the `Seek`
+        # interface. It takes an offset and a whence parameter, and attempts to move the stream's position according to
+        # those parameters. The method returns a `Res` indicating success (with Void value) if the seek was successful,
+        # or a `StreamErr` on failure. The specific behavior of the seek method (how it handles seeking beyond the
+        # bounds of the stream) is determined by the implementation in the concrete type that implements the `Seek`
+        # interface.
+        # @let offset: The offset to seek by. If `whence` is:   * `seek_set`: The offset is an absolute position from
+        # the start of the stream.   * `seek_cur`: The offset is a relative position from the current position in the
+        # stream.   * `seek_end`: The offset is a relative position from the end of the stream.
+        # @let whence: An integer indicating how to interpret the offset parameter. It should be one of the following
+        # values:   * `seek_set` (0): Seek from the start of the stream.   * `seek_cur` (1): Seek from the current
+        # position in the stream.   * `seek_end` (2): Seek from the end of the stream.
+        # @ret:
+        # @note: Once enums are supported, the whence parameter should be changed to an enum type for better type safety
+        # and readability.
+    }
+
+    !public
+    !abstract_method
+    fun stream_len(&mut self) -> Res[SSize, StreamErr] {
+        # The `stream_len` method is an abstract method that must be implemented by any type that implements the `Seek`
+        # interface. It attempts to determine the total length of the stream in bytes. For example, the file
+        # implementation of `stream_len` would return the total size of the file in bytes, using a system call.
+        # @ret: A `Res` indicating the total length of the stream in bytes on success, or a `StreamErr` on failure.
+    }
+
+    !public
+    !abstract_method
+    fun stream_pos(&mut self) -> Res[SSize, StreamErr] {
+        # The `stream_pos` method is an abstract method that must be implemented by any type that implements the `Seek`
+        # interface. It attempts to determine the current position within the stream in bytes. For example, the file
+        # implementation of `stream_pos` would return the current offset within the file in bytes, using a system call.
+        # @ret: A `Res` indicating the current position within the stream in bytes on success, or a `StreamErr` on
+        # failure.
+    }
+
+    !public
+    !virtual_method
+    fun seek_from_start(&mut self, offset: USize) -> Res[SSize, StreamErr] {
+        # The `seek_from_start` method is a wrapper for seeking for seeking with `whence` set to `seek_set`. It allows
+        # the caller to seek to an absolute position from the start of the stream by just providing the offset.
+        # @let offset: The absolute position from the start of the stream to seek to, in bytes. This is enforced to be
+        # non-negative by the type system.
+        # @ret: A `Res` indicating success (with Void value) if the seek was successful, or a `StreamErr` on failure.
+        # @todo: Consider possible data loss with this size conversion.
+        ret self.seek(SSize::from(offset), Self::seek_set)
+    }
+
+    !public
+    !virtual_method
+    fun seek_from_end(&mut self, offset: SSize) -> Res[SSize, StreamErr] {
+        # The `seek_from_end` method is a wrapper for seeking with `whence` set to `seek_end`. It allows the caller to
+        # seek to a position relative to the end of the stream by providing an offset that is added to the end position.
+        # For example, an offset of -10 would seek to 10 bytes before the end of the stream. The offset can be negative
+        # or positive, depending on whether you seeking backwards or forwards from the end of the stream.
+        # @let offset: The position relative to the end of the stream to seek to, in bytes. This can be negative (to
+        # seek backwards from the end) or positive (to seek forwards from the end).
+        # @ret: A `Res` indicating success (with Void value) if the seek was successful, or a `StreamErr` on failure.
+        ret self.seek(offset, Self::seek_end)
+    }
+
+    !public
+    !virtual_method
+    fun rewind(&mut self) -> Res[SSize, StreamErr] {
+        # The `rewind` method is a wrapper for seeking with `whence` set to `seek_set` and an offset of 0. It allows the
+        # caller to seek back to the start of the stream without having to specify an offset or whence. It is a
+        # convenient method for resetting the stream position back to the beginning.
+        # @ret: A `Res` indicating success (with Void value) if the seek was successful, or a `StreamErr` on failure.
+        ret self.seek(0_sz, Self::seek_set)
+    }
+}
+
+sup [R: Read] BufRead[R] {
+    !public
+    fun new(&mut self, inner: R) -> Self {
+        # Use the default capacity of 4096 bytes for the internal buffer.
+        ret self.new_with_capacity(inner, 4096_uz)
+    }
+
+    !public
+    fun new_with_capacity(&mut self, inner: R, capacity: USize) -> Self {
+        # Create a new buffer with the specified capacity, and initialize the position, filled byte count, and EOF flag
+        # to the defaults.
+        let buf = Vec[U8]::new_with_capacity(capacity)
+        ret Self(inner, buf)
+    }
+
+    !private
+    fun buffered_len(&self) -> USize {
+        # The buffer length is defined as the number of bytes that have been filled into the buffer but have not yet
+        # been consumed (i.e., the number of bytes between the current position and the filled byte count).
+        ret self.filled - self.pos
+    }
+
+    !private
+    fun refill(&mut self) -> Res[USize, StreamErr] {
+        # The use of the refill function is to ensure that the buffer is filled with bytes from the inner reader before
+        # we attempt to read from it. This is necessary because the buffer may be empty or
+
+        # If there are still bytes in the buffer that have been filled but not
+        # consumed, we can just return the length of those bytes. If we are at
+        # EOF, we return 0 bytes available.
+        case self.pos < self.filled { ret Pass(val=self.buffered_len()) }
+        case self.eof { ret Pass(val=0_uz) }
+
+        loop true {
+            let try = self.inner.read(&mut self.buf)
+            case try is Fail[StreamErr](err) and err is StreamInterruptedError() { skip }
+
+            let n = try?
+            self.pos = 0_uz
+            self.filled = n
+            case n == 0_uz { self.eof = true }
+            ret Pass(val=n)
+        }
+    }
+
+    !public
+    cor fill_buf(&mut self) -> GenOnce[&View[U8]] {
+        self.refill().expect("Failed to refill buffer") # TODO
+        gen self.buf[self.pos to self.filled]
+    }
+
+    !public
+    fun consume(&mut self, amount: USize) -> Void {
+        let available = self.buffered_len()
+        self.pos += amount.min(available)
+    }
+
+    !public
+    fun read_until(&mut self, byte: U8, out: &mut Vec[U8]) -> Res[USize, StreamErr] {
+        let mut total = 0_uz
+        loop true {
+            let available = self.refill()?
+            case available == 0_uz { exit }
+            let mut i = self.pos
+
+            let found = loop i < self.filled {
+                case self.buf[i] == byte { exit true }
+                i += 1_uz
+            }
+
+            let end = case found { i + 1_uz } else { self.filled }
+            out.append_from_view(self.buf[self.pos to end])
+            total += end - self.pos
+            self.pos = end
+            case found { exit }
+        }
+        ret Pass(val=total)
+    }
+
+    !public
+    fun skip_until(&mut self, byte: U8) -> Res[USize, StreamErr] {
+        let mut total = 0_uz
+        loop true {
+            let available = self.refill()?
+            case available == 0_uz { exit }
+            let mut i = self.pos
+
+            let found = loop i < self.filled {
+                case self.buf[i] == byte { exit true }
+                i += 1_uz
+            }
+
+            let end = case found { i + 1_uz } else { self.filled }
+            total += end - self.pos
+            self.pos = end
+            case found { exit }
+        }
+        ret Pass(val=total)
+    }
+
+    !public
+    fun read_line(&mut self, out: &mut Str) -> Res[USize, StreamErr] {
+        let mut bytes = Vec[U8]::new()
+        let result = self.read_until(b'\n', &mut bytes)
+        case result of {
+            is Fail[StreamErr](err) { ret Fail(err) }
+            is Pass[USize](val=0_uz) { ret Pass(val=0_uz) }
+        }
+
+        case bytes[bytes.len() - 1_uz]@ of {
+            == b'\n' | b'\r' { bytes.truncate(bytes.len() - 1_uz) }
+        }
+
+        # Return either the number of bytes read, otherwise map
+        # the error to a stream based error.
+        ret StrView::from_utf8(&bytes, out)
+            .map((caps &bytes) bytes.len())
+            .map_err((e: Utf8Err) StreamInvalidDataError)
+    }
+}
+
+sup [W: Write] BufWrite[W] {
+    !public
+    fun new(&mut self, inner: W) -> Self {
+        # Use the default capacity of 4096 bytes for the internal buffer.
+        ret self.new_with_capacity(inner, 4096_uz)
+    }
+
+    !public
+    fun new_with_capacity(&mut self, inner: W, capacity: USize) -> Self {
+        # Create a new buffer with the specified capacity.
+        let buf = Vec[U8]::new_with_capacity(capacity)
+        ret Self(inner, buf)
+    }
+
+    #     !public # TODO: coroutine issues here with return type
+    #     cor flush_buf(&mut self) -> GenOnce[Res[Void, StreamErr]] {
+    #         let mut written = 0_uz
+    #         let target = self.buf.len()
+    #
+    #         loop written < target {
+    #             let try = self.inner.write(self.buf[written to target])
+    #             case try is Fail[StreamErr](err) and err is StreamInterruptedError() { skip }
+    #
+    #             let n = try?
+    #             case n == 0_uz { ret Pass(val=Fail(err=StreamWriteZeroError())) }
+    #             written += n
+    #         }
+    #
+    #         self.buf.clear()
+    #         ret Pass(val=Pass[Void]())
+    #     }
 }

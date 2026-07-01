@@ -1,95 +1,147 @@
 use std::annotations::package
 use std::annotations::public
 use std::annotations::private
+use std::annotations::versioned
+use std::annotations::zero_type
 use std::boolean::Bool
-use std::function::FunRef
+use std::function::FunMut
+use std::number::U64
 use std::number::S32
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
-use std::string::Str
 use std::string_view::StrView
 use std::void::Void
-use std::ops::eq::Eq
 use std::ops::del::Del
+use std::ops::eq::Eq
 
-!public
-cls Thread {
-    !package id: S32
-    !private alive: Bool
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls ThreadMemoryErr {
+    # Indicates an error related to thread memory management, such as stack overflow or insufficient memory for thread
+    # creation. This error type can be used to represent various memory-related issues that may arise during thread
+    # operations. Mapped from the `ENOMEM` error code in `C`.
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls ThreadPermissionErr {
+    # Indicates an error related to thread permissions, such as insufficient privileges to create or manage threads.
+    # This error type can be used to represent various permission-related issues that may arise during thread
+    # operations. Mapped from the `EPERM` error code in `C`.
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls ThreadUnknownErr {
+    # Indicates an unknown error related to thread operations. This error type can be used to represent various
+    # unexpected issues that may arise during thread operations. Mapped from the `EAGAIN` error code in `C`, which
+    # typically indicates that a resource is temporarily unavailable or that the system is unable to create a new thread
+    # due to resource constraints.
 }
 
 !public
-cls ThreadErr {
-    !public msg: StrView
+!versioned(base="1.0.0", new="1.0.0")
+type ThreadErr = ThreadMemoryErr or ThreadPermissionErr or ThreadUnknownErr
+
+sup ThreadErr {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_errno(errno: S32) -> Self {
+        #
+        # @let errno:
+        # @ret:
+
+        ret case errno of {
+            == cffi::enomem { ThreadMemoryErr() }
+            == cffi::eperm { ThreadPermissionErr() }
+            else { ThreadUnknownErr() }
+        }
+    }
 }
 
-sup Thread {
-    !public
-    fun spawn[In, Out](function: FunRef[In, Out]) -> Res[Thread, ThreadErr] {
-        # Spawn a new thread using the sppc threading API.
-        let thread_id = sppc::thread_spawn(function)
-        case thread_id < 0 { ret Fail(err=ThreadErr(msg="Failed to spawn thread")) }
-        ret Pass(val=Thread(id=thread_id, alive=true))
-    }
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls JoinHandle[Out] {
+    !package handle: U64
+    !private detached: Bool
+}
 
-    !public
-    fun cancel(&mut self) -> Res[Void, ThreadErr] {
-        # Cancel the thread using the sppc threading API.
-        self.alive = false
-        let val = sppc::thread_cancel(self.id)
-        case val != 0 { ret Fail(err=ThreadErr(msg="Failed to cancel thread")) }
-        ret Pass[Void]()
-    }
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls ThreadId {
+    !package handle: U64
+}
 
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun spawn[Out, F: FunMut[(), Void]](function: F) -> Res[JoinHandle[Out], ThreadErr] {
+    # Spawn a new thread using the sppc threading API. The function to be executed in the new thread is passed as an
+    # argument.
+    # @type Out:
+    # @type F:
+    # @let function:
+    # @ret:
+    # @todo: Actually support "Out" type, currently just returns Void.
+
+    let mut handle = 0_u64
+    let err = sppc::pthread_create(function, &mut handle)
+    case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
+    ret Pass(val=JoinHandle[Out](handle))
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun current() -> ThreadId {
+    # Get the current thread using the sppc threading API. Todo: use a ThreadId type for equality check.
+    let mut handle = 0_u64
+    sppc::pthread_self(&mut handle)
+    ret ThreadId(handle)
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun yield_now() -> Void {
+    # Yield the current thread using the sppc threading API.
+    sppc::sched_yield()
+}
+
+sup [R] JoinHandle[R] {
     !public
-    fun detach(&mut self) -> Res[Void, ThreadErr] {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun detach(mut self) -> Res[Void, ThreadErr] {
         # Detach the thread using the sppc threading API.
-        self.alive = false
-        let val = sppc::thread_detach(self.id)
-        case val != 0 { ret Fail(err=ThreadErr(msg="Failed to detach thread")) }
+        let err = sppc::pthread_detach(&self.handle)
+        case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
+        self.detached = true
         ret Pass[Void]()
     }
 
     !public
-    fun join(mut self) -> Res[Void, ThreadErr] {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun join(self) -> Res[R, ThreadErr] {
         # Join the thread using the sppc threading API.
-        self.alive = false
-        let val = sppc::thread_join(self.id)
-        case val != 0 { ret Fail(err=ThreadErr(msg="Failed to join thread")) }
-        ret Pass[Void]()
-    }
-
-    !public
-    fun kill(&mut self) -> Res[Void, ThreadErr] {
-        # Kill the thread using the sppc threading API.
-        self.alive = false
-        let val = sppc::thread_kill(self.id)
-        case val != 0 { ret Fail(err=ThreadErr(msg="Failed to kill thread")) }
-        ret Pass[Void]()
-    }
-
-    !public
-    fun is_alive(&self) -> Bool {
-        # Simple accessor to check if the thread is alive.
-        ret self.alive
+        let err = sppc::pthread_join(&self.handle)
+        case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
+        ret Pass(val=R()) # Todo: get the value, maybe + transmute?
     }
 }
 
-
-sup Thread ext Eq[Rhs=Thread] {
-    fun eq(&self, that: &Thread) -> Bool {
+##
+sup [R] JoinHandle[R] ext Eq {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun eq(&self, that: &Self) -> Bool {
         # Compare thread IDs for equality.
-        let val = sppc::thread_equal(self.id, that.id)
-        ret val != 0
+        let err = sppc::pthread_equal(&self.handle, &that.handle)
+        ret err != 0
     }
 }
+##
 
-
-sup Thread ext Del {
+sup [R] JoinHandle[R] ext Del {
+    !versioned(base="1.0.0", new="1.0.0")
     fun del(&mut self) -> Void {
         # Ensure the thread is detached before deletion.
-        self.alive = false
-        sppc::thread_detach(self.id)
+        case self.detached.not { sppc::pthread_detach(&self.handle) }
     }
 }

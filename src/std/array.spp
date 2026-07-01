@@ -1,115 +1,106 @@
-use std::annotations::compiler_builtin
+use std::annotations::intrinsic
 use std::annotations::package
 use std::annotations::public
+use std::annotations::versioned
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
+use std::allocator::Layout
 use std::boolean::Bool
 use std::cast::From
 use std::clone::Clone
 use std::copy::Copy
+use std::function::FunMov
 use std::generator::GenOnce
+use std::iterator::Indexed
 use std::iterator::Iterator
-use std::mem::memory::Memory
 use std::number::USize
-use std::option::None
-use std::range::Range
-use std::slice::Slice
+use std::view::View
 use std::void::Void
+use std::single::Single
 use std::ops::eq::Eq
 use std::ops::idx::IndexMut
 use std::ops::idx::IndexRef
-
+use std::ops::iter::IterMov
+use std::ops::iter::IterMut
+use std::ops::iter::IterRef
+use std::ops::iter::RevIterMov
+use std::ops::iter::RevIterMut
+use std::ops::iter::RevIterRef
+use std::ops::fwd::FwdRef
+use std::ops::fwd::FwdMut
 
 !public
-cls Arr[T, cmp n: USize, A: Alloc[T] = GlobalAlloc[T]] {
-    !package mem: Memory[T, A]
+!versioned(base="1.0.0", new="1.0.0")
+cls Arr[T, cmp n: USize] {
+    # A fixed size, inline array of element type T. The length is a compiletime constant, so storage lives on the stack
+    # with no heap allocations, and therefore no allocation generic type parameter. The layout is statically known. All
+    # methods for the array type are intrinsic as the Arr[T, n] type lowers to the llvm array type, where all methods
+    # are defined in llvm directly.
+    # @type T: The type of elements stored in the array. This is a generic type parameter that can be any type, there
+    # are no constraints.
+    # @cmp n: The length of the array. This is a compile-time constant that determines how many elements the array can
+    # hold. The length is fixed and cannot be changed after the array is created.
 }
 
-sup [T, cmp n: USize, A: Alloc[T]] Arr[T, n, A] {
-    fun new() -> Self {
-        ret Arr[T, n](mem=Memory[T, A]::new(n))
-    }
-
-    fun length(&self) -> USize {
-        ret n
-    }
+sup [T, cmp n: USize] Arr[T, n] {
+    !public
+    !intrinsic(name="std.array.Arr.new")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun new() -> Self { }
 
     !public
-    !compiler_builtin
-    cor iter_mov(self) -> Iterator[T] { }
+    !intrinsic(name="std.array.Arr.from_fun")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_fun(f: FunMov[(), T]) -> Self { }
 
     !public
-    !compiler_builtin
-    cor iter_mut(&mut self) -> Iterator[&mut T] { }
-
-    !public
-    !compiler_builtin
-    cor iter_ref(&self) -> Iterator[&T] { }
-
-    !public
-    !compiler_builtin
-    cor reverse_iter_mov(self) -> Iterator[T] { }
-
-    !public
-    !compiler_builtin
-    cor reverse_iter_mut(&mut self) -> Iterator[&mut T] { }
-
-    !public
-    !compiler_builtin
-    cor reverse_iter_ref(&self) -> Iterator[&T] { }
-
-    !public
-    !compiler_builtin
-    cor get_ref(&self) -> GenOnce[&T or None] { }
-
-    !public
-    !compiler_builtin
-    cor get_mut(&mut self) -> GenOnce[&mut T or None] { }
-
-    !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun swap(&mut self, i: USize, j: USize) -> Void {
         std::mem::ops::swap(self[mut i], self[mut j])
     }
 }
 
-sup [T: Eq[T] & Copy, cmp n: USize, A: Alloc[T]] Arr[T, n, A] {
+sup [T: Copy, cmp n: USize] Arr[T, n] {
     !public
-    fun contains(&self, value: &T) -> Bool {
-        loop item in self.iter_ref() {
-            case item == value@ { ret true }
-        }
-        ret false
-    }
+    !intrinsic(name="std.array.Arr.new_filled")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun new_filled(val: T) -> Self { }
 }
 
+sup [T: Copy, cmp n: USize] Arr[T, n] ext Copy { }
 
-# todo: ": Clone[T]"
-sup [T, cmp n: USize, A: Alloc[T]] Arr[T, n, A] {
-    fun new(val: T) -> Self {
-        let array = Arr[T, n](mem=Memory[T, A]::new(n))
-        array.fill(val)
-        ret array
-    }
-
-    fun fill(&mut self, value: T) -> Void {
-        loop i in Range[USize]::between(0_uz, n) {
-            # self[i] = value.clone()
-        }
-    }
+sup [T, cmp n: USize] Arr[T, n] ext IterMov[T] {
+    !intrinsic(name="std.array.Arr.iter_mov")
+    !versioned(base="1.0.0", new="1.0.0")
+    cor iter_mov(self) -> Iterator[T] { }
 }
 
-sup [T, cmp n: USize, A: Alloc[T]] Arr[T, n, A] ext IndexMut[T, USize] {
-    !compiler_builtin
-    cor index_mut(&mut self, index: USize) -> GenOnce[&mut T] { }
+sup [T, cmp n: USize] Arr[T, n] ext RevIterMov[T] {
+    !intrinsic(name="std.array.Arr.reverse_iter_mov")
+    !versioned(base="1.0.0", new="1.0.0")
+    cor reverse_iter_mov(self) -> Iterator[T] { }
 }
 
-sup [T, cmp n: USize, A: Alloc[T]] Arr[T, n, A] ext IndexRef[T, USize] {
-    !compiler_builtin
-    cor index_ref(&self, index: USize) -> GenOnce[&T] { }
+sup [T, cmp n: USize] Arr[T, n] ext Eq {
+    !intrinsic(name="std.array.Arr.eq")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun eq(&self, that: &Self) -> Bool { }
+
+    !intrinsic(name="std.array.Arr.ne")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun ne(&self, that: &Self) -> Bool { }
 }
 
-sup [T, cmp n: USize, A: Alloc[T]] Arr[T, n, A] ext From[Self, Slice[T, A]] {
-    fun from(that: Slice[T, A]) -> Self {
-        ret Arr[T, n, A](mem=Memory[T, A](ptr=that.mem.ptr, cap=n))
-    }
+sup [T, cmp n: USize] Arr[T, n] ext FwdMut[View[T]] {
+    !intrinsic(name="std.array.Arr.fwd_mut[View]")
+    !versioned(base="1.0.0", new="1.0.0")
+    cor fwd_mut(&mut self) -> GenOnce[&mut View[T]] { }
 }
+
+sup [T, cmp n: USize] Arr[T, n] ext FwdRef[View[T]] {
+    !intrinsic(name="std.vec.Vec.fwd_ref[View]")
+    !versioned(base="1.0.0", new="1.0.0")
+    cor fwd_ref(&self) -> GenOnce[&View[T]] { }
+}
+
+# type HeapArr[T, cmp n: USize, A: Alloc] = Single[Arr[T, n], A]

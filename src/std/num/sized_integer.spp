@@ -1,9 +1,12 @@
-use std::annotations::compiler_builtin
+use std::abort::abort
+use std::annotations::intrinsic
 use std::annotations::public
-use std::llvm::inline
-
+use std::annotations::versioned
 use std::boolean::Bool
+use std::cast::From
 use std::limits::Limits
+use std::llvm::always_inline
+use std::llvm::inline
 use std::number::U8
 use std::number::U32
 use std::number::U64
@@ -11,7 +14,7 @@ use std::option::Opt
 use std::option::Some
 use std::option::None
 use std::void::Void
-
+use std::num::bases::Integer
 use std::ops::eq::Eq
 use std::ops::bit_and::BitAnd
 use std::ops::bit_and::BitAndAssign
@@ -32,17 +35,12 @@ use std::ops::sub::SubAssign
 use std::ops::mul::Mul
 use std::ops::mul::MulAssign
 
-use std::num::bases::Integer
-
-
 # A sized integer is an integer type with a provided bit width.
 !public
 cls SizedInteger[cmp w: U32, cmp signed: Bool] { }
 
-
 # The sized integer type extends the base integer type.
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Integer { }
-
 
 cmp log_10_lookup_table: [U32; 256_uz] = [
     0_u32, 0_u32, 0_u32, 0_u32, 1_u32, 1_u32, 1_u32, 2_u32, 2_u32, 2_u32, 3_u32, 3_u32, 3_u32, 3_u32, 4_u32, 4_u32,
@@ -62,8 +60,7 @@ cmp log_10_lookup_table: [U32; 256_uz] = [
     67_u32, 67_u32, 68_u32, 68_u32, 68_u32, 69_u32, 69_u32, 69_u32, 69_u32, 70_u32, 70_u32, 70_u32, 71_u32, 71_u32, 71_u32, 72_u32,
     72_u32, 72_u32, 72_u32, 73_u32, 73_u32, 73_u32, 74_u32, 74_u32, 74_u32, 75_u32, 75_u32, 75_u32, 76_u32, 76_u32, 76_u32, 76_u32]
 
-
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Eq[Rhs=Self] {
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Eq {
     cmp fun eq(&self, that: &Self) -> Bool {
         ret intrinsics::eq(self, that)
     }
@@ -73,67 +70,67 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Eq[Rhs=Self] {
     }
 }
 
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitAnd[Rhs=Self, Ret=Self] {
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitAnd {
     cmp fun bit_and(self, that: Self) -> Self {
         ret intrinsics::bit_and(self, that)
     }
 }
 
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitAndAssign[Rhs=Self] {
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitAndAssign {
     cmp fun bit_and_assign(&mut self, that: Self) -> Void {
         intrinsics::bit_and_assign(self, that)
     }
 }
 
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitIor[Rhs=Self, Ret=Self] {
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitIor {
     cmp fun bit_ior(self, that: Self) -> Self {
         ret intrinsics::bit_ior(self, that)
     }
 }
 
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitIorAssign[Rhs=Self] {
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitIorAssign {
     cmp fun bit_ior_assign(&mut self, that: Self) -> Void {
         intrinsics::bit_ior_assign(self, that)
     }
 }
 
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitXor[Rhs=Self, Ret=Self] {
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitXor {
     cmp fun bit_xor(self, that: Self) -> Self {
         ret intrinsics::bit_xor(self, that)
     }
 }
 
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitXorAssign[Rhs=Self] {
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitXorAssign {
     cmp fun bit_xor_assign(&mut self, that: Self) -> Void {
         intrinsics::bit_xor_assign(self, that)
     }
 }
 
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitShl[Rhs=U32, Ret=Self] {
-    cmp fun bit_shl(self, that: Self) -> Self {
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitShl[Rhs=U32] {
+    cmp fun bit_shl(self, that: U32) -> Self {
         ret intrinsics::bit_shl(self, that)
     }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitShlAssign[Rhs=U32] {
-    cmp fun bit_shl_assign(&mut self, that: Self) -> Void {
+    cmp fun bit_shl_assign(&mut self, that: U32) -> Void {
         intrinsics::bit_shl_assign(self, that)
     }
 }
 
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitShr[Rhs=U32, Ret=Self] {
-    cmp fun bit_shr(self, that: Self) -> Self {
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitShr[Rhs=U32] {
+    cmp fun bit_shr(self, that: U32) -> Self {
         ret intrinsics::bit_shr(self, that)
     }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitShrAssign[Rhs=U32] {
-    cmp fun bit_shr_assign(&mut self, that: Self) -> Void {
+    cmp fun bit_shr_assign(&mut self, that: U32) -> Void {
         intrinsics::bit_shr_assign(self, that)
     }
 }
 
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitNot[Ret=Self] {
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitNot {
     cmp fun bit_not(self) -> Self {
         ret intrinsics::bit_not(self)
     }
@@ -145,39 +142,58 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitNotAssign {
     }
 }
 
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Add[Rhs=Self, Ret=Self] {
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Add {
     cmp fun add(self, that: Self) -> Self {
         ret intrinsics::add(self, that)
     }
 }
 
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext AddAssign[Rhs=Self] {
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext AddAssign {
     cmp fun add_assign(&mut self, that: Self) -> Void {
         intrinsics::add_assign(self, that)
     }
 }
 
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Sub[Rhs=Self, Ret=Self] {
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Sub {
     cmp fun sub(self, that: Self) -> Self {
         ret intrinsics::sub(self, that)
     }
 }
 
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext SubAssign[Rhs=Self] {
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext SubAssign {
     cmp fun sub_assign(&mut self, that: Self) -> Void {
         intrinsics::sub_assign(self, that)
     }
 }
 
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Mul[Rhs=Self, Ret=Self] {
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Mul {
     cmp fun mul(self, that: Self) -> Self {
         ret intrinsics::mul(self, that)
     }
 }
 
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext MulAssign[Rhs=Self] {
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext MulAssign {
     cmp fun mul_assign(&mut self, that: Self) -> Void {
         intrinsics::mul_assign(self, that)
+    }
+}
+
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext From[Bool] {
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(that: Bool) -> Self {
+        # The `from` method defines how to convert a boolean value to an unsigned integer type of potentially different
+        # sizes. The conversion is performed by mapping the boolean value to an unsigned integer representation. The
+        # following mapping is used:
+        # - If the boolean value is `true`, it is converted to the unsigned integer value `1`.
+        # - If the boolean value is `false`, it is converted to the unsigned integer value `0`.
+        # This conversion is useful when a boolean value needs to be represented as an unsigned integer for various
+        # purposes, such as bit manipulation or arithmetic operations.
+        # @let that: The boolean value that is being converted to the unsigned integer type.
+        # @ret: The converted unsigned integer value of the target type, which will be either `1` for `true` or `0` for
+        # `false`.
+
+        ret case that { Self::one() } else { Self::zero() }
     }
 }
 
@@ -205,7 +221,7 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
     !public
     !inline
     fun bit_shl_checked(self, that: U32) -> Opt[Self] {
-        case that >= w { ret None() }
+        case that >= w { ret None }
         ret Some(val=intrinsics::bit_shl(self, that))
     }
 
@@ -224,9 +240,7 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
     !public
     !inline
     fun bit_shr_checked(self, that: U32) -> Opt[Self] {
-        case that >= w {
-            ret None()
-        }
+        case that >= w { ret None }
         ret Some(val=intrinsics::bit_shr(self, that))
     }
 
@@ -246,17 +260,17 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
     !public
     !inline
-    !compiler_builtin
+    !intrinsic(name="std.num.sized_integer.zero")
     fun zero() -> Self { }
 
     !public
     !inline
-    !compiler_builtin
+    !intrinsic(name="std.num.sized_integer.one")
     fun one() -> Self { }
 
     !public
     !inline
-    !compiler_builtin
+    !intrinsic(name="std.num.sized_integer.two")
     fun two() -> Self { }
 }
 
@@ -264,48 +278,46 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
     !public
     !inline
     fun ilog(self, base: Self) -> U32 {
-        case self.ilog_checked(base) is Some[U32](val) {
-            ret val
-        }
-        std::abort::abort("ilog: base must be a positive integer")
+        case self.ilog_checked(base) is Some[U32](val) { ret val }
+        abort("ilog: base must be a positive integer")
     }
 
     !public
     !inline
     fun ilog2(self) -> U32 {
-        case self.ilog2_checked() is Some[U32](val) {
-            ret val
-        }
-        std::abort::abort("ilog2: base must be a positive integer")
+        case self.ilog2_checked() is Some[U32](val) { ret val }
+        abort("ilog2: base must be a positive integer")
     }
 
     !public
     !inline
     fun ilog10(self) -> U32 {
-        case self.ilog10_checked() is Some[U32](val) {
-            ret val
-        }
-        std::abort::abort("ilog10: base must be a positive integer")
+        case self.ilog10_checked() is Some[U32](val) { ret val }
+        abort("ilog10: base must be a positive integer")
     }
 
     !public
     !inline
     fun ilog_checked(self, base: Self) -> Opt[U32] {
-        # case self <= Self::zero() or base <= Self::one() { TODO: no ord on "self" (ord is on signed & unsigned)
-        #     ret None()
-        # }
+        # Todo: self <= 0 or base <= 1 should return None.
+        # Todo: cant use ord on this base type, so do bit checking.
         ret Some(val=self.ilog2_checked()? / base.ilog2_checked()?)
     }
 
     !public
     !inline
     fun ilog2_checked(self) -> Opt[U32] {
+        # Todo: self <= 0 should return None.
+        # Todo: cant use ord on this base type, so do bit checking.
         ret Some(val=w - 1_u32 - intrinsics::ctlz(self))
     }
 
     !public
     !inline
     fun ilog10_checked(self) -> Opt[U32] {
+        # Todo: self <= 0 or base <= 1 should return None.
+        # Todo: cant use ord on this base type, so do bit checking.
+        # Todo: no clue if this is right, probably not.
         case self.ilog2_checked() of {
             is Some[U32](val as i) { ret Some(val=log_10_lookup_table.index_ref(U64::from(i))@) }
         }

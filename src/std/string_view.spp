@@ -1,192 +1,795 @@
-use std::annotations::compiler_builtin
+use std::annotations::package
 use std::annotations::public
-use std::llvm::inline
+use std::annotations::intrinsic
+use std::annotations::versioned
 use std::boolean::Bool
-use std::cast::From
+use std::char::Char
 use std::copy::Copy
+use std::function::FunRef
+use std::generator::Gen
 use std::generator::GenOnce
 use std::iterator::Iterator
-use std::number::U8
-use std::number::U16
-use std::number::U32
-use std::number::USize
 use std::option::None
 use std::option::Opt
 use std::option::Some
-use std::ops::eq::Eq
-use std::slice::Slice
+use std::number::S8
+use std::number::U8
+use std::number::USize
+use std::result::Res
 use std::string::Str
+use std::view::View
 use std::void::Void
-use std::fs::path::Path
-use std::ops::add::Add
-use std::ops::add::AddAssign
+use std::mem::pointer::NonNull
+use std::ops::eq::Eq
+use std::ops::idx::SliceMut
+use std::ops::idx::SliceRef
 
-
-##
-A string view is a lightweight, non-owning reference to a sequence of UTF-8 encoded characters. It always has a static
-lifetime, allowing the pointer lifetime analysis to become trivial. `StrView` is useful for efficiently passing around
-string data without the overhead of ownership or copying. It provides basic functionality for querying length,
-checking emptiness, slicing, and comparing string views. For more advanced string manipulation, consider using the
-full-featured `Str` type from `std::string::Str`.
-##
 !public
-cls StrView { }
+!versioned(base="1.0.0", new="1.0.0")
+cls Utf8Err {
+    !public valid_up_to: USize
+    !public error_len: Opt[USize]
+}
 
-sup StrView ext Copy { }
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls StrView {
+    # The `StrView` type is a view into a UTF-8 encoded string. It is null-terminated and is valid UTF-8. The `StrView`
+    # type is designed to be used as a view into a string, and it is not intended to be used as a standalone type. That
+    # is, it will always be used as `&StrView` or `&mut StrView`.
+    # @let ptr: The pointer to the start of the string. It is guaranteed to be non-null and aligned.
+    # @let length: The length of the string in bytes.
+
+    !package ptr: NonNull[U8]
+    !package length: USize
+}
 
 sup StrView {
     !public
-    !compiler_builtin
-    fun new() -> StrView { }
+    !intrinsic(name="std.string_view.StrView.from_utf8")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_utf8(bytes: &View[U8], str: &mut StrView) -> Res[Void, Utf8Err] { }
 
     !public
-    !compiler_builtin
-    fun new_with_capacity(capacity: USize) -> StrView { }
+    !intrinsic(name="std.string_view.StrView.from_utf8_unchecked")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_utf8_unchecked(bytes: &View[U8], str: &mut StrView) -> Void { }
 
     !public
-    !compiler_builtin
-    fun from_utf8(utf8: &Slice[U8]) -> StrView { }
+    !versioned(base="1.0.0", new="1.0.0")
+    fun len(&self) -> USize {
+        # The `len` method gets length of this string in bytes. This is not necessarily the number of characters, as
+        # some characters may be multiple bytes in UTF-8 encoding.
+        # @ret: The length of this string in bytes.
 
-    !public
-    fun from_utf16(utf16: &Slice[U16]) -> StrView {
-        # Convert each element into 2 U8 bytes to form a new Slice[U8]
-        let utf8 = Slice[U8]::new(utf16.length() * 2_uz)
-        loop unit in utf16.iter_ref() {
-            let high_byte = U8::from(unit >> 8_u16)
-            let low_byte = (unit & 0xFF_u16)
-        }
-        ret StrView::from_utf8(&utf8)
+        ret self.length
     }
 
     !public
-    !compiler_builtin
-    fun from_utf32(utf32: &Slice[U32]) -> StrView {
-        # Convert each element into 4 U8 bytes to form a new Slice[U8]
-        let utf8 = Slice[U8]::new(utf32.length() * 4_uz)
-        loop unit in utf32.iter_ref() {
-            let byte1 = U8::from((unit >> 24_u32) & 0xFF_u32)
-            let byte2 = U8::from((unit >> 16_u32) & 0xFF_u32)
-            let byte3 = U8::from((unit >> 8_u32) & 0xFF_u32)
-            let byte4 = U8::from(unit & 0xFF_u32)
-        }
-       ret StrView::from_utf8(&utf8)
-    }
-
-    !public
-    !inline
-    fun length(&self) -> USize {
-        ret sppc::str_len(self)
-    }
-
-    !public
-    !inline
+    !versioned(base="1.0.0", new="1.0.0")
     fun is_empty(&self) -> Bool {
-        ret sppc::str_empty(self) != 0
+        # The `is_empty` method checks if this `StrView` is empty, meaning it has a length of 0 bytes. An empty string
+        # is a valid UTF-8 string, and it is represented by a null-terminated string with no characters before the null
+        # terminator.
+        # @ret: `true` if this `StrView` is empty, `false` otherwise.
+
+        ret self.length == 0_uz
     }
 
-    # Iterate over the UTF-8 characters in the string view, yielding each character as a unicode scalar value. The
-    # number of elements yiuelded may not necessarily be equal to the length of the string view, as some characters may
-    # be represented by multiple bytes in UTF-8 encoding.
     !public
-    !compiler_builtin
-    cor chars(&self) -> Iterator[U32] { }
+    !versioned(base="1.0.0", new="1.0.0")
+    fun ceil_char_boundary(&self, index: USize) -> USize {
+        # The `ceil_char_boundary` method returns the smallest index greater than or equal to `index` that is a valid
+        # character boundary in this `StrView`. If `index` is already a valid character boundary, it is returned
+        # directly. If `index` is out of bounds, the length of the string is returned.
+        # @let index: The byte index to find the next character boundary from. It must be less than or equal to the
+        # length of the string to be a valid index.
+        # @ret: The smallest index greater than or equal to `index` that is a valid character boundary in this
+        # `StrView`.
 
-    # Iterate over the UTF-8 characters in reverse order, yielding each character as a unicode scalar value. Similar to
-    # `chars`, the number of elements yielded may not necessarily be equal to the length of the string view, as some
-    # characters may be represented by multiple bytes in UTF-8 encoding.
-    !public
-    !compiler_builtin
-    cor reverse_chars(&self) -> Iterator[U32] { }
+        # Shortcut for out of bounds and already valid index.
+        case index > self.length { ret self.length }
+        let mut idx = index
 
-    # Iterate over the raw bytes of the string view, yielding each byte as a `U8`. The number of elements yielded will
-    # always be equal to the length of the string view, as each byte corresponds to a single element in the view.
-    !public
-    !compiler_builtin
-    cor bytes(&self) -> Iterator[U8] { }
+        # Loop forwards until we find a valid character boundary.
+        loop idx < self.length {
+            case self.bytes().nth(idx).unwrap().is_utf8_char_boundary() { ret idx }
+            idx += 1_uz
+        }
+        ret self.length
+    }
 
-    # Iterate over the raw bytes of the string view in reverse order, yielding each byte as a `U8`. Similar to `bytes`,
-    # the number of elements yielded will always be equal to the length of the string view, as each byte corresponds to
-    # a single element in the view.
     !public
-    !compiler_builtin
-    cor reverse_bytes(&self) -> Iterator[U8] { }
+    !versioned(base="1.0.0", new="1.0.0")
+    !intrinsic(name="std.string_view.StrView.chars")
+    cor chars(&self) -> Iterator[Char] {
+        # The `chars` method returns an iterator over the characters of this `StrView`. Each character is a valid UTF-8
+        # character, and the iterator will yield the characters in order.
+        # @ret: An iterator over the characters of this `StrView`.
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    cor char_indices(&self) -> Iterator[(USize, Char)] {
+        # The `char_indices` method returns an iterator over the characters of this `StrView`, along with their byte
+        # indices. Each character is a valid UTF-8 character, and the iterator will yield the characters in order, along
+        # with their starting byte index in the string.
+        # @ret: An iterator over the characters of this `StrView`, along with their byte indices. Each item is a tuple
+        # of the form `(index, char)`, where `index` is the byte index of the start of the character in the string, and
+        # `char` is the character itself.
+
+        let mut idx = 0_uz
+        loop c in self.chars() {
+            gen (idx, c)
+            idx += USize::from(c.len_utf8())
+        }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    !intrinsic(name="std.string_view.StrView.bytes")
+    cor bytes(&self) -> Iterator[U8] {
+        # The `bytes` method returns an iterator over the bytes of this `StrView`. The bytes might make up valid UTF-8
+        # characters, but they are not guaranteed to be valid UTF-8 on their own. This is the same as iterating over a
+        # `Vec[U8]` type, for example.
+        # @ret: An iterator over the bytes of this `StrView`.
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    !intrinsic(name="std.string_view.StrView.bytes_ref")
+    cor bytes_ref(&self) -> Iterator[&U8] {
+        # The `bytes_ref` method returns an iterator over immutable borrows of the bytes of this `StrView`. This method
+        # will not typically be used, but is provided as the mirror of `bytes_mut`, which will often be used.
+        # @ret: An iterator over immutable borrows to the bytes of this `StrView`.
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    !intrinsic(name="std.string_view.StrView.bytes_mut")
+    cor bytes_mut(&mut self) -> Iterator[&mut U8] {
+        # The `bytes_mut` method returns an iterator over mutable borrows of the bytes of this `StrView`. This method
+        # will be used when mutating the bytes of the string, such as when converting to uppercase or lowercase
+        # in-place.
+        # @ret: An iterator over mutable borrows to the bytes of this `StrView`.
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun find(&self, needle: &StrView) -> Opt[USize] {
+        # The `find` method searches for the first occurrence of the `needle` in this `StrView` (the haystack) and
+        # returns the byte index of the start of the `needle` if found, or `None` if not found.
+        # @let needle: The `StrView` to search for in this `StrView`. It must be valid UTF-8 and null-terminated.
+        # @ret: The byte index of the start of the `needle` if found, or `None` if not found.
+
+        let mut idx = 0_uz
+        let err = sppc::strstr(&self.ptr, &needle.ptr, &mut idx)
+        case err != 0 { ret None }
+        ret Some(val=idx)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun find_if[F: FunRef[(Char,), Bool]](&self, predicate: F) -> Opt[USize] {
+        # The `find_if` method searches for the first character in this `StrView` that satisfies the given predicate and
+        # returns the byte index of that character if found, or `None` if not found.
+        # @type F: The type of the predicate function. It must be a function type that takes a `Char` and returns a
+        # `Bool`.
+        # @let predicate: The predicate function to apply to each character in this `StrView`. It must be valid UTF-8
+        # and null-terminated.
+        # @ret: The byte index of the first character that satisfies the predicate if found, or `None` if not found.
+
+        let mut idx = 0_uz
+        loop c in self.chars() {
+            case predicate(c) { ret Some(val=idx) }
+            idx += USize::from(c.len_utf8())
+        }
+        ret None
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun find_char(&self, needle: Char) -> Opt[USize] {
+        #
+        # @let needle:
+        # @ret:
+
+        let str = Str::from(needle)
+        ret self.find(&str)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun rfind(&self, needle: &StrView) -> Opt[USize] {
+        #
+        # @let needle:
+        # @ret:
+
+        let mut idx = 0_uz
+        let err = sppc::strrstr(&self.ptr, &needle.ptr, &mut idx)
+        case err != 0 { ret None }
+        ret Some(val=idx)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun rfind_if[F: FunRef[(Char,), Bool]](&self, predicate: F) -> Opt[USize] {
+        #
+        # @type F:
+        # @let predicate:
+        # @ret:
+
+        let mut idx = self.length
+        loop c in self.to_reverse().chars() {
+            idx -= USize::from(c.len_utf8())
+            case predicate(c) { ret Some(val=idx) }
+        }
+        ret None
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun rfind_char(&self, needle: Char) -> Opt[USize] {
+        #
+        # @let needle:
+        # @ret:
+
+        let str = Str::from(needle)
+        ret self.rfind(&str)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun starts_with(&self, needle: &StrView) -> Bool {
+        #
+        # @let needle:
+        # @ret:
+
+        case self.length < needle.length { ret false }
+        let end = needle.length
+        ret self[0_uz to end]@ == needle
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun ends_with(&self, needle: &StrView) -> Bool {
+        #
+        # @let needle:
+        # @ret:
+
+        case self.length < needle.length { ret false }
+        let start = self.length - needle.length
+        ret self[start to self.length]@ == needle
+    }
+
+    !public
+    fun contains(&self, needle: &StrView) -> Bool {
+        #
+        # @let needle:
+        # @ret:
+
+        let mut idx = 0_uz
+        let err = sppc::strstr(&self.ptr, &needle.ptr, &mut idx)
+        ret err == 0
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    cor split_once(&self, sep: &StrView) -> Gen[&StrView] {
+        #
+        # @let sep:
+        # @ret:
+
+        # For an empty separator, or an unfound separator, yield this string.
+        case sep.is_empty() or self.find(&sep).is_none() {
+            gen self
+            ret
+        }
+
+        # Get the position and yield each part of the string.
+        let pos = self.find(&sep).unwrap()
+        gen self[0_uz to pos]
+        gen self[pos + sep.length to self.length]
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    cor split_n(&self, sep: &StrView, n: USize) -> Gen[&StrView] {
+        #
+        # @let sep:
+        # @let n:
+        # @ret:
+
+        # For an empty separator, or an unfound separator, yield this string.
+        case sep.is_empty() or self.find(&sep).is_none() {
+            gen self
+            ret
+        }
+
+        # Define the counter variables.
+        let mut start = 0_uz
+        let mut count = 0_uz
+
+        # Loop until we have yielded `n` parts of the string (or run out of separators).
+        loop count < n {
+
+            # Get the substring starting at `start` and find the next separator.
+            let substr = self[start to self.length]
+            let idx = substr.find(&sep)
+            case idx.is_none() { exit }
+
+            # Get the position and yield the part of the string before the separator.
+            let pos = idx.unwrap()
+            gen self[start to start + pos]
+            start += pos + sep.length
+            count += 1_uz
+        }
+
+        # Yield the remainder of the string.
+        gen self[start to self.length]
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    cor split(&self, sep: &StrView) -> Iterator[&StrView] {
+        #
+        # @let sep:
+        # @ret:
+
+        # For an empty separator, or an unfound separator, yield this string.
+        case sep.is_empty() or self.find(&sep).is_none() {
+            gen self
+            ret
+        }
+
+        # Define the counter variable.
+        let mut start = 0_uz
+
+        # Loop until we run out of separators.
+        loop true {
+            # Get the substring starting at `start` and find the next separator.
+            let substr = self[start to self.length]
+            let idx = substr.find(&sep)
+            case idx.is_none() { exit }
+
+            # Get the position and yield the part of the string before the separator.
+            let pos = idx.unwrap()
+            gen self[start to start + pos]
+            start += pos + sep.length
+        }
+
+        # Yield the remainder of the string.
+        gen self[start to self.length]
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun lines(&self) -> Iterator[&StrView] {
+        #
+        # @ret:
+
+        # Map to splitting by all "\n" and then trim the trailing "\r" from each line.
+        let mut sep = "\n"
+        ret self.split(sep).map((line: &StrView) line.trim_end())
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    cor trim(&self) -> GenOnce[&StrView] {
+        #
+        # @ret:
+
+        let start = self.find_if((c: Char) c.is_whitespace().not).unwrap_or(self.length)
+        let end = self.rfind_if((c: Char) c.is_whitespace().not).map((i: USize) i + 1_uz).unwrap_or(start)
+        gen self[start to end]
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    cor trim_start(&self) -> GenOnce[&StrView] {
+        # The `trim_start` method returns a view of this `StrView` with all leading whitespace removed. This is a
+        # non-mutating method, and it does not modify the original string.
+        # @ret: A view of this `StrView` with all leading whitespace removed.
+
+        let start = self.find_if((c: Char) c.is_whitespace().not).unwrap_or(self.length)
+        gen self[start to self.length]
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    cor trim_end(&self) -> GenOnce[&StrView] {
+        # The `trim_end` method returns a view of this `StrView` with all trailing whitespace removed. This is a
+        # non-mutating method, and it does not modify the original string.
+        # @ret: A view of this `StrView` with all trailing whitespace removed.
+
+        let end = self.rfind_if((c: Char) c.is_whitespace().not).map((i: USize) i + 1_uz).unwrap_or(0_uz)
+        gen self[0_uz to end]
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    cor trim_prefix(&self, prefix: &StrView) -> GenOnce[&StrView] {
+        # If this `StrView` starts with the given `prefix`, return a view of this string with the prefix removed.
+        # Otherwise, return this string unchanged.
+        # @let prefix: The `StrView` prefix to remove from this string if it is present.
+        # @ret: A view of this string with the prefix removed if it starts with the prefix.
+
+        case self.starts_with(prefix).not { gen &self }
+        gen self[prefix.length to self.length]
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    cor trim_suffix(&self, suffix: &StrView) -> GenOnce[&StrView] {
+        # If this `StrView` ends with the given `suffix`, return a view of this string with the suffix removed.
+        # Otherwise, return this string unchanged.
+        # @let suffix: The `StrView` suffix to remove from this string if it is present.
+        # @ret: A view of this string with the suffix removed if it ends with the suffix.
+
+        case self.ends_with(suffix).not { gen &self }
+        gen self[0_uz to self.length - suffix.length]
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    cor trim_circumfix(&self, prefix: &StrView, suffix: &StrView) -> GenOnce[&StrView] {
+        # If this `StrView` starts with the given `prefix` and ends with the given `suffix`, return a view of this
+        # string with both the prefix and suffix removed. Otherwise, return this string unchanged.
+        # @let prefix: The `StrView` prefix to remove from this string if it is present at the start.
+        # @let suffix: The `StrView` suffix to remove from this string if it is present at the end.
+        # @ret: A view of this string with the prefix and suffix removed if it starts with the prefix and ends with the
+        # suffix.
+
+        # Check both the prefix and suffix, and if either is not present, return this string unchanged.
+        case self.starts_with(prefix).not { gen &self }
+        case self.ends_with(suffix).not { gen &self }
+        gen self[prefix.length to self.length - suffix.length]
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun to_uppercase(&self) -> Str {
+        # The `to_uppercase` method converts this `StrView` to uppercase and returns the result as a new `Str`. This is
+        # a non-mutating method, and it does not modify the original string. As it is a producing method, it returns a
+        # new heap-allocated string with the result.
+        # @ret: A new `Str` that is the uppercase version of this `StrView`.
+
+        # Re-use the "make uppercase" method on an owned verson of this string.
+        let owned = Str::from(self)
+        owned.make_uppercase()
+        ret owned
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun to_lowercase(&self) -> Str {
+        # The `to_lowercase` method converts this `StrView` to lowercase and returns the result as a new `Str`. This is
+        # a non-mutating method, and it does not modify the original string. As it is a producing method, it returns a
+        # new heap-allocated string with the result.
+        # @ret: A new `Str` that is the lowercase version of this `StrView`.
+
+        # Re-use the "make lowercase" method on an owned verson of this string.
+        let owned = Str::from(self)
+        owned.make_lowercase()
+        ret owned
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun make_uppercase(&mut self) -> Void {
+        # The `make_uppercase` method converts this `StrView` to uppercase in-place. This is a mutator method, and it
+        # modifies the string directly.
+
+        loop byte in self.bytes_mut() {
+            byte.make_ascii_uppercase()
+        }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun make_lowercase(&mut self) -> Void {
+        # The `make_lowercase` method converts this `StrView` to lowercase in-place. This is a mutator method, and it
+        # modifies the string directly.
+
+        loop byte in self.bytes_mut() {
+            byte.make_ascii_lowercase()
+        }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun replace(&self, from: &StrView, into: &StrView) -> Str {
+        # Replace all occurrences of `from` with `into` in this `StrView` and return the result as a new `Str`. The
+        # `from` and `into` strings must be valid UTF-8 and null-terminated, which is automatically guaranteed by the
+        # `StrView` type.
+        # @let from: The `StrView` to replace in this `StrView`.
+        # @let into: The `StrView` to replace `from` with in this `StrView`.
+        # @ret: A new `Str` with all occurrences of `from` replaced with `into`.
+        # @todo: Implement this (issue with view/strview)
+
+        #         # Build the initial string with capacity.
+        #         let mut result = Str::new_with_capacity(self.length)
+        #         let mut start = 0_uz
+        #
+        #         # Loop until we run out of occurrences of `from`.
+        #         loop true {
+        #
+        #             # Create a substring slice, and find the next `from` instance.
+        #             let substr = self[start to self.length]
+        #             let idx = substr.find(from)
+        #             case idx.is_none() { exit }
+        #
+        #             # Append the part of the string before the `from` instance,
+        #             # then the `into` string, and then update the start position.
+        #             let pos = idx.unwrap()
+        #             result.append_str(self[start to start + pos])
+        #             result.append_str(into)
+        #             start += pos + from.length
+        #         }
+        #
+        #         # Append the remainder of the string after the last `from` instance.
+        #         result.append_str(self[start to self.length])
+        #         ret result
+        ret Str::from("")
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun to_reverse(&self) -> Str {
+        # Reverse this string. We cannot just reverse the vector of bytes, because this would break the UTF-8 encoding.
+        # Instead, we need to reverse the order of the characters, which may be multiple bytes each.
+        # @ret: A new `Str` that is the reverse of this `StrView`.
+        # @todo: Use a more efficient solution.
+
+        # Create a string with capacity, and continuously insert
+        # the characters at the start of the string.
+        let mut result = Str::new_with_capacity(self.length)
+        result.make_reverse()
+        ret result
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun make_reverse(&mut self) -> Void {
+        # We cannot just reverse the vector of bytes, because this would break the UTF-8 encoding. Instead, we need to
+        # reverse the order of the characters, which may be multiple bytes each. As an in-place mutator method, we need
+        # to be careful to not overwrite bytes before we have read them.
+        # @ret:
+
+        # Shrotcut for empty string.
+        case self.is_empty() { ret }
+
+        let mut idx = self.len()
+        loop idx > 0_uz {
+            let c = self.chars().nth(idx).unwrap()
+
+            # Flow type the C from Opt[Char] into Char, and set the
+            # characters into their inverted positions.
+            case c is Char(..) {
+                let char_len = USize::from(c.len_utf8())
+                let start = self.len() - idx
+                c.encode_utf8(self[mut start to start + char_len].view_mut())
+                idx -= char_len
+            }
+        }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    !intrinsic(name="std.string_view.StrView.view")
+    cor view_ref(&self) -> GenOnce[&View[U8]] {
+        # The `view` method returns a view of the bytes of this `StrView`. This is a non-mutating method, and it does
+        # not modify the original string. The returned view is valid for the lifetime of this `StrView`, and it is
+        # guaranteed to be null-terminated.
+        # @ret: A view of the bytes of this `StrView`.
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    !intrinsic(name="std.string_view.StrView.view")
+    cor view_mut(&mut self) -> GenOnce[&mut View[U8]] {
+        # The `view` method returns a view of the bytes of this `StrView`. This is a non-mutating method, and it does
+        # not modify the original string. The returned view is valid for the lifetime of this `StrView`, and it is
+        # guaranteed to be null-terminated.
+        # @ret: A view of the bytes of this `StrView`.
+    }
 }
 
-sup StrView {
-    !public
-    fun starts_with(&self, needle: StrView) -> Bool {
-        case needle.length() > self.length() { ret false }
-        # loop (a, b) in self.chars().zip(needle.chars()) {
-        #     case a != b { ret false }
-        # }
-        ret true
+sup StrView ext Eq {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun eq(&self, that: &Self) -> Bool {
+        #
+        # @let that:
+        # @ret:
+
+        case self.length != that.length { ret false }
+        let mut matched = false
+        sppc::strcmp(&self.ptr, &that.ptr, &mut matched)
+        ret matched
     }
 
-    !public
-    fun ends_with(&self, needle: StrView) -> Bool {
-        case needle.length() > self.length() { ret false }
-        # loop (a, b) in self.reverse_chars().zip(needle.reverse_chars()) {
-        #     case a != b { ret false }
-        # }
-        ret true
-    }
+    !versioned(base="1.0.0", new="1.0.0")
+    fun ne(&self, that: &Self) -> Bool {
+        #
+        # @let that:
+        # @ret:
 
-    !public
-    fun contains(&self, needle: StrView) -> Bool {
-        ret sppc::str_str(self, &needle) != -1
-    }
-
-    !public
-    fun find(&self, needle: StrView) -> Opt[USize] {
-        let index = sppc::str_str(self, &needle)
-        case index == -1 { ret None() }
-        ret Some(val=USize::from(index))
-    }
-
-    !public
-    fun rfind(&self, needle: StrView) -> Opt[USize] {
-        let index = 0 # sppc::str_rstr(self, &needle) TODO
-        case index == -1 { ret None() }
-        ret Some(val=USize::from(index))
-    }
-
-    !public
-    !compiler_builtin
-    fun slice(&self, start: USize, end: USize) -> StrView { }
-}
-
-sup StrView ext Eq[Rhs=StrView] {
-    fun eq(&self, that: &StrView) -> Bool {
-        ret sppc::str_cmp(self, that) == 0
-    }
-
-    fun ne(&self, that: &StrView) -> Bool {
-        ret (self == that).not
+        case self.length != that.length { ret true }
+        let mut matched = false
+        sppc::strcmp(&self.ptr, &that.ptr, &mut matched)
+        ret matched.not
     }
 }
 
-sup StrView ext From[Self, Str] {
-    !compiler_builtin
-    fun from(that: Str) -> Self { }
+sup StrView ext SliceRef[StrView, USize] {
+    !intrinsic(name="std.string_view.StrView.slice_ref")
+    !versioned(base="1.0.0", new="1.0.0")
+    cor slice_ref(&self, from: USize, into: USize) -> GenOnce[&StrView] { }
 }
 
-sup StrView ext From[Self, U8] {
-    !compiler_builtin
-    fun from(that: U8) -> Self { }
+sup StrView ext SliceMut[StrView, USize] {
+    !intrinsic(name="std.string_view.StrView.slice_mut")
+    !versioned(base="1.0.0", new="1.0.0")
+    cor slice_mut(&mut self, from: USize, into: USize) -> GenOnce[&mut StrView] { }
 }
 
-sup StrView ext From[Self, Path] {
-    fun from(that: Path) -> Self {
-        ret StrView::from(that.path)
+sup U8 {
+    # Add some methods onto the `U8` type that are byte-specific, such as ASCII case conversion and char boundary
+    # detection. These are used extensively by the `StrView` and `Str` types, but can be used anywhere.
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_ascii(&self) -> Bool {
+        # The `is_ascii` method checks if this byte is an ASCII character, meaning it is in the range 0 to 127
+        # inclusive. This is a common check for many string operations, as ASCII characters are single-byte and have
+        # well-defined properties. If a byte is not ASCII, it may be part of a multi-byte UTF-8 character, and it may
+        # not have the same properties as ASCII characters.
+        # @ret: `true` if this byte is an ASCII character, `false` otherwise.
+
+        ret self@ < 128_u8
     }
-}
 
-sup StrView ext Add[StrView, StrView] {
-    !compiler_builtin
-    fun add(self, that: StrView) -> StrView { }
-}
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_ascii_alphabetic(&self) -> Bool {
+        # Check if this byte is an ASCII alphabetic character (between 'A' and 'Z' or between 'a' and 'z').
+        # @ret: `true` if this byte is an ASCII alphabetic character, `false` otherwise.
 
-sup StrView ext AddAssign[StrView] {
-    !compiler_builtin
-    fun add_assign(&mut self, that: StrView) -> Void { }
+        ret self.is_ascii_uppercase() or self.is_ascii_lowercase()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_ascii_digit(&self) -> Bool {
+        # Check if this byte is an ASCII digit (between '0' and '9').
+        # @ret: `true` if this byte is an ASCII digit, `false` otherwise.
+
+        ret self@ >= b'0' and self@ <= b'9'
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_ascii_alphanumeric(&self) -> Bool {
+        # Check if this byte is an ASCII alphanumeric character (between 'A' and 'Z', between 'a' and 'z', or between
+        # '0' and '9').
+        # @ret: `true` if this byte is an ASCII alphanumeric character, `false` otherwise.
+
+        ret self.is_ascii_alphabetic() or self.is_ascii_digit()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_ascii_hex_digit(&self) -> Bool {
+        # Check if this byte is an ASCII hexadecimal digit (between '0' and '9', between 'A' and 'F', or between 'a' and
+        # 'f').
+        # @ret: `true` if this byte is an ASCII hexadecimal digit, `false` otherwise.
+
+        ret self.is_ascii_digit() or (self@ >= b'A' and self@ <= b'F') or (self@ >= b'a' and self@ <= b'f')
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_ascii_punctuation(&self) -> Bool {
+        # Check if this byte is an ASCII punctuation character (between '!' and '/', between ':' and '@', between '['
+        # and '`', or between '{' and '~').
+        # @ret: `true` if this byte is an ASCII punctuation character, `false` otherwise.
+
+        ret (self@ >= b'!' and self@ <= b'/') or (self@ >= b':' and self@ <= b'@') or (self@ >= b'[' and self@ <= b'`') or (self@ >= b'{' and self@ <= b'~')
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_ascii_graphic(&self) -> Bool {
+        # Check if this byte is an ASCII graphic character (between '!' and '~').
+        # @ret: `true` if this byte is an ASCII graphic character, `false` otherwise.
+
+        ret self@ >= b'!' and self@ <= b'~'
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_ascii_whitespace(&self) -> Bool {
+        # Check if this byte is an ASCII whitespace character (space, horizontal tab, vertical tab, form feed, carriage
+        # return, or line feed).
+        # @ret: `true` if this byte is an ASCII whitespace character, `false` otherwise.
+
+        ret self@ == b' ' or self@ == b'\t' or self@ == b'\n' or self@ == b'\r' or self@ == b'\x0b' or self@ == b'\x0c'
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_ascii_control(&self) -> Bool {
+        # Check if this byte is an ASCII control character (between 0 and 31, or 127).
+        # @ret: `true` if this byte is an ASCII control character, `false` otherwise.
+
+        ret self@ < 32_u8 or self@ == 127_u8
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_ascii_lowercase(&self) -> Bool {
+        # Check if this byte is an ASCII lowercase letter (between 'a' and 'z').
+        # @ret: `true` if this byte is an ASCII lowercase letter, `false` otherwise.
+
+        ret self@ >= b'a' and self@ <= b'z'
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_ascii_uppercase(&self) -> Bool {
+        # Check if this byte is an ASCII uppercase letter (between 'A' and 'Z').
+        # @ret: `true` if this byte is an ASCII uppercase letter, `false` otherwise.
+
+        ret self@ >= b'A' and self@ <= b'Z'
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_utf8_char_boundary(&self) -> Bool {
+        # Check if this byte is a valid UTF-8 character boundary. In UTF-8, a character boundary occurs at the start of
+        # a character, which is indicated by a byte that is either less than 128 (for ASCII characters) or greater than
+        # or equal to 192 (for multi-byte characters). Bytes between 128 and 191 are continuation bytes and do not
+        # indicate character boundaries.
+        # @ret: `true` if this byte is a valid UTF-8 character boundary, `false` otherwise.
+
+        ret S8::from(self@) >= -0x40_s8
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun to_ascii_lowercase(&self) -> U8 {
+        # Branchless ASCII lowercase conversion. For ASCII bytes, we can convert to lowercase by setting the 6th bit
+        # (0x20). For non-ASCII bytes, we return the byte unchanged.
+        # @ret: The lowercase version of this byte if it is ASCII, or the original byte if it is not ASCII.
+
+        ret self@ | U8::from(self.is_ascii_lowercase()) * 0x20_u8
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun to_ascii_uppercase(&self) -> U8 {
+        # Branchless ASCII uppercase conversion. For ASCII bytes, we can convert to uppercase by clearing the 6th bit
+        # (0x20). For non-ASCII bytes, we return the byte unchanged.
+        # @ret: The uppercase version of this byte if it is ASCII, or the original byte if it is not ASCII.
+
+        ret self@ ^ U8::from(self.is_ascii_uppercase()) * 0x20_u8
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun make_ascii_lowercase(&mut self) -> Void {
+        # In-place version of `to_ascii_lowercase`. This modifies the byte directly, rather than returning a new byte.
+        # This is an in-place mutator.
+
+        self@ |= self.to_ascii_lowercase()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun make_ascii_uppercase(&mut self) -> Void {
+        # In-place version of `to_ascii_uppercase`. This modifies the byte directly, rather than returning a new byte.
+        # This is an in-place mutator.
+
+        self@ ^= self.to_ascii_uppercase()
+    }
 }

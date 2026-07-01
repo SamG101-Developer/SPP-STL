@@ -1,61 +1,68 @@
 use std::annotations::abstract_method
-use std::annotations::compiler_builtin
+use std::annotations::intrinsic
 use std::annotations::public
-use std::option::None
-use std::option::Opt
-use std::option::Some
+use std::annotations::versioned
+use std::annotations::zero_type
 use std::generator::GenOnce
+use std::option::None
+use std::result::Opt
+use std::string_view::StrView
 
-
-!public cls From[This, That] { }
-!public cls TryFrom[This, That] { }
-
-
-sup [This, That] From[This, That] {
-    !public
-    !abstract_method
-    fun from(that: That) -> This { }
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls From[That] {
+    # The `From` type is a simple trait that defines a conversion from one type to another. It has a single method,
+    # `from`, which takes an object of type `That` and returns an object of the implementing type (`Self`). The `From`
+    # trait is used for infallible conversions, where the conversion is guaranteed to succeed without any possibility of
+    # failure. It can be used for generic constraints, allowing "any type that can be made from `That`". Unlike Rust,
+    # there is no corresponding `Into` trait, enforcing one way conversions.
+    # @type That: The type that can be converted into the implementing type. This is the source type for the conversion.
 }
 
-
-sup [This, That] TryFrom[This, That] {
-    !public
-    !abstract_method
-    fun try_from(that: That) -> Opt[This] { }
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls TryFrom[That] {
+    # The `TryFrom` type is a trait that defines a fallible conversion from one type to another. It has a single method,
+    # `try_from`, which takes an object of type `That` and returns a `Res[Self, Err]`, which is a result type that can
+    # either contain the successfully converted object of the implementing type (`Self`) or an error of type `Err` if
+    # the conversion fails. The `TryFrom` trait is used for conversions that may fail, allowing the caller to handle the
+    # possibility of failure gracefully. It can be used for generic constraints, allowing "any type that can be tried to
+    # be made from `That`". The default error type is `ConversionErr`.
+    # @type That: The type that can be converted into the implementing type. This is the source type for the conversion.
 }
 
+sup [That] From[That] {
+    !public !abstract_method
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(that: That) -> Self {
+        # The `from` method is the core of the `From` trait. It defines how to convert an object of type `That` into an
+        # object of the implementing type (`Self`). This method is infallible, meaning that it is guaranteed to succeed
+        # without any possibility of failure. The implementation of this method will depend on the specific types
+        # involved in the conversion, but as it is marked abstract, it must be implemented when the `From` type is
+        # extended from.
+        # @let that: The object of type `That` that is being converted into the implementing type. This is the input for
+        # the conversion. It is pased by move convention.
+        # @ret: The created object, matching the type of the implementing type. For example, if `Str` extended
+        # `From[S32]`, then the `from` method would take an `S32` and return a `Str` that represents the string form of
+        # the integer.
+    }
+}
 
-# The `upcast_mov` method slices an object of type `Derived` to its base type `Base` by moving it. Fields that don't
-# belong to the type `Base` are discarded, and the resulting object is of type `Base`. This is useful for converting
-# derived types to their base types when ownership is transferred.
-!public
-!compiler_builtin
-fun upcast_mov[Base, Derived: Base](derived: Derived) -> Base { }
-
-
-# The `upcast_mut` method does not slice an object, but borrows part of it mutably from memory. The part it borrows
-# represents the fields over the `Base` type. This is useful for working with derived types when you need to modify the
-# base part of the object, or a method only accepts a borrow to the base type.
-!public
-!compiler_builtin
-cor upcast_mut[Base, Derived: Base](derived: &mut Derived) -> GenOnce[&mut Base] { }
-
-
-!public
-!compiler_builtin
-cor upcast_ref[Base, Derived: Base](derived: &Derived) -> GenOnce[&Base] { }
-
-
-!public
-!compiler_builtin
-fun downcast_mov[Base, Derived: Base](base: Base) -> Derived { }
-
-
-!public
-!compiler_builtin
-cor downcast_mut[Base, Derived: Base](base: &mut Base) -> GenOnce[&mut Derived or None] { }
-
-
-!public
-!compiler_builtin
-cor downcast_ref[Base, Derived: Base](base: &Base) -> GenOnce[&Derived or None] { }
+sup [That] TryFrom[That] {
+    !public !abstract_method
+    !versioned(base="1.0.0", new="1.0.0")
+    fun try_from(that: That) -> Opt[Self] {
+        # The `try_from` method is the core of the `TryFrom` trait. It defines how to convert an object of type `That`
+        # into an object of the implementing type (`Self`), but unlike the `from` method, it is fallible, meaning that
+        # it may fail and return an error. The method returns a `Opt[Self]`, which is a result type that can either
+        # contain the successfully converted object of the implementing type or an `None` if the conversion fails. The
+        # implementation of this method will depend on the specific types involved in the conversion and the conditions
+        # under which the conversion may fail, but as it is marked abstract, it must be implemented when the `TryFrom`
+        # type is extended from.
+        # @let that: The object of type `That` that is being converted into the implementing type. This is the input for
+        # the conversion. It is passed by move convention.
+        # @ret: A `Opt[Self]` that contains either the successfully converted object of the implementing type (`Self`)
+        # or an error of type `None` if the conversion fails. The caller can then handle the result accordingly,
+        # checking for success or failure and taking appropriate action based on the outcome of the conversion.
+    }
+}

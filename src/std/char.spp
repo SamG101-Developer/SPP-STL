@@ -1,0 +1,179 @@
+use std::annotations::private
+use std::annotations::public
+use std::annotations::versioned
+use std::boolean::Bool
+use std::cast::From
+use std::cast::TryFrom
+use std::copy::Copy
+use std::number::S32
+use std::number::U8
+use std::number::U16
+use std::number::U32
+use std::number::USize
+use std::option::None
+use std::option::Opt
+use std::option::Some
+use std::view::View
+use std::ops::eq::Eq
+use std::ops::ord::Ord
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls Char {
+    # The `Char` type i a validated U32 equivalent to a Unicode scalar value. It represents a single Unicode character
+    # and is used to store and manipulate individual characters in strings. The `Char` type provides methods for
+    # encoding and decoding characters in different formats, such as UTF-8 and UTF-16, as well as methods for
+    # determining the properties of characters, such as their length in bytes when encoded in UTF-8. The `Char` type is
+    # an essential part of the standard library for working with text and strings in the programming language.
+
+    !private inner: U32
+}
+
+sup Char ext Copy { }
+
+sup Char {
+    #
+    !private
+    !versioned(base="1.0.0", new="1.0.0")
+    cmp whitespace: [U32; 25_uz] = [
+        0x0009_u32, 0x000A_u32, 0x000B_u32, 0x000C_u32, 0x000D_u32,
+        0x0020_u32, 0x0085_u32, 0x00A0_u32, 0x1680_u32, 0x2000_u32,
+        0x2001_u32, 0x2002_u32, 0x2003_u32, 0x2004_u32, 0x2005_u32,
+        0x2006_u32, 0x2007_u32, 0x2008_u32, 0x2009_u32, 0x200A_u32,
+        0x2028_u32, 0x2029_u32, 0x202F_u32, 0x205F_u32, 0x3000_u32]
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun len_utf8(&self) -> U32 {
+        # Return the number of bytes that this character would take up in UTF-8 encoding. Fpr example, ASCII characters
+        # would return 1, while some Unicode characters might return 2, 3, or 4.
+        # @ret: The number of bytes in UTF-8 encoding for this character.
+        # @todo: Make the comparison values constants.
+
+        # Simple comparison against max characters representable
+        # in 1, 2, 3, or 4 bytes in UTF-8 encoding.
+        ret case self.inner of {
+            <= 0x7F_u32 { 1_u32 }
+            <= 0x7FF_u32 { 2_u32 }
+            <= 0xFFFF_u32 { 3_u32 }
+            else { 4_u32 }
+        }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun encode_utf8(&self, buffer: &mut View[U8]) -> U32 {
+        # Encode this character into `UTF-8` and write it into the provided buffer. The buffer should have space for at
+        # least 4 `U8` values.
+        # @let buffer: A mutable reference to an array of 4 `U8` values where the `UTF-8` encoding will be written.
+        # @ret: The number of `U8` values written to the buffer (1, 2, 3, or 4).
+
+        # Handle the 1-byte UTF-8 encoding case.
+        case self.inner <= 0x7F_u32 {
+            buffer[0_uz]@ = U8::from(self.inner)
+            ret 1_u32
+        }
+
+        # Handle the 2-byte UTF-8 encoding case.
+        case self.inner <= 0x7FF_u32 {
+            buffer[mut 0_uz]@ = U8::from((self.inner >> 6_u32) | 0xC0_u32)
+            buffer[mut 1_uz]@ = U8::from((self.inner & 0x3F_u32) | 0x80_u32)
+            ret 2_u32
+        }
+
+        # Handle the 3-byte UTF-8 encoding case.
+        case self.inner <= 0xFFFF_u32 {
+            buffer[mut 0_uz]@ = U8::from((self.inner >> 12_u32) | 0xE0_u32)
+            buffer[mut 1_uz]@ = U8::from(((self.inner >> 6_u32) & 0x3F_u32) | 0x80_u32)
+            buffer[mut 2_uz]@ = U8::from((self.inner & 0x3F_u32) | 0x80_u32)
+            ret 3_u32
+        }
+
+        # Handle the 4-byte UTF-8 encoding case.
+        buffer[mut 0_uz]@ = U8::from((self.inner >> 18_u32) | 0xF0_u32)
+        buffer[mut 1_uz]@ = U8::from(((self.inner >> 12_u32) & 0x3F_u32) | 0x80_u32)
+        buffer[mut 2_uz]@ = U8::from(((self.inner >> 6_u32) & 0x3F_u32) | 0x80_u32)
+        buffer[mut 3_uz]@ = U8::from((self.inner & 0x3F_u32) | 0x80_u32)
+        ret 4_u32
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun encode_utf16(&self, buffer: &mut View[U16]) -> U32 {
+        # Encode this character into `UTF-16` and write it into the provided buffer. The buffer should have space for at
+        # least 2 `U16` values.
+        # @let buffer: A mutable reference to an array of 2 `U16` values where the `UTF-16` encoding will be written.
+        # @ret: The number of `U16` values written to the buffer (1 or 2).
+        # @todo: Make the comparison values constants.
+
+        # For chars that can be represented in a single UTF-16
+        # code unit, we can directly write the value.
+        case self.inner <= 0xFFFF_u32 {
+            buffer[0_uz]@ = U16::from(self.inner)
+            ret 1_u32
+        }
+
+        # For chars that require surrogate pairs, we need to
+        # calculate the high and low surrogates.
+        let code_point = self.inner - 0x10000_u32
+        buffer[mut 0_uz]@ = U16::from((code_point >> 10_u32) | 0xD800_u32) # High surrogate
+        buffer[mut 1_uz]@ = U16::from((code_point & 0x3FF_u32) | 0xDC00_u32) # Low surrogate
+        ret 2_u32
+    }
+
+    fun is_whitespace(&self) -> Bool {
+        # Check if this character is a whitespace character.
+        # @ret: `true` if the character is a whitespace character, `false` otherwise.
+
+        ret Self::whitespace.contains(&self.inner)
+    }
+}
+
+sup Char ext Eq {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun eq(&self, that: &Self) -> Bool {
+        # Check if this character is equal to another character.
+        # @let that: A reference to another `Char` to compare with.
+        # @ret: `true` if the characters are equal, `false` otherwise.
+
+        ret self.inner == that.inner
+    }
+}
+
+sup Char ext Ord {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun ord(&self, that: &Self) -> S32 {
+        # Compare this character with another character.
+        # @let that: A reference to another `Char` to compare with.
+        # @ret: An `Ordering` value indicating the result of the comparison.
+
+        ret self.inner.ord(&that.inner)
+    }
+}
+
+sup Char ext TryFrom[U32] {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun try_from(that: U32) -> Opt[Self] {
+        # Attempt to convert a `U32` value to a `Char`, if it represents a valid Unicode scalar value. If the value is
+        # not a valid Unicode scalar value, return `None`.
+        # @let that: The `U32` value to convert to a `Char`.
+        # @ret: A `Opt[Char]` containing the corresponding `Char` if the value is valid, or `None` if it is not.
+
+        # Check if the value is a valid Unicode scalar value.
+        let valid = that <= 0xD7FF_u32 or (0xE000_u32 <= that <= 0x10FFFF_u32)
+        ret case valid { Some(val=Char(inner=that)) } else { None }
+    }
+}
+
+sup Char ext From[U32] {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(that: U32) -> Self {
+        # Convert a `U32` value to a `Char`, if it represents a valid Unicode scalar value. If the value is not a valid
+        # Unicode scalar value, error.
+        # @let that: The `U32` value to convert to a `Char`.
+        # @ret: The corresponding `Char` if the value is valid, or an error if it is not.
+
+        let opt = Char::try_from(that)
+        ret opt.expect("Invalid Unicode scalar value for Char conversion")
+    }
+}

@@ -1,95 +1,345 @@
 use std::annotations::package
 use std::annotations::public
-use std::number::S64
+use std::annotations::versioned
+use std::boolean::Bool
+use std::copy::Copy
+use std::number::U32
+use std::number::U64
+use std::option::None
+use std::option::Opt
+use std::option::Some
 use std::ops::add::Add
 use std::ops::sub::Sub
 use std::ops::mul::Mul
 use std::ops::div::Div
 
-
 !public
+!versioned(base="1.0.0", new="1.0.0")
 cls Duration {
-    !package seconds: S64
-    !package nanoseconds: S64
+    # The `duration` type represents a span of time, typically used for measuring elapsed time or specifying timeouts.
+    # It consists of two components: `seconds` and `nanoseconds`. The `seconds` field holds the whole seconds part of
+    # the duration, while the `nanoseconds` field holds the fractional part in nanoseconds. This allows for high
+    # precision when representing durations, as it can represent time spans down to the nanosecond level. The total
+    # duration can be calculated by combining these two fields, and various utility methods are provided to create
+    # durations from different time units and to convert durations back into those units.
+    # @let seconds: The whole seconds part of the duration.
+    # @let nanoseconds: The fractional part of the duration in nanoseconds. This allows for representing durations with
+    # high precision, as it can represent time spans down to the nanosecond level.
+
+    !package seconds: U64
+    !package nanoseconds: U64
 }
 
+sup Duration ext Copy { }
 
 sup Duration {
+    #
+
     !public
-    fun from_seconds(seconds: S64) -> Duration {
-        ret Duration(seconds=seconds, nanoseconds=0_s64)
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_weeks(weeks: U64) -> Duration {
+        # The `from_weeks` method creates a `Duration` instance from a given number of weeks. It converts the input
+        # weeks into seconds by multiplying it by 604,800 (since there are 604,800 seconds in a week), and sets the
+        # `nanoseconds` field to zero since there are no fractional seconds in this case.
+        # @let weeks: The number of weeks to convert into a `Duration` instance.
+        # @ret: A `Duration` instance representing the specified number of weeks, with the appropriate conversion to
+        # seconds.
+
+        ret Duration(seconds=weeks * 7_u64 * 24_u64 * 60_u64 * 60_u64)
     }
 
     !public
-    fun from_milliseconds(milliseconds: S64) -> Duration {
-        let secs = milliseconds / 1000_s64
-        let nanos = (milliseconds % 1000_s64) * 1000000_s64
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_days(days: U64) -> Duration {
+        # The `from_days` method creates a `Duration` instance from a given number of days. It converts the input days
+        # into seconds by multiplying it by 86,400 (since there are 86,400 seconds in a day), and sets the `nanoseconds`
+        # field to zero since there are no fractional seconds in this case.
+        # @let days: The number of days to convert into a `Duration` instance.
+        # @ret: A `Duration` instance representing the specified number of days, with the appropriate conversion to
+        # seconds.
+
+        ret Duration(seconds=days * 24_u64 * 60_u64 * 60_u64)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_hours(hours: U64) -> Duration {
+        # The `from_hours` method creates a `Duration` instance from a given number of hours. It converts the input
+        # hours into seconds by multiplying it by 3600 (since there are 3600 seconds in an hour), and sets the
+        # `nanoseconds` field to zero since there are no fractional seconds in this case.
+        # @let hours: The number of hours to convert into a `Duration` instance.
+        # @ret: A `Duration` instance representing the specified number of hours, with the appropriate conversion to
+        # seconds.
+
+        ret Duration(seconds=hours * 60_u64 * 60_u64)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_mins(minutes: U64) -> Duration {
+        # The `from_mins` method creates a `Duration` instance from a given number of minutes. It converts the input
+        # minutes into seconds by multiplying it by 60, and sets the `nanoseconds` field to zero since there are no
+        # fractional seconds in this case.
+        # @let minutes: The number of minutes to convert into a `Duration` instance.
+        # @ret: A `Duration` instance representing the specified number of minutes, with the appropriate conversion to
+        # seconds.
+
+        ret Duration(seconds=minutes * 60_u64)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_secs(seconds: U64) -> Duration {
+        # The `from_secs` method creates a `Duration` instance from a given number of seconds. No addtional calculation
+        # is needed since the input is already in seconds, so the `nanoseconds` field is set to zero..
+        # @let seconds:
+        # @ret: A `Duration` instance representing the specified number of seconds.
+
+        ret Duration(seconds)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_millis(milliseconds: U64) -> Duration {
+        # The `from_millis` method creates a `Duration` instance from a given number of milliseconds. It converts the
+        # input milliseconds into seconds and nanoseconds. The whole seconds are calculated by dividing the milliseconds
+        # by 1000, and the remaining milliseconds are converted to nanoseconds by taking the modulus of 1000 and
+        # multiplying by 1,000,000 (since there are 1,000,000 nanoseconds in a millisecond).
+        # @let milliseconds: The number of milliseconds to convert into a `Duration` instance.
+        # @ret: A `Duration` instance representing the specified number of milliseconds, with the appropriate conversion
+        # to seconds and nanoseconds.
+
+        # Standard conversion from milliseconds to seconds and nanoseconds.
+        let secs = milliseconds / 1000_u64
+        let nanos = (milliseconds % 1000_u64) * 1000000_u64
         ret Duration(seconds=secs, nanoseconds=nanos)
     }
 
     !public
-    fun from_microseconds(microseconds: S64) -> Duration {
-        let secs = microseconds / 1000000_s64
-        let nanos = (microseconds % 1000000_s64) * 1000_s64
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_micros(microseconds: U64) -> Duration {
+        # The `from_micros` method creates a `Duration` instance from a given number of microseconds. It converts the
+        # input microseconds into seconds and nanoseconds. The whole seconds are calculated by dividing the microseconds
+        # by 1,000,000, and the remaining microseconds are converted to nanoseconds by taking the modulus of 1,000,000
+        # and multiplying by 1,000 (since there are 1,000 nanoseconds in a microsecond).
+        # @let microseconds: The number of microseconds to convert into a `Duration` instance.
+        # @ret: A `Duration` instance representing the specified number of microseconds, with the appropriate conversion
+        # to seconds and nanoseconds.
+
+        # Standard conversion from microseconds to seconds and nanoseconds.
+        let secs = microseconds / 1000000_u64
+        let nanos = (microseconds % 1000000_u64) * 1000_u64
         ret Duration(seconds=secs, nanoseconds=nanos)
     }
 
     !public
-    fun from_nanoseconds(nanoseconds: S64) -> Duration {
-        let secs = nanoseconds / 1000000000_s64
-        let nanos = nanoseconds % 1000000000_s64
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_nanos(nanoseconds: U64) -> Duration {
+        # The `from_nanos` method creates a `Duration` instance from a given number of nanoseconds. It converts the
+        # input nanoseconds into seconds and nanoseconds. The whole seconds are calculated by dividing the nanoseconds
+        # by 1,000,000,000, and the remaining nanoseconds are calculated by taking the modulus of 1,000,000,000 (since
+        # there are 1,000,000,000 nanoseconds in a second).
+        # @let nanoseconds: The number of nanoseconds to convert into a `Duration` instance.
+        # @ret: A `Duration` instance representing the specified number of nanoseconds, with the appropriate conversion
+        # to seconds and nanoseconds.
+
+        # Standard conversion from nanoseconds to seconds and nanoseconds.
+        let secs = nanoseconds / 1000000000_u64
+        let nanos = nanoseconds % 1000000000_u64
         ret Duration(seconds=secs, nanoseconds=nanos)
     }
 
     !public
-    fun total_seconds(&self) -> S64 {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun as_secs(&self) -> U64 {
+        # The `as_secs` method returns the total duration in seconds as an `U64` value. It drops the nanoseconds part.
+        # @ret: The total duration in seconds, represented as an `U64` value. The nanoseconds part is not included in
+        # this calculation, so the result is effectively the whole seconds part of the duration.
+
         ret self.seconds
     }
 
     !public
-    fun total_milliseconds(&self) -> S64 {
-        ret self.seconds * 1000_s64 + (self.nanoseconds / 1000000_s64)
+    !versioned(base="1.0.0", new="1.0.0")
+    fun as_milliseconds(&self) -> U64 {
+        # The `as_millis` method returns the total duration in milliseconds as an `U64` value. It converts the seconds
+        # part to milliseconds by multiplying it by 1000, and then adds the nanoseconds part converted to milliseconds
+        # by dividing it by 1,000,000 (since there are 1,000,000 nanoseconds in a millisecond).
+        # @ret: The total duration in milliseconds, represented as an `U64` value. This is calculated by converting the
+        # seconds part to milliseconds and adding the nanoseconds part converted to milliseconds.
+
+        ret self.seconds * 1000_u64 + (self.nanoseconds / 1000000_u64)
     }
 
     !public
-    fun total_microseconds(&self) -> S64 {
-        ret self.seconds * 1000000_s64 + (self.nanoseconds / 1000_s64)
+    !versioned(base="1.0.0", new="1.0.0")
+    fun total_micros(&self) -> U64 {
+        # The `total_micros` method returns the total duration in microseconds as an `U64` value. It converts the
+        # seconds part to microseconds by multiplying it by 1,000,000, and then adds the nanoseconds part converted to
+        # microseconds by dividing it by 1,000 (since there are 1,000 nanoseconds in a microsecond).
+        # @ret: The total duration in microseconds, represented as an `U64` value. This is calculated by converting the
+        # seconds part to microseconds and adding the nanoseconds part converted to microseconds.
+
+        ret self.seconds * 1000000_u64 + (self.nanoseconds / 1000_u64)
     }
 
     !public
-    fun total_nanoseconds(&self) -> S64 {
-        ret self.seconds * 1000000000_s64 + self.nanoseconds
+    !versioned(base="1.0.0", new="1.0.0")
+    fun total_nanos(&self) -> U64 {
+        # The `total_nanos` method returns the total duration in nanoseconds as an `U64` value. It converts the seconds
+        # part to nanoseconds by multiplying it by 1,000,000,000, and then adds the nanoseconds part directly, since it
+        # is already in nanoseconds.
+        # @ret: The total duration in nanoseconds, represented as an `U64` value. This is calculated by converting the
+        # seconds part to nanoseconds and adding the nanoseconds part directly.
+
+        ret self.seconds * 1000000000_u64 + self.nanoseconds
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_zero(&self) -> Bool {
+        # The `is_zero` method checks if the duration is zero, meaning both the seconds and nanoseconds fields are zero.
+        # It returns `true` if both fields are zero, indicating that the duration represents no time, and `false`
+        # otherwise.
+        # @ret: A boolean value indicating whether the duration is zero. Returns `true` if both seconds and nanoseconds
+        # are zero, and `false` otherwise.
+
+        ret self.seconds == 0_u64 and self.nanoseconds == 0_u64
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun add_checked(self, rhs: Duration) -> Opt[Duration] {
+        #
+        # @let rhs:
+        # @ret:
+
+        let mut secs = self.seconds.add_checked(rhs.seconds)?
+        let mut nanos = self.nanoseconds + rhs.nanoseconds
+        case nanos >= 1000000000_u64 {
+            secs = secs.add_checked(1_u64)?
+            nanos -= 1000000000_u64
+        }
+        ret Some(val=Duration(seconds=secs, nanoseconds=nanos))
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun add_saturating(self, rhs: Duration) -> Duration {
+        #
+        # @let rhs:
+        # @ret:
+
+        let mut secs = self.seconds.add_saturating(rhs.seconds)
+        let mut nanos = self.nanoseconds + rhs.nanoseconds
+        case nanos >= 1000000000_u64 {
+            secs = secs.add_saturating(1_u64)
+            nanos -= 1000000000_u64
+        }
+        ret Duration(seconds=secs, nanoseconds=nanos)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun sub_checked(self, rhs: Duration) -> Opt[Duration] {
+        #
+        # @let rhs:
+        # @ret:
+
+        let mut secs = self.seconds.sub_checked(rhs.seconds)?
+        let mut nanos = self.nanoseconds
+        case nanos < rhs.nanoseconds {
+            secs = secs.sub_checked(1_u64)?
+            nanos += 1000000000_u64
+        }
+        nanos = nanos - rhs.nanoseconds
+        ret Some(val=Duration(seconds=secs, nanoseconds=nanos))
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun sub_saturating(self, rhs: Duration) -> Duration {
+        #
+        # @let rhs:
+        # @ret:
+
+        let mut secs = self.seconds.sub_saturating(rhs.seconds)
+        let mut nanos = self.nanoseconds
+        case nanos < rhs.nanoseconds {
+            secs = secs.sub_saturating(1_u64)
+            nanos += 1000000000_u64
+        }
+        nanos = nanos - rhs.nanoseconds
+        ret Duration(seconds=secs, nanoseconds=nanos)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun mul_checked(self, rhs: U32) -> Opt[Duration] {
+        # The `mul_checked` method multiplies the duration by a given `U32` value. Because the `rhs` is restricted to
+        # `U32`, we can safely multiply the seconds and nanoseconds without worrying about overflow from the `rhs`
+        # itself. However, we still need to check for overflow in the resulting seconds and nanoseconds. The method
+        # first multiplies the seconds by `rhs` and checks for overflow using `mul_checked`. If that succeeds, it
+        # multiplies the nanoseconds by `rhs` and checks if it exceeds 1 second (1,000,000,000 nanoseconds). If it does,
+        # it carries over the excess nanoseconds into the seconds. Finally, it returns a new `Duration` instance with
+        # the calculated seconds and nanoseconds. If any of the operations result in an overflow, it returns `None`.
+        # @let rhs: The `U32` value by which to multiply the duration. This is the right-hand side operand in the
+        # multiplication operation.
+        # @ret: An `Opt[Duration]` that contains the result of multiplying the duration by `rhs` if the operation is
+        # successful, or `None` if there is an overflow.
+
+        # Calculate the new nanoseconds and check for overflow.
+        let mut nanos = self.nanoseconds * U64::from(rhs)
+        let extra_secs = nanos / 1000000000_u64
+        nanos = nanos % 1000000000_u64
+
+        # Calculate the new seconds and check for overflow.
+        let mut secs = self.seconds
+            .mul_checked(U64::from(rhs))?
+            .add_checked(extra_secs)?
+        ret Some(val=Duration(seconds=secs, nanoseconds=nanos))
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun div_checked(self, rhs: U32) -> Opt[Duration] {
+        # The `div_checked` method divides the duration by a given `U32` value. Similar to `mul_checked`, we can safely
+        # divide the seconds and nanoseconds without worrying about overflow from the `rhs` itself, but we still need to
+        # check for overflow in the resulting seconds and nanoseconds. The method first converts the entire duration
+        # into nanoseconds, then divides by `rhs`, and finally converts back into seconds and nanoseconds. If any of the
+        # operations result in an overflow or if `rhs` is zero, it returns `None`.
+        # @let rhs: The `U32` value by which to divide the duration. This is the right-hand side operand in the division
+        # operation.
+        # @ret: An `Opt[Duration]` that contains the result of dividing the duration by `rhs` if the operation is
+        # successful, or `None` if there is an overflow or if `rhs` is zero.
+
+        let (secs, extra_secs) = (self.seconds / U64::from(rhs), self.seconds % U64::from(rhs))
+        let (mut nanos, extra_nanos) = (self.nanoseconds / U64::from(rhs), self.nanoseconds % U64::from(rhs))
+        nanos += (extra_secs * 1000000000_u64 + U64::from(extra_nanos)) / U64::from(rhs)
+        ret Some(val=Duration(seconds=secs, nanoseconds=nanos))
     }
 }
 
-
-sup Duration ext Add[Rhs=Self, Ret=Self] {
+sup Duration ext Add {
     fun add(self, that: Self) -> Self {
-        let total_nanos = self.total_nanoseconds() + that.total_nanoseconds()
-        ret Duration::from_nanoseconds(total_nanos)
+        ret self.add_checked(that).expect("Duration addition overflow")
     }
 }
 
-
-sup Duration ext Sub[Rhs=Self, Ret=Self] {
+sup Duration ext Sub {
     fun sub(self, that: Self) -> Self {
-        let total_nanos = self.total_nanoseconds() - that.total_nanoseconds()
-        ret Duration::from_nanoseconds(total_nanos)
+        ret self.sub_checked(that).expect("Duration subtraction overflow")
     }
 }
 
-
-sup Duration ext Mul[Rhs=S64, Ret=Self] {
-    fun mul(self, that: S64) -> Self {
-        let total_nanos = self.total_nanoseconds() * that
-        ret Duration::from_nanoseconds(total_nanos)
+sup Duration ext Mul[Rhs=U32] {
+    fun mul(self, that: U32) -> Self {
+        ret self.mul_checked(that).expect("Duration multiplication overflow")
     }
 }
 
-
-sup Duration ext Div[Rhs=S64, Ret=Self] {
-    fun div(self, that: S64) -> Self {
-        let total_nanos = self.total_nanoseconds() / that
-        ret Duration::from_nanoseconds(total_nanos)
+sup Duration ext Div[Rhs=U32] {
+    fun div(self, that: U32) -> Self {
+        ret self.div_checked(that).expect("Duration division overflow or division by zero")
     }
 }

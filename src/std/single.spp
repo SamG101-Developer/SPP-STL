@@ -1,54 +1,178 @@
-use std::annotations::compiler_builtin
+use std::annotations::intrinsic
+use std::annotations::package
 use std::annotations::public
+use std::annotations::versioned
 use std::allocator::Alloc
+use std::allocator::AllocErr
 use std::allocator::GlobalAlloc
+use std::allocator::Layout
 use std::generator::GenOnce
+use std::number::U8
 use std::number::USize
-use std::ops::fwd::FwdMov
+use std::result::Pass
+use std::result::Res
+use std::mem::pointer::NonNull
 use std::ops::fwd::FwdMut
 use std::ops::fwd::FwdRef
 use std::ops::del::Del
 use std::ops::void::Void
 
-
-##
-A uniquely owned pointer on the heap.
-##
 !public
-cls Single[T, A: Alloc[T] = GlobalAlloc[T]] { }
+!versioned(base="1.0.0", new="1.0.0")
+cls Single[T, A: Alloc = GlobalAlloc] {
+    # The `Single` type is a uniquely owned pointer on the heap, the same as `Box` in Rust, or `unique_ptr` in C++. It
+    # provides a way to allocate a single value on the heap and manage its lifetime.
+    # @type T: The type of the value that is allocated on the heap.
+    # @type A: The allocator type used to allocate and deallocate the value. Defaults to `GlobalAlloc`.
+    # @let ptr: A non-null pointer to the allocated value on the heap.
+    # @let alloc: The allocator used to allocate and deallocate the value on the heap.
 
-sup [T, A: Alloc[T]] Single[T, A] {
+    !package ptr: NonNull[T]
+    !package alloc: A
+}
+
+sup [T] Single[T, GlobalAlloc] {
+    # The set of methods where no allocator is specified, and the default `GlobalAlloc` allocator is used. This is the
+    # most common use case for the `Single` type, as it provides a simple way to allocate a single value on the heap
+    # without having to specify an allocator. The methods in this sup-block are convenience methods that map to the
+    # corresponding methods in the `Single[T, A]` sup, with `GlobalAlloc` as the allocator.
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun new(val: T) -> Self {
+        # The `new` function creates a new `Single` instance by allocating memory for the value `val` on the heap using
+        # the `GlobalAlloc` allocator. It returns a `Single` instance that owns the allocated value.
+        # @let val: The value to be allocated on the heap and managed by the `Single` instance.
+        # @ret: A `Single` instance that owns the allocated value on the heap.
+
+        # Map to the `new_in` function with `GlobalAlloc` as
+        # the allocator.
+        ret Self::new_in(val, GlobalAlloc)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun try_new(val: T) -> Res[Self, AllocErr] {
+        # The `try_new` function is the fallible version of the `new` function. It attempts to create a new `Single`
+        # instance by allocating memory for the value `val` on the heap using the `GlobalAlloc` allocator. If the
+        # allocation is successful, it returns a `Pass` state with the `Single` instance. If the allocation fails, it
+        # returns a `Fail` state with an `AllocErr`.
+        # @let val: The value to be allocated on the heap and managed by the `Single` instance.
+        # @ret: A `Res` type that indicates whether the allocation was successful or not. If successful, it returns a
+        # `Pass` state with the `Single` instance. If unsuccessful, it returns a `Fail` state with an `AllocErr`.
+
+        # Map to the `try_new_in` function with `GlobalAlloc` as
+        # the allocator.
+        ret Self::try_new_in(val, GlobalAlloc)
+    }
+}
+
+sup [T, A: Alloc] Single[T, A] {
+    # The set of methods where an allocator is specified. This allows for more control over how memory is allocated and
+    # deallocated for the `Single` instance. The methods in this sup-block provide functionality for creating a new
+    # `Single` instance, accessing the value it owns, and reading the value. All the other (non-construction) methods
+    # can use any allocator, so are defined in this sup-block.
+    # @type Element: A type alias for the type of the value that is allocated on the heap. This is the same as `T`.
+    # @type Allocator: A type alias for the allocator type used to allocate and deallocate the value on the heap. This
+    # is the same as `A`.
+
     !public type Element = T
+    !public type Allocator = A
 
     !public
-    !compiler_builtin
-    fun new(value: T) -> Single[T] { }
+    !versioned(base="1.0.0", new="1.0.0")
+    fun new_in(val: T, alloc: A) -> Self {
+        # The `new_in` function creates a new `Single` instance by allocating memory for the value `val` on the heap
+        # using the specified allocator `alloc`. It returns a `Single` instance that owns the allocated value.
+        # @let val: The value to be allocated on the heap and managed by the `Single` instance.
+        # @let alloc: The allocator used to allocate and deallocate the value on the heap.
+        # @ret: A `Single` instance that owns the allocated value on the heap.
+
+        # Allocate the non-null pointer an ambed the value into
+        # it. Wrap in the `Single` type and return.
+        let mut ptr = alloc.allocate(Layout::new_for_type[T]()).expect("Allocation failed").cast[T]()
+        ptr.write(val)
+        ret Single(ptr, alloc)
+    }
 
     !public
-    !compiler_builtin
-    cor get_ref(&self) -> GenOnce[&T] { }
+    !versioned(base="1.0.0", new="1.0.0")
+    fun try_new_in(val: T, alloc: A) -> Res[Self, AllocErr] {
+        # The `try_new_in` function is the fallible version of the `new_in` function. It attempts to create a new
+        # `Single` instance by allocating memory for the value `val` on the heap using the specified allocator `alloc`.
+        # If the allocation is successful, it returns a `Pass` state with the `Single` instance. If the allocation
+        # fails, it returns a `Fail` state with an `AllocErr`.
+        # @let val: The value to be allocated on the heap and managed by the `Single` instance.
+        # @let alloc: The allocator used to allocate and deallocate the value on the heap.
+        # @ret: A `Res` type that indicates whether the allocation was successful or not. If successful, it returns a
+        # `Pass` state with the `Single` instance. If unsuccessful, it returns a `Fail` state with an `AllocErr`.
+
+        # Allocate the non-null pointer and embed the value into
+        # it. Wrap in the `Single` type and return.
+        let mut ptr = alloc.allocate(Layout::new_for_type[T]())?.cast[T]()
+        ptr.write(val)
+        ret Pass(val=Single(ptr, alloc))
+    }
 
     !public
-    !compiler_builtin
-    cor get_mut(&mut self) -> GenOnce[&mut T] { }
+    !versioned(base="1.0.0", new="1.0.0")
+    cor get_mut(&mut self) -> GenOnce[&mut T] {
+        # The `get_mut` coroutine returns a generator that yields a mutable reference to the value owned by the `Single`
+        # instance. This allows for safe mutable access to the value without transferring ownership. The `FwdMut` trait
+        # allows the `Single[T, A]` to coalesce into `&mut T`, so we can just yield `self` and the compiler will handle
+        # the coercion.
+        # @ret: A generator that yields a mutable reference to the value owned by the `Single` instance.
+
+        # Hook into forwarded mutable borrow coercion, and yield
+        # self.
+        gen self
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    cor get_ref(&self) -> GenOnce[&T] {
+        # The `get_ref` coroutine returns a generator that yields a reference to the value owned by the `Single`
+        # instance. This allows for safe access to the value without transferring ownership. The `FwdRef` trait allows
+        # the `Single[T, A]` to coalesce into `&T`, so we can just yield `self` and the compiler will handle the
+        # coercion.
+        # @ret: A generator that yields a reference to the value owned by the `Single` instance.
+
+        # Hook into forwarded immutable borrow coercion, and
+        # yield self.
+        gen self
+    }
+
+    !public
+    fun read(self) -> T {
+        # The `take` function consumes the `Single` instance and returns the value it owns. This effectively transfers
+        # ownership of the value out of the `Single` instance, leaving it in an uninitialized state. But because this
+        # object is consumed, it is safe to do so.
+        # @ret: The value owned by the `Single` instance.
+
+        ret self.ptr.read()
+    }
 }
 
-sup [T] Single[T] ext FwdRef[T] {
-    !compiler_builtin
-    cor fwd_ref(&self) -> GenOnce[&T] { }
+sup [T, A: Alloc] Single[T, A] ext FwdMut[T] {
+    cor fwd_mut(&mut self) -> GenOnce[&mut T] {
+        gen &mut self.ptr
+    }
 }
 
-sup [T] Single[T] ext FwdMut[T] {
-    !compiler_builtin
-    cor fwd_mut(&mut self) -> GenOnce[&mut T] { }
+sup [T, A: Alloc] Single[T, A] ext FwdRef[T] {
+    cor fwd_ref(&self) -> GenOnce[&T] {
+        gen &self.ptr
+    }
 }
 
-sup [T] Single[T] ext FwdMov[T] {
-    !compiler_builtin
-    cor fwd_mov(self) -> GenOnce[T] { }
-}
+sup [T, A: Alloc] Single[T, A] ext Del {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun del(&mut self) -> Void {
+        # The `del` function is called when the `Single` instance is dropped. It deallocates the memory used by the
+        # `Single` instance, and calls the destructor of the value it owns. This ensures that the value is properly
+        # cleaned up and that there are no memory leaks. The `Del` trait allows for custom cleanup logic to be defined
+        # for types, and this implementation ensures that the `Single` type behaves correctly when it goes out of scope.
 
-sup [T] Single[T] ext Del {
-    !compiler_builtin
-    fun del(&mut self) -> Void { }
+        self.alloc.deallocate(self.ptr.cast[U8]())
+    }
 }
