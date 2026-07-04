@@ -12,10 +12,10 @@ cls IndexMut[T, I] { }
 cls IndexRef[T, I] { }
 
 !public
-cls SliceRef[V, I] { }
+cls SliceRef[V, I: Zero] { }
 
 !public
-cls SliceMut[V, I] { }
+cls SliceMut[V, I: Zero] { }
 
 # Allow the use of the "[mut n]" operator.
 sup [T, I] IndexMut[T, I] {
@@ -32,7 +32,7 @@ sup [T, I] IndexRef[T, I] {
 }
 
 # Allow the use of the "[mut n to m]" operator.
-sup [V, I] SliceMut[V, I] {
+sup [V, I: Zero] SliceMut[V, I] {
     !public
     !abstract_method
     fun slice_mut_max_len(&self) -> I { }
@@ -50,18 +50,18 @@ sup [V, I] SliceMut[V, I] {
     !public
     !virtual_method
     cor slice_mut_to(&mut self, into: I) -> GenOnce[&mut V] {
-        gen self.slice_mut(0, into)
+        gen self.slice_mut(I::zero(), into)
     }
 
     !public
     !virtual_method
     cor slice_mut_full(&mut self) -> GenOnce[&mut V] {
-        gen self.slice_mut(0, self.slice_mut_max_len())
+        gen self.slice_mut(I::zero(), self.slice_mut_max_len())
     }
 }
 
 # Allow the use of the "[n to m]" operator.
-sup [V, I] SliceRef[V, I] {
+sup [V, I: Zero] SliceRef[V, I] {
     !public
     !abstract_method
     fun slice_ref_max_len(&self) -> I { }
@@ -79,12 +79,12 @@ sup [V, I] SliceRef[V, I] {
     !public
     !virtual_method
     cor slice_ref_to(&self, into: I) -> GenOnce[&V] {
-        gen self.slice_ref(0, into)
+        gen self.slice_ref(I::zero(), into)
     }
 
     !public
     !virtual_method
     cor slice_ref_full(&self) -> GenOnce[&V] {
-        gen self.slice_ref(0, self.slice_ref_max_len())
+        gen self.slice_ref(I::zero(), self.slice_ref_max_len())
     }
 }

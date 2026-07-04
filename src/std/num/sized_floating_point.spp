@@ -16,6 +16,8 @@ use std::void::Void
 use std::num::sized_integer_signed::SizedIntegerSigned
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 use std::num::bases::FloatingPoint
+use std::num::bases::One
+use std::num::bases::Zero
 use std::ops::eq::Eq
 use std::ops::ord::Ord
 use std::ops::add::Add
@@ -723,23 +725,26 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
 
 sup [cmp w: U32] SizedFloatingPoint[w] {
     !public !inline
+    !intrinsic(name="std.num.sized_floating_point.neg_one")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun neg_one() -> Self { }
+}
+
+sup [cmp w: U32] SizedFloatingPoint[w] ext Zero {
+    !inline
     !intrinsic(name="std.num.sized_floating_point.zero")
     !versioned(base="1.0.0", new="1.0.0")
     fun zero() -> Self { }
 
-    !public !inline
+    !inline
+    !intrinsic(name="std.num.sized_floating_point.is_zero")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_zero(&self) -> Bool { }
+}
+
+sup [cmp w: U32] SizedFloatingPoint[w] ext One {
+    !inline
     !intrinsic(name="std.num.sized_floating_point.one")
     !versioned(base="1.0.0", new="1.0.0")
     fun one() -> Self { }
-
-    !public !inline
-    !intrinsic(name="std.num.sized_floating_point.neg_one")
-    !versioned(base="1.0.0", new="1.0.0")
-    fun neg_one() -> Self { }
-
-    # !public !inline
-    # !versioned(base="1.0.0", new="1.0.0")
-    # fun to_bits(self) -> SizedIntegerUnsigned[w] {
-    #     ret SizedIntegerUnsigned[w]::from(self)
-    # }
 }

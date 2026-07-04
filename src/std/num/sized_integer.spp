@@ -15,6 +15,8 @@ use std::option::Some
 use std::option::None
 use std::void::Void
 use std::num::bases::Integer
+use std::num::bases::One
+use std::num::bases::Zero
 use std::ops::eq::Eq
 use std::ops::bit_and::BitAnd
 use std::ops::bit_and::BitAndAssign
@@ -260,23 +262,6 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
     !public
     !inline
-    !intrinsic(name="std.num.sized_integer.zero")
-    fun zero() -> Self { }
-
-    !public
-    !inline
-    !intrinsic(name="std.num.sized_integer.one")
-    fun one() -> Self { }
-
-    !public
-    !inline
-    !intrinsic(name="std.num.sized_integer.two")
-    fun two() -> Self { }
-}
-
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
-    !public
-    !inline
     fun ilog(self, base: Self) -> U32 {
         case self.ilog_checked(base) is Some[U32](val) { ret val }
         abort("ilog: base must be a positive integer")
@@ -299,28 +284,51 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
     !public
     !inline
     fun ilog_checked(self, base: Self) -> Opt[U32] {
-        # Todo: self <= 0 or base <= 1 should return None.
-        # Todo: cant use ord on this base type, so do bit checking.
+        # Todo: self <= 0 or base <= 1 should return None. Todo: cant use ord on this base type, so do bit checking.
         ret Some(val=self.ilog2_checked()? / base.ilog2_checked()?)
     }
 
     !public
     !inline
     fun ilog2_checked(self) -> Opt[U32] {
-        # Todo: self <= 0 should return None.
-        # Todo: cant use ord on this base type, so do bit checking.
+        # Todo: self <= 0 should return None. Todo: cant use ord on this base type, so do bit checking.
         ret Some(val=w - 1_u32 - intrinsics::ctlz(self))
     }
 
     !public
     !inline
     fun ilog10_checked(self) -> Opt[U32] {
-        # Todo: self <= 0 or base <= 1 should return None.
-        # Todo: cant use ord on this base type, so do bit checking.
+        # Todo: self <= 0 or base <= 1 should return None. Todo: cant use ord on this base type, so do bit checking.
         # Todo: no clue if this is right, probably not.
         case self.ilog2_checked() of {
             is Some[U32](val as i) { ret Some(val=log_10_lookup_table.index_ref(U64::from(i))@) }
         }
         ret None()
     }
+}
+
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
+    !public
+    !inline
+    !intrinsic(name="std.num.sized_integer.two")
+    fun two() -> Self { }
+}
+
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
+    !inline
+    !intrinsic(name="std.num.sized_integer.zero")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun zero() -> Self { }
+
+    !inline
+    !intrinsic(name="std.num.sized_integer.is_zero")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_zero(&self) -> Bool { }
+}
+
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
+    !inline
+    !intrinsic(name="std.num.sized_integer.one")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun one() -> Self { }
 }
