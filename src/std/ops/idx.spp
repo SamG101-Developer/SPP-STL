@@ -4,10 +4,17 @@ use std::generator::GenOnce
 use std::iterator::Indexed
 use std::view::View
 
-!public cls IndexMut[T, I] { }
-!public cls IndexRef[T, I] { }
-!public cls SliceRef[V, I] { }
-!public cls SliceMut[V, I] { }
+!public
+cls IndexMut[T, I] { }
+
+!public
+cls IndexRef[T, I] { }
+
+!public
+cls SliceRef[V, I] { }
+
+!public
+cls SliceMut[V, I] { }
 
 # Allow the use of the "[mut n]" operator.
 sup [T, I] IndexMut[T, I] {
@@ -23,16 +30,60 @@ sup [T, I] IndexRef[T, I] {
     cor index_ref(&self, index: I) -> Indexed[&T] { }
 }
 
-# Allow the use of the "[n to m]" operator.
-sup [V, I] SliceRef[V, I] {
-    !public
-    !abstract_method
-    cor slice_ref(&self, from: I, into: I) -> GenOnce[&V] { }
-}
-
 # Allow the use of the "[mut n to m]" operator.
 sup [V, I] SliceMut[V, I] {
     !public
     !abstract_method
+    fun slice_mut_max_len(&self) -> I { }
+
+    !public
+    !abstract_method
     cor slice_mut(&mut self, from: I, into: I) -> GenOnce[&mut V] { }
+
+    !public
+    !virtual_method
+    cor slice_mut_from(&mut self, from: I) -> GenOnce[&mut V] {
+        gen self.slice_mut(from, self.slice_mut_max_len())
+    }
+
+    !public
+    !virtual_method
+    cor slice_mut_to(&mut self, into: I) -> GenOnce[&mut V] {
+        gen self.slice_mut(0, into)
+    }
+
+    !public
+    !virtual_method
+    cor slice_mut_full(&mut self) -> GenOnce[&mut V] {
+        gen self.slice_mut(0, self.slice_mut_max_len())
+    }
+}
+
+# Allow the use of the "[n to m]" operator.
+sup [V, I] SliceRef[V, I] {
+    !public
+    !abstract_method
+    fun slice_ref_max_len(&self) -> I { }
+
+    !public
+    !abstract_method
+    cor slice_ref(&self, from: I, into: I) -> GenOnce[&V] { }
+
+    !public
+    !virtual_method
+    cor slice_ref_from(&self, from: I) -> GenOnce[&V] {
+        gen self.slice_ref(from, self.slice_ref_max_len())
+    }
+
+    !public
+    !virtual_method
+    cor slice_ref_to(&self, into: I) -> GenOnce[&V] {
+        gen self.slice_ref(0, into)
+    }
+
+    !public
+    !virtual_method
+    cor slice_ref_full(&self) -> GenOnce[&V] {
+        gen self.slice_ref(0, self.slice_ref_max_len())
+    }
 }
