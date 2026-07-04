@@ -241,14 +241,31 @@ sup [T] View[T] ext RevIterMut[T] {
     cor reverse_iter_mut(&mut self) -> Iterator[&mut T] { }
 }
 
-sup [T] View[T] ext SliceRef[View[T], USize] {
-    !intrinsic(name="std.view.View.slice_ref")
-    !versioned(base="1.0.0", new="1.0.0")
-    cor slice_ref(&self, from: USize, into: USize) -> GenOnce[&View[T]] { }
-}
-
 sup [T] View[T] ext SliceMut[View[T], USize] {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun slice_mut_max_len(&self) -> USize {
+        # The `slice_mut_max_len` method returns the maximum length of the mutable slice that can be created from the
+        # view. This is equal to the length of the view itself, as a mutable slice can span the entire view.
+        # @ret: The maximum length of the mutable slice that can be created from the view.
+
+        ret self.len()
+    }
+
     !intrinsic(name="std.view.View.slice_mut")
     !versioned(base="1.0.0", new="1.0.0")
     cor slice_mut(&mut self, from: USize, into: USize) -> GenOnce[&mut View[T]] { }
+}
+
+sup [T] View[T] ext SliceRef[View[T], USize] {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun slice_ref_max_len(&self) -> USize {
+        # The `slice_ref_max_len` method returns the maximum length of the immutable slice that can be created from the
+        # view. This is equal to the length of the view itself, as an immutable slice can span the entire view.
+        # @ret: The maximum length of the slice that can be created from the view.
+
+        ret self.len()
+    }
+    !intrinsic(name="std.view.View.slice_ref")
+    !versioned(base="1.0.0", new="1.0.0")
+    cor slice_ref(&self, from: USize, into: USize) -> GenOnce[&View[T]] { }
 }
