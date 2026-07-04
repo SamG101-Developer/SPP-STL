@@ -314,7 +314,7 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
     fun two() -> Self { }
 }
 
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Zero {
     !inline
     !intrinsic(name="std.num.sized_integer.zero")
     !versioned(base="1.0.0", new="1.0.0")
@@ -326,7 +326,7 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
     fun is_zero(&self) -> Bool { }
 }
 
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext One {
     !inline
     !intrinsic(name="std.num.sized_integer.one")
     !versioned(base="1.0.0", new="1.0.0")
