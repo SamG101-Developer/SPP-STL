@@ -4,6 +4,8 @@ use std::annotations::public
 use std::generator::GenOnce
 use std::iterator::Indexed
 use std::view::View
+use std::num::bases::One
+use std::num::bases::Zero
 
 !public
 cls IndexMut[T, I] { }
