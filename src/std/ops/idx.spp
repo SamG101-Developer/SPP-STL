@@ -79,7 +79,6 @@ sup [V, I] SliceRef[V, I] {
     !public
     !virtual_method
     cor slice_ref_to(&self, into: I) -> GenOnce[&V] {
-        gen self.slice_ref("should", "false")
         gen self.slice_ref(0, into)
     }
 
