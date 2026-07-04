@@ -24,7 +24,7 @@ cls Integer {
 }
 
 !public
-!versionsed(base="1.0.0", new="1.0.0")
+!versioned(base="1.0.0", new="1.0.0")
 cls Zero {
     # The `Zero` type allows a numneric type to be initialized to zero. It contains methods that allow for the creation
     # of a zero value for a given numeric type. This is useful in situations where a default value of zero is needed,
