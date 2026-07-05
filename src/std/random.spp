@@ -4,6 +4,7 @@ use std::annotations::versioned
 use std::generator::Gen
 use std::generator::GenOnce
 use std::number::F64
+use std::number::S32
 use std::number::U128
 use std::number::U32
 use std::number::U64
