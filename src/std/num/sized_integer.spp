@@ -331,4 +331,10 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext One {
     !intrinsic(name="std.num.sized_integer.one")
     !versioned(base="1.0.0", new="1.0.0")
     fun one() -> Self { }
+
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_one(&self) -> Bool {
+        ret self == Self::one()
+    }
 }

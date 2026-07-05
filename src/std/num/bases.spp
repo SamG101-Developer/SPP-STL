@@ -92,6 +92,6 @@ sup One {
     fun one() -> Self { }
 
     !public
-    !virtual_method
+    !abstract_method
     fun is_one(&self) -> Bool { }
 }
