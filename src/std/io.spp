@@ -20,19 +20,26 @@ use std::vector::Vec
 use std::view::View
 use std::void::Void
 
-# All the individual possible streaming errors.
 cls StreamEofError { }
+
 cls StreamInterruptedError { }
+
 cls StreamWouldBlockError { }
+
 cls StreamInvalidInputError { }
+
 cls StreamInvalidDataError { }
+
 cls StreamPermissionDeniedError { }
+
 cls StreamNotFoundError { }
+
 cls StreamAlreadyExistsError { }
+
 cls StreamWriteZeroError { }
+
 cls StreamOtherError { }
 
-# Merge them all into a single StreamErr.
 !public
 !versioned(base="1.0.0", new="1.0.0")
 type StreamErr = StreamEofError

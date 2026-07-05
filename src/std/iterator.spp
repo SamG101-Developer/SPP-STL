@@ -1,8 +1,8 @@
 use std::annotations::public
 use std::annotations::versioned
 use std::boolean::Bool
-use std::function::FunRef
 use std::function::FunMut
+use std::function::FunRef
 use std::generator::Gen
 use std::generator::GenOnce
 use std::number::USize

@@ -1,6 +1,6 @@
 use std::annotations::package
-use std::annotations::public
 use std::annotations::private
+use std::annotations::public
 use std::annotations::versioned
 use std::annotations::zero_type
 use std::boolean::Bool

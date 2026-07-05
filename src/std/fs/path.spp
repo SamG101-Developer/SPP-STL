@@ -6,8 +6,8 @@ use std::annotations::zero_type
 use std::boolean::Bool
 use std::char::Char
 use std::clone::Clone
-use std::number::USize
 use std::number::S32
+use std::number::USize
 use std::result::Fail
 use std::result::Pass
 use std::result::Res

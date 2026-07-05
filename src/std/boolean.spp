@@ -1,30 +1,31 @@
-use std::annotations::public
 use std::annotations::intrinsic
+use std::annotations::public
 use std::annotations::versioned
 use std::llvm::inline
-use std::copy::Copy
 use std::cast::From
 use std::clone::Clone
+use std::copy::Copy
 use std::number::U32
-use std::string::Str
-use std::string_view::StrView
+use std::option::None
 use std::option::Opt
 use std::option::Some
-use std::option::None
+use std::string::Str
+use std::string_view::StrView
+use std::num::sized_floating_point::SizedFloatingPoint
 use std::num::sized_integer_signed::SizedIntegerSigned
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
-use std::num::sized_floating_point::SizedFloatingPoint
 use std::ops::and_::And
-use std::ops::ior_::Ior
 use std::ops::bit_and::BitAnd
 use std::ops::bit_ior::BitIor
-use std::ops::bit_xor::BitXor
 use std::ops::bit_not::BitNot
+use std::ops::bit_xor::BitXor
 use std::ops::eq::Eq
+use std::ops::ior_::Ior
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls Integral { }
+
 sup Integral ext Copy { }
 
 !public

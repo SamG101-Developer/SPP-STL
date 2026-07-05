@@ -1,17 +1,16 @@
-use std::annotations::public
 use std::annotations::private
+use std::annotations::public
 use std::boolean::Bool
 use std::cast::From
 use std::clone::Clone
+use std::number::S32
 use std::number::U32
 use std::number::U64
 use std::number::USize
-use std::number::S32
 use std::range::Range
 use std::vector::Vec
 use std::void::Void
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
-
 
 !public
 cls BigUInt {
@@ -68,7 +67,7 @@ sup BigUInt {
 
     !public
     fun trim(&mut self) -> Void {
-        ##
+        # #
         loop self.data.len() > 1_uz and self.data.get_tail_ref() == 0_u32 {
             self.data.pop()
         }
@@ -77,7 +76,7 @@ sup BigUInt {
 
     !public
     fun bit_length(&self) -> USize {
-        ##
+        # #
         case self.is_zero() { ret 0_uz }
         let last = self.data.get_tail_ref().clone()
         let bits = 32_u32 * (self.data.len() - 1_uz)
@@ -415,7 +414,6 @@ sup BigUInt ext std::ops::eq::Eq {
         ret self.data != that.data
     }
 }
-
 
 sup BigUInt ext std::ops::ord::Ord {
     # TODO: Implement this properly.

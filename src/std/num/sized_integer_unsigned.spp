@@ -1,28 +1,27 @@
 use std::annotations::intrinsic
 use std::annotations::public
 use std::annotations::versioned
-use std::boolean::Bool
-use std::cast::From
 use std::llvm::always_inline
 use std::llvm::inline
+use std::boolean::Bool
+use std::cast::From
+use std::number::S32
 use std::number::U32
 use std::number::U64
-use std::number::S32
-use std::option::Opt
 use std::option::None
+use std::option::Opt
 use std::option::Some
 use std::void::Void
+use std::num::sized_floating_point::SizedFloatingPoint
 use std::num::sized_integer::SizedInteger
 use std::num::sized_integer_signed::SizedIntegerSigned
-use std::num::sized_floating_point::SizedFloatingPoint
+use std::ops::div::Div
+use std::ops::div::DivAssign
 use std::ops::ord::Ord
 use std::ops::pow::Pow
 use std::ops::rem::Rem
 use std::ops::rem::RemAssign
-use std::ops::div::Div
-use std::ops::div::DivAssign
 
-# Type alias the "unsigned" version of the the sized integer type.
 !public
 type SizedIntegerUnsigned[cmp w: U32] = SizedInteger[w, false]
 

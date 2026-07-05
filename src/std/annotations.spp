@@ -3,6 +3,7 @@ use std::string_view::StrView
 use std::void::Void
 
 cls Annotation { }
+
 sup Annotation {
     !public cmp function: S32 = 1
     !public cmp method: S32 = 2

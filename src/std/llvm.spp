@@ -48,9 +48,9 @@ cmp fun no_inline() -> Void {
 !annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
 cmp fun hot() -> Void {
     # The `hot` annotation is a hint to the compiler that the annotated function is expected to be called frequently,
-    # and therefore should be optimized for performance. This can influence the compiler's optimization decisions,
-    # such as inlining the function or optimizing it for speed. The compiler cannot always detect hot functions
-    # acccurately, due to loops calling functions for example.
+    # and therefore should be optimized for performance. This can influence the compiler's optimization decisions, such
+    # as inlining the function or optimizing it for speed. The compiler cannot always detect hot functions acccurately,
+    # due to loops calling functions for example.
 }
 
 !public

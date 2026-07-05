@@ -8,19 +8,19 @@ use std::cast::From
 use std::char::Char
 use std::clone::Clone
 use std::generator::GenOnce
-use std::option::Opt
 use std::number::U8
 use std::number::USize
+use std::option::Opt
 use std::result::Res
-use std::vector::Vec
 use std::string_view::StrView
 use std::string_view::Utf8Err
+use std::vector::Vec
 use std::view::View
 use std::void::Void
-use std::ops::fwd::FwdMut
-use std::ops::fwd::FwdRef
 use std::ops::add::Add
 use std::ops::add::AddAssign
+use std::ops::fwd::FwdMut
+use std::ops::fwd::FwdRef
 
 cls Str[A: Alloc = GlobalAlloc] {
     # The `Str` type represents a mutable string that can be allocated using a specified allocator. It is designed to be

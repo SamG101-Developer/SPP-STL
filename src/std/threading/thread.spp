@@ -1,12 +1,12 @@
 use std::annotations::package
-use std::annotations::public
 use std::annotations::private
+use std::annotations::public
 use std::annotations::versioned
 use std::annotations::zero_type
 use std::boolean::Bool
 use std::function::FunMut
-use std::number::U64
 use std::number::S32
+use std::number::U64
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
@@ -128,6 +128,7 @@ sup [R] JoinHandle[R] {
 }
 
 ##
+
 sup [R] JoinHandle[R] ext Eq {
     !versioned(base="1.0.0", new="1.0.0")
     fun eq(&self, that: &Self) -> Bool {

@@ -33,10 +33,15 @@ sup FileMode ext Copy { }
 
 sup FileMode {
     fun read(self, yes: Bool = true) -> Self { ret Self(is_read=yes, ..self) }
+
     fun write(self, yes: Bool = true) -> Self { ret Self(is_write=yes, ..self) }
+
     fun append(self, yes: Bool = true) -> Self { ret Self(is_append=yes, ..self) }
+
     fun truncate(self, yes: Bool = true) -> Self { ret Self(is_truncate=yes, ..self) }
+
     fun create(self, yes: Bool = true) -> Self { ret Self(is_create=yes, ..self) }
+
     fun create_new(self, yes: Bool = true) -> Self { ret Self(is_create=yes, is_exclusive=yes, ..self) }
 
     fun to_flags(&self) -> S32 {

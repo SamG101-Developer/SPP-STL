@@ -32,7 +32,6 @@ cls AddAssign[Rhs=Self] {
     # added together using the "+=" operator.
 }
 
-# Allow the use of the "+" operator.
 sup [Rhs, Ret] Add[Rhs, Ret] {
     !public !abstract_method
     !versioned(base="1.0.0", new="1.0.0")
@@ -50,7 +49,6 @@ sup [Rhs, Ret] Add[Rhs, Ret] {
     }
 }
 
-# Allow the use of the "+=" operator.
 sup [Rhs] AddAssign[Rhs] {
     !public !abstract_method
     !versioned(base="1.0.0", new="1.0.0")

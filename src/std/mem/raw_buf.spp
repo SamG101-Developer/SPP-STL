@@ -11,9 +11,9 @@ use std::allocator::Layout
 use std::array::Arr
 use std::cast::From
 use std::clone::Clone
+use std::generator::GenOnce
 use std::iterator::Indexed
 use std::iterator::Iterator
-use std::generator::GenOnce
 use std::number::U8
 use std::number::USize
 use std::option::None
@@ -23,19 +23,19 @@ use std::result::Res
 use std::string::Str
 use std::string_view::StrView
 use std::void::Void
-use std::ops::idx::IndexRef
+use std::mem::pointer::NonNull
 use std::ops::idx::IndexMut
+use std::ops::idx::IndexRef
 use std::ops::iter::IterMov
 use std::ops::iter::IterMut
 use std::ops::iter::IterRef
 use std::ops::iter::RevIterMov
 use std::ops::iter::RevIterMut
 use std::ops::iter::RevIterRef
-use std::mem::pointer::NonNull
 
 !package
 !versioned(base="1.0.0", new="1.0.0")
-cls RawBuf[T, A: Alloc = GlobalAlloc] {
+cls RawBuf[T, A: Alloc=GlobalAlloc] {
     # The `RawBuf` type is a low level container for contiguous elements in memory. It is capacity aware, but not length
     # aware. It is used as the underlying container inside a Vec. Elements are not guaranteed to be initialized, so all
     # accessors are `Opt`-returning.

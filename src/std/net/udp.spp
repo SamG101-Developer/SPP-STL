@@ -1,19 +1,19 @@
+use sppc::CTimeval
 use std::annotations::public
 use std::annotations::versioned
-use sppc::CTimeval
-use std::net::socket::Socket
-use std::net::socket::SockAddr
-use std::net::socket::SockErr
-use std::net::socket::SockV4Addr
-use std::net::socket::SockV6Addr
 use std::boolean::Bool
 use std::number::U8
 use std::number::USize
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
-use std::void::Void
 use std::view::View
+use std::void::Void
+use std::net::socket::SockAddr
+use std::net::socket::SockErr
+use std::net::socket::Socket
+use std::net::socket::SockV4Addr
+use std::net::socket::SockV6Addr
 use std::time::duration::Duration
 
 cls UdpSocket {

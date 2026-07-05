@@ -1,5 +1,6 @@
 use std::cffi::CBool
 use std::cffi::CCharPtr
+use std::cffi::CDouble
 use std::cffi::CInt
 use std::cffi::CLong
 use std::cffi::CShort
@@ -7,7 +8,6 @@ use std::cffi::CUChar
 use std::cffi::CUInt
 use std::cffi::CULong
 use std::cffi::CUShort
-use std::cffi::CDouble
 use std::cffi::CVoid
 use std::cffi::CVoidPtr
 
