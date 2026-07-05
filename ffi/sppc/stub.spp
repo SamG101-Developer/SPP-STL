@@ -253,7 +253,7 @@ fun pread(fd: CInt, buffer: &mut CVoidPtr, size: CULong, count: CULong, offset: 
 fun pwrite(fd: CInt, buffer: &CVoidPtr, size: CULong, count: CULong, offset: CLong, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="sppc_mmap")
-fun mmap(fd: CInt, length: CULong, prot: CInt, flags: CInt, offset: CLong, out_addr: &mut CVoidPtr, out_length: &mut CULong) -> CInt { }
+fun mmap(fd: CInt, length: CULong, prot: CInt, flags: CInt, offset: CLong, out_addr: &mut CVoidPtr) -> CInt { }
 
 !ffi(symbol="sppc_munmap")
 fun munmap(addr: &mut CVoidPtr, length: &CULong) -> CInt { }
