@@ -1,5 +1,9 @@
+use std::annotations::abstract_method
+use std::annotations::virtual_method
 use std::annotations::package
+use std::annotations::public
 use std::annotations::versioned
+use std::boolean::Bool
 use std::boolean::Integral
 
 !package
@@ -18,6 +22,25 @@ cls Integer {
     # indicate that a type is an integer. It does not have any fields or methods, and it cannot be instantiated
     # directly. Instead, it is extended by other types that represent specific kinds of integer types, such as signed
     # and unsigned integers of various sizes. Typically used to constrain generics in the `intrinsics` module.
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls Zero {
+    # The `Zero` type allows a numneric type to be initialized to zero. It contains methods that allow for the creation
+    # of a zero value for a given numeric type. This is useful in situations where a default value of zero is needed,
+    # such as in mathematical operations or when initializing variables. The `Zero` type is typically used in
+    # conjunction with other numeric types to provide a consistent way to create zero values across different numeric
+    # types.
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls One {
+    # The `One` type allows a numeric type to be initialized to one. It contains methods that allow for the creation of
+    # a one value for a given numeric type. This is useful in situations where a default value of one is needed, such as
+    # in mathematical operations or when initializing variables. The `One` type is typically used in conjunction with
+    # other numeric types to provide a consistent way to create one values across different numeric types.
 }
 
 !package
@@ -51,4 +74,24 @@ sup FloatingPoint ext Num {
     # operations or generic functions that operate on numeric types. By extending `Num`, the `FloatingPoint` type
     # inherits any properties or behaviors associated with numeric types, while also providing additional functionality
     # specific to floating point numbers, such as support for floating point-specific operations and traits.
+}
+
+sup Zero {
+    !public
+    !abstract_method
+    fun zero() -> Self { }
+
+    !public
+    !abstract_method
+    fun is_zero(&self) -> Bool { }
+}
+
+sup One {
+    !public
+    !abstract_method
+    fun one() -> Self { }
+
+    !public
+    !abstract_method
+    fun is_one(&self) -> Bool { }
 }

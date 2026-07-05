@@ -19,13 +19,28 @@ sup Annotation {
 !intrinsic(name="std.annotations.annotation")
 !annotation(target=Annotation::function)
 !versioned(base="1.0.0", new="1.0.0")
-cmp fun annotation(target: S32) -> Void { }
+cmp fun annotation(target: S32) -> Void {
+    # The master annotation that is used to define other annotations. This annotation is used to indicate that the
+    # annotated item is an annotation, and it specifies the target of the annotation - a function, because all
+    # annotations are defined as a function.
+    # @let target: The valid AST types that the annotation can be applied to. This is a bitmask of the `Annotation` enum
+    # values, which can be combined using the bitwise OR operator. For example, using the target of
+    # `Annotation::function | Annotation::method` indicates that the annotation can be applied to both functions and
+    # sup-methods, but not overriding methods; this would require the addiotnation `| Annotation::ext_method`.
+}
 
 !public
 !intrinsic(name="std.annotations.intrinsic")
-!annotation(target=Annotation::function | Annotation::method | Annotation::ext_method | Annotation::class)
+!annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
 !versioned(base="1.0.0", new="1.0.0")
-cmp fun intrinsic(name: &StrView = "") -> Void { }
+cmp fun intrinsic(name: &StrView = "") -> Void {
+    # The `intrinsic` annotation is used to indicate that the annotated function is an intrinsic function, which means
+    # that it is a built-in function provided by the compiler or runtime environment. Intrinsic functions are
+    # implemented in LLVM IR, and are optimized for performance. They may provide access to special hardware features or
+    # perform operations that are not available in the standard library.
+    # @let ?name: The name of the intrinsic, that the compiler wilkl match and inject IR for.
+    # @todo: Make the name required, and fill it in in the `intrinsice.spp` stl module.
+}
 
 !public
 !intrinsic(name="std.annotations.public")
