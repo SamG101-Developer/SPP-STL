@@ -542,7 +542,7 @@ sup [T: Copy, A: Alloc] Vec[T, A] {
         # Append all the elements from a view, by copying the elements from the view.
         # @let that: The view to append from.
 
-        loop i in Range[USize]::between(0_uz, that.len()) { self.append(that[i]) }
+        loop i in Range[USize]::between(0_uz, that.len()) { self.append(that[i]@) }
     }
 }
 
