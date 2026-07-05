@@ -219,7 +219,7 @@ sup [T] Iterator[T] {
     }
 
     !public
-    fun fold[U, F: FunRef[(U, &T), U]](self, initial: U, reducer: F) -> U {
+    fun fold[U, F: FunRef[(U, T), U]](self, initial: U, reducer: F) -> U {
         # The `fold` method is a function that takes an iterator, an initial value, and a reducer function, and returns
         # a single value that is the result of applying the reducer function cumulatively to the items produced by the
         # iterator, starting with the initial value. The method uses a loop to iterate through the items of the original
