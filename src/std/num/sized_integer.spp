@@ -10,10 +10,12 @@ use std::limits::Limits
 use std::number::U32
 use std::number::U64
 use std::number::U8
+use std::number::USize
 use std::option::None
 use std::option::Opt
 use std::option::Some
 use std::void::Void
+use std::view::View
 use std::num::bases::Integer
 use std::num::bases::One
 use std::num::bases::Zero
@@ -334,5 +336,65 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext One {
     !versioned(base="1.0.0", new="1.0.0")
     fun is_one(&self) -> Bool {
         ret self == Self::one()
+    }
+}
+
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
+    # Byte-array conversions for integers of any width. These are defined on the generic `SizedInteger[w, signed]` base
+    # so that both signed and unsigned integers of every width gain them, mirroring the standard integer APIs. Each
+    # function reads exactly `w / 8` bytes from the view; the view must contain at least that many bytes (indexing aborts
+    # otherwise), and any trailing bytes are ignored.
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_le_bytes(bytes: &View[U8]) -> Self {
+        # Reconstruct an integer from its little-endian byte representation, where `bytes[0]` is the least-significant
+        # byte. The reconstruction is done purely with shifts and bitwise-or, so the produced value is independent of the
+        # host's endianness.
+        # @let bytes: A view over the little-endian byte representation of the integer (at least `w / 8` bytes).
+        # @ret: The reconstructed integer value.
+
+        let byte_count = w / 8_u32
+        let mut result = Self::zero()
+        let mut i = 0_u32
+        loop i < byte_count {
+            result |= Self::from(bytes[USize::from(i)]@) << (i * 8_u32)
+            i += 1_u32
+        }
+        ret result
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_be_bytes(bytes: &View[U8]) -> Self {
+        # Reconstruct an integer from its big-endian byte representation, where `bytes[0]` is the most-significant byte.
+        # The reconstruction is done purely with shifts and bitwise-or, so the produced value is independent of the
+        # host's endianness.
+        # @let bytes: A view over the big-endian byte representation of the integer (at least `w / 8` bytes).
+        # @ret: The reconstructed integer value.
+
+        let byte_count = w / 8_u32
+        let mut result = Self::zero()
+        let mut i = 0_u32
+        loop i < byte_count {
+            result |= Self::from(bytes[USize::from(i)]@) << ((byte_count - 1_u32 - i) * 8_u32)
+            i += 1_u32
+        }
+        ret result
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_ne_bytes(bytes: &View[U8]) -> Self {
+        # Reconstruct an integer from its native-endian byte representation, matching the in-memory layout of the target.
+        # Every target currently supported by S++ is little-endian, so this forwards to `from_le_bytes`.
+        # Todo: when a big-endian target is supported, dispatch here on the target's endianness.
+        # @let bytes: A view over the native-endian byte representation of the integer (at least `w / 8` bytes).
+        # @ret: The reconstructed integer value.
+
+        ret Self::from_le_bytes(bytes)
     }
 }
