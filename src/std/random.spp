@@ -3,6 +3,7 @@ use std::annotations::versioned
 use std::generator::Gen
 use std::generator::GenOnce
 use std::number::F64
+use std::number::U128
 use std::number::U32
 use std::number::U64
 use std::number::U8
@@ -12,74 +13,141 @@ use std::string_view::StrView
 use std::vector::Vec
 use std::void::Void
 
-!public
-!versioned(base="1.0.0", new="1.0.0")
-fun set_seed(seed: U64) -> Void {
-    # Set the seed for the pseudo-random number generator (PRNG) to ensure reproducibility of random sequences.
-    # @let seed: The seed value used to initialize the PRNG.
+cls Rng {
+    # The `Rng` type is a pseudo-random number generator (PRNG) that provides methods for generating random numbers and
+    # sequences. It is designed to be used in a single-threaded context, and it is not safe to use across multiple
+    # threads without proper synchronization. The `Rng` type can be seeded with a specific value to ensure
+    # reproducibility of random sequences, and it provides methods for generating random bytes, integers, and
+    # floating-point numbers within specified ranges. The underlying implementation of the PRNG is based on the
+    # "Xoshiro256**" algorithm, which is known for its speed and quality of randomness.
+    # @let state: The internal state of the PRNG, represented as an array of four 64-bit unsigned integers. This state
+    # is used to generate random numbers and cannot be modified directly by the user. It is initialized with a seed
+    # value and updated with each random number generation.
 
-    # Hook into the C function.
-    sppc::prngseed(seed)
+    state: [U64; 4]
 }
 
-!public
-!versioned(base="1.0.0", new="1.0.0")
-fun random_bytes(n: USize) -> Vec[U8] {
-    # The `random_bytes` function generates a vector of `n` random bytes using the pseudo-random number generator
-    # (PRNG). It writes them into a vector of bytes.
-    # @let n: The number of random bytes to generate.
-    # @ret: A vector containing `n` random bytes.
-
-    let mut buffer = Vec[U8]::new_with_capacity(n)
-    sppc::prngbytes(n, &mut buffer.ptr)
-    ret buffer
+cls OsRng {
+    # The `OsRng` type is a cryptographically secure random number generator (CSPRNG) that provides methods for
+    # generating random numbers and sequences. It is designed to be used in a single-threaded context, and it is not
+    # safe to use across multiple threads without proper synchronization. The `OsRng` type uses the operating system's
+    # native random number generator to provide high-quality randomness suitable for cryptographic applications. It
+    # provides methods for generating random bytes, integers, and floating-point numbers within specified ranges. The
+    # underlying implementation of the CSPRNG is based on the operating system's entropy sources, which may include
+    # hardware random number generators, user input, and other sources of entropy.
 }
 
-!public
+!private
 !versioned(base="1.0.0", new="1.0.0")
-fun random_between(min: U64, max: U64) -> U64 {
-    # The `random_between` function generates a random 64-bit unsigned integer between the specified `min` and `max`
-    # values (inclusive). "Lemire method" is used to ensure uniform distribution of the generated random number within
-    # the specified range, preventing modulo bias.
-    # @let min: The minimum value (inclusive) of the range from which to generate a random number.
-    # @let max: The maximum value (inclusive) of the range from which to generate a random number.
-    # @ret: A random 64-bit unsigned integer between `min` and `max` (inclusive).
-
-    let mut num = 0_u64
-    sppc::prngbetween(min, max, &mut num)
-    ret num
+fun rotl64(x: U64, k: S32) -> U64 {
+    ret x << k | x >> (64 - k)
 }
 
-!public
+!private
 !versioned(base="1.0.0", new="1.0.0")
-fun random_u32() -> U32 {
-    # Generate a random 32-bit unsigned integer using the pseudo-random number generator (PRNG).
-    # @ret: A random 32-bit unsigned integer.
-
-    let mut num = 0_u32
-    sppc::prngu32(&mut num)
-    ret num
+fun splitmix64(sm: &mut U64) -> U64 {
+    x += 0x9e3779b97f4a7c15_u32
+    let mut z = x
+    z = (z ^ z >> 30_u32) * 0xbf58476d1ce4e5b9_u32
+    z = (z ^ z >> 27_u32) * 0x94d049bb133111eb_u32
+    ret z ^ z >> 31_u32
 }
 
-!public
-!versioned(base="1.0.0", new="1.0.0")
-fun random_u64() -> U64 {
-    # Generate a random 64-bit unsigned integer using the pseudo-random number generator (PRNG).
-    # @ret: A random 64-bit unsigned integer.
+sup Rng {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_seed(seed: U64) -> Rng {
+        let mut sm = seed
+        ret Rng(state=[
+            splitmix64(&mut sm), splitmix64(&mut sm),
+            splitmix64(&mut sm), splitmix64(&mut sm)])
+    }
 
-    let mut num = 0_u64
-    sppc::prngu64(&mut num)
-    ret num
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_os_seed() -> Rng {
+        let mut buffer = [0_u8; 8]
+        sppc::get_random(8_uz, &mut buffer)
+        let seed = U64::from_le_bytes(buffer)
+        ret Rng::from_seed(seed)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun next_u64(&mut self) -> U64 {
+        let mut result = rotl64(self.state[0]@ * 5, 7) * 9
+        let t = self.state[1]@ << 17
+
+        self.state[mut 2] ^= self.state[0]@
+        self.state[mut 3] ^= self.state[1]@
+        self.state[mut 1] ^= self.state[2]@
+        self.state[mut 0] ^= self.state[3]@
+        self.state[mut 2] ^= t
+        self.state[mut 3] = rotl64(self.state[3]@, 45)
+
+        ret result
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun next_u32(&mut self) -> U32 {
+        ret U32::from(self.next_u64() >> 32)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun next_double(&mut self) -> F64 {
+        ret F64::from(self.next_u64() >> 11) * (1.0 / 9007199254740992.0)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun next_bytes(&mut self, n: USize) -> Vec[U8] {
+        let mut buffer = Vec[U8]::new_with_capacity(n)
+        loop i in Range[USize]::between(0_uz, n) {
+            buffer.append(U8::from(self.next_u64() & 0xFF))
+        }
+        ret buffer
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun between(&mut self, min: U64, max: U64) -> U64 {
+        case max == 0 { ret self.next_u64() }
+        let t = 0_u64.sub_wrapping(max) % max
+        loop true {
+            let r = self.next_u64()
+            let m = U128::from(r) * U128::from(max)
+            let l = U64::from(m)
+            case l >= t { ret U64::from(m >> 64) }
+        }
+    }
 }
 
-!public
-!versioned(base="1.0.0", new="1.0.0")
-fun random_double() -> F64 {
-    # Generate a random double-precision floating-point number in the range [0.0, 1.0) using the pseudo-random number
-    # generator (PRNG).
-    # @ret: A random double-precision floating-point number in the range [0.0, 1.0).
+sup OsRng {
+    #
 
-    let mut num = 0.0_f64
-    sppc::prngdouble(&mut num)
-    ret num
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun next_u64() -> U64 {
+        let mut buffer = [0_u8; 8]
+        sppc::get_random(8_uz, &mut buffer)
+        ret U64::from_le_bytes(buffer)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun next_u32() -> U32 {
+        let mut buffer = [0_u8; 4]
+        sppc::get_random(4_uz, &mut buffer)
+        ret U32::from_le_bytes(buffer)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun next_bytes(n: USize) -> Vec[U8] {
+        let mut buffer = Vec[U8]::new_with_capacity(n)
+        sppc::get_random(n, &mut buffer)
+        ret buffer
+    }
 }

@@ -366,9 +366,6 @@ fun memset(dest: &mut CVoidPtr, value: CInt, size: CULong, dest_index: CULong) -
 !ffi(symbol="c_memcmp")
 fun memcmp(ptr1: &CVoidPtr, ptr2: &CVoidPtr, size: CULong, out: &mut CInt) -> CInt { }
 
-!ffi(symbol="c_memcmpconst")
-fun memcmpconst(ptr1: &CVoidPtr, ptr2: &CVoidPtr, size: CULong, out: &mut CInt) -> CInt { }
-
 !ffi(symbol="c_memmem")
 fun memmem(haystack: &CVoidPtr, haystack_size: CULong, needle: &CVoidPtr, needle_size: CULong, out: &mut CULong) -> CInt { }
 
@@ -546,32 +543,5 @@ fun clock_gettime(clock_id: CInt, out_tp: &mut CTimespec) -> CInt { }
 !ffi(symbol="c_clock_nanosleep")
 fun clock_nanosleep(clock: CInt, flags: CInt, duration: &CTimespec) -> CInt { }
 
-!ffi(symbol="c_prngseed")
-fun prngseed(seed: CULong) -> CInt { }
-
-!ffi(symbol="c_prngreset")
-fun prngreset() -> CInt { }
-
-!ffi(symbol="c_prngbytes")
-fun prngbytes(size: CULong, out: &mut CCharPtr) -> CInt { }
-
-!ffi(symbol="c_prngu32")
-fun prngu32(out: &mut CUInt) -> CInt { }
-
-!ffi(symbol="c_prngu64")
-fun prngu64(out: &mut CULong) -> CInt { }
-
-!ffi(symbol="c_prngdouble")
-fun prngdouble(out: &mut CDouble) -> CInt { }
-
-!ffi(symbol="c_prngbetween")
-fun prngbetween(min: CULong, max: CULong, out: &mut CULong) -> CInt { }
-
 !ffi(symbol="c_csprngbytes")
-fun csprngbytes(size: CULong, out: &mut CCharPtr) -> CInt { }
-
-!ffi(symbol="c_csprngu32")
-fun csprngu32(out: &mut CUInt) -> CInt { }
-
-!ffi(symbol="c_csprngu64")
-fun csprngu64(out: &mut CULong) -> CInt { }
+fun get_random(size: CULong, out: &mut CCharPtr) -> CInt { }
