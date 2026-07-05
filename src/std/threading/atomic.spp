@@ -3,9 +3,9 @@ use std::annotations::intrinsic
 use std::annotations::private
 use std::annotations::public
 use std::annotations::versioned
+use std::llvm::always_inline
 use std::boolean::Bool
 use std::boolean::Integral
-use std::llvm::always_inline
 use std::number::U8
 use std::void::Void
 use std::num::bases::Integer

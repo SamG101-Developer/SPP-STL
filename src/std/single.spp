@@ -12,9 +12,9 @@ use std::number::USize
 use std::result::Pass
 use std::result::Res
 use std::mem::pointer::NonNull
+use std::ops::del::Del
 use std::ops::fwd::FwdMut
 use std::ops::fwd::FwdRef
-use std::ops::del::Del
 use std::ops::void::Void
 
 !public

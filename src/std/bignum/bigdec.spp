@@ -1,8 +1,7 @@
 use std::annotations::public
-use std::bignum::bigint::BigInt
 use std::number::S64
 use std::void::Void
-
+use std::bignum::bigint::BigInt
 
 !public
 cls BigDec {

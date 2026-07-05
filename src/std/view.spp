@@ -13,15 +13,15 @@ use std::option::Opt
 use std::option::Some
 use std::range::Range
 use std::mem::pointer::NonNull
-use std::ops::idx::IndexRef
-use std::ops::idx::IndexMut
-use std::ops::idx::SliceRef
-use std::ops::idx::SliceMut
-use std::ops::iter::IterRef
-use std::ops::iter::IterMut
-use std::ops::iter::RevIterRef
-use std::ops::iter::RevIterMut
 use std::ops::eq::Eq
+use std::ops::idx::IndexMut
+use std::ops::idx::IndexRef
+use std::ops::idx::SliceMut
+use std::ops::idx::SliceRef
+use std::ops::iter::IterMut
+use std::ops::iter::IterRef
+use std::ops::iter::RevIterMut
+use std::ops::iter::RevIterRef
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
@@ -265,6 +265,7 @@ sup [T] View[T] ext SliceRef[View[T], USize] {
 
         ret self.len()
     }
+
     !intrinsic(name="std.view.View.slice_ref")
     !versioned(base="1.0.0", new="1.0.0")
     cor slice_ref(&self, from: USize, into: USize) -> GenOnce[&View[T]] { }

@@ -1,6 +1,6 @@
+use std::annotations::intrinsic
 use std::annotations::package
 use std::annotations::public
-use std::annotations::intrinsic
 use std::annotations::versioned
 use std::boolean::Bool
 use std::char::Char
@@ -9,12 +9,12 @@ use std::function::FunRef
 use std::generator::Gen
 use std::generator::GenOnce
 use std::iterator::Iterator
-use std::option::None
-use std::option::Opt
-use std::option::Some
 use std::number::S8
 use std::number::U8
 use std::number::USize
+use std::option::None
+use std::option::Opt
+use std::option::Some
 use std::result::Res
 use std::string::Str
 use std::view::View

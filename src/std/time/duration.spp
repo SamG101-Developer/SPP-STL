@@ -9,9 +9,9 @@ use std::option::None
 use std::option::Opt
 use std::option::Some
 use std::ops::add::Add
-use std::ops::sub::Sub
-use std::ops::mul::Mul
 use std::ops::div::Div
+use std::ops::mul::Mul
+use std::ops::sub::Sub
 
 !public
 !versioned(base="1.0.0", new="1.0.0")

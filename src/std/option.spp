@@ -4,9 +4,9 @@ use std::annotations::zero_type
 use std::boolean::Bool
 use std::copy::Copy
 use std::function::FunMov
-use std::result::Res
-use std::result::Pass
 use std::result::Fail
+use std::result::Pass
+use std::result::Res
 use std::string_view::StrView
 use std::ops::eq::Eq
 use std::ops::try::Try
@@ -332,10 +332,10 @@ sup [T] Opt[T] {
         # @let default: A function that is invoked to get the default value if this optional is `None`. If this optional
         # is `Some`, then `default` is not evaluated, and the result of applying `func` to the value inside is returned
         # instead.
-        # @let f: The function that is applied to the value inside the optional if it is `Some`. This function is
-        # called with the value of type `T` if the optional is `Some`, and should return a value of type `U` that is the
-        # result of the transformation. If the optional is `None`, then `func` is not evaluated, and the result of
-        # invoking `default()` is returned instead.
+        # @let f: The function that is applied to the value inside the optional if it is `Some`. This function is called
+        # with the value of type `T` if the optional is `Some`, and should return a value of type `U` that is the result
+        # of the transformation. If the optional is `None`, then `func` is not evaluated, and the result of invoking
+        # `default()` is returned instead.
         # @ret: Returns the result of applying `func` to the value inside the optional if this optional is `Some`,
         # otherwise returns the result of invoking `default()`.
 

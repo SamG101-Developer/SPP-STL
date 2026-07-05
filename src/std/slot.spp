@@ -6,7 +6,6 @@ use std::copy::Copy
 use std::generator::GenOnce
 use std::void::Void
 
-
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls Slot[T] {

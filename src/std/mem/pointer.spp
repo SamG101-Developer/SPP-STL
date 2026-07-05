@@ -5,9 +5,9 @@ use std::annotations::versioned
 use std::annotations::zero_type
 use std::boolean::Bool
 use std::function::Fun
-use std::function::FunRef
 use std::function::FunMov
 use std::function::FunMut
+use std::function::FunRef
 use std::generator::GenOnce
 use std::number::USize
 use std::result::Fail
