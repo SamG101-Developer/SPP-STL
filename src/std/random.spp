@@ -69,7 +69,7 @@ sup Rng {
     !versioned(base="1.0.0", new="1.0.0")
     fun from_os_seed() -> Rng {
         let mut buffer = [0_u8; 8_uz]
-        sppc::get_random(8_uz, &mut buffer)
+        sppc::get_random(8_uz, &mut buffer.ptr)
         let seed = U64::from_le_bytes(buffer)
         ret Rng::from_seed(seed)
     }
@@ -133,7 +133,7 @@ sup OsRng {
     !versioned(base="1.0.0", new="1.0.0")
     fun next_u64() -> U64 {
         let mut buffer = [0_u8; 8_uz]
-        sppc::get_random(8_uz, &mut buffer)
+        sppc::get_random(8_uz, &mut buffer.ptr)
         ret U64::from_le_bytes(buffer)
     }
 
@@ -141,7 +141,7 @@ sup OsRng {
     !versioned(base="1.0.0", new="1.0.0")
     fun next_u32() -> U32 {
         let mut buffer = [0_u8; 4_uz]
-        sppc::get_random(4_uz, &mut buffer)
+        sppc::get_random(4_uz, &mut buffer.ptr)
         ret U32::from_le_bytes(buffer)
     }
 
@@ -149,7 +149,7 @@ sup OsRng {
     !versioned(base="1.0.0", new="1.0.0")
     fun next_bytes(n: USize) -> Vec[U8] {
         let mut buffer = Vec[U8]::new_with_capacity(n)
-        sppc::get_random(n, &mut buffer)
+        sppc::get_random(n, &mut buffer.ptr)
         ret buffer
     }
 }
