@@ -121,7 +121,7 @@ sup Rng {
             let r = self.next_u64()
             let m = U128::from(r) * U128::from(max)
             let l = U64::from(m)
-            case l >= t { ret U64::from(m >> 64) }
+            case l >= t { ret U64::from(m >> 64_u32) }
         }
     }
 }
