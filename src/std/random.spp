@@ -78,7 +78,7 @@ sup Rng {
     !versioned(base="1.0.0", new="1.0.0")
     fun next_u64(&mut self) -> U64 {
         let mut result = rotl64(self.state[0_uz]@ * 5_u64, 7_u32) * 9_u64
-        let t = self.state[1_uz]@ << 17
+        let t = self.state[1_uz]@ << 17_u32
 
         self.state[mut 2_uz] ^= self.state[0_uz]@
         self.state[mut 3_uz] ^= self.state[1_uz]@
