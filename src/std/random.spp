@@ -93,13 +93,13 @@ sup Rng {
     !public
     !versioned(base="1.0.0", new="1.0.0")
     fun next_u32(&mut self) -> U32 {
-        ret U32::from(self.next_u64() >> 32)
+        ret U32::from(self.next_u64() >> 32_u32)
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
     fun next_double(&mut self) -> F64 {
-        ret F64::from(self.next_u64() >> 11) * (1.0 / 9007199254740992.0)
+        ret F64::from(self.next_u64() >> 11_u32) * (1.0 / 9007199254740992.0)
     }
 
     !public
