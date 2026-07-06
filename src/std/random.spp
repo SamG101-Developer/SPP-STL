@@ -115,7 +115,7 @@ sup Rng {
     !public
     !versioned(base="1.0.0", new="1.0.0")
     fun between(&mut self, min: U64, max: U64) -> U64 {
-        case max == 0 { ret self.next_u64() }
+        case max == 0_u64 { ret self.next_u64() }
         let t = 0_u64.sub_wrapping(max) % max
         loop true {
             let r = self.next_u64()
