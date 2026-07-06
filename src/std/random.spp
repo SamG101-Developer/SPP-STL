@@ -42,7 +42,7 @@ cls OsRng {
 !private
 !versioned(base="1.0.0", new="1.0.0")
 fun rotl64(x: U64, k: S32) -> U64 {
-    ret x << k | x >> (64 - k)
+    ret x << U32::from(k) | x >> (64 - k)
 }
 
 !private
