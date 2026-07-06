@@ -1,0 +1,40 @@
+# Formatting rules:
+# Title
+# - "xxx/yyy"
+# - "xxx" is one of [fmt, api, core, meta, fix, docs]
+# - "yyy" fits the regex pattern: [a-z][a-z0-9-]*
+#
+# Description
+# - Must contain a summary of the changes made in the PR (non-empty)
+
+name: PR Meta Validation
+on:
+  pull_request:
+    types: [ opened, edited, reopened, synchronize ]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR Title & Description
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          # Validate PR title format
+          if [[ ! "$PR_TITLE" =~ ^(fmt|api|core|meta|fix|docs)/[a-z][a-z0-9-]*$ ]]; then
+              echo "Error: PR title must be in the format 'xxx/yyy' where 'xxx' is one of [fmt, api, core, meta, fix, docs] and 'yyy' fits the regex pattern [a-z][a-z0-9-]*."
+              exit 1
+          fi
+          
+          # Validate PR description is non-empty
+          if [[ -z "$PR_BODY" ]]; then
+              echo "Error: PR description must contain a summary of the changes made in the PR (non-empty)."
+              exit 1
+          fi
+          
+          echo "PR title and description validation passed."
