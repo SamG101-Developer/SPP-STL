@@ -2,6 +2,8 @@ name: Claude PR Review
 on:
   pull_request:
     types: [ opened, edited, reopened, synchronize ]
+  issue_comment:
+    types: [ created ]
 permissions:
   contents: read
   issues: read
@@ -19,3 +21,19 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            Review only the changes in this pull request's diff.
+            Do not review or comment on unchanged code.
+            
+            Look for:
+            - Bugs: logic errors, unhandled edge cases, incorrect assumptions, etc.
+            - Optimizations: unnecessary computations, inefficient algorithms, redundant code, suboptimal data
+            structures, avoidable allocations, etc.
+            - Security vulnerabilities: injection risks, unsafe deserialization. The ffi section is particularly
+            sensitive to this.
+            - Code cleanliness: naming, formatting, consistency, readability, maintainability, etc.
+            - Modularity: code organization, separation of concerns, single responsibility principle, etc.
+            
+            Post findings as inline review comments on the specific lines they refer to. Tag each with a severity
+            (critical / major / minor / suggestion). If there is a simple suggestion to fix an issue, provide it. If a
+            section is clean, dont comment on it. If the whole dif is clean, say so briefly.
