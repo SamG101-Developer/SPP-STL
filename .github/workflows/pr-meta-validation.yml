@@ -7,7 +7,7 @@
 # Description
 # - Must contain a summary of the changes made in the PR (non-empty)
 
-name: pr-meta-validation.yml
+name: PR Meta Validation
 on:
   pull_request:
     types: [ opened, edited, reopened, synchronize ]
