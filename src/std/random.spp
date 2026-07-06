@@ -26,7 +26,7 @@ cls Rng {
     # is used to generate random numbers and cannot be modified directly by the user. It is initialized with a seed
     # value and updated with each random number generation.
 
-    state: [U64; 4]
+    state: [U64; 4_uz]
 }
 
 cls OsRng {
