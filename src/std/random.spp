@@ -85,7 +85,7 @@ sup Rng {
         self.state[mut 1_uz] ^= self.state[2_uz]@
         self.state[mut 0_uz] ^= self.state[3_uz]@
         self.state[mut 2_uz] ^= t
-        self.state[mut 3_uz] = rotl64(self.state[3_uz]@, 45_u32)
+        self.state[mut 3_uz]@ = rotl64(self.state[3_uz]@, 45_u32)
 
         ret result
     }
