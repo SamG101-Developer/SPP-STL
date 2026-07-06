@@ -107,7 +107,7 @@ sup Rng {
     fun next_bytes(&mut self, n: USize) -> Vec[U8] {
         let mut buffer = Vec[U8]::new_with_capacity(n)
         loop i in Range[USize]::between(0_uz, n) {
-            buffer.append(U8::from(self.next_u64() & 0xFF))
+            buffer.append(U8::from(self.next_u64() & 0xFF_u64))
         }
         ret buffer
     }
