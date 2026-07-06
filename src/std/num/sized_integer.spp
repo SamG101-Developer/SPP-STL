@@ -19,6 +19,7 @@ use std::void::Void
 use std::num::bases::Integer
 use std::num::bases::One
 use std::num::bases::Zero
+use std::num::sized_floating_point::SizedFloatingPoint
 use std::num::sized_integer_signed::SizedIntegerSigned
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 use std::ops::add::Add
@@ -243,6 +244,28 @@ sup [cmp w: U32, cmp signed: Bool, cmp that_w: U32] SizedInteger[w, signed] ext 
             < that_w { intrinsics::strunc[Self](that) }
             > that_w { intrinsics::szext[Self](that) }
             else { intrinsics::bit_cast[Self](that) }
+        }
+    }
+}
+
+sup [cmp w: U32, cmp signed: Bool, cmp that_w: U32] SizedInteger[w, signed] ext From[SizedFloatingPoint[that_w]] {
+    # Converting from a floating point value of any width to an integer of this width. This is a value conversion (the
+    # floating point value is rounded toward zero), not a bit reinterpretation. The correct intrinsic depends on this
+    # integer's signedness, so the implementation dispatches on the base's `signed` compiletime parameter.
+
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(that: SizedFloatingPoint[that_w]) -> Self {
+        # Convert the floating point source value to this integer type, truncating the fractional part (rounding toward
+        # zero). A signed target uses `fptosi`, an unsigned target uses `fptoui`; the result is reinterpreted as `Self`.
+        # @let that: The floating point value of the source type that is being converted.
+        # @ret: The converted integer value of this type.
+
+        ret case signed {
+            intrinsics::bit_cast[Self](intrinsics::fptosi[w](that))
+        }
+        else {
+            intrinsics::bit_cast[Self](intrinsics::fptoui[w](that))
         }
     }
 }
