@@ -57,521 +57,491 @@ cls CPollfd {
 
 cls CSockaddrStorage { }
 
-!ffi(symbol="c_init")
+!ffi(symbol="sppc_init")
 fun init() -> CInt { }
 
-!ffi(symbol="c_cleanup")
+!ffi(symbol="sppc_cleanup")
 fun cleanup() -> CInt { }
 
-!ffi(symbol="c_pthread_create")
+!ffi(symbol="sppc_pthread_create")
 fun pthread_create[F0: FunMov[(), CVoid]](start_routine: F0, out: &mut CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_join")
+!ffi(symbol="sppc_pthread_join")
 fun pthread_join(handle: &CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_detach")
+!ffi(symbol="sppc_pthread_detach")
 fun pthread_detach(handle: &CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_equal")
+!ffi(symbol="sppc_pthread_equal")
 fun pthread_equal(handle1: &CULong, handle2: &CULong, out: &mut CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_self")
+!ffi(symbol="sppc_pthread_self")
 fun pthread_self(out: &mut CULong) -> CInt { }
 
-!ffi(symbol="c_sched_yield")
+!ffi(symbol="sppc_sched_yield")
 fun sched_yield() -> CVoid { }
 
-!ffi(symbol="c_pthread_mutex_init")
+!ffi(symbol="sppc_pthread_mutex_init")
 fun pthread_mutex_init(out: &mut CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_mutex_init_recursive")
+!ffi(symbol="sppc_pthread_mutex_init_recursive")
 fun pthread_mutex_init_recursive(out: &mut CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_mutex_lock")
+!ffi(symbol="sppc_pthread_mutex_lock")
 fun pthread_mutex_lock(mutex: &CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_mutex_clocklock")
+!ffi(symbol="sppc_pthread_mutex_clocklock")
 fun pthread_mutex_clocklock(mutex: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
 
-!ffi(symbol="c_pthread_mutex_trylock")
+!ffi(symbol="sppc_pthread_mutex_trylock")
 fun pthread_mutex_trylock(mutex: &CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_mutex_unlock")
+!ffi(symbol="sppc_pthread_mutex_unlock")
 fun pthread_mutex_unlock(mutex: &CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_mutex_destroy")
+!ffi(symbol="sppc_pthread_mutex_destroy")
 fun pthread_mutex_destroy(mutex: &CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_once")
+!ffi(symbol="sppc_pthread_once")
 fun pthread_once[F0: FunMov[(), CVoid]](func: F0) -> CInt { }
 
-!ffi(symbol="c_pthread_cond_init")
+!ffi(symbol="sppc_pthread_cond_init")
 fun pthread_cond_init(out: &mut CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_cond_wait")
+!ffi(symbol="sppc_pthread_cond_wait")
 fun pthread_cond_wait(cond: &CULong, mutex: &CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_cond_clockwait")
+!ffi(symbol="sppc_pthread_cond_clockwait")
 fun pthread_cond_clockwait(cond: &CULong, mutex: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
 
-!ffi(symbol="c_pthread_cond_signal")
+!ffi(symbol="sppc_pthread_cond_signal")
 fun pthread_cond_signal(cond: &CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_cond_broadcast")
+!ffi(symbol="sppc_pthread_cond_broadcast")
 fun pthread_cond_broadcast(cond: &CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_cond_destroy")
+!ffi(symbol="sppc_pthread_cond_destroy")
 fun pthread_cond_destroy(cond: &CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_rwlock_init")
+!ffi(symbol="sppc_pthread_rwlock_init")
 fun pthread_rwlock_init(rwlock: &mut CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_rwlock_rdlock")
+!ffi(symbol="sppc_pthread_rwlock_rdlock")
 fun pthread_rwlock_rdlock(rwlock: &CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_rwlock_tryrdlock")
+!ffi(symbol="sppc_pthread_rwlock_tryrdlock")
 fun pthread_rwlock_tryrdlock(rwlock: &CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_rwlock_clockrdlock")
+!ffi(symbol="sppc_pthread_rwlock_clockrdlock")
 fun pthread_rwlock_clockrdlock(rwlock: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
 
-!ffi(symbol="c_pthread_rwlock_wrlock")
+!ffi(symbol="sppc_pthread_rwlock_wrlock")
 fun pthread_rwlock_wrlock(rwlock: &CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_rwlock_trywrlock")
+!ffi(symbol="sppc_pthread_rwlock_trywrlock")
 fun pthread_rwlock_trywrlock(rwlock: &CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_rwlock_clockwrlock")
+!ffi(symbol="sppc_pthread_rwlock_clockwrlock")
 fun pthread_rwlock_clockwrlock(rwlock: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
 
-!ffi(symbol="c_pthread_rwlock_unlock")
+!ffi(symbol="sppc_pthread_rwlock_unlock")
 fun pthread_rwlock_unlock(rwlock: &CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_rwlock_destroy")
+!ffi(symbol="sppc_pthread_rwlock_destroy")
 fun pthread_rwlock_destroy(rwlock: &CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_barrier_init")
+!ffi(symbol="sppc_pthread_barrier_init")
 fun pthread_barrier_init(barrier: &mut CULong, count: CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_barrier_wait")
+!ffi(symbol="sppc_pthread_barrier_wait")
 fun pthread_barrier_wait(barrier: &CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_barrier_destroy")
+!ffi(symbol="sppc_pthread_barrier_destroy")
 fun pthread_barrier_destroy(barrier: &CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_spin_init")
+!ffi(symbol="sppc_pthread_spin_init")
 fun pthread_spin_init(spinlock: &mut CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_spin_lock")
+!ffi(symbol="sppc_pthread_spin_lock")
 fun pthread_spin_lock(spinlock: &CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_spin_trylock")
+!ffi(symbol="sppc_pthread_spin_trylock")
 fun pthread_spin_trylock(spinlock: &CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_spin_unlock")
+!ffi(symbol="sppc_pthread_spin_unlock")
 fun pthread_spin_unlock(spinlock: &CULong) -> CInt { }
 
-!ffi(symbol="c_pthread_spin_destroy")
+!ffi(symbol="sppc_pthread_spin_destroy")
 fun pthread_spin_destroy(spinlock: &CULong) -> CInt { }
 
-!ffi(symbol="c_read")
+!ffi(symbol="sppc_read")
 fun read(buffer: &mut CCharPtr, size: CULong, count: CULong, fd: CInt, out_n: &mut CLong) -> CInt { }
 
-!ffi(symbol="c_write")
+!ffi(symbol="sppc_write")
 fun write(buffer: &CCharPtr, size: CULong, count: CULong, fd: CInt, out_n: &mut CLong) -> CInt { }
 
-!ffi(symbol="c_stdin_read")
+!ffi(symbol="sppc_stdin_read")
 fun stdin_read(buffer: &mut CCharPtr, size: CULong, count: CULong, out_n: &mut CLong) -> CInt { }
 
-!ffi(symbol="c_stdout_write")
+!ffi(symbol="sppc_stdout_write")
 fun stdout_write(buffer: &CCharPtr, size: CULong, count: CULong, out_n: &mut CLong) -> CInt { }
 
-!ffi(symbol="c_stderr_write")
+!ffi(symbol="sppc_stderr_write")
 fun stderr_write(buffer: &CCharPtr, size: CULong, count: CULong, out_n: &mut CLong) -> CInt { }
 
-!ffi(symbol="c_open")
+!ffi(symbol="sppc_open")
 fun open(path: &CCharPtr, flags: CInt, mode: CInt, out_fd: &mut CInt) -> CInt { }
 
-!ffi(symbol="c_close")
+!ffi(symbol="sppc_close")
 fun close(fd: CInt) -> CInt { }
 
-!ffi(symbol="c_flush")
+!ffi(symbol="sppc_flush")
 fun flush(fd: CInt) -> CInt { }
 
-!ffi(symbol="c_flush_data")
+!ffi(symbol="sppc_flush_data")
 fun flush_data(fd: CInt) -> CInt { }
 
-!ffi(symbol="c_seek")
+!ffi(symbol="sppc_seek")
 fun seek(fd: CInt, offset: CLong, whence: CInt, out_pos: &mut CLong) -> CInt { }
 
-!ffi(symbol="c_tell")
+!ffi(symbol="sppc_tell")
 fun tell(fd: CInt, out_pos: &mut CLong) -> CInt { }
 
-!ffi(symbol="c_truncate")
+!ffi(symbol="sppc_truncate")
 fun truncate(fd: CInt, length: CLong) -> CInt { }
 
-!ffi(symbol="c_lock_ex")
+!ffi(symbol="sppc_lock_ex")
 fun lock_ex(fd: CInt, non_blocking: CBool) -> CInt { }
 
-!ffi(symbol="c_lock_sh")
+!ffi(symbol="sppc_lock_sh")
 fun lock_sh(fd: CInt, non_blocking: CBool) -> CInt { }
 
-!ffi(symbol="c_unlock")
+!ffi(symbol="sppc_unlock")
 fun unlock(fd: CInt) -> CInt { }
 
-!ffi(symbol="c_stat")
+!ffi(symbol="sppc_stat")
 fun stat(fd: CInt, out: &mut CStat) -> CInt { }
 
-!ffi(symbol="c_dup")
+!ffi(symbol="sppc_dup")
 fun dup(fd: CInt, out_fd: &mut CInt) -> CInt { }
 
-!ffi(symbol="c_dup_into")
+!ffi(symbol="sppc_dup_into")
 fun dup_into(fd: CInt, target_fd: CInt) -> CInt { }
 
-!ffi(symbol="c_pipe")
+!ffi(symbol="sppc_pipe")
 fun pipe(out_read_fd: &mut CInt, out_write_fd: &mut CInt) -> CInt { }
 
-!ffi(symbol="c_get_flags")
+!ffi(symbol="sppc_get_flags")
 fun get_flags(fd: CInt, out: &mut CInt) -> CInt { }
 
-!ffi(symbol="c_set_flags")
+!ffi(symbol="sppc_set_flags")
 fun set_flags(fd: CInt, flags: CInt) -> CInt { }
 
-!ffi(symbol="c_get_status")
+!ffi(symbol="sppc_get_status")
 fun get_status(fd: CInt, out: &mut CInt) -> CInt { }
 
-!ffi(symbol="c_set_status")
+!ffi(symbol="sppc_set_status")
 fun set_status(fd: CInt, flags: CInt) -> CInt { }
 
-!ffi(symbol="c_poll")
+!ffi(symbol="sppc_poll")
 fun poll(fds: &mut CPollfd, count: CInt, duration: &CTimespec, out_n: &mut CInt) -> CInt { }
 
-!ffi(symbol="c_pread")
+!ffi(symbol="sppc_pread")
 fun pread(fd: CInt, buffer: &mut CVoidPtr, size: CULong, count: CULong, offset: CLong, out_n: &mut CLong) -> CInt { }
 
-!ffi(symbol="c_pwrite")
+!ffi(symbol="sppc_pwrite")
 fun pwrite(fd: CInt, buffer: &CVoidPtr, size: CULong, count: CULong, offset: CLong, out_n: &mut CLong) -> CInt { }
 
-!ffi(symbol="c_mmap")
-fun mmap(fd: CInt, length: CULong, prot: CInt, flags: CInt, offset: CLong, out_addr: &mut CVoidPtr, out_length: &mut CULong) -> CInt { }
+!ffi(symbol="sppc_mmap")
+fun mmap(fd: CInt, length: CULong, prot: CInt, flags: CInt, offset: CLong, out_addr: &mut CVoidPtr) -> CInt { }
 
-!ffi(symbol="c_munmap")
+!ffi(symbol="sppc_munmap")
 fun munmap(addr: &mut CVoidPtr, length: &CULong) -> CInt { }
 
-!ffi(symbol="c_msync")
+!ffi(symbol="sppc_msync")
 fun msync(addr: &mut CVoidPtr, length: &CULong, flags: CInt) -> CInt { }
 
-!ffi(symbol="c_madvise")
+!ffi(symbol="sppc_madvise")
 fun madvise(addr: &mut CVoidPtr, length: &CULong, advice: CInt) -> CInt { }
 
-!ffi(symbol="c_isatty")
+!ffi(symbol="sppc_isatty")
 fun isatty(fd: CInt, out: &mut CBool) -> CInt { }
 
-!ffi(symbol="c_exists")
+!ffi(symbol="sppc_exists")
 fun exists(path: &CCharPtr, out: &mut CBool) -> CInt { }
 
-!ffi(symbol="c_is_file")
+!ffi(symbol="sppc_is_file")
 fun is_file(path: &CCharPtr, out: &mut CBool) -> CInt { }
 
-!ffi(symbol="c_is_dir")
+!ffi(symbol="sppc_is_dir")
 fun is_dir(path: &CCharPtr, out: &mut CBool) -> CInt { }
 
-!ffi(symbol="c_is_symlink")
+!ffi(symbol="sppc_is_symlink")
 fun is_symlink(path: &CCharPtr, out: &mut CBool) -> CInt { }
 
-!ffi(symbol="c_filesize")
+!ffi(symbol="sppc_filesize")
 fun filesize(path: &CCharPtr, out: &mut CLong) -> CInt { }
 
-!ffi(symbol="c_remove")
+!ffi(symbol="sppc_remove")
 fun remove(path: &CCharPtr) -> CInt { }
 
-!ffi(symbol="c_rename")
+!ffi(symbol="sppc_rename")
 fun rename(old_path: &CCharPtr, new_path: &CCharPtr) -> CInt { }
 
-!ffi(symbol="c_mkdir")
+!ffi(symbol="sppc_mkdir")
 fun mkdir(path: &CCharPtr, mode: CInt) -> CInt { }
 
-!ffi(symbol="c_rmdir")
+!ffi(symbol="sppc_rmdir")
 fun rmdir(path: &CCharPtr) -> CInt { }
 
-!ffi(symbol="c_chmod")
+!ffi(symbol="sppc_chmod")
 fun chmod(path: &CCharPtr, mode: CInt) -> CInt { }
 
-!ffi(symbol="c_fsstat")
+!ffi(symbol="sppc_fsstat")
 fun fsstat(path: &CCharPtr, out: &mut CStat, follow_symlink: CBool) -> CInt { }
 
-!ffi(symbol="c_chown")
+!ffi(symbol="sppc_chown")
 fun chown(path: &CCharPtr, owner: CInt, group: CInt, follow_symlink: CBool) -> CInt { }
 
-!ffi(symbol="c_access")
+!ffi(symbol="sppc_access")
 fun access(path: &CCharPtr, flags: CInt) -> CInt { }
 
-!ffi(symbol="c_touch")
+!ffi(symbol="sppc_touch")
 fun touch(path: &CCharPtr, flags: CInt) -> CInt { }
 
-!ffi(symbol="c_realpath")
+!ffi(symbol="sppc_realpath")
 fun realpath(path: &CCharPtr, buffer: &mut CCharPtr) -> CInt { }
 
-!ffi(symbol="c_hardlink")
+!ffi(symbol="sppc_hardlink")
 fun hardlink(target: &CCharPtr, linkpath: &CCharPtr) -> CInt { }
 
-!ffi(symbol="c_symlink")
+!ffi(symbol="sppc_symlink")
 fun symlink(target: &CCharPtr, linkpath: &CCharPtr) -> CInt { }
 
-!ffi(symbol="c_readlink")
+!ffi(symbol="sppc_readlink")
 fun readlink(path: &CCharPtr, buffer: &mut CCharPtr, buffer_size: CULong) -> CInt { }
 
-!ffi(symbol="c_mktemp")
+!ffi(symbol="sppc_mktemp")
 fun mktemp(path: &mut CCharPtr, out_fd: &mut CInt) -> CInt { }
 
-!ffi(symbol="c_mktemp_dir")
+!ffi(symbol="sppc_mktemp_dir")
 fun mktemp_dir(path: &mut CCharPtr) -> CInt { }
 
-!ffi(symbol="c_statvfs")
+!ffi(symbol="sppc_statvfs")
 fun statvfs(path: &CCharPtr, out: &mut CStatvfs) -> CInt { }
 
-!ffi(symbol="c_copyfile")
+!ffi(symbol="sppc_copyfile")
 fun copyfile(fd_in: CInt, fd_out: CInt, len: CULong, flags: CInt) -> CInt { }
 
-!ffi(symbol="c_getcwd")
+!ffi(symbol="sppc_getcwd")
 fun getcwd(buffer: &mut CCharPtr, size: CULong) -> CInt { }
 
-!ffi(symbol="c_chdir")
+!ffi(symbol="sppc_chdir")
 fun chdir(path: &CCharPtr) -> CInt { }
 
-!ffi(symbol="c_malloc")
+!ffi(symbol="sppc_malloc")
 fun malloc(size: CULong) -> CVoidPtr { }
 
-!ffi(symbol="c_aligned_alloc")
+!ffi(symbol="sppc_aligned_alloc")
 fun aligned_alloc(size: CULong, alignment: CULong) -> CVoidPtr { }
 
-!ffi(symbol="c_calloc")
+!ffi(symbol="sppc_calloc")
 fun calloc(num: CULong, size: CULong) -> CVoidPtr { }
 
-!ffi(symbol="c_realloc")
+!ffi(symbol="sppc_realloc")
 fun realloc(ptr: &mut CVoidPtr, new_size: CULong) -> CVoidPtr { }
 
-!ffi(symbol="c_free")
+!ffi(symbol="sppc_free")
 fun free(ptr: &mut CVoidPtr) -> CVoid { }
 
-!ffi(symbol="c_memcpy")
+!ffi(symbol="sppc_memcpy")
 fun memcpy(dest: &mut CVoidPtr, src: &CVoidPtr, size: CULong, dest_index: CULong, src_index: CULong) -> CInt { }
 
-!ffi(symbol="c_memmove")
+!ffi(symbol="sppc_memmove")
 fun memmove(dest: &mut CVoidPtr, src: &CVoidPtr, size: CULong) -> CInt { }
 
-!ffi(symbol="c_memset")
+!ffi(symbol="sppc_memset")
 fun memset(dest: &mut CVoidPtr, value: CInt, size: CULong, dest_index: CULong) -> CInt { }
 
-!ffi(symbol="c_memcmp")
+!ffi(symbol="sppc_memcmp")
 fun memcmp(ptr1: &CVoidPtr, ptr2: &CVoidPtr, size: CULong, out: &mut CInt) -> CInt { }
 
-!ffi(symbol="c_memcmpconst")
-fun memcmpconst(ptr1: &CVoidPtr, ptr2: &CVoidPtr, size: CULong, out: &mut CInt) -> CInt { }
-
-!ffi(symbol="c_memmem")
+!ffi(symbol="sppc_memmem")
 fun memmem(haystack: &CVoidPtr, haystack_size: CULong, needle: &CVoidPtr, needle_size: CULong, out: &mut CULong) -> CInt { }
 
-!ffi(symbol="c_mlock")
+!ffi(symbol="sppc_mlock")
 fun mlock(addr: &CVoidPtr, size: CULong) -> CInt { }
 
-!ffi(symbol="c_munlock")
+!ffi(symbol="sppc_munlock")
 fun munlock(addr: &CVoidPtr, size: CULong) -> CInt { }
 
-!ffi(symbol="c_memprotect")
+!ffi(symbol="sppc_memprotect")
 fun memprotect(addr: &mut CVoidPtr, size: CULong, prot: CInt) -> CInt { }
 
-!ffi(symbol="c_strcpy")
+!ffi(symbol="sppc_strcpy")
 fun strcpy(dest: &mut CCharPtr, src: &CCharPtr) -> CInt { }
 
-!ffi(symbol="c_strcat")
+!ffi(symbol="sppc_strcat")
 fun strcat(dest: &mut CCharPtr, src: &CCharPtr) -> CInt { }
 
-!ffi(symbol="c_strcmp")
+!ffi(symbol="sppc_strcmp")
 fun strcmp(str1: &CCharPtr, str2: &CCharPtr, out: &mut CBool) -> CInt { }
 
-!ffi(symbol="c_strcasecmp")
+!ffi(symbol="sppc_strcasecmp")
 fun strcasecmp(str1: &CCharPtr, str2: &CCharPtr, out: &mut CBool) -> CInt { }
 
-!ffi(symbol="c_strchr")
+!ffi(symbol="sppc_strchr")
 fun strchr(str: &CCharPtr, ch: CUChar, out_idx: &mut CULong) -> CInt { }
 
-!ffi(symbol="c_strrchr")
+!ffi(symbol="sppc_strrchr")
 fun strrchr(str: &CCharPtr, ch: CUChar, out_idx: &mut CULong) -> CInt { }
 
-!ffi(symbol="c_strstr")
+!ffi(symbol="sppc_strstr")
 fun strstr(haystack: &CCharPtr, needle: &CCharPtr, out_idx: &mut CULong) -> CInt { }
 
-!ffi(symbol="c_strrstr")
+!ffi(symbol="sppc_strrstr")
 fun strrstr(haystack: &CCharPtr, needle: &CCharPtr, out_idx: &mut CULong) -> CInt { }
 
-!ffi(symbol="c_strcasestr")
+!ffi(symbol="sppc_strcasestr")
 fun strcasestr(haystack: &CCharPtr, needle: &CCharPtr, out_idx: &mut CULong) -> CInt { }
 
-!ffi(symbol="c_strpbrk")
+!ffi(symbol="sppc_strpbrk")
 fun strpbrk(string: &CCharPtr, accept: &CCharPtr, out_idx: &mut CULong) -> CInt { }
 
-!ffi(symbol="c_strdup")
+!ffi(symbol="sppc_strdup")
 fun strdup(str: &CCharPtr) -> CVoidPtr { }
 
-!ffi(symbol="c_get_pid")
+!ffi(symbol="sppc_get_pid")
 fun get_pid(out_pid: &mut CInt) -> CInt { }
 
-!ffi(symbol="c_get_ppid")
+!ffi(symbol="sppc_get_ppid")
 fun get_ppid(out_ppid: &mut CInt) -> CInt { }
 
-!ffi(symbol="c_getenv")
+!ffi(symbol="sppc_getenv")
 fun getenv(key: &CCharPtr, out: &mut CCharPtr) -> CInt { }
 
-!ffi(symbol="c_setenv")
+!ffi(symbol="sppc_setenv")
 fun setenv(key: &CCharPtr, val: &CCharPtr, overwrite: CBool) -> CInt { }
 
-!ffi(symbol="c_unsetenv")
+!ffi(symbol="sppc_unsetenv")
 fun unsetenv(key: &CCharPtr) -> CInt { }
 
-!ffi(symbol="c_signal")
+!ffi(symbol="sppc_signal")
 fun signal(pid: CInt, signal: CInt) -> CInt { }
 
-!ffi(symbol="c_is_running")
+!ffi(symbol="sppc_is_running")
 fun is_running(pid: CInt) -> CInt { }
 
-!ffi(symbol="c_exit")
+!ffi(symbol="sppc_exit")
 fun exit_(status: CInt) -> ! { }
 
-!ffi(symbol="c_exit_clean")
+!ffi(symbol="sppc_exit_clean")
 fun exit_clean(status: CInt) -> ! { }
 
-!ffi(symbol="c_abort")
+!ffi(symbol="sppc_abort")
 fun abort() -> ! { }
 
-!ffi(symbol="c_set_sockaddr_v4")
+!ffi(symbol="sppc_set_sockaddr_v4")
 fun set_sockaddr_v4(octets: &CUChar, port: CUShort, out_storage: &mut CSockaddrStorage) -> CInt { }
 
-!ffi(symbol="c_set_sockaddr_v6")
+!ffi(symbol="sppc_set_sockaddr_v6")
 fun set_sockaddr_v6(segments: &CUShort, port: CUShort, out_storage: &mut CSockaddrStorage) -> CInt { }
 
-!ffi(symbol="c_get_sockaddr_v4")
+!ffi(symbol="sppc_get_sockaddr_v4")
 fun get_sockaddr_v4(storage: &CSockaddrStorage, out_octets: &mut CUChar, out_port: &mut CUShort) -> CInt { }
 
-!ffi(symbol="c_get_sockaddr_v6")
+!ffi(symbol="sppc_get_sockaddr_v6")
 fun get_sockaddr_v6(storage: &CSockaddrStorage, out_segments: &mut CUShort, out_port: &mut CUShort) -> CInt { }
 
-!ffi(symbol="c_sockaddr_family")
+!ffi(symbol="sppc_sockaddr_family")
 fun sockaddr_family(storage: &CSockaddrStorage, out_family: &mut CInt) -> CInt { }
 
-!ffi(symbol="c_socket")
+!ffi(symbol="sppc_socket")
 fun socket(domain: CInt, type_: CInt, protocol: CInt, out_fd: &mut CInt) -> CInt { }
 
-!ffi(symbol="c_shutdown")
+!ffi(symbol="sppc_shutdown")
 fun shutdown(fd: CInt, how: CInt) -> CInt { }
 
-!ffi(symbol="c_connect")
+!ffi(symbol="sppc_connect")
 fun connect(fd: CInt, storage: &CSockaddrStorage) -> CInt { }
 
-!ffi(symbol="c_bind")
+!ffi(symbol="sppc_bind")
 fun bind(fd: CInt, storage: &CSockaddrStorage) -> CInt { }
 
-!ffi(symbol="c_listen")
+!ffi(symbol="sppc_listen")
 fun listen(fd: CInt, backlog: CInt) -> CInt { }
 
-!ffi(symbol="c_accept")
+!ffi(symbol="sppc_accept")
 fun accept(fd: CInt, out_storage: &mut CSockaddrStorage, out_fd: &mut CInt) -> CInt { }
 
-!ffi(symbol="c_send")
+!ffi(symbol="sppc_send")
 fun send(fd: CInt, data: &CCharPtr, size: CULong, flags: CInt, out_n: &mut CLong) -> CInt { }
 
-!ffi(symbol="c_recv")
+!ffi(symbol="sppc_recv")
 fun recv(fd: CInt, buffer: &mut CCharPtr, size: CULong, flags: CInt, out: &mut CLong) -> CInt { }
 
-!ffi(symbol="c_sendto")
+!ffi(symbol="sppc_sendto")
 fun sendto(fd: CInt, data: &CCharPtr, size: CULong, storage: &CSockaddrStorage, out_n: &mut CLong) -> CInt { }
 
-!ffi(symbol="c_recvfrom")
+!ffi(symbol="sppc_recvfrom")
 fun recvfrom(fd: CInt, buffer: &mut CCharPtr, size: CULong, out_storage: &mut CSockaddrStorage, out_n: &mut CLong) -> CInt { }
 
-!ffi(symbol="c_set_nonblocking")
+!ffi(symbol="sppc_set_nonblocking")
 fun set_nonblocking(fd: CInt, non_blocking: CBool) -> CInt { }
 
-!ffi(symbol="c_set_keepalive")
+!ffi(symbol="sppc_set_keepalive")
 fun set_keepalive(fd: CInt, keepalive: CBool) -> CInt { }
 
-!ffi(symbol="c_set_linger")
+!ffi(symbol="sppc_set_linger")
 fun set_linger(fd: CInt, on: CBool, linger: &CTimeval) -> CInt { }
 
-!ffi(symbol="c_set_nodelay")
+!ffi(symbol="sppc_set_nodelay")
 fun set_nodelay(fd: CInt, nodelay: CBool) -> CInt { }
 
-!ffi(symbol="c_set_ttl")
+!ffi(symbol="sppc_set_ttl")
 fun set_ttl(fd: CInt, ttl: CInt) -> CInt { }
 
-!ffi(symbol="c_set_broadcast")
+!ffi(symbol="sppc_set_broadcast")
 fun set_broadcast(fd: CInt, broadcast: CBool) -> CInt { }
 
-!ffi(symbol="c_set_recv_timeout")
+!ffi(symbol="sppc_set_recv_timeout")
 fun set_recv_timeout(fd: CInt, timeout: &CTimeval) -> CInt { }
 
-!ffi(symbol="c_set_send_timeout")
+!ffi(symbol="sppc_set_send_timeout")
 fun set_send_timeout(fd: CInt, timeout: &CTimeval) -> CInt { }
 
-!ffi(symbol="c_get_keepalive")
+!ffi(symbol="sppc_get_keepalive")
 fun get_keepalive(fd: CInt, out_keepalive: &mut CBool) -> CInt { }
 
-!ffi(symbol="c_get_linger")
+!ffi(symbol="sppc_get_linger")
 fun get_linger(fd: CInt, out_on: &mut CBool, out_linger: &mut CTimeval) -> CInt { }
 
-!ffi(symbol="c_get_nodelay")
+!ffi(symbol="sppc_get_nodelay")
 fun get_nodelay(fd: CInt, out_nodelay: &mut CBool) -> CInt { }
 
-!ffi(symbol="c_get_ttl")
+!ffi(symbol="sppc_get_ttl")
 fun get_ttl(fd: CInt, out_ttl: &mut CInt) -> CInt { }
 
-!ffi(symbol="c_get_broadcast")
+!ffi(symbol="sppc_get_broadcast")
 fun get_broadcast(fd: CInt, out_broadcast: &mut CBool) -> CInt { }
 
-!ffi(symbol="c_get_recv_timeout")
+!ffi(symbol="sppc_get_recv_timeout")
 fun get_recv_timeout(fd: CInt, out_timeout: &mut CTimeval) -> CInt { }
 
-!ffi(symbol="c_get_send_timeout")
+!ffi(symbol="sppc_get_send_timeout")
 fun get_send_timeout(fd: CInt, out_timeout: &mut CTimeval) -> CInt { }
 
-!ffi(symbol="c_getsockname")
+!ffi(symbol="sppc_getsockname")
 fun getsockname(fd: CInt, out_storage: &mut CSockaddrStorage) -> CInt { }
 
-!ffi(symbol="c_getpeername")
+!ffi(symbol="sppc_getpeername")
 fun getpeername(fd: CInt, out_storage: &mut CSockaddrStorage) -> CInt { }
 
-!ffi(symbol="c_clock_gettime")
+!ffi(symbol="sppc_clock_gettime")
 fun clock_gettime(clock_id: CInt, out_tp: &mut CTimespec) -> CInt { }
 
-!ffi(symbol="c_clock_nanosleep")
+!ffi(symbol="sppc_clock_nanosleep")
 fun clock_nanosleep(clock: CInt, flags: CInt, duration: &CTimespec) -> CInt { }
 
-!ffi(symbol="c_prngseed")
-fun prngseed(seed: CULong) -> CInt { }
-
-!ffi(symbol="c_prngreset")
-fun prngreset() -> CInt { }
-
-!ffi(symbol="c_prngbytes")
-fun prngbytes(size: CULong, out: &mut CCharPtr) -> CInt { }
-
-!ffi(symbol="c_prngu32")
-fun prngu32(out: &mut CUInt) -> CInt { }
-
-!ffi(symbol="c_prngu64")
-fun prngu64(out: &mut CULong) -> CInt { }
-
-!ffi(symbol="c_prngdouble")
-fun prngdouble(out: &mut CDouble) -> CInt { }
-
-!ffi(symbol="c_prngbetween")
-fun prngbetween(min: CULong, max: CULong, out: &mut CULong) -> CInt { }
-
-!ffi(symbol="c_csprngbytes")
-fun csprngbytes(size: CULong, out: &mut CCharPtr) -> CInt { }
-
-!ffi(symbol="c_csprngu32")
-fun csprngu32(out: &mut CUInt) -> CInt { }
-
-!ffi(symbol="c_csprngu64")
-fun csprngu64(out: &mut CULong) -> CInt { }
+!ffi(symbol="sppc_csprngbytes")
+fun get_random(size: CULong, out: &mut CCharPtr) -> CInt { }

@@ -9,9 +9,11 @@ use std::cast::From
 use std::limits::Limits
 use std::number::S32
 use std::number::U32
+use std::number::U8
 use std::option::None
 use std::option::Opt
 use std::option::Some
+use std::view::View
 use std::void::Void
 use std::num::bases::FloatingPoint
 use std::num::bases::One
@@ -87,6 +89,36 @@ From[SizedFloatingPoint[that_w]] {
             > that_w { intrinsics::fpext[this_w](that) }
             else { intrinsics::bit_cast[Self](that) }
         }
+    }
+}
+
+sup [cmp w: U32, cmp that_w: U32] SizedFloatingPoint[w] ext From[SizedIntegerUnsigned[that_w]] {
+    # Converting from an unsigned integer of any width to a floating point value of this width. This is a value
+    # conversion (the integer's numeric value, rounded to the nearest representable float), not a bit reinterpretation.
+
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(that: SizedIntegerUnsigned[that_w]) -> Self {
+        # Convert the unsigned integer source value to this floating point type using the `uitofp` intrinsic.
+        # @let that: The unsigned integer value of the source type that is being converted.
+        # @ret: The converted floating point value of this type.
+
+        ret intrinsics::uitofp[w](that)
+    }
+}
+
+sup [cmp w: U32, cmp that_w: U32] SizedFloatingPoint[w] ext From[SizedIntegerSigned[that_w]] {
+    # Converting from a signed integer of any width to a floating point value of this width. This is a value conversion
+    # (the integer's numeric value, rounded to the nearest representable float), not a bit reinterpretation.
+
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(that: SizedIntegerSigned[that_w]) -> Self {
+        # Convert the signed integer source value to this floating point type using the `sitofp` intrinsic.
+        # @let that: The signed integer value of the source type that is being converted.
+        # @ret: The converted floating point value of this type.
+
+        ret intrinsics::sitofp[w](that)
     }
 }
 
@@ -752,5 +784,48 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext One {
     !versioned(base="1.0.0", new="1.0.0")
     fun is_one(&self) -> Bool {
         ret self == Self::one()
+    }
+}
+
+sup [cmp w: U32] SizedFloatingPoint[w] {
+    # Byte-array conversions for floating point values of any width. The byte representation is that of the value's
+    # IEEE-754 bit pattern. Each function reconstructs the same-width unsigned integer bit pattern from the bytes
+    # (reusing the integer implementations) and then reinterprets it as a floating point value with `bit_cast`. Exactly
+    # `w / 8` bytes are read from the view.
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_le_bytes(bytes: &View[U8]) -> Self {
+        # Reconstruct a floating point value from the little-endian byte representation of its IEEE-754 bit pattern,
+        # where `bytes[0]` is the least-significant byte.
+        # @let bytes: A view over the little-endian byte representation of the value (at least `w / 8` bytes).
+        # @ret: The reconstructed floating point value.
+
+        ret intrinsics::bit_cast[Self](SizedIntegerUnsigned[w]::from_le_bytes(bytes))
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_be_bytes(bytes: &View[U8]) -> Self {
+        # Reconstruct a floating point value from the big-endian byte representation of its IEEE-754 bit pattern, where
+        # `bytes[0]` is the most-significant byte.
+        # @let bytes: A view over the big-endian byte representation of the value (at least `w / 8` bytes).
+        # @ret: The reconstructed floating point value.
+
+        ret intrinsics::bit_cast[Self](SizedIntegerUnsigned[w]::from_be_bytes(bytes))
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_ne_bytes(bytes: &View[U8]) -> Self {
+        # Reconstruct a floating point value from the native-endian byte representation of its IEEE-754 bit pattern,
+        # matching the in-memory layout of the target.
+        # @let bytes: A view over the native-endian byte representation of the value (at least `w / 8` bytes).
+        # @ret: The reconstructed floating point value.
+
+        ret intrinsics::bit_cast[Self](SizedIntegerUnsigned[w]::from_ne_bytes(bytes))
     }
 }

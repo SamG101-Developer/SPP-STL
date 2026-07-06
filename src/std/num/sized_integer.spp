@@ -10,13 +10,18 @@ use std::limits::Limits
 use std::number::U32
 use std::number::U64
 use std::number::U8
+use std::number::USize
 use std::option::None
 use std::option::Opt
 use std::option::Some
+use std::view::View
 use std::void::Void
 use std::num::bases::Integer
 use std::num::bases::One
 use std::num::bases::Zero
+use std::num::sized_floating_point::SizedFloatingPoint
+use std::num::sized_integer_signed::SizedIntegerSigned
+use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 use std::ops::add::Add
 use std::ops::add::AddAssign
 use std::ops::bit_and::BitAnd
@@ -197,6 +202,74 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext From[Bool] {
     }
 }
 
+sup [cmp w: U32, cmp signed: Bool, cmp that_w: U32] SizedInteger[w, signed] ext From[SizedIntegerUnsigned[that_w]] {
+    # Converting from an unsigned integer of any width to an integer of this width. This is defined on the generic
+    # `SizedInteger[w, signed]` base rather than the signed/unsigned subtypes because the conversion is chosen entirely
+    # by the source (unsigned) width: the target's signedness never affects the result, so a single implementation
+    # serves both signed and unsigned targets.
+
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(that: SizedIntegerUnsigned[that_w]) -> Self {
+        # Convert the unsigned source value to this integer type. If this type is narrower than the source (w < that_w)
+        # the value is truncated; if it is wider (w > that_w) the value is zero-extended; if the widths match the bit
+        # pattern is reinterpreted unchanged.
+        # @let that: The unsigned integer value of the source type that is being converted.
+        # @ret: The converted integer value of this type.
+
+        ret case w of {
+            < that_w { intrinsics::utrunc[Self](that) }
+            > that_w { intrinsics::uzext[Self](that) }
+            else { intrinsics::bit_cast[Self](that) }
+        }
+    }
+}
+
+sup [cmp w: U32, cmp signed: Bool, cmp that_w: U32] SizedInteger[w, signed] ext From[SizedIntegerSigned[that_w]] {
+    # Converting from a signed integer of any width to an integer of this width. This is defined on the generic
+    # `SizedInteger[w, signed]` base rather than the signed/unsigned subtypes because the conversion is chosen entirely
+    # by the source (signed) width: the target's signedness never affects the result, so a single implementation serves
+    # both signed and unsigned targets.
+
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(that: SizedIntegerSigned[that_w]) -> Self {
+        # Convert the signed source value to this integer type. If this type is narrower than the source (w < that_w)
+        # the value is truncated; if it is wider (w > that_w) the value is sign-extended to preserve the 2's complement
+        # representation; if the widths match the bit pattern is reinterpreted unchanged.
+        # @let that: The signed integer value of the source type that is being converted.
+        # @ret: The converted integer value of this type.
+
+        ret case w of {
+            < that_w { intrinsics::strunc[Self](that) }
+            > that_w { intrinsics::szext[Self](that) }
+            else { intrinsics::bit_cast[Self](that) }
+        }
+    }
+}
+
+sup [cmp w: U32, cmp signed: Bool, cmp that_w: U32] SizedInteger[w, signed] ext From[SizedFloatingPoint[that_w]] {
+    # Converting from a floating point value of any width to an integer of this width. This is a value conversion (the
+    # floating point value is rounded toward zero), not a bit reinterpretation. The correct intrinsic depends on this
+    # integer's signedness, so the implementation dispatches on the base's `signed` compiletime parameter.
+
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(that: SizedFloatingPoint[that_w]) -> Self {
+        # Convert the floating point source value to this integer type, truncating the fractional part (rounding toward
+        # zero). A signed target uses `fptosi`, an unsigned target uses `fptoui`; the result is reinterpreted as `Self`.
+        # @let that: The floating point value of the source type that is being converted.
+        # @ret: The converted integer value of this type.
+
+        ret case signed {
+            intrinsics::bit_cast[Self](intrinsics::fptosi[w](that))
+        }
+        else {
+            intrinsics::bit_cast[Self](intrinsics::fptoui[w](that))
+        }
+    }
+}
+
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
     !public
     !inline
@@ -334,5 +407,65 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext One {
     !versioned(base="1.0.0", new="1.0.0")
     fun is_one(&self) -> Bool {
         ret self == Self::one()
+    }
+}
+
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
+    # Byte-array conversions for integers of any width. These are defined on the generic `SizedInteger[w, signed]` base
+    # so that both signed and unsigned integers of every width gain them, mirroring the standard integer APIs. Each
+    # function reads exactly `w / 8` bytes from the view; the view must contain at least that many bytes (indexing
+    # aborts otherwise), and any trailing bytes are ignored.
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_le_bytes(bytes: &View[U8]) -> Self {
+        # Reconstruct an integer from its little-endian byte representation, where `bytes[0]` is the least-significant
+        # byte. The reconstruction is done purely with shifts and bitwise-or, so the produced value is independent of
+        # the host's endianness.
+        # @let bytes: A view over the little-endian byte representation of the integer (at least `w / 8` bytes).
+        # @ret: The reconstructed integer value.
+
+        let byte_count = w / 8_u32
+        let mut result = Self::zero()
+        let mut i = 0_u32
+        loop i < byte_count {
+            result |= Self::from(bytes[USize::from(i)]@) << (i * 8_u32)
+            i += 1_u32
+        }
+        ret result
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_be_bytes(bytes: &View[U8]) -> Self {
+        # Reconstruct an integer from its big-endian byte representation, where `bytes[0]` is the most-significant byte.
+        # The reconstruction is done purely with shifts and bitwise-or, so the produced value is independent of the
+        # host's endianness.
+        # @let bytes: A view over the big-endian byte representation of the integer (at least `w / 8` bytes).
+        # @ret: The reconstructed integer value.
+
+        let byte_count = w / 8_u32
+        let mut result = Self::zero()
+        let mut i = 0_u32
+        loop i < byte_count {
+            result |= Self::from(bytes[USize::from(i)]@) << ((byte_count - 1_u32 - i) * 8_u32)
+            i += 1_u32
+        }
+        ret result
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_ne_bytes(bytes: &View[U8]) -> Self {
+        # Reconstruct an integer from its native-endian byte representation, matching the in-memory layout of the
+        # target. Every target currently supported by S++ is little-endian, so this forwards to `from_le_bytes`. Todo:
+        # when a big-endian target is supported, dispatch here on the target's endianness.
+        # @let bytes: A view over the native-endian byte representation of the integer (at least `w / 8` bytes).
+        # @ret: The reconstructed integer value.
+
+        ret Self::from_le_bytes(bytes)
     }
 }
