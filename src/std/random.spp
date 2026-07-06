@@ -47,7 +47,7 @@ fun rotl64(x: U64, k: S32) -> U64 {
 
 !private
 !versioned(base="1.0.0", new="1.0.0")
-fun splitmix64(sm: &mut U64) -> U64 {
+fun splitmix64(x: &mut U64) -> U64 {
     x += 0x9e3779b97f4a7c15_u32
     let mut z = x
     z = (z ^ z >> 30_u32) * 0xbf58476d1ce4e5b9_u32
