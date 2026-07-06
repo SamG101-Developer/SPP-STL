@@ -4,7 +4,10 @@ on:
     types: [ opened, edited, reopened, synchronize ]
 permissions:
   contents: read
+  issues: read
   pull-requests: write
+  id-token: write
+  actions: read
 jobs:
   review:
     runs-on: ubuntu-latest
