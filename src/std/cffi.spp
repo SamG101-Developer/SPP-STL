@@ -400,3 +400,15 @@ use std::limits::Limits
 !public cmp o_path: CInt = 0o10000000 # O_PATH
 !public cmp o_dsync: CInt = 0o10000 # O_DSYNC
 !public cmp o_tmpfile: CInt = 0o20000000 | o_directory # O_TMPFILE
+
+!public cmp clock_realtime: CInt = 0 # Identifier for system-wide realtime clock
+!public cmp clock_monotonic: CInt = 1 # Monotonic system-wide clock
+!public cmp clock_process_cputime_id: CInt = 2 # High-resolution timer from the CPU
+!public cmp clock_thread_cputime_id: CInt = 3 # Thread-specific CPU-time clock
+!public cmp clock_monotonic_raw: CInt = 4 # Monotonic system-wide clock, not adjusted for frequency scaling
+!public cmp clock_realtime_coarse: CInt = 5 # Identifier for system-wide realtime clock, updated only on ticks
+!public cmp clock_monotonic_coarse: CInt = 6 # Monotonic system-wide clock, updated only on ticks
+!public cmp clock_boottime: CInt = 7 # Monotonic system-wide clock that includes time spent in suspension
+!public cmp clock_realtime_alarm: CInt = 8 # Like CLOCK_REALTIME but also wakes suspended system
+!public cmp clock_boottime_alarm: CInt = 9 # Like CLOCK_BOOTTIME but also wakes suspended system
+!public cmp clock_tai: CInt = 11 # Like CLOCK_REALTIME but in International Atomic Time
