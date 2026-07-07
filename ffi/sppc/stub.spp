@@ -326,6 +326,9 @@ fun getpeername(fd: CInt, out_storage: &mut CSockaddrStorage) -> CInt { }
 !ffi(symbol="sppc_exit")
 fun exit_(status: CInt) -> ! { }
 
+!ffi(symbol="sppc_signal")
+fun signal(pid: CInt, signal: CInt) -> CInt { }
+
 !ffi(symbol="sppc_fcntl")
 fun fcntl(fd: CInt, cmd: CInt, opt: CInt) -> CInt { }
 
