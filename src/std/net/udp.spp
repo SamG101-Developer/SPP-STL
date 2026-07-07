@@ -198,7 +198,7 @@ sup UdpSocket {
 
         # Call the `getsockopt` function to get the receive
         # timeout for the socket (milliseconds).
-        let mut timeout = 0_u32
+        let mut timeout = 0
         let err = sppc::getsockopt(self.fd, cffi::sol_socket, cffi::so_sndtimeo, &mut timeout)
 
         # Convert the timeout from milliseconds to a `Duration`
