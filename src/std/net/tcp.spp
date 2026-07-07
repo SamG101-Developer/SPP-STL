@@ -215,9 +215,11 @@ sup TcpStream {
         let err = sppc::getsockopt(self.fd, cffi::sol_socket, cffi::so_linger, &mut timeout)
 
         # Convert the timeout from milliseconds to a `Duration`
-        # object and return it (or error).
+        # object and return it (or error). A timeout of `0` means the
+        # socket is not set to linger, so `None` is returned.
         case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
-        ret Pass(val=Duration::from_millis(U64::from(timeout)))
+        case timeout == 0 { ret Pass(val=None) }
+        ret Pass(val=Some(val=Duration::from_millis(U64::from(timeout))))
     }
 
     !public
