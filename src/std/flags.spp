@@ -339,7 +339,7 @@ sup Flags ext Eq {
 
     !inline
     !versioned(base="1.0.0", new="1.0.0")
-    fun eq(&self, that: &Self) -> Self {
+    fun eq(&self, that: &Self) -> Bool {
         ret self.bits == that.bits
     }
 }
