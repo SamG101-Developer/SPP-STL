@@ -251,11 +251,11 @@ fun pread(fd: CInt, buffer: &mut CVoidPtr, size: CULong, count: CULong, offset: 
 !ffi(symbol="sppc_pwrite")
 fun pwrite(fd: CInt, buffer: &CVoidPtr, size: CULong, count: CULong, offset: CLong, out_n: &mut CLong) -> CInt { }
 
-!ffi(symbol="sppc_readv")
-fun readv(fd: CInt, iov: &CIovec, iov_count: CInt, out_n: &mut CLong) -> CInt { }
-
-!ffi(symbol="sppc_writev")
-fun writev(fd: CInt, iov: &CIovec, iov_count: CInt, out_n: &mut CLong) -> CInt { }
+# !ffi(symbol="sppc_readv")
+# fun readv(fd: CInt, iov: &CIovec, iov_count: CInt, out_n: &mut CLong) -> CInt { }
+#
+# !ffi(symbol="sppc_writev")
+# fun writev(fd: CInt, iov: &CIovec, iov_count: CInt, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="sppc_access")
 fun access(path: &CCharPtr, flags: CInt, out: &mut CInt) -> CInt { }
