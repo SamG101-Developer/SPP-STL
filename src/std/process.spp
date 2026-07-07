@@ -133,7 +133,7 @@ fun exit_checked(status: S32) -> ! {
     # to terminate the process, but does clean up resources, such as the std streams, before exiting.
     # @let status: The exit status code to be returned when the process terminates.
 
-    sppc::exit_clean(status)
+    sppc::exit_(status)
 }
 
 !public
@@ -145,7 +145,7 @@ fun exit_unchecked(status: S32) -> ! {
     # concern for resource management.
     # @let status: The exit status code to be returned when the process terminates.
 
-    sppc::exit_(status)
+    sppc::halt(status)
 }
 
 !public
