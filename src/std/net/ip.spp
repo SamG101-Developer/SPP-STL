@@ -205,7 +205,7 @@ sup IpV4Addr {
         # address family for IPv4 addresses is typically represented as `AF_INET`.
         # @ret: The address family of the IP address.
 
-        ret cffi::af_inet4
+        ret cffi::af_inet
     }
 }
 

@@ -189,7 +189,7 @@ sup SockAddr {
         ret case family of {
             # For IpV4, fill the octets of the IpV4Addr and the
             # port from the storage.
-            == cffi::af_inet4 {
+            == cffi::af_inet {
                 let mut socket_address = SockV4Addr()
                 sppc::get_sockaddr_v4(&storage, &mut socket_address.ip.octets.ptr, &mut socket_address.port)
                 socket_address
