@@ -420,8 +420,11 @@ sup Path {
         # @let new_path: The new path to copy to.
         # @ret: A `Res` type containing `Pass()` if the copy is successful, or an error message if the operation fails.
 
-        let mut file_length = 0_sz
-        sppc::filesize(&self.inner.ptr, &mut file_length)
+        let info = sppc::CStat()
+        let err = sppc::fstat(&self.inner.ptr, &info)
+        case err != 0 { ret Fail(err=PathErr::from_errno(err)) }
+        let file_length = info.st_size
+
         let file_in = File::open(self.clone(), FileMode().read())?
         let file_out = File::open(new_path.clone(), FileMode().write())?
         let err = sppc::copyfile(file_in.fd, file_out.fd, USize::from(file_length), 0)
