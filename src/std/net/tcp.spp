@@ -236,7 +236,7 @@ sup TcpStream {
 
         # Call the `setsockopt` function to set the nodelay
         # option for the socket.
-        let err = sppc::setsockopt(self.fd, cffi::sol_socket, cffi::so_nodelay, &yes)
+        let err = sppc::setsockopt(self.fd, cffi::sol_socket, cffi::tcp_nodelay, &yes)
         case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass[Void]()
     }
@@ -253,7 +253,7 @@ sup TcpStream {
         # Call the `getsockopt` function to get the current
         # state of the nodelay option for the socket.
         let mut yes = 0
-        let err = sppc::getsockopt(self.fd, cffi::sol_socket, cffi::so_nodelay, &mut yes)
+        let err = sppc::getsockopt(self.fd, cffi::sol_socket, cffi::tcp_nodelay, &mut yes)
         case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(val=yes != 0)
     }
