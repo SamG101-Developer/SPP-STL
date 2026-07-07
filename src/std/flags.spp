@@ -143,6 +143,18 @@ sup Flags {
     !public
     !inline
     !versioned(base="1.0.0", new="1.0.0")
+    fun has_bit(&self, index: U32) -> Bool {
+        # The `has_bit` method reports whether the bit at `index` is set in this flag set. It is a convenience wrapper
+        # around `has(Flags::bit(index))` for callers that work with raw bit positions.
+        # @let index: The zero-based bit position to test, counting from the least-significant bit.
+        # @ret: `true` if the bit at `index` is set, `false` otherwise.
+
+        ret self.has(Flags::bit(index))
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
     fun has_all(&self, flags: Flags) -> Bool {
         # The `has_all` method reports whether every bit of `flags` is present in this set. It is a named alias for
         # `has` that reads more naturally when the argument is known to be a compound mask.
