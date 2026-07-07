@@ -438,7 +438,7 @@ sup Path {
         # @ret: A `Res` type containing `Pass()` if the hard link is successfully created, or an error message if the
         # operation fails.
 
-        let err = sppc::hardlink(&self.inner.ptr, &new_path.inner.ptr)
+        let err = sppc::link(&self.inner.ptr, &new_path.inner.ptr)
         ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
     }
 
