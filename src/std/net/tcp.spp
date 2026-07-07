@@ -186,7 +186,7 @@ sup TcpStream {
 
         # Convert the duration to milliseconds, or use 0 if
         # the timeout is None.
-        let timeout = U32::from(timeout
+        let timeout = S32::from(timeout
             .and_then((t: Duration) Some(val=t.as_millis()))
             .unwrap_or(0_u64))
 
@@ -269,7 +269,7 @@ sup TcpStream {
 
         # Convert the duration to milliseconds, or use 0 if
         # the timeout is None.
-        let timeout = U32::from(timeout
+        let timeout = S32::from(timeout
             .and_then((t: Duration) Some(val=t.as_millis()))
             .unwrap_or(0_u64))
 
@@ -312,7 +312,7 @@ sup TcpStream {
 
         # Convert the duration to milliseconds, or use 0 if
         # the timeout is None.
-        let timeout = U32::from(timeout
+        let timeout = S32::from(timeout
             .and_then((t: Duration) Some(val=t.as_millis()))
             .unwrap_or(0_u64))
 
