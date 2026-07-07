@@ -412,3 +412,69 @@ use std::limits::Limits
 !public cmp clock_realtime_alarm: CInt = 8 # Like CLOCK_REALTIME but also wakes suspended system
 !public cmp clock_boottime_alarm: CInt = 9 # Like CLOCK_BOOTTIME but also wakes suspended system
 !public cmp clock_tai: CInt = 11 # Like CLOCK_REALTIME but in International Atomic Time
+
+!public cmp ip_tos: CInt = 1 # int; IP type of service and precedence
+!public cmp ip_ttl: CInt = 2 # int; IP time to live
+!public cmp ip_hdrincl: CInt = 3 # int; Header is included with data
+!public cmp ip_options: CInt = 4 # ip_opts; IP per-packet options
+!public cmp ip_router_alert: CInt = 5 # bool
+!public cmp ip_recvopts: CInt = 6 # bool; Receive all IP options w/datagram
+!public cmp ip_retopts: CInt = 7 # ip_opts; Set/get IP per-packet options
+!public cmp ip_recvretopts: CInt = ip_retopts # BSD compatibility alias
+!public cmp ip_pktinfo: CInt = 8 # bool
+!public cmp ip_pktoptions: CInt = 9
+!public cmp ip_pmtudisc: CInt = 10 # obsolete name
+!public cmp ip_mtu_discover: CInt = 10 # int; see IP_PMTUDISC_* values
+!public cmp ip_recverr: CInt = 11 # bool
+!public cmp ip_recvttl: CInt = 12 # bool
+!public cmp ip_recvtos: CInt = 13 # bool
+!public cmp ip_mtu: CInt = 14 # int
+!public cmp ip_freebind: CInt = 15
+!public cmp ip_ipsec_policy: CInt = 16
+!public cmp ip_xfrm_policy: CInt = 17
+!public cmp ip_passsec: CInt = 18
+!public cmp ip_transparent: CInt = 19
+!public cmp ip_origdstaddr: CInt = 20 # TProxy original addresses
+!public cmp ip_recvorigdstaddr: CInt = ip_origdstaddr
+!public cmp ip_minttl: CInt = 21
+!public cmp ip_nodefrag: CInt = 22
+!public cmp ip_checksum: CInt = 23
+!public cmp ip_bind_address_no_port: CInt = 24
+!public cmp ip_recvfragsize: CInt = 25
+!public cmp ip_recverr_rfc4884: CInt = 26
+
+!public cmp ip_multicast_if: CInt = 32 # in_addr; set/get IP multicast i/f
+!public cmp ip_multicast_ttl: CInt = 33 # unsigned char; set/get IP multicast ttl
+!public cmp ip_multicast_loop: CInt = 34 # bool; set/get IP multicast loopback
+!public cmp ip_add_membership: CInt = 35 # ip_mreq; add an IP group membership
+!public cmp ip_drop_membership: CInt = 36 # ip_mreq; drop an IP group membership
+!public cmp ip_unblock_source: CInt = 37 # ip_mreq_source; unblock data from source
+!public cmp ip_block_source: CInt = 38 # ip_mreq_source; block data from source
+!public cmp ip_add_source_membership: CInt = 39 # ip_mreq_source; join source group
+!public cmp ip_drop_source_membership: CInt = 40 # ip_mreq_source; leave source group
+!public cmp ip_msfilter: CInt = 41
+!public cmp ip_multicast_all: CInt = 49 # bool
+!public cmp ip_unicast_if: CInt = 50
+
+!public cmp mcast_join_group: CInt = 42 # group_req; join any-source group
+!public cmp mcast_block_source: CInt = 43 # group_source_req; block from given group
+!public cmp mcast_unblock_source: CInt = 44 # group_source_req; unblock from given group
+!public cmp mcast_leave_group: CInt = 45 # group_req; leave any-source group
+!public cmp mcast_join_source_group: CInt = 46 # group_source_req; join source-spec group
+!public cmp mcast_leave_source_group: CInt = 47 # group_source_req; leave source-spec group
+!public cmp mcast_msfilter: CInt = 48
+!public cmp mcast_exclude: CInt = 0
+!public cmp mcast_include: CInt = 1
+
+!public cmp ip_pmtudisc_dont: CInt = 0 # Never send DF frames
+!public cmp ip_pmtudisc_want: CInt = 1 # Use per-route hints
+!public cmp ip_pmtudisc_do: CInt = 2 # Always DF
+!public cmp ip_pmtudisc_probe: CInt = 3 # Ignore dst pmtu
+!public cmp ip_pmtudisc_interface: CInt = 4 # Always use interface mtu
+!public cmp ip_pmtudisc_omit: CInt = 5 # Like interface, but allow fragmentation
+
+!public cmp sol_ip: CInt = 0 # To select the IP level
+
+!public cmp ip_default_multicast_ttl: CInt = 1
+!public cmp ip_default_multicast_loop: CInt = 1
+!public cmp ip_max_memberships: CInt = 20
