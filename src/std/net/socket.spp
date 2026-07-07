@@ -86,7 +86,7 @@ sup Socket {
         # Read the flags from the socket and check if the
         # non-blocking flag is set. Error on failure.
         case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
-        ret Pass(val=flags.has_bit(cffi::o_nonblock))
+        ret Pass(val=flags.has_bit(U32::from(cffi::o_nonblock)))
     }
 
     !public
