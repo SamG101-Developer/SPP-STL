@@ -1,0 +1,388 @@
+use std::annotations::package
+use std::annotations::public
+use std::annotations::versioned
+use std::llvm::inline
+use std::boolean::Bool
+use std::copy::Copy
+use std::number::S32
+use std::number::U32
+use std::void::Void
+use std::ops::bit_and::BitAnd
+use std::ops::bit_ior::BitIor
+use std::ops::bit_not::BitNot
+use std::ops::bit_xor::BitXor
+use std::ops::eq::Eq
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls Flags {
+    # The `Flags` type is a small, copyable wrapper around a 32-bit signed integer (`S32`) that treats the integer as a
+    # set of independent boolean flags, one per bit. It provides a readable, misuse-resistant API for the common
+    # bit-twiddling operations - adding, removing, toggling and testing flags - so that callers never have to remember
+    # which combination of `&`, `|`, `^` and `~` implements a given set operation. Each flag is itself a `Flags` value
+    # holding one or more set bits, which means flags compose naturally: several single-bit flags can be combined with
+    # `union` (or the `|` operator) into a compound mask and passed around as a single value. The type is deliberately
+    # thin - it is layout-compatible with an `S32` and every method is a straight bitwise operation - so it is suitable
+    # for interoperating with C-style flag/option fields while keeping call sites self-documenting.
+    # @let bits: The underlying 32-bit signed integer whose bits represent the individual flags. Bit `i` (counting from
+    # the least-significant bit) is considered set when it is `1`. The field is package-private so that the invariants
+    # of the type are expressed exclusively through its methods.
+
+    !package bits: S32
+}
+
+sup Flags ext Copy { }
+
+sup Flags {
+    # These are the constructors for the `Flags` type. They cover the three ways a flag set is normally produced: from
+    # nothing (an empty set), from a known raw bit pattern (for example a constant coming from a C header), and from a
+    # single bit index (the building block used to declare individual named flags). All of them are trivial wrappers
+    # around the underlying `S32` and perform no allocation.
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun new() -> Flags {
+        # The `new` function creates an empty `Flags` value with no flags set (all bits `0`). It is the identity element
+        # for `union`: unioning any flag set with an empty one leaves it unchanged.
+        # @ret: A `Flags` value with every bit cleared.
+
+        ret Flags(bits=0_s32)
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun all() -> Flags {
+        # The `all` function creates a `Flags` value with every one of the 32 bits set. It is the identity element for
+        # `intersection` and is the complement of `new`. It is useful as a starting point when flags are to be removed
+        # rather than added.
+        # @ret: A `Flags` value with every bit set (the bit pattern of `-1`).
+
+        ret Flags(bits=-1_s32)
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_bits(bits: S32) -> Flags {
+        # The `from_bits` function wraps a raw 32-bit integer as a `Flags` value without interpreting or validating it.
+        # This is the inverse of `to_bits` and is the entry point for adopting an externally produced bit pattern, such
+        # as a flags field returned from a C API.
+        # @let bits: The raw bit pattern to wrap; each set bit becomes a set flag.
+        # @ret: A `Flags` value holding exactly the given bit pattern.
+
+        ret Flags(bits)
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun bit(index: U32) -> Flags {
+        # The `bit` function creates a `Flags` value with exactly one bit set, namely the bit at the given `index`. This
+        # is the canonical way to define an individual named flag, for example `let readable = Flags::bit(0_u32)`. The
+        # index must be in the range `0` to `31` inclusive; an index of `32` or greater does not select a valid bit of
+        # an `S32` and is not supported.
+        # @let index: The zero-based position of the single bit to set, counting from the least-significant bit.
+        # @ret: A `Flags` value with only the bit at `index` set.
+
+        ret Flags(bits=1_s32 << index)
+    }
+}
+
+sup Flags {
+    # These are the query methods for the `Flags` type. They read the flag set without mutating it and answer the
+    # questions a caller typically asks before branching on a flag: whether a particular flag (or group of flags) is
+    # present, whether the set is empty or full, and how many flags are set. The `flag` / `flags` parameter of the
+    # membership tests is itself a `Flags` value, so a single call can test either one flag or a whole mask of them.
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun to_bits(&self) -> S32 {
+        # The `to_bits` method returns the raw 32-bit integer backing this flag set. It is the inverse of `from_bits`
+        # and is intended for handing the flags off to code that expects a plain integer, such as a C API.
+        # @ret: The underlying bit pattern of this flag set.
+
+        ret self.bits
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_empty(&self) -> Bool {
+        # The `is_empty` method reports whether no flags are set, that is whether every bit is `0`.
+        # @ret: `true` if the flag set is empty, `false` otherwise.
+
+        ret self.bits == 0_s32
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun is_all(&self) -> Bool {
+        # The `is_all` method reports whether every one of the 32 bits is set, that is whether this set equals `all`.
+        # @ret: `true` if every bit is set, `false` otherwise.
+
+        ret self.bits == -1_s32
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun has(&self, flag: Flags) -> Bool {
+        # The `has` method reports whether all of the bits of `flag` are present in this set. When `flag` holds a single
+        # bit this is a plain membership test; when `flag` is a compound mask this requires every bit of the mask to be
+        # present, and is therefore equivalent to `has_all`.
+        # @let flag: The flag, or mask of flags, to test for.
+        # @ret: `true` if every bit of `flag` is set in this flag set, `false` otherwise.
+
+        ret self.bits & flag.bits == flag.bits
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun has_all(&self, flags: Flags) -> Bool {
+        # The `has_all` method reports whether every bit of `flags` is present in this set. It is a named alias for
+        # `has` that reads more naturally when the argument is known to be a compound mask.
+        # @let flags: The mask of flags that must all be present.
+        # @ret: `true` if every bit of `flags` is set in this flag set, `false` otherwise.
+
+        ret self.bits & flags.bits == flags.bits
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun has_any(&self, flags: Flags) -> Bool {
+        # The `has_any` method reports whether at least one bit of `flags` is present in this set, that is whether the
+        # two sets overlap at all.
+        # @let flags: The mask of flags to test for overlap with.
+        # @ret: `true` if any bit of `flags` is set in this flag set, `false` otherwise.
+
+        ret self.bits & flags.bits != 0_s32
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun has_none(&self, flags: Flags) -> Bool {
+        # The `has_none` method reports whether none of the bits of `flags` are present in this set, that is whether the
+        # two sets are disjoint. It is the logical negation of `has_any`.
+        # @let flags: The mask of flags that must all be absent.
+        # @ret: `true` if no bit of `flags` is set in this flag set, `false` otherwise.
+
+        ret self.bits & flags.bits == 0_s32
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun count(&self) -> U32 {
+        # The `count` method returns the number of flags that are set, that is the population count (number of `1` bits)
+        # of the underlying integer. It is computed by inspecting each of the 32 bits in turn, so it does not depend on
+        # a dedicated hardware population-count instruction.
+        # @ret: The number of set flags, in the range `0` to `32` inclusive.
+
+        let mut set = 0_u32
+        let mut index = 0_u32
+        loop index < 32_u32 {
+            case (self.bits >> index) & 1_s32 == 1_s32 {
+                set += 1_u32
+            }
+            index += 1_u32
+        }
+        ret set
+    }
+}
+
+sup Flags {
+    # These are the in-place mutation methods for the `Flags` type. Each one takes a mutable borrow of the flag set and
+    # rewrites its bits, mirroring the non-mutating set-algebra methods below but avoiding the construction of an
+    # intermediate value. The `flag` argument may be a single flag or a compound mask; the operation is applied to every
+    # bit of the mask at once.
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun add(&mut self, flag: Flags) -> Void {
+        # The `add` method sets every bit of `flag` in this set, leaving all other bits untouched. Adding a flag that is
+        # already present has no effect.
+        # @let flag: The flag, or mask of flags, to set.
+
+        self.bits |= flag.bits
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun remove(&mut self, flag: Flags) -> Void {
+        # The `remove` method clears every bit of `flag` in this set, leaving all other bits untouched. Removing a flag
+        # that is already absent has no effect.
+        # @let flag: The flag, or mask of flags, to clear.
+
+        self.bits &= flag.bits.bit_not()
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun toggle(&mut self, flag: Flags) -> Void {
+        # The `toggle` method flips every bit of `flag` in this set: bits that were set become clear and bits that were
+        # clear become set. All other bits are left untouched.
+        # @let flag: The flag, or mask of flags, to flip.
+
+        self.bits ^= flag.bits
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun set(&mut self, flag: Flags, value: Bool) -> Void {
+        # The `set` method adds or removes `flag` depending on `value`, giving a single entry point for driving a flag
+        # from a boolean condition. It is equivalent to calling `add` when `value` is `true` and `remove` when `value`
+        # is `false`.
+        # @let flag: The flag, or mask of flags, to add or remove.
+        # @let value: `true` to set the flag, `false` to clear it.
+
+        case value {
+            self.add(flag)
+        }
+        else {
+            self.remove(flag)
+        }
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun clear(&mut self) -> Void {
+        # The `clear` method removes every flag, resetting the set to empty. It is the in-place equivalent of assigning
+        # `Flags::new`.
+
+        self.bits = 0_s32
+    }
+}
+
+sup Flags {
+    # These are the non-mutating set-algebra methods for the `Flags` type. Each one leaves both operands unchanged and
+    # returns a new `Flags` value describing the result, which makes them convenient inside expressions where a
+    # temporary combination of flags is needed. They mirror the bitwise operator implementations below; the named
+    # methods are provided so that the intent (union, intersection, difference) is explicit at the call site.
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun union(&self, other: Flags) -> Flags {
+        # The `union` method returns a flag set containing every flag that is present in either this set or `other`. It
+        # corresponds to the `|` operator.
+        # @let other: The flag set to union with this one.
+        # @ret: A new flag set holding the union of the two sets.
+
+        ret Flags(bits=self.bits | other.bits)
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun intersection(&self, other: Flags) -> Flags {
+        # The `intersection` method returns a flag set containing only the flags that are present in both this set and
+        # `other`. It corresponds to the `&` operator.
+        # @let other: The flag set to intersect with this one.
+        # @ret: A new flag set holding the intersection of the two sets.
+
+        ret Flags(bits=self.bits & other.bits)
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun difference(&self, other: Flags) -> Flags {
+        # The `difference` method returns a flag set containing the flags that are present in this set but absent from
+        # `other`. It is the operation performed by `remove`, expressed as a value.
+        # @let other: The flag set whose flags should be excluded from this one.
+        # @ret: A new flag set holding the flags in this set that are not in `other`.
+
+        ret Flags(bits=self.bits & other.bits.bit_not())
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun symmetric_difference(&self, other: Flags) -> Flags {
+        # The `symmetric_difference` method returns a flag set containing the flags that are present in exactly one of
+        # the two sets - that is, in this set or `other` but not in both. It corresponds to the `^` operator.
+        # @let other: The flag set to take the symmetric difference with.
+        # @ret: A new flag set holding the flags that belong to exactly one of the two sets.
+
+        ret Flags(bits=self.bits ^ other.bits)
+    }
+
+    !public
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun complement(&self) -> Flags {
+        # The `complement` method returns a flag set in which every bit is the opposite of its value in this set: set
+        # bits become clear and clear bits become set. It corresponds to the `~` (`bit_not`) operator and turns `new`
+        # into `all` and vice versa.
+        # @ret: A new flag set holding the bitwise complement of this one.
+
+        ret Flags(bits=self.bits.bit_not())
+    }
+}
+
+sup Flags ext Eq {
+    # Two flag sets are equal when their underlying bit patterns are identical, which lets `Flags` values be compared
+    # directly with the `==` and `!=` operators. Only `eq` is defined; `ne` is supplied by the `Eq` interface as the
+    # negation of `eq`.
+
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun eq(&self, that: &Flags) -> Bool {
+        ret self.bits == that.bits
+    }
+}
+
+sup Flags ext BitIor {
+    # Allow two flag sets to be combined with the `|` operator, producing their union. This is the operator form of
+    # `union`.
+
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun bit_ior(self, that: Flags) -> Flags {
+        ret Flags(bits=self.bits | that.bits)
+    }
+}
+
+sup Flags ext BitAnd {
+    # Allow two flag sets to be combined with the `&` operator, producing their intersection. This is the operator form
+    # of `intersection`.
+
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun bit_and(self, that: Flags) -> Flags {
+        ret Flags(bits=self.bits & that.bits)
+    }
+}
+
+sup Flags ext BitXor {
+    # Allow two flag sets to be combined with the `^` operator, producing their symmetric difference. This is the
+    # operator form of `symmetric_difference`.
+
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun bit_xor(self, that: Flags) -> Flags {
+        ret Flags(bits=self.bits ^ that.bits)
+    }
+}
+
+sup Flags ext BitNot {
+    # Allow a flag set to be complemented with the `~` (`bit_not`) operator. This is the operator form of `complement`.
+
+    !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun bit_not(self) -> Flags {
+        ret Flags(bits=self.bits.bit_not())
+    }
+}
