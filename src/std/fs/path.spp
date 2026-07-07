@@ -88,7 +88,9 @@ cmp path_max: USize = 4096_uz
 !versioned(base="1.0.0", new="1.0.0")
 cls Path {
     # The `Path` type is used to represent filepaths in a platform-agnostic way. It provides methods for manipulating
-    # and querying paths, such as joining paths, extracting file names, and iterating over path components.
+    # and querying paths, such as joining paths, extracting file names, and iterating over path components. This type
+    # uses C ffi functions that accept the `const char*` input, where-as the `File` type uses the `fd`, keeping these
+    # two types isolated.
     # @let inner: The inner path stored as a string.
 
     !package inner: Str
@@ -271,9 +273,9 @@ sup Path {
         # file or directory is present before attempting to access it.
         # @ret: `true` if the path exists, `false` otherwise.
 
-        let mut exists = false
-        let err = sppc::exists(&self.inner.ptr, &mut exists)
-        ret case err == 0 { exists } else { false }
+        let mut exists = 0
+        let err = sppc::access(&self.inner.ptr, cffi::f_ok, &mut exists)
+        ret case err != cffi::enoent { false } else { exists != 0 }
     }
 
     !public
@@ -285,7 +287,7 @@ sup Path {
         # the check fails.
 
         let mut exists = false
-        let err = sppc::exists(&self.inner.ptr, &mut exists)
+        let err = sppc::access(&self.inner.ptr, cffi::f_ok, &mut exists)
         ret case err == 0 { Pass(val=exists) } else { Fail(err=PathErr::from_errno(err)) }
     }
 
@@ -296,9 +298,9 @@ sup Path {
         # distinguishing between files and directories.
         # @ret: `true` if the path is a regular file, `false` otherwise.
 
-        let mut is_file = false
-        let err = sppc::is_file(&self.inner.ptr, &mut is_file)
-        ret case err == 0 { is_file } else { false }
+        let mut info = sppc::CStat()
+        let err = sppc::fstat(&self.inner.ptr, &mut info)
+        ret case err != 0 { false } else { (info & cffi::s_ifmt) == cffi::s_ifreg }
     }
 
     !public
@@ -308,9 +310,9 @@ sup Path {
         # distinguishing between files and directories.
         # @ret: `true` if the path is a directory, `false` otherwise.
 
-        let mut is_dir = false
-        let err = sppc::is_dir(&self.inner.ptr, &mut is_dir)
-        ret case err == 0 { is_dir } else { false }
+        let mut info = sppc::CStat()
+        let err = sppc::fstat(&self.inner.ptr, &mut info)
+        ret case err != 0 { false } else { (info & cffi::s_ifmt) == cffi::s_ifdir }
     }
 
     !public
@@ -320,9 +322,9 @@ sup Path {
         # identifying symbolic links and handling them appropriately.
         # @ret: `true` if the path is a symbolic link, `false` otherwise.
 
-        let mut is_symlink = false
-        let err = sppc::is_symlink(&self.inner.ptr, &mut is_symlink)
-        ret case err == 0 { is_symlink } else { false }
+        let mut info = sppc::CStat()
+        let err = sppc::lstat(&self.inner.ptr, &mut info)
+        ret case err != 0 { false } else { (info & cffi::s_ifmt) == cffi::s_iflnk }
     }
 
     !public
@@ -377,7 +379,7 @@ sup Path {
         # @ret: A `Res` type containing `Pass()` if the file is successfully removed, or an error message if the
         # operation fails.
 
-        let err = sppc::remove(&self.inner.ptr)
+        let err = sppc::unlink(&self.inner.ptr)
         ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
     }
 
