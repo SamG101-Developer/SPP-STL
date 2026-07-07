@@ -169,7 +169,7 @@ sup UdpSocket {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun set_write_timeout(&mut self, timeout: Duration) -> Res[Void, SockErr] {
+    fun set_write_timeout(&mut self, timeout: Opt[Duration]) -> Res[Void, SockErr] {
         # The `set_write_timeout` method sets the send timeout for the socket. This means that if a send operation takes
         # longer than the specified timeout, it will return an error. This is useful for preventing the application from
         # hanging indefinitely while waiting for data to be sent.
