@@ -81,7 +81,7 @@ sup Socket {
         # Create the empty flags object and read the current
         # flags from the socket using `fcntl`.
         let mut flags = Flags::new()
-        let err = sppc::fcntl(self.fd, cffi::f_getfl, &mut flags.bits)
+        let err = sppc::fcntl(self.fd, cffi::f_getfl, 0, &mut flags.bits)
 
         # Read the flags from the socket and check if the
         # non-blocking flag is set. Error on failure.
