@@ -146,7 +146,13 @@ sup TcpStream {
         # false, the socket will not be set to keep alive.
         # @ret: A result indicating whether the operation was successful or not.
 
-        let err = sppc::set_keepalive(self.fd, yes)
+        # Convert the boolean value to an integer (1 for true,
+        # 0 for false) to be used in the `setsockopt` function.
+        let yes = case yes { 1 } else { 0 }
+
+        # Call the `setsockopt` function to set the keepalive
+        # option for the socket.
+        let err = sppc::setsockopt(self.fd, cffi::sol_socket, cffi::so_keepalive, &yes)
         case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass[Void]()
     }
@@ -159,10 +165,12 @@ sup TcpStream {
         # @ret: A result containing a boolean indicating whether the socket is set to keep alive or not if successful,
         # or a `SockErr` if there was an error.
 
-        let mut yes = false
-        let err = sppc::get_keepalive(self.fd, &mut yes)
+        # Call the `getsockopt` function to get the current
+        # state of the keepalive option for the socket.
+        let mut yes = 0
+        let err = sppc::getsockopt(self.fd, cffi::sol_socket, cffi::so_keepalive, &mut yes)
         case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
-        ret Pass(val=yes)
+        ret Pass(val=yes != 0)
     }
 
     !public
@@ -176,11 +184,15 @@ sup TcpStream {
         # `Some(val=duration)`, then the socket will linger for the specified duration before closing the connection.
         # @ret: A result indicating whether the operation was successful or not.
 
-        let timeval = case timeout of {
-            is Some[Duration](val) { sppc::CTimeval(sec=val.seconds, usec=val.nanoseconds / 1000_u64) }
-            else { sppc::CTimeval(sec=0_u64, usec=0_u64) }
-        }
-        let err = sppc::set_linger(self.fd, timeout.is_some(), &timeval)
+        # Convert the duration to milliseconds, or use 0 if
+        # the timeout is None.
+        let timeout = U32::from(timeout
+            .and_then((t: Duration) t.as_millis())
+            .or_else(() 0_u64))
+
+        # Call the `setsockopt` function to set the linger
+        # for the socket.
+        let err = sppc::setsockopt(self.fd, cffi::sol_socket, cffi::so_linger, &timeout)
         case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass[Void]()
     }
@@ -196,12 +208,15 @@ sup TcpStream {
         # is `Some(val=duration)`, then the socket is set to linger for the specified duration before closing the
         # connection.
 
-        let mut yes = false
-        let mut timeout = sppc::CTimeval()
-        let err = sppc::get_linger(self.fd, &mut yes, &mut timeout)
+        # Call the `getsockopt` function to get the linger
+        # for the socket (milliseconds).
+        let mut timeout = 0_u32
+        let err = sppc::getsockopt(self.fd, cffi::sol_socket, cffi::so_linger, &mut timeout)
+
+        # Convert the timeout from milliseconds to a `Duration`
+        # object and return it (or error).
         case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
-        let duration: Opt[Duration] = case yes { Some(val=Duration(seconds=timeout.sec, nanoseconds=timeout.usec * 1000_u64)) } else { None }
-        ret Pass(val=duration)
+        ret Pass(val=Duration::from_millis(U64::from(timeout)))
     }
 
     !public
@@ -214,7 +229,13 @@ sup TcpStream {
         # the socket will not be set to no delay.
         # @ret: A result indicating whether the operation was successful or not.
 
-        let err = sppc::set_nodelay(self.fd, yes)
+        # Convert the boolean value to an integer (1 for true,
+        # 0 for false) to be used in the `setsockopt` function.
+        let yes = case yes { 1 } else { 0 }
+
+        # Call the `setsockopt` function to set the nodelay
+        # option for the socket.
+        let err = sppc::setsockopt(self.fd, cffi::sol_socket, cffi::so_nodelay, &yes)
         case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass[Void]()
     }
@@ -228,15 +249,17 @@ sup TcpStream {
         # @ret: A result containing a boolean indicating whether the socket is set to no delay or not if successful, or
         # a `SockErr` if there was an error.
 
-        let mut yes = false
-        let err = sppc::get_nodelay(self.fd, &mut yes)
+        # Call the `getsockopt` function to get the current
+        # state of the nodelay option for the socket.
+        let mut yes = 0
+        let err = sppc::getsockopt(self.fd, cffi::sol_socket, cffi::so_nodelay, &mut yes)
         case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
-        ret Pass(val=yes)
+        ret Pass(val=yes != 0)
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun set_read_timeout(&mut self, timeout: Duration) -> Res[Void, SockErr] {
+    fun set_read_timeout(&mut self, timeout: Opt[Duration]) -> Res[Void, SockErr] {
         # The `set_read_timeout` method sets the receive timeout for the socket. This means that if a receive operation
         # takes longer than the specified timeout, it will return an error. This is useful for preventing the
         # application from hanging indefinitely while waiting for data to be received.
@@ -244,8 +267,15 @@ sup TcpStream {
         # zero, then there is no timeout and the receive operation will block indefinitely until data is received.
         # @ret: A result indicating whether the operation was successful or not.
 
-        let timeval = sppc::CTimeval(sec=timeout.seconds, usec=timeout.nanoseconds / 1000_u64)
-        let err = sppc::set_recv_timeout(self.fd, &timeval)
+        # Convert the duration to milliseconds, or use 0 if
+        # the timeout is None.
+        let timeout = U32::from(timeout
+            .and_then((t: Duration) t.as_millis())
+            .or_else(() 0_u64))
+
+        # Call the `setsockopt` function to set the receive
+        # timeout for the socket.
+        let err = sppc::setsockopt(self.fd, cffi::sol_socket, cffi::so_rcvtimeo, &timeout)
         case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass[Void]()
     }
@@ -259,15 +289,20 @@ sup TcpStream {
         # @ret: A result containing the receive timeout for the socket if successful, or a `SockErr` if there was an
         # error.
 
-        let mut timeval = sppc::CTimeval()
-        let err = sppc::get_recv_timeout(self.fd, &mut timeval)
+        # Call the `getsockopt` function to get the receive
+        # timeout for the socket (milliseconds).
+        let mut timeout = 0_u32
+        let err = sppc::getsockopt(self.fd, cffi::sol_socket, cffi::so_rcvtimeo, &mut timeout)
+
+        # Convert the timeout from milliseconds to a `Duration`
+        # object and return it (or error).
         case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
-        ret Pass(val=Duration(seconds=timeval.sec, nanoseconds=timeval.usec * 1000_u64))
+        ret Pass(val=Duration::from_millis(U64::from(timeout)))
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun set_write_timeout(&mut self, timeout: Duration) -> Res[Void, SockErr] {
+    fun set_write_timeout(&mut self, timeout: Opt[Duration]) -> Res[Void, SockErr] {
         # The `set_write_timeout` method sets the send timeout for the socket. This means that if a send operation takes
         # longer than the specified timeout, it will return an error. This is useful for preventing the application from
         # hanging indefinitely while waiting for data to be sent.
@@ -275,8 +310,15 @@ sup TcpStream {
         # zero, then there is no timeout and the send operation will block indefinitely until data is sent.
         # @ret: A result indicating whether the operation was successful or not.
 
-        let timeval = sppc::CTimeval(sec=timeout.seconds, usec=timeout.nanoseconds / 1000_u64)
-        let err = sppc::set_send_timeout(self.fd, &timeval)
+        # Convert the duration to milliseconds, or use 0 if
+        # the timeout is None.
+        let timeout = U32::from(timeout
+            .and_then((t: Duration) t.as_millis())
+            .or_else(() 0_u64))
+
+        # Call the `setsockopt` function to set the receive
+        # timeout for the socket.
+        let err = sppc::setsockopt(self.fd, cffi::sol_socket, cffi::so_sndtimeo, &timeout)
         case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass[Void]()
     }
@@ -289,10 +331,15 @@ sup TcpStream {
         # returns an error.
         # @ret: A result containing the send timeout for the socket if successful, or a `SockErr` if there was an error.
 
-        let mut timeval = sppc::CTimeval()
-        let err = sppc::get_send_timeout(self.fd, &mut timeval)
+        # Call the `getsockopt` function to get the receive
+        # timeout for the socket (milliseconds).
+        let mut timeout = 0_u32
+        let err = sppc::getsockopt(self.fd, cffi::sol_socket, cffi::so_sndtimeo, &mut timeout)
+
+        # Convert the timeout from milliseconds to a `Duration`
+        # object and return it (or error).
         case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
-        ret Pass(val=Duration(seconds=timeval.sec, nanoseconds=timeval.usec * 1000_u64))
+        ret Pass(val=Duration::from_millis(U64::from(timeout)))
     }
 
     !public

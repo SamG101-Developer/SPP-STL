@@ -137,6 +137,48 @@ sup SockAddr {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
+    fun set_nonblocking(&self, yes: Bool) -> Res[Void, SockErr] {
+        # The `set_nonblocking` method sets the socket to non-blocking mode. This means that all operations on the
+        # socket will return immediately, even if they would normally block. This is useful for asynchronous
+        # programming, as it allows you to perform other tasks while waiting for the socket to become ready.
+        # @let yes: Whether to set the socket to non-blocking mode or not. If true, the socket will be set to
+        # non-blocking mode. If false, the socket will be set to blocking mode.
+        # @ret: A result indicating whether the operation was successful or not.
+
+        # Convert the boolean value to an integer (1 for true,
+        # 0 for false) to be used in the `fcntl` function.
+        let flags = Flags::new()
+        sppc::fcntl(self.fd, cffi::f_getfl, &mut flags.bits)
+        flags.set(cffi::o_nonblock, yes)
+
+        # Call the `setsockopt` function to set the broadcast
+        # option for the socket.
+        let err = sppc::fcntl(self.fd, cffi::f_setfl, &flags.bits)
+        case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass[Void]()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun nonblocking(&self) -> Res[Bool, SockErr] {
+        # The `nonblocking` method checks if the socket is in non-blocking mode. This means that all operations on the
+        # socket will return immediately, even if they would normally block. This is useful for asynchronous
+        # programming, as it allows you to perform other tasks while waiting for the socket to become ready.
+        # @ret: A result indicating whether the socket is in non-blocking mode or not.
+
+        # Create the empty flags object and read the current
+        # flags from the socket using `fcntl`.
+        let mut flags = Flags::new()
+        let err = sppc::fcntl(self.fd, cffi::f_getfl, &mut flags.bits)
+
+        # Read the flags from the socket and check if the
+        # non-blocking flag is set. Error on failure.
+        case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass(val=flags.has(cffi::o_nonblock))
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun from_storage(storage: &sppc::CSockaddrStorage) -> SockAddr {
         #
         # @let storage:
