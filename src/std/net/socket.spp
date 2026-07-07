@@ -3,6 +3,7 @@ use std::annotations::public
 use std::annotations::versioned
 use std::annotations::zero_type
 use std::boolean::Bool
+use std::flags::Flags
 use std::number::S32
 use std::number::U16
 use std::number::U32
