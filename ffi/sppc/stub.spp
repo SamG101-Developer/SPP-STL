@@ -458,12 +458,6 @@ fun setenv(key: &CCharPtr, val: &CCharPtr, overwrite: CBool) -> CInt { }
 !ffi(symbol="sppc_unsetenv")
 fun unsetenv(key: &CCharPtr) -> CInt { }
 
-!ffi(symbol="sppc_signal")
-fun signal(pid: CInt, signal: CInt) -> CInt { }
-
-!ffi(symbol="sppc_is_running")
-fun is_running(pid: CInt) -> CInt { }
-
 !ffi(symbol="sppc_halt")
 fun halt(status: CInt) -> ! { }
 
