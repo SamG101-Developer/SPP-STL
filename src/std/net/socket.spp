@@ -59,7 +59,7 @@ sup Socket {
 
         # Convert the boolean value to an integer (1 for true,
         # 0 for false) to be used in the `fcntl` function.
-        let flags = Flags::new()
+        let mut flags = Flags::new()
         sppc::fcntl(self.fd, cffi::f_getfl, &mut flags.bits)
         flags.set(cffi::o_nonblock, yes)
 
