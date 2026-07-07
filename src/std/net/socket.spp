@@ -60,12 +60,12 @@ sup Socket {
         # Convert the boolean value to an integer (1 for true,
         # 0 for false) to be used in the `fcntl` function.
         let mut flags = Flags::new()
-        sppc::fcntl(self.fd, cffi::f_getfl, &mut flags.bits)
+        sppc::fcntl(self.fd, cffi::f_getfl, flags.bits, &mut flags.bits)
         flags.set(cffi::o_nonblock, yes)
 
         # Call the `setsockopt` function to set the broadcast
         # option for the socket.
-        let err = sppc::fcntl(self.fd, cffi::f_setfl, &flags.bits)
+        let err = sppc::fcntl(self.fd, cffi::f_setfl, flags.bits, &mut flags.bits)
         case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass[Void]()
     }
