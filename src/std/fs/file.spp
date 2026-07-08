@@ -94,7 +94,7 @@ sup File {
         # @ret: A `Res` type containing an empty value if the synchronization is successful, or an error message if the
         # operation fails.
 
-        let err = sppc::sync(self.fd)
+        let err = sppc::fsync(self.fd)
         ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
     }
 
@@ -109,7 +109,7 @@ sup File {
         # @ret: A `Res` type containing an empty value if the data synchronization is successful, or an error message if
         # the operation fails.
 
-        let err = sppc::syncdata(self.fd)
+        let err = sppc::fdatasync(self.fd)
         ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
     }
 
