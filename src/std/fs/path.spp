@@ -425,7 +425,7 @@ sup Path {
         case err != 0 { ret Fail(err=PathErr::from_errno(err)) }
         let file_length = info.size
 
-        let file_in = File::open(self.clone(), FileMode().read())?
+        let file_in = File::open(&self, FileMode().read())?
         let file_out = File::open(new_path.clone(), FileMode().write())?
         let err = sppc::copyfile(file_in.fd, file_out.fd, USize::from(file_length), 0)
         ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
