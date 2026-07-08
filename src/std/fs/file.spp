@@ -138,7 +138,7 @@ sup File {
 
         let mut info = sppc::CStat()
         let err = sppc::fstat(self.fd, &mut info)
-        case err == 0 { ret USize::from(info.st_size) } else { 0_uz }
+        case err == 0 { ret USize::from(info.size) } else { 0_uz }
     }
 
     !public
@@ -242,7 +242,7 @@ sup File ext Seek {
     fun stream_len(&mut self) -> Res[SSize, StreamErr] {
         let mut info = sppc::CFStat()
         let err = sppc::fstat(&self.path.inner.ptr, &mut info)
-        let len = SSize::from(info.st_size)
+        let len = SSize::from(info.size)
         ret case err == 0 { Pass(val=len) } else { Fail(err=StreamErr::from_errno(err)) }
     }
 
