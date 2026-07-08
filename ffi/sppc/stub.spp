@@ -333,7 +333,7 @@ fun exit_(status: CInt) -> ! { }
 fun signal(pid: CInt, signal: CInt) -> CInt { }
 
 !ffi(symbol="sppc_fcntl")
-fun fcntl(fd: CInt, cmd: CInt, opt: CInt, out_flags: &mut CInt) -> CInt { }
+fun fcntl[..V](fd: CInt, cmd: CInt, ..varargs: V) -> CInt { }
 
 !ffi(symbol="sppc_fsync")
 fun fsync(fd: CInt) -> CInt { }
