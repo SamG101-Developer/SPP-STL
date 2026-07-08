@@ -6,6 +6,7 @@ use std::annotations::versioned
 use std::annotations::virtual_method
 use std::boolean::Bool
 use std::generator::GenOnce
+use std::number::S16
 use std::number::S32
 use std::number::SSize
 use std::number::U8
@@ -301,7 +302,7 @@ sup Seek {
 
     !public
     !abstract_method
-    fun seek(&mut self, offset: SSize, whence: S32) -> Res[SSize, StreamErr] {
+    fun seek(&mut self, offset: SSize, whence: S16) -> Res[SSize, StreamErr] {
         # The `seek` method is an abstract method that must be implemented by any type that implements the `Seek`
         # interface. It takes an offset and a whence parameter, and attempts to move the stream's position according to
         # those parameters. The method returns a `Res` indicating success (with Void value) if the seek was successful,
