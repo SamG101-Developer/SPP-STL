@@ -7,7 +7,6 @@ use std::io::Read
 use std::io::Seek
 use std::io::StreamErr
 use std::io::Write
-use std::number::S16
 use std::number::S32
 use std::number::SSize
 use std::number::U8
@@ -155,7 +154,7 @@ sup File {
         # @ret: A `Res` type containing an empty value if the lock is successfully acquired, or an error message if the
         # operation fails.
 
-        let fl = sppc::CFlock(type_=S16::from(cffi::f_wrlock), whence=cffi::seek_set, start=0_sz, len=0_sz)
+        let fl = sppc::CFlock(type_=cffi::f_wrlock, whence=cffi::seek_set, start=0_sz, len=0_sz)
         let err = sppc::fcntl(self.fd, case non_blocking { cffi::f_setlk } else { cffi::f_setlkw }, &fl)
         ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
     }
@@ -173,7 +172,7 @@ sup File {
         # @ret: A `Res` type containing an empty value if the shared lock is successfully acquired, or an error message
         # if the operation fails.
 
-        let fl = sppc::CFlock(type_=S16::from(cffi::f_rdlock), whence=cffi::seek_set, start=0_sz, len=0_sz)
+        let fl = sppc::CFlock(type_=cffi::f_rdlock, whence=cffi::seek_set, start=0_sz, len=0_sz)
         let err = sppc::fcntl(self.fd, case non_blocking { cffi::f_setlk } else { cffi::f_setlkw }, &fl)
         ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
     }
@@ -188,7 +187,7 @@ sup File {
         # @ret: A `Res` type containing an empty value if the lock is successfully released, or an error message if the
         # operation fails.
 
-        let fl = sppc::CFlock(type_=S16::from(cffi::f_unlck), whence=cffi::seek_set, start=0_sz, len=0_sz)
+        let fl = sppc::CFlock(type_=cffi::f_unlck, whence=cffi::seek_set, start=0_sz, len=0_sz)
         let err = sppc::fcntl(self.fd, cffi::f_setlk, &fl)
         ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
     }

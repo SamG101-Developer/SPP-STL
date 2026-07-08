@@ -493,10 +493,10 @@ use std::limits::Limits
 !public cmp x_ok: CInt = 1 # Test for execute permission
 !public cmp f_ok: CInt = 0 # Test for existence
 
-!public cmp f_rdlck: CInt = 0 # Read lock
-!public cmp f_wrlck: CInt = 1 # Write lock
-!public cmp f_unlck: CInt = 2 # Remove lock
+!public cmp f_rdlck: CShort = 0_s16 # Read lock
+!public cmp f_wrlck: CShort = 1_s16 # Write lock
+!public cmp f_unlck: CShort = 2_s16 # Remove lock
 
-!public cmp seek_set: CInt = 0 # Seek from beginning of file
-!public cmp seek_cur: CInt = 1 # Seek from current position
-!public cmp seek_end: CInt = 2 # Seek from end of file
+!public cmp seek_set: CShort = 0_s16 # Seek from beginning of file
+!public cmp seek_cur: CShort = 1_s16 # Seek from current position
+!public cmp seek_end: CShort = 2_s16 # Seek from end of file
