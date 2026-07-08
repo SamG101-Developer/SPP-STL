@@ -138,7 +138,7 @@ sup File {
 
         let mut info = sppc::CStat()
         let err = sppc::fstat(self.fd, &mut info)
-        case err == 0 { ret USize::from(info.size) } else { 0_uz }
+        ret case err == 0 { USize::from(info.size) } else { 0_uz }
     }
 
     !public
