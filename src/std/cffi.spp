@@ -478,3 +478,12 @@ use std::limits::Limits
 !public cmp ip_default_multicast_ttl: CInt = 1
 !public cmp ip_default_multicast_loop: CInt = 1
 !public cmp ip_max_memberships: CInt = 20
+
+!public cmp s_ifmt: CInt = 0o170000 # Type of file
+!public cmp s_ifdir: CInt = 0o40000 # Directory
+!public cmp s_ifchr: CInt = 0o20000 # Character device
+!public cmp s_ifblk: CInt = 0o60000 # Block device
+!public cmp s_ifreg: CInt = 0o100000 # Regular file
+!public cmp s_ififo: CInt = 0o10000 # FIFO
+!public cmp s_iflnk: CInt = 0o120000 # Symbolic link
+!public cmp s_ifsock: CInt = 0o140000 # Socket
