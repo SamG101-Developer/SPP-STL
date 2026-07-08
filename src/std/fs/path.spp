@@ -288,7 +288,7 @@ sup Path {
 
         let mut exists = 0
         let err = sppc::access(&self.inner.ptr, cffi::f_ok, &mut exists)
-        ret case err == 0 { Pass(val=exists != 0) } else { Fail(err=PathErr::from_errno(err)) }
+        ret case err != 0 { Fail(err=PathErr::from_errno(err)) } else { Pass(val=exists != 0) }
     }
 
     !public
