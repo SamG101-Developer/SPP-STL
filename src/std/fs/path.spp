@@ -300,7 +300,7 @@ sup Path {
 
         let mut info = sppc::CStat()
         let err = sppc::fstat(&self.inner.ptr, &mut info)
-        ret case err != 0 { false } else { (info.mode & cffi::s_ifmt) == U32::from(cffi::s_ifreg) }
+        ret case err != 0 { false } else { (S32::from(info.mode) & cffi::s_ifmt) == cffi::s_ifreg }
     }
 
     !public
@@ -312,7 +312,7 @@ sup Path {
 
         let mut info = sppc::CStat()
         let err = sppc::fstat(&self.inner.ptr, &mut info)
-        ret case err != 0 { false } else { (info.mode & cffi::s_ifmt) == U32::from(cffi::s_ifdir) }
+        ret case err != 0 { false } else { (S32::from(info.mode) & cffi::s_ifmt) == cffi::s_ifdir }
     }
 
     !public
@@ -324,7 +324,7 @@ sup Path {
 
         let mut info = sppc::CStat()
         let err = sppc::lstat(&self.inner.ptr, &mut info)
-        ret case err != 0 { false } else { (info.mode & cffi::s_ifmt) == U32::from(cffi::s_iflnk) }
+        ret case err != 0 { false } else { (S32::from(info.mode) & cffi::s_ifmt) == cffi::s_iflnk }
     }
 
     !public
