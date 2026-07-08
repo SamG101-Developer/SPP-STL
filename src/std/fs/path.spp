@@ -286,9 +286,9 @@ sup Path {
         # @ret: A `Res` type containing `true` if the path exists, `false` if it does not exist, or an error message if
         # the check fails.
 
-        let mut exists = false
+        let mut exists = 0
         let err = sppc::access(&self.inner.ptr, cffi::f_ok, &mut exists)
-        ret case err == 0 { Pass(val=exists) } else { Fail(err=PathErr::from_errno(err)) }
+        ret case err == 0 { Pass(val=exists != 0) } else { Fail(err=PathErr::from_errno(err)) }
     }
 
     !public
