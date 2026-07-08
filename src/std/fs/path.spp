@@ -299,7 +299,7 @@ sup Path {
         # @ret: `true` if the path is a regular file, `false` otherwise.
 
         let mut info = sppc::CStat()
-        let err = sppc::fstat(&self.inner.ptr, &mut info)
+        let err = sppc::stat(&self.inner.ptr, &mut info)
         ret case err != 0 { false } else { (S32::from(info.mode) & cffi::s_ifmt) == cffi::s_ifreg }
     }
 
@@ -311,7 +311,7 @@ sup Path {
         # @ret: `true` if the path is a directory, `false` otherwise.
 
         let mut info = sppc::CStat()
-        let err = sppc::fstat(&self.inner.ptr, &mut info)
+        let err = sppc::stat(&self.inner.ptr, &mut info)
         ret case err != 0 { false } else { (S32::from(info.mode) & cffi::s_ifmt) == cffi::s_ifdir }
     }
 
