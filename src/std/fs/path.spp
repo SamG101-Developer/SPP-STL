@@ -423,7 +423,7 @@ sup Path {
         let mut info = sppc::CStat()
         let err = sppc::stat(&self.inner.ptr, &mut info)
         case err != 0 { ret Fail(err=PathErr::from_errno(err)) }
-        let file_length = info.st_size
+        let file_length = info.size
 
         let file_in = File::open(self.clone(), FileMode().read())?
         let file_out = File::open(new_path.clone(), FileMode().write())?

@@ -43,6 +43,9 @@ cls CStat {
     uid: CUInt
     gid: CUInt
     block_size: CLong
+    pad: CLong
+    rdev: CULong
+    size: CLong
     blocks: CLong
     atim: CTimespec
     mtim: CTimespec
