@@ -160,6 +160,15 @@ use std::limits::Limits
 !public cmp f_setfd: CInt = 2  # Set file descriptor flags
 !public cmp f_getfl: CInt = 3  # Get file status flags
 !public cmp f_setfl: CInt = 4  # Set file status flags
+!public cmp f_getlk: CInt = 5  # Get record locking info
+!public cmp f_setlk: CInt = 6  # Set record locking info (non-blocking)
+!public cmp f_setlkw: CInt = 7  # Set record locking info (blocking)
+!public cmp f_setown: CInt = 8  # Set owner (process receiving SIGIO)
+!public cmp f_getown: CInt = 9  # Get owner (process receiving SIGIO)
+!public cmp f_setsig: CInt = 10 # Set number of signal to be sent
+!public cmp f_getsig: CInt = 11 # Get number of signal to be sent
+!public cmp f_setown_ex: CInt = 15 # Set owner (thread receiving SIGIO)
+!public cmp f_getown_ex: CInt = 16 # Get owner (thread receiving SIGIO)
 
 !public cmp so_debug: CInt = 1 # Enable debugging info recording
 !public cmp so_reuseaddr: CInt = 2 # Allow local address reuse
