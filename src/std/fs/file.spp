@@ -7,18 +7,18 @@ use std::io::Read
 use std::io::Seek
 use std::io::StreamErr
 use std::io::Write
-use std::number::U8
 use std::number::S32
 use std::number::SSize
+use std::number::U8
 use std::number::USize
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
 use std::view::View
 use std::void::Void
-use std::ops::del::Del
 use std::fs::path::Path
 use std::fs::path::PathErr
+use std::ops::del::Del
 
 cls FileMode {
     !public is_read: Bool = false
@@ -61,14 +61,12 @@ sup FileMode {
 
 cls File {
     !package fd: S32
-    !package mode: FileMode
-    !package path: Path
 }
 
 sup File {
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun open(path: Path, mode: FileMode) -> Res[File, PathErr] {
+    fun open(path: &Path, mode: FileMode) -> Res[File, PathErr] {
         # The `open` method attempts to open the file at the specified path and returns a `Res` type that indicates
         # success or failure. The caller must have the necessary permissions to access the file, and the file must exist
         # unless the `create` option is set. If the file is successfully opened, a `File` object containing the file
@@ -81,7 +79,7 @@ sup File {
         # @ret: A `Res` type containing a `File` object if the file is successfully opened, or an error message if the
         # operation fails.
 
-        let mut file = File(path=path.clone(), mode)
+        let mut file = File()
         let err = sppc::open(&path.inner.ptr, mode.to_flags(), 0, &mut file.fd)
         ret case err == 0 { Pass(val=file) } else { Fail(err=PathErr::from_errno(err)) }
     }
@@ -96,7 +94,7 @@ sup File {
         # @ret: A `Res` type containing an empty value if the synchronization is successful, or an error message if the
         # operation fails.
 
-        let err = sppc::flush(self.fd)
+        let err = sppc::fsync(self.fd)
         ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
     }
 
@@ -111,7 +109,7 @@ sup File {
         # @ret: A `Res` type containing an empty value if the data synchronization is successful, or an error message if
         # the operation fails.
 
-        let err = sppc::flush_data(self.fd)
+        let err = sppc::fdatasync(self.fd)
         ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
     }
 
@@ -125,7 +123,7 @@ sup File {
         # @ret: A `Res` type containing an empty value if the operation is successful, or an error message if the
         # operation fails.
 
-        let err = sppc::truncate(self.fd, SSize::from(len))
+        let err = sppc::ftruncate(self.fd, SSize::from(len))
         ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
     }
 
@@ -138,9 +136,60 @@ sup File {
         # undefined.
         # @ret: The size of the file in bytes as a `USize` value.
 
-        let mut size = 0_sz
-        sppc::filesize(&self.path.inner.ptr, &mut size)
-        ret USize::from(size)
+        let mut info = sppc::CStat()
+        let err = sppc::fstat(self.fd, &mut info)
+        ret case err == 0 { USize::from(info.size) } else { 0_uz }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun lock(&self, non_blocking: Bool = true) -> Res[Void, StreamErr] {
+        # The `lock` method attempts to acquire an exclusive lock on the file. This prevents other processes from
+        # accessing the file while it is locked. The method returns a `Res` type that indicates success or failure. On
+        # success, it returns an empty value. On failure, it returns an error message indicating the reason for the
+        # failure.
+        # @let non_blocking: A boolean value indicating whether the lock operation should be non-blocking. If set to
+        # `true`, the method will return immediately if the lock cannot be acquired. If set to `false`, the method will
+        # block until the lock is acquired.
+        # @ret: A `Res` type containing an empty value if the lock is successfully acquired, or an error message if the
+        # operation fails.
+
+        let fl = sppc::CFlock(type_=cffi::f_wrlck, whence=cffi::seek_set, start=0_sz, len=0_sz)
+        let err = sppc::fcntl(self.fd, case non_blocking { cffi::f_setlk } else { cffi::f_setlkw }, &fl)
+        ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun lock_shared(&self, non_blocking: Bool = true) -> Res[Void, StreamErr] {
+        # The `lock_shared` method attempts to acquire a shared lock on the file. This allows multiple processes to read
+        # from the file simultaneously, but prevents any process from writing to the file while it is locked. The method
+        # returns a `Res` type that indicates success or failure. On success, it returns an empty value. On failure, it
+        # returns an error message indicating the reason for the failure.
+        # @let non_blocking: A boolean value indicating whether the lock operation should be non-blocking. If set to
+        # `true`, the method will return immediately if the lock cannot be acquired. If set to `false`, the method will
+        # block until the lock is acquired.
+        # @ret: A `Res` type containing an empty value if the shared lock is successfully acquired, or an error message
+        # if the operation fails.
+
+        let fl = sppc::CFlock(type_=cffi::f_rdlck, whence=cffi::seek_set, start=0_sz, len=0_sz)
+        let err = sppc::fcntl(self.fd, case non_blocking { cffi::f_setlk } else { cffi::f_setlkw }, &fl)
+        ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun unlock(&self) -> Res[Void, StreamErr] {
+        # The `unlock` method releases any lock (exclusive or shared) that has been acquired on the file. This allows
+        # other processes to access the file again. The method returns a `Res` type that indicates success or failure.
+        # On success, it returns an empty value. On failure, it returns an error message indicating the reason for the
+        # failure.
+        # @ret: A `Res` type containing an empty value if the lock is successfully released, or an error message if the
+        # operation fails.
+
+        let fl = sppc::CFlock(type_=cffi::f_unlck, whence=cffi::seek_set, start=0_sz, len=0_sz)
+        let err = sppc::fcntl(self.fd, cffi::f_setlk, &fl)
+        ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
     }
 }
 
@@ -178,7 +227,7 @@ sup File ext Write {
         # @ret: A `Res` type containing an empty value if the flush operation is successful, or an error message if the
         # operation fails.
 
-        let err = sppc::flush(self.fd)
+        let err = sppc::fsync(self.fd)
         ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
     }
 }
@@ -186,19 +235,20 @@ sup File ext Write {
 sup File ext Seek {
     fun seek(&mut self, offset: SSize, whence: S32) -> Res[SSize, StreamErr] {
         let mut pos = 0_sz
-        let err = sppc::seek(self.fd, offset, whence, &mut pos)
+        let err = sppc::lseek(self.fd, offset, whence, &mut pos)
         ret case err == 0 { Pass(val=pos) } else { Fail(err=StreamErr::from_errno(err)) }
     }
 
     fun stream_len(&mut self) -> Res[SSize, StreamErr] {
-        let mut len = 0_sz
-        let err = sppc::filesize(&self.path.inner.ptr, &mut len)
+        let mut info = sppc::CStat()
+        let err = sppc::fstat(self.fd, &mut info)
+        let len = SSize::from(info.size)
         ret case err == 0 { Pass(val=len) } else { Fail(err=StreamErr::from_errno(err)) }
     }
 
     fun stream_pos(&mut self) -> Res[SSize, StreamErr] {
         let mut pos = 0_sz
-        let err = sppc::tell(self.fd, &mut pos)
+        let err = sppc::lseek(self.fd, 0_sz, Self::seek_cur, &mut pos)
         ret case err == 0 { Pass(val=pos) } else { Fail(err=StreamErr::from_errno(err)) }
     }
 }

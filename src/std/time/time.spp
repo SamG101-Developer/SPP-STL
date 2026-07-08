@@ -46,7 +46,7 @@ sup TimeErr {
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-fun sleep(duration: Duration, clock: S32 = constants::clock_realtime) -> Void {
+fun sleep(duration: Duration, clock: S32 = cffi::clock_realtime) -> Void {
     # Sleep for the specified duration using the specified clock. This function will block the current thread for at
     # least the specified duration, but it may block for longer if the system is under heavy load or if the clock is not
     # precise.
@@ -61,7 +61,7 @@ fun sleep(duration: Duration, clock: S32 = constants::clock_realtime) -> Void {
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-fun sleep_until(time_point: TimePoint, clock: S32 = constants::clock_realtime) -> Void {
+fun sleep_until(time_point: TimePoint, clock: S32 = cffi::clock_realtime) -> Void {
     # Sleep until the specified `TimePoint` using the specified clock. This function will block the current thread until
     # the specified `TimePoint` is reached, but it may block for longer if the system is under heavy load or if the
     # clock is not precise.

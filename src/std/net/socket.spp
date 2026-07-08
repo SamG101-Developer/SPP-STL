@@ -3,6 +3,7 @@ use std::annotations::public
 use std::annotations::versioned
 use std::annotations::zero_type
 use std::boolean::Bool
+use std::flags::Flags
 use std::number::S32
 use std::number::U16
 use std::number::U32
@@ -48,22 +49,49 @@ cls Socket {
 sup Socket {
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun set_non_blocking(&mut self, yes: Bool) -> Res[Void, SockErr] {
-        # The `set_non_blocking` method sets the socket to non-blocking mode. This means that all operations on the
+    fun set_nonblocking(&self, yes: Bool) -> Res[Void, SockErr] {
+        # The `set_nonblocking` method sets the socket to non-blocking mode. This means that all operations on the
         # socket will return immediately, even if they would normally block. This is useful for asynchronous
         # programming, as it allows you to perform other tasks while waiting for the socket to become ready.
         # @let yes: Whether to set the socket to non-blocking mode or not. If true, the socket will be set to
         # non-blocking mode. If false, the socket will be set to blocking mode.
         # @ret: A result indicating whether the operation was successful or not.
 
-        let err = sppc::set_nonblocking(self.fd, yes)
+        # Convert the boolean value to an integer (1 for true,
+        # 0 for false) to be used in the `fcntl` function.
+        let mut flags = Flags::new()
+        sppc::fcntl(self.fd, cffi::f_getfl, 0, &mut flags.bits)
+        flags.set(Flags::bit(U32::from(cffi::o_nonblock)), yes)
+
+        # Call the `setsockopt` function to set the broadcast
+        # option for the socket.
+        let err = sppc::fcntl(self.fd, cffi::f_setfl, flags.bits)
         case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass[Void]()
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun set_ttl(&mut self, ttl: U8) -> Res[Void, SockErr] {
+    fun nonblocking(&self) -> Res[Bool, SockErr] {
+        # The `nonblocking` method checks if the socket is in non-blocking mode. This means that all operations on the
+        # socket will return immediately, even if they would normally block. This is useful for asynchronous
+        # programming, as it allows you to perform other tasks while waiting for the socket to become ready.
+        # @ret: A result indicating whether the socket is in non-blocking mode or not.
+
+        # Create the empty flags object and read the current
+        # flags from the socket using `fcntl`.
+        let mut flags = Flags::new()
+        let err = sppc::fcntl(self.fd, cffi::f_getfl, &mut flags.bits)
+
+        # Read the flags from the socket and check if the
+        # non-blocking flag is set. Error on failure.
+        case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass(val=flags.has(Flags::bit(U32::from(cffi::o_nonblock))))
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun set_ttl(&mut self, ttl: U32) -> Res[Void, SockErr] {
         # The `set_ttl` method sets the time-to-live (TTL) for the socket. This is the maximum number of hops that a
         # packet can take before it is discarded. This is useful for controlling the scope of packets sent from the
         # socket, as it can help to prevent packets from being sent too far and potentially causing network congestion.
@@ -71,7 +99,9 @@ sup Socket {
         # take before it is discarded.
         # @ret: A result indicating whether the operation was successful or not.
 
-        let err = sppc::set_ttl(self.fd, S32::from(ttl))
+        # Call the `setsockopt` function to set the ttl
+        # option for the socket.
+        let err = sppc::setsockopt(self.fd, cffi::ipproto_ip, cffi::ip_ttl, &S32::from(ttl))
         case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass[Void]()
     }
@@ -85,8 +115,10 @@ sup Socket {
         # @ret: A result containing the time-to-live value for the socket if successful, or a `SockErr` if there was an
         # error.
 
+        # Call the `getsockopt` function to get the current
+        # state of the ttl option for the socket.
         let mut ttl = 0
-        let err = sppc::get_ttl(self.fd, &mut S32::from(ttl))
+        let err = sppc::getsockopt(self.fd, cffi::ipproto_ip, cffi::ip_ttl, &mut ttl)
         case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(val=U32::from(ttl))
     }
@@ -147,7 +179,7 @@ sup SockAddr {
         ret case family of {
             # For IpV4, fill the octets of the IpV4Addr and the
             # port from the storage.
-            == constants::af_inet4 {
+            == cffi::af_inet {
                 let mut socket_address = SockV4Addr()
                 sppc::get_sockaddr_v4(&storage, &mut socket_address.ip.octets.ptr, &mut socket_address.port)
                 socket_address
@@ -155,7 +187,7 @@ sup SockAddr {
 
             # For IpV6, fill the segments of the IpV6Addr and the
             # port from the storage.
-            == constants::af_inet6 {
+            == cffi::af_inet6 {
                 let mut socket_address = SockV6Addr()
                 sppc::get_sockaddr_v6(&storage, &mut socket_address.ip.segments.ptr, &mut socket_address.port)
                 socket_address

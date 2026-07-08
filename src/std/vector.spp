@@ -128,6 +128,7 @@ sup [T] Vec[T] {
         # @type G: The type of the generator that produces elements of type `T`. It must implement the `Gen[T]` trait.
         # @let generator: The generator instance that will be used to produce elements for the new `Vec`.
         # @ret: A new `Vec` instance containing all the elements produced by the generator.
+        # @todo: Move this to a trait
 
         # Create the vector and yield all the elements
         # from the generator into it.

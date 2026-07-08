@@ -2,8 +2,13 @@ use sppc::CTimeval
 use std::annotations::public
 use std::annotations::versioned
 use std::boolean::Bool
+use std::number::S32
+use std::number::U32
+use std::number::U64
 use std::number::U8
 use std::number::USize
+use std::option::Opt
+use std::option::Some
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
@@ -41,7 +46,7 @@ sup UdpSocket {
 
         # Create the file descriptor from the address.
         let mut fd = 0
-        sppc::socket(addr.ip().family(), constants::sock_dgram, constants::ipproto_udp, &mut fd)
+        sppc::socket(addr.ip().family(), cffi::sock_dgram, cffi::ipproto_udp, &mut fd)
         case fd < 0 { ret Fail(err=SockErr::from_errno(fd)) }
 
         # Create the `UdpSocket` object with the file descriptor.
@@ -94,9 +99,15 @@ sup UdpSocket {
         # broadcast messages. If false, the socket will not be able to send broadcast messages.
         # @ret: A result indicating whether the operation was successful or not.
 
-        let err = sppc::set_broadcast(self.fd, yes)
-        case err == 0 { ret Pass[Void]() }
-        ret Fail(err=SockErr::from_errno(err))
+        # Convert the boolean value to an integer (1 for true,
+        # 0 for false) to be used in the `setsockopt` function.
+        let yes = case yes { 1 } else { 0 }
+
+        # Call the `setsockopt` function to set the broadcast
+        # option for the socket.
+        let err = sppc::setsockopt(self.fd, cffi::sol_socket, cffi::so_broadcast, &yes)
+        case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass[Void]()
     }
 
     !public
@@ -107,15 +118,17 @@ sup UdpSocket {
         # @ret: A result containing a boolean value indicating whether the broadcast option is enabled for the socket if
         # successful, or a `SockErr` if there was an error.
 
-        let mut yes = false
-        let err = sppc::get_broadcast(self.fd, &mut yes)
+        # Call the `getsockopt` function to get the current
+        # state of the broadcast option for the socket.
+        let mut yes = 0
+        let err = sppc::getsockopt(self.fd, cffi::sol_socket, cffi::so_broadcast, &mut yes)
         case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
-        ret Pass(val=yes)
+        ret Pass(val=yes != 0)
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun set_read_timeout(&mut self, timeout: Duration) -> Res[Void, SockErr] {
+    fun set_read_timeout(&mut self, timeout: Opt[Duration]) -> Res[Void, SockErr] {
         # The `set_read_timeout` method sets the receive timeout for the socket. This means that if a receive operation
         # takes longer than the specified timeout, it will return an error. This is useful for preventing the
         # application from hanging indefinitely while waiting for data to be received.
@@ -123,8 +136,15 @@ sup UdpSocket {
         # zero, then there is no timeout and the receive operation will block indefinitely until data is received.
         # @ret: A result indicating whether the operation was successful or not.
 
-        let timeval = CTimeval(sec=timeout.seconds, usec=timeout.nanoseconds / 1000_u64)
-        let err = sppc::set_recv_timeout(self.fd, &timeval)
+        # Convert the duration to milliseconds, or use 0 if
+        # the timeout is None.
+        let timeout = S32::from(timeout
+            .and_then((t: Duration) Some(val=t.as_millis()))
+            .unwrap_or(0_u64))
+
+        # Call the `setsockopt` function to set the receive
+        # timeout for the socket.
+        let err = sppc::setsockopt(self.fd, cffi::sol_socket, cffi::so_rcvtimeo, &timeout)
         case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass[Void]()
     }
@@ -138,15 +158,20 @@ sup UdpSocket {
         # @ret: A result containing the receive timeout for the socket if successful, or a `SockErr` if there was an
         # error.
 
-        let mut timeval = CTimeval()
-        let err = sppc::get_recv_timeout(self.fd, &mut timeval)
+        # Call the `getsockopt` function to get the receive
+        # timeout for the socket (milliseconds).
+        let mut timeout = 0
+        let err = sppc::getsockopt(self.fd, cffi::sol_socket, cffi::so_rcvtimeo, &mut timeout)
+
+        # Convert the timeout from milliseconds to a `Duration`
+        # object and return it (or error).
         case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
-        ret Pass(val=Duration(seconds=timeval.sec, nanoseconds=timeval.usec * 1000_u64))
+        ret Pass(val=Duration::from_millis(U64::from(timeout)))
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun set_write_timeout(&mut self, timeout: Duration) -> Res[Void, SockErr] {
+    fun set_write_timeout(&mut self, timeout: Opt[Duration]) -> Res[Void, SockErr] {
         # The `set_write_timeout` method sets the send timeout for the socket. This means that if a send operation takes
         # longer than the specified timeout, it will return an error. This is useful for preventing the application from
         # hanging indefinitely while waiting for data to be sent.
@@ -154,8 +179,15 @@ sup UdpSocket {
         # zero, then there is no timeout and the send operation will block indefinitely until data is sent.
         # @ret: A result indicating whether the operation was successful or not.
 
-        let timeval = CTimeval(sec=timeout.seconds, usec=timeout.nanoseconds / 1000_u64)
-        let err = sppc::set_send_timeout(self.fd, &timeval)
+        # Convert the duration to milliseconds, or use 0 if
+        # the timeout is None.
+        let timeout = S32::from(timeout
+            .and_then((t: Duration) Some(val=t.as_millis()))
+            .unwrap_or(0_u64))
+
+        # Call the `setsockopt` function to set the receive
+        # timeout for the socket.
+        let err = sppc::setsockopt(self.fd, cffi::sol_socket, cffi::so_sndtimeo, &timeout)
         case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass[Void]()
     }
@@ -168,9 +200,14 @@ sup UdpSocket {
         # returns an error.
         # @ret: A result containing the send timeout for the socket if successful, or a `SockErr` if there was an error.
 
-        let mut timeval = CTimeval()
-        let err = sppc::get_send_timeout(self.fd, &mut timeval)
+        # Call the `getsockopt` function to get the receive
+        # timeout for the socket (milliseconds).
+        let mut timeout = 0
+        let err = sppc::getsockopt(self.fd, cffi::sol_socket, cffi::so_sndtimeo, &mut timeout)
+
+        # Convert the timeout from milliseconds to a `Duration`
+        # object and return it (or error).
         case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
-        ret Pass(val=Duration(seconds=timeval.sec, nanoseconds=timeval.usec * 1000_u64))
+        ret Pass(val=Duration::from_millis(U64::from(timeout)))
     }
 }
