@@ -136,8 +136,8 @@ sup File {
         # undefined.
         # @ret: The size of the file in bytes as a `USize` value.
 
-        let info = sppc::CFStat()
-        let err = sppc::fstat(self.fd, &info)
+        let mut info = sppc::CStat()
+        let err = sppc::fstat(self.fd, &mut info)
         case err == 0 { ret USize::from(info.st_size) } else { 0_uz }
     }
 
