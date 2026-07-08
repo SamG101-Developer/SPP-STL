@@ -296,9 +296,9 @@ sup Seek {
     # @cmp seek_cur: Seek from the current position in the stream.
     # @cmp seek_end: Seek from the end of the stream.
 
-    !public cmp seek_set: S32 = 0
-    !public cmp seek_cur: S32 = 1
-    !public cmp seek_end: S32 = 2
+    !public cmp seek_set: S16 = cffi::seek_set
+    !public cmp seek_cur: S16 = cffi::seek_cur
+    !public cmp seek_end: S16 = cffi::seek_end
 
     !public
     !abstract_method
