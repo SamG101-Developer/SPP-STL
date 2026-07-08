@@ -487,3 +487,8 @@ use std::limits::Limits
 !public cmp s_ififo: CInt = 0o10000 # FIFO
 !public cmp s_iflnk: CInt = 0o120000 # Symbolic link
 !public cmp s_ifsock: CInt = 0o140000 # Socket
+
+!public cmp r_ok: CInt = 4 # Test for read permission
+!public cmp w_ok: CInt = 2 # Test for write permission
+!public cmp x_ok: CInt = 1 # Test for execute permission
+!public cmp f_ok: CInt = 0 # Test for existence
