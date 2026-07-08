@@ -7,7 +7,6 @@ use std::io::Read
 use std::io::Seek
 use std::io::StreamErr
 use std::io::Write
-use std::number::S16
 use std::number::S32
 use std::number::SSize
 use std::number::U8
@@ -234,7 +233,7 @@ sup File ext Write {
 }
 
 sup File ext Seek {
-    fun seek(&mut self, offset: SSize, whence: S16) -> Res[SSize, StreamErr] {
+    fun seek(&mut self, offset: SSize, whence: S32) -> Res[SSize, StreamErr] {
         let mut pos = 0_sz
         let err = sppc::lseek(self.fd, offset, whence, &mut pos)
         ret case err == 0 { Pass(val=pos) } else { Fail(err=StreamErr::from_errno(err)) }
