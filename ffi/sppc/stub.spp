@@ -22,48 +22,48 @@ cls CTimeval {
 }
 
 cls CStatvfs {
-    block_size: CULong
-    frag_size: CULong
-    blocks: CULong
-    blocks_free: CULong
-    blocks_available: CULong
-    files: CULong
-    files_free: CULong
-    files_available: CULong
-    fs_id: CULong
-    flag: CULong
-    namemax: CULong
+    !public block_size: CULong
+    !public frag_size: CULong
+    !public blocks: CULong
+    !public blocks_free: CULong
+    !public blocks_available: CULong
+    !public files: CULong
+    !public files_free: CULong
+    !public files_available: CULong
+    !public fs_id: CULong
+    !public flag: CULong
+    !public namemax: CULong
 }
 
 cls CStat {
-    dev: CULong
-    ino: CULong
-    nlink: CULong
-    mode: CUInt
-    uid: CUInt
-    gid: CUInt
-    block_size: CLong
-    pad: CLong
-    rdev: CULong
-    size: CLong
-    blocks: CLong
-    atim: CTimespec
-    mtim: CTimespec
-    ctim: CTimespec
+    !public dev: CULong
+    !public ino: CULong
+    !public nlink: CULong
+    !public mode: CUInt
+    !public uid: CUInt
+    !public gid: CUInt
+    !public block_size: CLong
+    !private pad: CLong
+    !public rdev: CULong
+    !public size: CLong
+    !public blocks: CLong
+    !public atim: CTimespec
+    !public mtim: CTimespec
+    !public ctim: CTimespec
 }
 
 cls CPollfd {
-    fd: CInt
-    events: CShort
-    revents: CShort
+    !public fd: CInt
+    !public events: CShort
+    !public revents: CShort
 }
 
 cls CFlock {
-    type_: CShort
-    whence: CShort
-    start: CLong
-    len: CLong
-    pid: CInt
+    !public type_: CShort
+    !public whence: CShort
+    !public start: CLong
+    !public len: CLong
+    !public pid: CInt
 }
 
 cls CSockaddrStorage { }
