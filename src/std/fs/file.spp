@@ -249,7 +249,7 @@ sup File ext Seek {
 
     fun stream_pos(&mut self) -> Res[SSize, StreamErr] {
         let mut pos = 0_sz
-        let err = sppc::lseek(self.fd, 0_sz, cffi::seek_cur, &mut pos)
+        let err = sppc::lseek(self.fd, 0_sz, Self::seek_cur, &mut pos)
         ret case err == 0 { Pass(val=pos) } else { Fail(err=StreamErr::from_errno(err)) }
     }
 }
