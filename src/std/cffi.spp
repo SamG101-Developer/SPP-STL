@@ -492,3 +492,7 @@ use std::limits::Limits
 !public cmp w_ok: CInt = 2 # Test for write permission
 !public cmp x_ok: CInt = 1 # Test for execute permission
 !public cmp f_ok: CInt = 0 # Test for existence
+
+!public cmp f_rdlck: CInt = 0 # Shared file lock
+!public cmp f_wrlck: CInt = 1 # Exclusive file lock
+!public cmp f_unlck: CInt = 2 # Unlock file
