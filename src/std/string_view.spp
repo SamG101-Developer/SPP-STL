@@ -455,7 +455,7 @@ sup StrView {
         # @ret: A new `Str` that is the uppercase version of this `StrView`.
 
         # Re-use the "make uppercase" method on an owned verson of this string.
-        let owned = Str::from(self)
+        let mut owned = Str::from(self)
         owned.make_uppercase()
         ret owned
     }
@@ -469,7 +469,7 @@ sup StrView {
         # @ret: A new `Str` that is the lowercase version of this `StrView`.
 
         # Re-use the "make lowercase" method on an owned verson of this string.
-        let owned = Str::from(self)
+        let mut owned = Str::from(self)
         owned.make_lowercase()
         ret owned
     }
