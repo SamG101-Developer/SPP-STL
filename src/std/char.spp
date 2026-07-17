@@ -70,7 +70,7 @@ sup Char {
 
         # Handle the 1-byte UTF-8 encoding case.
         case self.inner <= 0x7F_u32 {
-            buffer[0_uz]@ = U8::from(self.inner)
+            buffer[mut 0_uz]@ = U8::from(self.inner)
             ret 1_u32
         }
 
@@ -109,7 +109,7 @@ sup Char {
         # For chars that can be represented in a single UTF-16
         # code unit, we can directly write the value.
         case self.inner <= 0xFFFF_u32 {
-            buffer[0_uz]@ = U16::from(self.inner)
+            buffer[mut 0_uz]@ = U16::from(self.inner)
             ret 1_u32
         }
 
