@@ -549,7 +549,7 @@ sup [T: Copy, A: Alloc] Vec[T, A] {
 
 sup [T, A: Alloc] Vec[T, A] ext IterMov[T] {
     !versioned(base="1.0.0", new="1.0.0")
-    cor iter_mov(self) -> Iterator[T] {
+    cor iter_mov(mut self) -> Iterator[T] {
         #
         # @ret:
 
@@ -561,7 +561,7 @@ sup [T, A: Alloc] Vec[T, A] ext IterMov[T] {
 
 sup [T, A: Alloc] Vec[T, A] ext RevIterMov[T] {
     !versioned(base="1.0.0", new="1.0.0")
-    cor reverse_iter_mov(self) -> Iterator[T] {
+    cor reverse_iter_mov(mut self) -> Iterator[T] {
         #
         # @ret:
 
