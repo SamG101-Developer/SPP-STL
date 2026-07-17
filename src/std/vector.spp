@@ -458,7 +458,7 @@ sup [T, A: Alloc] Vec[T, A] {
         #
         # @ret:
 
-        let (l, r) = (0_uz, self.len() - 1_uz)
+        let (mut l, mut r) = (0_uz, self.len() - 1_uz)
         loop l < r {
             self.swap(l, r)
             l += 1_uz
