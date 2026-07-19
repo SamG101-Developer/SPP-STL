@@ -44,7 +44,7 @@ use std::ops::iter::RevIterRef
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-cls Vec[T, A: Alloc = GlobalAlloc] {
+cls Vec[T, A: Alloc=GlobalAlloc] {
     # The `Vec` type is a growable array that provides efficient storage and access to a sequence of elements. It is the
     # length-aware version of `RawBuf`, which is the lowest level contiguous buffer type. The `Vec` type manages the
     # length of the buffer and provides methods for adding, removing, and accessing elements. It also handles memory
@@ -115,25 +115,6 @@ sup [T] Vec[T] {
         let mut vec = Self::new_with_capacity_in(len, GlobalAlloc)
         loop i in Range[USize]::between(0_uz, len) { vec.append_unchecked(f(i)) }
         vec.length = len
-        ret vec
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun from_generator[G: Gen[T]](generator: G) -> Self {
-        # Build a new `Vec` from a generator. The generator is expected to yield elements of type `T`, and the function
-        # will collect these elements into a new `Vec`. The function will continue to call the generator until it
-        # returns `None`, indicating that there are no more elements to yield. The resulting `Vec` will contain all the
-        # elements produced by the generator, in the order they were generated.
-        # @type G: The type of the generator that produces elements of type `T`. It must implement the `Gen[T]` trait.
-        # @let generator: The generator instance that will be used to produce elements for the new `Vec`.
-        # @ret: A new `Vec` instance containing all the elements produced by the generator.
-        # @todo: Move this to a trait
-
-        # Create the vector and yield all the elements
-        # from the generator into it.
-        let mut vec = Self::new_in(GlobalAlloc)
-        # loop generator.res() is T() { vec.append(val) } # todo
         ret vec
     }
 }
@@ -634,6 +615,25 @@ sup [T: Eq, A: Alloc] Vec[T, A] ext Eq {
             case self[i] == that[i] { ret true }
         }
         ret false
+    }
+}
+
+sup [T, A: Alloc, G: Gen[T]] Vec[T, A] ext From[G] {
+    !intrinsic(name="std.vector.Vec.from[Gen]")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(that: G) -> Self {
+        # Build a new `Vec` from a generator. The generator is expected to yield elements of type `T`, and the function
+        # will collect these elements into a new `Vec`. The function will continue to call the generator until it
+        # returns `None`, indicating that there are no more elements to yield. The resulting `Vec` will contain all the
+        # elements produced by the generator, in the order they were generated.
+        # @let that: The generator instance that will be used to produce elements for the new `Vec`.
+        # @ret: A new `Vec` instance containing all the elements produced by the generator.
+
+        # Create the vector and yield all the elements
+        # from the generator into it.
+        let mut vec = Self::new_in(GlobalAlloc)
+        # loop generator.res() is T() { vec.append(val) } # todo
+        ret vec
     }
 }
 

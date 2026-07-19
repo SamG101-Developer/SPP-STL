@@ -66,19 +66,6 @@ sup [T] Iterator[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    cor cycle(self) -> Iterator[T] {
-        # The `cycle` method is a coroutine that takes an iterator and produces a new iterator that yields the items
-        # from the original iterator in an infinite loop. The method uses the `gen with` syntax to exhaust the
-        # generator, and then repeats the process indefinitely.
-        # @ret: A new iterator of type `Iterator[T]` that produces an infinite sequence of items by repeatedly yielding
-        # the items from the original iterator (`self`).
-
-        # Yield from the generator in an infinite loop.
-        loop true { gen with self }
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
     cor drop(self, count: USize) -> Iterator[T] {
         # The `drop` method is a coroutine that takes an iterator and a count, and produces a new iterator that yields
         # the items from the original iterator after skipping the first `count` items. The method uses a loop to iterate
@@ -375,5 +362,36 @@ sup [T] Iterator[T] {
             index += 1_uz
         }
         ret None
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun collect[Collection: From[Iterator[T]]](self) -> Collection[T] {
+        # Collect this iterator into a collection. The `collect` method is a function that takes an iterator and
+        # collects all the items produced by the iterator into a collection of type `Collection[T]`. The method uses the
+        # `From` trait to convert the iterator into the specified collection type. This will only work for non-borrowed
+        # `T` types, as the `From` trait requires ownership of the items produced by the iterator.
+        # @type Collection: A collection type that implements the `From[Iterator[T]]` trait.
+        # @ret: A collection of type `Collection[T]` that contains all the items produced by the iterator.
+
+        ret Collection::from(self)
+    }
+}
+
+sup [T: Clone] Iterator[T] {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    cor cycle(self) -> Iterator[T] {
+        # The `cycle` method is a coroutine that takes an iterator and produces a new iterator that yields the items
+        # from the original iterator in an infinite loop. The method uses the `gen with` syntax to exhaust the
+        # generator, and then repeats the process indefinitely.
+        # @ret: A new iterator of type `Iterator[T]` that produces an infinite sequence of items by repeatedly yielding
+        # the items from the original iterator (`self`).
+
+        # Yield from the generator in an infinite loop. This requires
+        # a "buffer-and-clone" approach, as the generator will be
+        # exhausted after the first iteration.
+        let mut buffer = Vec[T]::from(self)
+        loop true { gen with buffer.clone() }
     }
 }
