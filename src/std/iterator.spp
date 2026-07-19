@@ -1,6 +1,9 @@
+use std::annotations::abstract_method
 use std::annotations::public
 use std::annotations::versioned
 use std::boolean::Bool
+use std::cast::From
+use std::clone::Clone
 use std::function::FunMut
 use std::function::FunRef
 use std::generator::Gen
@@ -9,7 +12,33 @@ use std::number::USize
 use std::option::None
 use std::option::Opt
 use std::option::Some
+use std::vector::Vec
 use std::void::Void
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls FromIterator[T] {
+    # The `FromIterator` trait is used to define how to create a collection from an iterator. It provides a method
+    # `from_iter` that takes an iterator and produces a collection of type `Self`. This trait is essential for enabling
+    # the `collect` method on iterators, allowing them to be transformed into various collection types.
+    # @type T: The type of items produced by the iterator that will be collected into the collection.
+}
+
+sup [T] FromIterator[T] {
+    !public !abstract_method
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_iter[G: Gen[T]](iter: G) -> Self {
+        # The `from_iter` method is the core of the `FromIterator` trait. It defines how to create a collection of type
+        # `Self` from an iterator that produces items of type `T`. This method is typically implemented by collection
+        # types to specify how they should be constructed from an iterator. The implementation will depend on the
+        # specific collection type and how it manages its internal storage and structure.
+        # @type G: A generator type that produces items of type `T`. This is a generic type parameter that must
+        # implement the `Gen[T]` interface, meaning it must be a generator that yields items of type `T`.
+        # @let iter: The iterator that produces items of type `T` to be collected into the collection. This is a value
+        # of type `G`, which is a generator that yields items of type `T`.
+        # @ret: A new instance of the collection type (`Self`) that contains all the items produced by the iterator.
+    }
+}
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
@@ -62,19 +91,6 @@ sup [T] Iterator[T] {
         # Yield from the two generators.
         gen with self
         gen with other
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    cor cycle(self) -> Iterator[T] {
-        # The `cycle` method is a coroutine that takes an iterator and produces a new iterator that yields the items
-        # from the original iterator in an infinite loop. The method uses the `gen with` syntax to exhaust the
-        # generator, and then repeats the process indefinitely.
-        # @ret: A new iterator of type `Iterator[T]` that produces an infinite sequence of items by repeatedly yielding
-        # the items from the original iterator (`self`).
-
-        # Yield from the generator in an infinite loop.
-        loop true { gen with self }
     }
 
     !public
@@ -375,5 +391,36 @@ sup [T] Iterator[T] {
             index += 1_uz
         }
         ret None
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun collect[Collection: FromIterator[T]](self) -> Collection {
+        # Collect this iterator into a collection. The `collect` method is a function that takes an iterator and
+        # collects all the items produced by the iterator into a collection of type `Collection`. The method uses the
+        # `FromIterator` trait to convert the iterator into the specified collection type. This will only work for
+        # non-borrowed `T` types, as the `FromIterator` trait requires ownership of the items produced by the iterator.
+        # @type Collection: A collection type that implements the `FromIterator[T]` trait.
+        # @ret: A collection of type `Collection` that contains all the items produced by the iterator.
+
+        ret Collection::from_iter(self)
+    }
+}
+
+sup [T: Clone] Iterator[T] {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    cor cycle(self) -> Iterator[T] {
+        # The `cycle` method is a coroutine that takes an iterator and produces a new iterator that yields the items
+        # from the original iterator in an infinite loop. The method uses the `gen with` syntax to exhaust the
+        # generator, and then repeats the process indefinitely.
+        # @ret: A new iterator of type `Iterator[T]` that produces an infinite sequence of items by repeatedly yielding
+        # the items from the original iterator (`self`).
+
+        # Yield from the generator in an infinite loop. This requires
+        # a "buffer-and-clone" approach, as the generator will be
+        # exhausted after the first iteration.
+        let mut buffer = self.collect[Vec[T]]()
+        loop true { gen with buffer.clone().iter_mov() }
     }
 }

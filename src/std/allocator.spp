@@ -1,8 +1,10 @@
 use std::annotations::abstract_method
+use std::annotations::intrinsic
 use std::annotations::public
 use std::annotations::versioned
 use std::annotations::virtual_method
 use std::annotations::zero_type
+use std::clone::Clone
 use std::copy::Copy
 use std::number::S32
 use std::number::U8
@@ -331,4 +333,14 @@ sup GlobalAlloc ext Alloc {
 
         ret self.grow(ptr, old_layout, new_layout)
     }
+}
+
+sup GlobalAlloc ext Clone {
+    # The `GlobalAlloc` type implements the `Clone` trait, which allows for creating a new instance of the allocator.
+    # This is useful in scenarios where multiple instances of the allocator are needed, such as in multi-threaded
+    # environments. The `clone` method creates a new instance of `GlobalAlloc`, which can be used independently of the
+    # original instance.
+
+    !intrinsic(name="std.allocator.GlobalAlloc.clone")
+    fun clone(&self) -> Self { }
 }
