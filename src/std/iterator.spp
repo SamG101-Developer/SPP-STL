@@ -2,6 +2,7 @@ use std::annotations::public
 use std::annotations::versioned
 use std::boolean::Bool
 use std::cast::From
+use std::clone::Clone
 use std::function::FunMut
 use std::function::FunRef
 use std::generator::Gen
