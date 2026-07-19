@@ -420,7 +420,7 @@ sup [T: Clone] Iterator[T] {
         # Yield from the generator in an infinite loop. This requires
         # a "buffer-and-clone" approach, as the generator will be
         # exhausted after the first iteration.
-        let mut buffer = self.collect[Vec[Str]]()
+        let mut buffer = self.collect[Vec[T]]()
         loop true { gen with buffer.clone() }
     }
 }
