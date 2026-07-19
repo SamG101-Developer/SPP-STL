@@ -15,6 +15,31 @@ use std::void::Void
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
+cls FromIterator[T] {
+    # The `FromIterator` trait is used to define how to create a collection from an iterator. It provides a method
+    # `from_iter` that takes an iterator and produces a collection of type `Self`. This trait is essential for enabling
+    # the `collect` method on iterators, allowing them to be transformed into various collection types.
+    # @type T: The type of items produced by the iterator that will be collected into the collection.
+}
+
+sup [T] FromIterator[T] {
+    !public !abstract_method
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_iter[G: Gen[T]](iter: G) -> Self {
+        # The `from_iter` method is the core of the `FromIterator` trait. It defines how to create a collection of type
+        # `Self` from an iterator that produces items of type `T`. This method is typically implemented by collection
+        # types to specify how they should be constructed from an iterator. The implementation will depend on the
+        # specific collection type and how it manages its internal storage and structure.
+        # @type G: A generator type that produces items of type `T`. This is a generic type parameter that must
+        # implement the `Gen[T]` interface, meaning it must be a generator that yields items of type `T`.
+        # @let iter: The iterator that produces items of type `T` to be collected into the collection. This is a value
+        # of type `G`, which is a generator that yields items of type `T`.
+        # @ret: A new instance of the collection type (`Self`) that contains all the items produced by the iterator.
+    }
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
 cls Indexed[T] {
     # The `Indexed` class is used for the result of `[index]` indexing operations. Whilst it currently does not extend
     # add methods beyond what `GenOnce` provides, it is used for easy extension in the future, and to provide a clear
@@ -368,15 +393,15 @@ sup [T] Iterator[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun collect[Collection: From[Iterator[T]]](self) -> Collection {
+    fun collect[Collection: FromIterator[T]](self) -> Collection {
         # Collect this iterator into a collection. The `collect` method is a function that takes an iterator and
         # collects all the items produced by the iterator into a collection of type `Collection`. The method uses the
-        # `From` trait to convert the iterator into the specified collection type. This will only work for non-borrowed
-        # `T` types, as the `From` trait requires ownership of the items produced by the iterator.
-        # @type Collection: A collection type that implements the `From[Iterator[T]]` trait.
+        # `FromIterator` trait to convert the iterator into the specified collection type. This will only work for
+        # non-borrowed `T` types, as the `FromIterator` trait requires ownership of the items produced by the iterator.
+        # @type Collection: A collection type that implements the `FromIterator[T]` trait.
         # @ret: A collection of type `Collection` that contains all the items produced by the iterator.
 
-        ret Collection::from(self)
+        ret Collection::from_iter(self)
     }
 }
 

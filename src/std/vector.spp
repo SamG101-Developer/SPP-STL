@@ -16,6 +16,7 @@ use std::function::FunMov
 use std::function::FunMut
 use std::generator::Gen
 use std::generator::GenOnce
+use std::iterator::FromIterator
 use std::iterator::Indexed
 use std::iterator::Iterator
 use std::number::USize
@@ -618,15 +619,17 @@ sup [T: Eq, A: Alloc] Vec[T, A] ext Eq {
     }
 }
 
-sup [T, A: Alloc, G: Gen[T]] Vec[T, A] ext From[G] {
+sup [T, A: Alloc] Vec[T, A] ext FromIterator[T] {
     !intrinsic(name="std.vector.Vec.from[Gen]")
     !versioned(base="1.0.0", new="1.0.0")
-    fun from(that: G) -> Self {
+    fun from_iter[G: Gen[T]](iter: G) -> Self {
         # Build a new `Vec` from a generator. The generator is expected to yield elements of type `T`, and the function
         # will collect these elements into a new `Vec`. The function will continue to call the generator until it
         # returns `None`, indicating that there are no more elements to yield. The resulting `Vec` will contain all the
         # elements produced by the generator, in the order they were generated.
-        # @let that: The generator instance that will be used to produce elements for the new `Vec`.
+        # @type G: The type of the generator that produces elements of type `T`. This must be a generator type that
+        # yields elements of type `T`.
+        # @let iter: The generator instance that will be used to produce elements for the new `Vec`.
         # @ret: A new `Vec` instance containing all the elements produced by the generator.
 
         # Create the vector and yield all the elements
