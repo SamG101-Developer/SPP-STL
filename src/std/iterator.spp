@@ -421,6 +421,6 @@ sup [T: Clone] Iterator[T] {
         # a "buffer-and-clone" approach, as the generator will be
         # exhausted after the first iteration.
         let mut buffer = self.collect[Vec[T]]()
-        loop true { gen with buffer.clone() }
+        loop true { gen with buffer.clone().iter_mov() }
     }
 }
