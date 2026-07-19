@@ -160,7 +160,7 @@ sup Path {
         let parts = self.inner
             .split(&sep)
             .map((part: &StrView) Str::from(part))
-        ret Vec[Str]::from_generator(parts)
+        ret Vec[Str]::from(parts)
     }
 
     !public
