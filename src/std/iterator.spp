@@ -368,13 +368,13 @@ sup [T] Iterator[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun collect[Collection: From[Iterator[T]]](self) -> Collection[T] {
+    fun collect[Collection: From[Iterator[T]]](self) -> Collection {
         # Collect this iterator into a collection. The `collect` method is a function that takes an iterator and
-        # collects all the items produced by the iterator into a collection of type `Collection[T]`. The method uses the
+        # collects all the items produced by the iterator into a collection of type `Collection`. The method uses the
         # `From` trait to convert the iterator into the specified collection type. This will only work for non-borrowed
         # `T` types, as the `From` trait requires ownership of the items produced by the iterator.
         # @type Collection: A collection type that implements the `From[Iterator[T]]` trait.
-        # @ret: A collection of type `Collection[T]` that contains all the items produced by the iterator.
+        # @ret: A collection of type `Collection` that contains all the items produced by the iterator.
 
         ret Collection::from(self)
     }
