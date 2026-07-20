@@ -63,7 +63,7 @@ sup [Args: TupLike, Out] FunRef[Args, Out] {
 
     !public !abstract_method
     !versioned(base="1.0.0", new="1.0.0")
-    fun call_ref(args: Args) -> Out { }
+    fun call_ref(&self, args: Args) -> Out { }
 }
 
 sup [Args: TupLike, Out] FunMov[Args, Out] ext Fun {
