@@ -114,127 +114,122 @@ cmp fun bit_shr_assign[T: Integer, U: Integer](this: &mut T, by: U) -> Void { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.bit_ior")
 cmp fun bit_ior[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.bit_ior_assign")
 cmp fun bit_ior_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.bit_and")
 cmp fun bit_and[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.bit_and_assign")
 cmp fun bit_and_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.bit_xor")
 cmp fun bit_xor[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.bit_xor_assign")
 cmp fun bit_xor_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.bit_not")
 cmp fun bit_not[T: Integer](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.bit_not_assign")
 cmp fun bit_not_assign[T: Integer](this: &mut T) -> Void { }
 
 !public
 !always_inline
-!intrinsic
-cmp fun abs[T: Integer](this: T, that: T) -> T { }  # todo: not being used anywhere atm
-
-!public
-!always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.eq")
 cmp fun eq[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.oeq")
 cmp fun oeq[T: Num](this: &T, that: &T) -> Bool { }  # ordered equal (floats)
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.ne")
 cmp fun ne[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.one")
 cmp fun one[T: Num](this: &T, that: &T) -> Bool { }  # ordered not equal (floats)
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.slt")
 cmp fun slt[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.ult")
 cmp fun ult[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.olt")
 cmp fun olt[T: Num](this: &T, that: &T) -> Bool { }  # ordered less than (floats)
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.sle")
 cmp fun sle[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.ule")
 cmp fun ule[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.ole")
 cmp fun ole[T: Num](this: &T, that: &T) -> Bool { }  # ordered less than or equal (floats)
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.sgt")
 cmp fun sgt[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.ugt")
 cmp fun ugt[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.ogt")
 cmp fun ogt[T: Num](this: &T, that: &T) -> Bool { }  # ordered greater than (floats)
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.sge")
 cmp fun sge[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.uge")
 cmp fun uge[T: Num](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.oge")
 cmp fun oge[T: Num](this: &T, that: &T) -> Bool { }  # ordered greater than or equal (floats)
 
 !public

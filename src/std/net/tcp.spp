@@ -51,7 +51,7 @@ sup TcpListener {
         case fd < 0 { ret Fail(err=SockErr::from_errno(err)) }
 
         # Create the `TcpListener` object with the file descriptor.
-        let listener = TcpListener(fd, local=addr)
+        let listener = TcpListener(fd)
         let err = sppc::bind(listener.fd, &addr.storage())
         case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(val=listener)
