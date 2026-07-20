@@ -39,24 +39,36 @@ cls FunRef[Args: TupLike, Out] {
     # @type Out:
 }
 
-sup [Args: TupLike, Out] FunMov[Args, Out] ext Fun {
-    # Ensure all variations of functional types are able to be used with `Fun`, so that a generic constraint of `Fun`
-    # can accept any functional type.
-}
-
 sup [Args: TupLike, Out] FunMov[Args, Out] {
     # Add the abstract method that prevents a `Fun` from being instantiated, and allows provides the base method for
     # making a type functional / callable.
 
     !public !abstract_method
     !versioned(base="1.0.0", new="1.0.0")
-    fun call(self, args: Args) -> Out {
-        # The `call` method is the abstract method that defines the behavior of a functional type. It takes a tuple of
-        # arguments of type `Args` and returns a value of type `Out`. The specific behavior of the function is
-        # determined by the implementation of this method in the class that implements a derivative of `Fun`.
-        # @let args: A tuple of the arguments to pass to the function.
-        # @ret: The result of the function call, of type `Out`.
-    }
+    fun call_mov(self, args: Args) -> Out { }
+}
+
+sup [Args: TupLike, Out] FunMut[Args, Out] {
+    # Add the abstract method that prevents a `Fun` from being instantiated, and allows provides the base method for
+    # making a type functional / callable.
+
+    !public !abstract_method
+    !versioned(base="1.0.0", new="1.0.0")
+    fun call_mut(&mut self, args: Args) -> Out { }
+}
+
+sup [Args: TupLike, Out] FunRef[Args, Out] {
+    # Add the abstract method that prevents a `Fun` from being instantiated, and allows provides the base method for
+    # making a type functional / callable.
+
+    !public !abstract_method
+    !versioned(base="1.0.0", new="1.0.0")
+    fun call_ref(&self, args: Args) -> Out { }
+}
+
+sup [Args: TupLike, Out] FunMov[Args, Out] ext Fun {
+    # Ensure all variations of functional types are able to be used with `Fun`, so that a generic constraint of `Fun`
+    # can accept any functional type.
 }
 
 sup [Args: TupLike, Out] FunMut[Args, Out] ext FunMov[Args, Out] {
@@ -64,11 +76,15 @@ sup [Args: TupLike, Out] FunMut[Args, Out] ext FunMov[Args, Out] {
     # for generic constraints to accept either `FunMut` to `FunMov`, so that a `FunMut` can be passed to a function that
     # also accepts a `FunMov`.
 
-    !abstract_method
-    fun call(self, args: Args) -> Out {
-        # Re-implement the `call` method but keep it abstract.
-        # @let args: A tuple of the arguments to pass to the function.
-        # @ret: The result of the function call, of type `Out`.
+    !versioned(base="1.0.0", new="1.0.0")
+    fun call_mov(self, args: Args) -> Out {
+        # The `call_mov` method is implemented for `FunMut` to allow it to be used in contexts where a `FunMov` is
+        # expected. This method consumes the `FunMut` instance, allowing it to be called once and then moved.
+        # @let args: The arguments to pass to the function when calling it. This is a tuple of the argument types
+        # specified in the `Args` type parameter.
+        # @ret: The result of calling the function, which is of the type specified in the `Out` type parameter.
+
+        ret self.call_mut(&mut self, args)
     }
 }
 
@@ -77,10 +93,15 @@ sup [Args: TupLike, Out] FunRef[Args, Out] ext FunMut[Args, Out] {
     # for generic constraints to accept either `FunRef` to `FunMut`, so that a `FunRef` can be passed to a function that
     # also accepts a `FunMut`.
 
-    !abstract_method
-    fun call(self, args: Args) -> Out {
-        # Re-implement the `call` method but keep it abstract.
-        # @let args: A tuple of the arguments to pass to the function.
-        # @ret: The result of the function call, of type `Out`.
+    !versioned(base="1.0.0", new="1.0.0")
+    fun call_mut(&mut self, args: Args) -> Out {
+        # The `call_mut` method is implemented for `FunRef` to allow it to be used in contexts where a `FunMut` is
+        # expected. This method allows the `FunRef` instance to be called multiple times, as it does not consume the
+        # instance.
+        # @let args: The arguments to pass to the function when calling it. This is a tuple of the argument types
+        # specified in the `Args` type parameter.
+        # @ret: The result of calling the function, which is of the type specified in the `Out` type parameter.
+
+        ret self.call_ref(&self, args)
     }
 }
