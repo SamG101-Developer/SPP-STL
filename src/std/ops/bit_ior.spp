@@ -1,12 +1,11 @@
 use std::annotations::abstract_method
-use std::annotations::no_init
 use std::annotations::public
 use std::void::Void
 
-!public !no_init
+!public
 cls BitIor[Rhs=Self, Ret=Self] { }
 
-!public !no_init
+!public
 cls BitIorAssign[Rhs=Self] { }
 
 sup [Rhs, Ret] BitIor[Rhs, Ret] {

@@ -1,12 +1,11 @@
 use std::annotations::abstract_method
-use std::annotations::no_init
 use std::annotations::public
 use std::void::Void
 
-!public !no_init
+!public
 cls Pow[Rhs=Self, Ret=Self] { }
 
-!public !no_init
+!public
 cls PowAssign[Rhs=Self] { }
 
 sup [Rhs, Ret] Pow[Rhs, Ret] {

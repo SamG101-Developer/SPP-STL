@@ -1,12 +1,11 @@
 use std::annotations::abstract_method
-use std::annotations::no_init
 use std::annotations::public
 use std::void::Void
 
-!public !no_init
+!public
 cls BitNot[Ret=Self] { }
 
-!public !no_init
+!public
 cls BitNotAssign { }
 
 sup [Ret] BitNot[Ret] {

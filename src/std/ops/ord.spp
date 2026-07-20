@@ -1,11 +1,10 @@
 use std::annotations::abstract_method
-use std::annotations::no_init
 use std::annotations::public
 use std::annotations::virtual_method
 use std::boolean::Bool
 use std::number::S32
 
-!public !no_init
+!public
 cls Ord[Rhs=Self] { }
 
 sup [Rhs] Ord[Rhs] {

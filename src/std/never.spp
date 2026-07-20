@@ -1,8 +1,8 @@
-use std::annotations::no_init
 use std::annotations::public
 use std::annotations::versioned
+use std::annotations::zero_type
 
-!public !no_init
+!public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
 cls Never {
     # The `Never` type represents a value that can never exist. It has no fields or methods, and cannot be instantiated.

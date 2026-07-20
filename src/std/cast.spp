@@ -1,6 +1,5 @@
 use std::annotations::abstract_method
 use std::annotations::intrinsic
-use std::annotations::no_init
 use std::annotations::public
 use std::annotations::versioned
 use std::annotations::zero_type
@@ -9,7 +8,7 @@ use std::option::None
 use std::result::Opt
 use std::string_view::StrView
 
-!public !no_init
+!public
 !versioned(base="1.0.0", new="1.0.0")
 cls From[That] {
     # The `From` type is a simple trait that defines a conversion from one type to another. It has a single method,
@@ -20,7 +19,7 @@ cls From[That] {
     # @type That: The type that can be converted into the implementing type. This is the source type for the conversion.
 }
 
-!public !no_init
+!public
 !versioned(base="1.0.0", new="1.0.0")
 cls TryFrom[That] {
     # The `TryFrom` type is a trait that defines a fallible conversion from one type to another. It has a single method,

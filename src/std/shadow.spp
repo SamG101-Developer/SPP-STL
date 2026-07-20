@@ -1,12 +1,11 @@
 use std::annotations::intrinsic
-use std::annotations::no_init
 use std::annotations::public
 use std::annotations::versioned
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::shared::Shared
 
-!public !no_init
+!public
 !versioned(base="1.0.0", new="1.0.0")
 cls Shadow[T, A: Alloc = GlobalAlloc] { }
 

@@ -1,5 +1,4 @@
 use std::annotations::abstract_method
-use std::annotations::no_init
 use std::annotations::public
 use std::annotations::virtual_method
 use std::generator::GenOnce
@@ -8,16 +7,16 @@ use std::view::View
 use std::num::bases::One
 use std::num::bases::Zero
 
-!public !no_init
+!public
 cls IndexMut[T, I] { }
 
-!public !no_init
+!public
 cls IndexRef[T, I] { }
 
-!public !no_init
+!public
 cls SliceRef[V, I: Zero] { }
 
-!public !no_init
+!public
 cls SliceMut[V, I: Zero] { }
 
 sup [T, I] IndexMut[T, I] {

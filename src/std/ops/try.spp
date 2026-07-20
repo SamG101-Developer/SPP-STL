@@ -1,10 +1,9 @@
 use std::annotations::abstract_method
-use std::annotations::no_init
 use std::annotations::protected
 use std::annotations::public
 use std::boolean::Bool
 
-!public !no_init
+!public
 cls Try[Output, Residual, Value] { }
 
 sup [Output, Residual, Value] Try[Output, Residual, Value] {
