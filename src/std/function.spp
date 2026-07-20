@@ -39,31 +39,24 @@ cls FunRef[Args: TupLike, Out] {
     # @type Out:
 }
 
-# sup Fun {
-#     # Add the abstract method that prevents a `Fun` from being instantiated, and allows provides the base method for
-#     # making a type functional / callable.
-#
-#     !public !abstract_method
-#     !versioned(base="1.0.0", new="1.0.0")
-#     fun call(self, args: Args) -> Out {
-#         # The `call` method is the abstract method that defines the behavior of a functional type. It takes a tuple of
-#         # arguments of type `Args` and returns a value of type `Out`. The specific behavior of the function is
-#         # determined by the implementation of this method in the class that implements a derivative of `Fun`.
-#         # @let args: A tuple of the arguments to pass to the function.
-#         # @ret: The result of the function call, of type `Out`.
-#     }
-# }
+sup [Args: TupLike, Out] FunMov[Args, Out] {
+    # Add the abstract method that prevents a `Fun` from being instantiated, and allows provides the base method for
+    # making a type functional / callable.
+
+    !public !abstract_method
+    !versioned(base="1.0.0", new="1.0.0")
+    fun call(self, args: Args) -> Out {
+        # The `call` method is the abstract method that defines the behavior of a functional type. It takes a tuple of
+        # arguments of type `Args` and returns a value of type `Out`. The specific behavior of the function is
+        # determined by the implementation of this method in the class that implements a derivative of `Fun`.
+        # @let args: A tuple of the arguments to pass to the function.
+        # @ret: The result of the function call, of type `Out`.
+    }
+}
 
 sup [Args: TupLike, Out] FunMov[Args, Out] ext Fun {
     # Ensure all variations of functional types are able to be used with `Fun`, so that a generic constraint of `Fun`
     # can accept any functional type.
-
-    !abstract_method
-    fun call(self, args: Args) -> Out {
-        # # Re-implement the `call` method but keep it abstract.
-        # @let args: A tuple of the arguments to pass to the function.
-        # @ret: The result of the function call, of type `Out`.
-    }
 }
 
 sup [Args: TupLike, Out] FunMut[Args, Out] ext FunMov[Args, Out] {
