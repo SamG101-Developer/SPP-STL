@@ -39,11 +39,8 @@ cls Socket {
     # sockets.
     # @let fd: The file descriptor for the socket. This is used to identify the socket in the operating system, and is
     # used for all socket operations.
-    # @let local: The local address of the socket. This is the address that the socket is bound to, and is used for
-    # operations that require the local address, such as binding and listening.
 
-    !package fd: S32
-    !package local: SockAddr
+    !package fd: S32 = -1
 }
 
 sup Socket {
@@ -125,12 +122,16 @@ sup Socket {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun local_addr(&self) -> SockAddr {
+    fun local_addr(&self) -> Res[SockAddr, SockErr] {
         # The `local_addr` method returns the local address that the socket is bound to. This is used for servers that
-        # want to know the address they are listening on, especially if they bound to a wildcard address.
+        # want to know the address they are listening on, especially if they bound to a wildcard address or an ephemeral
+        # port, in which case the kernel-assigned address is only known after binding.
         # @ret: A result containing the local `SockAddr` if successful, or a `SockErr` if there was an error.
 
-        ret self.local
+        let mut storage = sppc::CSockaddrStorage()
+        let err = sppc::getsockname(self.fd, &mut storage)
+        case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
+        ret Pass(val=SockAddr::from_storage(&storage))
     }
 }
 
