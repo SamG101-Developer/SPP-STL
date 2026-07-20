@@ -1,4 +1,5 @@
 use std::annotations::intrinsic
+use std::annotations::no_init
 use std::annotations::public
 use std::annotations::versioned
 use std::allocator::Alloc
@@ -14,7 +15,7 @@ use std::void::Void
 use std::ops::del::Del
 use std::ops::fwd::FwdRef
 
-!public
+!public !no_init
 !versioned(base="1.0.0", new="1.0.0")
 cls Shared[T, A: Alloc = GlobalAlloc] {
     shared_counter: USize

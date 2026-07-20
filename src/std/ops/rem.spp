@@ -1,18 +1,20 @@
 use std::annotations::abstract_method
+use std::annotations::no_init
 use std::annotations::public
 use std::void::Void
 
-!public cls Rem[Rhs=Self, Ret=Self] { }
-!public cls RemAssign[Rhs=Self] { }
+!public !no_init
+cls Rem[Rhs=Self, Ret=Self] { }
 
-# Allow the use of the "%" operator.
+!public !no_init
+cls RemAssign[Rhs=Self] { }
+
 sup [Rhs, Ret] Rem[Rhs, Ret] {
     !public
     !abstract_method
     fun rem(self, that: Rhs) -> Ret { }
 }
 
-# Allow the use of the "%=" operator.
 sup [Rhs] RemAssign[Rhs] {
     !public
     !abstract_method

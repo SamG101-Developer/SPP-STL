@@ -1,4 +1,5 @@
 use std::annotations::abstract_method
+use std::annotations::no_init
 use std::annotations::package
 use std::annotations::private
 use std::annotations::public
@@ -72,7 +73,7 @@ sup StreamErr {
     }
 }
 
-!public
+!public !no_init
 !versioned(base="1.0.0", new="1.0.0")
 cls Read {
     # The Read type defines the interface for reading bytes from a stream. It includes an abstract method `read` that
@@ -83,7 +84,7 @@ cls Read {
     # designed as the common `byte source` interface.
 }
 
-!public
+!public !no_init
 !versioned(base="1.0.0", new="1.0.0")
 cls Write {
     # The Write type defines the interface for writing bytes to a stream. It includes an abstract method `write` that
@@ -94,7 +95,7 @@ cls Write {
     # interface is designed as the common `byte sink` interface.
 }
 
-!public
+!public !no_init
 !versioned(base="1.0.0", new="1.0.0")
 cls Seek {
     # The Seek type defines the interface for seeking within a stream. It includes an abstract method `seek`,

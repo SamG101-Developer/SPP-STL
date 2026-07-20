@@ -1,9 +1,10 @@
 use std::annotations::abstract_method
+use std::annotations::no_init
 use std::annotations::public
 use std::annotations::versioned
 use std::void::Void
 
-!public
+!public !no_init
 !versioned(base="1.0.0", new="1.0.0")
 cls Add[Rhs=Self, Ret=Self] {
     # The `Add` class represents the ability to add two values together using the "+" operator. It is a generic class
@@ -19,7 +20,7 @@ cls Add[Rhs=Self, Ret=Self] {
     # allow for flexibility in the types that can be returned as a result of the addition.
 }
 
-!public
+!public !no_init
 !versioned(base="1.0.0", new="1.0.0")
 cls AddAssign[Rhs=Self] {
     # The `AddAssign` class represents the ability to add a value to another value in place using the "+=" operator. It

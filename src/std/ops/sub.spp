@@ -1,18 +1,20 @@
 use std::annotations::abstract_method
+use std::annotations::no_init
 use std::annotations::public
 use std::void::Void
 
-!public cls Sub[Rhs=Self, Ret=Self] { }
-!public cls SubAssign[Rhs=Self] { }
+!public !no_init
+cls Sub[Rhs=Self, Ret=Self] { }
 
-# Allow the use of the "-" operator.
+!public !no_init
+cls SubAssign[Rhs=Self] { }
+
 sup [Rhs, Ret] Sub[Rhs, Ret] {
     !public
     !abstract_method
     fun sub(self, that: Rhs) -> Ret { }
 }
 
-# Allow the use of the "-=" operator.
 sup [Rhs] SubAssign[Rhs] {
     !public
     !abstract_method

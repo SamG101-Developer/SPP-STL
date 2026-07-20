@@ -1,11 +1,12 @@
 use std::annotations::abstract_method
+use std::annotations::no_init
 use std::annotations::public
 use std::annotations::virtual_method
 use std::boolean::Bool
 
-!public cls Eq[Rhs=Self] { }
+!public !no_init
+cls Eq[Rhs=Self] { }
 
-# Allow the use of the "==", "!=" operator.
 sup [Rhs] Eq[Rhs] {
     !public
     !abstract_method

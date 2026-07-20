@@ -1,9 +1,13 @@
 use std::annotations::abstract_method
+use std::annotations::no_init
 use std::annotations::public
 use std::generator::GenOnce
 
-!public cls FwdMut[T] { }
-!public cls FwdRef[T] { }
+!public !no_init
+cls FwdMut[T] { }
+
+!public !no_init
+cls FwdRef[T] { }
 
 sup [T] FwdMut[T] {
     !public

@@ -1,5 +1,6 @@
 use std::annotations::abstract_method
 use std::annotations::intrinsic
+use std::annotations::no_init
 use std::annotations::public
 use std::annotations::versioned
 use std::annotations::virtual_method
@@ -120,7 +121,7 @@ sup Layout {
     }
 }
 
-!public
+!public !no_init
 !versioned(base="1.0.0", new="1.0.0")
 cls Alloc {
     # The `Alloc` implementation defines the interface for memory allocation, deallocation, and reallocation. It is

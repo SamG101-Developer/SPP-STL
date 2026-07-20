@@ -1,7 +1,8 @@
+use std::annotations::no_init
 use std::annotations::public
 use std::annotations::versioned
 
-!public
+!public !no_init
 !versioned(base="1.0.0", new="1.0.0")
 cls Copy {
     # The `Copy` type is a marker that changes all move operations into copy operations, leaving the value behind. This

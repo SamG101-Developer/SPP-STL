@@ -1,18 +1,20 @@
 use std::annotations::abstract_method
+use std::annotations::no_init
 use std::annotations::public
 use std::void::Void
 
-!public cls BitNot[Ret=Self] { }
-!public cls BitNotAssign { }
+!public !no_init
+cls BitNot[Ret=Self] { }
 
-# Allow the use of the ??? operator.
+!public !no_init
+cls BitNotAssign { }
+
 sup [Ret] BitNot[Ret] {
     !public
     !abstract_method
     fun bit_not(self) -> Ret { }
 }
 
-# Allow the use of the ??? operator.
 sup BitNotAssign {
     !public
     !abstract_method

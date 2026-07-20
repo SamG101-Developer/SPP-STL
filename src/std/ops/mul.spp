@@ -1,18 +1,20 @@
 use std::annotations::abstract_method
+use std::annotations::no_init
 use std::annotations::public
 use std::void::Void
 
-!public cls Mul[Rhs=Self, Ret=Self] { }
-!public cls MulAssign[Rhs=Self] { }
+!public !no_init
+cls Mul[Rhs=Self, Ret=Self] { }
 
-# Allow the use of the "*" operator.
+!public !no_init
+cls MulAssign[Rhs=Self] { }
+
 sup [Rhs, Ret] Mul[Rhs, Ret] {
     !public
     !abstract_method
     fun mul(self, that: Rhs) -> Ret { }
 }
 
-# Allow the use of the "*=" operator.
 sup [Rhs] MulAssign[Rhs] {
     !public
     !abstract_method

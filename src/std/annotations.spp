@@ -85,11 +85,11 @@ cmp fun abstract_method() -> Void { }
 !versioned(base="1.0.0", new="1.0.0")
 cmp fun ffi(symbol: &StrView) -> Void { }
 
-!public
-!intrinsic(name="std.annotations.ext_method")
-!annotation(target=Annotation::class)
-!versioned(base="1.0.0", new="1.0.0")
-cmp fun extends[..Ts]() -> Void { }
+# !public
+# !intrinsic(name="std.annotations.ext_method")
+# !annotation(target=Annotation::class)
+# !versioned(base="1.0.0", new="1.0.0")
+# cmp fun extends[..Ts]() -> Void { }
 
 !public
 !intrinsic(name="std.annotations.constant")
@@ -102,6 +102,12 @@ cmp fun variant_default[T]() -> Void { }
 !annotation(target=Annotation::class)
 !versioned(base="1.0.0", new="1.0.0")
 cmp fun zero_type() -> Void { }
+
+!public
+!intrinsic(name="std.annotations.no_init")
+!annotation(target=Annotation::class)
+!versioned(base="1.0.0", new="1.0.0")
+cmp fun no_init() -> Void { }
 
 !public
 !intrinsic(name="std.annotations.zero_type")

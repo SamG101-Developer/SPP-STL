@@ -1,4 +1,5 @@
 use std::annotations::intrinsic
+use std::annotations::no_init
 use std::annotations::package
 use std::annotations::public
 use std::annotations::versioned
@@ -17,7 +18,7 @@ use std::ops::fwd::FwdMut
 use std::ops::fwd::FwdRef
 use std::ops::void::Void
 
-!public
+!public !no_init
 !versioned(base="1.0.0", new="1.0.0")
 cls Single[T, A: Alloc = GlobalAlloc] {
     # The `Single` type is a uniquely owned pointer on the heap, the same as `Box` in Rust, or `unique_ptr` in C++. It

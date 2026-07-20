@@ -1,15 +1,16 @@
+use std::annotations::no_init
 use std::annotations::public
 use std::annotations::versioned
 use std::tuple::TupLike
 
-!public
+!public !no_init
 !versioned(base="1.0.0", new="1.0.0")
 cls Fun {
     # The `Fun` type is a non-generic marker trait for all functions. This allows another function to accept a function
     # parameter, wihout having to monomorphize when the args types or return type isn't needed.
 }
 
-!public
+!public !no_init
 !versioned(base="1.0.0", new="1.0.0")
 cls FunMov[Args: TupLike, Out] {
     # A `FunMov` is a function that contains by-val captures, and therefore can only be called once. Calling the
@@ -19,7 +20,7 @@ cls FunMov[Args: TupLike, Out] {
     # @type Out: The return type of the function. If the function returns nothing, it is `Void`.
 }
 
-!public
+!public !no_init
 !versioned(base="1.0.0", new="1.0.0")
 cls FunMut[Args: TupLike, Out] {
     # A `FunMut` is a function that contains mutable borrow captures, and therefore can be called multiple times, but
@@ -28,7 +29,7 @@ cls FunMut[Args: TupLike, Out] {
     # @type Out: The return type of the function. If the function returns nothing, it is `Void`.
 }
 
-!public
+!public !no_init
 !versioned(base="1.0.0", new="1.0.0")
 cls FunRef[Args: TupLike, Out] {
     # A `FunRef` is a function that contains only by-ref captures, and therefore can be called multiple times, and

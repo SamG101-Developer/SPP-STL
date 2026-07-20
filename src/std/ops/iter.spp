@@ -1,13 +1,25 @@
 use std::annotations::abstract_method
+use std::annotations::no_init
 use std::annotations::public
 use std::iterator::Iterator
 
-!public cls IterMov[T] { }
-!public cls IterMut[T] { }
-!public cls IterRef[T] { }
-!public cls RevIterMov[T] { }
-!public cls RevIterMut[T] { }
-!public cls RevIterRef[T] { }
+!public !no_init
+cls IterMov[T] { }
+
+!public !no_init
+cls IterMut[T] { }
+
+!public !no_init
+cls IterRef[T] { }
+
+!public !no_init
+cls RevIterMov[T] { }
+
+!public !no_init
+cls RevIterMut[T] { }
+
+!public !no_init
+cls RevIterRef[T] { }
 
 sup [T] IterMov[T] {
     !public
