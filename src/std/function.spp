@@ -39,6 +39,11 @@ cls FunRef[Args: TupLike, Out] {
     # @type Out:
 }
 
+sup [Args: TupLike, Out] FunMov[Args, Out] ext Fun {
+    # Ensure all variations of functional types are able to be used with `Fun`, so that a generic constraint of `Fun`
+    # can accept any functional type.
+}
+
 sup [Args: TupLike, Out] FunMov[Args, Out] {
     # Add the abstract method that prevents a `Fun` from being instantiated, and allows provides the base method for
     # making a type functional / callable.
@@ -54,11 +59,6 @@ sup [Args: TupLike, Out] FunMov[Args, Out] {
     }
 }
 
-sup [Args: TupLike, Out] FunMov[Args, Out] ext Fun {
-    # Ensure all variations of functional types are able to be used with `Fun`, so that a generic constraint of `Fun`
-    # can accept any functional type.
-}
-
 sup [Args: TupLike, Out] FunMut[Args, Out] ext FunMov[Args, Out] {
     # A `FunMut` can be used wherever a `FunMov` is expected, as it can be called at least once. This extension allows
     # for generic constraints to accept either `FunMut` to `FunMov`, so that a `FunMut` can be passed to a function that
@@ -66,7 +66,7 @@ sup [Args: TupLike, Out] FunMut[Args, Out] ext FunMov[Args, Out] {
 
     !abstract_method
     fun call(self, args: Args) -> Out {
-        # # Re-implement the `call` method but keep it abstract.
+        # Re-implement the `call` method but keep it abstract.
         # @let args: A tuple of the arguments to pass to the function.
         # @ret: The result of the function call, of type `Out`.
     }
@@ -79,7 +79,7 @@ sup [Args: TupLike, Out] FunRef[Args, Out] ext FunMut[Args, Out] {
 
     !abstract_method
     fun call(self, args: Args) -> Out {
-        # # Re-implement the `call` method but keep it abstract.
+        # Re-implement the `call` method but keep it abstract.
         # @let args: A tuple of the arguments to pass to the function.
         # @ret: The result of the function call, of type `Out`.
     }
