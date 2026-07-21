@@ -414,7 +414,7 @@ sup StrView {
         # @let prefix: The `StrView` prefix to remove from this string if it is present.
         # @ret: A view of this string with the prefix removed if it starts with the prefix.
 
-        case self.starts_with(prefix).not { gen &self }
+        case self.starts_with(&prefix).not { gen &self }
         gen self[prefix.length to self.length]
     }
 
@@ -426,7 +426,7 @@ sup StrView {
         # @let suffix: The `StrView` suffix to remove from this string if it is present.
         # @ret: A view of this string with the suffix removed if it ends with the suffix.
 
-        case self.ends_with(suffix).not { gen &self }
+        case self.ends_with(&suffix).not { gen &self }
         gen self[0_uz to self.length - suffix.length]
     }
 
@@ -441,8 +441,8 @@ sup StrView {
         # suffix.
 
         # Check both the prefix and suffix, and if either is not present, return this string unchanged.
-        case self.starts_with(prefix).not { gen &self }
-        case self.ends_with(suffix).not { gen &self }
+        case self.starts_with(&prefix).not { gen &self }
+        case self.ends_with(&suffix).not { gen &self }
         gen self[prefix.length to self.length - suffix.length]
     }
 
