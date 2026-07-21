@@ -327,7 +327,7 @@ sup BigUInt ext std::ops::mul::MulAssign {
             ret
         }
 
-        let val = BigUInt()
+        let mut val = BigUInt()
 
         loop i in Range[USize]::between(0_uz, self.data.len()) {
             let mut carry = 0_u64
