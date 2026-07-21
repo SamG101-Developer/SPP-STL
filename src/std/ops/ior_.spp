@@ -3,10 +3,32 @@ use std::annotations::public
 use std::boolean::Bool
 
 !public
-cls Ior[Rhs=Self] { }
+cls Ior[Rhs=Self] {
+    # The `Ior` class represents the ability to compute the logical inclusive OR of two values using the "or" operator.
+    # It is a generic class that takes one type parameter: `Rhs`, which represents the type of the right-hand side
+    # operand. By default, `Rhs` is set to `Self`, meaning that if no specific type is provided, it will assume that the
+    # right-hand side operand is of the same type as the implementing class. The result of the logical inclusive OR
+    # operation is always a `Bool`.
+    # @type Rhs: The type of the right-hand side operand in the logical inclusive OR operation. This is the type of the
+    # value that will be combined with the left-hand side operand (the instance of the class that implements `Ior`)
+    # using a logical inclusive OR. It can be any type, and it is specified as a generic parameter to allow for
+    # flexibility in the types that can be combined together.
+}
 
 sup [Rhs] Ior[Rhs] {
     !public
     !abstract_method
-    fun ior_(self, that: Rhs) -> Bool { }
+    fun ior_(self, that: Rhs) -> Bool {
+        # The `ior_` method defines the behavior of the "or" operator for the implementing class. It takes a value of
+        # type `Rhs` as an argument, which represents the right-hand side operand in the logical inclusive OR operation.
+        # The method returns a `Bool`, which represents the result of the logical inclusive OR. The specific behavior of
+        # the logical inclusive OR operation is determined by the implementation of this method in the class that
+        # implements `Ior`.
+        # @let that: The right-hand side operand in the logical inclusive OR operation. This is the value that will be
+        # combined with the left-hand side operand (the instance of the class that implements `Ior`) using a logical
+        # inclusive OR. It is of type `Rhs`, which is a generic parameter that can be specified when implementing the
+        # `Ior` class.
+        # @ret: The result of the logical inclusive OR operation, as a `Bool`. This is the value that will be returned
+        # when the "or" operator is used to combine two values.
+    }
 }

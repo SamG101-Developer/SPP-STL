@@ -3,19 +3,60 @@ use std::annotations::public
 use std::void::Void
 
 !public
-cls Div[Rhs=Self, Ret=Self] { }
+cls Div[Rhs=Self, Ret=Self] {
+    # The `Div` class represents the ability to divide one value by another using the "/" operator. It is a generic
+    # class that takes two type parameters: `Rhs`, which represents the type of the right-hand side operand, and `Ret`,
+    # which represents the type of the result of the division. By default, both `Rhs` and `Ret` are set to `Self`,
+    # meaning that if no specific types are provided, it will assume that both operands and the result are of the same
+    # type as the implementing class.
+    # @type Rhs: The type of the right-hand side operand in the division operation. This is the type of the value that
+    # the left-hand side operand (the instance of the class that implements `Div`) will be divided by. It can be any
+    # type, and it is specified as a generic parameter to allow for flexibility in the types that can be divided.
+    # @type Ret: The type of the result of the division operation. This is the type of the value that will be returned
+    # when the "/" operator is used to divide one value by another. Like `Rhs`, it is specified as a generic parameter
+    # to allow for flexibility in the types that can be returned as a result of the division.
+}
 
 !public
-cls DivAssign[Rhs=Self] { }
+cls DivAssign[Rhs=Self] {
+    # The `DivAssign` class represents the ability to divide a value by another value in place using the "/=" operator.
+    # It is a generic class that takes one type parameter: `Rhs`, which represents the type of the right-hand side
+    # operand. By default, `Rhs` is set to `Self`, meaning that if no specific type is provided, it will assume that the
+    # right-hand side operand is of the same type as the implementing class.
+    # @type Rhs: The type of the right-hand side operand in the division assignment operation. This is the type of the
+    # value that the left-hand side operand (the instance of the class that implements `DivAssign`) will be divided by.
+    # It can be any type, and it is specified as a generic parameter to allow for flexibility in the types that can be
+    # divided using the "/=" operator.
+}
 
 sup [Rhs, Ret] Div[Rhs, Ret] {
     !public
     !abstract_method
-    fun div(self, that: Rhs) -> Ret { }
+    fun div(self, that: Rhs) -> Ret {
+        # The `div` method defines the behavior of the "/" operator for the implementing class. It takes a value of type
+        # `Rhs` as an argument, which represents the right-hand side operand in the division operation. The method
+        # returns a value of type `Ret`, which represents the result of the division. The specific behavior of the
+        # division operation is determined by the implementation of this method in the class that implements `Div`.
+        # @let that: The right-hand side operand in the division operation. This is the value that the left-hand side
+        # operand (the instance of the class that implements `Div`) will be divided by. It is of type `Rhs`, which is a
+        # generic parameter that can be specified when implementing the `Div` class.
+        # @ret: The result of the division operation. This is the value that will be returned when the "/" operator is
+        # used to divide one value by another. It is of type `Ret`, which is a generic parameter that can be specified
+        # when implementing the `Div` class.
+    }
 }
 
 sup [Rhs] DivAssign[Rhs] {
     !public
     !abstract_method
-    fun div_assign(&mut self, that: Rhs) -> Void { }
+    fun div_assign(&mut self, that: Rhs) -> Void {
+        # The `div_assign` method defines the behavior of the "/=" operator for the implementing class. It takes a value
+        # of type `Rhs` as an argument, which represents the right-hand side operand in the division assignment
+        # operation. The method modifies the left-hand side operand (the instance of the class that implements
+        # `DivAssign`) in place by dividing it by the value of `that`. The method does not return a value, as the result
+        # of the division assignment is stored directly in the left-hand side operand.
+        # @let that: The right-hand side operand in the division assignment operation. This is the value that the
+        # left-hand side operand (the instance of the class that implements `DivAssign`) will be divided by. It is of
+        # type `Rhs`, which is a generic parameter that can be specified when implementing the `DivAssign` class.
+    }
 }

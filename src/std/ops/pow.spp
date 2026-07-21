@@ -3,19 +3,64 @@ use std::annotations::public
 use std::void::Void
 
 !public
-cls Pow[Rhs=Self, Ret=Self] { }
+cls Pow[Rhs=Self, Ret=Self] {
+    # The `Pow` class represents the ability to raise one value to the power of another using the "**" operator. It is a
+    # generic class that takes two type parameters: `Rhs`, which represents the type of the right-hand side operand (the
+    # exponent), and `Ret`, which represents the type of the result of the exponentiation. By default, both `Rhs` and
+    # `Ret` are set to `Self`, meaning that if no specific types are provided, it will assume that both operands and the
+    # result are of the same type as the implementing class.
+    # @type Rhs: The type of the right-hand side operand in the exponentiation operation. This is the type of the
+    # exponent that the left-hand side operand (the instance of the class that implements `Pow`) will be raised to the
+    # power of. It can be any type, and it is specified as a generic parameter to allow for flexibility in the types
+    # that can be used as the exponent.
+    # @type Ret: The type of the result of the exponentiation operation. This is the type of the value that will be
+    # returned when the "**" operator is used to raise one value to the power of another. Like `Rhs`, it is specified as
+    # a generic parameter to allow for flexibility in the types that can be returned as a result of the exponentiation.
+}
 
 !public
-cls PowAssign[Rhs=Self] { }
+cls PowAssign[Rhs=Self] {
+    # The `PowAssign` class represents the ability to raise a value to the power of another value in place using the
+    # "**=" operator. It is a generic class that takes one type parameter: `Rhs`, which represents the type of the
+    # right-hand side operand (the exponent). By default, `Rhs` is set to `Self`, meaning that if no specific type is
+    # provided, it will assume that the right-hand side operand is of the same type as the implementing class.
+    # @type Rhs: The type of the right-hand side operand in the exponentiation assignment operation. This is the type of
+    # the exponent that the left-hand side operand (the instance of the class that implements `PowAssign`) will be
+    # raised to the power of. It can be any type, and it is specified as a generic parameter to allow for flexibility in
+    # the types that can be used as the exponent with the "**=" operator.
+}
 
 sup [Rhs, Ret] Pow[Rhs, Ret] {
     !public
     !abstract_method
-    fun pow(self, that: Rhs) -> Ret { }
+    fun pow(self, that: Rhs) -> Ret {
+        # The `pow` method defines the behavior of the "**" operator for the implementing class. It takes a value of
+        # type `Rhs` as an argument, which represents the right-hand side operand (the exponent) in the exponentiation
+        # operation. The method returns a value of type `Ret`, which represents the result of raising the left-hand side
+        # operand to the power of the right-hand side operand. The specific behavior of the exponentiation operation is
+        # determined by the implementation of this method in the class that implements `Pow`.
+        # @let that: The right-hand side operand in the exponentiation operation. This is the exponent that the
+        # left-hand side operand (the instance of the class that implements `Pow`) will be raised to the power of. It is
+        # of type `Rhs`, which is a generic parameter that can be specified when implementing the `Pow` class.
+        # @ret: The result of the exponentiation operation. This is the value that will be returned when the "**"
+        # operator is used to raise one value to the power of another. It is of type `Ret`, which is a generic parameter
+        # that can be specified when implementing the `Pow` class.
+    }
 }
 
 sup [Rhs] PowAssign[Rhs] {
     !public
     !abstract_method
-    fun pow_assign(&mut self, that: Rhs) -> Void { }
+    fun pow_assign(&mut self, that: Rhs) -> Void {
+        # The `pow_assign` method defines the behavior of the "**=" operator for the implementing class. It takes a
+        # value of type `Rhs` as an argument, which represents the right-hand side operand (the exponent) in the
+        # exponentiation assignment operation. The method modifies the left-hand side operand (the instance of the class
+        # that implements `PowAssign`) in place by raising it to the power of the value of `that`. The method does not
+        # return a value, as the result of the exponentiation assignment is stored directly in the left-hand side
+        # operand.
+        # @let that: The right-hand side operand in the exponentiation assignment operation. This is the exponent that
+        # the left-hand side operand (the instance of the class that implements `PowAssign`) will be raised to the power
+        # of. It is of type `Rhs`, which is a generic parameter that can be specified when implementing the `PowAssign`
+        # class.
+    }
 }

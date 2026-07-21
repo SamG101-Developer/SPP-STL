@@ -3,19 +3,66 @@ use std::annotations::public
 use std::void::Void
 
 !public
-cls BitShr[Rhs=Self, Ret=Self] { }
+cls BitShr[Rhs=Self, Ret=Self] {
+    # The `BitShr` class represents the ability to shift the bits of a value to the right using the ">>" operator. It is
+    # a generic class that takes two type parameters: `Rhs`, which represents the type of the right-hand side operand
+    # (the shift amount), and `Ret`, which represents the type of the result of the right shift operation. By default,
+    # both `Rhs` and `Ret` are set to `Self`, meaning that if no specific types are provided, it will assume that both
+    # operands and the result are of the same type as the implementing class.
+    # @type Rhs: The type of the right-hand side operand in the right shift operation. This is the type of the value
+    # that specifies how many bit positions the left-hand side operand (the instance of the class that implements
+    # `BitShr`) will be shifted to the right. It can be any type, and it is specified as a generic parameter to allow
+    # for flexibility in the types that can be used as the shift amount.
+    # @type Ret: The type of the result of the right shift operation. This is the type of the value that will be
+    # returned when the ">>" operator is used to shift the bits of a value to the right. Like `Rhs`, it is specified as
+    # a generic parameter to allow for flexibility in the types that can be returned as a result of the right shift
+    # operation.
+}
 
 !public
-cls BitShrAssign[Rhs=Self] { }
+cls BitShrAssign[Rhs=Self] {
+    # The `BitShrAssign` class represents the ability to shift the bits of a value to the right in place using the ">>="
+    # operator. It is a generic class that takes one type parameter: `Rhs`, which represents the type of the right-hand
+    # side operand (the shift amount). By default, `Rhs` is set to `Self`, meaning that if no specific type is provided,
+    # it will assume that the right-hand side operand is of the same type as the implementing class.
+    # @type Rhs: The type of the right-hand side operand in the right shift assignment operation. This is the type of
+    # the value that specifies how many bit positions the left-hand side operand (the instance of the class that
+    # implements `BitShrAssign`) will be shifted to the right. It can be any type, and it is specified as a generic
+    # parameter to allow for flexibility in the types that can be used as the shift amount with the ">>=" operator.
+}
 
 sup [Rhs, Ret] BitShr[Rhs, Ret] {
     !public
     !abstract_method
-    fun bit_shr(self, that: Rhs) -> Ret { }
+    fun bit_shr(self, that: Rhs) -> Ret {
+        # The `bit_shr` method defines the behavior of the ">>" operator for the implementing class. It takes a value of
+        # type `Rhs` as an argument, which represents the right-hand side operand (the shift amount) in the right shift
+        # operation. The method returns a value of type `Ret`, which represents the result of shifting the bits of the
+        # left-hand side operand to the right. The specific behavior of the right shift operation is determined by the
+        # implementation of this method in the class that implements `BitShr`.
+        # @let that: The right-hand side operand in the right shift operation. This is the value that specifies how many
+        # bit positions the left-hand side operand (the instance of the class that implements `BitShr`) will be shifted
+        # to the right. It is of type `Rhs`, which is a generic parameter that can be specified when implementing the
+        # `BitShr` class.
+        # @ret: The result of the right shift operation. This is the value that will be returned when the ">>" operator
+        # is used to shift the bits of a value to the right. It is of type `Ret`, which is a generic parameter that can
+        # be specified when implementing the `BitShr` class.
+    }
 }
 
 sup [Rhs] BitShrAssign[Rhs] {
     !public
     !abstract_method
-    fun bit_shr_assign(&mut self, that: Rhs) -> Void { }
+    fun bit_shr_assign(&mut self, that: Rhs) -> Void {
+        # The `bit_shr_assign` method defines the behavior of the ">>=" operator for the implementing class. It takes a
+        # value of type `Rhs` as an argument, which represents the right-hand side operand (the shift amount) in the
+        # right shift assignment operation. The method modifies the left-hand side operand (the instance of the class
+        # that implements `BitShrAssign`) in place by shifting its bits to the right by the number of positions
+        # specified by `that`. The method does not return a value, as the result of the right shift assignment is stored
+        # directly in the left-hand side operand.
+        # @let that: The right-hand side operand in the right shift assignment operation. This is the value that
+        # specifies how many bit positions the left-hand side operand (the instance of the class that implements
+        # `BitShrAssign`) will be shifted to the right. It is of type `Rhs`, which is a generic parameter that can be
+        # specified when implementing the `BitShrAssign` class.
+    }
 }

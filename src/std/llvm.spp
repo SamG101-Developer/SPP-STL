@@ -64,12 +64,14 @@ cmp fun cold() -> Void {
 }
 
 !public
-!intrinsic(name="std.llvm.packed")
+!intrinsic(name="std.llvm.layout")
 !versioned(base="1.0.0", new="1.0.0")
 !annotation(target=Annotation::class)
-cmp fun packed() -> Void {
-    # The `packed` annotation is a hint to the compiler that the annotated class should have a packed memory layout,
+cmp fun layout(conv: &StrView) -> Void {
+    # The `layout` annotation is a hint to the compiler that the annotated class should have a specific memory layout,
     # meaning that there should be no padding between the fields of the class. This can be useful for certain low-level
     # programming scenarios where memory layout is important, such as when interfacing with hardware or when working
-    # with binary data formats.
+    # with binary data formats. Examples include "C", "packed", etc.
+    # @let conv: The name of the layout convention to use for the class. This is a string that specifies the desired
+    # memory layout convention, such as "C" for C-style layout or "packed".
 }

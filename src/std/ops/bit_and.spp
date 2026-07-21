@@ -3,19 +3,63 @@ use std::annotations::public
 use std::void::Void
 
 !public
-cls BitAnd[Rhs=Self, Ret=Self] { }
+cls BitAnd[Rhs=Self, Ret=Self] {
+    # The `BitAnd` class represents the ability to compute the bitwise AND of two values using the "&" operator. It is a
+    # generic class that takes two type parameters: `Rhs`, which represents the type of the right-hand side operand, and
+    # `Ret`, which represents the type of the result of the bitwise AND operation. By default, both `Rhs` and `Ret` are
+    # set to `Self`, meaning that if no specific types are provided, it will assume that both operands and the result
+    # are of the same type as the implementing class.
+    # @type Rhs: The type of the right-hand side operand in the bitwise AND operation. This is the type of the value
+    # that will be combined with the left-hand side operand (the instance of the class that implements `BitAnd`) using a
+    # bitwise AND. It can be any type, and it is specified as a generic parameter to allow for flexibility in the types
+    # that can be combined together.
+    # @type Ret: The type of the result of the bitwise AND operation. This is the type of the value that will be
+    # returned when the "&" operator is used to combine two values. Like `Rhs`, it is specified as a generic parameter
+    # to allow for flexibility in the types that can be returned as a result of the bitwise AND operation.
+}
 
 !public
-cls BitAndAssign[Rhs=Self] { }
+cls BitAndAssign[Rhs=Self] {
+    # The `BitAndAssign` class represents the ability to combine a value with another value using a bitwise AND in place
+    # using the "&=" operator. It is a generic class that takes one type parameter: `Rhs`, which represents the type of
+    # the right-hand side operand. By default, `Rhs` is set to `Self`, meaning that if no specific type is provided, it
+    # will assume that the right-hand side operand is of the same type as the implementing class.
+    # @type Rhs: The type of the right-hand side operand in the bitwise AND assignment operation. This is the type of
+    # the value that will be combined with the left-hand side operand (the instance of the class that implements
+    # `BitAndAssign`) using a bitwise AND. It can be any type, and it is specified as a generic parameter to allow for
+    # flexibility in the types that can be combined together using the "&=" operator.
+}
 
 sup [Rhs, Ret] BitAnd[Rhs, Ret] {
     !public
     !abstract_method
-    fun bit_and(self, that: Rhs) -> Ret { }
+    fun bit_and(self, that: Rhs) -> Ret {
+        # The `bit_and` method defines the behavior of the "&" operator for the implementing class. It takes a value of
+        # type `Rhs` as an argument, which represents the right-hand side operand in the bitwise AND operation. The
+        # method returns a value of type `Ret`, which represents the result of the bitwise AND. The specific behavior of
+        # the bitwise AND operation is determined by the implementation of this method in the class that implements
+        # `BitAnd`.
+        # @let that: The right-hand side operand in the bitwise AND operation. This is the value that will be combined
+        # with the left-hand side operand (the instance of the class that implements `BitAnd`) using a bitwise AND. It
+        # is of type `Rhs`, which is a generic parameter that can be specified when implementing the `BitAnd` class.
+        # @ret: The result of the bitwise AND operation. This is the value that will be returned when the "&" operator
+        # is used to combine two values. It is of type `Ret`, which is a generic parameter that can be specified when
+        # implementing the `BitAnd` class.
+    }
 }
 
 sup [Rhs] BitAndAssign[Rhs] {
     !public
     !abstract_method
-    fun bit_and_assign(&mut self, that: Rhs) -> Void { }
+    fun bit_and_assign(&mut self, that: Rhs) -> Void {
+        # The `bit_and_assign` method defines the behavior of the "&=" operator for the implementing class. It takes a
+        # value of type `Rhs` as an argument, which represents the right-hand side operand in the bitwise AND assignment
+        # operation. The method modifies the left-hand side operand (the instance of the class that implements
+        # `BitAndAssign`) in place by combining it with the value of `that` using a bitwise AND. The method does not
+        # return a value, as the result of the bitwise AND assignment is stored directly in the left-hand side operand.
+        # @let that: The right-hand side operand in the bitwise AND assignment operation. This is the value that will be
+        # combined with the left-hand side operand (the instance of the class that implements `BitAndAssign`) using a
+        # bitwise AND. It is of type `Rhs`, which is a generic parameter that can be specified when implementing the
+        # `BitAndAssign` class.
+    }
 }

@@ -3,19 +3,45 @@ use std::annotations::public
 use std::void::Void
 
 !public
-cls BitNot[Ret=Self] { }
+cls BitNot[Ret=Self] {
+    # The `BitNot` class represents the ability to compute the bitwise NOT (complement) of a value using the unary "~"
+    # operator. It is a generic class that takes one type parameter: `Ret`, which represents the type of the result of
+    # the bitwise NOT operation. By default, `Ret` is set to `Self`, meaning that if no specific type is provided, it
+    # will assume that the result is of the same type as the implementing class. Unlike the binary bitwise operators,
+    # `BitNot` is a unary operation and therefore has no right-hand side operand.
+    # @type Ret: The type of the result of the bitwise NOT operation. This is the type of the value that will be
+    # returned when the "~" operator is used to compute the bitwise complement of a value. It is specified as a generic
+    # parameter to allow for flexibility in the types that can be returned as a result of the bitwise NOT operation.
+}
 
 !public
-cls BitNotAssign { }
+cls BitNotAssign {
+    # The `BitNotAssign` class represents the ability to replace a value with its bitwise NOT (complement) in place
+    # using the "~=" operator. It is a unary operation and therefore takes no type parameters and has no right-hand side
+    # operand; it operates solely on the instance of the implementing class.
+}
 
 sup [Ret] BitNot[Ret] {
     !public
     !abstract_method
-    fun bit_not(self) -> Ret { }
+    fun bit_not(self) -> Ret {
+        # The `bit_not` method defines the behavior of the unary "~" operator for the implementing class. It takes no
+        # operand other than the instance itself and returns a value of type `Ret`, which represents the bitwise
+        # complement of the instance. The specific behavior of the bitwise NOT operation is determined by the
+        # implementation of this method in the class that implements `BitNot`.
+        # @ret: The result of the bitwise NOT operation. This is the value that will be returned when the "~" operator
+        # is used to compute the bitwise complement of a value. It is of type `Ret`, which is a generic parameter that
+        # can be specified when implementing the `BitNot` class.
+    }
 }
 
 sup BitNotAssign {
     !public
     !abstract_method
-    fun bit_not_assign(&mut self) -> Void { }
+    fun bit_not_assign(&mut self) -> Void {
+        # The `bit_not_assign` method defines the behavior of the "~=" operator for the implementing class. It takes no
+        # operand other than the instance itself and modifies the instance of the class that implements `BitNotAssign`
+        # in place by replacing it with its bitwise complement. The method does not return a value, as the result of the
+        # bitwise NOT assignment is stored directly in the instance.
+    }
 }

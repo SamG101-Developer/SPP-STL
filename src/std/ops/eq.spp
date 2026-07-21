@@ -4,16 +4,49 @@ use std::annotations::virtual_method
 use std::boolean::Bool
 
 !public
-cls Eq[Rhs=Self] { }
+cls Eq[Rhs=Self] {
+    # The `Eq` class represents the ability to test two values for equality using the "==" operator and inequality using
+    # the "!=" operator. It is a generic class that takes one type parameter: `Rhs`, which represents the type of the
+    # right-hand side operand. By default, `Rhs` is set to `Self`, meaning that if no specific type is provided, it will
+    # assume that the right-hand side operand is of the same type as the implementing class. The result of both
+    # comparisons is always a `Bool`.
+    # @type Rhs: The type of the right-hand side operand in the equality comparison. This is the type of the value that
+    # the left-hand side operand (the instance of the class that implements `Eq`) will be compared against for equality.
+    # It can be any type, and it is specified as a generic parameter to allow for flexibility in the types that can be
+    # compared together.
+}
 
 sup [Rhs] Eq[Rhs] {
     !public
     !abstract_method
-    fun eq(&self, that: &Rhs) -> Bool { }
+    fun eq(&self, that: &Rhs) -> Bool {
+        # The `eq` method defines the behavior of the "==" operator for the implementing class. It takes a reference to
+        # a value of type `Rhs` as an argument, which represents the right-hand side operand in the equality comparison.
+        # The method returns a `Bool` that is `true` if the two values are considered equal and `false` otherwise. The
+        # specific behavior of the equality comparison is determined by the implementation of this method in the class
+        # that implements `Eq`.
+        # @let that: The right-hand side operand in the equality comparison. This is the value that the left-hand side
+        # operand (the instance of the class that implements `Eq`) will be compared against for equality. It is a
+        # reference to a value of type `Rhs`, which is a generic parameter that can be specified when implementing the
+        # `Eq` class.
+        # @ret: The result of the equality comparison, as a `Bool`. This is `true` when the two values are considered
+        # equal and `false` otherwise.
+    }
 
     !public
     !virtual_method
     fun ne(&self, that: &Rhs) -> Bool {
+        # The `ne` method defines the behavior of the "!=" operator for the implementing class. It takes a reference to
+        # a value of type `Rhs` as an argument, which represents the right-hand side operand in the inequality
+        # comparison. The method returns a `Bool` that is `true` if the two values are considered unequal and `false`
+        # otherwise. By default, it is implemented as the logical negation of `eq`, so implementing classes only need to
+        # provide `eq`, but this method may be overridden if a more direct implementation is desired.
+        # @let that: The right-hand side operand in the inequality comparison. This is the value that the left-hand side
+        # operand (the instance of the class that implements `Eq`) will be compared against for inequality. It is a
+        # reference to a value of type `Rhs`, which is a generic parameter that can be specified when implementing the
+        # `Eq` class.
+        # @ret: The result of the inequality comparison, as a `Bool`. This is `true` when the two values are considered
+        # unequal and `false` otherwise.
         ret self.eq(that).not
     }
 }

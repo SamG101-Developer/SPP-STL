@@ -3,10 +3,20 @@ use std::annotations::public
 use std::void::Void
 
 !public
-cls Del { }
+cls Del {
+    # The `Del` class represents the ability to run custom logic when a value is destroyed (deleted). A class that
+    # implements `Del` defines what should happen when one of its instances goes out of scope or is otherwise deleted,
+    # such as releasing resources, closing handles, or freeing memory. It takes no type parameters, as the destruction
+    # behavior operates solely on the instance of the implementing class.
+}
 
 sup Del {
     !public
     !abstract_method
-    fun del(&mut self) -> Void { }
+    fun del(&mut self) -> Void {
+        # The `del` method defines the destruction behavior for the implementing class. It is invoked when an instance
+        # of the class is deleted, giving the class an opportunity to perform any necessary cleanup, such as releasing
+        # resources or freeing memory. It takes a mutable reference to the instance and does not return a value. The
+        # specific cleanup logic is determined by the implementation of this method in the class that implements `Del`.
+    }
 }

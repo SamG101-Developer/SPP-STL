@@ -3,19 +3,62 @@ use std::annotations::public
 use std::void::Void
 
 !public
-cls Mul[Rhs=Self, Ret=Self] { }
+cls Mul[Rhs=Self, Ret=Self] {
+    # The `Mul` class represents the ability to multiply two values together using the "*" operator. It is a generic
+    # class that takes two type parameters: `Rhs`, which represents the type of the right-hand side operand, and `Ret`,
+    # which represents the type of the result of the multiplication. By default, both `Rhs` and `Ret` are set to `Self`,
+    # meaning that if no specific types are provided, it will assume that both operands and the result are of the same
+    # type as the implementing class.
+    # @type Rhs: The type of the right-hand side operand in the multiplication operation. This is the type of the value
+    # that will be multiplied with the left-hand side operand (the instance of the class that implements `Mul`). It can
+    # be any type, and it is specified as a generic parameter to allow for flexibility in the types that can be
+    # multiplied together.
+    # @type Ret: The type of the result of the multiplication operation. This is the type of the value that will be
+    # returned when the "*" operator is used to multiply two values together. Like `Rhs`, it is specified as a generic
+    # parameter to allow for flexibility in the types that can be returned as a result of the multiplication.
+}
 
 !public
-cls MulAssign[Rhs=Self] { }
+cls MulAssign[Rhs=Self] {
+    # The `MulAssign` class represents the ability to multiply a value by another value in place using the "*="
+    # operator. It is a generic class that takes one type parameter: `Rhs`, which represents the type of the right-hand
+    # side operand. By default, `Rhs` is set to `Self`, meaning that if no specific type is provided, it will assume
+    # that the right-hand side operand is of the same type as the implementing class.
+    # @type Rhs: The type of the right-hand side operand in the multiplication assignment operation. This is the type of
+    # the value that will be multiplied with the left-hand side operand (the instance of the class that implements
+    # `MulAssign`). It can be any type, and it is specified as a generic parameter to allow for flexibility in the types
+    # that can be multiplied together using the "*=" operator.
+}
 
 sup [Rhs, Ret] Mul[Rhs, Ret] {
     !public
     !abstract_method
-    fun mul(self, that: Rhs) -> Ret { }
+    fun mul(self, that: Rhs) -> Ret {
+        # The `mul` method defines the behavior of the "*" operator for the implementing class. It takes a value of type
+        # `Rhs` as an argument, which represents the right-hand side operand in the multiplication operation. The method
+        # returns a value of type `Ret`, which represents the result of the multiplication. The specific behavior of the
+        # multiplication operation is determined by the implementation of this method in the class that implements
+        # `Mul`.
+        # @let that: The right-hand side operand in the multiplication operation. This is the value that will be
+        # multiplied with the left-hand side operand (the instance of the class that implements `Mul`). It is of type
+        # `Rhs`, which is a generic parameter that can be specified when implementing the `Mul` class.
+        # @ret: The result of the multiplication operation. This is the value that will be returned when the "*"
+        # operator is used to multiply two values together. It is of type `Ret`, which is a generic parameter that can
+        # be specified when implementing the `Mul` class.
+    }
 }
 
 sup [Rhs] MulAssign[Rhs] {
     !public
     !abstract_method
-    fun mul_assign(&mut self, that: Rhs) -> Void { }
+    fun mul_assign(&mut self, that: Rhs) -> Void {
+        # The `mul_assign` method defines the behavior of the "*=" operator for the implementing class. It takes a value
+        # of type `Rhs` as an argument, which represents the right-hand side operand in the multiplication assignment
+        # operation. The method modifies the left-hand side operand (the instance of the class that implements
+        # `MulAssign`) in place by multiplying it by the value of `that`. The method does not return a value, as the
+        # result of the multiplication assignment is stored directly in the left-hand side operand.
+        # @let that: The right-hand side operand in the multiplication assignment operation. This is the value that will
+        # be multiplied with the left-hand side operand (the instance of the class that implements `MulAssign`). It is
+        # of type `Rhs`, which is a generic parameter that can be specified when implementing the `MulAssign` class.
+    }
 }
