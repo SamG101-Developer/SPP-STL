@@ -4,6 +4,7 @@ use std::annotations::public
 use std::annotations::versioned
 use std::function::Fun
 use std::number::U8
+use std::option::None
 use std::option::Opt
 use std::void::Void
 use std::threading::atomic::Atom
@@ -28,7 +29,7 @@ cls Fut[T] {
     # is still pending, the value remains `None`.
 
     !private state: Atom[U8]
-    !private val: Opt[T]
+    !private val: Opt[T] = None
 }
 
 sup [T] Fut[T] {
