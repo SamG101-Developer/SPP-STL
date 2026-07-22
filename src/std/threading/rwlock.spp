@@ -52,7 +52,7 @@ sup [T] RwLock[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    cor timed_read(&self, timeout: Duration, clock: U32 = 1) -> GenOnce[&T] {
+    cor timed_read(&self, timeout: Duration, clock: U32 = 1_u32) -> GenOnce[&T] {
         # Timed lock the rwlock for reading using the sppc threadinging API.
         let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
         sppc::pthread_rwlock_clockrdlock(&self.handle, S32::from(clock), &timespec)
@@ -61,7 +61,7 @@ sup [T] RwLock[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    cor timed_write(&self, timeout: Duration, clock: U32 = 1) -> GenOnce[&mut T] {
+    cor timed_write(&self, timeout: Duration, clock: U32 = 1_u32) -> GenOnce[&mut T] {
         # Timed lock the rwlock for writing using the sppc threading API.
         let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
         sppc::pthread_rwlock_clockwrlock(&self.handle, S32::from(clock), &timespec)
