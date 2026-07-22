@@ -135,11 +135,13 @@ sup Socket {
     }
 }
 
+!public
 cls SockV4Addr {
     !public ip: IpV4Addr
     !public port: U16
 }
 
+!public
 cls SockV6Addr {
     !public ip: IpV6Addr
     !public port: U16
