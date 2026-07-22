@@ -519,7 +519,7 @@ sup [T, A: Alloc] Vec[T, A] {
 }
 
 sup [T: Copy, A: Alloc] Vec[T, A] {
-    #
+    !public
     !versioned(base="1.0.0", new="1.0.0")
     fun append_from_view(&mut self, that: &View[T]) -> Void {
         # Append all the elements from a view, by copying the elements from the view.

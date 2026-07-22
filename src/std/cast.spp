@@ -5,7 +5,7 @@ use std::annotations::versioned
 use std::annotations::zero_type
 use std::generator::GenOnce
 use std::option::None
-use std::result::Opt
+use std::option::Opt
 use std::string_view::StrView
 
 !public

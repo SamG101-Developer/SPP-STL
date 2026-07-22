@@ -22,6 +22,8 @@ use std::ops::add::AddAssign
 use std::ops::fwd::FwdMut
 use std::ops::fwd::FwdRef
 
+!public
+!versioned(base="1.0.0", new="1.0.0")
 cls Str[A: Alloc = GlobalAlloc] {
     # The `Str` type represents a mutable string that can be allocated using a specified allocator. It is designed to be
     # flexible and efficient for various use cases, allowing for dynamic resizing and manipulation of string data. The
@@ -270,6 +272,7 @@ sup [A: Alloc] Str[A] {
         self.bytes.capacity_reserve(cap)
     }
 
+    !public
     !versioned(base="1.0.0", new="1.0.0")
     fun add(self, that: &StrView) -> Self {
         # The `add` method concatenates the current string with another string view, creating a new `Str` instance that
@@ -288,6 +291,7 @@ sup [A: Alloc] Str[A] {
         ret result
     }
 
+    !public
     !versioned(base="1.0.0", new="1.0.0")
     fun add_assign(&mut self, that: &StrView) -> Void {
         # The `add_assign` method appends the contents of another string view to the current string in place. This

@@ -135,16 +135,22 @@ sup Socket {
     }
 }
 
+!public
+!versioned(base="1.0.0", new="1.0.0")
 cls SockV4Addr {
     !public ip: IpV4Addr
     !public port: U16
 }
 
+!public
+!versioned(base="1.0.0", new="1.0.0")
 cls SockV6Addr {
     !public ip: IpV6Addr
     !public port: U16
 }
 
+!public
+!versioned(base="1.0.0", new="1.0.0")
 type SockAddr = SockV4Addr or SockV6Addr
 
 sup SockAddr {

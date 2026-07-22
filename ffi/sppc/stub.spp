@@ -11,16 +11,19 @@ use std::cffi::CUShort
 use std::cffi::CVoid
 use std::cffi::CVoidPtr
 
+!public
 cls CTimespec {
     !public sec: U64
     !public nsec: U64
 }
 
+!public
 cls CTimeval {
     !public sec: U64
     !public usec: U64
 }
 
+!public
 cls CStatvfs {
     !public block_size: CULong
     !public frag_size: CULong
@@ -35,6 +38,7 @@ cls CStatvfs {
     !public namemax: CULong
 }
 
+!public
 cls CStat {
     !public dev: CULong
     !public ino: CULong
@@ -52,12 +56,14 @@ cls CStat {
     !public ctim: CTimespec
 }
 
+!public
 cls CPollfd {
     !public fd: CInt
     !public events: CShort
     !public revents: CShort
 }
 
+!public
 cls CFlock {
     !public type_: CShort
     !public whence: CShort
@@ -66,6 +72,7 @@ cls CFlock {
     !public pid: CInt
 }
 
+!public
 cls CSockaddrStorage { }
 
 !ffi(symbol="sppc_init")
