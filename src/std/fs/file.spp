@@ -59,6 +59,8 @@ sup FileMode {
     }
 }
 
+!public
+!versioned(base="1.0.0", new="1.0.0")
 cls File {
     !package fd: S32
 }
