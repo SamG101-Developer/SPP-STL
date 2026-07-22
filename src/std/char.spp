@@ -121,6 +121,8 @@ sup Char {
         ret 2_u32
     }
 
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun is_whitespace(&self) -> Bool {
         # Check if this character is a whitespace character.
         # @ret: `true` if the character is a whitespace character, `false` otherwise.
