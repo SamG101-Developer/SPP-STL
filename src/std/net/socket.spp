@@ -149,6 +149,8 @@ cls SockV6Addr {
     !public port: U16
 }
 
+!public
+!versioned(base="1.0.0", new="1.0.0")
 type SockAddr = SockV4Addr or SockV6Addr
 
 sup SockAddr {
