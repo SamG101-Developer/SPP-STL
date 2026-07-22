@@ -26,12 +26,6 @@ use std::void::Void
 use std::mem::pointer::NonNull
 use std::ops::idx::IndexMut
 use std::ops::idx::IndexRef
-use std::ops::iter::IterMov
-use std::ops::iter::IterMut
-use std::ops::iter::IterRef
-use std::ops::iter::RevIterMov
-use std::ops::iter::RevIterMut
-use std::ops::iter::RevIterRef
 
 !package
 !versioned(base="1.0.0", new="1.0.0")

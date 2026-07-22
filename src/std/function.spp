@@ -1,8 +1,10 @@
+use std::annotations::abstract_method
+use std::annotations::package
 use std::annotations::public
 use std::annotations::versioned
 use std::tuple::TupLike
 
-!public
+!package
 !versioned(base="1.0.0", new="1.0.0")
 cls Fun {
     # The `Fun` type is a non-generic marker trait for all functions. This allows another function to accept a function
@@ -37,6 +39,33 @@ cls FunRef[Args: TupLike, Out] {
     # @type Out:
 }
 
+sup [Args: TupLike, Out] FunMov[Args, Out] {
+    # Add the abstract method that prevents a `Fun` from being instantiated, and allows provides the base method for
+    # making a type functional / callable.
+
+    !public !abstract_method
+    !versioned(base="1.0.0", new="1.0.0")
+    fun call_mov(self, args: Args) -> Out { }
+}
+
+sup [Args: TupLike, Out] FunMut[Args, Out] {
+    # Add the abstract method that prevents a `Fun` from being instantiated, and allows provides the base method for
+    # making a type functional / callable.
+
+    !public !abstract_method
+    !versioned(base="1.0.0", new="1.0.0")
+    fun call_mut(&mut self, args: Args) -> Out { }
+}
+
+sup [Args: TupLike, Out] FunRef[Args, Out] {
+    # Add the abstract method that prevents a `Fun` from being instantiated, and allows provides the base method for
+    # making a type functional / callable.
+
+    !public !abstract_method
+    !versioned(base="1.0.0", new="1.0.0")
+    fun call_ref(&self, args: Args) -> Out { }
+}
+
 sup [Args: TupLike, Out] FunMov[Args, Out] ext Fun {
     # Ensure all variations of functional types are able to be used with `Fun`, so that a generic constraint of `Fun`
     # can accept any functional type.
@@ -46,10 +75,33 @@ sup [Args: TupLike, Out] FunMut[Args, Out] ext FunMov[Args, Out] {
     # A `FunMut` can be used wherever a `FunMov` is expected, as it can be called at least once. This extension allows
     # for generic constraints to accept either `FunMut` to `FunMov`, so that a `FunMut` can be passed to a function that
     # also accepts a `FunMov`.
+
+    !versioned(base="1.0.0", new="1.0.0")
+    fun call_mov(mut self, args: Args) -> Out {
+        # The `call_mov` method is implemented for `FunMut` to allow it to be used in contexts where a `FunMov` is
+        # expected. This method consumes the `FunMut` instance, allowing it to be called once and then moved.
+        # @let args: The arguments to pass to the function when calling it. This is a tuple of the argument types
+        # specified in the `Args` type parameter.
+        # @ret: The result of calling the function, which is of the type specified in the `Out` type parameter.
+
+        ret self.call_mut(args)
+    }
 }
 
 sup [Args: TupLike, Out] FunRef[Args, Out] ext FunMut[Args, Out] {
     # A `FunRef` can be used wherever a `FunMut` is expected, as it can be called multiple times. This extension allows
     # for generic constraints to accept either `FunRef` to `FunMut`, so that a `FunRef` can be passed to a function that
     # also accepts a `FunMut`.
+
+    !versioned(base="1.0.0", new="1.0.0")
+    fun call_mut(&mut self, args: Args) -> Out {
+        # The `call_mut` method is implemented for `FunRef` to allow it to be used in contexts where a `FunMut` is
+        # expected. This method allows the `FunRef` instance to be called multiple times, as it does not consume the
+        # instance.
+        # @let args: The arguments to pass to the function when calling it. This is a tuple of the argument types
+        # specified in the `Args` type parameter.
+        # @ret: The result of calling the function, which is of the type specified in the `Out` type parameter.
+
+        ret self.call_ref(args)
+    }
 }

@@ -2,19 +2,66 @@ use std::annotations::abstract_method
 use std::annotations::public
 use std::void::Void
 
-!public cls BitShl[Rhs=Self, Ret=Self] { }
-!public cls BitShlAssign[Rhs=Self] { }
+!public
+cls BitShl[Rhs=Self, Ret=Self] {
+    # The `BitShl` class represents the ability to shift the bits of a value to the left using the "<<" operator. It is
+    # a generic class that takes two type parameters: `Rhs`, which represents the type of the right-hand side operand
+    # (the shift amount), and `Ret`, which represents the type of the result of the left shift operation. By default,
+    # both `Rhs` and `Ret` are set to `Self`, meaning that if no specific types are provided, it will assume that both
+    # operands and the result are of the same type as the implementing class.
+    # @type Rhs: The type of the right-hand side operand in the left shift operation. This is the type of the value that
+    # specifies how many bit positions the left-hand side operand (the instance of the class that implements `BitShl`)
+    # will be shifted to the left. It can be any type, and it is specified as a generic parameter to allow for
+    # flexibility in the types that can be used as the shift amount.
+    # @type Ret: The type of the result of the left shift operation. This is the type of the value that will be returned
+    # when the "<<" operator is used to shift the bits of a value to the left. Like `Rhs`, it is specified as a generic
+    # parameter to allow for flexibility in the types that can be returned as a result of the left shift operation.
+}
 
-# Allow the use of the "<<" operator.
+!public
+cls BitShlAssign[Rhs=Self] {
+    # The `BitShlAssign` class represents the ability to shift the bits of a value to the left in place using the "<<="
+    # operator. It is a generic class that takes one type parameter: `Rhs`, which represents the type of the right-hand
+    # side operand (the shift amount). By default, `Rhs` is set to `Self`, meaning that if no specific type is provided,
+    # it will assume that the right-hand side operand is of the same type as the implementing class.
+    # @type Rhs: The type of the right-hand side operand in the left shift assignment operation. This is the type of the
+    # value that specifies how many bit positions the left-hand side operand (the instance of the class that implements
+    # `BitShlAssign`) will be shifted to the left. It can be any type, and it is specified as a generic parameter to
+    # allow for flexibility in the types that can be used as the shift amount with the "<<=" operator.
+}
+
 sup [Rhs, Ret] BitShl[Rhs, Ret] {
     !public
     !abstract_method
-    fun bit_shl(self, that: Rhs) -> Ret { }
+    fun bit_shl(self, that: Rhs) -> Ret {
+        # The `bit_shl` method defines the behavior of the "<<" operator for the implementing class. It takes a value of
+        # type `Rhs` as an argument, which represents the right-hand side operand (the shift amount) in the left shift
+        # operation. The method returns a value of type `Ret`, which represents the result of shifting the bits of the
+        # left-hand side operand to the left. The specific behavior of the left shift operation is determined by the
+        # implementation of this method in the class that implements `BitShl`.
+        # @let that: The right-hand side operand in the left shift operation. This is the value that specifies how many
+        # bit positions the left-hand side operand (the instance of the class that implements `BitShl`) will be shifted
+        # to the left. It is of type `Rhs`, which is a generic parameter that can be specified when implementing the
+        # `BitShl` class.
+        # @ret: The result of the left shift operation. This is the value that will be returned when the "<<" operator
+        # is used to shift the bits of a value to the left. It is of type `Ret`, which is a generic parameter that can
+        # be specified when implementing the `BitShl` class.
+    }
 }
 
-# Allow the use of the "<<=" operator.
 sup [Rhs] BitShlAssign[Rhs] {
     !public
     !abstract_method
-    fun bit_shl_assign(&mut self, that: Rhs) -> Void { }
+    fun bit_shl_assign(&mut self, that: Rhs) -> Void {
+        # The `bit_shl_assign` method defines the behavior of the "<<=" operator for the implementing class. It takes a
+        # value of type `Rhs` as an argument, which represents the right-hand side operand (the shift amount) in the
+        # left shift assignment operation. The method modifies the left-hand side operand (the instance of the class
+        # that implements `BitShlAssign`) in place by shifting its bits to the left by the number of positions specified
+        # by `that`. The method does not return a value, as the result of the left shift assignment is stored directly
+        # in the left-hand side operand.
+        # @let that: The right-hand side operand in the left shift assignment operation. This is the value that
+        # specifies how many bit positions the left-hand side operand (the instance of the class that implements
+        # `BitShlAssign`) will be shifted to the left. It is of type `Rhs`, which is a generic parameter that can be
+        # specified when implementing the `BitShlAssign` class.
+    }
 }

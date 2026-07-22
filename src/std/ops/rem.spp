@@ -2,19 +2,65 @@ use std::annotations::abstract_method
 use std::annotations::public
 use std::void::Void
 
-!public cls Rem[Rhs=Self, Ret=Self] { }
-!public cls RemAssign[Rhs=Self] { }
+!public
+cls Rem[Rhs=Self, Ret=Self] {
+    # The `Rem` class represents the ability to compute the remainder of dividing one value by another using the "%"
+    # operator. It is a generic class that takes two type parameters: `Rhs`, which represents the type of the right-hand
+    # side operand, and `Ret`, which represents the type of the result of the remainder operation. By default, both
+    # `Rhs` and `Ret` are set to `Self`, meaning that if no specific types are provided, it will assume that both
+    # operands and the result are of the same type as the implementing class.
+    # @type Rhs: The type of the right-hand side operand in the remainder operation. This is the type of the value that
+    # the left-hand side operand (the instance of the class that implements `Rem`) will be divided by to obtain the
+    # remainder. It can be any type, and it is specified as a generic parameter to allow for flexibility in the types
+    # that can be used as the divisor.
+    # @type Ret: The type of the result of the remainder operation. This is the type of the value that will be returned
+    # when the "%" operator is used to compute the remainder. Like `Rhs`, it is specified as a generic parameter to
+    # allow for flexibility in the types that can be returned as a result of the remainder operation.
+}
 
-# Allow the use of the "%" operator.
+!public
+cls RemAssign[Rhs=Self] {
+    # The `RemAssign` class represents the ability to replace a value with the remainder of dividing it by another value
+    # in place using the "%=" operator. It is a generic class that takes one type parameter: `Rhs`, which represents the
+    # type of the right-hand side operand. By default, `Rhs` is set to `Self`, meaning that if no specific type is
+    # provided, it will assume that the right-hand side operand is of the same type as the implementing class.
+    # @type Rhs: The type of the right-hand side operand in the remainder assignment operation. This is the type of the
+    # value that the left-hand side operand (the instance of the class that implements `RemAssign`) will be divided by
+    # to obtain the remainder. It can be any type, and it is specified as a generic parameter to allow for flexibility
+    # in the types that can be used as the divisor with the "%=" operator.
+}
+
 sup [Rhs, Ret] Rem[Rhs, Ret] {
     !public
     !abstract_method
-    fun rem(self, that: Rhs) -> Ret { }
+    fun rem(self, that: Rhs) -> Ret {
+        # The `rem` method defines the behavior of the "%" operator for the implementing class. It takes a value of type
+        # `Rhs` as an argument, which represents the right-hand side operand in the remainder operation. The method
+        # returns a value of type `Ret`, which represents the remainder of dividing the left-hand side operand by the
+        # right-hand side operand. The specific behavior of the remainder operation is determined by the implementation
+        # of this method in the class that implements `Rem`.
+        # @let that: The right-hand side operand in the remainder operation. This is the value that the left-hand side
+        # operand (the instance of the class that implements `Rem`) will be divided by to obtain the remainder. It is of
+        # type `Rhs`, which is a generic parameter that can be specified when implementing the `Rem` class.
+        # @ret: The result of the remainder operation. This is the value that will be returned when the "%" operator is
+        # used to compute the remainder of dividing one value by another. It is of type `Ret`, which is a generic
+        # parameter that can be specified when implementing the `Rem` class.
+    }
 }
 
-# Allow the use of the "%=" operator.
 sup [Rhs] RemAssign[Rhs] {
     !public
     !abstract_method
-    fun rem_assign(&mut self, that: Rhs) -> Void { }
+    fun rem_assign(&mut self, that: Rhs) -> Void {
+        # The `rem_assign` method defines the behavior of the "%=" operator for the implementing class. It takes a value
+        # of type `Rhs` as an argument, which represents the right-hand side operand in the remainder assignment
+        # operation. The method modifies the left-hand side operand (the instance of the class that implements
+        # `RemAssign`) in place by replacing it with the remainder of dividing it by the value of `that`. The method
+        # does not return a value, as the result of the remainder assignment is stored directly in the left-hand side
+        # operand.
+        # @let that: The right-hand side operand in the remainder assignment operation. This is the value that the
+        # left-hand side operand (the instance of the class that implements `RemAssign`) will be divided by to obtain
+        # the remainder. It is of type `Rhs`, which is a generic parameter that can be specified when implementing the
+        # `RemAssign` class.
+    }
 }

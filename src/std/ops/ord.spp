@@ -4,35 +4,91 @@ use std::annotations::virtual_method
 use std::boolean::Bool
 use std::number::S32
 
-!public cls Ord[Rhs=Self] { }
+!public
+cls Ord[Rhs=Self] {
+    # The `Ord` class represents the ability to order two values relative to one another, providing the behavior of the
+    # comparison operators "<", "<=", ">", and ">=". It is a generic class that takes one type parameter: `Rhs`, which
+    # represents the type of the right-hand side operand. By default, `Rhs` is set to `Self`, meaning that if no
+    # specific type is provided, it will assume that the right-hand side operand is of the same type as the implementing
+    # class. Ordering is defined in terms of a single `ord` method that returns an `S32` (-1, 0, or 1), from which the
+    # individual comparison operators are derived.
+    # @type Rhs: The type of the right-hand side operand in the ordering comparison. This is the type of the value that
+    # the left-hand side operand (the instance of the class that implements `Ord`) will be compared against. It can be
+    # any type, and it is specified as a generic parameter to allow for flexibility in the types that can be compared
+    # together.
+}
 
-# Allow the use of the ".ord(...)", "<", "<=", ">", ">=" operator.
 sup [Rhs] Ord[Rhs] {
     !public
     !abstract_method
-    fun ord(&self, that: &Rhs) -> S32 { }
+    fun ord(&self, that: &Rhs) -> S32 {
+        # The `ord` method defines the total ordering between the implementing class and a value of type `Rhs`. It takes
+        # a reference to a value of type `Rhs` as an argument, which represents the right-hand side operand, and returns
+        # an `S32` indicating the relative order: -1 if the left-hand side operand is less than the right-hand side
+        # operand, 0 if they are equal, and 1 if the left-hand side operand is greater than the right-hand side operand.
+        # All of the derived comparison methods are defined in terms of this method.
+        # @let that: The right-hand side operand in the ordering comparison. This is the value that the left-hand side
+        # operand (the instance of the class that implements `Ord`) will be compared against. It is a reference to a
+        # value of type `Rhs`, which is a generic parameter that can be specified when implementing the `Ord` class.
+        # @ret: An `S32` indicating the relative order of the two values: -1 if the left-hand side operand is less than
+        # the right-hand side operand, 0 if they are equal, and 1 if it is greater.
+    }
 
     !public
     !virtual_method
     fun lt(&self, that: &Rhs) -> Bool {
+        # The `lt` method defines the behavior of the "<" operator for the implementing class. It takes a reference to a
+        # value of type `Rhs` as an argument and returns a `Bool` that is `true` if the left-hand side operand is
+        # strictly less than the right-hand side operand. By default, it is derived from `ord`, so implementing classes
+        # only need to provide `ord`, but this method may be overridden if a more direct implementation is desired.
+        # @let that: The right-hand side operand in the "less than" comparison. It is a reference to a value of type
+        # `Rhs`, which is a generic parameter that can be specified when implementing the `Ord` class.
+        # @ret: A `Bool` that is `true` if the left-hand side operand is strictly less than the right-hand side operand
+        # and `false` otherwise.
         ret self.ord(that) == -1
     }
 
     !public
     !virtual_method
     fun le(&self, that: &Rhs) -> Bool {
+        # The `le` method defines the behavior of the "<=" operator for the implementing class. It takes a reference to
+        # a value of type `Rhs` as an argument and returns a `Bool` that is `true` if the left-hand side operand is less
+        # than or equal to the right-hand side operand. By default, it is derived from `ord`, so implementing classes
+        # only need to provide `ord`, but this method may be overridden if a more direct implementation is desired.
+        # @let that: The right-hand side operand in the "less than or equal to" comparison. It is a reference to a value
+        # of type `Rhs`, which is a generic parameter that can be specified when implementing the `Ord` class.
+        # @ret: A `Bool` that is `true` if the left-hand side operand is less than or equal to the right-hand side
+        # operand and `false` otherwise.
         ret self.ord(that) != 1
     }
 
     !public
     !virtual_method
     fun gt(&self, that: &Rhs) -> Bool {
+        # The `gt` method defines the behavior of the ">" operator for the implementing class. It takes a reference to a
+        # value of type `Rhs` as an argument and returns a `Bool` that is `true` if the left-hand side operand is
+        # strictly greater than the right-hand side operand. By default, it is derived from `ord`, so implementing
+        # classes only need to provide `ord`, but this method may be overridden if a more direct implementation is
+        # desired.
+        # @let that: The right-hand side operand in the "greater than" comparison. It is a reference to a value of type
+        # `Rhs`, which is a generic parameter that can be specified when implementing the `Ord` class.
+        # @ret: A `Bool` that is `true` if the left-hand side operand is strictly greater than the right-hand side
+        # operand and `false` otherwise.
         ret self.ord(that) == 1
     }
 
     !public
     !virtual_method
     fun ge(&self, that: &Rhs) -> Bool {
+        # The `ge` method defines the behavior of the ">=" operator for the implementing class. It takes a reference to
+        # a value of type `Rhs` as an argument and returns a `Bool` that is `true` if the left-hand side operand is
+        # greater than or equal to the right-hand side operand. By default, it is derived from `ord`, so implementing
+        # classes only need to provide `ord`, but this method may be overridden if a more direct implementation is
+        # desired.
+        # @let that: The right-hand side operand in the "greater than or equal to" comparison. It is a reference to a
+        # value of type `Rhs`, which is a generic parameter that can be specified when implementing the `Ord` class.
+        # @ret: A `Bool` that is `true` if the left-hand side operand is greater than or equal to the right-hand side
+        # operand and `false` otherwise.
         ret self.ord(that) != -1
     }
 }

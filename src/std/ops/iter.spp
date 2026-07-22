@@ -2,45 +2,134 @@ use std::annotations::abstract_method
 use std::annotations::public
 use std::iterator::Iterator
 
-!public cls IterMov[T] { }
-!public cls IterMut[T] { }
-!public cls IterRef[T] { }
-!public cls RevIterMov[T] { }
-!public cls RevIterMut[T] { }
-!public cls RevIterRef[T] { }
+!public
+cls IterMov[T] {
+    # The `IterMov` class represents the ability to iterate over a value by moving its elements out of it, consuming the
+    # value in the process and yielding each element by value. It is a generic class that takes one type parameter: `T`,
+    # which represents the type of the elements being iterated over.
+    # @type T: The type of the elements produced by the iteration. Each element is yielded by value of type `T`,
+    # transferring ownership out of the instance being iterated.
+}
+
+!public
+cls IterMut[T] {
+    # The `IterMut` class represents the ability to iterate over a value by mutable reference, yielding a mutable
+    # reference to each of its elements without consuming the value. It is a generic class that takes one type
+    # parameter: `T`, which represents the type of the elements being iterated over.
+    # @type T: The type of the elements produced by the iteration. Each element is yielded as a mutable reference of
+    # type `&mut T`, allowing the elements of the instance to be modified in place.
+}
+
+!public
+cls IterRef[T] {
+    # The `IterRef` class represents the ability to iterate over a value by immutable reference, yielding an immutable
+    # reference to each of its elements without consuming the value. It is a generic class that takes one type
+    # parameter: `T`, which represents the type of the elements being iterated over.
+    # @type T: The type of the elements produced by the iteration. Each element is yielded as an immutable reference of
+    # type `&T`, allowing the elements of the instance to be inspected without modification.
+}
+
+!public
+cls RevIterMov[T] {
+    # The `RevIterMov` class represents the ability to iterate over a value in reverse order by moving its elements out
+    # of it, consuming the value in the process and yielding each element by value. It is a generic class that takes one
+    # type parameter: `T`, which represents the type of the elements being iterated over.
+    # @type T: The type of the elements produced by the reverse iteration. Each element is yielded by value of type `T`,
+    # transferring ownership out of the instance being iterated.
+}
+
+!public
+cls RevIterMut[T] {
+    # The `RevIterMut` class represents the ability to iterate over a value in reverse order by mutable reference,
+    # yielding a mutable reference to each of its elements without consuming the value. It is a generic class that takes
+    # one type parameter: `T`, which represents the type of the elements being iterated over.
+    # @type T: The type of the elements produced by the reverse iteration. Each element is yielded as a mutable
+    # reference of type `&mut T`, allowing the elements of the instance to be modified in place.
+}
+
+!public
+cls RevIterRef[T] {
+    # The `RevIterRef` class represents the ability to iterate over a value in reverse order by immutable reference,
+    # yielding an immutable reference to each of its elements without consuming the value. It is a generic class that
+    # takes one type parameter: `T`, which represents the type of the elements being iterated over.
+    # @type T: The type of the elements produced by the reverse iteration. Each element is yielded as an immutable
+    # reference of type `&T`, allowing the elements of the instance to be inspected without modification.
+}
 
 sup [T] IterMov[T] {
     !public
     !abstract_method
-    cor iter_mov(self) -> Iterator[T] { }
+    cor iter_mov(self) -> Iterator[T] {
+        # The `iter_mov` coroutine defines how the elements of the implementing class are iterated over by value. It
+        # consumes the instance and returns an `Iterator` that yields each element by value of type `T`. The specific
+        # iteration behavior is determined by the implementation of this coroutine in the class that implements
+        # `IterMov`.
+        # @ret: An `Iterator[T]` that yields each element of the instance by value, transferring ownership out of the
+        # instance as iteration proceeds.
+    }
 }
 
 sup [T] IterMut[T] {
     !public
     !abstract_method
-    cor iter_mut(&mut self) -> Iterator[&mut T] { }
+    cor iter_mut(&mut self) -> Iterator[&mut T] {
+        # The `iter_mut` coroutine defines how the elements of the implementing class are iterated over by mutable
+        # reference. It takes a mutable reference to the instance and returns an `Iterator` that yields a mutable
+        # reference to each element. The specific iteration behavior is determined by the implementation of this
+        # coroutine in the class that implements `IterMut`.
+        # @ret: An `Iterator[&mut T]` that yields a mutable reference to each element of the instance, allowing the
+        # elements to be modified in place.
+    }
 }
 
 sup [T] IterRef[T] {
     !public
     !abstract_method
-    cor iter_ref(&self) -> Iterator[&T] { }
+    cor iter_ref(&self) -> Iterator[&T] {
+        # The `iter_ref` coroutine defines how the elements of the implementing class are iterated over by immutable
+        # reference. It takes an immutable reference to the instance and returns an `Iterator` that yields an immutable
+        # reference to each element. The specific iteration behavior is determined by the implementation of this
+        # coroutine in the class that implements `IterRef`.
+        # @ret: An `Iterator[&T]` that yields an immutable reference to each element of the instance, allowing the
+        # elements to be inspected without modification.
+    }
 }
 
 sup [T] RevIterMov[T] {
     !public
     !abstract_method
-    cor reverse_iter_mov(self) -> Iterator[T] { }
+    cor reverse_iter_mov(self) -> Iterator[T] {
+        # The `reverse_iter_mov` coroutine defines how the elements of the implementing class are iterated over in
+        # reverse order by value. It consumes the instance and returns an `Iterator` that yields each element, in
+        # reverse order, by value of type `T`. The specific iteration behavior is determined by the implementation of
+        # this coroutine in the class that implements `RevIterMov`.
+        # @ret: An `Iterator[T]` that yields each element of the instance in reverse order by value, transferring
+        # ownership out of the instance as iteration proceeds.
+    }
 }
 
 sup [T] RevIterMut[T] {
     !public
     !abstract_method
-    cor reverse_iter_mut(&mut self) -> Iterator[&mut T] { }
+    cor reverse_iter_mut(&mut self) -> Iterator[&mut T] {
+        # The `reverse_iter_mut` coroutine defines how the elements of the implementing class are iterated over in
+        # reverse order by mutable reference. It takes a mutable reference to the instance and returns an `Iterator`
+        # that yields a mutable reference to each element in reverse order. The specific iteration behavior is
+        # determined by the implementation of this coroutine in the class that implements `RevIterMut`.
+        # @ret: An `Iterator[&mut T]` that yields a mutable reference to each element of the instance in reverse order,
+        # allowing the elements to be modified in place.
+    }
 }
 
 sup [T] RevIterRef[T] {
     !public
     !abstract_method
-    cor reverse_iter_ref(&self) -> Iterator[&T] { }
+    cor reverse_iter_ref(&self) -> Iterator[&T] {
+        # The `reverse_iter_ref` coroutine defines how the elements of the implementing class are iterated over in
+        # reverse order by immutable reference. It takes an immutable reference to the instance and returns an
+        # `Iterator` that yields an immutable reference to each element in reverse order. The specific iteration
+        # behavior is determined by the implementation of this coroutine in the class that implements `RevIterRef`.
+        # @ret: An `Iterator[&T]` that yields an immutable reference to each element of the instance in reverse order,
+        # allowing the elements to be inspected without modification.
+    }
 }

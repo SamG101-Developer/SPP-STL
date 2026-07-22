@@ -21,6 +21,8 @@ use std::number::U8
 use std::number::USize
 
 # Todo: Change the values to cmp function powers etc (formula).
+# Todo: Move these onto the number types themselves + above formula
+# Todo: Will be able to remove most duplication this way too!
 
 !public
 !versioned(base="1.0.0", new="1.0.0")

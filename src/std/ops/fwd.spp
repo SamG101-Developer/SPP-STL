@@ -2,17 +2,46 @@ use std::annotations::abstract_method
 use std::annotations::public
 use std::generator::GenOnce
 
-!public cls FwdMut[T] { }
-!public cls FwdRef[T] { }
+!public
+cls FwdMut[T] {
+    # The `FwdMut` class represents the ability to forward the mutable elements of a value into a generator, yielding a
+    # mutable reference to each element in turn. It is a generic class that takes one type parameter: `T`, which
+    # represents the type of the elements being forwarded. Forwarding differs from iteration in that it hands each
+    # element on to a consuming generator (`GenOnce`) rather than producing a reusable iterator.
+    # @type T: The type of the elements that are forwarded. Each element is yielded to the resulting generator as a
+    # mutable reference of type `&mut T`.
+}
+
+!public
+cls FwdRef[T] {
+    # The `FwdRef` class represents the ability to forward the immutable elements of a value into a generator, yielding
+    # an immutable reference to each element in turn. It is a generic class that takes one type parameter: `T`, which
+    # represents the type of the elements being forwarded. Forwarding differs from iteration in that it hands each
+    # element on to a consuming generator (`GenOnce`) rather than producing a reusable iterator.
+    # @type T: The type of the elements that are forwarded. Each element is yielded to the resulting generator as an
+    # immutable reference of type `&T`.
+}
 
 sup [T] FwdMut[T] {
     !public
     !abstract_method
-    cor fwd_mut(&mut self) -> GenOnce[&mut T] { }
+    cor fwd_mut(&mut self) -> GenOnce[&mut T] {
+        # The `fwd_mut` coroutine defines how the mutable elements of the implementing class are forwarded into a
+        # generator. It takes a mutable reference to the instance and returns a `GenOnce` that yields a mutable
+        # reference to each element in turn. The specific forwarding behavior is determined by the implementation of
+        # this coroutine in the class that implements `FwdMut`.
+        # @ret: A `GenOnce[&mut T]` that yields a mutable reference to each element of the instance as it is forwarded.
+    }
 }
 
 sup [T] FwdRef[T] {
     !public
     !abstract_method
-    cor fwd_ref(&self) -> GenOnce[&T] { }
+    cor fwd_ref(&self) -> GenOnce[&T] {
+        # The `fwd_ref` coroutine defines how the immutable elements of the implementing class are forwarded into a
+        # generator. It takes an immutable reference to the instance and returns a `GenOnce` that yields an immutable
+        # reference to each element in turn. The specific forwarding behavior is determined by the implementation of
+        # this coroutine in the class that implements `FwdRef`.
+        # @ret: A `GenOnce[&T]` that yields an immutable reference to each element of the instance as it is forwarded.
+    }
 }

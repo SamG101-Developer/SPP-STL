@@ -1,6 +1,6 @@
 use std::annotations::abstract_method
-use std::annotations::virtual_method
 use std::annotations::public
+use std::annotations::virtual_method
 use std::generator::GenOnce
 use std::iterator::Indexed
 use std::view::View
@@ -8,85 +8,205 @@ use std::num::bases::One
 use std::num::bases::Zero
 
 !public
-cls IndexMut[T, I] { }
+cls IndexMut[T, I] {
+    # The `IndexMut` class represents the ability to access an element of a value by index for mutation, providing the
+    # behavior of the indexing operator (e.g. `x[i]`) in a mutable context. It is a generic class that takes two type
+    # parameters: `T`, which represents the type of the element being indexed, and `I`, which represents the type of the
+    # index used to locate that element.
+    # @type T: The type of the element that is accessed by indexing. The returned element is exposed as a mutable
+    # reference of type `&mut T`, allowing it to be modified in place.
+    # @type I: The type of the index used to locate an element within the instance. It can be any type, and it is
+    # specified as a generic parameter to allow for flexibility in how elements are addressed.
+}
 
 !public
-cls IndexRef[T, I] { }
+cls IndexRef[T, I] {
+    # The `IndexRef` class represents the ability to access an element of a value by index for reading, providing the
+    # behavior of the indexing operator (e.g. `x[i]`) in an immutable context. It is a generic class that takes two type
+    # parameters: `T`, which represents the type of the element being indexed, and `I`, which represents the type of the
+    # index used to locate that element.
+    # @type T: The type of the element that is accessed by indexing. The returned element is exposed as an immutable
+    # reference of type `&T`, allowing it to be inspected without modification.
+    # @type I: The type of the index used to locate an element within the instance. It can be any type, and it is
+    # specified as a generic parameter to allow for flexibility in how elements are addressed.
+}
 
 !public
-cls SliceRef[V, I: Zero] { }
+cls SliceRef[V, I: Zero] {
+    # The `SliceRef` class represents the ability to take an immutable slice (a contiguous sub-range) of a value,
+    # producing a generator that yields immutable references to the elements within the requested range. It is a generic
+    # class that takes two type parameters: `V`, which represents the type of the elements being sliced, and `I`, which
+    # represents the type of the indices that bound the slice. The index type `I` must implement `Zero` so that slice
+    # ranges starting at the beginning can be expressed.
+    # @type V: The type of the elements contained in the slice. Each element within the requested range is yielded as an
+    # immutable reference of type `&V`.
+    # @type I: The type of the indices that bound the slice. It must implement `Zero`, which provides the zero index
+    # used as the default lower bound when slicing from the start.
+}
 
 !public
-cls SliceMut[V, I: Zero] { }
+cls SliceMut[V, I: Zero] {
+    # The `SliceMut` class represents the ability to take a mutable slice (a contiguous sub-range) of a value, producing
+    # a generator that yields mutable references to the elements within the requested range. It is a generic class that
+    # takes two type parameters: `V`, which represents the type of the elements being sliced, and `I`, which represents
+    # the type of the indices that bound the slice. The index type `I` must implement `Zero` so that slice ranges
+    # starting at the beginning can be expressed.
+    # @type V: The type of the elements contained in the slice. Each element within the requested range is yielded as a
+    # mutable reference of type `&mut V`.
+    # @type I: The type of the indices that bound the slice. It must implement `Zero`, which provides the zero index
+    # used as the default lower bound when slicing from the start.
+}
 
-# Allow the use of the "[mut n]" operator.
 sup [T, I] IndexMut[T, I] {
     !public
     !abstract_method
-    cor index_mut(&mut self, index: I) -> Indexed[&mut T] { }
+    cor index_mut(&mut self, index: I) -> Indexed[&mut T] {
+        # The `index_mut` coroutine defines how an element of the implementing class is accessed by index for mutation.
+        # It takes a mutable reference to the instance and an index of type `I`, and returns an `Indexed` yielding a
+        # mutable reference to the element located at that index. The specific indexing behavior is determined by the
+        # implementation of this coroutine in the class that implements `IndexMut`.
+        # @let index: The index that locates the element to access. It is of type `I`, which is a generic parameter that
+        # can be specified when implementing the `IndexMut` class.
+        # @ret: An `Indexed[&mut T]` yielding a mutable reference to the element located at the given index, allowing
+        # the element to be modified in place.
+    }
 }
 
-# Allow the use of the "[n]" operator.
 sup [T, I] IndexRef[T, I] {
     !public
     !abstract_method
-    cor index_ref(&self, index: I) -> Indexed[&T] { }
+    cor index_ref(&self, index: I) -> Indexed[&T] {
+        # The `index_ref` coroutine defines how an element of the implementing class is accessed by index for reading.
+        # It takes an immutable reference to the instance and an index of type `I`, and returns an `Indexed` yielding an
+        # immutable reference to the element located at that index. The specific indexing behavior is determined by the
+        # implementation of this coroutine in the class that implements `IndexRef`.
+        # @let index: The index that locates the element to access. It is of type `I`, which is a generic parameter that
+        # can be specified when implementing the `IndexRef` class.
+        # @ret: An `Indexed[&T]` yielding an immutable reference to the element located at the given index, allowing the
+        # element to be inspected without modification.
+    }
 }
 
-# Allow the use of the "[mut n to m]" operator.
 sup [V, I: Zero] SliceMut[V, I] {
     !public
     !abstract_method
-    fun slice_mut_max_len(&self) -> I { }
+    fun slice_mut_max_len(&self) -> I {
+        # The `slice_mut_max_len` method returns the maximum valid upper bound for a mutable slice of the implementing
+        # class, i.e. the length past the last element. It is used by the derived slicing methods to fill in the upper
+        # bound when it is not explicitly provided. The specific behavior is determined by the implementation of this
+        # method in the class that implements `SliceMut`.
+        # @ret: The maximum valid upper bound for a mutable slice, of type `I`. This corresponds to the position just
+        # past the last element of the instance.
+    }
 
     !public
     !abstract_method
-    cor slice_mut(&mut self, from: I, into: I) -> GenOnce[&mut V] { }
+    cor slice_mut(&mut self, from: I, into: I) -> GenOnce[&mut V] {
+        # The `slice_mut` coroutine defines how a mutable slice of the implementing class is produced. It takes a
+        # mutable reference to the instance and two indices, `from` and `into`, that bound the slice, and returns a
+        # `GenOnce` that yields a mutable reference to each element within the half-open range. The specific slicing
+        # behavior is determined by the implementation of this coroutine in the class that implements `SliceMut`.
+        # @let from: The lower bound (inclusive) of the slice range, of type `I`.
+        # @let into: The upper bound (exclusive) of the slice range, of type `I`.
+        # @ret: A `GenOnce[&mut V]` that yields a mutable reference to each element within the requested range, allowing
+        # those elements to be modified in place.
+    }
 
     !public
     !virtual_method
     cor slice_mut_from(&mut self, from: I) -> GenOnce[&mut V] {
+        # The `slice_mut_from` coroutine produces a mutable slice that runs from the given lower bound to the end of the
+        # instance. By default, it is derived from `slice_mut` using `slice_mut_max_len` as the upper bound, but it may
+        # be overridden if a more direct implementation is desired.
+        # @let from: The lower bound (inclusive) of the slice range, of type `I`. The slice extends from this index to
+        # the end of the instance.
+        # @ret: A `GenOnce[&mut V]` that yields a mutable reference to each element from the given lower bound to the
+        # end of the instance.
         gen self.slice_mut(from, self.slice_mut_max_len())
     }
 
     !public
     !virtual_method
     cor slice_mut_to(&mut self, into: I) -> GenOnce[&mut V] {
+        # The `slice_mut_to` coroutine produces a mutable slice that runs from the start of the instance up to the given
+        # upper bound. By default, it is derived from `slice_mut` using the zero index as the lower bound, but it may be
+        # overridden if a more direct implementation is desired.
+        # @let into: The upper bound (exclusive) of the slice range, of type `I`. The slice extends from the start of
+        # the instance up to this index.
+        # @ret: A `GenOnce[&mut V]` that yields a mutable reference to each element from the start of the instance up to
+        # the given upper bound.
         gen self.slice_mut(I::zero(), into)
     }
 
     !public
     !virtual_method
     cor slice_mut_full(&mut self) -> GenOnce[&mut V] {
+        # The `slice_mut_full` coroutine produces a mutable slice spanning the entire instance. By default, it is
+        # derived from `slice_mut` using the zero index as the lower bound and `slice_mut_max_len` as the upper bound,
+        # but it may be overridden if a more direct implementation is desired.
+        # @ret: A `GenOnce[&mut V]` that yields a mutable reference to every element of the instance.
         gen self.slice_mut(I::zero(), self.slice_mut_max_len())
     }
 }
 
-# Allow the use of the "[n to m]" operator.
 sup [V, I: Zero] SliceRef[V, I] {
     !public
     !abstract_method
-    fun slice_ref_max_len(&self) -> I { }
+    fun slice_ref_max_len(&self) -> I {
+        # The `slice_ref_max_len` method returns the maximum valid upper bound for an immutable slice of the
+        # implementing class, i.e. the length past the last element. It is used by the derived slicing methods to fill
+        # in the upper bound when it is not explicitly provided. The specific behavior is determined by the
+        # implementation of this method in the class that implements `SliceRef`.
+        # @ret: The maximum valid upper bound for an immutable slice, of type `I`. This corresponds to the position just
+        # past the last element of the instance.
+    }
 
     !public
     !abstract_method
-    cor slice_ref(&self, from: I, into: I) -> GenOnce[&V] { }
+    cor slice_ref(&self, from: I, into: I) -> GenOnce[&V] {
+        # The `slice_ref` coroutine defines how an immutable slice of the implementing class is produced. It takes an
+        # immutable reference to the instance and two indices, `from` and `into`, that bound the slice, and returns a
+        # `GenOnce` that yields an immutable reference to each element within the half-open range. The specific slicing
+        # behavior is determined by the implementation of this coroutine in the class that implements `SliceRef`.
+        # @let from: The lower bound (inclusive) of the slice range, of type `I`.
+        # @let into: The upper bound (exclusive) of the slice range, of type `I`.
+        # @ret: A `GenOnce[&V]` that yields an immutable reference to each element within the requested range, allowing
+        # those elements to be inspected without modification.
+    }
 
     !public
     !virtual_method
     cor slice_ref_from(&self, from: I) -> GenOnce[&V] {
+        # The `slice_ref_from` coroutine produces an immutable slice that runs from the given lower bound to the end of
+        # the instance. By default, it is derived from `slice_ref` using `slice_ref_max_len` as the upper bound, but it
+        # may be overridden if a more direct implementation is desired.
+        # @let from: The lower bound (inclusive) of the slice range, of type `I`. The slice extends from this index to
+        # the end of the instance.
+        # @ret: A `GenOnce[&V]` that yields an immutable reference to each element from the given lower bound to the end
+        # of the instance.
         gen self.slice_ref(from, self.slice_ref_max_len())
     }
 
     !public
     !virtual_method
     cor slice_ref_to(&self, into: I) -> GenOnce[&V] {
+        # The `slice_ref_to` coroutine produces an immutable slice that runs from the start of the instance up to the
+        # given upper bound. By default, it is derived from `slice_ref` using the zero index as the lower bound, but it
+        # may be overridden if a more direct implementation is desired.
+        # @let into: The upper bound (exclusive) of the slice range, of type `I`. The slice extends from the start of
+        # the instance up to this index.
+        # @ret: A `GenOnce[&V]` that yields an immutable reference to each element from the start of the instance up to
+        # the given upper bound.
         gen self.slice_ref(I::zero(), into)
     }
 
     !public
     !virtual_method
     cor slice_ref_full(&self) -> GenOnce[&V] {
+        # The `slice_ref_full` coroutine produces an immutable slice spanning the entire instance. By default, it is
+        # derived from `slice_ref` using the zero index as the lower bound and `slice_ref_max_len` as the upper bound,
+        # but it may be overridden if a more direct implementation is desired.
+        # @ret: A `GenOnce[&V]` that yields an immutable reference to every element of the instance.
         gen self.slice_ref(I::zero(), self.slice_ref_max_len())
     }
 }

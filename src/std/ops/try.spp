@@ -3,15 +3,42 @@ use std::annotations::protected
 use std::annotations::public
 use std::boolean::Bool
 
-!public cls Try[Output, Residual, Value] { }
+!public
+cls Try[Output, Residual, Value] {
+    # The `Try` class represents the ability for a value to participate in the "?" (try) operator, which provides early
+    # return based short-circuiting for types that model success or failure (such as `Option` and `Result`). It is a
+    # generic class that takes three type parameters: `Output`, which represents the type produced on the success path;
+    # `Residual`, which represents the value that is propagated (early-returned) on the failure path; and `Value`, which
+    # represents the type of the wrapped value extracted on success.
+    # @type Output: The type produced on the success path of the "?" operator. This is the type of the value that the
+    # overall expression evaluates to when the operand represents a successful value and no early return occurs.
+    # @type Residual: The type that is propagated out of the enclosing function on the failure path of the "?" operator.
+    # This is the value that is early-returned when the operand represents a failure and short-circuiting occurs.
+    # @type Value: The type of the wrapped value extracted from the operand on the success path. This is the value that
+    # `op_as_value` yields when the operand is determined to represent a successful value.
+}
 
-# Allow the use of the "?" operator.
 sup [Output, Residual, Value] Try[Output, Residual, Value] {
     !protected
     !abstract_method
-    fun op_is_value(&self) -> Bool { }
+    fun op_is_value(&self) -> Bool {
+        # The `op_is_value` method determines whether the operand of the "?" operator represents a successful value (as
+        # opposed to a failure that should be propagated). It takes a reference to the instance and returns a `Bool`
+        # that is `true` when the operand holds a value that should be unwrapped and used, and `false` when the operand
+        # represents a failure that should trigger short-circuiting. The specific behavior is determined by the
+        # implementation of this method in the class that implements `Try`.
+        # @ret: A `Bool` that is `true` if the operand represents a successful value that can be unwrapped, and `false`
+        # if it represents a failure that should be propagated.
+    }
 
     !protected
     !abstract_method
-    fun op_as_value(self) -> Value { }
+    fun op_as_value(self) -> Value {
+        # The `op_as_value` method extracts the wrapped value from the operand of the "?" operator when it represents a
+        # successful value. It consumes the instance and returns a value of type `Value`. It is only invoked when
+        # `op_is_value` has determined that the operand represents a success. The specific behavior is determined by the
+        # implementation of this method in the class that implements `Try`.
+        # @ret: The wrapped value extracted from the operand, of type `Value`. This is the value that the "?" expression
+        # yields when the operand represents a successful value.
+    }
 }

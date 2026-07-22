@@ -2,11 +2,31 @@ use std::annotations::abstract_method
 use std::annotations::public
 use std::boolean::Bool
 
-!public cls And[Rhs=Self] { }
+!public
+cls And[Rhs=Self] {
+    # The `And` class represents the ability to compute the logical AND of two values using the "and" operator. It is a
+    # generic class that takes one type parameter: `Rhs`, which represents the type of the right-hand side operand. By
+    # default, `Rhs` is set to `Self`, meaning that if no specific type is provided, it will assume that the right-hand
+    # side operand is of the same type as the implementing class. The result of the logical AND operation is always a
+    # `Bool`.
+    # @type Rhs: The type of the right-hand side operand in the logical AND operation. This is the type of the value
+    # that will be combined with the left-hand side operand (the instance of the class that implements `And`) using a
+    # logical AND. It can be any type, and it is specified as a generic parameter to allow for flexibility in the types
+    # that can be combined together.
+}
 
-# Allow the use of the "and" operator.
 sup [Rhs] And[Rhs] {
     !public
     !abstract_method
-    fun and_(self, that: Rhs) -> Bool { }
+    fun and_(self, that: Rhs) -> Bool {
+        # The `and_` method defines the behavior of the "and" operator for the implementing class. It takes a value of
+        # type `Rhs` as an argument, which represents the right-hand side operand in the logical AND operation. The
+        # method returns a `Bool`, which represents the result of the logical AND. The specific behavior of the logical
+        # AND operation is determined by the implementation of this method in the class that implements `And`.
+        # @let that: The right-hand side operand in the logical AND operation. This is the value that will be combined
+        # with the left-hand side operand (the instance of the class that implements `And`) using a logical AND. It is
+        # of type `Rhs`, which is a generic parameter that can be specified when implementing the `And` class.
+        # @ret: The result of the logical AND operation, as a `Bool`. This is the value that will be returned when the
+        # "and" operator is used to combine two values.
+    }
 }
