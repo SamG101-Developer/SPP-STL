@@ -23,6 +23,18 @@ use std::ops::del::Del
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls FileMode {
+    # The `FileMode` type represents the mode in which a file should be opened. It contains boolean flags that indicate
+    # whether the file should be opened for reading, writing, appending, truncating, creating, or exclusively creating a
+    # new file. This type is used to specify the desired access mode when opening a file.
+    #
+    # @let is_read:
+    # @let is_write:
+    # @let is_append:
+    # @let is_truncate:
+    # @let is_create:
+    # @let is_exclusive:
+    # @todo: Look at re-using the "Flags" type here? issue is the C mapping.
+
     !public is_read: Bool = false
     !public is_write: Bool = false
     !public is_append: Bool = false
@@ -34,19 +46,97 @@ cls FileMode {
 sup FileMode ext Copy { }
 
 sup FileMode {
-    fun read(self, yes: Bool = true) -> Self { ret Self(is_read=yes, ..self) }
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun read(self, yes: Bool = true) -> Self {
+        # Marks the file mode as readable. This method sets the `is_read` flag to the specified boolean value.
+        # @let ?yes: A boolean value indicating whether the file should be marked as readable. Defaults to `true`.
+        # @ret: A new `FileMode` instance with the `is_read` flag set to the specified value, and all other flags
+        # unchanged.
 
-    fun write(self, yes: Bool = true) -> Self { ret Self(is_write=yes, ..self) }
+        # Set the `is_read` flag to the specified value while
+        # preserving the other flags in the `FileMode` instance.
+        ret Self(is_read=yes, ..self)
+    }
 
-    fun append(self, yes: Bool = true) -> Self { ret Self(is_append=yes, ..self) }
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun write(self, yes: Bool = true) -> Self {
+        # Marks the file mode as writable. This method sets the `is_write` flag to the specified boolean value.
+        # @let ?yes: A boolean value indicating whether the file should be marked as writable. Defaults to `true`.
+        # @ret: A new `FileMode` instance with the `is_write` flag set to the specified value, and all other flags
+        # unchanged.
 
-    fun truncate(self, yes: Bool = true) -> Self { ret Self(is_truncate=yes, ..self) }
+        # Set the `is_write` flag to the specified value while
+        # preserving the other flags in the `FileMode` instance.
+        ret Self(is_write=yes, ..self)
+    }
 
-    fun create(self, yes: Bool = true) -> Self { ret Self(is_create=yes, ..self) }
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun append(self, yes: Bool = true) -> Self {
+        # Marks the file mode as appendable. This method sets the `is_append` flag to the specified boolean value.
+        # @let ?yes: A boolean value indicating whether the file should be marked as appendable. Defaults to `true`.
+        # @ret: A new `FileMode` instance with the `is_append` flag set to the specified value, and all other flags
+        # unchanged.
 
-    fun create_new(self, yes: Bool = true) -> Self { ret Self(is_create=yes, is_exclusive=yes, ..self) }
+        # Set the `is_append` flag to the specified value while
+        # preserving the other flags in the `FileMode` instance.
+        ret Self(is_append=yes, ..self)
+    }
 
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun truncate(self, yes: Bool = true) -> Self {
+        # Marks the file mode as truncatable. This method sets the `is_truncate` flag to the specified boolean value.
+        # @let ?yes: A boolean value indicating whether the file should be marked as truncatable. Defaults to `true`.
+        # @ret: A new `FileMode` instance with the `is_truncate` flag set to the specified value, and all other flags
+        # unchanged.
+
+        # Set the `is_truncate` flag to the specified value while
+        # preserving the other flags in the `FileMode` instance.
+        ret Self(is_truncate=yes, ..self)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun create(self, yes: Bool = true) -> Self {
+        # Marks the file mode as creatable. This method sets the `is_create` flag to the specified boolean value.
+        # @let ?yes: A boolean value indicating whether the file should be marked as creatable. Defaults to `true`.
+        # @ret: A new `FileMode` instance with the `is_create` flag set to the specified value, and all other flags
+        # unchanged.
+
+        # Set the `is_create` flag to the specified value while
+        # preserving the other flags in the `FileMode` instance.
+        ret Self(is_create=yes, ..self)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun create_new(self, yes: Bool = true) -> Self {
+        # Marks the file mode as exclusively creatable. This method sets both the `is_create` and `is_exclusive` flags
+        # to the specified boolean value.
+        # @let ?yes: A boolean value indicating whether the file should be marked as exclusively creatable. Defaults to
+        # `true`.
+        # @ret: A new `FileMode` instance with the `is_create` and `is_exclusive` flags set to the specified value, and
+        # all other flags unchanged.
+
+        # Set both the `is_create` and `is_exclusive` flags to the
+        # specified value while preserving the other flags in the
+        # `FileMode` instance.
+        ret Self(is_create=yes, is_exclusive=yes, ..self)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun to_flags(&self) -> S32 {
+        # Converts the `FileMode` instance into a set of flags that can be used with the underlying file system
+        # operations. The flags are represented as a 32-bit signed integer, where each bit corresponds to a specific
+        # file mode option. The method checks the boolean flags in the `FileMode` instance and sets the corresponding
+        # bits in the integer value. The resulting integer can be used to specify the desired file mode when opening a
+        # file.
+        # @ret:
+
         let mut flags: S32 = 0
         case self.is_read and self.is_write { flags |= 0x2 }
         else {
