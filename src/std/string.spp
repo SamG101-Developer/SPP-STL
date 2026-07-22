@@ -22,6 +22,7 @@ use std::ops::add::AddAssign
 use std::ops::fwd::FwdMut
 use std::ops::fwd::FwdRef
 
+!public
 cls Str[A: Alloc = GlobalAlloc] {
     # The `Str` type represents a mutable string that can be allocated using a specified allocator. It is designed to be
     # flexible and efficient for various use cases, allowing for dynamic resizing and manipulation of string data. The
