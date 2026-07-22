@@ -20,24 +20,34 @@ use std::vector::Vec
 use std::view::View
 use std::void::Void
 
+!public
 cls StreamEofError { }
 
+!public
 cls StreamInterruptedError { }
 
+!public
 cls StreamWouldBlockError { }
 
+!public
 cls StreamInvalidInputError { }
 
+!public
 cls StreamInvalidDataError { }
 
+!public
 cls StreamPermissionDeniedError { }
 
+!public
 cls StreamNotFoundError { }
 
+!public
 cls StreamAlreadyExistsError { }
 
+!public
 cls StreamWriteZeroError { }
 
+!public
 cls StreamOtherError { }
 
 !public
