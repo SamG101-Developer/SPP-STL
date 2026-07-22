@@ -38,7 +38,7 @@ cls Ptr[T] {
     !package addr: USize
 }
 
-!package
+!public
 !versioned(base="1.0.0", new="1.0.0")
 cls NonNull[T] {
     # Whilst the `Ptr` class is a raw pointer wrapper, only exposed by the sppc allocation functions, the `NonNull`
