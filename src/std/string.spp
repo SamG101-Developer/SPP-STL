@@ -320,7 +320,6 @@ sup [A: Alloc] Str[A] ext FwdRef[StrView] {
 }
 
 sup [A: Alloc] Str[A] ext Clone {
-    !public
     !versioned(base="1.0.0", new="1.0.0")
     fun clone(&self) -> Self {
         # The `clone` method creates a new instance of the `Str` type that is a copy of the current instance. This
