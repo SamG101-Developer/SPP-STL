@@ -20,6 +20,8 @@ use std::fs::path::Path
 use std::fs::path::PathErr
 use std::ops::del::Del
 
+!public
+!versioned(base="1.0.0", new="1.0.0")
 cls FileMode {
     !public is_read: Bool = false
     !public is_write: Bool = false
