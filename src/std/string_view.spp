@@ -364,13 +364,15 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun lines(&self) -> Iterator[&StrView] {
+    cor lines(&self) -> Iterator[&StrView] {
         #
         # @ret:
 
         # Map to splitting by all "\n" and then trim the trailing "\r" from each line.
         let mut sep = "\n"
-        ret self.split(sep).map((line: &StrView) line.trim_end())
+        loop line in self.split(sep) {
+            gen line.trim_end()
+        }
     }
 
     !public
