@@ -27,7 +27,7 @@ use std::mem::pointer::NonNull
 use std::ops::idx::IndexMut
 use std::ops::idx::IndexRef
 
-!package
+!public
 !versioned(base="1.0.0", new="1.0.0")
 cls RawBuf[T, A: Alloc=GlobalAlloc] {
     # The `RawBuf` type is a low level container for contiguous elements in memory. It is capacity aware, but not length
