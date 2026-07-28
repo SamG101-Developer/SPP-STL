@@ -49,6 +49,11 @@ sup [T, cmp n: USize] Arr[T, n] {
     fun new() -> Self { }
 
     !public
+    !intrinsic(name="std.array.Arr.fill")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun fill(&mut self, val: T) -> Void { }
+
+    !public
     !versioned(base="1.0.0", new="1.0.0")
     fun swap(&mut self, i: USize, j: USize) -> Void {
         std::mem::ops::swap(self[mut i], self[mut j])
@@ -57,9 +62,12 @@ sup [T, cmp n: USize] Arr[T, n] {
 
 sup [T: Copy, cmp n: USize] Arr[T, n] {
     !public
-    !intrinsic(name="std.array.Arr.new_filled")
     !versioned(base="1.0.0", new="1.0.0")
-    fun new_filled(val: T) -> Self { }
+    fun new_filled(val: T) -> Self {
+        let mut arr = Self::new()
+        arr.fill(val)
+        ret arr
+    }
 }
 
 sup [T: Copy, cmp n: USize] Arr[T, n] ext Copy { }
