@@ -272,11 +272,6 @@ cmp fun scmp[T: Integer](this: &T, that: &T) -> S32 { }
 !intrinsic(name="std.intrinsics.ucmp")
 cmp fun ucmp[T: Integer](this: &T, that: &T) -> S32 { }
 
-!public
-!always_inline
-!intrinsic(name="std.intrinsics.fcmp")
-cmp fun fcmp[T: FloatingPoint](this: &T, that: &T) -> S32 { }
-
 # !public
 # !always_inline
 # !intrinsic

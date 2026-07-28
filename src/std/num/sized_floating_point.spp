@@ -161,15 +161,19 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Ord {
     fun ord(&self, that: &Self) -> S32 {
         # The `ord` method defines how to compare two floating point values of the same size and determine their
         # ordering. It uses the `fcmp` intrinsic function to perform the comparison, which checks the relative ordering
-        # of the two values according to the rules of floating point arithmetic.
+        # of the two values according to the rules of floating point arithmetic. There is no intrinsic for `fcmp`, so it
+        # is implemented in S++.
         # @let that: A borrow to the floating point value that is being compared to the current value for ordering.
         # @ret: An `S32` value indicating the ordering of the two floating point values:
         # - A negative value indicates that the current value is less than the other value.
         # - Zero indicates that the two values are equal.
         # - A positive value indicates that the current value is greater than the other value.
 
-        # Hook into comparison intrinsic.
-        ret intrinsics::fcmp(self, that)
+        # Simple 3 way comparison.
+        ret case self of {
+            < that { -1 }
+            > that { 1 }
+            else { 0 } }
     }
 
     !versioned(base="1.0.0", new="1.0.0")
