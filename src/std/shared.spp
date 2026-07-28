@@ -1,4 +1,5 @@
 use std::annotations::intrinsic
+use std::annotations::package
 use std::annotations::public
 use std::annotations::versioned
 use std::allocator::Alloc
@@ -124,13 +125,14 @@ sup [T, A: Alloc & Clone] Shared[T, A] ext Clone {
 sup [T, A: Alloc] Shared[T, A] ext Del {
     !versioned(base="1.0.0", new="1.0.0")
     fun del(&mut self) -> Void {
-        # Drop one share. When the share count reaches zero the value is no longer reachable through any `Shared`, so its
-        # destructor must run: `drop_in_place` destroys the `val` field of the control block directly, leaving the
-        # counters intact for any surviving shadows. Deallocation is a pure memory operation that never runs destructors,
-        # so the value must be destroyed here explicitly. The heap block itself is only deallocated once there are also no
-        # shadows left, since a live shadow keeps the block around to read the counters; if shadows remain, the last of
-        # them will deallocate the block when it is dropped. A shadow that outlives the value never reads it, as `upgrade`
-        # returns `None` once the share count is zero, so the destroyed `val` slot is never observed.
+        # Drop one share. When the share count reaches zero the value is no longer reachable through any `Shared`, so
+        # its destructor must run: `drop_in_place` destroys the `val` field of the control block directly, leaving the
+        # counters intact for any surviving shadows. Deallocation is a pure memory operation that never runs
+        # destructors, so the value must be destroyed here explicitly. The heap block itself is only deallocated once
+        # there are also no shadows left, since a live shadow keeps the block around to read the counters; if shadows
+        # remain, the last of them will deallocate the block when it is dropped. A shadow that outlives the value never
+        # reads it, as `upgrade` returns `None` once the share count is zero, so the destroyed `val` slot is never
+        # observed.
         # @ret: Nothing; this is invoked for its cleanup side effects when a `Shared` is destroyed.
 
         self.ptr.shared_counter -= 1_uz
