@@ -549,42 +549,42 @@ fun usub_saturating[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic(name="std.intrinsics.smul_saturating")
+!intrinsic(name="std.intrinsics.uadd_wrapping")
 fun uadd_wrapping[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic(name="std.intrinsics.smul_saturating")
+!intrinsic(name="std.intrinsics.sadd_wrapping")
 fun sadd_wrapping[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic(name="std.intrinsics.usub_saturating")
+!intrinsic(name="std.intrinsics.usub_wrapping")
 fun usub_wrapping[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic(name="std.intrinsics.ssub_saturating")
+!intrinsic(name="std.intrinsics.ssub_wrapping")
 fun ssub_wrapping[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic(name="std.intrinsics.smul_saturating")
-fun umul_wrapping[T: Integer](this: T, that: T) -> T { }
-
-!public
-!always_inline
-!intrinsic(name="std.intrinsics.smul_saturating")
+!intrinsic(name="std.intrinsics.smul_wrapping")
 fun smul_wrapping[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic(name="std.intrinsics.smul_saturating")
+!intrinsic(name="std.intrinsics.umul_wrapping")
+fun umul_wrapping[T: Integer](this: T, that: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.sshl_saturating")
 fun sshl_saturating[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic(name="std.intrinsics.smul_saturating")
+!intrinsic(name="std.intrinsics.ushl_saturating")
 fun ushl_saturating[T: Integer](this: T, that: T) -> T { }
 
 !public
