@@ -115,47 +115,47 @@ cmp fun bit_shr_assign[T: Integer, U: Integer](this: &mut T, by: U) -> Void { }
 !public
 !always_inline
 !intrinsic(name="std.intrinsics.bit_ior")
-cmp fun bit_ior[T: Integer](this: T, that: T) -> T { }
+cmp fun bit_ior[T: Integral](this: T, that: T) -> T { }
 
 !public
 !always_inline
 !intrinsic(name="std.intrinsics.bit_ior_assign")
-cmp fun bit_ior_assign[T: Integer](this: &mut T, that: T) -> Void { }
+cmp fun bit_ior_assign[T: Integral](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
 !intrinsic(name="std.intrinsics.bit_and")
-cmp fun bit_and[T: Integer](this: T, that: T) -> T { }
+cmp fun bit_and[T: Integral](this: T, that: T) -> T { }
 
 !public
 !always_inline
 !intrinsic(name="std.intrinsics.bit_and_assign")
-cmp fun bit_and_assign[T: Integer](this: &mut T, that: T) -> Void { }
+cmp fun bit_and_assign[T: Integral](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
 !intrinsic(name="std.intrinsics.bit_xor")
-cmp fun bit_xor[T: Integer](this: T, that: T) -> T { }
+cmp fun bit_xor[T: Integral](this: T, that: T) -> T { }
 
 !public
 !always_inline
 !intrinsic(name="std.intrinsics.bit_xor_assign")
-cmp fun bit_xor_assign[T: Integer](this: &mut T, that: T) -> Void { }
+cmp fun bit_xor_assign[T: Integral](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
 !intrinsic(name="std.intrinsics.bit_not")
-cmp fun bit_not[T: Integer](value: T) -> T { }
+cmp fun bit_not[T: Integral](value: T) -> T { }
 
 !public
 !always_inline
 !intrinsic(name="std.intrinsics.bit_not_assign")
-cmp fun bit_not_assign[T: Integer](this: &mut T) -> Void { }
+cmp fun bit_not_assign[T: Integral](this: &mut T) -> Void { }
 
 !public
 !always_inline
 !intrinsic(name="std.intrinsics.eq")
-cmp fun eq[T: Num](this: &T, that: &T) -> Bool { }
+cmp fun eq[T: Integral](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline
@@ -165,7 +165,7 @@ cmp fun oeq[T: Num](this: &T, that: &T) -> Bool { }  # ordered equal (floats)
 !public
 !always_inline
 !intrinsic(name="std.intrinsics.ne")
-cmp fun ne[T: Num](this: &T, that: &T) -> Bool { }
+cmp fun ne[T: Integral](this: &T, that: &T) -> Bool { }
 
 !public
 !always_inline

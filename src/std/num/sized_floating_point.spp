@@ -759,14 +759,14 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
     !public !inline
     !intrinsic(name="std.num.sized_floating_point.neg_one")
     !versioned(base="1.0.0", new="1.0.0")
-    fun neg_one() -> Self { }
+    cmp fun neg_one() -> Self { }
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext Zero {
     !inline
     !intrinsic(name="std.num.sized_floating_point.zero")
     !versioned(base="1.0.0", new="1.0.0")
-    fun zero() -> Self { }
+    cmp fun zero() -> Self { }
 
     !inline
     !intrinsic(name="std.num.sized_floating_point.is_zero")
@@ -778,7 +778,7 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext One {
     !inline
     !intrinsic(name="std.num.sized_floating_point.one")
     !versioned(base="1.0.0", new="1.0.0")
-    fun one() -> Self { }
+    cmp fun one() -> Self { }
 
     !inline
     !versioned(base="1.0.0", new="1.0.0")
