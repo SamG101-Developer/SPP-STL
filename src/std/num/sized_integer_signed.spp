@@ -354,7 +354,7 @@ sup [cmp w: U32] SizedIntegerSigned[w] {
 sup [cmp w: U32] SizedIntegerSigned[w] {
     !public
     !inline
-    !intrinsic(name="std.num.sized_integer_signed.neg_one")
+    !intrinsic(name="std.num.sized_integer_signed.SizedIntegerSigned.neg_one")
     cmp fun neg_one() -> Self { }
 }
 
