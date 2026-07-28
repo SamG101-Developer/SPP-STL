@@ -41,7 +41,6 @@ cmp fun intrinsic(name: &StrView = "") -> Void {
     # implemented in LLVM IR, and are optimized for performance. They may provide access to special hardware features or
     # perform operations that are not available in the standard library.
     # @let ?name: The name of the intrinsic, that the compiler wilkl match and inject IR for.
-    # @todo: Make the name required, and fill it in in the `intrinsice.spp` stl module.
 }
 
 !public

@@ -234,47 +234,47 @@ cmp fun oge[T: Num](this: &T, that: &T) -> Bool { }  # ordered greater than or e
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.max_val")
 cmp fun max_val[T: Integer]() -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.min_val")
 cmp fun min_val[T: Integer]() -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.smax")
 cmp fun smax[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.umax")
 cmp fun umax[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.smin")
 cmp fun smin[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.umin")
 cmp fun umin[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
-cmp fun ucmp[T: Integer](this: &T, that: &T) -> S32 { }
-
-!public
-!always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.scmp")
 cmp fun scmp[T: Integer](this: &T, that: &T) -> S32 { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.ucmp")
+cmp fun ucmp[T: Integer](this: &T, that: &T) -> S32 { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.fcmp")
 cmp fun fcmp[T: FloatingPoint](this: &T, that: &T) -> S32 { }
 
 # !public
@@ -294,157 +294,157 @@ cmp fun fcmp[T: FloatingPoint](this: &T, that: &T) -> S32 { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_add")
 cmp fun float_add[T: FloatingPoint](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_add_assign")
 cmp fun float_add_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_sub")
 cmp fun float_sub[T: FloatingPoint](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_sub_assign")
 cmp fun float_sub_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_mul")
 cmp fun float_mul[T: FloatingPoint](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_mul_assign")
 cmp fun float_mul_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_div")
 cmp fun float_div[T: FloatingPoint](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_div_assign")
 cmp fun float_div_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_rem")
 cmp fun float_rem[T: FloatingPoint](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_rem_assign")
 cmp fun float_rem_assign[T: FloatingPoint](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_neg")
 cmp fun float_neg[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_neg_assign")
 fun float_sqrt[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_powi")
 fun float_powi[T: FloatingPoint](base: T, exponent: S32) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_powf")
 fun float_powf[T: FloatingPoint](base: T, exponent: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_sin")
 fun float_sin[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_cos")
 fun float_cos[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_tan")
 fun float_tan[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_asin")
 fun float_asin[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_acos")
 fun float_acos[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_atan")
 fun float_atan[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_atan2")
 fun float_atan2[T: FloatingPoint](y: T, x: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_sinh")
 fun float_sinh[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_cosh")
 fun float_cosh[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_tanh")
 fun float_tanh[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_asinh")
 fun float_exp[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_acosh")
 fun float_exp2[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_atanh")
 fun float_exp10[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_log")
 fun float_log[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_log2")
 fun float_log2[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_log10")
 fun float_log10[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_abs")
 cmp fun float_abs[T: FloatingPoint](value: T) -> T { }
 
 !public
@@ -459,195 +459,195 @@ cmp fun float_min_val[T: FloatingPoint]() -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_max")
 cmp fun float_max[T: FloatingPoint](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_min")
 cmp fun float_min[T: FloatingPoint](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_copysign")
 fun float_copysign[T: FloatingPoint](value: T, sign: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_floor")
 cmp fun float_floor[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_ceil")
 cmp fun float_ceil[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_trunc")
 cmp fun float_trunc[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_round")
 cmp fun float_round[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.float_bitreverse")
 fun bitreverse[T: Integer](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.ctlz")
 fun ctlz[T: Integer](value: T) -> U32 { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.sadd_overflow")
 fun sadd_overflow[T: Integer](this: T, that: T) -> (T, Bool) { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.uadd_overflow")
 fun uadd_overflow[T: Integer](this: T, that: T) -> (T, Bool) { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.ssub_overflow")
 fun ssub_overflow[T: Integer](this: T, that: T) -> (T, Bool) { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.usub_overflow")
 fun usub_overflow[T: Integer](this: T, that: T) -> (T, Bool) { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.smul_overflow")
 fun smul_overflow[T: Integer](this: T, that: T) -> (T, Bool) { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.umul_overflow")
 fun umul_overflow[T: Integer](this: T, that: T) -> (T, Bool) { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.sadd_saturating")
 fun sadd_saturating[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.uadd_saturating")
 fun uadd_saturating[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.ssub_saturating")
 fun ssub_saturating[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.usub_saturating")
 fun usub_saturating[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.smul_saturating")
 fun uadd_wrapping[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.smul_saturating")
 fun sadd_wrapping[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.usub_saturating")
 fun usub_wrapping[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.ssub_saturating")
 fun ssub_wrapping[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.smul_saturating")
 fun umul_wrapping[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.smul_saturating")
 fun smul_wrapping[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.smul_saturating")
 fun sshl_saturating[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.smul_saturating")
 fun ushl_saturating[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.sitofp")
 fun sitofp[cmp this_w: U32, cmp that_w: U32](value: SizedIntegerSigned[that_w]) -> SizedFloatingPoint[this_w] { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.uitofp")
 fun uitofp[cmp this_w: U32, cmp that_w: U32](value: SizedIntegerUnsigned[that_w]) -> SizedFloatingPoint[this_w] { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.strunc")
 fun strunc[T: Integer, cmp that_w: U32](value: SizedIntegerSigned[that_w]) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.utrunc")
 fun utrunc[T: Integer, cmp that_w: U32](value: SizedIntegerUnsigned[that_w]) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.szext")
 fun szext[T: Integer, cmp that_w: U32](value: SizedIntegerSigned[that_w]) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.uzext")
 fun uzext[T: Integer, cmp that_w: U32](value: SizedIntegerUnsigned[that_w]) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.fpext")
 fun fpext[cmp this_w: U32, cmp that_w: U32](value: SizedFloatingPoint[that_w]) -> SizedFloatingPoint[this_w] { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.fptrunc")
 fun fptrunc[cmp this_w: U32, cmp that_w: U32](value: SizedFloatingPoint[that_w]) -> SizedFloatingPoint[this_w] { }
 
 !public
 !always_inline
-!intrinsic
-fun bit_cast[T, U](value: U) -> T { }  # Identity function (type hint to change U32 to S32 etc - same bit width)
+!intrinsic(name="std.intrinsics.bit_cast")
+fun bit_cast[T, U](value: U) -> T { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.fptosi")
 fun fptosi[cmp this_w: U32, cmp that_w: U32](value: SizedFloatingPoint[that_w]) -> SizedIntegerSigned[this_w] { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.fptoui")
 fun fptoui[cmp this_w: U32, cmp that_w: U32](value: SizedFloatingPoint[that_w]) -> SizedIntegerUnsigned[this_w] { }
 
 !public
 !always_inline
-!intrinsic
+!intrinsic(name="std.intrinsics.fpclass")
 fun fpclass[T: FloatingPoint](value: T, flag: S32) -> Bool { }
