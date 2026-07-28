@@ -175,15 +175,6 @@ sup [T, A: Alloc] Vec[T, A] {
     }
 
     !public
-    !intrinsic(name="std.vector.Vec.from[View]")
-    !versioned(base="1.0.0", new="1.0.0")
-    fun from(that: &View[T]) -> Self {
-        #
-        # @let that:
-        # @ret:
-    }
-
-    !public
     !versioned(base="1.0.0", new="1.0.0")
     fun cap(&self) -> USize {
         #
@@ -525,29 +516,22 @@ sup [T, A: Alloc] Vec[T, A] {
     }
 }
 
-sup [T, A: Alloc] Vec[T, A] ext Del {
-    !versioned(base="1.0.0", new="1.0.0")
-    fun del(&mut self) -> Void {
-        # The `del` function runs the destructors of the vector's live elements when it is dropped, then lets the
-        # underlying buffer drop, which frees the backing memory. The live elements are the range `[start, length)`,
-        # which `clear_range` destroys in place. For any vector in normal use `start` is `0`, so this is `[0, length)`;
-        # a forward move-iterator abandoned early leaves `start` advanced past the elements it already yielded, so only
-        # the un-yielded remainder is dropped. The buffer's own destructor only frees memory and never touches the
-        # elements, so there is no double drop; it runs after this body as part of normal field destruction.
-        # @ret: Nothing; this is invoked for its cleanup side effect when a `Vec` is destroyed.
-
-        self.buffer.clear_range(self.start, self.length - self.start)
-    }
-}
-
-sup [T: Copy, A: Alloc] Vec[T, A] {
+sup [T: Clone, A: Alloc] Vec[T, A] {
     !public
+    !intrinsic(name="std.vector.Vec.append_from_view")
     !versioned(base="1.0.0", new="1.0.0")
     fun append_from_view(&mut self, that: &View[T]) -> Void {
         # Append all the elements from a view, by copying the elements from the view.
         # @let that: The view to append from.
+    }
 
-        loop i in Range[USize]::between(0_uz, that.len()) { self.append(that[i]@) }
+    !public
+    !intrinsic(name="std.vector.Vec.from[View]")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(that: &View[T]) -> Self {
+        #
+        # @let that:
+        # @ret:
     }
 }
 
@@ -692,4 +676,19 @@ sup [T, A: Alloc] Vec[T, A] ext FwdRef[View[T]] {
     !intrinsic(name="std.vector.Vec.fwd_ref[View]")
     !versioned(base="1.0.0", new="1.0.0")
     cor fwd_ref(&self) -> GenOnce[&View[T]] { }
+}
+
+sup [T, A: Alloc] Vec[T, A] ext Del {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun del(&mut self) -> Void {
+        # The `del` function runs the destructors of the vector's live elements when it is dropped, then lets the
+        # underlying buffer drop, which frees the backing memory. The live elements are the range `[start, length)`,
+        # which `clear_range` destroys in place. For any vector in normal use `start` is `0`, so this is `[0, length)`;
+        # a forward move-iterator abandoned early leaves `start` advanced past the elements it already yielded, so only
+        # the un-yielded remainder is dropped. The buffer's own destructor only frees memory and never touches the
+        # elements, so there is no double drop; it runs after this body as part of normal field destruction.
+        # @ret: Nothing; this is invoked for its cleanup side effect when a `Vec` is destroyed.
+
+        self.buffer.clear_range(self.start, self.length - self.start)
+    }
 }
