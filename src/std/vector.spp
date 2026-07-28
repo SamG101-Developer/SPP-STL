@@ -518,7 +518,6 @@ sup [T, A: Alloc] Vec[T, A] {
 
 sup [T: Clone, A: Alloc] Vec[T, A] {
     !public
-    !intrinsic(name="std.vector.Vec.append_from_view")
     !versioned(base="1.0.0", new="1.0.0")
     fun append_from_view(&mut self, that: &View[T]) -> Void {
         # Append all the elements from a view, by copying the elements from the view.
@@ -532,7 +531,6 @@ sup [T: Clone, A: Alloc] Vec[T, A] {
     }
 
     !public
-    !intrinsic(name="std.vector.Vec.from[View]")
     !versioned(base="1.0.0", new="1.0.0")
     fun from(that: &View[T]) -> Self {
         # Create the vector from a view, by copying the elements from the view.
@@ -650,7 +648,6 @@ sup [T: Eq, A: Alloc] Vec[T, A] ext Eq {
 }
 
 sup [T, A: Alloc] Vec[T, A] ext FromIterator[T] {
-    !intrinsic(name="std.vector.Vec.from[Gen]")
     !versioned(base="1.0.0", new="1.0.0")
     fun from_iter[G: Gen[T]](iter: G) -> Self {
         # Build a new `Vec` from a generator. The generator is expected to yield elements of type `T`, and the function
@@ -671,12 +668,16 @@ sup [T, A: Alloc] Vec[T, A] ext FromIterator[T] {
 }
 
 sup [T, cmp n: USize, A: Alloc] Vec[T, A] ext From[Arr[T, n]] {
-    !intrinsic(name="std.vector.Vec.from[Arr]")
     !versioned(base="1.0.0", new="1.0.0")
     fun from(that: Arr[T, n]) -> Self {
         #
         # @let that:
         # @ret:
+
+        let mut vec = Self::new_with_capacity_in(n, GlobalAlloc)
+        std::mem::ops::mem_copy(&mut vec.buffer.ptr, &that.ptr, n)
+        vec.length = n
+        ret vec
     }
 }
 
