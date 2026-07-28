@@ -4,6 +4,8 @@ use std::annotations::private
 use std::annotations::public
 use std::annotations::versioned
 use std::annotations::zero_type
+use std::llvm::always_inline
+use std::llvm::inline
 use std::boolean::Bool
 use std::copy::Copy
 use std::function::Fun
@@ -57,7 +59,7 @@ sup [T] NonNull[T] {
 
     type Element = T
 
-    !package
+    !package !inline
     !versioned(base="1.0.0", new="1.0.0")
     fun from_ptr(ptr: Ptr[T]) -> Res[NonNull[T], NullptrErr] {
         # Create a `NonNull` pointer from a raw pointer. This is safe because the `NonNull` type guarantees that the
@@ -74,12 +76,12 @@ sup [T] NonNull[T] {
         ret Pass(val=Self::from_ptr_inner(ptr))
     }
 
-    !private
+    !private !always_inline
     !intrinsic(name="spp.mem.pointer.NonNull.from_ptr_inner")
     !versioned(base="1.0.0", new="1.0.0")
     fun from_ptr_inner(ptr: Ptr[T]) -> NonNull[T] { }
 
-    !package
+    !package !inline
     !versioned(base="1.0.0", new="1.0.0")
     fun dangling() -> NonNull[T] {
         # Create a dangling `NonNull` that is non-null and correctly aligned for `T` but points at no allocation. The
@@ -91,7 +93,7 @@ sup [T] NonNull[T] {
         ret Self::from_ptr_inner(Ptr(addr=std::mem::ops::align_of[T]()))
     }
 
-    !package
+    !package !always_inline
     !intrinsic(name="spp.mem.pointer.NonNull.raw")
     !versioned(base="1.0.0", new="1.0.0")
     fun raw(&self) -> Ptr[T] {
@@ -101,7 +103,7 @@ sup [T] NonNull[T] {
         # calls, and it is guaranteed to be non-null.
     }
 
-    !package
+    !package !always_inline
     !intrinsic(name="spp.mem.pointer.NonNull.from_func")
     !versioned(base="1.0.0", new="1.0.0")
     fun from_func[F: Fun](func: F) -> NonNull[F] {
@@ -116,7 +118,7 @@ sup [T] NonNull[T] {
         # passed into ffi calls, and it is guaranteed to be non-null.
     }
 
-    !package
+    !package !always_inline
     !intrinsic(name="spp.mem.pointer.NonNull.erase_type")
     !versioned(base="1.0.0", new="1.0.0")
     fun erase_type(self) -> NonNull[U8] {
@@ -131,7 +133,7 @@ sup [T] NonNull[T] {
         # @ret: A `NonNull[U8]` with the same address as `self`, viewing the allocation as raw bytes.
     }
 
-    !package
+    !package !always_inline
     !intrinsic(name="spp.mem.pointer.NonNull.is_aligned")
     !versioned(base="1.0.0", new="1.0.0")
     fun is_aligned(&self, align: USize) -> Bool {
@@ -142,7 +144,7 @@ sup [T] NonNull[T] {
         # @ret: A boolean value indicating whether the pointer is aligned to the specified alignment or not.
     }
 
-    !package
+    !package !always_inline
     !intrinsic(name="spp.mem.pointer.NonNull.write")
     !versioned(base="1.0.0", new="1.0.0")
     fun write(&mut self, value: T) -> Void {
@@ -153,7 +155,7 @@ sup [T] NonNull[T] {
         # value that the pointer points to.
     }
 
-    !package
+    !package !always_inline
     !intrinsic(name="spp.mem.pointer.NonNull.read")
     !versioned(base="1.0.0", new="1.0.0")
     fun read(&self) -> T {
@@ -176,7 +178,7 @@ sup NonNull[U8] {
     # unrelated types, because the only way into this block is to hold a byte pointer, and the only way to get a byte
     # pointer from a typed one is `erase_type`.
 
-    !package
+    !package !always_inline
     !intrinsic(name="spp.mem.pointer.NonNull.cast")
     !versioned(base="1.0.0", new="1.0.0")
     fun cast[U](self) -> NonNull[U] {
@@ -208,6 +210,7 @@ sup [T] NonNull[T] ext Copy {
 sup [T] NonNull[T] ext FwdMut[&mut T] {
     # Provide a forwarding implementation for mutable references to the inner type of the `NonNull` pointer.
 
+    !always_inline
     !intrinsic(name="spp.mem.pointer.NonNull.fwd_mut")
     !versioned(base="1.0.0", new="1.0.0")
     cor fwd_mut(&mut self) -> GenOnce[&mut T] {
@@ -220,6 +223,7 @@ sup [T] NonNull[T] ext FwdMut[&mut T] {
 sup [T] NonNull[T] ext FwdRef[&T] {
     # Provide a forwarding implementation for immutable references to the inner type of the `NonNull` pointer.
 
+    !always_inline
     !intrinsic(name="spp.mem.pointer.NonNull.fwd_ref")
     !versioned(base="1.0.0", new="1.0.0")
     cor fwd_ref(&self) -> GenOnce[&T] {

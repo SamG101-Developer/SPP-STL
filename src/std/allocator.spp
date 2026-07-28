@@ -5,6 +5,7 @@ use std::annotations::public
 use std::annotations::versioned
 use std::annotations::virtual_method
 use std::annotations::zero_type
+use std::llvm::inline
 use std::clone::Clone
 use std::copy::Copy
 use std::number::S32
@@ -90,7 +91,7 @@ sup Layout ext Copy {
 }
 
 sup Layout {
-    !public
+    !public !inline
     fun new_for_array[T](n: USize) -> Self {
         # The `new_for_array` function creates a new `Layout` for an array of `n` elements of type `T`, by using the
         # `size_of` and `align_of` functions from the `std::mem::ops` module. The created layout represents a contiguous
@@ -236,7 +237,7 @@ sup Alloc {
     # retyped result back into the caller's slot. This is sound because `NonNull` is `Copy`: erasing the pointer to pass
     # it does not disturb the slot, so on failure the slot still holds the original, valid pointer.
 
-    !public
+    !public !inline
     !versioned(base="1.0.0", new="1.0.0")
     fun allocate_array[T](&self, n: USize) -> Res[NonNull[T], AllocErr] {
         # Allocate uninitialized storage for `n` contiguous values of type `T`, returning a typed pointer to the first
@@ -251,7 +252,7 @@ sup Alloc {
         ret Pass(val=ptr.cast[T]())
     }
 
-    !public
+    !public !inline
     !versioned(base="1.0.0", new="1.0.0")
     fun allocate_array_zeroed[T](&self, n: USize) -> Res[NonNull[T], AllocErr] {
         # The same as `allocate_array`, but every byte of the allocation is initialized to zero first. Note that a
@@ -266,7 +267,7 @@ sup Alloc {
         ret Pass(val=ptr.cast[T]())
     }
 
-    !public
+    !public !inline
     !versioned(base="1.0.0", new="1.0.0")
     fun deallocate_array[T](&self, ptr: NonNull[T], n: USize) -> Void {
         # Free a typed array allocation of `n` elements. Erases the pointer to bytes and reconstructs the same `Layout`
@@ -278,7 +279,7 @@ sup Alloc {
         self.deallocate(ptr.erase_type(), Layout::new_for_array[T](n))
     }
 
-    !public
+    !public !inline
     !versioned(base="1.0.0", new="1.0.0")
     fun grow_array[T](&self, ptr: &mut NonNull[T], old_n: USize, new_n: USize) -> Res[Void, AllocErr] {
         # Grow a typed array allocation from `old_n` to `new_n` elements, updating the pointer in-place. Erases the
@@ -296,7 +297,7 @@ sup Alloc {
         ret Pass[Void]()
     }
 
-    !public
+    !public !inline
     !versioned(base="1.0.0", new="1.0.0")
     fun grow_array_zeroed[T](&self, ptr: &mut NonNull[T], old_n: USize, new_n: USize) -> Res[Void, AllocErr] {
         # The same as `grow_array`, but the newly added tail elements are zero-initialized, by delegating to the
@@ -312,7 +313,7 @@ sup Alloc {
         ret Pass[Void]()
     }
 
-    !public
+    !public !inline
     !versioned(base="1.0.0", new="1.0.0")
     fun shrink_array[T](&self, ptr: &mut NonNull[T], old_n: USize, new_n: USize) -> Res[Void, AllocErr] {
         # Shrink a typed array allocation from `old_n` to `new_n` elements, updating the pointer in-place. Elements
@@ -339,6 +340,7 @@ cls GlobalAlloc {
 }
 
 sup GlobalAlloc ext Alloc {
+    !inline
     !versioned(base="1.0.0", new="1.0.0")
     fun allocate(&self, layout: Layout) -> Res[NonNull[U8], AllocErr] {
         # The default way to allocate memory in the global allocator, is to use the C malloc function. This is
@@ -357,6 +359,7 @@ sup GlobalAlloc ext Alloc {
         ret Pass(val=ptr)
     }
 
+    !inline
     !versioned(base="1.0.0", new="1.0.0")
     fun deallocate(&self, ptr: NonNull[U8], layout: Layout) -> Void {
         # The global allocator frees memory with the C `free` function via the sppc library. `free` recovers the block
@@ -368,6 +371,7 @@ sup GlobalAlloc ext Alloc {
         sppc::free(&mut ptr.raw())
     }
 
+    !inline
     !versioned(base="1.0.0", new="1.0.0")
     fun allocate_zeroed(&self, layout: Layout) -> Res[NonNull[U8], AllocErr] {
         # The default way to allocate zeroed memory in the global allocator, is to use the C calloc function. This is
@@ -387,6 +391,7 @@ sup GlobalAlloc ext Alloc {
         ret Pass(val=ptr)
     }
 
+    !inline
     !versioned(base="1.0.0", new="1.0.0")
     fun grow(&self, ptr: NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[NonNull[U8], AllocErr] {
         # Uses `realloc` to grow the block, which frees the old block internally and preserves its bytes, so no explicit
@@ -401,6 +406,7 @@ sup GlobalAlloc ext Alloc {
         ret Pass(val=new_ptr)
     }
 
+    !inline
     !versioned(base="1.0.0", new="1.0.0")
     fun grow_zeroed(&self, ptr: NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[NonNull[U8], AllocErr] {
         # Uses `realloc` to grow the block, then zeros the newly added tail bytes. On failure the old block is
@@ -416,6 +422,7 @@ sup GlobalAlloc ext Alloc {
         ret Pass(val=new_ptr)
     }
 
+    !inline
     !versioned(base="1.0.0", new="1.0.0")
     fun shrink(&self, ptr: NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[NonNull[U8], AllocErr] {
         # `realloc` handles both growing and shrinking, so this delegates directly to `grow`.
