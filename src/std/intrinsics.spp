@@ -344,7 +344,7 @@ cmp fun float_neg[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic(name="std.intrinsics.float_neg_assign")
+!intrinsic(name="std.intrinsics.float_sqrt")
 fun float_sqrt[T: FloatingPoint](value: T) -> T { }
 
 !public
