@@ -86,13 +86,23 @@ sup [T, cmp n: USize] Arr[T, n] ext RevIterMov[T] {
 }
 
 sup [T, cmp n: USize] Arr[T, n] ext Eq {
-    !intrinsic(name="std.array.Arr.eq")
     !versioned(base="1.0.0", new="1.0.0")
-    fun eq(&self, that: &Self) -> Bool { }
+    fun eq(&self, that: &Self) -> Bool {
+        # Use the `sppc::memcpy` function to compare the memory of the two arrays. This is a fast and efficient way to
+        # check for equality, as it compares the raw bytes of the arrays directly.
+        # @let that: The other array to compare against. This is a reference to another instance of the same array type.
+        # @ret: A boolean value indicating whether the two arrays are equal.
 
-    !intrinsic(name="std.array.Arr.ne")
+        ret sppc::memcmp(&self.ptr, &that.ptr, n * std::mem::size_of[T]()) == 0
+    }
+
     !versioned(base="1.0.0", new="1.0.0")
-    fun ne(&self, that: &Self) -> Bool { }
+    fun ne(&self, that: &Self) -> Bool {
+        # @let that: The other array to compare against. This is a reference to another instance of the same array type.
+        # @ret: A boolean value indicating whether the two arrays are not equal.
+
+        ret sppc::memcmp(&self.ptr, &that.ptr, n * std::mem::size_of[T]()) != 0
+    }
 }
 
 sup [T, cmp n: USize] Arr[T, n] ext FwdMut[View[T]] {
