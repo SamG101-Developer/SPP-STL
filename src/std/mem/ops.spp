@@ -62,10 +62,12 @@ fun align_of_val[T](value: &T) -> USize {
 
 !package !inline
 !versioned(base="1.0.0", new="1.0.0")
-fun mem_set(dest: &mut NonNull[U8], value: U8, n: USize, dest_index: USize = 0_uz) -> Void {
+fun mem_set[T](dest: &mut NonNull[T], value: U8, n: USize, dest_index: USize = 0_uz) -> Void {
     # Writes a byte value into a block of memory. This is typically used for zeroing out memory, or setting it to a
     # specific value. Whilst this might be considered "unsafe", it is never exposed to the user, as it is hidden under
-    # allocators and the memory api.
+    # allocators and the memory api. It is generic over the pointee type because it operates purely on bytes, so it can
+    # zero or fill an allocation viewed through either a byte pointer or a typed pointer.
+    # @type T: The pointee type of the destination pointer. The operation is byte-level and does not depend on it.
     # @let dest: A mutable reference to the value to write to.
     # @let value: The byte value to write to the memory.
     # @let n: The number of bytes to write to the memory.
@@ -143,6 +145,22 @@ fun drop[T](val: T) -> Void {
     # @ret: An empty value, as the function is only used for its side effect of dropping the value.
 }
 
+!package
+!intrinsic(name="std.mem.ops.drop_in_place")
+!versioned(base="1.0.0", new="1.0.0")
+fun drop_in_place[T](ptr: &mut T) -> Void {
+    # Runs the destructor of the value behind `ptr` in place, without moving it out. Unlike `drop`, which consumes an
+    # owned value, this destroys a value that ownership rules cannot move - typically a heap value reached only through
+    # a pointer inside a `del` that has just `&mut self`. It is a low-level, package-internal primitive: after it
+    # returns the pointed-to storage is logically uninitialized and must not be read, dropped, or otherwise used again.
+    # The caller is responsible for immediately freeing or overwriting that storage. Because deallocation is a pure
+    # memory operation that never runs destructors, owning containers must call this explicitly before freeing, or any
+    # resources the value holds would leak.
+    # @type T: The type of the value whose destructor is run.
+    # @let ptr: A mutable reference to the value to destroy in place. The referenced storage is left uninitialized.
+    # @ret: Nothing; the function exists solely for the destructor side effect.
+}
+
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun copy[T: Copy](src: &T) -> T {
@@ -155,7 +173,3 @@ fun copy[T: Copy](src: &T) -> T {
 
     ret src@
 }
-
-!public
-!versioned(base="1.0.0",  new="1.0.0")
-fun lock() -> Void { }

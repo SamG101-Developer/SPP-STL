@@ -5,17 +5,14 @@ use std::annotations::versioned
 use std::allocator::Alloc
 use std::allocator::AllocErr
 use std::allocator::GlobalAlloc
-use std::allocator::Layout
 use std::generator::GenOnce
-use std::number::U8
-use std::number::USize
 use std::result::Pass
 use std::result::Res
+use std::void::Void
 use std::mem::pointer::NonNull
 use std::ops::del::Del
 use std::ops::fwd::FwdMut
 use std::ops::fwd::FwdRef
-use std::ops::void::Void
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
@@ -90,7 +87,7 @@ sup [T, A: Alloc] Single[T, A] {
 
         # Allocate the non-null pointer an ambed the value into
         # it. Wrap in the `Single` type and return.
-        let mut ptr = alloc.allocate(Layout::new_for_type[T]()).expect("Allocation failed").cast[T]()
+        let mut ptr = alloc.allocate_array[T](1_uz).expect("Allocation failed")
         ptr.write(val)
         ret Single(ptr, alloc)
     }
@@ -109,7 +106,7 @@ sup [T, A: Alloc] Single[T, A] {
 
         # Allocate the non-null pointer and embed the value into
         # it. Wrap in the `Single` type and return.
-        let mut ptr = alloc.allocate(Layout::new_for_type[T]())?.cast[T]()
+        let mut ptr = alloc.allocate_array[T](1_uz)?
         ptr.write(val)
         ret Pass(val=Single(ptr, alloc))
     }
@@ -144,7 +141,7 @@ sup [T, A: Alloc] Single[T, A] {
 
     !public
     fun read(self) -> T {
-        # The `take` function consumes the `Single` instance and returns the value it owns. This effectively transfers
+        # The `read` function consumes the `Single` instance and returns the value it owns. This effectively transfers
         # ownership of the value out of the `Single` instance, leaving it in an uninitialized state. But because this
         # object is consumed, it is safe to do so.
         # @ret: The value owned by the `Single` instance.
@@ -168,11 +165,14 @@ sup [T, A: Alloc] Single[T, A] ext FwdRef[T] {
 sup [T, A: Alloc] Single[T, A] ext Del {
     !versioned(base="1.0.0", new="1.0.0")
     fun del(&mut self) -> Void {
-        # The `del` function is called when the `Single` instance is dropped. It deallocates the memory used by the
-        # `Single` instance, and calls the destructor of the value it owns. This ensures that the value is properly
-        # cleaned up and that there are no memory leaks. The `Del` trait allows for custom cleanup logic to be defined
-        # for types, and this implementation ensures that the `Single` type behaves correctly when it goes out of scope.
+        # The `del` function is called when the `Single` instance is dropped. It first runs the destructor of the owned
+        # value in place, then deallocates the heap storage. Deallocation is a pure memory operation that never runs
+        # destructors, so the value must be destroyed explicitly first; otherwise any resources it owns would leak. The
+        # explicit `[T]` on `drop_in_place` drives the `NonNull[T]` -> `&mut T` forwarding coercion so the destructor runs
+        # on the pointee rather than the pointer itself. The `Del` trait allows for custom cleanup logic to be defined for
+        # types, and this ensures the `Single` behaves correctly when it goes out of scope.
 
-        self.alloc.deallocate(self.ptr.cast[U8]())
+        std::mem::ops::drop_in_place[T](&mut self.ptr)
+        self.alloc.deallocate_array[T](self.ptr, 1_uz)
     }
 }

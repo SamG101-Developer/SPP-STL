@@ -90,19 +90,6 @@ sup Layout ext Copy {
 
 sup Layout {
     !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun new_for_type[T]() -> Self {
-        # The `new_for_type` function creates a new `Layout` for a given type `T`, by using the `size_of` and `align_of`
-        # functions from the `std::mem::ops` module. The created layout represents a single instance of the type `T`.
-        # @type T: The type for which the layout is being created.
-        # @ret: A `Layout` instance that encapsulates the size and alignment requirements for an instance of type `T`.
-
-        let size = std::mem::ops::size_of[T]()
-        let align = std::mem::ops::align_of[T]()
-        ret Self(size, align)
-    }
-
-    !public
     fun new_for_array[T](n: USize) -> Self {
         # The `new_for_array` function creates a new `Layout` for an array of `n` elements of type `T`, by using the
         # `size_of` and `align_of` functions from the `std::mem::ops` module. The created layout represents a contiguous
@@ -130,10 +117,17 @@ cls Alloc {
     # methods are the allocate and de-allocate methods, which handle the basic memory management tasks. The other
     # methods can be implemented but have stable default behaviour by using the required allocation methods, and other
     # memory utilities, particularly from sppc.
+    #
+    # There is a split in the `Alloc` class; there are the "untyped" methods which must be overloaded - such as
+    # `allocate` and `deallocate` - and the "typed" methods which are implemented in terms of the untyped methods, such
+    # as `allocate_array` and `grow_array`. The typed methods are what the STL containers call, expressed in types and
+    # element counts. They are the only place the two pointer retypings live - `cast` (byte -> typed, after every
+    # allocation and reallocation) and `erase_type` (typed -> byte, before every free and reallocation) - so a container
+    # never retypes a pointer and an allocator author never handles a typed one.
 }
 
 sup Alloc {
-    !public !abstract_method
+    !protected !abstract_method
     !versioned(base="1.0.0", new="1.0.0")
     fun allocate(&self, layout: Layout) -> Res[NonNull[U8], AllocErr] {
         # The `allocate` method allocates a block of memory for the specified layout. The method returns a `Res` type,
@@ -144,20 +138,20 @@ sup Alloc {
         # @ret: A `Res` type that indicates whether the allocation was successful or if it failed with an `AllocErr`.
     }
 
-    !public !abstract_method
+    !protected !abstract_method
     !versioned(base="1.0.0", new="1.0.0")
-    fun deallocate(&self, ptr: NonNull[U8]) -> Void {
-        # The `deallocate` method deallocates a previously allocated block of memory. The method takes a `NonNull`
-        # pointer as an argument, which represents the memory block to be deallocated. The method does not return any
-        # value, as it is expected to perform the deallocation and not return any result. This cannot fail because the
-        # pointers gicen to it are moved, so cannot be double freed, and `NonNull` can only be constructed from
-        # allocatos, proving the validity of the pointer.
-        # @let ptr: A `NonNull` pointer that represents the block of memory to be deallocated. The caller is
-        # transferring ownership of the memory to the allocator for deallocation, which ensures that manual deallocation
-        # is safe and prevents issues such as double frees or use-after-free errors.
+    fun deallocate(&self, ptr: NonNull[U8], layout: Layout) -> Void {
+        # The `deallocate` method frees a previously allocated block of memory. It takes the byte pointer to the block
+        # and the `Layout` it was allocated with. Passing the layout back mirrors the C sized-free convention and lets
+        # allocators that bucket by size avoid storing per-allocation metadata; `GlobalAlloc` ignores it because `free`
+        # recovers the size itself. This never fails: a `NonNull[U8]` can only originate from an allocator, and the
+        # typed layer erases the pointer for the caller so a release site never has to retype.
+        # @let ptr: The byte pointer to the block of memory to free. Ownership of the memory transfers to the allocator,
+        # so the caller must not use the pointer again.
+        # @let layout: The `Layout` the block was originally allocated with.
     }
 
-    !public !virtual_method
+    !protected !virtual_method
     !versioned(base="1.0.0", new="1.0.0")
     fun allocate_zeroed(&self, layout: Layout) -> Res[NonNull[U8], AllocErr] {
         # The `allocate_zeroed` method allocates a block of memory for the specified layout and initializes all bytes to
@@ -175,57 +169,162 @@ sup Alloc {
         ret Pass(val=ptr)
     }
 
-    !public !virtual_method
+    !protected !virtual_method
     !versioned(base="1.0.0", new="1.0.0")
-    fun grow(&self, ptr: &mut NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[Void, AllocErr] {
-        # Reallocates a block of memory to a new larger size, updating the pointer in-place. The default implementation
-        # allocates a new block, copies bytes over, then deallocates the old block. On allocation failure, `ptr` is left
-        # unchanged so the caller retains a valid pointer.
-        # @let ptr: A mutable reference to the pointer to reallocate. Updated in-place on success.
-        # @let old_layout: A `Layout` instance specifying the size and alignment of the existing memory block.
-        # @let new_layout: A `Layout` instance specifying the size and alignment of the new memory block.
-        # @ret: `Pass()` if the reallocation succeeded, or an `AllocErr` on failure.
+    fun grow(&self, ptr: NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[NonNull[U8], AllocErr] {
+        # Reallocate a block to a larger size, returning the new byte pointer. The old contents up to `old_layout.size`
+        # are preserved; the newly added tail is left uninitialized. The default allocates a new block, copies the old
+        # bytes over, and frees the old block. On allocation failure the old block is untouched and the caller keeps its
+        # still-valid pointer. This is value-in / value-out rather than an in-place update, because the typed
+        # `grow_array` wrapper threads the pointer through by value.
+        # @let ptr: The byte pointer to the existing block.
+        # @let old_layout: The `Layout` the block is currently allocated with.
+        # @let new_layout: The `Layout` to reallocate the block to.
+        # @ret: The new byte pointer on success, or an `AllocErr` on failure.
 
         let mut new_ptr = self.allocate(new_layout)?
         std::mem::ops::mem_copy(&mut new_ptr, &ptr, old_layout.size)
-        let old_ptr = std::mem::ops::replace(ptr, new_ptr)
-        self.deallocate(old_ptr)
-        ret Pass[Void]()
+        self.deallocate(ptr, old_layout)
+        ret Pass(val=new_ptr)
     }
 
-    !public !virtual_method
+    !protected !virtual_method
     !versioned(base="1.0.0", new="1.0.0")
-    fun grow_zeroed(&self, ptr: &mut NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[Void, AllocErr] {
-        # Reallocates a block of memory to a new larger size, initializing any new bytes to zero, and updating the
-        # pointer in-place. The default implementation allocates a zeroed new block (so only old bytes need copying),
-        # then deallocates the old block. On allocation failure, `ptr` is left unchanged.
-        # @let ptr: A mutable reference to the pointer to reallocate. Updated in-place on success.
-        # @let old_layout: A `Layout` instance specifying the size and alignment of the existing memory block.
-        # @let new_layout: A `Layout` instance specifying the size and alignment of the new memory block.
-        # @ret: `Pass()` if the reallocation succeeded, or an `AllocErr` on failure.
+    fun grow_zeroed(&self, ptr: NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[NonNull[U8], AllocErr] {
+        # The same as `grow`, but the newly added tail bytes are zero-initialized. The default allocates a zeroed block
+        # so only the old bytes need copying, then frees the old block. On failure the old block is left untouched.
+        # @let ptr: The byte pointer to the existing block.
+        # @let old_layout: The `Layout` the block is currently allocated with.
+        # @let new_layout: The `Layout` to reallocate the block to.
+        # @ret: The new byte pointer on success, or an `AllocErr` on failure.
 
         let mut new_ptr = self.allocate_zeroed(new_layout)?
         std::mem::ops::mem_copy(&mut new_ptr, &ptr, old_layout.size)
-        let old_ptr = std::mem::ops::replace(ptr, new_ptr)
-        self.deallocate(old_ptr)
-        ret Pass[Void]()
+        self.deallocate(ptr, old_layout)
+        ret Pass(val=new_ptr)
     }
 
-    !public !virtual_method
+    !protected !virtual_method
     !versioned(base="1.0.0", new="1.0.0")
-    fun shrink(&self, ptr: &mut NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[Void, AllocErr] {
-        # Reallocates a block of memory to a new smaller size, updating the pointer in-place. The default implementation
-        # allocates a new block, copies only `new_layout.size` bytes (truncating the rest), then deallocates the old
-        # block. On allocation failure, `ptr` is left unchanged.
-        # @let ptr: A mutable reference to the pointer to reallocate. Updated in-place on success.
-        # @let old_layout: A `Layout` instance specifying the size and alignment of the existing memory block.
-        # @let new_layout: A `Layout` instance specifying the size and alignment of the new memory block.
-        # @ret: `Pass()` if the reallocation succeeded, or an `AllocErr` on failure.
+    fun shrink(&self, ptr: NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[NonNull[U8], AllocErr] {
+        # Reallocate a block to a smaller size, returning the new byte pointer. Only `new_layout.size` bytes are copied;
+        # the truncated tail is discarded. The default allocates a new block, copies the retained bytes, and frees the
+        # old block. On failure the old block is left untouched.
+        # @let ptr: The byte pointer to the existing block.
+        # @let old_layout: The `Layout` the block is currently allocated with.
+        # @let new_layout: The `Layout` to reallocate the block to.
+        # @ret: The new byte pointer on success, or an `AllocErr` on failure.
 
         let mut new_ptr = self.allocate(new_layout)?
         std::mem::ops::mem_copy(&mut new_ptr, &ptr, new_layout.size)
-        let old_ptr = std::mem::ops::replace(ptr, new_ptr)
-        self.deallocate(old_ptr)
+        self.deallocate(ptr, old_layout)
+        ret Pass(val=new_ptr)
+    }
+
+}
+
+sup Alloc {
+    # The typed container-facing layer. The byte-level methods above are what an allocator author implements, mirroring
+    # the Rust allocation API over `NonNull[U8]` and `Layout`. The methods here are what the STL containers call,
+    # expressed in types and element counts. They are the only place the two pointer retypings live - `cast` (byte ->
+    # typed, after every allocation and reallocation) and `erase_type` (typed -> byte, before every free and
+    # reallocation) - so a container never retypes a pointer and an allocator author never handles a typed one.
+    # Allocating a single value is just `allocate_array[T](1)`, so there is no separate single-object entry point.
+    #
+    # The reallocating wrappers thread the pointer through the value-in / value-out byte `grow`/`shrink` and write the
+    # retyped result back into the caller's slot. This is sound because `NonNull` is `Copy`: erasing the pointer to pass
+    # it does not disturb the slot, so on failure the slot still holds the original, valid pointer.
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun allocate_array[T](&self, n: USize) -> Res[NonNull[T], AllocErr] {
+        # Allocate uninitialized storage for `n` contiguous values of type `T`, returning a typed pointer to the first
+        # element. This is what `RawBuf` uses to back `Vec` and `Str`, and single-value owners like `Single` and
+        # `Shared` call it with `n = 1`.
+        # @type T: The element type to allocate storage for.
+        # @let n: The number of elements to allocate storage for.
+        # @ret: A `Res` containing a `NonNull[T]` pointing at uninitialized storage for `n` values, or an `AllocErr` if
+        # the underlying allocation failed.
+
+        let ptr = self.allocate(Layout::new_for_array[T](n))?
+        ret Pass(val=ptr.cast[T]())
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun allocate_array_zeroed[T](&self, n: USize) -> Res[NonNull[T], AllocErr] {
+        # The same as `allocate_array`, but every byte of the allocation is initialized to zero first. Note that a
+        # zeroed allocation is still uninitialized as far as `T` is concerned, unless `T` treats an all-zero bit pattern
+        # as a valid value, so the elements must still be written before they are read.
+        # @type T: The element type to allocate storage for.
+        # @let n: The number of elements to allocate zeroed storage for.
+        # @ret: A `Res` containing a `NonNull[T]` pointing at zeroed storage for `n` values, or an `AllocErr` if the
+        # underlying allocation failed.
+
+        let ptr = self.allocate_zeroed(Layout::new_for_array[T](n))?
+        ret Pass(val=ptr.cast[T]())
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun deallocate_array[T](&self, ptr: NonNull[T], n: USize) -> Void {
+        # Free a typed array allocation of `n` elements. Erases the pointer to bytes and reconstructs the same `Layout`
+        # that `allocate_array[T](n)` used, so a release site never names `erase_type` or builds a `Layout` itself.
+        # @type T: The element type of the allocation.
+        # @let ptr: The typed pointer to free. Must not be used after this call.
+        # @let n: The number of elements the allocation was sized for.
+
+        self.deallocate(ptr.erase_type(), Layout::new_for_array[T](n))
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun grow_array[T](&self, ptr: &mut NonNull[T], old_n: USize, new_n: USize) -> Res[Void, AllocErr] {
+        # Grow a typed array allocation from `old_n` to `new_n` elements, updating the pointer in-place. Erases the
+        # current pointer to bytes, calls the byte-level `grow` (value-in, value-out), and retypes the result back into
+        # the slot. Because `NonNull` is `Copy`, erasing does not disturb the caller's pointer, so on failure the slot
+        # is left unchanged and still valid.
+        # @type T: The element type of the allocation.
+        # @let ptr: A mutable reference to the typed pointer to reallocate. Updated in-place on success.
+        # @let old_n: The number of elements the allocation is currently sized for.
+        # @let new_n: The number of elements to grow the allocation to.
+        # @ret: `Pass()` if the reallocation succeeded, or an `AllocErr` on failure.
+
+        let new_byte = self.grow(ptr@.erase_type(), Layout::new_for_array[T](old_n), Layout::new_for_array[T](new_n))?
+        ptr@ = new_byte.cast[T]()
+        ret Pass[Void]()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun grow_array_zeroed[T](&self, ptr: &mut NonNull[T], old_n: USize, new_n: USize) -> Res[Void, AllocErr] {
+        # The same as `grow_array`, but the newly added tail elements are zero-initialized, by delegating to the
+        # byte-level `grow_zeroed`. On failure the slot is left unchanged.
+        # @type T: The element type of the allocation.
+        # @let ptr: A mutable reference to the typed pointer to reallocate. Updated in-place on success.
+        # @let old_n: The number of elements the allocation is currently sized for.
+        # @let new_n: The number of elements to grow the allocation to.
+        # @ret: `Pass()` if the reallocation succeeded, or an `AllocErr` on failure.
+
+        let new_byte = self.grow_zeroed(ptr@.erase_type(), Layout::new_for_array[T](old_n), Layout::new_for_array[T](new_n))?
+        ptr@ = new_byte.cast[T]()
+        ret Pass[Void]()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun shrink_array[T](&self, ptr: &mut NonNull[T], old_n: USize, new_n: USize) -> Res[Void, AllocErr] {
+        # Shrink a typed array allocation from `old_n` to `new_n` elements, updating the pointer in-place. Elements
+        # above `new_n` are discarded without being dropped, so the caller is responsible for having dropped them
+        # already. Delegates to the byte-level `shrink`. On failure the slot is left unchanged.
+        # @type T: The element type of the allocation.
+        # @let ptr: A mutable reference to the typed pointer to reallocate. Updated in-place on success.
+        # @let old_n: The number of elements the allocation is currently sized for.
+        # @let new_n: The number of elements to shrink the allocation to.
+        # @ret: `Pass()` if the reallocation succeeded, or an `AllocErr` on failure.
+
+        let new_byte = self.shrink(ptr@.erase_type(), Layout::new_for_array[T](old_n), Layout::new_for_array[T](new_n))?
+        ptr@ = new_byte.cast[T]()
         ret Pass[Void]()
     }
 }
@@ -258,17 +357,12 @@ sup GlobalAlloc ext Alloc {
     }
 
     !versioned(base="1.0.0", new="1.0.0")
-    fun deallocate(&self, ptr: NonNull[U8]) -> Void {
-        # The default way to deallocate memory in the global allocator, is to use the C free function. This is
-        # interfaced via the sppc library. The method takes a NonNull object as an argument, by move, which means that
-        # the caller is transferring ownership of the memory to the allocator for deallocation. The sppc library maps
-        # the `mem_deallocate` to the `free` function in `C`, and no value is returned, so Void is used as the return
-        # type.
-        # @let ptr: A `NonNull` pointer that represents the block of memory to be deallocated. The `free` function in
-        # `C` does not take a size or alignment argument, so only the pointer is needed to perform the deallocation.
-        # @ret: The method does not return any value, as it is expected to perform the deallocation and not return any
-        # result. The caller is responsible for ensuring that the pointer passed to this method was previously allocated
-        # by the same allocator,
+    fun deallocate(&self, ptr: NonNull[U8], layout: Layout) -> Void {
+        # The global allocator frees memory with the C `free` function via the sppc library. `free` recovers the block
+        # size itself, so the `layout` is accepted only to satisfy the `Alloc` contract and is ignored here.
+        # @let ptr: The byte pointer to the block to free. Ownership transfers to the allocator; it must not be used
+        # again.
+        # @let layout: The `Layout` the block was allocated with. Unused by `GlobalAlloc`.
 
         sppc::free(&mut ptr.raw())
     }
@@ -293,43 +387,41 @@ sup GlobalAlloc ext Alloc {
     }
 
     !versioned(base="1.0.0", new="1.0.0")
-    fun grow(&self, ptr: &mut NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[Void, AllocErr] {
-        # Uses `realloc` to grow the allocation, updating the pointer in-place. `realloc` internally frees the old
-        # block, so no explicit `deallocate` call is needed. On failure, `ptr` is left unchanged.
-        # @let ptr: A mutable reference to the pointer to reallocate. Updated in-place on success.
-        # @let old_layout: A `Layout` instance specifying the size and alignment of the existing memory block.
-        # @let new_layout: A `Layout` instance specifying the size and alignment of the new memory block.
-        # @ret: `Pass()` if the reallocation succeeded, or an `AllocErr` on failure.
+    fun grow(&self, ptr: NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[NonNull[U8], AllocErr] {
+        # Uses `realloc` to grow the block, which frees the old block internally and preserves its bytes, so no explicit
+        # copy or free is needed. `realloc` returns a raw address, so `from_ptr` rebuilds the byte pointer. On failure
+        # the old block is left untouched.
+        # @let ptr: The byte pointer to the existing block.
+        # @let old_layout: The `Layout` the block is currently allocated with. Unused - `realloc` tracks the old size.
+        # @let new_layout: The `Layout` to reallocate the block to.
+        # @ret: The new byte pointer on success, or an `AllocErr` on failure.
 
-        let new_raw = sppc::realloc(&mut ptr.raw(), new_layout.size)
-        let new_ptr = NonNull[U8]::from_ptr(new_raw).map_err((e: NullptrErr) AllocOomErr)?
-        ptr@ = new_ptr
-        ret Pass[Void]()
+        let new_ptr = NonNull[U8]::from_ptr(sppc::realloc(&mut ptr.raw(), new_layout.size)).map_err((e: NullptrErr) AllocOomErr)?
+        ret Pass(val=new_ptr)
     }
 
     !versioned(base="1.0.0", new="1.0.0")
-    fun grow_zeroed(&self, ptr: &mut NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[Void, AllocErr] {
-        # Uses `realloc` to grow the allocation, then zeros the newly added tail bytes. `realloc` internally frees the
-        # old block, so no explicit `deallocate` call is needed. On failure, `ptr` is left unchanged.
-        # @let ptr: A mutable reference to the pointer to reallocate. Updated in-place on success.
-        # @let old_layout: A `Layout` instance specifying the size and alignment of the existing memory block.
-        # @let new_layout: A `Layout` instance specifying the size and alignment of the new memory block.
-        # @ret: `Pass()` if the reallocation succeeded, or an `AllocErr` on failure.
+    fun grow_zeroed(&self, ptr: NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[NonNull[U8], AllocErr] {
+        # Uses `realloc` to grow the block, then zeros the newly added tail bytes. On failure the old block is
+        # untouched.
+        # @let ptr: The byte pointer to the existing block.
+        # @let old_layout: The `Layout` the block is currently allocated with.
+        # @let new_layout: The `Layout` to reallocate the block to.
+        # @ret: The new byte pointer on success, or an `AllocErr` on failure.
 
         let new_raw = sppc::realloc(&mut ptr.raw(), new_layout.size)
         let mut new_ptr = NonNull[U8]::from_ptr(new_raw).map_err((e: NullptrErr) AllocOomErr)?
         std::mem::ops::mem_set(&mut new_ptr, 0_u8, new_layout.size - old_layout.size, old_layout.size)
-        ptr@ = new_ptr
-        ret Pass[Void]()
+        ret Pass(val=new_ptr)
     }
 
     !versioned(base="1.0.0", new="1.0.0")
-    fun shrink(&self, ptr: &mut NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[Void, AllocErr] {
+    fun shrink(&self, ptr: NonNull[U8], old_layout: Layout, new_layout: Layout) -> Res[NonNull[U8], AllocErr] {
         # `realloc` handles both growing and shrinking, so this delegates directly to `grow`.
-        # @let ptr: A mutable reference to the pointer to reallocate. Updated in-place on success.
-        # @let old_layout: A `Layout` instance specifying the size and alignment of the existing memory block.
-        # @let new_layout: A `Layout` instance specifying the size and alignment of the new memory block.
-        # @ret: `Pass()` if the reallocation succeeded, or an `AllocErr` on failure.
+        # @let ptr: The byte pointer to the existing block.
+        # @let old_layout: The `Layout` the block is currently allocated with.
+        # @let new_layout: The `Layout` to reallocate the block to.
+        # @ret: The new byte pointer on success, or an `AllocErr` on failure.
 
         ret self.grow(ptr, old_layout, new_layout)
     }

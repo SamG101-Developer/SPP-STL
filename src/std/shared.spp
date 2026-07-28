@@ -11,39 +11,91 @@ use std::option::Opt
 use std::option::Some
 use std::shadow::Shadow
 use std::void::Void
+use std::mem::pointer::NonNull
 use std::ops::del::Del
 use std::ops::fwd::FwdRef
+use std::threading::atomic::Atom
+
+!package
+!versioned(base="1.0.0", new="1.0.0")
+cls ControlBlock[T] {
+    !package shared_counter: USize
+    !package shadow_counter: USize
+    !package val: T
+}
+
+!package
+!versioned(base="1.0.0", new="1.0.0")
+cls AtomicControlBlock[T] {
+    !package shared_counter: Atom[USize]
+    !package shadow_counter: Atom[USize]
+    !package val: T
+}
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-cls Shared[T, A: Alloc = GlobalAlloc] {
-    shared_counter: USize
-    shadow_counter: USize
+cls Shared[T, A: Alloc=GlobalAlloc] {
+    !package ptr: NonNull[ControlBlock[T]]
+    !package alloc: A
 }
 
 sup [T] Shared[T] {
     !public type Element = T
 
     !public
-    !intrinsic(name="std.shared.Shared.new")
     !versioned(base="1.0.0", new="1.0.0")
-    fun new(val: T) -> Shared[T] { }
+    fun new(val: T) -> Shared[T] {
+        ret self.new_in(val, GlobalAlloc)
+    }
+}
 
+sup [T, A: Alloc] Shared[T, A] {
+    #
     !public
-    !intrinsic(name="std.shared.Shared.downgrade")
     !versioned(base="1.0.0", new="1.0.0")
-    fun downgrade(&self) -> Shadow[T] { }
+    fun new_in(val: T, alloc: A) -> Shared[T, A] {
+        # Create a new `Shared` by allocating a control block with the given allocator and moving `val` into it. The
+        # share count starts at one, for the `Shared` being returned here, and the shadow count at zero.
+        # @let val: The value to be allocated on the heap and shared.
+        # @let alloc: The allocator used to allocate and deallocate the control block.
+        # @ret: A `Shared` instance owning the sole share of the newly allocated control block.
+
+        # Allocate storage sized for the control block, then initialize
+        # it with a single write, so there is no window in which the
+        # block is only partially constructed.
+        let mut ptr = alloc.allocate_array[ControlBlock[T]](1_uz).expect("Allocation failed")
+        ptr.write(ControlBlock(shared_counter=1_uz, shadow_counter=0_uz, val))
+        ret Shared(ptr, alloc)
+    }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
     fun shares(&self) -> USize {
-        ret self.shared_counter
+        ret self.ptr.shared_counter
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
     fun shadows(&self) -> USize {
-        ret self.shadow_counter
+        ret self.ptr.shadow_counter
+    }
+}
+
+sup [T, A: Alloc & Clone] Shared[T, A] {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun downgrade(&self) -> Shadow[T, A] {
+        # Create a new `Shadow` (weak) handle to the same control block. This does not touch the share count, so it
+        # never keeps the value alive; it only increments the shadow count, which keeps the control block itself alive
+        # while any shadow exists. A fresh `NonNull` to the same block is fabricated from the raw address; as a locally
+        # owned `mut` pointer it provides the mutable access needed to bump the counter through the shared `&self`
+        # borrow, and is then moved into the returned `Shadow`. The allocator is cloned so the shadow can deallocate the
+        # block independently.
+        # @ret: A `Shadow` handle pointing at the same control block as this `Shared`.
+
+        let mut cb = NonNull[ControlBlock[T]]::from(self.ptr.raw())
+        cb.shadow_counter += 1_uz
+        ret Shadow(ptr=cb, alloc=self.alloc.clone())
     }
 }
 
@@ -53,14 +105,40 @@ sup [T] Shared[T] ext FwdRef[T] {
     cor fwd_ref(&self) -> GenOnce[&T] { }
 }
 
-sup [T] Shared[T] ext Clone {
-    !intrinsic(name="std.shared.Shared.clone")
+sup [T, A: Alloc & Clone] Shared[T, A] ext Clone {
     !versioned(base="1.0.0", new="1.0.0")
-    fun clone(&self) -> Self { }
+    fun clone(&self) -> Self {
+        # Create a new `Shared` handle to the same control block. This increments the share count, which keeps the value
+        # alive while any share exists. A fresh `NonNull` to the same block is fabricated from the raw address; as a
+        # locally owned `mut` pointer it provides the mutable access needed to bump the counter through the shared
+        # `&self` borrow, and is then moved into the returned `Shared`. The allocator is cloned so the new share can
+        # deallocate the block independently.
+        # @ret: A new `Shared` handle pointing at the same control block as this one.
+
+        let mut cb = NonNull[ControlBlock[T]]::from(self.ptr.raw())
+        cb.shared_counter += 1_uz
+        ret Shared(ptr=cb, alloc=self.alloc.clone())
+    }
 }
 
-sup [T] Shared[T] ext Del {
-    # TODO
+sup [T, A: Alloc] Shared[T, A] ext Del {
     !versioned(base="1.0.0", new="1.0.0")
-    fun del(&mut self) -> Void { }
+    fun del(&mut self) -> Void {
+        # Drop one share. When the share count reaches zero the value is no longer reachable through any `Shared`, so its
+        # destructor must run: `drop_in_place` destroys the `val` field of the control block directly, leaving the
+        # counters intact for any surviving shadows. Deallocation is a pure memory operation that never runs destructors,
+        # so the value must be destroyed here explicitly. The heap block itself is only deallocated once there are also no
+        # shadows left, since a live shadow keeps the block around to read the counters; if shadows remain, the last of
+        # them will deallocate the block when it is dropped. A shadow that outlives the value never reads it, as `upgrade`
+        # returns `None` once the share count is zero, so the destroyed `val` slot is never observed.
+        # @ret: Nothing; this is invoked for its cleanup side effects when a `Shared` is destroyed.
+
+        self.ptr.shared_counter -= 1_uz
+        case self.ptr.shared_counter == 0_uz {
+            std::mem::ops::drop_in_place(&mut self.ptr.val)
+            case self.ptr.shadow_counter == 0_uz {
+                self.alloc.deallocate_array[ControlBlock[T]](self.ptr, 1_uz)
+            }
+        }
+    }
 }

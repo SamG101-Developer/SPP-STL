@@ -31,6 +31,7 @@ use std::void::Void
 use std::mem::raw_buf::RawBuf
 use std::ops::add::Add
 use std::ops::add::AddAssign
+use std::ops::del::Del
 use std::ops::eq::Eq
 use std::ops::fwd::FwdMut
 use std::ops::fwd::FwdRef
@@ -50,7 +51,7 @@ cls Vec[T, A: Alloc=GlobalAlloc] {
     # length-aware version of `RawBuf`, which is the lowest level contiguous buffer type. The `Vec` type manages the
     # length of the buffer and provides methods for adding, removing, and accessing elements. It also handles memory
     # management through the use of an allocator, allowing for flexible memory allocation strategies. It forwards to the
-    # `View[T]` type, specifically `&View[T]` and `&mut Viewf[T]`.
+    # `View[T]` type, specifically `&View[T]` and `&mut View[T]`.
     # @type T: The type of elements stored in the vector.
     # @type A: The allocator type used for memory management. Defaults to `GlobalAlloc` if not specified.
     # @let buffer: The underlying raw buffer that holds the elements of the vector. It is of type `RawBuf[T, A]`, which
@@ -58,9 +59,15 @@ cls Vec[T, A: Alloc=GlobalAlloc] {
     # @let length: The current number of elements in the vector. It is of type `USize` and is used to track how many
     # elements are currently stored in the vector. The length is always less than or equal to the capacity of the
     # buffer.
+    # @let start: The index of the first live element. It is `0` for every vector in normal use - all length-based
+    # access treats the live region as `[0, length)`. It is only advanced by the by-value forward move-iterator
+    # (`iter_mov`) as it consumes elements from the front, so that if iteration stops early the destructor drops only
+    # the elements that were not yet yielded (`[start, length)`). Because `iter_mov` consumes the vector by value, no
+    # other method ever observes a non-zero `start`; it participates only in destruction.
 
     !package buffer: RawBuf[T, A]
     !package length: USize
+    !package start: USize
 }
 
 sup [T] Vec[T] {
@@ -138,7 +145,7 @@ sup [T, A: Alloc] Vec[T, A] {
         # @let alloc:
         # @ret:
 
-        ret Vec(buffer=RawBuf[T, A]::new_with_capacity_in(0_uz, alloc), length=0_uz)
+        ret Vec(buffer=RawBuf[T, A]::new_with_capacity_in(0_uz, alloc), length=0_uz, start=0_uz)
     }
 
     !public
@@ -149,7 +156,7 @@ sup [T, A: Alloc] Vec[T, A] {
         # @let alloc:
         # @ret:
 
-        ret Vec(buffer=RawBuf[T, A]::new_with_capacity_in(cap, alloc), length=0_uz)
+        ret Vec(buffer=RawBuf[T, A]::new_with_capacity_in(cap, alloc), length=0_uz, start=0_uz)
     }
 
     !public
@@ -270,7 +277,7 @@ sup [T, A: Alloc] Vec[T, A] {
         # @ret:
 
         case new_len >= self.len() { ret }
-        # self.buffer.clear_range(new_len, self.len() - new_len) # todo
+        self.buffer.clear_range(new_len, self.len() - new_len)
         self.length = new_len
     }
 
@@ -427,11 +434,11 @@ sup [T, A: Alloc] Vec[T, A] {
     !public
     !versioned(base="1.0.0", new="1.0.0")
     fun clear(&mut self) -> Void {
-        #
-        # @ret:
+        # Removes every element from the vector, running each one's destructor, and resets the length to zero. The
+        # capacity is left unchanged. Delegates to `truncate(0)`, which drops the whole live range in place.
+        # @ret: Nothing; the vector is left empty.
 
-        # self.buffer.clear(self.len()) # todo
-        self.length = 0_uz
+        self.truncate(0_uz)
     }
 
     !public
@@ -518,6 +525,21 @@ sup [T, A: Alloc] Vec[T, A] {
     }
 }
 
+sup [T, A: Alloc] Vec[T, A] ext Del {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun del(&mut self) -> Void {
+        # The `del` function runs the destructors of the vector's live elements when it is dropped, then lets the
+        # underlying buffer drop, which frees the backing memory. The live elements are the range `[start, length)`,
+        # which `clear_range` destroys in place. For any vector in normal use `start` is `0`, so this is `[0, length)`;
+        # a forward move-iterator abandoned early leaves `start` advanced past the elements it already yielded, so only
+        # the un-yielded remainder is dropped. The buffer's own destructor only frees memory and never touches the
+        # elements, so there is no double drop; it runs after this body as part of normal field destruction.
+        # @ret: Nothing; this is invoked for its cleanup side effect when a `Vec` is destroyed.
+
+        self.buffer.clear_range(self.start, self.length - self.start)
+    }
+}
+
 sup [T: Copy, A: Alloc] Vec[T, A] {
     !public
     !versioned(base="1.0.0", new="1.0.0")
@@ -532,10 +554,15 @@ sup [T: Copy, A: Alloc] Vec[T, A] {
 sup [T, A: Alloc] Vec[T, A] ext IterMov[T] {
     !versioned(base="1.0.0", new="1.0.0")
     cor iter_mov(mut self) -> Iterator[T] {
-        #
-        # @ret:
+        # Yields the elements from front to back, moving each one out of the buffer. Consuming from the front leaves the
+        # remaining live elements as the suffix `[start, length)`, so `start` is advanced to just past each element
+        # before it is yielded. If iteration is abandoned early, `Vec::del` then drops exactly the un-yielded remainder
+        # via `clear_range(start, length - start)`, with no double drop and no leak; if it runs to completion `start`
+        # equals `length` and nothing is left to drop. `length` is left untouched, since `start` alone tracks progress.
+        # @ret: An iterator that moves the vector's elements out in order.
 
-        loop i in Range[USize]::between(0_uz, self.len()) {
+        loop i in Range[USize]::between(0_uz, self.length) {
+            self.start = i + 1_uz
             gen self.buffer.take_at(i).unwrap()
         }
     }
@@ -544,11 +571,16 @@ sup [T, A: Alloc] Vec[T, A] ext IterMov[T] {
 sup [T, A: Alloc] Vec[T, A] ext RevIterMov[T] {
     !versioned(base="1.0.0", new="1.0.0")
     cor reverse_iter_mov(mut self) -> Iterator[T] {
-        #
-        # @ret:
+        # Yields the elements from back to front, moving each one out of the buffer. The length is decremented before
+        # each yield, so the still-live elements are always exactly the prefix `[0, length)`. That keeps `Vec::del`
+        # correct even if iteration is abandoned early: it drops precisely the elements that were never yielded, with no
+        # double drop and no leak.
+        # @ret: An iterator that moves the vector's elements out in reverse order.
 
-        loop i in Range[USize]::between(self.len(), 0_uz).step_by(-1_sz) {
-            gen self.buffer.take_at(i).unwrap()
+        loop true {
+            case self.length == 0_uz { ret }
+            self.length -= 1_uz
+            gen self.buffer.take_at(self.length).unwrap()
         }
     }
 }

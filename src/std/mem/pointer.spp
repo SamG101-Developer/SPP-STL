@@ -4,11 +4,13 @@ use std::annotations::public
 use std::annotations::versioned
 use std::annotations::zero_type
 use std::boolean::Bool
+use std::copy::Copy
 use std::function::Fun
 use std::function::FunMov
 use std::function::FunMut
 use std::function::FunRef
 use std::generator::GenOnce
+use std::number::U8
 use std::number::USize
 use std::result::Fail
 use std::result::Pass
@@ -71,10 +73,22 @@ sup [T] NonNull[T] {
         ret Pass(val=Self::from_ptr_inner(ptr))
     }
 
-    !package
+    !private
     !intrinsic(name="spp.mem.pointer.NonNull.from_ptr_inner")
     !versioned(base="1.0.0", new="1.0.0")
     fun from_ptr_inner(ptr: Ptr[T]) -> NonNull[T] { }
+
+    !package
+    !versioned(base="1.0.0", new="1.0.0")
+    fun dangling() -> NonNull[T] {
+        # Create a dangling `NonNull` that is non-null and correctly aligned for `T` but points at no allocation. The
+        # address is `T`'s alignment - always a non-zero power of two - so it is a valid, well-aligned, non-null sentinel
+        # that must never be dereferenced or freed. It backs zero-sized allocations (an empty buffer, or a buffer of a
+        # zero-sized type), letting them hold a non-null pointer without ever touching the allocator.
+        # @ret: A dangling, well-aligned, non-null pointer for `T`.
+
+        ret Self::from_ptr_inner(Ptr(addr=std::mem::ops::align_of[T]()))
+    }
 
     !package
     !intrinsic(name="spp.mem.pointer.NonNull.raw")
@@ -102,13 +116,18 @@ sup [T] NonNull[T] {
     }
 
     !package
-    !intrinsic(name="spp.mem.pointer.NonNull.cast")
+    !intrinsic(name="spp.mem.pointer.NonNull.erase_type")
     !versioned(base="1.0.0", new="1.0.0")
-    fun cast[U](self) -> NonNull[U] {
-        # Reinterpret this pointer as a pointer to type `U`. The underlying address is unchanged; only the type changes.
-        # Used to convert between `NonNull[U8]` (returned by allocators) and typed `NonNull[T]` pointers.
-        # @type U: The target type to reinterpret the pointer as.
-        # @ret: A `NonNull[U]` with the same address as `self`.
+    fun erase_type(self) -> NonNull[U8] {
+        # Erase the static type of this pointer, viewing the referent as raw bytes. The underlying address and the bytes
+        # it points at are unchanged; only the static type is discarded. This direction is unconditionally sound: any
+        # live, initialized allocation is a valid sequence of bytes, so no precondition is attached to it. It is the
+        # inverse of `cast`, which retypes a byte pointer back into a typed one.
+        #
+        # `NonNull` is `Copy`, so this takes `self` by value without consuming the caller's pointer - it just produces a
+        # byte-typed view of the same address. Not handing an allocation to the allocator twice is a contract of the
+        # package-internal allocation API, not something enforced by move semantics.
+        # @ret: A `NonNull[U8]` with the same address as `self`, viewing the allocation as raw bytes.
     }
 
     !package
@@ -137,12 +156,52 @@ sup [T] NonNull[T] {
     !intrinsic(name="spp.mem.pointer.NonNull.read")
     !versioned(base="1.0.0", new="1.0.0")
     fun read(&self) -> T {
-        # The `read` method reads a value from the memory location pointed to by the `NonNull` pointer. This is a
-        # compiler intrinsic, as it can be implemented using a single instruction in LLVM. The method returns a copy of
-        # the value being read, and it is moved out of the memory location. Due to ownership rules, this is safe.
-        # @ret: A value of type `T`, which is the type of the value that the pointer points to. This is a copy of the
-        # value that was read from the memory location.
+        # The `read` method performs a bitwise move-out of the value at the memory location pointed to by the `NonNull`
+        # pointer. It does not require `T: Copy`: the bits are moved into the returned owned value and the pointed-to
+        # storage is left logically uninitialized. The caller must guarantee the source is never read or dropped again -
+        # it should either consume the owning container so the source becomes unreachable (as in `Single::read(self)`) or
+        # immediately overwrite or free the storage. To destroy a value in place without extracting it, prefer
+        # `std::mem::ops::drop_in_place`. This is a package-internal primitive and is never exposed to user code.
+        # @ret: An owned value of type `T`, moved bit-for-bit out of the memory location. Ownership of any resources the
+        # value holds transfers to the caller, and the original storage must not be used again.
     }
+}
+
+sup NonNull[U8] {
+    # Retyping a byte pointer into a typed pointer is the one pointer operation in the STL that carries a genuine
+    # soundness precondition, so it is deliberately confined to this sup-block. Declaring it on `NonNull[U8]` rather
+    # than on `NonNull[T]` means the type system, not a naming convention, prevents it from being used as a general
+    # "reinterpret anything as anything" primitive: there is no way to spell `NonNull[A] -> NonNull[B]` for two
+    # unrelated types, because the only way into this block is to hold a byte pointer, and the only way to get a byte
+    # pointer from a typed one is `erase_type`.
+
+    !package
+    !intrinsic(name="spp.mem.pointer.NonNull.cast")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun cast[U](self) -> NonNull[U] {
+        # Retype a byte pointer as a pointer to `U`. The underlying address is unchanged; only the static type changes.
+        # This is the sole way to turn a `NonNull[U8]` into a typed pointer, and together with `erase_type` (the reverse)
+        # it is the only pointer retyping in the STL.
+        #
+        # Preconditions, which the caller must establish and which this function cannot check:
+        #   - The allocation is at least `size_of[U]()` bytes and the address is aligned to `align_of[U]()`.
+        #   - Any byte the caller subsequently reads as a `U` has actually been initialized as a `U`. A freshly allocated
+        #     block is entirely uninitialized; a reallocated block preserves its existing elements and leaves the newly
+        #     added tail uninitialized.
+        #
+        # These hold by construction at the only call sites - the `allocate_array` and `grow_array` families - each of
+        # which sits directly on top of an allocation whose `Layout` was computed from `U` itself. Nothing else in the
+        # STL may call this.
+        # @type U: The target type to retype the pointer as.
+        # @ret: A `NonNull[U]` with the same address as `self`.
+    }
+}
+
+sup [T] NonNull[T] ext Copy {
+    # A `NonNull` is a single machine address, so it is `Copy`: duplicating one just duplicates the address. Copying a
+    # pointer does not copy or alias the pointee in any ownership sense - keeping a duplicate from being handed to the
+    # allocator twice (a double free) is a contract of the package-internal allocation API, not something the type
+    # system enforces. This mirrors how the reallocating allocator methods thread a pointer value in and out.
 }
 
 sup [T] NonNull[T] ext FwdMut[&mut T] {
