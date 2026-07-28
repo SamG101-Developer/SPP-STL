@@ -489,7 +489,7 @@ cmp fun float_round[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic(name="std.intrinsics.float_bitreverse")
+!intrinsic(name="std.intrinsics.bitreverse")
 fun bitreverse[T: Integer](value: T) -> T { }
 
 !public
