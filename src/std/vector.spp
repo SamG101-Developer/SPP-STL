@@ -523,15 +523,29 @@ sup [T: Clone, A: Alloc] Vec[T, A] {
     fun append_from_view(&mut self, that: &View[T]) -> Void {
         # Append all the elements from a view, by copying the elements from the view.
         # @let that: The view to append from.
+
+        # Allocate enough space and them memcpy the
+        # elements from the view into the vector.
+        self.capacity_reserve(that.len())
+        std::mem::ops::mem_copy(&mut self.buffer.ptr, &that.ptr, that.len(), self.len())
+        self.length += that.len()
     }
 
     !public
     !intrinsic(name="std.vector.Vec.from[View]")
     !versioned(base="1.0.0", new="1.0.0")
     fun from(that: &View[T]) -> Self {
-        #
-        # @let that:
-        # @ret:
+        # Create the vector from a view, by copying the elements from the view.
+        # @let that: The view to create the vector from.
+        # @ret: A new vector containing the elements from the view.
+        # @todo: This doesn't respect clone steps.
+
+        # Allocate enough space and then memcpy the
+        # elements from the view into the vector.
+        let mut vec = Self::new_with_capacity(that.len())
+        std::mem::ops::mem_copy(&mut vec.buffer.ptr, &that.ptr, that.len())
+        vec.length = that.len()
+        ret vec
     }
 }
 
