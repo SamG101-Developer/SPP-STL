@@ -49,11 +49,6 @@ sup [T, cmp n: USize] Arr[T, n] {
     fun new() -> Self { }
 
     !public
-    !intrinsic(name="std.array.Arr.from_fun")
-    !versioned(base="1.0.0", new="1.0.0")
-    fun from_fun(f: FunMov[(), T]) -> Self { }
-
-    !public
     !versioned(base="1.0.0", new="1.0.0")
     fun swap(&mut self, i: USize, j: USize) -> Void {
         std::mem::ops::swap(self[mut i], self[mut j])
