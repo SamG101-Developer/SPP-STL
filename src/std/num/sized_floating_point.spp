@@ -761,30 +761,31 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
 
 sup [cmp w: U32] SizedFloatingPoint[w] {
     !public !inline
-    !intrinsic(name="std.num.sized_floating_point.neg_one")
+    !intrinsic(name="std.num.sized_floating_point.SizedFloatingPoint.neg_one")
     !versioned(base="1.0.0", new="1.0.0")
     cmp fun neg_one() -> Self { }
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext Zero {
     !inline
-    !intrinsic(name="std.num.sized_floating_point.zero")
+    !intrinsic(name="std.num.sized_floating_point.SizedFloatingPoint.zero")
     !versioned(base="1.0.0", new="1.0.0")
     cmp fun zero() -> Self { }
 
     !inline
-    !intrinsic(name="std.num.sized_floating_point.is_zero")
+    !intrinsic(name="std.num.sized_floating_point.SizedFloatingPoint.is_zero")
     !versioned(base="1.0.0", new="1.0.0")
     fun is_zero(&self) -> Bool { }
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext One {
     !inline
-    !intrinsic(name="std.num.sized_floating_point.one")
+    !intrinsic(name="std.num.sized_floating_point.SizedFloatingPoint.one")
     !versioned(base="1.0.0", new="1.0.0")
     cmp fun one() -> Self { }
 
     !inline
+    !intrinsic(name="std.num.sized_floating_point.SizedFloatingPoint.is_one")
     !versioned(base="1.0.0", new="1.0.0")
     fun is_one(&self) -> Bool {
         ret self == Self::one()
