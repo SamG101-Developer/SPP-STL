@@ -1,6 +1,6 @@
 use std::annotations::abstract_method
 use std::annotations::intrinsic
-use std::annotations::public
+use std::annotations::protected
 use std::annotations::versioned
 use std::annotations::virtual_method
 use std::annotations::zero_type
