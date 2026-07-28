@@ -106,13 +106,13 @@ sup [T, cmp n: USize] Arr[T, n] ext Eq {
 }
 
 sup [T, cmp n: USize] Arr[T, n] ext FwdMut[View[T]] {
-    !intrinsic(name="std.array.Arr.fwd_mut[View]")
+    !intrinsic(name="std.array.Arr.fwd_mut")
     !versioned(base="1.0.0", new="1.0.0")
     cor fwd_mut(&mut self) -> GenOnce[&mut View[T]] { }
 }
 
 sup [T, cmp n: USize] Arr[T, n] ext FwdRef[View[T]] {
-    !intrinsic(name="std.vec.Vec.fwd_ref[View]")
+    !intrinsic(name="std.array.Arr.fwd_ref")
     !versioned(base="1.0.0", new="1.0.0")
     cor fwd_ref(&self) -> GenOnce[&View[T]] { }
 }
