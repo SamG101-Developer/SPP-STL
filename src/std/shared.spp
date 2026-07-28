@@ -101,9 +101,10 @@ sup [T, A: Alloc & Clone] Shared[T, A] {
 }
 
 sup [T] Shared[T] ext FwdRef[T] {
-    !intrinsic(name="std.shared.Shared.fwd_ref")
     !versioned(base="1.0.0", new="1.0.0")
-    cor fwd_ref(&self) -> GenOnce[&T] { }
+    cor fwd_ref(&self) -> GenOnce[&T] {
+        gen &self.ptr.val
+    }
 }
 
 sup [T, A: Alloc & Clone] Shared[T, A] ext Clone {
