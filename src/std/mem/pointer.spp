@@ -1,5 +1,6 @@
 use std::annotations::intrinsic
 use std::annotations::package
+use std::annotations::private
 use std::annotations::public
 use std::annotations::versioned
 use std::annotations::zero_type
@@ -82,9 +83,9 @@ sup [T] NonNull[T] {
     !versioned(base="1.0.0", new="1.0.0")
     fun dangling() -> NonNull[T] {
         # Create a dangling `NonNull` that is non-null and correctly aligned for `T` but points at no allocation. The
-        # address is `T`'s alignment - always a non-zero power of two - so it is a valid, well-aligned, non-null sentinel
-        # that must never be dereferenced or freed. It backs zero-sized allocations (an empty buffer, or a buffer of a
-        # zero-sized type), letting them hold a non-null pointer without ever touching the allocator.
+        # address is `T`'s alignment - always a non-zero power of two - so it is a valid, well-aligned, non-null
+        # sentinel that must never be dereferenced or freed. It backs zero-sized allocations (an empty buffer, or a
+        # buffer of a zero-sized type), letting them hold a non-null pointer without ever touching the allocator.
         # @ret: A dangling, well-aligned, non-null pointer for `T`.
 
         ret Self::from_ptr_inner(Ptr(addr=std::mem::ops::align_of[T]()))
@@ -159,8 +160,8 @@ sup [T] NonNull[T] {
         # The `read` method performs a bitwise move-out of the value at the memory location pointed to by the `NonNull`
         # pointer. It does not require `T: Copy`: the bits are moved into the returned owned value and the pointed-to
         # storage is left logically uninitialized. The caller must guarantee the source is never read or dropped again -
-        # it should either consume the owning container so the source becomes unreachable (as in `Single::read(self)`) or
-        # immediately overwrite or free the storage. To destroy a value in place without extracting it, prefer
+        # it should either consume the owning container so the source becomes unreachable (as in `Single::read(self)`)
+        # or immediately overwrite or free the storage. To destroy a value in place without extracting it, prefer
         # `std::mem::ops::drop_in_place`. This is a package-internal primitive and is never exposed to user code.
         # @ret: An owned value of type `T`, moved bit-for-bit out of the memory location. Ownership of any resources the
         # value holds transfers to the caller, and the original storage must not be used again.
@@ -180,14 +181,14 @@ sup NonNull[U8] {
     !versioned(base="1.0.0", new="1.0.0")
     fun cast[U](self) -> NonNull[U] {
         # Retype a byte pointer as a pointer to `U`. The underlying address is unchanged; only the static type changes.
-        # This is the sole way to turn a `NonNull[U8]` into a typed pointer, and together with `erase_type` (the reverse)
-        # it is the only pointer retyping in the STL.
+        # This is the sole way to turn a `NonNull[U8]` into a typed pointer, and together with `erase_type` (the
+        # reverse) it is the only pointer retyping in the STL.
         #
-        # Preconditions, which the caller must establish and which this function cannot check:
-        #   - The allocation is at least `size_of[U]()` bytes and the address is aligned to `align_of[U]()`.
-        #   - Any byte the caller subsequently reads as a `U` has actually been initialized as a `U`. A freshly allocated
-        #     block is entirely uninitialized; a reallocated block preserves its existing elements and leaves the newly
-        #     added tail uninitialized.
+        # Preconditions, which the caller must establish and which this function cannot check:   - The allocation is at
+        # least `size_of[U]()` bytes and the address is aligned to `align_of[U]()`.   - Any byte the caller subsequently
+        # reads as a `U` has actually been initialized as a `U`. A freshly allocated     block is entirely
+        # uninitialized; a reallocated block preserves its existing elements and leaves the newly     added tail
+        # uninitialized.
         #
         # These hold by construction at the only call sites - the `allocate_array` and `grow_array` families - each of
         # which sits directly on top of an allocation whose `Layout` was computed from `U` itself. Nothing else in the
