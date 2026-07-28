@@ -409,17 +409,17 @@ fun float_tanh[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic(name="std.intrinsics.float_asinh")
+!intrinsic(name="std.intrinsics.float_exp")
 fun float_exp[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic(name="std.intrinsics.float_acosh")
+!intrinsic(name="std.intrinsics.float_exp2")
 fun float_exp2[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline
-!intrinsic(name="std.intrinsics.float_atanh")
+!intrinsic(name="std.intrinsics.float_exp10")
 fun float_exp10[T: FloatingPoint](value: T) -> T { }
 
 !public
