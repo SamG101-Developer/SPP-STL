@@ -1,5 +1,6 @@
 use std::annotations::public
 use std::annotations::versioned
+use std::clone::Clone
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
@@ -7,4 +8,20 @@ cls Copy {
     # The `Copy` type is a marker that changes all move operations into copy operations, leaving the value behind. This
     # is used on numbers (integers and floats) and booleans in the standard library, as simple maths would be very
     # cumbersome if they were moved instead of copied.
+}
+
+sup Copy ext Clone {
+    # All `Copy` types are also `Clone`, as they can be trivially cloned by simply copying the value. This allows for
+    # constraints to be placed on generic types that require both `Copy` and `Clone` traits, ensuring that the type can
+    # be copied and cloned without any additional overhead.
+
+    !versioned(base="1.0.0", new="1.0.0")
+    fun clone(&self) -> Self {
+        # The default clone implementation for `Copy` types simply returns the value itself, as `Copy` types are
+        # trivially copyable. This means that when you clone a `Copy` type, you get a new instance of the same value
+        # without any additional overhead.
+        # @ret: A new instance of the same value, as `Copy` types are trivially copyable.
+
+        ret self
+    }
 }
