@@ -501,7 +501,7 @@ sup [R: Read] BufRead[R] {
         # otherwise map the validation error to a stream based error.
         ret Str::from_utf8(&bytes)
             .map_err((e: Utf8Err) { StreamInvalidDataError })
-            .map((s: Str) {
+            .map((s: Str caps &mut out) {
                 let len = s.len()
                 out@ = s
                 len
