@@ -150,15 +150,16 @@ sup [A: Alloc] Str[A] {
     }
 
     !public
-    !intrinsic(name="std.string.Str.from[StrView]")
     !versioned(base="1.0.0", new="1.0.0")
     fun from(view: &StrView) -> Str {
-        # The `from` method creates a new instance of the `Str` type from a given `StrView`. This involves copying the
-        # bytes from the provided string view into a new internal vector. This method allows for easy conversion from a
-        # string view to a mutable string, enabling further modifications to the string data after it has been created.
+        # The `from` method creates a new instance of the `Str` type from a given `StrView`. It takes a byte view of
+        # `view` (`view_ref`, which just repackages the `StrView`'s existing pointer and length - no copy yet) and
+        # forwards to the `View[U8]`-based `from` below, which does the actual allocation and memcpy.
         # @let view: A reference to a `StrView` that contains the string data to be copied. The bytes from this view
         # will be used to initialize the internal vector of the new `Str` instance.
         # @ret: A new `Str` instance that contains a copy of the bytes from the provided `StrView`.
+
+        ret Str::from(view.view_ref())
     }
 
     !public
