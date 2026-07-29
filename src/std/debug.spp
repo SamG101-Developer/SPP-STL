@@ -21,14 +21,14 @@ fun breakpoint() -> Void {
     debug_internal()
 }
 
-!public
-!cfg(mode="rel")
-!versioned(base="1.0.0", new="1.0.0")
-fun breakpoint() -> Void {
-    # In release mode, this function does nothing. It is a no-op, as breakpoints are typically not used in release
-    # builds. This allows the same code to be used in both debug and release builds without any changes, while still
-    # providing the ability to trigger breakpoints in debug builds.
-}
+# !public
+# !cfg(mode="rel")
+# !versioned(base="1.0.0", new="1.0.0")
+# fun breakpoint() -> Void {
+#     # In release mode, this function does nothing. It is a no-op, as breakpoints are typically not used in release
+#     # builds. This allows the same code to be used in both debug and release builds without any changes, while still
+#     # providing the ability to trigger breakpoints in debug builds.
+# } # Todo: Re-enable when we have "cfg" supported
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
