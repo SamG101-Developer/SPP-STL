@@ -424,7 +424,7 @@ sup [cmp w: USize] Atom[SizedIntegerSigned[w]] {
     !public
     !intrinsic(name="std.threading.atomic.Atom.fetch_smin")
     !versioned(base="1.0.0", new="1.0.0")
-    fun fetch_min(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
+    fun fetch_min(&self, val: SizedIntegerSigned[w], order: U8 = Self::mo_seq_cst) -> T {
         # The `fetch_min` method atomically compares the current value of the atomic variable with the provided `val`,
         # stores the smaller of the two values back in the atomic variable, and returns the old value. This is
         # specialized for signed integer types, to uses the `smin` atomic intrinsic. This operation can be useful for
@@ -439,7 +439,7 @@ sup [cmp w: USize] Atom[SizedIntegerSigned[w]] {
     !public
     !intrinsic(name="std.threading.atomic.Atom.fetch_smax")
     !versioned(base="1.0.0", new="1.0.0")
-    fun fetch_max(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
+    fun fetch_max(&self, val: SizedIntegerSigned[w], order: U8 = Self::mo_seq_cst) -> T {
         # The `fetch_max` method atomically compares the current value of the atomic variable with the provided `val`,
         # stores the larger of the two values back in the atomic variable, and returns the old value. This is
         # specialized for signed integer types, to uses the `smax` atomic intrinsic. This operation can be useful for
@@ -456,7 +456,7 @@ sup [cmp w: USize] Atom[SizedIntegerUnsigned[w]] {
     !public
     !intrinsic(name="std.threading.atomic.Atom.fetch_umin")
     !versioned(base="1.0.0", new="1.0.0")
-    fun fetch_min(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
+    fun fetch_min(&self, val: SizedIntegerUnsigned[w], order: U8 = Self::mo_seq_cst) -> T {
         # The `fetch_min` method atomically compares the current value of the atomic variable with the provided `val`,
         # stores the smaller of the two values back in the atomic variable, and returns the old value. This is
         # specialized for unsigned integer types, to uses the `umin` atomic intrinsic. This operation can be useful for
@@ -471,7 +471,7 @@ sup [cmp w: USize] Atom[SizedIntegerUnsigned[w]] {
     !public
     !intrinsic(name="std.threading.atomic.Atom.fetch_umax")
     !versioned(base="1.0.0", new="1.0.0")
-    fun fetch_max(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
+    fun fetch_max(&self, val: SizedIntegerUnsigned[w], order: U8 = Self::mo_seq_cst) -> T {
         # The `fetch_max` method atomically compares the current value of the atomic variable with the provided `val`,
         # stores the larger of the two values back in the atomic variable, and returns the old value. This is
         # specialized for unsigned integer types, to uses the `umax` atomic intrinsic. This operation can be useful for
