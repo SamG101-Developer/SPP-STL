@@ -9,6 +9,7 @@ use std::boolean::Integral
 use std::number::U32
 use std::number::U8
 use std::void::Void
+use std::num::bases::FloatingPoint
 use std::num::bases::Integer
 use std::num::bases::Zero
 use std::num::sized_integer_signed::SizedIntegerSigned
@@ -493,6 +494,66 @@ sup [cmp w: U32] Atom[SizedIntegerUnsigned[w]] {
         # stores the larger of the two values back in the atomic variable, and returns the old value. This is
         # specialized for unsigned integer types, to uses the `umax` atomic intrinsic. This operation can be useful for
         # various synchronization patterns, such as implementing atomic maximum tracking.
+        # @let val: The value to be compared with the current value of the atomic variable, and the larger of the two
+        # will be stored back in the atomic variable.
+        # @let ?order: The memory ordering for the fetch-max operation. The default is `mo_seq_cst`, which provides
+        # sequential consistency guarantees.
+        # @ret: The old value of the atomic variable before the fetch-max operation was performed.
+    }
+}
+
+sup [T: FloatingPoint] Atom[T] {
+    !public
+    !intrinsic(name="std.threading.atomic.Atom.fetch_fadd")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun fetch_add(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
+        # The `fetch_add` method atomically adds the provided `val` to the current value of the atomic variable, stores
+        # the result back in the atomic variable, and returns the old value. This is specialized for floating point
+        # types, so it uses the `fadd` atomic intrinsic, which has no signedness variant unlike the integer `add`.
+        # @let val: The value to be added to the current value of the atomic variable, and then stored back in the
+        # atomic variable.
+        # @let ?order: The memory ordering for the fetch-add operation. The default is `mo_seq_cst`, which provides
+        # sequential consistency guarantees.
+        # @ret: The old value of the atomic variable before the fetch-add operation was performed.
+    }
+
+    !public
+    !intrinsic(name="std.threading.atomic.Atom.fetch_fsub")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun fetch_sub(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
+        # The `fetch_sub` method atomically subtracts the provided `val` from the current value of the atomic variable,
+        # stores the result back in the atomic variable, and returns the old value. This is specialized for floating
+        # point types, so it uses the `fsub` atomic intrinsic, which has no signedness variant unlike the integer `sub`.
+        # @let val: The value to be subtracted from the current value of the atomic variable, and then stored back in
+        # the atomic variable.
+        # @let ?order: The memory ordering for the fetch-sub operation. The default is `mo_seq_cst`, which provides
+        # sequential consistency guarantees.
+        # @ret: The old value of the atomic variable before the fetch-sub operation was performed.
+    }
+
+    !public
+    !intrinsic(name="std.threading.atomic.Atom.fetch_fmin")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun fetch_min(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
+        # The `fetch_min` method atomically compares the current value of the atomic variable with the provided `val`,
+        # stores the smaller of the two values back in the atomic variable, and returns the old value. This is
+        # specialized for floating point types, so it uses the `fmin` atomic intrinsic, which has no signed/unsigned
+        # split unlike the integer `smin`/`umin`.
+        # @let val: The value to be compared with the current value of the atomic variable, and the smaller of the two
+        # will be stored back in the atomic variable.
+        # @let ?order: The memory ordering for the fetch-min operation. The default is `mo_seq_cst`, which provides
+        # sequential consistency guarantees.
+        # @ret: The old value of the atomic variable before the fetch-min operation was performed.
+    }
+
+    !public
+    !intrinsic(name="std.threading.atomic.Atom.fetch_fmax")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun fetch_max(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
+        # The `fetch_max` method atomically compares the current value of the atomic variable with the provided `val`,
+        # stores the larger of the two values back in the atomic variable, and returns the old value. This is
+        # specialized for floating point types, so it uses the `fmax` atomic intrinsic, which has no signed/unsigned
+        # split unlike the integer `smax`/`umax`.
         # @let val: The value to be compared with the current value of the atomic variable, and the larger of the two
         # will be stored back in the atomic variable.
         # @let ?order: The memory ordering for the fetch-max operation. The default is `mo_seq_cst`, which provides
