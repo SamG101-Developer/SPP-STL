@@ -420,7 +420,7 @@ sup [T: Integer] Atom[T] {
     }
 }
 
-sup [cmp w: USize] Atom[SizedIntegerSized[w]] {
+sup [cmp w: USize] Atom[SizedIntegerSigned[w]] {
     !public
     !intrinsic(name="std.threading.atomic.Atom.fetch_smin")
     !versioned(base="1.0.0", new="1.0.0")
@@ -452,7 +452,7 @@ sup [cmp w: USize] Atom[SizedIntegerSized[w]] {
     }
 }
 
-sup [cmp w: USize] Atom[SizedIntegerUnsized[w]] {
+sup [cmp w: USize] Atom[SizedIntegerUnsigned[w]] {
     !public
     !intrinsic(name="std.threading.atomic.Atom.fetch_umin")
     !versioned(base="1.0.0", new="1.0.0")
