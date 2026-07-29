@@ -103,7 +103,7 @@ sup [V, I: Zero] SliceMut[V, I] {
     !abstract_method
     cor slice_mut(&mut self, from: I, upto: I) -> GenOnce[&mut V] {
         # The `slice_mut` coroutine defines how a mutable slice of the implementing class is produced. It takes a
-        # mutable reference to the instance and two indices, `from` and `into`, that bound the slice, and returns a
+        # mutable reference to the instance and two indices, `from` and `upto`, that bound the slice, and returns a
         # `GenOnce` that yields a mutable reference to each element within the half-open range. The specific slicing
         # behavior is determined by the implementation of this coroutine in the class that implements `SliceMut`.
         # @let from: The lower bound (inclusive) of the slice range, of type `I`.
@@ -135,7 +135,7 @@ sup [V, I: Zero] SliceMut[V, I] {
         # the instance up to this index.
         # @ret: A `GenOnce[&mut V]` that yields a mutable reference to each element from the start of the instance up to
         # the given upper bound.
-        gen self.slice_mut(I::zero(), into)
+        gen self.slice_mut(I::zero(), upto)
     }
 
     !public
@@ -165,7 +165,7 @@ sup [V, I: Zero] SliceRef[V, I] {
     !abstract_method
     cor slice_ref(&self, from: I, upto: I) -> GenOnce[&V] {
         # The `slice_ref` coroutine defines how an immutable slice of the implementing class is produced. It takes an
-        # immutable reference to the instance and two indices, `from` and `into`, that bound the slice, and returns a
+        # immutable reference to the instance and two indices, `from` and `upto`, that bound the slice, and returns a
         # `GenOnce` that yields an immutable reference to each element within the half-open range. The specific slicing
         # behavior is determined by the implementation of this coroutine in the class that implements `SliceRef`.
         # @let from: The lower bound (inclusive) of the slice range, of type `I`.
@@ -197,7 +197,7 @@ sup [V, I: Zero] SliceRef[V, I] {
         # the instance up to this index.
         # @ret: A `GenOnce[&V]` that yields an immutable reference to each element from the start of the instance up to
         # the given upper bound.
-        gen self.slice_ref(I::zero(), into)
+        gen self.slice_ref(I::zero(), upto)
     }
 
     !public
