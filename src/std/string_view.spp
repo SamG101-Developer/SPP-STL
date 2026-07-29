@@ -578,22 +578,25 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    !intrinsic(name="std.string_view.StrView.view")
     cor view_ref(&self) -> GenOnce[&View[U8]] {
-        # The `view` method returns a view of the bytes of this `StrView`. This is a non-mutating method, and it does
-        # not modify the original string. The returned view is valid for the lifetime of this `StrView`, and it is
-        # guaranteed to be null-terminated.
+        # The `view_ref` method returns a view of the bytes of this `StrView`. This is a non-mutating method, and it
+        # does not modify the original string. The returned view is valid for the lifetime of this `StrView`, and it
+        # is guaranteed to be null-terminated.
         # @ret: A view of the bytes of this `StrView`.
+
+        let view = View(ptr=self.ptr, length=self.length)
+        gen &view
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    !intrinsic(name="std.string_view.StrView.view")
     cor view_mut(&mut self) -> GenOnce[&mut View[U8]] {
-        # The `view` method returns a view of the bytes of this `StrView`. This is a non-mutating method, and it does
-        # not modify the original string. The returned view is valid for the lifetime of this `StrView`, and it is
-        # guaranteed to be null-terminated.
-        # @ret: A view of the bytes of this `StrView`.
+        # The `view_mut` method returns a mutable view of the bytes of this `StrView`. The returned view is valid for
+        # the lifetime of this `StrView`, and it is guaranteed to be null-terminated.
+        # @ret: A mutable view of the bytes of this `StrView`.
+
+        let mut view = View(ptr=self.ptr, length=self.length)
+        gen &mut view
     }
 }
 

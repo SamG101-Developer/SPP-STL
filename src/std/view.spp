@@ -36,7 +36,7 @@ cls View[T] {
     # provide efficient access to the elements.
 
     !package ptr: NonNull[T]
-    length: USize
+    !package length: USize
 }
 
 sup [T] View[T] {
