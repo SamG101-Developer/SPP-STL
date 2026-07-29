@@ -104,7 +104,6 @@ sup [T] NonNull[T] {
     }
 
     !package !always_inline
-    !intrinsic(name="std.mem.pointer.NonNull.erase_type")
     !versioned(base="1.0.0", new="1.0.0")
     fun erase_type(self) -> NonNull[U8] {
         # Erase the static type of this pointer, viewing the referent as raw bytes. The underlying address and the bytes
@@ -116,6 +115,8 @@ sup [T] NonNull[T] {
         # byte-typed view of the same address. Not handing an allocation to the allocator twice is a contract of the
         # package-internal allocation API, not something enforced by move semantics.
         # @ret: A `NonNull[U8]` with the same address as `self`, viewing the allocation as raw bytes.
+
+        ret self.cast[U8]()
     }
 
     !package !always_inline
