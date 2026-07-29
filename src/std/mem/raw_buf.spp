@@ -77,8 +77,8 @@ sup [T, A: Alloc] RawBuf[T, A] {
     !package
     !versioned(base="1.0.0", new="1.0.0")
     fun new_with_capacity_zeroed_in(cap: USize, alloc: A) -> Self {
-        # As `new_with_capacity_in`, but zeroed. A storage-free capacity still needs no allocation - a zero-byte block is
-        # trivially already zeroed - so it uses a dangling sentinel.
+        # As `new_with_capacity_in`, but zeroed. A storage-free capacity still needs no allocation - a zero-byte block
+        # is trivially already zeroed - so it uses a dangling sentinel.
         case Self::is_storage_free(cap) { ret RawBuf(ptr=NonNull[T]::dangling(), capacity=cap, alloc) }
 
         let ptr = alloc.allocate_array_zeroed[T](cap).expect("Allocation failed")
@@ -265,8 +265,8 @@ sup [T, A: Alloc] RawBuf[T, A] ext Del {
         # keep in step with the real allocation size. If the buffer occupies no bytes (an empty buffer, or a zero-sized
         # type) its pointer is a dangling sentinel and there is nothing to free, so the deallocation is skipped. It does
         # not drop the elements: a `RawBuf` is not length-aware and does not know which slots are initialized, so
-        # dropping the live elements is the responsibility of the length-aware owner (`Vec`), which must do so before its
-        # buffer is dropped.
+        # dropping the live elements is the responsibility of the length-aware owner (`Vec`), which must do so before
+        # its buffer is dropped.
         # @ret: Nothing; this is invoked for its cleanup side effect when a `RawBuf` is destroyed.
 
         case Self::is_storage_free(self.capacity) { ret }
