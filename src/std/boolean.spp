@@ -11,6 +11,7 @@ use std::option::Opt
 use std::option::Some
 use std::string::Str
 use std::string_view::StrView
+use std::num::bases::Zero
 use std::num::sized_floating_point::SizedFloatingPoint
 use std::num::sized_integer_signed::SizedIntegerSigned
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
@@ -36,6 +37,28 @@ cls Bool {
     # The `Bool` type is a fundamental type in the language and is used for control flow, conditional expressions, and
     # logical operations. It is a simple type that can be easily optimized by the compiler, and is mapped to the llvm
     # `bool` type.
+}
+
+sup Bool ext Zero {
+    # The `Bool` type has a zero value, which is `false`. This allows for the use of the `Zero` trait to create a `Bool`
+    # value that is initialized to `false`, and can be used in generic contexts where a zero value is required.
+
+    !versioned(base="1.0.0", new="1.0.0")
+    fun zero() -> Self {
+        # The `zero` method returns the zero value for the `Bool` type, which is `false`. This is useful for
+        # initializing variables or fields to a known state, and for generic contexts where a zero value is required.
+        # @ret: The zero value for the `Bool` type, which is `false`.
+        ret false
+    }
+
+    fun is_zero(&self) -> Bool {
+        # The `is_zero` method checks if the `Bool` value is equal to the zero value, which is `false`. This is useful
+        # for checking if a variable or field is in its default state, and for generic contexts where a zero value is
+        # required.
+        # @ret: A boolean value indicating whether the `Bool` value is equal to the zero value (`false`).
+
+        ret self.not
+    }
 }
 
 sup Bool ext Integral {

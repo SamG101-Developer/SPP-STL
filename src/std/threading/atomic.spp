@@ -6,10 +6,11 @@ use std::annotations::versioned
 use std::llvm::always_inline
 use std::boolean::Bool
 use std::boolean::Integral
-use std::number::U8
 use std::number::U32
+use std::number::U8
 use std::void::Void
 use std::num::bases::Integer
+use std::num::bases::Zero
 use std::num::sized_integer_signed::SizedIntegerSigned
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 
@@ -159,24 +160,14 @@ sup [T: Integral] Atom[T] {
     !public cmp mo_seq_cst: U8 = 7_u8
 
     !public
-    !intrinsic(name="std.threading.atomic.Atom.new")
     !versioned(base="1.0.0", new="1.0.0")
     fun new(val: T) -> Atom[T] {
-        # The static `new` method creates a new atomic variable with the given initial value. The intrinsic function
-        # will handle the initialization under the hood, and the provided value will be stored in the `val` field of the
-        # `Atom` struct.
+        # The static `new` method creates a new atomic variable with the given initial value. Simple store on the
+        # object, no intrinsics required.
         # @let val: The initial value to store in the atomic variable.
         # @ret: A new `Atom` instance containing the provided initial value.
-    }
 
-    !public
-    !intrinsic(name="std.threading.atomic.Atom.new_zeroed")
-    !versioned(base="1.0.0", new="1.0.0")
-    fun new_zeroed() -> Atom[T] {
-        # The static `new_zeroed` method creates a new atomic variable that is initialized to zero. This is a convenient
-        # method for creating an atomic variable with a default value, and as all types can be defaulted, either the
-        # number is set to `0`, or the boolean is set to `false`.
-        # @ret: A new `Atom` instance containing the default zero value for the type `T`.
+        ret Atom(val)
     }
 
     !public
@@ -345,6 +336,19 @@ sup [T: Integral] Atom[T] {
         # @let ?order: The memory ordering for the fetch-xor operation. The default is `mo_seq_cst`, which provides
         # sequential consistency guarantees.
         # @ret: The old value of the atomic variable before the fetch-xor operation was performed.
+    }
+}
+
+sup [T: Zero] Atom[T] {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun new_zeroed() -> Atom[T] {
+        # The static `new_zeroed` method creates a new atomic variable that is initialized to zero. This is a convenient
+        # method for creating an atomic variable with a default value, and as all types can be defaulted, either the
+        # number is set to `0`, or the boolean is set to `false`.
+        # @ret: A new `Atom` instance containing the default zero value for the type `T`.
+
+        Atom[T](T::zero())
     }
 }
 
