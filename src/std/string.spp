@@ -415,15 +415,31 @@ sup [A: Alloc] Str[A] {
 }
 
 sup [A: Alloc] Str[A] ext FwdMut[StrView] {
-    !intrinsic(name="std.string.Str.fwd_mut[StrView]")
     !versioned(base="1.0.0", new="1.0.0")
-    cor fwd_mut(&mut self) -> GenOnce[&mut StrView] { }
+    cor fwd_mut(&mut self) -> GenOnce[&mut StrView] {
+        # Lets `&mut Str` coalesce to `&mut StrView` for method calls, the same way `Vec::fwd_mut` coalesces to `&mut
+        # View[T]`. Builds a `StrView` pointing at this `Str`'s own backing buffer - not a copy of the bytes, just of
+        # the pointer and length - so mutating through the yielded borrow (e.g. `make_uppercase`, which only ever
+        # rewrites bytes in place and never grows the buffer) mutates this `Str`'s real storage.
+        # @ret: A `StrView` aliasing this `Str`'s own bytes.
+
+        let mut view = StrView(ptr=self.bytes.buffer.ptr, length=self.bytes.length)
+        gen &mut view
+    }
 }
 
 sup [A: Alloc] Str[A] ext FwdRef[StrView] {
-    !intrinsic(name="std.string.Str.fwd_ref[StrView]")
     !versioned(base="1.0.0", new="1.0.0")
-    cor fwd_ref(&self) -> GenOnce[&StrView] { }
+    cor fwd_ref(&self) -> GenOnce[&StrView] {
+        # Lets `&Str` coalesce to `&StrView` for method calls, the same way `Vec::fwd_ref` coalesces to `&View[T]`.
+        # Builds a `StrView` pointing at this `Str`'s own backing buffer - not a copy of the bytes, just of the pointer
+        # and length - so reading through the yielded borrow (e.g. `chars`, `find`, etc.) reads this `Str`'s real
+        # storage.
+        # @ret: A `StrView` aliasing this `Str`'s own bytes.
+
+        let view = StrView(ptr=self.bytes.buffer.ptr, length=self.bytes.length)
+        gen &view
+    }
 }
 
 sup [A: Alloc] Str[A] ext Clone {
