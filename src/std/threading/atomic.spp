@@ -16,8 +16,8 @@ cls Atom[T: Integral] {
     # The `Atom` type is a low-level atomic variable type that provides atomic operations on a value of type `T`. It is
     # designed to be used in parallel programming scenarios where multiple threads may need to access and modify the
     # same variable without causing data races. The `Atom` type provides a set of atomic operations such as load, store,
-    # compare_exchange, and various fetch-and-update operations. The memory ordering of these operations can be
-    # specified using the `order` parameter.
+    # compex, and various fetch-and-update operations. The memory ordering of these operations can be specified using
+    # the `order` parameter.
     #
     # Notes for the future:
     # - When enums are supported, the memory ordering will be an enum (over U8).
@@ -80,17 +80,17 @@ fun atomic_store_inner[T: Integral](ptr: &T, val: T, order: U8) -> Void {
 }
 
 !private
-!intrinsic(name="std.threading.atomic.compare_exchange_inner")
+!intrinsic(name="std.threading.atomic.compex_inner")
 !versioned(base="1.0.0", new="1.0.0")
-fun atomic_compare_exchange_inner[T: Integral](ptr: &T, old: T, new: T, success_order: U8, failure_order: U8) -> (T, Bool) {
-    # The `compare_exchange_inner` function is a low-level intrinsic function that implements the actual
-    # compare-and-exchange operation. It is not intended to be called directly by user code, but is instead called by
-    # the public `compare_exchange` method of the `Atom` type after validating the memory orders. The `ptr` parameter is
-    # a reference to the value to be modified, the `old` parameter is the expected value, the `new` parameter is the
-    # value to be stored if the current value matches the expected value, and the `success_order` and `failure_order`
-    # parameters specify the memory ordering of the operation in the success and failure cases, respectively. The
-    # behavior of this function is platform-specific and is implemented by the compiler using the appropriate atomic
-    # compare-and-exchange instructions for the target architecture.
+fun atomic_compex_inner[T: Integral](ptr: &T, old: T, new: T, success_order: U8, failure_order: U8) -> (T, Bool) {
+    # The `compex_inner` function is a low-level intrinsic function that implements the actual compare-and-exchange
+    # operation. It is not intended to be called directly by user code, but is instead called by the public `compex`
+    # method of the `Atom` type after validating the memory orders. The `ptr` parameter is a reference to the value to
+    # be modified, the `old` parameter is the expected value, the `new` parameter is the value to be stored if the
+    # current value matches the expected value, and the `success_order` and `failure_order` parameters specify the
+    # memory ordering of the operation in the success and failure cases, respectively. The behavior of this function is
+    # platform-specific and is implemented by the compiler using the appropriate atomic compare-and-exchange
+    # instructions for the target architecture.
     # @type T: The type of the value stored in the atomic variable.
     # @let ptr: A reference to the value to be modified in the atomic variable.
     # @let old: The expected value to compare against the current value of the atomic variable.
@@ -102,19 +102,19 @@ fun atomic_compare_exchange_inner[T: Integral](ptr: &T, old: T, new: T, success_
 }
 
 !private
-!intrinsic(name="std.threading.atomic.compare_exchange_weak_inner")
+!intrinsic(name="std.threading.atomic.compex_weak_inner")
 !versioned(base="1.0.0", new="1.0.0")
-fun atomic_compare_exchange_weak_inner[T: Integral](ptr: &T, old: T, new: T, success_order: U8, failure_order: U8) -> (T, Bool) {
-    # The `compare_exchange_weak_inner` function is a low-level intrinsic function that implements the actual weak
+fun atomic_compex_weak_inner[T: Integral](ptr: &T, old: T, new: T, success_order: U8, failure_order: U8) -> (T, Bool) {
+    # The `compex_weak_inner` function is a low-level intrinsic function that implements the actual weak
     # compare-and-exchange operation. It is not intended to be called directly by user code, but is instead called by
-    # the public `compare_exchange_weak` method of the `Atom` type after validating the memory orders. The `ptr`
-    # parameter is a reference to the value to be modified, the `old` parameter is the expected value, the `new`
-    # parameter is the value to be stored if the current value matches the expected value, and the `success_order` and
-    # `failure_order` parameters specify the memory ordering of the operation in the success and failure cases,
-    # respectively. The weak compare-and-exchange operation may fail spuriously even if the current value matches the
-    # expected value, so it is typically used in a loop to retry the operation until it succeeds or the expected value
-    # no longer matches the current value. The behavior of this function is platform-specific and is implemented by the
-    # compiler using the appropriate weak atomic compare-and-exchange instructions for the target architecture.
+    # the public `compex_weak` method of the `Atom` type after validating the memory orders. The `ptr` parameter is a
+    # reference to the value to be modified, the `old` parameter is the expected value, the `new` parameter is the value
+    # to be stored if the current value matches the expected value, and the `success_order` and `failure_order`
+    # parameters specify the memory ordering of the operation in the success and failure cases, respectively. The weak
+    # compare-and-exchange operation may fail spuriously even if the current value matches the expected value, so it is
+    # typically used in a loop to retry the operation until it succeeds or the expected value no longer matches the
+    # current value. The behavior of this function is platform-specific and is implemented by the compiler using the
+    # appropriate weak atomic compare-and-exchange instructions for the target architecture.
     # @type T: The type of the value stored in the atomic variable.
     # @let ptr: A reference to the value to be modified in the atomic variable.
     # @let old: The expected value to compare against the current value of the atomic variable.
@@ -222,13 +222,13 @@ sup [T: Integral] Atom[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun compare_exchange(&self, old: T, new: T, success_order: U8 = Self::mo_seq_cst, failure_order: U8 = Self::mo_seq_cst) -> (T, Bool) {
-        # The `compare_exchange` method performs an atomic compare-and-exchange operation on the atomic variable. It
-        # compares the current value of the atomic variable with the provided `old` value, and if they are equal, it
-        # atomically replaces the current value with the provided `new` value. The memory ordering of the operation can
-        # be specified separately for the success and failure cases. The method validates the memory orders to ensure
-        # that the failure memory order is not `mo_release` or `mo_acq_rel`, as these memory orders are not meaningful
-        # for the failure case of a compare-and-exchange operation. After validating the memory orders, it calls the
+    fun compex(&self, old: T, new: T, success_order: U8 = Self::mo_seq_cst, failure_order: U8 = Self::mo_seq_cst) -> (T, Bool) {
+        # The `compex` method performs an atomic compare-and-exchange operation on the atomic variable. It compares the
+        # current value of the atomic variable with the provided `old` value, and if they are equal, it atomically
+        # replaces the current value with the provided `new` value. The memory ordering of the operation can be
+        # specified separately for the success and failure cases. The method validates the memory orders to ensure that
+        # the failure memory order is not `mo_release` or `mo_acq_rel`, as these memory orders are not meaningful for
+        # the failure case of a compare-and-exchange operation. After validating the memory orders, it calls the
         # appropriate intrinsic function to perform the compare-and-exchange operation..
         # @let old: The expected value to compare against the current value of the atomic variable.
         # @let new: The value to be stored in the atomic variable if the current value matches the expected `old` value.
@@ -240,21 +240,21 @@ sup [T: Integral] Atom[T] {
         # compare-and-exchange was successful (i.e., whether the current value matched the expected `old` value and was
         # replaced with the `new` value).
 
-        abort_if(failure_order == Self::mo_release, "Cannot use release memory order for compare_exchange failure case")
-        abort_if(failure_order == Self::mo_acq_rel, "Cannot use acquire-release memory order for compare_exchange failure case")
-        ret atomic_compare_exchange_inner(&self.val, old, new, success_order, failure_order)
+        abort_if(failure_order == Self::mo_release, "Cannot use release memory order for compex failure case")
+        abort_if(failure_order == Self::mo_acq_rel, "Cannot use acquire-release memory order for compex failure case")
+        ret atomic_compex_inner(&self.val, old, new, success_order, failure_order)
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun compare_exchange_weak(&self, old: T, new: T, success_order: U8 = Self::mo_seq_cst, failure_order: U8 = Self::mo_seq_cst) -> (T, Bool) {
-        # The `compare_exchange_weak` method is similar to the `compare_exchange` method, but it performs a weak
-        # compare-and-exchange operation. A weak compare-and-exchange operation may fail spuriously even if the current
-        # value matches the expected `old` value, so it is typically used in a loop to retry the operation until it
-        # succeeds or the expected value no longer matches the current value. The method validates the memory orders in
-        # the same way as the `compare_exchange` method, ensuring that the failure memory order is not `mo_release` or
-        # `mo_acq_rel`. After validating the memory orders, it calls the appropriate intrinsic function to perform the
-        # weak compare-and-exchange operation.
+    fun compex_weak(&self, old: T, new: T, success_order: U8 = Self::mo_seq_cst, failure_order: U8 = Self::mo_seq_cst) -> (T, Bool) {
+        # The `compex_weak` method is similar to the `compex` method, but it performs a weak compare-and-exchange
+        # operation. A weak compare-and-exchange operation may fail spuriously even if the current value matches the
+        # expected `old` value, so it is typically used in a loop to retry the operation until it succeeds or the
+        # expected value no longer matches the current value. The method validates the memory orders in the same way as
+        # the `compex` method, ensuring that the failure memory order is not `mo_release` or `mo_acq_rel`. After
+        # validating the memory orders, it calls the appropriate intrinsic function to perform the weak
+        # compare-and-exchange operation.
         # @let old: The expected value to compare against the current value of the atomic variable.
         # @let new: The value to be stored in the atomic variable if the current value matches the expected `old` value.
         # @let ?success_order: The memory ordering for the operation if the weak compare-and-exchange is successful. The
@@ -265,9 +265,9 @@ sup [T: Integral] Atom[T] {
         # compare-and-exchange was successful (i.e., whether the current value matched the expected `old` value and the
         # operation did not fail spuriously).
 
-        abort_if(failure_order == Self::mo_release, "Cannot use release memory order for compare_exchange failure case")
-        abort_if(failure_order == Self::mo_acq_rel, "Cannot use acquire-release memory order for compare_exchange failure case")
-        ret atomic_compare_exchange_weak_inner(&self.val, old, new, success_order, failure_order)
+        abort_if(failure_order == Self::mo_release, "Cannot use release memory order for compex failure case")
+        abort_if(failure_order == Self::mo_acq_rel, "Cannot use acquire-release memory order for compex failure case")
+        ret atomic_compex_weak_inner(&self.val, old, new, success_order, failure_order)
     }
 
     !public
