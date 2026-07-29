@@ -17,14 +17,10 @@ cls Barrier {
     # in their execution. It is initialized with a total number of threads that must call `wait` before any of them can
     # proceed. The `wait` method blocks the calling thread until the specified number of threads have called it, at
     # which point all waiting threads are released and can continue executing.
-    # @let handle: A handle to the underlying barrier object in the sppc threading API.
-    # @let total: The total number of threads that must call `wait` before any of them can proceed.
-    # @let count: The number of threads that have currently called `wait`. This is used to track how many threads are
-    # waiting at the barrier.
+    # @let handle: A handle to the underlying barrier object in the sppc threading API. The arrival count and total are
+    # tracked internally by the pthread barrier, so they are not duplicated here.
 
     !private handle: U64
-    !private total: U64
-    !private count: U64
 }
 
 sup Barrier {
@@ -42,12 +38,12 @@ sup Barrier {
         let mut handle = 0_u64
         let err = sppc::pthread_barrier_init(&mut handle, total)
         case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
-        ret Pass(val=Barrier(handle, total, count=0_u64))
+        ret Pass(val=Barrier(handle))
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun wait(&mut self) -> Res[Void, ThreadErr] {
+    fun wait(&self) -> Res[Void, ThreadErr] {
         # The `wait` function is called by threads to wait at the barrier. It blocks the calling thread until the
         # specified number of threads have called `wait`, at which point all waiting threads are released and can
         # continue executing. The function returns a `Res` type that indicates success or failure. The `C` `errno` value
@@ -58,7 +54,6 @@ sup Barrier {
 
         let err = sppc::pthread_barrier_wait(&self.handle)
         case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
-        self.count += 1_u64
         ret Pass[Void]()
     }
 }

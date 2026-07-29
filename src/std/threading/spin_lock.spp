@@ -55,7 +55,7 @@ sup SpinLock {
     fun unlock(&self) -> Res[Void, ThreadErr] {
         # Release the spin lock using the sppc threading API.
         let err = sppc::pthread_spin_unlock(&self.handle)
-        case err == 0 { ret Fail(err=ThreadErr::from_errno(err))  }
+        case err != 0 { ret Fail(err=ThreadErr::from_errno(err))  }
         ret Pass[Void]()
     }
 }

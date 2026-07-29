@@ -4,7 +4,7 @@ use std::annotations::public
 use std::annotations::versioned
 use std::annotations::zero_type
 use std::boolean::Bool
-use std::function::FunMut
+use std::function::FunMov
 use std::number::S32
 use std::number::U64
 use std::result::Fail
@@ -75,7 +75,7 @@ cls ThreadId {
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-fun spawn[Out, F: FunMut[(), Void]](function: F) -> Res[JoinHandle[Out], ThreadErr] {
+fun spawn[Out, F: FunMov[(), Void]](function: F) -> Res[JoinHandle[Out], ThreadErr] {
     # Spawn a new thread using the sppc threading API. The function to be executed in the new thread is passed as an
     # argument.
     # @type Out:

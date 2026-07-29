@@ -64,7 +64,7 @@ fun atomic_load_inner[T: Integral](ptr: &T, order: U8) -> T {
 }
 
 !private !always_inline
-!intrinsic(name="std.threading.atomic.atomic_load_inner")
+!intrinsic(name="std.threading.atomic.atomic_store_inner")
 !versioned(base="1.0.0", new="1.0.0")
 fun atomic_store_inner[T: Integral](ptr: &T, val: T, order: U8) -> Void {
     # The `atomic_store_inner` function is a low-level intrinsic function that implements the actual atomic store

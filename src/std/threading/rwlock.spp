@@ -40,6 +40,7 @@ sup [T] RwLock[T] {
         # Lock the rwlock for reading using the sppc threading API.
         sppc::pthread_rwlock_rdlock(&self.handle)
         gen self.val.get_ref()
+        sppc::pthread_rwlock_unlock(&self.handle)
     }
 
     !public
@@ -48,6 +49,7 @@ sup [T] RwLock[T] {
         # Lock the rwlock for writing using the sppc threading API.
         sppc::pthread_rwlock_wrlock(&self.handle)
         gen self.val.get_mut()
+        sppc::pthread_rwlock_unlock(&self.handle)
     }
 
     !public
@@ -57,6 +59,7 @@ sup [T] RwLock[T] {
         let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
         sppc::pthread_rwlock_clockrdlock(&self.handle, S32::from(clock), &timespec)
         gen self.val.get_ref()
+        sppc::pthread_rwlock_unlock(&self.handle)
     }
 
     !public
@@ -66,6 +69,7 @@ sup [T] RwLock[T] {
         let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
         sppc::pthread_rwlock_clockwrlock(&self.handle, S32::from(clock), &timespec)
         gen self.val.get_mut()
+        sppc::pthread_rwlock_unlock(&self.handle)
     }
 
     !public
@@ -73,8 +77,12 @@ sup [T] RwLock[T] {
     cor try_write(&self) -> GenOnce[&mut T or WouldBlock] {
         # Try to lock the rwlock for writing using the sppc threading API.
         let code = sppc::pthread_rwlock_trywrlock(&self.handle)
-        case code == 1 { gen WouldBlock }
+        case code == cffi::ebusy {
+            gen WouldBlock
+            ret
+        }
         gen self.val.get_mut()
+        sppc::pthread_rwlock_unlock(&self.handle)
     }
 
     !public
@@ -82,8 +90,12 @@ sup [T] RwLock[T] {
     cor try_read(&self) -> GenOnce[&T or WouldBlock] {
         # Try to lock the rwlock for reading using the sppc threading API.
         let code = sppc::pthread_rwlock_tryrdlock(&self.handle)
-        case code == 1 { gen WouldBlock }
+        case code == cffi::ebusy {
+            gen WouldBlock
+            ret
+        }
         gen self.val.get_ref()
+        sppc::pthread_rwlock_unlock(&self.handle)
     }
 }
 

@@ -49,7 +49,7 @@ sup [T] Mutex[T] {
     cor lock(&self) -> GenOnce[&mut T] {
         # Lock the mutex using the sppc threading API. Todo: Error Handling.
         sppc::pthread_mutex_lock(&self.handle)
-        gen &mut self.val.get_mut()
+        gen self.val.get_mut()
         sppc::pthread_mutex_unlock(&self.handle)
     }
 
@@ -59,7 +59,7 @@ sup [T] Mutex[T] {
         # Timed lock the mutex using the sppc threading API. Todo: Error Handling.
         let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
         sppc::pthread_mutex_clocklock(&self.handle, S32::from(clock), &timespec)
-        gen &mut self.val.get_mut()
+        gen self.val.get_mut()
         sppc::pthread_mutex_unlock(&self.handle)
     }
 
@@ -68,8 +68,11 @@ sup [T] Mutex[T] {
     cor try_lock(&self) -> GenOnce[&mut T or WouldBlock] {
         # Try to lock the mutex using the sppc threading API. Todo: Error Handling.
         let code = sppc::pthread_mutex_trylock(&self.handle)
-        case code == 1 { gen WouldBlock }
-        gen &mut self.val.get_mut()
+        case code == cffi::ebusy {
+            gen WouldBlock
+            ret
+        }
+        gen self.val.get_mut()
         sppc::pthread_mutex_unlock(&self.handle)
     }
 
