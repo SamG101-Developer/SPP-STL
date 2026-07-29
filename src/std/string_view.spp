@@ -127,31 +127,34 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    !intrinsic(name="std.string_view.StrView.bytes")
     cor bytes(&self) -> Iterator[U8] {
         # The `bytes` method returns an iterator over the bytes of this `StrView`. The bytes might make up valid UTF-8
         # characters, but they are not guaranteed to be valid UTF-8 on their own. This is the same as iterating over a
         # `Vec[U8]` type, for example.
         # @ret: An iterator over the bytes of this `StrView`.
+
+        loop byte in self.bytes_ref() { gen byte@ }
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    !intrinsic(name="std.string_view.StrView.bytes_ref")
     cor bytes_ref(&self) -> Iterator[&U8] {
         # The `bytes_ref` method returns an iterator over immutable borrows of the bytes of this `StrView`. This method
         # will not typically be used, but is provided as the mirror of `bytes_mut`, which will often be used.
         # @ret: An iterator over immutable borrows to the bytes of this `StrView`.
+
+        loop byte in self.view_ref().iter_ref() { gen byte }
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    !intrinsic(name="std.string_view.StrView.bytes_mut")
     cor bytes_mut(&mut self) -> Iterator[&mut U8] {
         # The `bytes_mut` method returns an iterator over mutable borrows of the bytes of this `StrView`. This method
         # will be used when mutating the bytes of the string, such as when converting to uppercase or lowercase
         # in-place.
         # @ret: An iterator over mutable borrows to the bytes of this `StrView`.
+
+        loop byte in self.view_mut().iter_mut() { gen byte }
     }
 
     !public
