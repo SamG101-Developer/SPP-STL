@@ -415,15 +415,17 @@ sup [T: Integer] Atom[T] {
         # sequential consistency guarantees.
         # @ret: The old value of the atomic variable before the fetch-sub operation was performed.
     }
+}
 
+sup [cmp w: USize, T: SizedIntegerSized[w]] Atom[T] {
     !public
-    !intrinsic(name="std.threading.atomic.Atom.fetch_min")
+    !intrinsic(name="std.threading.atomic.Atom.fetch_smin")
     !versioned(base="1.0.0", new="1.0.0")
     fun fetch_min(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
         # The `fetch_min` method atomically compares the current value of the atomic variable with the provided `val`,
-        # stores the smaller of the two values back in the atomic variable, and returns the old value. It calls the
-        # appropriate intrinsic function to perform the atomic fetch-min operation and returns the old value. This
-        # operation can be useful for various synchronization patterns, such as implementing atomic minimum tracking.
+        # stores the smaller of the two values back in the atomic variable, and returns the old value. This is
+        # specialized for signed integer types, to uses the `smin` atomic intrinsic. This operation can be useful for
+        # various synchronization patterns, such as implementing atomic minimum tracking.
         # @let val: The value to be compared with the current value of the atomic variable, and the smaller of the two
         # will be stored back in the atomic variable.
         # @let ?order: The memory ordering for the fetch-min operation. The default is `mo_seq_cst`, which provides
@@ -432,13 +434,45 @@ sup [T: Integer] Atom[T] {
     }
 
     !public
-    !intrinsic(name="std.threading.atomic.Atom.fetch_max")
+    !intrinsic(name="std.threading.atomic.Atom.fetch_smax")
     !versioned(base="1.0.0", new="1.0.0")
     fun fetch_max(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
         # The `fetch_max` method atomically compares the current value of the atomic variable with the provided `val`,
-        # stores the larger of the two values back in the atomic variable, and returns the old value. It calls the
-        # appropriate intrinsic function to perform the atomic fetch-max operation and returns the old value. This
-        # operation can be useful for various synchronization patterns, such as implementing atomic maximum tracking.
+        # stores the larger of the two values back in the atomic variable, and returns the old value. This is
+        # specialized for signed integer types, to uses the `smax` atomic intrinsic. This operation can be useful for
+        # various synchronization patterns, such as implementing atomic maximum tracking.
+        # @let val: The value to be compared with the current value of the atomic variable, and the larger of the two
+        # will be stored back in the atomic variable.
+        # @let ?order: The memory ordering for the fetch-max operation. The default is `mo_seq_cst`, which provides
+        # sequential consistency guarantees.
+        # @ret: The old value of the atomic variable before the fetch-max operation was performed.
+    }
+}
+
+sup [cmp w: USize, T: SizedIntegerUnized[w]] Atom[T] {
+    !public
+    !intrinsic(name="std.threading.atomic.Atom.fetch_umin")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun fetch_min(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
+        # The `fetch_min` method atomically compares the current value of the atomic variable with the provided `val`,
+        # stores the smaller of the two values back in the atomic variable, and returns the old value. This is
+        # specialized for unsigned integer types, to uses the `umin` atomic intrinsic. This operation can be useful for
+        # various synchronization patterns, such as implementing atomic minimum tracking.
+        # @let val: The value to be compared with the current value of the atomic variable, and the smaller of the two
+        # will be stored back in the atomic variable.
+        # @let ?order: The memory ordering for the fetch-min operation. The default is `mo_seq_cst`, which provides
+        # sequential consistency guarantees.
+        # @ret: The old value of the atomic variable before the fetch-min operation was performed.
+    }
+
+    !public
+    !intrinsic(name="std.threading.atomic.Atom.fetch_umax")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun fetch_max(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
+        # The `fetch_max` method atomically compares the current value of the atomic variable with the provided `val`,
+        # stores the larger of the two values back in the atomic variable, and returns the old value. This is
+        # specialized for unsigned integer types, to uses the `umax` atomic intrinsic. This operation can be useful for
+        # various synchronization patterns, such as implementing atomic maximum tracking.
         # @let val: The value to be compared with the current value of the atomic variable, and the larger of the two
         # will be stored back in the atomic variable.
         # @let ?order: The memory ordering for the fetch-max operation. The default is `mo_seq_cst`, which provides
