@@ -339,7 +339,7 @@ sup [T: Integral] Atom[T] {
     }
 }
 
-sup [T: Zero] Atom[T] {
+sup [T: Integral & Zero] Atom[T] {
     !public
     !versioned(base="1.0.0", new="1.0.0")
     fun new_zeroed() -> Atom[T] {
