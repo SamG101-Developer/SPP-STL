@@ -104,21 +104,6 @@ sup [T] NonNull[T] {
     }
 
     !package !always_inline
-    !intrinsic(name="std.mem.pointer.NonNull.from_func")
-    !versioned(base="1.0.0", new="1.0.0")
-    fun from_func[F: Fun](func: F) -> NonNull[F] {
-        # Convert a function into the function pointer type associated with it. This is needed to pass functions into
-        # ffi calls, which only accept function pointers. Ffi must accept `void*` as the function pointer type and cast
-        # it internally, because NonNull is effectively a `void*` with respect to cffi.
-        # @type F: The type of the function being converted. This must be a function type, as the generic is constrained
-        # to the base `Fun` trait.
-        # @let func: The function being converted into a function pointer. This is a value of type `F`, which is any
-        # functional object.
-        # @ret: A `NonNull` pointer that points to the function. This is effectively a function pointer that can be
-        # passed into ffi calls, and it is guaranteed to be non-null.
-    }
-
-    !package !always_inline
     !intrinsic(name="std.mem.pointer.NonNull.erase_type")
     !versioned(base="1.0.0", new="1.0.0")
     fun erase_type(self) -> NonNull[U8] {
