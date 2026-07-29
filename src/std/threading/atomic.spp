@@ -156,7 +156,7 @@ sup [T: Integral] Atom[T] {
     !public cmp mo_seq_cst: U8 = 7_u8
 
     !public
-    !intrinsic(name="std.threading.atomic.new")
+    !intrinsic(name="std.threading.atomic.Atom.new")
     !versioned(base="1.0.0", new="1.0.0")
     fun new(val: T) -> Atom[T] {
         # The static `new` method creates a new atomic variable with the given initial value. The intrinsic function
@@ -167,7 +167,7 @@ sup [T: Integral] Atom[T] {
     }
 
     !public
-    !intrinsic(name="std.threading.atomic.new_zeroed")
+    !intrinsic(name="std.threading.atomic.Atom.new_zeroed")
     !versioned(base="1.0.0", new="1.0.0")
     fun new_zeroed() -> Atom[T] {
         # The static `new_zeroed` method creates a new atomic variable that is initialized to zero. This is a convenient
@@ -177,7 +177,7 @@ sup [T: Integral] Atom[T] {
     }
 
     !public
-    !intrinsic(name="std.threading.atomic.is_lock_free")
+    !intrinsic(name="std.threading.atomic.Atom.is_lock_free")
     !versioned(base="1.0.0", new="1.0.0")
     fun is_lock_free() -> Bool {
         # The `lock_free` method checks if operations on the atomic variable are lock-free on the current platform. A
@@ -271,7 +271,7 @@ sup [T: Integral] Atom[T] {
     }
 
     !public
-    !intrinsic(name="std.threading.atomic.exchange")
+    !intrinsic(name="std.threading.atomic.Atom.exchange")
     !versioned(base="1.0.0", new="1.0.0")
     fun exchange(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
         # The `exchange` method atomically replaces the current value of the atomic variable with the provided `val` and
@@ -284,7 +284,7 @@ sup [T: Integral] Atom[T] {
     }
 
     !public
-    !intrinsic(name="std.threading.atomic.fetch_and")
+    !intrinsic(name="std.threading.atomic.Atom.fetch_and")
     !versioned(base="1.0.0", new="1.0.0")
     fun fetch_and(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
         # The `fetch_and` method atomically performs a bitwise AND operation between the current value of the atomic
@@ -299,7 +299,7 @@ sup [T: Integral] Atom[T] {
     }
 
     !public
-    !intrinsic(name="std.threading.atomic.fetch_nand")
+    !intrinsic(name="std.threading.atomic.Atom.fetch_nand")
     !versioned(base="1.0.0", new="1.0.0")
     fun fetch_nand(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
         # The `fetch_nand` method atomically performs a bitwise NAND operation between the current value of the atomic
@@ -314,7 +314,7 @@ sup [T: Integral] Atom[T] {
     }
 
     !public
-    !intrinsic(name="std.threading.atomic.fetch_or")
+    !intrinsic(name="std.threading.atomic.Atom.fetch_or")
     !versioned(base="1.0.0", new="1.0.0")
     fun fetch_or(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
         # The `fetch_or` method atomically performs a bitwise OR operation between the current value of the atomic
@@ -329,7 +329,7 @@ sup [T: Integral] Atom[T] {
     }
 
     !public
-    !intrinsic(name="std.threading.atomic.fetch_xor")
+    !intrinsic(name="std.threading.atomic.Atom.fetch_xor")
     !versioned(base="1.0.0", new="1.0.0")
     fun fetch_xor(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
         # The `fetch_xor` method atomically performs a bitwise XOR operation between the current value of the atomic
@@ -347,7 +347,8 @@ sup [T: Integral] Atom[T] {
 
 sup Atom[Bool] {
     !public
-    !intrinsic(name="std.threading.atomic.fetch_not")
+    !intrinsic(name="std.threading.atomic.Atom.fetch_not")
+    !versioned(base="1.0.0", new="1.0.0")
     fun fetch_not(&self, order: U8 = Self::mo_seq_cst) -> Bool {
         # The `fetch_not` method atomically performs a bitwise NOT operation on the current value of the atomic
         # variable, stores the result back in the atomic variable, and returns the old value. This operation is only
@@ -359,7 +360,8 @@ sup Atom[Bool] {
     }
 
     !public
-    !intrinsic(name="std.threading.atomic.test_and_set")
+    !intrinsic(name="std.threading.atomic.Atom.test_and_set")
+    !versioned(base="1.0.0", new="1.0.0")
     fun test_and_set(&self, order: U8 = Self::mo_seq_cst) -> Bool {
         # The `test_and_set` method atomically sets the value of the atomic variable to `true` and returns the old
         # value. This operation is typically used for implementing spinlocks or other synchronization primitives. It
@@ -371,7 +373,8 @@ sup Atom[Bool] {
     }
 
     !public
-    !intrinsic(name="std.threading.atomic.clear")
+    !intrinsic(name="std.threading.atomic.Atom.clear")
+    !versioned(base="1.0.0", new="1.0.0")
     fun clear(&self, order: U8 = Self::mo_seq_cst) -> Void {
         # The `clear` method atomically sets the value of the atomic variable to `false`. This operation is typically
         # used for implementing spinlocks or other synchronization primitives. It calls the appropriate intrinsic
@@ -383,7 +386,8 @@ sup Atom[Bool] {
 
 sup [T: Integer] Atom[T] {
     !public
-    !intrinsic(name="std.threading.atomic.fetch_add")
+    !intrinsic(name="std.threading.atomic.Atom.fetch_add")
+    !versioned(base="1.0.0", new="1.0.0")
     fun fetch_add(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
         # The `fetch_add` method atomically adds the provided `val` to the current value of the atomic variable, stores
         # the result back in the atomic variable, and returns the old value. It calls the appropriate intrinsic function
@@ -397,7 +401,8 @@ sup [T: Integer] Atom[T] {
     }
 
     !public
-    !intrinsic(name="std.threading.atomic.fetch_sub")
+    !intrinsic(name="std.threading.atomic.Atom.fetch_sub")
+    !versioned(base="1.0.0", new="1.0.0")
     fun fetch_sub(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
         # The `fetch_sub` method atomically subtracts the provided `val` from the current value of the atomic variable,
         # stores the result back in the atomic variable, and returns the old value. It calls the appropriate intrinsic
@@ -412,7 +417,8 @@ sup [T: Integer] Atom[T] {
     }
 
     !public
-    !intrinsic(name="std.threading.atomic.fetch_min")
+    !intrinsic(name="std.threading.atomic.Atom.fetch_min")
+    !versioned(base="1.0.0", new="1.0.0")
     fun fetch_min(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
         # The `fetch_min` method atomically compares the current value of the atomic variable with the provided `val`,
         # stores the smaller of the two values back in the atomic variable, and returns the old value. It calls the
@@ -426,7 +432,8 @@ sup [T: Integer] Atom[T] {
     }
 
     !public
-    !intrinsic(name="std.threading.atomic.fetch_max")
+    !intrinsic(name="std.threading.atomic.Atom.fetch_max")
+    !versioned(base="1.0.0", new="1.0.0")
     fun fetch_max(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
         # The `fetch_max` method atomically compares the current value of the atomic variable with the provided `val`,
         # stores the larger of the two values back in the atomic variable, and returns the old value. It calls the
