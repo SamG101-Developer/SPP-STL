@@ -538,12 +538,12 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun replace(&self, from: &StrView, into: &StrView) -> Str {
+    fun replace(&self, from: &StrView, upto: &StrView) -> Str {
         # Replace all occurrences of `from` with `into` in this `StrView` and return the result as a new `Str`. The
         # `from` and `into` strings must be valid UTF-8 and null-terminated, which is automatically guaranteed by the
         # `StrView` type.
         # @let from: The `StrView` to replace in this `StrView`.
-        # @let into: The `StrView` to replace `from` with in this `StrView`.
+        # @let upto: The `StrView` to replace `from` with in this `StrView`.
         # @ret: A new `Str` with all occurrences of `from` replaced with `into`.
         # @todo: Implement this (issue with view/strview)
 

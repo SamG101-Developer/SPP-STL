@@ -13,6 +13,7 @@ use std::option::Opt
 use std::option::Some
 use std::range::Range
 use std::mem::pointer::NonNull
+use std::mem::pointer::Ptr
 use std::ops::eq::Eq
 use std::ops::idx::IndexMut
 use std::ops::idx::IndexRef
@@ -253,7 +254,7 @@ sup [T] View[T] ext SliceMut[View[T], USize] {
 
     !intrinsic(name="std.view.View.slice_mut")
     !versioned(base="1.0.0", new="1.0.0")
-    cor slice_mut(&mut self, from: USize, into: USize) -> GenOnce[&mut View[T]] { }
+    cor slice_mut(&mut self, from: USize, upto: USize) -> GenOnce[&mut View[T]] { }
 }
 
 sup [T] View[T] ext SliceRef[View[T], USize] {
@@ -268,5 +269,5 @@ sup [T] View[T] ext SliceRef[View[T], USize] {
 
     !intrinsic(name="std.view.View.slice_ref")
     !versioned(base="1.0.0", new="1.0.0")
-    cor slice_ref(&self, from: USize, into: USize) -> GenOnce[&View[T]] { }
+    cor slice_ref(&self, from: USize, upto: USize) -> GenOnce[&View[T]] { }
 }

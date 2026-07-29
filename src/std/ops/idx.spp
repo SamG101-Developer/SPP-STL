@@ -101,13 +101,13 @@ sup [V, I: Zero] SliceMut[V, I] {
 
     !public
     !abstract_method
-    cor slice_mut(&mut self, from: I, into: I) -> GenOnce[&mut V] {
+    cor slice_mut(&mut self, from: I, upto: I) -> GenOnce[&mut V] {
         # The `slice_mut` coroutine defines how a mutable slice of the implementing class is produced. It takes a
         # mutable reference to the instance and two indices, `from` and `into`, that bound the slice, and returns a
         # `GenOnce` that yields a mutable reference to each element within the half-open range. The specific slicing
         # behavior is determined by the implementation of this coroutine in the class that implements `SliceMut`.
         # @let from: The lower bound (inclusive) of the slice range, of type `I`.
-        # @let into: The upper bound (exclusive) of the slice range, of type `I`.
+        # @let upto: The upper bound (exclusive) of the slice range, of type `I`.
         # @ret: A `GenOnce[&mut V]` that yields a mutable reference to each element within the requested range, allowing
         # those elements to be modified in place.
     }
@@ -127,11 +127,11 @@ sup [V, I: Zero] SliceMut[V, I] {
 
     !public
     !virtual_method
-    cor slice_mut_to(&mut self, into: I) -> GenOnce[&mut V] {
+    cor slice_mut_to(&mut self, upto: I) -> GenOnce[&mut V] {
         # The `slice_mut_to` coroutine produces a mutable slice that runs from the start of the instance up to the given
         # upper bound. By default, it is derived from `slice_mut` using the zero index as the lower bound, but it may be
         # overridden if a more direct implementation is desired.
-        # @let into: The upper bound (exclusive) of the slice range, of type `I`. The slice extends from the start of
+        # @let upto: The upper bound (exclusive) of the slice range, of type `I`. The slice extends from the start of
         # the instance up to this index.
         # @ret: A `GenOnce[&mut V]` that yields a mutable reference to each element from the start of the instance up to
         # the given upper bound.
@@ -163,13 +163,13 @@ sup [V, I: Zero] SliceRef[V, I] {
 
     !public
     !abstract_method
-    cor slice_ref(&self, from: I, into: I) -> GenOnce[&V] {
+    cor slice_ref(&self, from: I, upto: I) -> GenOnce[&V] {
         # The `slice_ref` coroutine defines how an immutable slice of the implementing class is produced. It takes an
         # immutable reference to the instance and two indices, `from` and `into`, that bound the slice, and returns a
         # `GenOnce` that yields an immutable reference to each element within the half-open range. The specific slicing
         # behavior is determined by the implementation of this coroutine in the class that implements `SliceRef`.
         # @let from: The lower bound (inclusive) of the slice range, of type `I`.
-        # @let into: The upper bound (exclusive) of the slice range, of type `I`.
+        # @let upto: The upper bound (exclusive) of the slice range, of type `I`.
         # @ret: A `GenOnce[&V]` that yields an immutable reference to each element within the requested range, allowing
         # those elements to be inspected without modification.
     }
@@ -189,11 +189,11 @@ sup [V, I: Zero] SliceRef[V, I] {
 
     !public
     !virtual_method
-    cor slice_ref_to(&self, into: I) -> GenOnce[&V] {
+    cor slice_ref_to(&self, upto: I) -> GenOnce[&V] {
         # The `slice_ref_to` coroutine produces an immutable slice that runs from the start of the instance up to the
         # given upper bound. By default, it is derived from `slice_ref` using the zero index as the lower bound, but it
         # may be overridden if a more direct implementation is desired.
-        # @let into: The upper bound (exclusive) of the slice range, of type `I`. The slice extends from the start of
+        # @let upto: The upper bound (exclusive) of the slice range, of type `I`. The slice extends from the start of
         # the instance up to this index.
         # @ret: A `GenOnce[&V]` that yields an immutable reference to each element from the start of the instance up to
         # the given upper bound.
