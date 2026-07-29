@@ -172,7 +172,7 @@ sup [T, A: Alloc] Single[T, A] ext Del {
         # on the pointee rather than the pointer itself. The `Del` trait allows for custom cleanup logic to be defined for
         # types, and this ensures the `Single` behaves correctly when it goes out of scope.
 
-        std::mem::ops::drop_in_place[T](&mut self.ptr)
-        self.alloc.deallocate_array[T](self.ptr, 1_uz)
+        std::mem::ops::drop_in_place(&mut self.ptr)
+        self.alloc.deallocate_array(self.ptr, 1_uz)
     }
 }
