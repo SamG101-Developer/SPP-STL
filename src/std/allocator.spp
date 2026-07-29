@@ -241,8 +241,8 @@ sup Alloc {
     !versioned(base="1.0.0", new="1.0.0")
     fun allocate_array[T](&self, n: USize) -> Res[NonNull[T], AllocErr] {
         # Allocate uninitialized storage for `n` contiguous values of type `T`, returning a typed pointer to the first
-        # element. This is what `RawBuf` uses to back `Vec` and `Str`, and single-value owners like `Single` and
-        # `Shared` call it with `n = 1`.
+        # element. This is what `RawBuf` uses to back `Vec` and `Str`, and single-value owners like `Single`, `Rc` and
+        # `Arc` call it with `n = 1`.
         # @type T: The element type to allocate storage for.
         # @let n: The number of elements to allocate storage for.
         # @ret: A `Res` containing a `NonNull[T]` pointing at uninitialized storage for `n` values, or an `AllocErr` if

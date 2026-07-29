@@ -270,6 +270,6 @@ sup [T, A: Alloc] RawBuf[T, A] ext Del {
         # @ret: Nothing; this is invoked for its cleanup side effect when a `RawBuf` is destroyed.
 
         case Self::is_storage_free(self.capacity) { ret }
-        self.alloc.deallocate_array[T](self.ptr, self.capacity)
+        self.alloc.deallocate_array(self.ptr, self.capacity)
     }
 }
