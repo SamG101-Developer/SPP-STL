@@ -368,10 +368,10 @@ sup Atom[Bool] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun set(&self, order: U8 = Self::mo_seq_cst) -> Bool {
-        # The `set` method atomically sets the value of the atomic variable to `true` and returns the old value. This
-        # operation is typically used for implementing spinlocks or other synchronization primitives. It calls the
-        # appropriate intrinsic function to perform the atomic set operation and returns the old value.
+    fun test_and_set(&self, order: U8 = Self::mo_seq_cst) -> Bool {
+        # The `test_and_set` method atomically sets the value of the atomic variable to `true` and returns the old
+        # value. This operation is typically used for implementing spinlocks or other synchronization primitives. It
+        # calls the appropriate intrinsic function to perform the atomic set operation and returns the old value.
         # @let ?order: The memory ordering for the set operation. The default is `mo_seq_cst`, which provides sequential
         # consistency guarantees.
         # @ret: The old value of the atomic variable before it was set to `true`.
@@ -381,10 +381,22 @@ sup Atom[Bool] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
+    fun set(&self, order: U8 = Self::mo_seq_cst) -> Void {
+        # The `set` method atomically sets the value of the atomic variable to `true`. This operation is typically used
+        # for implementing spinlocks or other synchronization primitives. It reuses the `store` method to perform the
+        # atomic set operation.
+        # @let ?order: The memory ordering for the set operation. The default is `mo_seq_cst`, which provides sequential
+        # consistency guarantees.
+
+        self.store(true, order)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun clear(&self, order: U8 = Self::mo_seq_cst) -> Void {
         # The `clear` method atomically sets the value of the atomic variable to `false`. This operation is typically
-        # used for implementing spinlocks or other synchronization primitives. It calls the appropriate intrinsic
-        # function to perform the atomic clear operation.
+        # used for implementing spinlocks or other synchronization primitives. It reuses the `store` method to perform
+        # the atomic clear operation.
         # @let ?order: The memory ordering for the clear operation. The default is `mo_seq_cst`, which provides
         # sequential consistency guarantees.
 
