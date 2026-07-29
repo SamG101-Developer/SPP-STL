@@ -1,9 +1,7 @@
 use std::annotations::public
 use std::annotations::versioned
 use std::function::FunMov
-use std::number::U8
 use std::void::Void
-use std::mem::pointer::NonNull
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
@@ -12,6 +10,9 @@ fun call_once[F: FunMov[(), Void]](func: F) -> Void {
     # @type F: The type of the function being called. This must be a function type that takes no arguments and returns
     # `Void`.
     # @let func: The function being called. This is a value of type `F`.
+    # @todo: This cannot actually dedupe yet. `pthread_once` requires a persistent `pthread_once_t` control word to gate
+    # on, but `sppc::pthread_once` takes only the function, so every call runs `func` afresh. Needs a `Once` control
+    # object threaded through here and a matching `sppc` FFI signature change on both sides.
 
     sppc::pthread_once(func)
 }

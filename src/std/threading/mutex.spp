@@ -1,5 +1,4 @@
 use std::annotations::package
-use std::annotations::private
 use std::annotations::public
 use std::annotations::versioned
 use std::annotations::zero_type
@@ -16,7 +15,10 @@ use std::slot::Slot
 use std::string_view::StrView
 use std::void::Void
 use std::ops::del::Del
+use std::threading::cond_var::CondVar
+use std::threading::cond_var::TimedOut
 use std::time::duration::Duration
+use std::time::time_point::TimePoint
 
 !public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
@@ -25,6 +27,27 @@ cls WouldBlock {
     # it were to be performed. It is used as a return type for the `try_lock` method of the `Mutex` class, which
     # attempts to acquire a lock on the mutex without blocking. If the mutex is already locked, the `try_lock` method
     # returns a `WouldBlock` value to indicate that the operation would block if it were to be performed.
+}
+
+!package
+!versioned(base="1.0.0", new="1.0.0")
+cls MutexUnlockGuard {
+    # Internal RAII helper whose destructor unlocks the mutex. One is created as a local inside each locking coroutine
+    # once the lock is held, so the release runs on every exit path -- normal completion, an early `ret`, or the
+    # coroutine frame being dropped before it resumes past the `gen` -- rather than relying on the statement after `gen`
+    # being reached. Because the mutex lives behind an opaque sppc handle, a copy of the handle is enough to unlock the
+    # same underlying mutex.
+    # @let handle: A copy of the owning mutex's sppc handle; unlocking through it releases the same underlying mutex.
+
+    !package handle: U64
+}
+
+sup MutexUnlockGuard ext Del {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun del(&mut self) -> Void {
+        # Release the mutex when the guard leaves scope.
+        sppc::pthread_mutex_unlock(&self.handle)
+    }
 }
 
 !public
@@ -49,8 +72,8 @@ sup [T] Mutex[T] {
     cor lock(&self) -> GenOnce[&mut T] {
         # Lock the mutex using the sppc threading API. Todo: Error Handling.
         sppc::pthread_mutex_lock(&self.handle)
+        let guard = MutexUnlockGuard(handle=self.handle)
         gen self.val.get_mut()
-        sppc::pthread_mutex_unlock(&self.handle)
     }
 
     !public
@@ -59,8 +82,68 @@ sup [T] Mutex[T] {
         # Timed lock the mutex using the sppc threading API. Todo: Error Handling.
         let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
         sppc::pthread_mutex_clocklock(&self.handle, S32::from(clock), &timespec)
+        let guard = MutexUnlockGuard(handle=self.handle)
         gen self.val.get_mut()
-        sppc::pthread_mutex_unlock(&self.handle)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    cor lock_when[F: FunMut[(&mut T,), Bool]](&self, cond: &CondVar, mut pred: F) -> GenOnce[&mut T] {
+        # Acquire the mutex, then block on `cond` until `pred` reports that the guarded value satisfies the caller's
+        # condition, and finally yield the guard. This is the safe replacement for the classic "lock, then wait on a
+        # condition variable" dance: because the wait lives inside this guard coroutine, the mutex is released and
+        # re-acquired atomically across each `pthread_cond_wait` (guarding against spurious wake-ups via the predicate
+        # loop), and there is only ever one `&mut T` in existence -- no separate condition-variable API can conjure an
+        # aliasing reference to the protected value while a waiter holds the lock. The signalling half is on `CondVar`
+        # itself (`signal_one` / `signal_all`), called by whichever thread mutates the guarded value.
+        # @type F: The predicate function type, taking a mutable reference to the guarded value and reporting whether
+        # the awaited condition now holds.
+        # @let cond: The condition variable that threads mutating the guarded value signal after each change.
+        # @let pred: The predicate; the wait continues for as long as it returns `false`, and the guard is yielded once
+        # it returns `true`.
+        # @ret: A generator that yields the guarded value by mutable reference once the predicate is satisfied, and
+        # releases the mutex when the guard is dropped.
+
+        sppc::pthread_mutex_lock(&self.handle)
+        let guard = MutexUnlockGuard(handle=self.handle)
+        loop pred(self.val.get_mut()).not {
+            sppc::pthread_cond_wait(&cond.handle, &self.handle)
+        }
+        gen self.val.get_mut()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    cor lock_when_timeout[F: FunMut[(&mut T,), Bool]](&self, cond: &CondVar, timeout: Duration, mut pred: F, clock: U32 = 1_u32) -> GenOnce[&mut T or TimedOut] {
+        # The timed counterpart of `lock_when`: acquire the mutex and wait on `cond` for the predicate to hold, but give
+        # up once `timeout` has elapsed. On success the guard is yielded exactly as in `lock_when`. On timeout the mutex
+        # is released first and `TimedOut` is yielded instead, so no guarded reference escapes past the deadline; a
+        # caller that still needs the value must re-lock. The deadline is computed once up front and the remaining time
+        # is recomputed each iteration, so repeated spurious wake-ups cannot extend the total wait.
+        # @type F: The predicate function type, taking a mutable reference to the guarded value and reporting whether
+        # the awaited condition now holds.
+        # @let cond: The condition variable that threads mutating the guarded value signal after each change.
+        # @let timeout: The maximum duration to wait for the predicate to hold before giving up.
+        # @let pred: The predicate; the wait continues for as long as it returns `false` and the deadline has not
+        # passed.
+        # @let ?clock: The clock id used to measure the timeout, matching the `clock`-parameter convention of
+        # `timed_lock`. Defaults to `1`.
+        # @ret: A generator that yields the guarded value by mutable reference if the predicate is satisfied in time, or
+        # `TimedOut` if the deadline elapses first.
+
+        let deadline = TimePoint::now() + timeout
+        sppc::pthread_mutex_lock(&self.handle)
+        let guard = MutexUnlockGuard(handle=self.handle)
+        loop pred(self.val.get_mut()).not {
+            let remaining = deadline.duration_since_saturating(TimePoint::now())
+            case remaining.is_zero() {
+                gen TimedOut
+                ret
+            }
+            let timespec = sppc::CTimespec(sec=remaining.seconds, nsec=remaining.nanoseconds)
+            sppc::pthread_cond_clockwait(&cond.handle, &self.handle, S32::from(clock), &timespec)
+        }
+        gen self.val.get_mut()
     }
 
     !public
@@ -72,8 +155,8 @@ sup [T] Mutex[T] {
             gen WouldBlock
             ret
         }
+        let guard = MutexUnlockGuard(handle=self.handle)
         gen self.val.get_mut()
-        sppc::pthread_mutex_unlock(&self.handle)
     }
 
     !public
@@ -82,13 +165,6 @@ sup [T] Mutex[T] {
         # Take the value out of the mutex, consuming the mutex. Because "self" is being moved, it requires exclusive
         # access to the mutex, so we can safely consume the mutex and take the value out without locking it.
         ret self.val.take()
-    }
-
-    !private
-    !versioned(base="1.0.0", new="1.0.0")
-    fun unlock(&mut self) -> Void {
-        # Unlock the mutex using the sppc threading API. Todo: Error Handling.
-        sppc::pthread_mutex_unlock(&self.handle)
     }
 }
 
