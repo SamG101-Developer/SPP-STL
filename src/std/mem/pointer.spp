@@ -158,15 +158,13 @@ sup [T] NonNull[T] {
     !package !always_inline
     !intrinsic(name="spp.mem.pointer.NonNull.read")
     !versioned(base="1.0.0", new="1.0.0")
-    fun read(&self) -> T {
+    fun read(self) -> T {
         # The `read` method performs a bitwise move-out of the value at the memory location pointed to by the `NonNull`
-        # pointer. It does not require `T: Copy`: the bits are moved into the returned owned value and the pointed-to
-        # storage is left logically uninitialized. The caller must guarantee the source is never read or dropped again -
-        # it should either consume the owning container so the source becomes unreachable (as in `Single::read(self)`)
-        # or immediately overwrite or free the storage. To destroy a value in place without extracting it, prefer
-        # `std::mem::ops::drop_in_place`. This is a package-internal primitive and is never exposed to user code.
-        # @ret: An owned value of type `T`, moved bit-for-bit out of the memory location. Ownership of any resources the
-        # value holds transfers to the caller, and the original storage must not be used again.
+        # pointer. Because this is a "self" method, it takes ownership of the pointer, and the caller cannot use the raw
+        # pointer object again. This is a compiler intrinsic, as it can be implemented using a single instruction in
+        # LLVM.
+        # @ret: The value that was read from the memory location. This is a value of type `T`, which is the type of the
+        # value that the pointer points to.
     }
 }
 
