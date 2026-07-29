@@ -8,7 +8,7 @@ use std::clone::Clone
 use std::option::None
 use std::option::Opt
 use std::option::Some
-use std::rc::ControlBlock
+use std::rc::rc::ControlBlock
 use std::rc::rc::Rc
 use std::void::Void
 use std::mem::pointer::NonNull
