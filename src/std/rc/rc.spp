@@ -1,0 +1,144 @@
+use std::annotations::package
+use std::annotations::public
+use std::annotations::thread_hazard
+use std::annotations::versioned
+use std::allocator::Alloc
+use std::allocator::GlobalAlloc
+use std::clone::Clone
+use std::generator::GenOnce
+use std::number::USize
+use std::void::Void
+use std::mem::pointer::NonNull
+use std::ops::del::Del
+use std::ops::fwd::FwdRef
+use std::rc::weak::Weak
+
+!package
+!versioned(base="1.0.0", new="1.0.0")
+cls ControlBlock[T] {
+    !package strong_counter: USize
+    !package weak_counter: USize
+    !package val: T
+}
+
+!public !thread_hazard
+!versioned(base="1.0.0", new="1.0.0")
+cls Rc[T, A: Alloc=GlobalAlloc] {
+    # The `Rc` type is a single-threaded, reference-counted shared owner of a heap-allocated value, the same as `Rc` in
+    # Rust. Cloning an `Rc` produces another handle to the same value and bumps a non-atomic strong count; the value is
+    # destroyed when the last share is dropped. Because the share and weak counts are non-atomic, `Rc` is a thread
+    # hazard and must never be sent or shared across threads; use `Arc` from `std::threading` for that.
+    # @type T: The type of the shared value.
+    # @type A: The allocator type used to allocate and deallocate the control block. Defaults to `GlobalAlloc`.
+    # @let ptr: A non-null pointer to the heap-allocated control block holding the counters and value.
+    # @let alloc: The allocator used to allocate and deallocate the control block.
+
+    !package ptr: NonNull[ControlBlock[T]]
+    !package alloc: A
+}
+
+sup [T] Rc[T] {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun new(val: T) -> Rc[T] {
+        ret self.new_in(val, GlobalAlloc)
+    }
+}
+
+sup [T, A: Alloc] Rc[T, A] {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun new_in(val: T, alloc: A) -> Rc[T, A] {
+        # Create a new `Rc` by allocating a control block with the given allocator and moving `val` into it. The strong
+        # count starts at one, for the `Rc` being returned here, and the weak count at zero.
+        # @let val: The value to be allocated on the heap and shared.
+        # @let alloc: The allocator used to allocate and deallocate the control block.
+        # @ret: An `Rc` instance owning the sole share of the newly allocated control block.
+
+        # Allocate storage sized for the control block, then initialize
+        # it with a single write, so there is no window in which the
+        # block is only partially constructed.
+        let mut ptr = alloc.allocate_array[ControlBlock[T]](1_uz).expect("Allocation failed")
+        ptr.write(ControlBlock(strong_counter=1_uz, weak_counter=0_uz, val))
+        ret Rc(ptr, alloc)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun strong_count(&self) -> USize {
+        # The `strong_count` is a public accessor the the internal control block's strong counter. It is used to
+        # determine how many `Rc` handles are currently sharing ownership of the value.
+        # @ret: The number of `Rc` handles currently sharing ownership of the value.
+
+        ret self.ptr.strong_counter
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun weak_count(&self) -> USize {
+        # The `weak_count` is a public accessor the the internal control block's weak counter. It is used to determine
+        # how many `Weak` handles are currently sharing ownership of the control block.
+        # @ret: The number of `Weak` handles currently sharing ownership of the control block.
+
+        ret self.ptr.weak_counter
+    }
+}
+
+sup [T, A: Alloc & Clone] Rc[T, A] {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun downgrade(&self) -> Weak[T, A] {
+        # Create a new `Weak` handle to the same control block. This does not touch the strong count, so it never keeps
+        # the value alive; it only increments the weak count, which keeps the control block itself alive while any weak
+        # handle exists.  The allocator is cloned so the weak handle can deallocate the block independently.
+        # @ret: A `Weak` handle pointing at the same control block as this `Rc`.
+
+        let mut cb = self.ptr.clone()
+        cb.weak_counter += 1_uz
+        ret Weak(ptr=cb, alloc=self.alloc.clone())
+    }
+}
+
+sup [T] Rc[T] ext FwdRef[T] {
+    !versioned(base="1.0.0", new="1.0.0")
+    cor fwd_ref(&self) -> GenOnce[&T] {
+        gen &self.ptr.val
+    }
+}
+
+sup [T, A: Alloc & Clone] Rc[T, A] ext Clone {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun clone(&self) -> Self {
+        # Create a new `Rc` handle to the same control block. This increments the strong count, which keeps the value
+        # alive while any share exists. A fresh `NonNull` to the same block is created; as a locally owned `mut` pointer
+        # it provides the mutable access needed to bump the counter through the shared `&self` borrow, and is then moved
+        # into the returned `Rc`. The allocator is cloned so the new share can deallocate the block independently.
+        # @ret: A new `Rc` handle pointing at the same control block as this one.
+
+        let mut cb = self.ptr.clone()
+        cb.strong_counter += 1_uz
+        ret Rc(ptr=cb, alloc=self.alloc.clone())
+    }
+}
+
+sup [T, A: Alloc] Rc[T, A] ext Del {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun del(&mut self) -> Void {
+        # Drop one share. When the strong count reaches zero the value is no longer reachable through any `Rc`, so its
+        # destructor must run: `drop_in_place` destroys the `val` field of the control block directly, leaving the
+        # counters intact for any surviving weak pointers. Deallocation is a pure memory operation that never runs
+        # destructors, so the value must be destroyed here explicitly. The heap block is only deallocated once there are
+        # also no weak pointers left, since a live weak pointer keeps the block around to read the counters; if weak
+        # pointers remain, the last of them will deallocate the block when it is dropped. A weak pointer that outlives
+        # the value never reads it, as `upgrade` returns `None` once the strong count is zero, so the destroyed `val`
+        # slot is never observed.
+
+        self.ptr.strong_counter -= 1_uz
+        case self.ptr.strong_counter == 0_uz {
+            std::mem::ops::drop_in_place(&mut self.ptr.val)
+            case self.ptr.weak_counter == 0_uz {
+                self.alloc.deallocate_array(self.ptr, 1_uz)
+            }
+        }
+    }
+}
