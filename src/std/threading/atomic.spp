@@ -149,11 +149,11 @@ sup [T: Integral] Atom[T] {
     # @cmp mo_acq_rel:
     # @cmp mo_seq_cst:
 
-    !public cmp mo_relaxed: U8 = 0_u8
-    !public cmp mo_acquire: U8 = 1_u8
-    !public cmp mo_release: U8 = 2_u8
-    !public cmp mo_acq_rel: U8 = 3_u8
-    !public cmp mo_seq_cst: U8 = 4_u8
+    !public cmp mo_relaxed: U8 = 2_u8
+    !public cmp mo_acquire: U8 = 4_u8
+    !public cmp mo_release: U8 = 5_u8
+    !public cmp mo_acq_rel: U8 = 6_u8
+    !public cmp mo_seq_cst: U8 = 7_u8
 
     !public
     !intrinsic(name="std.threading.atomic.new")
