@@ -7,7 +7,6 @@ use std::string_view::StrView
 use std::void::Void
 
 !public
-!intrinsic(name="std.llvm.inline")
 !versioned(base="1.0.0", new="1.0.0")
 !annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
 cmp fun inline() -> Void {
@@ -19,7 +18,6 @@ cmp fun inline() -> Void {
 }
 
 !public
-!intrinsic(name="std.llvm.no_inline")
 !versioned(base="1.0.0", new="1.0.0")
 !annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
 cmp fun always_inline() -> Void {
@@ -32,7 +30,6 @@ cmp fun always_inline() -> Void {
 }
 
 !public
-!intrinsic(name="std.llvm.no_inline")
 !versioned(base="1.0.0", new="1.0.0")
 !annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
 cmp fun no_inline() -> Void {
@@ -44,7 +41,6 @@ cmp fun no_inline() -> Void {
 }
 
 !public
-!intrinsic(name="std.llvm.hot")
 !versioned(base="1.0.0", new="1.0.0")
 !annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
 cmp fun hot() -> Void {
@@ -55,7 +51,6 @@ cmp fun hot() -> Void {
 }
 
 !public
-!intrinsic(name="std.llvm.cold")
 !versioned(base="1.0.0", new="1.0.0")
 !annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
 cmp fun cold() -> Void {
@@ -65,7 +60,6 @@ cmp fun cold() -> Void {
 }
 
 !public
-!intrinsic(name="std.llvm.layout")
 !versioned(base="1.0.0", new="1.0.0")
 !annotation(target=Annotation::class)
 cmp fun layout(conv: &StrView) -> Void {
