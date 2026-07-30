@@ -41,7 +41,7 @@ sup [T] Rc[T] {
     !public
     !versioned(base="1.0.0", new="1.0.0")
     fun new(val: T) -> Rc[T] {
-        ret self.new_in(val, GlobalAlloc)
+        ret Self::new_in(val, GlobalAlloc)
     }
 }
 
