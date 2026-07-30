@@ -22,6 +22,6 @@ sup Copy ext Clone {
         # without any additional overhead.
         # @ret: A new instance of the same value, as `Copy` types are trivially copyable.
 
-        ret self
+        ret self@
     }
 }
