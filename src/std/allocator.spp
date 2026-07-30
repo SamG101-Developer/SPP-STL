@@ -434,3 +434,9 @@ sup GlobalAlloc ext Alloc {
         ret self.grow(ptr, old_layout, new_layout)
     }
 }
+
+sup GlobalAlloc ext Clone {
+    fun clone(&self) -> Self {
+        ret GlobalAlloc
+    }
+}
