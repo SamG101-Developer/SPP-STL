@@ -93,7 +93,7 @@ sup [T, cmp n: USize] Arr[T, n] ext Eq {
         # @let that: The other array to compare against. This is a reference to another instance of the same array type.
         # @ret: A boolean value indicating whether the two arrays are equal.
 
-        ret sppc::memcmp(&self.ptr, &that.ptr, n * std::mem::size_of[T]()) == 0
+        ret sppc::memcmp(&self.ptr, &that.ptr, n * std::mem::ops::size_of[T]()) == 0
     }
 
     !versioned(base="1.0.0", new="1.0.0")
@@ -101,7 +101,7 @@ sup [T, cmp n: USize] Arr[T, n] ext Eq {
         # @let that: The other array to compare against. This is a reference to another instance of the same array type.
         # @ret: A boolean value indicating whether the two arrays are not equal.
 
-        ret sppc::memcmp(&self.ptr, &that.ptr, n * std::mem::size_of[T]()) != 0
+        ret sppc::memcmp(&self.ptr, &that.ptr, n * std::mem::ops::size_of[T]()) != 0
     }
 }
 
