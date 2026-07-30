@@ -349,7 +349,7 @@ sup [T: Integral & Zero] Atom[T] {
         # number is set to `0`, or the boolean is set to `false`.
         # @ret: A new `Atom` instance containing the default zero value for the type `T`.
 
-        Atom[T](val=T::zero())
+        ret Atom[T](val=T::zero())
     }
 }
 
