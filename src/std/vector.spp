@@ -674,7 +674,7 @@ sup [T, cmp n: USize, A: Alloc] Vec[T, A] ext From[Arr[T, n]] {
         # @let that:
         # @ret:
 
-        let mut vec = Self::new_with_capacity_in(n, GlobalAlloc)
+        let mut vec = Self::new_with_capacity(n)
         std::mem::ops::mem_copy(&mut vec.buffer.ptr, &that.ptr, n)
         vec.length = n
         ret vec
