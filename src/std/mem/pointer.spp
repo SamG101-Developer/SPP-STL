@@ -90,7 +90,7 @@ sup [T] NonNull[T] {
         # buffer of a zero-sized type), letting them hold a non-null pointer without ever touching the allocator.
         # @ret: A dangling, well-aligned, non-null pointer for `T`.
 
-        ret Self::from_ptr_inner(Ptr(addr=std::mem::ops::align_of[T]()))
+        ret Self::from_ptr_inner(Ptr[T](addr=std::mem::ops::align_of[T]()))
     }
 
     !package !always_inline
