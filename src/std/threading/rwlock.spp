@@ -9,13 +9,34 @@ use std::number::U64
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
-use std::shared::Shared
 use std::slot::Slot
 use std::void::Void
 use std::ops::del::Del
 use std::threading::mutex::WouldBlock
+use std::threading::safe::ThreadSafe
 use std::threading::thread::ThreadErr
 use std::time::duration::Duration
+
+!package
+!versioned(base="1.0.0", new="1.0.0")
+cls RwLockUnlockGuard {
+    # Internal RAII helper whose destructor unlocks the rwlock (a single `pthread_rwlock_unlock` releases both read and
+    # write holds). One is created as a local inside each locking coroutine once the lock is held, so the release runs
+    # on every exit path -- normal completion, an early `ret`, or the coroutine frame being dropped before it resumes
+    # past the `gen` -- rather than relying on the statement after `gen` being reached. A copy of the opaque sppc handle
+    # is enough to unlock the same underlying rwlock.
+    # @let handle: A copy of the owning rwlock's sppc handle; unlocking through it releases the same underlying rwlock.
+
+    !package handle: U64
+}
+
+sup RwLockUnlockGuard ext Del {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun del(&mut self) -> Void {
+        # Release the rwlock when the guard leaves scope.
+        sppc::pthread_rwlock_unlock(&self.handle)
+    }
+}
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
@@ -39,6 +60,7 @@ sup [T] RwLock[T] {
     cor read(&self) -> GenOnce[&T] {
         # Lock the rwlock for reading using the sppc threading API.
         sppc::pthread_rwlock_rdlock(&self.handle)
+        let guard = RwLockUnlockGuard(handle=self.handle)
         gen self.val.get_ref()
     }
 
@@ -47,6 +69,7 @@ sup [T] RwLock[T] {
     cor write(&self) -> GenOnce[&mut T] {
         # Lock the rwlock for writing using the sppc threading API.
         sppc::pthread_rwlock_wrlock(&self.handle)
+        let guard = RwLockUnlockGuard(handle=self.handle)
         gen self.val.get_mut()
     }
 
@@ -56,6 +79,7 @@ sup [T] RwLock[T] {
         # Timed lock the rwlock for reading using the sppc threadinging API.
         let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
         sppc::pthread_rwlock_clockrdlock(&self.handle, S32::from(clock), &timespec)
+        let guard = RwLockUnlockGuard(handle=self.handle)
         gen self.val.get_ref()
     }
 
@@ -65,6 +89,7 @@ sup [T] RwLock[T] {
         # Timed lock the rwlock for writing using the sppc threading API.
         let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
         sppc::pthread_rwlock_clockwrlock(&self.handle, S32::from(clock), &timespec)
+        let guard = RwLockUnlockGuard(handle=self.handle)
         gen self.val.get_mut()
     }
 
@@ -73,7 +98,11 @@ sup [T] RwLock[T] {
     cor try_write(&self) -> GenOnce[&mut T or WouldBlock] {
         # Try to lock the rwlock for writing using the sppc threading API.
         let code = sppc::pthread_rwlock_trywrlock(&self.handle)
-        case code == 1 { gen WouldBlock }
+        case code == cffi::ebusy {
+            gen WouldBlock
+            ret
+        }
+        let guard = RwLockUnlockGuard(handle=self.handle)
         gen self.val.get_mut()
     }
 
@@ -82,7 +111,11 @@ sup [T] RwLock[T] {
     cor try_read(&self) -> GenOnce[&T or WouldBlock] {
         # Try to lock the rwlock for reading using the sppc threading API.
         let code = sppc::pthread_rwlock_tryrdlock(&self.handle)
-        case code == 1 { gen WouldBlock }
+        case code == cffi::ebusy {
+            gen WouldBlock
+            ret
+        }
+        let guard = RwLockUnlockGuard(handle=self.handle)
         gen self.val.get_ref()
     }
 }

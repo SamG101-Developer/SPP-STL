@@ -1,23 +1,35 @@
 use std::annotations::package
-use std::annotations::private
 use std::annotations::public
 use std::annotations::versioned
-use std::boolean::Bool
-use std::function::FunMut
+use std::annotations::zero_type
 use std::number::U64
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
 use std::void::Void
 use std::ops::del::Del
-use std::threading::mutex::Mutex
 use std::threading::thread::ThreadErr
-use std::time::duration::Duration
-use std::time::time_point::TimePoint
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls TimedOut {
+    # The `TimedOut` type is a zero sized type yielded by `Mutex.lock_when_timeout` to indicate that the deadline
+    # elapsed before the wait predicate became satisfied. When it is yielded, the mutex has already been released and no
+    # guarded reference is handed out, so a caller that needs to inspect the protected value after a timeout must
+    # re-lock explicitly.
+}
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls CondVar {
+    # A `CondVar` is a notification primitive that lets threads block until another thread signals that some condition
+    # over shared state may have changed. It carries no data of its own and is not tied to any particular mutex. The
+    # blocking half of the protocol lives on `Mutex` (`lock_when` / `lock_when_timeout`), which owns the lock lifetime,
+    # so a `CondVar` only exposes the waking half (`signal_one` / `signal_all`). Keeping the wait on the mutex means the
+    # guarded value is reachable through exactly one path -- the mutex guard -- so there is no way to fabricate a
+    # second, aliasing reference to it while a waiter holds the lock.
+    # @let handle: A handle to the underlying condition variable object in the sppc threading API.
+
     !package handle: U64
 }
 
@@ -37,105 +49,6 @@ sup CondVar {
         let err = sppc::pthread_cond_init(&mut handle)
         case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
         ret Pass(val=CondVar(handle))
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun wait[T](&self, mutex: &Mutex[T]) -> Res[Void, ThreadErr] {
-        # Wait on the condition variable, releasing the associated mutex. This function will block the current thread
-        # until the condition variable is signaled. The mutex must be locked before calling this function, and it will
-        # be automatically re-acquired when the wait is over.
-        # @type T: The type of the value protected by the mutex.
-        # @let mutex: A reference to the `Mutex` that is associated with the condition variable. The mutex must be
-        # locked before calling this function, and it will be automatically re-acquired when the wait is over.
-        # @ret: A `Res` type indicating whether the wait operation was successful or not.
-        # @todo: Rework will include compile-time known mutex state. Currently controlled with returned result type.
-
-        # Wait on the condition variable, releasing the
-        # associated mutex, using sppc internal calls.
-        let err = sppc::pthread_cond_wait(&self.handle, &mutex.handle)
-        case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
-        ret Pass[Void]()
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun wait_while[T, F: FunMut[(&mut T,), Bool]](&self, mut mutex: &Mutex[T], mut pred: F) -> Res[Bool, ThreadErr] {
-        # Wait on the condition variable while a predicate is true, releasing the associated mutex. This function will
-        # block the current thread until the condition variable is signaled and the predicate returns false. The mutex
-        # must be locked before calling this function, and it will be automatically re-acquired when the wait is over.
-        # @type T: The type of the value protected by the mutex.
-        # @let mutex: A reference to the `Mutex` that is associated with the condition variable. The mutex must be
-        # locked before calling this function, and it will be automatically re-acquired when the wait is over.
-        # @let pred: A mutable function that takes a mutable reference to the value protected by the mutex and returns a
-        # boolean indicating whether to continue waiting. The predicate is evaluated while the mutex is locked, and the
-        # wait will continue as long as the predicate returns true.
-        # @ret: A `Res` type indicating whether the wait operation was successful or not.
-        # @todo: Rework will include compile-time known mutex state. Currently controlled with returned result type.
-
-        loop pred(mutex.val.get_mut()) {
-            let err = sppc::pthread_cond_wait(&self.handle, &mutex.handle)
-            case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
-        }
-        ret Pass(val=true)
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun wait_timeout[T](&self, mutex: &Mutex[T], timeout: Duration) -> Res[Void, ThreadErr] {
-        # Wait on the condition variable with a timeout, releasing the associated mutex. This function will block the
-        # current thread until the condition variable is signaled or the specified timeout has elapsed. The mutex must
-        # be locked before calling this function, and it will be automatically re-acquired when the wait is over. If the
-        # timeout elapses before the condition variable is signaled, the function will return an error indicating that
-        # the wait operation timed out.
-        # @type T: The type of the value protected by the mutex.
-        # @let mutex: A reference to the `Mutex` that is associated with the condition variable. The mutex must be
-        # locked before calling this function, and it will be automatically re-acquired when the wait is over.
-        # @let timeout: The duration to wait for the condition variable to be signaled before timing out. If the timeout
-        # elapses before the condition variable is signaled, the function will return an error indicating that the wait
-        # operation timed out.
-        # @ret: A `Res` type indicating whether the wait operation was successful or not. If the wait operation times
-        # out, it will return an error indicating that the wait operation timed out.
-        # @todo: Rework will include compile-time known mutex state. Currently controlled with returned result type.
-
-        # Build the C timespec struct for the timeout duration.
-        let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
-        let err = sppc::pthread_cond_clockwait(&self.handle, &mutex.handle, 0, &timespec)
-        case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
-        ret Pass[Void]()
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun wait_timeout_while[T, F: FunMut[(&mut T,), Bool]](&self, mutex: &Mutex[T], timeout: Duration, mut pred: F) -> Res[Bool, ThreadErr] {
-        # Wait on the condition variable with a timeout while a predicate is true, releasing the associated mutex. This
-        # function will block the current thread until the condition variable is signaled, the specified timeout has
-        # elapsed, or the predicate returns false. The mutex must be locked before calling this function, and it will be
-        # automatically re-acquired when the wait is over. If the timeout elapses before the condition variable is
-        # signaled and the predicate returns false, the function will return an error indicating that the wait operation
-        # timed out.
-        # @type T: The type of the value protected by the mutex.
-        # @let mutex: A reference to the `Mutex` that is associated with the condition variable. The mutex must be
-        # locked before calling this function, and it will be automatically re-acquired when the wait is over.
-        # @let timeout: The duration to wait for the condition variable to be signaled before timing out. If the timeout
-        # elapses before the condition variable is signaled and the predicate returns false, the function will return an
-        # error indicating that the wait operation timed out.
-        # @let pred: A mutable function that takes a mutable reference to the value protected by the mutex and returns a
-        # boolean indicating whether to continue waiting. The predicate is evaluated while the mutex is locked, and the
-        # wait will continue as long as the predicate returns true.
-        # @ret: A `Res` type indicating whether the wait operation was successful or not. If the wait operation times
-        # out, it will return an error indicating that the wait operation timed out.
-        # @todo: Rework will include compile-time known mutex state. Currently controlled with returned result type.
-
-        let deadline = TimePoint::now() + timeout
-        loop pred(mutex.val.get_mut()) {
-            let remaining = deadline.duration_since_saturating(TimePoint::now())
-            case remaining.is_zero() { ret Pass(val=false) }
-            let timespec = sppc::CTimespec(sec=remaining.seconds, nsec=remaining.nanoseconds)
-            let err = sppc::pthread_cond_clockwait(&self.handle, &mutex.handle, 0, &timespec)
-            case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
-        }
-        ret Pass(val=true)
     }
 
     !public
@@ -171,9 +84,8 @@ sup CondVar ext Del {
     !versioned(base="1.0.0", new="1.0.0")
     fun del(&mut self) -> Void {
         # Destroy the condition variable. This function is called when the `CondVar` instance is dropped, and it cleans
-        # up any resources associated with the condition variable. The function does not return a value, but it may
-        # panic if the destruction of the condition variable fails. It is important to ensure that no threads are
-        # waiting on the condition variable when it is destroyed, as this can lead to undefined behavior.
+        # up any resources associated with the condition variable. It is important to ensure that no threads are waiting
+        # on the condition variable when it is destroyed, as this can lead to undefined behavior.
 
         sppc::pthread_cond_destroy(&self.handle)
     }

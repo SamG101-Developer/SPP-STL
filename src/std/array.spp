@@ -49,9 +49,10 @@ sup [T, cmp n: USize] Arr[T, n] {
     fun new() -> Self { }
 
     !public
-    !intrinsic(name="std.array.Arr.from_fun")
     !versioned(base="1.0.0", new="1.0.0")
-    fun from_fun(f: FunMov[(), T]) -> Self { }
+    fun fill(&mut self, val: T) -> Void {
+        # std::mem::ops::mem_set(&mut self.ptr, n, val) TODO
+    }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
@@ -62,9 +63,12 @@ sup [T, cmp n: USize] Arr[T, n] {
 
 sup [T: Copy, cmp n: USize] Arr[T, n] {
     !public
-    !intrinsic(name="std.array.Arr.new_filled")
     !versioned(base="1.0.0", new="1.0.0")
-    fun new_filled(val: T) -> Self { }
+    fun new_filled(val: T) -> Self {
+        let mut arr = Self::new()
+        arr.fill(val)
+        ret arr
+    }
 }
 
 sup [T: Copy, cmp n: USize] Arr[T, n] ext Copy { }
@@ -82,23 +86,33 @@ sup [T, cmp n: USize] Arr[T, n] ext RevIterMov[T] {
 }
 
 sup [T, cmp n: USize] Arr[T, n] ext Eq {
-    !intrinsic(name="std.array.Arr.eq")
     !versioned(base="1.0.0", new="1.0.0")
-    fun eq(&self, that: &Self) -> Bool { }
+    fun eq(&self, that: &Self) -> Bool {
+        # Use the `sppc::memcpy` function to compare the memory of the two arrays. This is a fast and efficient way to
+        # check for equality, as it compares the raw bytes of the arrays directly.
+        # @let that: The other array to compare against. This is a reference to another instance of the same array type.
+        # @ret: A boolean value indicating whether the two arrays are equal.
 
-    !intrinsic(name="std.array.Arr.ne")
+        ret std::mem::ops::mem_cmp(&self.ptr, &that.ptr, n * std::mem::ops::size_of[T]()) == 0
+    }
+
     !versioned(base="1.0.0", new="1.0.0")
-    fun ne(&self, that: &Self) -> Bool { }
+    fun ne(&self, that: &Self) -> Bool {
+        # @let that: The other array to compare against. This is a reference to another instance of the same array type.
+        # @ret: A boolean value indicating whether the two arrays are not equal.
+
+        ret std::mem::ops::mem_cmp(&self.ptr, &that.ptr, n * std::mem::ops::size_of[T]()) != 0
+    }
 }
 
 sup [T, cmp n: USize] Arr[T, n] ext FwdMut[View[T]] {
-    !intrinsic(name="std.array.Arr.fwd_mut[View]")
+    !intrinsic(name="std.array.Arr.fwd_mut")
     !versioned(base="1.0.0", new="1.0.0")
     cor fwd_mut(&mut self) -> GenOnce[&mut View[T]] { }
 }
 
 sup [T, cmp n: USize] Arr[T, n] ext FwdRef[View[T]] {
-    !intrinsic(name="std.vec.Vec.fwd_ref[View]")
+    !intrinsic(name="std.array.Arr.fwd_ref")
     !versioned(base="1.0.0", new="1.0.0")
     cor fwd_ref(&self) -> GenOnce[&View[T]] { }
 }

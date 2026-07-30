@@ -10,7 +10,12 @@ use std::clone::Clone
 use std::generator::GenOnce
 use std::number::U8
 use std::number::USize
+use std::option::None
 use std::option::Opt
+use std::option::Some
+use std::range::Range
+use std::result::Fail
+use std::result::Pass
 use std::result::Res
 use std::string_view::StrView
 use std::string_view::Utf8Err
@@ -24,7 +29,7 @@ use std::ops::fwd::FwdRef
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-cls Str[A: Alloc = GlobalAlloc] {
+cls Str[A: Alloc=GlobalAlloc] {
     # The `Str` type represents a mutable string that can be allocated using a specified allocator. It is designed to be
     # flexible and efficient for various use cases, allowing for dynamic resizing and manipulation of string data. The
     # internal representation of the string is based on a vector of bytes, which allows for efficient storage and
@@ -145,15 +150,16 @@ sup [A: Alloc] Str[A] {
     }
 
     !public
-    !intrinsic(name="std.string.Str.from[StrView]")
     !versioned(base="1.0.0", new="1.0.0")
     fun from(view: &StrView) -> Str {
-        # The `from` method creates a new instance of the `Str` type from a given `StrView`. This involves copying the
-        # bytes from the provided string view into a new internal vector. This method allows for easy conversion from a
-        # string view to a mutable string, enabling further modifications to the string data after it has been created.
+        # The `from` method creates a new instance of the `Str` type from a given `StrView`. It takes a byte view of
+        # `view` (`view_ref`, which just repackages the `StrView`'s existing pointer and length - no copy yet) and
+        # forwards to the `View[U8]`-based `from` below, which does the actual allocation and memcpy.
         # @let view: A reference to a `StrView` that contains the string data to be copied. The bytes from this view
         # will be used to initialize the internal vector of the new `Str` instance.
         # @ret: A new `Str` instance that contains a copy of the bytes from the provided `StrView`.
+
+        ret Str::from(view.view_ref())
     }
 
     !public
@@ -169,6 +175,107 @@ sup [A: Alloc] Str[A] {
         # Forward to the constructor of `Str`, creating a new `Vec`
         # filled with the bytes from the provided view.
         ret Str(bytes=Vec[U8, A]::from(that))
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_utf8_unchecked(bytes: &View[U8]) -> Self {
+        # The `from_utf8_unchecked` method creates a new `Str` by copying `bytes` verbatim, without checking that they
+        # are valid UTF-8. The caller must have already established that `bytes` is valid UTF-8 - for example, because
+        # it was copied out of an existing `StrView`, which carries that guarantee as an invariant. Passing bytes that
+        # are not valid UTF-8 will produce a `Str` that violates its own invariant, and any subsequent use of it as a
+        # `StrView` (`chars`, `find`, etc.) is undefined behaviour.
+        # @let bytes: The raw bytes to copy into the new `Str`, asserted by the caller to already be valid UTF-8.
+        # @ret: A new `Str` containing a copy of `bytes`.
+
+        ret Self::from(bytes)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from_utf8(bytes: &View[U8]) -> Res[Self, Utf8Err] {
+        # The `from_utf8` method validates that `bytes` is well-formed UTF-8 and, if so, copies it into a new `Str`.
+        # Validation walks the bytes one sequence at a time: the leading byte's range picks the sequence length (1-4
+        # bytes), and every continuation byte must fall in `0x80..=0xBF`. The second byte of 3- and 4-byte sequences is
+        # additionally range-checked against the specific leading byte, to reject overlong encodings (`0xE0 0x80 ..`),
+        # UTF-16 surrogates smuggled through as UTF-8 (`0xED 0xA0..0xBF ..`), and code points past the Unicode maximum
+        # of `0x10FFFF` (`0xF4 0x90.. ..`).
+        # @let bytes: The raw bytes to validate and, if valid, copy into a new `Str`.
+        # @ret: A new `Str` containing a copy of `bytes` if it is valid UTF-8, or a `Utf8Err` describing the byte index
+        # and length of the first invalid sequence found.
+
+        let mut idx = 0_uz
+        loop idx < bytes.len() {
+            let first = bytes[idx]@
+
+            # Fast path: a leading byte below `0x80` is a single-byte
+            # ASCII character, valid on its own.
+            case first < 0x80_u8 {
+                idx += 1_uz
+                skip
+            }
+
+            # Reject bytes that can never start a sequence: bare continuation
+            # bytes (`0x80..=0xBF`), and the two bytes reserved for overlong
+            # 2-byte encodings (`0xC0`, `0xC1`), and everything above the
+            # highest valid 4-byte leader (`0xF4`).
+            case first < 0xC2_u8 or first > 0xF4_u8 {
+                ret Fail(err=Utf8Err(valid_up_to=idx, error_len=Some(val=1_uz)))
+            }
+
+            # The leading byte's range determines how many bytes make up this
+            # sequence.
+            let seq_len = case first of {
+                < 0xE0_u8 { 2_uz }
+                < 0xF0_u8 { 3_uz }
+                else { 4_uz }
+            }
+
+            # If the sequence would run past the end of `bytes`, it is a
+            # truncated sequence rather than an invalid one - `error_len=None`
+            # signals that more bytes would have made it valid.
+            case idx + seq_len > bytes.len() {
+                ret Fail(err=Utf8Err(valid_up_to=idx, error_len=None))
+            }
+
+            # Most continuation bytes are only constrained to `0x80..=0xBF`,
+            # but the second byte following the extremal leading bytes (`0xE0`,
+            # `0xED`, `0xF0`, `0xF4`) has a narrower valid range, to rule out
+            # overlong encodings, surrogates, and out-of-range code points.
+            let (second_min, second_max) = case first == 0xE0_u8 {
+                (0xA0_u8, 0xBF_u8)
+            }
+            else case first == 0xED_u8 {
+                (0x80_u8, 0x9F_u8)
+            }
+            else case first == 0xF0_u8 {
+                (0x90_u8, 0xBF_u8)
+            }
+            else case first == 0xF4_u8 {
+                (0x80_u8, 0x8F_u8)
+            }
+            else {
+                (0x80_u8, 0xBF_u8)
+            }
+
+            let second = bytes[idx + 1_uz]@
+            case second < second_min or second > second_max {
+                ret Fail(err=Utf8Err(valid_up_to=idx, error_len=Some(val=1_uz)))
+            }
+
+            # Any remaining continuation bytes (the 3rd and 4th, when present)
+            # are only constrained to the plain continuation-byte range.
+            loop k in Range[USize]::between(2_uz, seq_len) {
+                let cont = bytes[idx + k]@
+                case cont < 0x80_u8 or cont > 0xBF_u8 {
+                    ret Fail(err=Utf8Err(valid_up_to=idx, error_len=Some(val=k)))
+                }
+            }
+
+            idx += seq_len
+        }
+
+        ret Pass(val=Self::from_utf8_unchecked(bytes))
     }
 
     !public
@@ -308,15 +415,31 @@ sup [A: Alloc] Str[A] {
 }
 
 sup [A: Alloc] Str[A] ext FwdMut[StrView] {
-    !intrinsic(name="std.string.Str.fwd_mut[StrView]")
     !versioned(base="1.0.0", new="1.0.0")
-    cor fwd_mut(&mut self) -> GenOnce[&mut StrView] { }
+    cor fwd_mut(&mut self) -> GenOnce[&mut StrView] {
+        # Lets `&mut Str` coalesce to `&mut StrView` for method calls, the same way `Vec::fwd_mut` coalesces to `&mut
+        # View[T]`. Builds a `StrView` pointing at this `Str`'s own backing buffer - not a copy of the bytes, just of
+        # the pointer and length - so mutating through the yielded borrow (e.g. `make_uppercase`, which only ever
+        # rewrites bytes in place and never grows the buffer) mutates this `Str`'s real storage.
+        # @ret: A `StrView` aliasing this `Str`'s own bytes.
+
+        let mut view = StrView(ptr=self.bytes.buffer.ptr, length=self.bytes.length)
+        gen &mut view
+    }
 }
 
 sup [A: Alloc] Str[A] ext FwdRef[StrView] {
-    !intrinsic(name="std.string.Str.fwd_ref[StrView]")
     !versioned(base="1.0.0", new="1.0.0")
-    cor fwd_ref(&self) -> GenOnce[&StrView] { }
+    cor fwd_ref(&self) -> GenOnce[&StrView] {
+        # Lets `&Str` coalesce to `&StrView` for method calls, the same way `Vec::fwd_ref` coalesces to `&View[T]`.
+        # Builds a `StrView` pointing at this `Str`'s own backing buffer - not a copy of the bytes, just of the pointer
+        # and length - so reading through the yielded borrow (e.g. `chars`, `find`, etc.) reads this `Str`'s real
+        # storage.
+        # @ret: A `StrView` aliasing this `Str`'s own bytes.
+
+        let view = StrView(ptr=self.bytes.buffer.ptr, length=self.bytes.length)
+        gen &view
+    }
 }
 
 sup [A: Alloc] Str[A] ext Clone {

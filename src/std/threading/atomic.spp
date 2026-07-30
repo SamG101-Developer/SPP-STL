@@ -6,9 +6,14 @@ use std::annotations::versioned
 use std::llvm::always_inline
 use std::boolean::Bool
 use std::boolean::Integral
+use std::number::U32
 use std::number::U8
 use std::void::Void
+use std::num::bases::FloatingPoint
 use std::num::bases::Integer
+use std::num::bases::Zero
+use std::num::sized_integer_signed::SizedIntegerSigned
+use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
@@ -16,8 +21,8 @@ cls Atom[T: Integral] {
     # The `Atom` type is a low-level atomic variable type that provides atomic operations on a value of type `T`. It is
     # designed to be used in parallel programming scenarios where multiple threads may need to access and modify the
     # same variable without causing data races. The `Atom` type provides a set of atomic operations such as load, store,
-    # compare_exchange, and various fetch-and-update operations. The memory ordering of these operations can be
-    # specified using the `order` parameter.
+    # compex, and various fetch-and-update operations. The memory ordering of these operations can be specified using
+    # the `order` parameter.
     #
     # Notes for the future:
     # - When enums are supported, the memory ordering will be an enum (over U8).
@@ -64,7 +69,7 @@ fun atomic_load_inner[T: Integral](ptr: &T, order: U8) -> T {
 }
 
 !private !always_inline
-!intrinsic(name="std.threading.atomic.atomic_load_inner")
+!intrinsic(name="std.threading.atomic.atomic_store_inner")
 !versioned(base="1.0.0", new="1.0.0")
 fun atomic_store_inner[T: Integral](ptr: &T, val: T, order: U8) -> Void {
     # The `atomic_store_inner` function is a low-level intrinsic function that implements the actual atomic store
@@ -80,17 +85,17 @@ fun atomic_store_inner[T: Integral](ptr: &T, val: T, order: U8) -> Void {
 }
 
 !private
-!intrinsic(name="std.threading.atomic.compare_exchange_inner")
+!intrinsic(name="std.threading.atomic.atomic_compex_inner")
 !versioned(base="1.0.0", new="1.0.0")
-fun atomic_compare_exchange_inner[T: Integral](ptr: &T, old: T, new: T, success_order: U8, failure_order: U8) -> (T, Bool) {
-    # The `compare_exchange_inner` function is a low-level intrinsic function that implements the actual
-    # compare-and-exchange operation. It is not intended to be called directly by user code, but is instead called by
-    # the public `compare_exchange` method of the `Atom` type after validating the memory orders. The `ptr` parameter is
-    # a reference to the value to be modified, the `old` parameter is the expected value, the `new` parameter is the
-    # value to be stored if the current value matches the expected value, and the `success_order` and `failure_order`
-    # parameters specify the memory ordering of the operation in the success and failure cases, respectively. The
-    # behavior of this function is platform-specific and is implemented by the compiler using the appropriate atomic
-    # compare-and-exchange instructions for the target architecture.
+fun atomic_compex_inner[T: Integral](ptr: &T, old: T, new: T, success_order: U8, failure_order: U8) -> (T, Bool) {
+    # The `compex_inner` function is a low-level intrinsic function that implements the actual compare-and-exchange
+    # operation. It is not intended to be called directly by user code, but is instead called by the public `compex`
+    # method of the `Atom` type after validating the memory orders. The `ptr` parameter is a reference to the value to
+    # be modified, the `old` parameter is the expected value, the `new` parameter is the value to be stored if the
+    # current value matches the expected value, and the `success_order` and `failure_order` parameters specify the
+    # memory ordering of the operation in the success and failure cases, respectively. The behavior of this function is
+    # platform-specific and is implemented by the compiler using the appropriate atomic compare-and-exchange
+    # instructions for the target architecture.
     # @type T: The type of the value stored in the atomic variable.
     # @let ptr: A reference to the value to be modified in the atomic variable.
     # @let old: The expected value to compare against the current value of the atomic variable.
@@ -102,19 +107,19 @@ fun atomic_compare_exchange_inner[T: Integral](ptr: &T, old: T, new: T, success_
 }
 
 !private
-!intrinsic(name="std.threading.atomic.compare_exchange_weak_inner")
+!intrinsic(name="std.threading.atomic.atomic_compex_weak_inner")
 !versioned(base="1.0.0", new="1.0.0")
-fun atomic_compare_exchange_weak_inner[T: Integral](ptr: &T, old: T, new: T, success_order: U8, failure_order: U8) -> (T, Bool) {
-    # The `compare_exchange_weak_inner` function is a low-level intrinsic function that implements the actual weak
+fun atomic_compex_weak_inner[T: Integral](ptr: &T, old: T, new: T, success_order: U8, failure_order: U8) -> (T, Bool) {
+    # The `compex_weak_inner` function is a low-level intrinsic function that implements the actual weak
     # compare-and-exchange operation. It is not intended to be called directly by user code, but is instead called by
-    # the public `compare_exchange_weak` method of the `Atom` type after validating the memory orders. The `ptr`
-    # parameter is a reference to the value to be modified, the `old` parameter is the expected value, the `new`
-    # parameter is the value to be stored if the current value matches the expected value, and the `success_order` and
-    # `failure_order` parameters specify the memory ordering of the operation in the success and failure cases,
-    # respectively. The weak compare-and-exchange operation may fail spuriously even if the current value matches the
-    # expected value, so it is typically used in a loop to retry the operation until it succeeds or the expected value
-    # no longer matches the current value. The behavior of this function is platform-specific and is implemented by the
-    # compiler using the appropriate weak atomic compare-and-exchange instructions for the target architecture.
+    # the public `compex_weak` method of the `Atom` type after validating the memory orders. The `ptr` parameter is a
+    # reference to the value to be modified, the `old` parameter is the expected value, the `new` parameter is the value
+    # to be stored if the current value matches the expected value, and the `success_order` and `failure_order`
+    # parameters specify the memory ordering of the operation in the success and failure cases, respectively. The weak
+    # compare-and-exchange operation may fail spuriously even if the current value matches the expected value, so it is
+    # typically used in a loop to retry the operation until it succeeds or the expected value no longer matches the
+    # current value. The behavior of this function is platform-specific and is implemented by the compiler using the
+    # appropriate weak atomic compare-and-exchange instructions for the target architecture.
     # @type T: The type of the value stored in the atomic variable.
     # @let ptr: A reference to the value to be modified in the atomic variable.
     # @let old: The expected value to compare against the current value of the atomic variable.
@@ -149,35 +154,25 @@ sup [T: Integral] Atom[T] {
     # @cmp mo_acq_rel:
     # @cmp mo_seq_cst:
 
-    !public cmp mo_relaxed: U8 = 0_u8
-    !public cmp mo_acquire: U8 = 1_u8
-    !public cmp mo_release: U8 = 2_u8
-    !public cmp mo_acq_rel: U8 = 3_u8
-    !public cmp mo_seq_cst: U8 = 4_u8
+    !public cmp mo_relaxed: U8 = 2_u8
+    !public cmp mo_acquire: U8 = 4_u8
+    !public cmp mo_release: U8 = 5_u8
+    !public cmp mo_acq_rel: U8 = 6_u8
+    !public cmp mo_seq_cst: U8 = 7_u8
 
     !public
-    !intrinsic(name="std.threading.atomic.new")
     !versioned(base="1.0.0", new="1.0.0")
     fun new(val: T) -> Atom[T] {
-        # The static `new` method creates a new atomic variable with the given initial value. The intrinsic function
-        # will handle the initialization under the hood, and the provided value will be stored in the `val` field of the
-        # `Atom` struct.
+        # The static `new` method creates a new atomic variable with the given initial value. Simple store on the
+        # object, no intrinsics required.
         # @let val: The initial value to store in the atomic variable.
         # @ret: A new `Atom` instance containing the provided initial value.
+
+        ret Atom(val)
     }
 
     !public
-    !intrinsic(name="std.threading.atomic.new_zeroed")
-    !versioned(base="1.0.0", new="1.0.0")
-    fun new_zeroed() -> Atom[T] {
-        # The static `new_zeroed` method creates a new atomic variable that is initialized to zero. This is a convenient
-        # method for creating an atomic variable with a default value, and as all types can be defaulted, either the
-        # number is set to `0`, or the boolean is set to `false`.
-        # @ret: A new `Atom` instance containing the default zero value for the type `T`.
-    }
-
-    !public
-    !intrinsic(name="std.threading.atomic.is_lock_free")
+    !intrinsic(name="std.threading.atomic.Atom.is_lock_free")
     !versioned(base="1.0.0", new="1.0.0")
     fun is_lock_free() -> Bool {
         # The `lock_free` method checks if operations on the atomic variable are lock-free on the current platform. A
@@ -222,13 +217,13 @@ sup [T: Integral] Atom[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun compare_exchange(&self, old: T, new: T, success_order: U8 = Self::mo_seq_cst, failure_order: U8 = Self::mo_seq_cst) -> (T, Bool) {
-        # The `compare_exchange` method performs an atomic compare-and-exchange operation on the atomic variable. It
-        # compares the current value of the atomic variable with the provided `old` value, and if they are equal, it
-        # atomically replaces the current value with the provided `new` value. The memory ordering of the operation can
-        # be specified separately for the success and failure cases. The method validates the memory orders to ensure
-        # that the failure memory order is not `mo_release` or `mo_acq_rel`, as these memory orders are not meaningful
-        # for the failure case of a compare-and-exchange operation. After validating the memory orders, it calls the
+    fun compex(&self, old: T, new: T, success_order: U8 = Self::mo_seq_cst, failure_order: U8 = Self::mo_seq_cst) -> (T, Bool) {
+        # The `compex` method performs an atomic compare-and-exchange operation on the atomic variable. It compares the
+        # current value of the atomic variable with the provided `old` value, and if they are equal, it atomically
+        # replaces the current value with the provided `new` value. The memory ordering of the operation can be
+        # specified separately for the success and failure cases. The method validates the memory orders to ensure that
+        # the failure memory order is not `mo_release` or `mo_acq_rel`, as these memory orders are not meaningful for
+        # the failure case of a compare-and-exchange operation. After validating the memory orders, it calls the
         # appropriate intrinsic function to perform the compare-and-exchange operation..
         # @let old: The expected value to compare against the current value of the atomic variable.
         # @let new: The value to be stored in the atomic variable if the current value matches the expected `old` value.
@@ -240,21 +235,21 @@ sup [T: Integral] Atom[T] {
         # compare-and-exchange was successful (i.e., whether the current value matched the expected `old` value and was
         # replaced with the `new` value).
 
-        abort_if(failure_order == Self::mo_release, "Cannot use release memory order for compare_exchange failure case")
-        abort_if(failure_order == Self::mo_acq_rel, "Cannot use acquire-release memory order for compare_exchange failure case")
-        ret atomic_compare_exchange_inner(&self.val, old, new, success_order, failure_order)
+        abort_if(failure_order == Self::mo_release, "Cannot use release memory order for compex failure case")
+        abort_if(failure_order == Self::mo_acq_rel, "Cannot use acquire-release memory order for compex failure case")
+        ret atomic_compex_inner(&self.val, old, new, success_order, failure_order)
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun compare_exchange_weak(&self, old: T, new: T, success_order: U8 = Self::mo_seq_cst, failure_order: U8 = Self::mo_seq_cst) -> (T, Bool) {
-        # The `compare_exchange_weak` method is similar to the `compare_exchange` method, but it performs a weak
-        # compare-and-exchange operation. A weak compare-and-exchange operation may fail spuriously even if the current
-        # value matches the expected `old` value, so it is typically used in a loop to retry the operation until it
-        # succeeds or the expected value no longer matches the current value. The method validates the memory orders in
-        # the same way as the `compare_exchange` method, ensuring that the failure memory order is not `mo_release` or
-        # `mo_acq_rel`. After validating the memory orders, it calls the appropriate intrinsic function to perform the
-        # weak compare-and-exchange operation.
+    fun compex_weak(&self, old: T, new: T, success_order: U8 = Self::mo_seq_cst, failure_order: U8 = Self::mo_seq_cst) -> (T, Bool) {
+        # The `compex_weak` method is similar to the `compex` method, but it performs a weak compare-and-exchange
+        # operation. A weak compare-and-exchange operation may fail spuriously even if the current value matches the
+        # expected `old` value, so it is typically used in a loop to retry the operation until it succeeds or the
+        # expected value no longer matches the current value. The method validates the memory orders in the same way as
+        # the `compex` method, ensuring that the failure memory order is not `mo_release` or `mo_acq_rel`. After
+        # validating the memory orders, it calls the appropriate intrinsic function to perform the weak
+        # compare-and-exchange operation.
         # @let old: The expected value to compare against the current value of the atomic variable.
         # @let new: The value to be stored in the atomic variable if the current value matches the expected `old` value.
         # @let ?success_order: The memory ordering for the operation if the weak compare-and-exchange is successful. The
@@ -265,13 +260,13 @@ sup [T: Integral] Atom[T] {
         # compare-and-exchange was successful (i.e., whether the current value matched the expected `old` value and the
         # operation did not fail spuriously).
 
-        abort_if(failure_order == Self::mo_release, "Cannot use release memory order for compare_exchange failure case")
-        abort_if(failure_order == Self::mo_acq_rel, "Cannot use acquire-release memory order for compare_exchange failure case")
-        ret atomic_compare_exchange_weak_inner(&self.val, old, new, success_order, failure_order)
+        abort_if(failure_order == Self::mo_release, "Cannot use release memory order for compex failure case")
+        abort_if(failure_order == Self::mo_acq_rel, "Cannot use acquire-release memory order for compex failure case")
+        ret atomic_compex_weak_inner(&self.val, old, new, success_order, failure_order)
     }
 
     !public
-    !intrinsic(name="std.threading.atomic.exchange")
+    !intrinsic(name="std.threading.atomic.Atom.exchange")
     !versioned(base="1.0.0", new="1.0.0")
     fun exchange(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
         # The `exchange` method atomically replaces the current value of the atomic variable with the provided `val` and
@@ -284,7 +279,7 @@ sup [T: Integral] Atom[T] {
     }
 
     !public
-    !intrinsic(name="std.threading.atomic.fetch_and")
+    !intrinsic(name="std.threading.atomic.Atom.fetch_and")
     !versioned(base="1.0.0", new="1.0.0")
     fun fetch_and(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
         # The `fetch_and` method atomically performs a bitwise AND operation between the current value of the atomic
@@ -299,7 +294,7 @@ sup [T: Integral] Atom[T] {
     }
 
     !public
-    !intrinsic(name="std.threading.atomic.fetch_nand")
+    !intrinsic(name="std.threading.atomic.Atom.fetch_nand")
     !versioned(base="1.0.0", new="1.0.0")
     fun fetch_nand(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
         # The `fetch_nand` method atomically performs a bitwise NAND operation between the current value of the atomic
@@ -314,7 +309,7 @@ sup [T: Integral] Atom[T] {
     }
 
     !public
-    !intrinsic(name="std.threading.atomic.fetch_or")
+    !intrinsic(name="std.threading.atomic.Atom.fetch_or")
     !versioned(base="1.0.0", new="1.0.0")
     fun fetch_or(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
         # The `fetch_or` method atomically performs a bitwise OR operation between the current value of the atomic
@@ -329,7 +324,7 @@ sup [T: Integral] Atom[T] {
     }
 
     !public
-    !intrinsic(name="std.threading.atomic.fetch_xor")
+    !intrinsic(name="std.threading.atomic.Atom.fetch_xor")
     !versioned(base="1.0.0", new="1.0.0")
     fun fetch_xor(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
         # The `fetch_xor` method atomically performs a bitwise XOR operation between the current value of the atomic
@@ -345,9 +340,23 @@ sup [T: Integral] Atom[T] {
     }
 }
 
+sup [T: Integral & Zero] Atom[T] {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun new_zeroed() -> Atom[T] {
+        # The static `new_zeroed` method creates a new atomic variable that is initialized to zero. This is a convenient
+        # method for creating an atomic variable with a default value, and as all types can be defaulted, either the
+        # number is set to `0`, or the boolean is set to `false`.
+        # @ret: A new `Atom` instance containing the default zero value for the type `T`.
+
+        ret Atom[T](val=T::zero())
+    }
+}
+
 sup Atom[Bool] {
     !public
-    !intrinsic(name="std.threading.atomic.fetch_not")
+    !intrinsic(name="std.threading.atomic.Atom.fetch_not")
+    !versioned(base="1.0.0", new="1.0.0")
     fun fetch_not(&self, order: U8 = Self::mo_seq_cst) -> Bool {
         # The `fetch_not` method atomically performs a bitwise NOT operation on the current value of the atomic
         # variable, stores the result back in the atomic variable, and returns the old value. This operation is only
@@ -359,31 +368,47 @@ sup Atom[Bool] {
     }
 
     !public
-    !intrinsic(name="std.threading.atomic.test_and_set")
+    !versioned(base="1.0.0", new="1.0.0")
     fun test_and_set(&self, order: U8 = Self::mo_seq_cst) -> Bool {
         # The `test_and_set` method atomically sets the value of the atomic variable to `true` and returns the old
         # value. This operation is typically used for implementing spinlocks or other synchronization primitives. It
-        # calls the appropriate intrinsic function to perform the atomic test-and-set operation and returns the old
-        # value.
-        # @let ?order: The memory ordering for the test-and-set operation. The default is `mo_seq_cst`, which provides
-        # sequential consistency guarantees.
+        # calls the appropriate intrinsic function to perform the atomic set operation and returns the old value.
+        # @let ?order: The memory ordering for the set operation. The default is `mo_seq_cst`, which provides sequential
+        # consistency guarantees.
         # @ret: The old value of the atomic variable before it was set to `true`.
+
+        ret self.exchange(true, order)
     }
 
     !public
-    !intrinsic(name="std.threading.atomic.clear")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun set(&self, order: U8 = Self::mo_seq_cst) -> Void {
+        # The `set` method atomically sets the value of the atomic variable to `true`. This operation is typically used
+        # for implementing spinlocks or other synchronization primitives. It reuses the `store` method to perform the
+        # atomic set operation.
+        # @let ?order: The memory ordering for the set operation. The default is `mo_seq_cst`, which provides sequential
+        # consistency guarantees.
+
+        self.store(true, order)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun clear(&self, order: U8 = Self::mo_seq_cst) -> Void {
         # The `clear` method atomically sets the value of the atomic variable to `false`. This operation is typically
-        # used for implementing spinlocks or other synchronization primitives. It calls the appropriate intrinsic
-        # function to perform the atomic clear operation.
+        # used for implementing spinlocks or other synchronization primitives. It reuses the `store` method to perform
+        # the atomic clear operation.
         # @let ?order: The memory ordering for the clear operation. The default is `mo_seq_cst`, which provides
         # sequential consistency guarantees.
+
+        self.store(false, order)
     }
 }
 
 sup [T: Integer] Atom[T] {
     !public
-    !intrinsic(name="std.threading.atomic.fetch_add")
+    !intrinsic(name="std.threading.atomic.Atom.fetch_add")
+    !versioned(base="1.0.0", new="1.0.0")
     fun fetch_add(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
         # The `fetch_add` method atomically adds the provided `val` to the current value of the atomic variable, stores
         # the result back in the atomic variable, and returns the old value. It calls the appropriate intrinsic function
@@ -397,7 +422,8 @@ sup [T: Integer] Atom[T] {
     }
 
     !public
-    !intrinsic(name="std.threading.atomic.fetch_sub")
+    !intrinsic(name="std.threading.atomic.Atom.fetch_sub")
+    !versioned(base="1.0.0", new="1.0.0")
     fun fetch_sub(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
         # The `fetch_sub` method atomically subtracts the provided `val` from the current value of the atomic variable,
         # stores the result back in the atomic variable, and returns the old value. It calls the appropriate intrinsic
@@ -410,14 +436,17 @@ sup [T: Integer] Atom[T] {
         # sequential consistency guarantees.
         # @ret: The old value of the atomic variable before the fetch-sub operation was performed.
     }
+}
 
+sup [cmp w: U32] Atom[SizedIntegerSigned[w]] {
     !public
-    !intrinsic(name="std.threading.atomic.fetch_min")
-    fun fetch_min(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
+    !intrinsic(name="std.threading.atomic.Atom.fetch_smin")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun fetch_min(&self, val: SizedIntegerSigned[w], order: U8 = Self::mo_seq_cst) -> SizedIntegerSigned[w] {
         # The `fetch_min` method atomically compares the current value of the atomic variable with the provided `val`,
-        # stores the smaller of the two values back in the atomic variable, and returns the old value. It calls the
-        # appropriate intrinsic function to perform the atomic fetch-min operation and returns the old value. This
-        # operation can be useful for various synchronization patterns, such as implementing atomic minimum tracking.
+        # stores the smaller of the two values back in the atomic variable, and returns the old value. This is
+        # specialized for signed integer types, to uses the `smin` atomic intrinsic. This operation can be useful for
+        # various synchronization patterns, such as implementing atomic minimum tracking.
         # @let val: The value to be compared with the current value of the atomic variable, and the smaller of the two
         # will be stored back in the atomic variable.
         # @let ?order: The memory ordering for the fetch-min operation. The default is `mo_seq_cst`, which provides
@@ -426,12 +455,105 @@ sup [T: Integer] Atom[T] {
     }
 
     !public
-    !intrinsic(name="std.threading.atomic.fetch_max")
+    !intrinsic(name="std.threading.atomic.Atom.fetch_smax")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun fetch_max(&self, val: SizedIntegerSigned[w], order: U8 = Self::mo_seq_cst) -> SizedIntegerSigned[w] {
+        # The `fetch_max` method atomically compares the current value of the atomic variable with the provided `val`,
+        # stores the larger of the two values back in the atomic variable, and returns the old value. This is
+        # specialized for signed integer types, to uses the `smax` atomic intrinsic. This operation can be useful for
+        # various synchronization patterns, such as implementing atomic maximum tracking.
+        # @let val: The value to be compared with the current value of the atomic variable, and the larger of the two
+        # will be stored back in the atomic variable.
+        # @let ?order: The memory ordering for the fetch-max operation. The default is `mo_seq_cst`, which provides
+        # sequential consistency guarantees.
+        # @ret: The old value of the atomic variable before the fetch-max operation was performed.
+    }
+}
+
+sup [cmp w: U32] Atom[SizedIntegerUnsigned[w]] {
+    !public
+    !intrinsic(name="std.threading.atomic.Atom.fetch_umin")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun fetch_min(&self, val: SizedIntegerUnsigned[w], order: U8 = Self::mo_seq_cst) -> SizedIntegerUnsigned[w] {
+        # The `fetch_min` method atomically compares the current value of the atomic variable with the provided `val`,
+        # stores the smaller of the two values back in the atomic variable, and returns the old value. This is
+        # specialized for unsigned integer types, to uses the `umin` atomic intrinsic. This operation can be useful for
+        # various synchronization patterns, such as implementing atomic minimum tracking.
+        # @let val: The value to be compared with the current value of the atomic variable, and the smaller of the two
+        # will be stored back in the atomic variable.
+        # @let ?order: The memory ordering for the fetch-min operation. The default is `mo_seq_cst`, which provides
+        # sequential consistency guarantees.
+        # @ret: The old value of the atomic variable before the fetch-min operation was performed.
+    }
+
+    !public
+    !intrinsic(name="std.threading.atomic.Atom.fetch_umax")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun fetch_max(&self, val: SizedIntegerUnsigned[w], order: U8 = Self::mo_seq_cst) -> SizedIntegerUnsigned[w] {
+        # The `fetch_max` method atomically compares the current value of the atomic variable with the provided `val`,
+        # stores the larger of the two values back in the atomic variable, and returns the old value. This is
+        # specialized for unsigned integer types, to uses the `umax` atomic intrinsic. This operation can be useful for
+        # various synchronization patterns, such as implementing atomic maximum tracking.
+        # @let val: The value to be compared with the current value of the atomic variable, and the larger of the two
+        # will be stored back in the atomic variable.
+        # @let ?order: The memory ordering for the fetch-max operation. The default is `mo_seq_cst`, which provides
+        # sequential consistency guarantees.
+        # @ret: The old value of the atomic variable before the fetch-max operation was performed.
+    }
+}
+
+sup [T: FloatingPoint] Atom[T] {
+    !public
+    !intrinsic(name="std.threading.atomic.Atom.fetch_fadd")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun fetch_add(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
+        # The `fetch_add` method atomically adds the provided `val` to the current value of the atomic variable, stores
+        # the result back in the atomic variable, and returns the old value. This is specialized for floating point
+        # types, so it uses the `fadd` atomic intrinsic, which has no signedness variant unlike the integer `add`.
+        # @let val: The value to be added to the current value of the atomic variable, and then stored back in the
+        # atomic variable.
+        # @let ?order: The memory ordering for the fetch-add operation. The default is `mo_seq_cst`, which provides
+        # sequential consistency guarantees.
+        # @ret: The old value of the atomic variable before the fetch-add operation was performed.
+    }
+
+    !public
+    !intrinsic(name="std.threading.atomic.Atom.fetch_fsub")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun fetch_sub(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
+        # The `fetch_sub` method atomically subtracts the provided `val` from the current value of the atomic variable,
+        # stores the result back in the atomic variable, and returns the old value. This is specialized for floating
+        # point types, so it uses the `fsub` atomic intrinsic, which has no signedness variant unlike the integer `sub`.
+        # @let val: The value to be subtracted from the current value of the atomic variable, and then stored back in
+        # the atomic variable.
+        # @let ?order: The memory ordering for the fetch-sub operation. The default is `mo_seq_cst`, which provides
+        # sequential consistency guarantees.
+        # @ret: The old value of the atomic variable before the fetch-sub operation was performed.
+    }
+
+    !public
+    !intrinsic(name="std.threading.atomic.Atom.fetch_fmin")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun fetch_min(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
+        # The `fetch_min` method atomically compares the current value of the atomic variable with the provided `val`,
+        # stores the smaller of the two values back in the atomic variable, and returns the old value. This is
+        # specialized for floating point types, so it uses the `fmin` atomic intrinsic, which has no signed/unsigned
+        # split unlike the integer `smin`/`umin`.
+        # @let val: The value to be compared with the current value of the atomic variable, and the smaller of the two
+        # will be stored back in the atomic variable.
+        # @let ?order: The memory ordering for the fetch-min operation. The default is `mo_seq_cst`, which provides
+        # sequential consistency guarantees.
+        # @ret: The old value of the atomic variable before the fetch-min operation was performed.
+    }
+
+    !public
+    !intrinsic(name="std.threading.atomic.Atom.fetch_fmax")
+    !versioned(base="1.0.0", new="1.0.0")
     fun fetch_max(&self, val: T, order: U8 = Self::mo_seq_cst) -> T {
         # The `fetch_max` method atomically compares the current value of the atomic variable with the provided `val`,
-        # stores the larger of the two values back in the atomic variable, and returns the old value. It calls the
-        # appropriate intrinsic function to perform the atomic fetch-max operation and returns the old value. This
-        # operation can be useful for various synchronization patterns, such as implementing atomic maximum tracking.
+        # stores the larger of the two values back in the atomic variable, and returns the old value. This is
+        # specialized for floating point types, so it uses the `fmax` atomic intrinsic, which has no signed/unsigned
+        # split unlike the integer `smax`/`umax`.
         # @let val: The value to be compared with the current value of the atomic variable, and the larger of the two
         # will be stored back in the atomic variable.
         # @let ?order: The memory ordering for the fetch-max operation. The default is `mo_seq_cst`, which provides

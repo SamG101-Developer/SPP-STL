@@ -11,6 +11,7 @@ use std::option::Opt
 use std::option::Some
 use std::string::Str
 use std::string_view::StrView
+use std::num::bases::Zero
 use std::num::sized_floating_point::SizedFloatingPoint
 use std::num::sized_integer_signed::SizedIntegerSigned
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
@@ -36,6 +37,28 @@ cls Bool {
     # The `Bool` type is a fundamental type in the language and is used for control flow, conditional expressions, and
     # logical operations. It is a simple type that can be easily optimized by the compiler, and is mapped to the llvm
     # `bool` type.
+}
+
+sup Bool ext Zero {
+    # The `Bool` type has a zero value, which is `false`. This allows for the use of the `Zero` trait to create a `Bool`
+    # value that is initialized to `false`, and can be used in generic contexts where a zero value is required.
+
+    !versioned(base="1.0.0", new="1.0.0")
+    fun zero() -> Self {
+        # The `zero` method returns the zero value for the `Bool` type, which is `false`. This is useful for
+        # initializing variables or fields to a known state, and for generic contexts where a zero value is required.
+        # @ret: The zero value for the `Bool` type, which is `false`.
+        ret false
+    }
+
+    fun is_zero(&self) -> Bool {
+        # The `is_zero` method checks if the `Bool` value is equal to the zero value, which is `false`. This is useful
+        # for checking if a variable or field is in its default state, and for generic contexts where a zero value is
+        # required.
+        # @ret: A boolean value indicating whether the `Bool` value is equal to the zero value (`false`).
+
+        ret self.not
+    }
 }
 
 sup Bool ext Integral {
@@ -76,7 +99,6 @@ sup Bool ext BitAnd {
     # Use the `&` operator class.
 
     !inline
-    !intrinsic(name="std.boolean.Bool.bit_and")
     !versioned(base="1.0.0", new="1.0.0")
     cmp fun bit_and(self, that: Self) -> Self {
         # The `bit_and` method allows for `true & false` to be evaluated as `try.bit_and(false)`, which is intrinsically
@@ -84,6 +106,8 @@ sup Bool ext BitAnd {
         # operations are the same, but they are provided as separate methods to allow for better contextual usage.
         # @let that: The right-hand side of the bitwise AND operation.
         # @ret: The result of the bitwise AND operation between `self` and `that`.
+
+        ret std::intrinsics::bit_and(self, that)
     }
 }
 
@@ -91,7 +115,6 @@ sup Bool ext BitIor {
     # Use the `|` operator class.
 
     !inline
-    !intrinsic(name="std.boolean.Bool.bit_ior")
     !versioned(base="1.0.0", new="1.0.0")
     cmp fun bit_ior(self, that: Self) -> Self {
         # The `bit_ior` method allows for `true | false` to be evaluated as `try.bit_ior(false)`, which is intrinsically
@@ -99,6 +122,8 @@ sup Bool ext BitIor {
         # operations are the same, but they are provided as separate methods to allow for better contextual usage.
         # @let that: The right-hand side of the bitwise OR operation.
         # @ret: The result of the bitwise OR operation between `self` and `that`.
+
+        ret std::intrinsics::bit_ior(self, that)
     }
 }
 
@@ -106,7 +131,6 @@ sup Bool ext BitXor {
     # Use the `^` operator class.
 
     !inline
-    !intrinsic(name="std.boolean.Bool.bit_xor")
     !versioned(base="1.0.0", new="1.0.0")
     cmp fun bit_xor(self, that: Self) -> Self {
         # The `bit_xor` method allows for `true ^ false` to be evaluated as `try.bit_xor(false)`, which is intrinsically
@@ -114,6 +138,8 @@ sup Bool ext BitXor {
         # only way to perform an exclusive OR operation on `Bool` values.
         # @let that: The right-hand side of the bitwise XOR operation.
         # @ret: The result of the bitwise XOR operation between `self` and `that`.
+
+        ret std::intrinsics::bit_xor(self, that)
     }
 }
 
@@ -121,13 +147,14 @@ sup Bool ext BitNot {
     # Use the `~` operator class.
 
     !inline
-    !intrinsic(name="std.boolean.Bool.bit_not")
     !versioned(base="1.0.0", new="1.0.0")
     cmp fun bit_not(self) -> Self {
         # The `bit_not` method allows for `true~` to be evaluated as `try.bit_not()`, which is intrinsically mapped to
         # the llvm `not` instruction. Because a `Bool` is a single bit, the bitwise NOT and logical NOT operations are
         # the same, but they are provided as separate methods to allow for better contextual usage.
         # @ret: The result of the bitwise NOT operation on `self`.
+
+        ret std::intrinsics::bit_not(self)
     }
 }
 
@@ -135,23 +162,25 @@ sup Bool ext Eq {
     # Use the `==` and `!=` operator class.
 
     !inline
-    !intrinsic(name="std.boolean.Bool.eq")
     !versioned(base="1.0.0", new="1.0.0")
     fun eq(&self, that: &Self) -> Bool {
         # The `eq` method allows for `true == false` to be evaluated as `try.eq(false)`, which is intrinsically mapped
         # to the llvm `icmp eq` instruction.
         # @let that: The right-hand side of the equality comparison.
         # @ret: The result of the equality comparison between `self` and `that`.
+
+        ret std::intrinsics::eq(self, that)
     }
 
     !inline
-    !intrinsic(name="std.boolean.Bool.ne")
     !versioned(base="1.0.0", new="1.0.0")
     fun ne(&self, that: &Self) -> Bool {
         # The `ne` method allows for `true != false` to be evaluated as `try.ne(false)`, which is intrinsically mapped
         # to the llvm `icmp ne` instruction.
         # @let that: The right-hand side of the inequality comparison.
         # @ret: The result of the inequality comparison between `self` and `that`.
+
+        ret std::intrinsics::ne(self, that)
     }
 }
 

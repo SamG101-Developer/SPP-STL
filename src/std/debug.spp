@@ -1,4 +1,6 @@
+use std::annotations::cfg
 use std::annotations::intrinsic
+use std::annotations::private
 use std::annotations::public
 use std::annotations::versioned
 use std::annotations::zero_type
@@ -9,23 +11,44 @@ use std::void::Void
 cls AssertErr { }
 
 !public
-!intrinsic(name="std.debug.breakpoint")
+!cfg(mode="dev")
 !versioned(base="1.0.0", new="1.0.0")
-cmp fun breakpoint() -> Void {
+fun breakpoint() -> Void {
+    # In debug mode, this function triggers a breakpoint in the debugger. It re-uses the `breakpoint_internal` function,
+    # which is an intrinsic that hooks into the `llvm.debugtrap` instruction. This allows developers to pause execution
+    # and inspect the state of the program at this point.
+
+    breakpoint_internal()
+}
+
+# !public
+# !cfg(mode="rel")
+# !versioned(base="1.0.0", new="1.0.0")
+# fun breakpoint() -> Void {
+#     # In release mode, this function does nothing. It is a no-op, as breakpoints are typically not used in release
+#     # builds. This allows the same code to be used in both debug and release builds without any changes, while still
+#     # providing the ability to trigger breakpoints in debug builds.
+# } # Todo: Re-enable when we have "cfg" supported
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun breakpoint_always() -> Void {
+    # This function always triggers a breakpoint in the debugger, regardless of whether the build is in debug or release
+    # mode. This isn't used often, but can be useful in certain situations where there is a difference in thr debug and
+    # release builds, and you want to ensure that a breakpoint is hit in both cases. It re-uses the
+    # `breakpoint_internal` function, which is an intrinsic that hooks into the `llvm.debugtrap` instruction
+
+    breakpoint_internal()
+}
+
+!private
+!intrinsic(name="std.debug.breakpoint_internal")
+!versioned(base="1.0.0", new="1.0.0")
+fun breakpoint_internal() -> Void {
     # Triggers a breakpoint in the debugger. This is typically used for debugging purposes, and can be used to pause
     # execution at a specific point in the code. When this function is called, the debugger will halt execution and
     # allow the developer to inspect the state of the program. This can be useful for diagnosing issues or understanding
     # the flow of the program. The function does not take any parameters and does not return any value. Only trips on
-    # debug builds, and is a no-op on release builds.
-}
-
-!public
-!intrinsic(name="std.debug.breakpoint_always")
-!versioned(base="1.0.0", new="1.0.0")
-cmp fun breakpoint_always() -> Void {
-    # Triggers a breakpoint in the debugger, even in release builds. This is typically used for debugging purposes, and
-    # can be used to pause execution at a specific point in the code. When this function is called, the debugger will
-    # halt execution and allow the developer to inspect the state of the program. This can be useful for diagnosing
-    # issues or understanding the flow of the program. The function does not take any parameters and does not return any
-    # value. This function is always active, regardless of the build configuration.
+    # debug builds, and is a no-op on release builds. This hooks into the `llvm` intrinsic `llvm.debugtrap`, which is a
+    # low-level instruction that triggers a breakpoint in the debugger.
 }

@@ -1,14 +1,19 @@
 use std::annotations::intrinsic
 use std::annotations::package
+use std::annotations::private
 use std::annotations::public
 use std::annotations::versioned
 use std::annotations::zero_type
+use std::llvm::always_inline
+use std::llvm::inline
 use std::boolean::Bool
+use std::copy::Copy
 use std::function::Fun
 use std::function::FunMov
 use std::function::FunMut
 use std::function::FunRef
 use std::generator::GenOnce
+use std::number::U8
 use std::number::USize
 use std::result::Fail
 use std::result::Pass
@@ -54,7 +59,7 @@ sup [T] NonNull[T] {
 
     type Element = T
 
-    !package
+    !package !inline
     !versioned(base="1.0.0", new="1.0.0")
     fun from_ptr(ptr: Ptr[T]) -> Res[NonNull[T], NullptrErr] {
         # Create a `NonNull` pointer from a raw pointer. This is safe because the `NonNull` type guarantees that the
@@ -71,13 +76,25 @@ sup [T] NonNull[T] {
         ret Pass(val=Self::from_ptr_inner(ptr))
     }
 
-    !package
-    !intrinsic(name="spp.mem.pointer.NonNull.from_ptr_inner")
+    !private !always_inline
+    !intrinsic(name="std.mem.pointer.NonNull.from_ptr_inner")
     !versioned(base="1.0.0", new="1.0.0")
     fun from_ptr_inner(ptr: Ptr[T]) -> NonNull[T] { }
 
-    !package
-    !intrinsic(name="spp.mem.pointer.NonNull.raw")
+    !package !inline
+    !versioned(base="1.0.0", new="1.0.0")
+    fun dangling() -> NonNull[T] {
+        # Create a dangling `NonNull` that is non-null and correctly aligned for `T` but points at no allocation. The
+        # address is `T`'s alignment - always a non-zero power of two - so it is a valid, well-aligned, non-null
+        # sentinel that must never be dereferenced or freed. It backs zero-sized allocations (an empty buffer, or a
+        # buffer of a zero-sized type), letting them hold a non-null pointer without ever touching the allocator.
+        # @ret: A dangling, well-aligned, non-null pointer for `T`.
+
+        ret Self::from_ptr_inner(Ptr[T](addr=std::mem::ops::align_of[T]()))
+    }
+
+    !package !always_inline
+    !intrinsic(name="std.mem.pointer.NonNull.raw")
     !versioned(base="1.0.0", new="1.0.0")
     fun raw(&self) -> Ptr[T] {
         # Get the raw pointer from the `NonNull` pointer. This is a compiler intrinsic, as it can be implemented using a
@@ -86,33 +103,23 @@ sup [T] NonNull[T] {
         # calls, and it is guaranteed to be non-null.
     }
 
-    !package
-    !intrinsic(name="spp.mem.pointer.NonNull.from_func")
+    !package !always_inline
     !versioned(base="1.0.0", new="1.0.0")
-    fun from_func[F: Fun](func: F) -> NonNull[F] {
-        # Convert a function into the function pointer type associated with it. This is needed to pass functions into
-        # ffi calls, which only accept function pointers. Ffi must accept `void*` as the function pointer type and cast
-        # it internally, because NonNull is effectively a `void*` with respect to cffi.
-        # @type F: The type of the function being converted. This must be a function type, as the generic is constrained
-        # to the base `Fun` trait.
-        # @let func: The function being converted into a function pointer. This is a value of type `F`, which is any
-        # functional object.
-        # @ret: A `NonNull` pointer that points to the function. This is effectively a function pointer that can be
-        # passed into ffi calls, and it is guaranteed to be non-null.
+    fun erase_type(self) -> NonNull[U8] {
+        # Erase the static type of this pointer, viewing the referent as raw bytes. The underlying address and the bytes
+        # it points at are unchanged; only the static type is discarded. This direction is unconditionally sound: any
+        # live, initialized allocation is a valid sequence of bytes, so no precondition is attached to it. It is the
+        # inverse of `cast`, which retypes a byte pointer back into a typed one.
+        #
+        # `NonNull` is `Copy`, so this takes `self` by value without consuming the caller's pointer - it just produces a
+        # byte-typed view of the same address. Not handing an allocation to the allocator twice is a contract of the
+        # package-internal allocation API, not something enforced by move semantics.
+        # @ret: A `NonNull[U8]` with the same address as `self`, viewing the allocation as raw bytes.
+
+        ret self.cast[U8]()
     }
 
-    !package
-    !intrinsic(name="spp.mem.pointer.NonNull.cast")
-    !versioned(base="1.0.0", new="1.0.0")
-    fun cast[U](self) -> NonNull[U] {
-        # Reinterpret this pointer as a pointer to type `U`. The underlying address is unchanged; only the type changes.
-        # Used to convert between `NonNull[U8]` (returned by allocators) and typed `NonNull[T]` pointers.
-        # @type U: The target type to reinterpret the pointer as.
-        # @ret: A `NonNull[U]` with the same address as `self`.
-    }
-
-    !package
-    !intrinsic(name="spp.mem.pointer.NonNull.is_aligned")
+    !package !always_inline
     !versioned(base="1.0.0", new="1.0.0")
     fun is_aligned(&self, align: USize) -> Bool {
         # The `is_aligned` method checks if the pointer is aligned to a given alignment. This is a compiler intrinsic,
@@ -120,10 +127,12 @@ sup [T] NonNull[T] {
         # method returns true if the pointer is aligned to that alignment, and false otherwise.
         # @let align: The alignment to check against. This must be a power of two.
         # @ret: A boolean value indicating whether the pointer is aligned to the specified alignment or not.
+
+        ret self.raw().addr & (align - 1_uz) == 0_uz
     }
 
-    !package
-    !intrinsic(name="spp.mem.pointer.NonNull.write")
+    !package !always_inline
+    !intrinsic(name="std.mem.pointer.NonNull.write")
     !versioned(base="1.0.0", new="1.0.0")
     fun write(&mut self, value: T) -> Void {
         # The `write` method writes a value to the memory location pointed to by the `NonNull` pointer. This is a
@@ -133,22 +142,61 @@ sup [T] NonNull[T] {
         # value that the pointer points to.
     }
 
-    !package
-    !intrinsic(name="spp.mem.pointer.NonNull.read")
+    !package !always_inline
+    !intrinsic(name="std.mem.pointer.NonNull.read")
     !versioned(base="1.0.0", new="1.0.0")
-    fun read(&self) -> T {
-        # The `read` method reads a value from the memory location pointed to by the `NonNull` pointer. This is a
-        # compiler intrinsic, as it can be implemented using a single instruction in LLVM. The method returns a copy of
-        # the value being read, and it is moved out of the memory location. Due to ownership rules, this is safe.
-        # @ret: A value of type `T`, which is the type of the value that the pointer points to. This is a copy of the
-        # value that was read from the memory location.
+    fun read(self) -> T {
+        # The `read` method performs a bitwise move-out of the value at the memory location pointed to by the `NonNull`
+        # pointer. Because this is a "self" method, it takes ownership of the pointer, and the caller cannot use the raw
+        # pointer object again. This is a compiler intrinsic, as it can be implemented using a single instruction in
+        # LLVM.
+        # @ret: The value that was read from the memory location. This is a value of type `T`, which is the type of the
+        # value that the pointer points to.
     }
+}
+
+sup NonNull[U8] {
+    # Retyping a byte pointer into a typed pointer is the one pointer operation in the STL that carries a genuine
+    # soundness precondition, so it is deliberately confined to this sup-block. Declaring it on `NonNull[U8]` rather
+    # than on `NonNull[T]` means the type system, not a naming convention, prevents it from being used as a general
+    # "reinterpret anything as anything" primitive: there is no way to spell `NonNull[A] -> NonNull[B]` for two
+    # unrelated types, because the only way into this block is to hold a byte pointer, and the only way to get a byte
+    # pointer from a typed one is `erase_type`.
+
+    !package !always_inline
+    !intrinsic(name="std.mem.pointer.NonNull.cast")
+    !versioned(base="1.0.0", new="1.0.0")
+    fun cast[U](self) -> NonNull[U] {
+        # Retype a byte pointer as a pointer to `U`. The underlying address is unchanged; only the static type changes.
+        # This is the sole way to turn a `NonNull[U8]` into a typed pointer, and together with `erase_type` (the
+        # reverse) it is the only pointer retyping in the STL.
+        #
+        # Preconditions, which the caller must establish and which this function cannot check:   - The allocation is at
+        # least `size_of[U]()` bytes and the address is aligned to `align_of[U]()`.   - Any byte the caller subsequently
+        # reads as a `U` has actually been initialized as a `U`. A freshly allocated     block is entirely
+        # uninitialized; a reallocated block preserves its existing elements and leaves the newly     added tail
+        # uninitialized.
+        #
+        # These hold by construction at the only call sites - the `allocate_array` and `grow_array` families - each of
+        # which sits directly on top of an allocation whose `Layout` was computed from `U` itself. Nothing else in the
+        # STL may call this.
+        # @type U: The target type to retype the pointer as.
+        # @ret: A `NonNull[U]` with the same address as `self`.
+    }
+}
+
+sup [T] NonNull[T] ext Copy {
+    # A `NonNull` is a single machine address, so it is `Copy`: duplicating one just duplicates the address. Copying a
+    # pointer does not copy or alias the pointee in any ownership sense - keeping a duplicate from being handed to the
+    # allocator twice (a double free) is a contract of the package-internal allocation API, not something the type
+    # system enforces. This mirrors how the reallocating allocator methods thread a pointer value in and out.
 }
 
 sup [T] NonNull[T] ext FwdMut[&mut T] {
     # Provide a forwarding implementation for mutable references to the inner type of the `NonNull` pointer.
 
-    !intrinsic(name="spp.mem.pointer.NonNull.fwd_mut")
+    !always_inline
+    !intrinsic(name="std.mem.pointer.NonNull.fwd_mut")
     !versioned(base="1.0.0", new="1.0.0")
     cor fwd_mut(&mut self) -> GenOnce[&mut T] {
         # Allow the `NonNull` pointer type to coalesce to the inner type, allowing for simple field access and method
@@ -160,7 +208,8 @@ sup [T] NonNull[T] ext FwdMut[&mut T] {
 sup [T] NonNull[T] ext FwdRef[&T] {
     # Provide a forwarding implementation for immutable references to the inner type of the `NonNull` pointer.
 
-    !intrinsic(name="spp.mem.pointer.NonNull.fwd_ref")
+    !always_inline
+    !intrinsic(name="std.mem.pointer.NonNull.fwd_ref")
     !versioned(base="1.0.0", new="1.0.0")
     cor fwd_ref(&self) -> GenOnce[&T] {
         # Allow the `NonNull` pointer type to coalesce to the inner type, allowing for simple field access and method

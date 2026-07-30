@@ -381,27 +381,27 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
     !public
     !inline
-    !intrinsic(name="std.num.sized_integer.two")
+    !intrinsic(name="std.num.sized_integer.SizedInteger.two")
     fun two() -> Self { }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Zero {
     !inline
-    !intrinsic(name="std.num.sized_integer.zero")
+    !intrinsic(name="std.num.sized_integer.SizedInteger.zero")
     !versioned(base="1.0.0", new="1.0.0")
-    fun zero() -> Self { }
+    cmp fun zero() -> Self { }
 
     !inline
-    !intrinsic(name="std.num.sized_integer.is_zero")
+    !intrinsic(name="std.num.sized_integer.SizedInteger.is_zero")
     !versioned(base="1.0.0", new="1.0.0")
     fun is_zero(&self) -> Bool { }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext One {
     !inline
-    !intrinsic(name="std.num.sized_integer.one")
+    !intrinsic(name="std.num.sized_integer.SizedInteger.one")
     !versioned(base="1.0.0", new="1.0.0")
-    fun one() -> Self { }
+    cmp fun one() -> Self { }
 
     !inline
     !versioned(base="1.0.0", new="1.0.0")

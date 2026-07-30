@@ -10,12 +10,12 @@ use std::generator::Gen
 use std::generator::GenOnce
 use std::iterator::Iterator
 use std::number::S8
+use std::number::U32
 use std::number::U8
 use std::number::USize
 use std::option::None
 use std::option::Opt
 use std::option::Some
-use std::result::Res
 use std::string::Str
 use std::view::View
 use std::void::Void
@@ -45,16 +45,7 @@ cls StrView {
 }
 
 sup StrView {
-    !public
-    !intrinsic(name="std.string_view.StrView.from_utf8")
-    !versioned(base="1.0.0", new="1.0.0")
-    fun from_utf8(bytes: &View[U8], str: &mut StrView) -> Res[Void, Utf8Err] { }
-
-    !public
-    !intrinsic(name="std.string_view.StrView.from_utf8_unchecked")
-    !versioned(base="1.0.0", new="1.0.0")
-    fun from_utf8_unchecked(bytes: &View[U8], str: &mut StrView) -> Void { }
-
+    #
     !public
     !versioned(base="1.0.0", new="1.0.0")
     fun len(&self) -> USize {
@@ -101,11 +92,55 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    !intrinsic(name="std.string_view.StrView.chars")
     cor chars(&self) -> Iterator[Char] {
         # The `chars` method returns an iterator over the characters of this `StrView`. Each character is a valid UTF-8
-        # character, and the iterator will yield the characters in order.
+        # character, and the iterator will yield the characters in order. Decodes the underlying bytes as it goes:
+        # `remaining` counts how many continuation bytes are still owed to the in-progress `code_point`, so a leading
+        # byte starts a new character and each subsequent byte folds in its 6 payload bits, per the standard UTF-8
+        # layout (110xxxxx, 1110xxxx, 11110xxx leaders with 10xxxxxx continuations). Validity is guaranteed by the
+        # `StrView` invariant, so the leading-byte ranges below are not re-validated.
         # @ret: An iterator over the characters of this `StrView`.
+
+        # Start with the assumption that there are no continuation
+        # bytes owed to a code point, and that the code point is 0.
+        let mut code_point = 0_u32
+        let mut remaining = 0_u32
+
+        # Iterate the raw bytes of the string, decoding them into
+        # characters as we go.
+        loop byte in self.bytes() {
+
+            # If there are no remaining continuation bytes owed to
+            # a code point, then this byte is a leading byte and
+            # starts a new character.
+            case remaining == 0_u32 {
+                case byte of {
+                    < 0x80_u8 { gen Char::from(U32::from(byte)) }
+                    < 0xE0_u8 {
+                        code_point = U32::from(byte & 0x1F_u8)
+                        remaining = 1_u32
+                    }
+                    < 0xF0_u8 {
+                        code_point = U32::from(byte & 0x0F_u8)
+                        remaining = 2_u32
+                    }
+                    else {
+                        code_point = U32::from(byte & 0x07_u8)
+                        remaining = 3_u32
+                    }
+                }
+            }
+
+            # Otherwise, this byte is a continuation byte and contributes
+            # to the current code point. Merge it into the code point and
+            # decrement the remaining count. Yield if this was the last
+            # continuation byte.
+            else {
+                code_point = (code_point << 6_u32) | U32::from(byte & 0x3F_u8)
+                remaining -= 1_u32
+                case remaining == 0_u32 { gen Char::from(code_point) }
+            }
+        }
     }
 
     !public
@@ -127,31 +162,34 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    !intrinsic(name="std.string_view.StrView.bytes")
     cor bytes(&self) -> Iterator[U8] {
         # The `bytes` method returns an iterator over the bytes of this `StrView`. The bytes might make up valid UTF-8
         # characters, but they are not guaranteed to be valid UTF-8 on their own. This is the same as iterating over a
         # `Vec[U8]` type, for example.
         # @ret: An iterator over the bytes of this `StrView`.
+
+        loop byte in self.bytes_ref() { gen byte@ }
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    !intrinsic(name="std.string_view.StrView.bytes_ref")
     cor bytes_ref(&self) -> Iterator[&U8] {
         # The `bytes_ref` method returns an iterator over immutable borrows of the bytes of this `StrView`. This method
         # will not typically be used, but is provided as the mirror of `bytes_mut`, which will often be used.
         # @ret: An iterator over immutable borrows to the bytes of this `StrView`.
+
+        loop byte in self.view_ref().iter_ref() { gen byte }
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    !intrinsic(name="std.string_view.StrView.bytes_mut")
     cor bytes_mut(&mut self) -> Iterator[&mut U8] {
         # The `bytes_mut` method returns an iterator over mutable borrows of the bytes of this `StrView`. This method
         # will be used when mutating the bytes of the string, such as when converting to uppercase or lowercase
         # in-place.
         # @ret: An iterator over mutable borrows to the bytes of this `StrView`.
+
+        loop byte in self.view_mut().iter_mut() { gen byte }
     }
 
     !public
@@ -500,12 +538,12 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun replace(&self, from: &StrView, into: &StrView) -> Str {
+    fun replace(&self, from: &StrView, upto: &StrView) -> Str {
         # Replace all occurrences of `from` with `into` in this `StrView` and return the result as a new `Str`. The
         # `from` and `into` strings must be valid UTF-8 and null-terminated, which is automatically guaranteed by the
         # `StrView` type.
         # @let from: The `StrView` to replace in this `StrView`.
-        # @let into: The `StrView` to replace `from` with in this `StrView`.
+        # @let upto: The `StrView` to replace `from` with in this `StrView`.
         # @ret: A new `Str` with all occurrences of `from` replaced with `into`.
         # @todo: Implement this (issue with view/strview)
 
@@ -578,22 +616,25 @@ sup StrView {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    !intrinsic(name="std.string_view.StrView.view")
     cor view_ref(&self) -> GenOnce[&View[U8]] {
-        # The `view` method returns a view of the bytes of this `StrView`. This is a non-mutating method, and it does
-        # not modify the original string. The returned view is valid for the lifetime of this `StrView`, and it is
+        # The `view_ref` method returns a view of the bytes of this `StrView`. This is a non-mutating method, and it
+        # does not modify the original string. The returned view is valid for the lifetime of this `StrView`, and it is
         # guaranteed to be null-terminated.
         # @ret: A view of the bytes of this `StrView`.
+
+        let view = View(ptr=self.ptr, length=self.length)
+        gen &view
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    !intrinsic(name="std.string_view.StrView.view")
     cor view_mut(&mut self) -> GenOnce[&mut View[U8]] {
-        # The `view` method returns a view of the bytes of this `StrView`. This is a non-mutating method, and it does
-        # not modify the original string. The returned view is valid for the lifetime of this `StrView`, and it is
-        # guaranteed to be null-terminated.
-        # @ret: A view of the bytes of this `StrView`.
+        # The `view_mut` method returns a mutable view of the bytes of this `StrView`. The returned view is valid for
+        # the lifetime of this `StrView`, and it is guaranteed to be null-terminated.
+        # @ret: A mutable view of the bytes of this `StrView`.
+
+        let mut view = View(ptr=self.ptr, length=self.length)
+        gen &mut view
     }
 }
 
@@ -635,7 +676,7 @@ sup StrView ext SliceMut[StrView, USize] {
 
     !intrinsic(name="std.string_view.StrView.slice_mut")
     !versioned(base="1.0.0", new="1.0.0")
-    cor slice_mut(&mut self, from: USize, into: USize) -> GenOnce[&mut StrView] { }
+    cor slice_mut(&mut self, from: USize, upto: USize) -> GenOnce[&mut StrView] { }
 }
 
 sup StrView ext SliceRef[StrView, USize] {
@@ -650,7 +691,7 @@ sup StrView ext SliceRef[StrView, USize] {
 
     !intrinsic(name="std.string_view.StrView.slice_ref")
     !versioned(base="1.0.0", new="1.0.0")
-    cor slice_ref(&self, from: USize, into: USize) -> GenOnce[&StrView] { }
+    cor slice_ref(&self, from: USize, upto: USize) -> GenOnce[&StrView] { }
 }
 
 sup U8 {

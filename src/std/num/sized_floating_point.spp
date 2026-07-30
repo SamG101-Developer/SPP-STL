@@ -161,15 +161,19 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Ord {
     fun ord(&self, that: &Self) -> S32 {
         # The `ord` method defines how to compare two floating point values of the same size and determine their
         # ordering. It uses the `fcmp` intrinsic function to perform the comparison, which checks the relative ordering
-        # of the two values according to the rules of floating point arithmetic.
+        # of the two values according to the rules of floating point arithmetic. There is no intrinsic for `fcmp`, so it
+        # is implemented in S++.
         # @let that: A borrow to the floating point value that is being compared to the current value for ordering.
         # @ret: An `S32` value indicating the ordering of the two floating point values:
         # - A negative value indicates that the current value is less than the other value.
         # - Zero indicates that the two values are equal.
         # - A positive value indicates that the current value is greater than the other value.
 
-        # Hook into comparison intrinsic.
-        ret intrinsics::fcmp(self, that)
+        # Simple 3 way comparison.
+        ret case self of {
+            < that { -1 }
+            > that { 1 }
+            else { 0 } }
     }
 
     !versioned(base="1.0.0", new="1.0.0")
@@ -757,30 +761,31 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
 
 sup [cmp w: U32] SizedFloatingPoint[w] {
     !public !inline
-    !intrinsic(name="std.num.sized_floating_point.neg_one")
+    !intrinsic(name="std.num.sized_floating_point.SizedFloatingPoint.neg_one")
     !versioned(base="1.0.0", new="1.0.0")
-    fun neg_one() -> Self { }
+    cmp fun neg_one() -> Self { }
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext Zero {
     !inline
-    !intrinsic(name="std.num.sized_floating_point.zero")
+    !intrinsic(name="std.num.sized_floating_point.SizedFloatingPoint.zero")
     !versioned(base="1.0.0", new="1.0.0")
-    fun zero() -> Self { }
+    cmp fun zero() -> Self { }
 
     !inline
-    !intrinsic(name="std.num.sized_floating_point.is_zero")
+    !intrinsic(name="std.num.sized_floating_point.SizedFloatingPoint.is_zero")
     !versioned(base="1.0.0", new="1.0.0")
     fun is_zero(&self) -> Bool { }
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext One {
     !inline
-    !intrinsic(name="std.num.sized_floating_point.one")
+    !intrinsic(name="std.num.sized_floating_point.SizedFloatingPoint.one")
     !versioned(base="1.0.0", new="1.0.0")
-    fun one() -> Self { }
+    cmp fun one() -> Self { }
 
     !inline
+    !intrinsic(name="std.num.sized_floating_point.SizedFloatingPoint.is_one")
     !versioned(base="1.0.0", new="1.0.0")
     fun is_one(&self) -> Bool {
         ret self == Self::one()
