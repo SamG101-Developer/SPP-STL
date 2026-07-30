@@ -79,6 +79,24 @@ fun mem_set[T](dest: &mut NonNull[T], value: U8, n: USize, dest_index: USize = 0
 
 !package !inline
 !versioned(base="1.0.0", new="1.0.0")
+fun mem_cmp[T](a: &NonNull[T], b: &NonNull[T], n: USize) -> S32 {
+    # Compares two blocks of memory. This is typically used for comparing values, or for comparing the contents of two
+    # references. Whilst this might be considered "unsafe", it is never exposed to the user, as it is hidden under
+    # allocators and the memory api.
+    # @type T: The pointee type of the two pointers. The operation is byte-level and does not depend on it.
+    # @let a: A reference to the first value to compare.
+    # @let b: A reference to the second value to compare.
+    # @let n: The number of bytes to compare.
+    # @ret: An integer indicating the result of the comparison. A negative value indicates that `a` is less than `b`, a
+    # positive value indicates that `a` is greater than `b`, and zero indicates that they are equal.
+
+    let mut out = 0_s32
+    sppc::memcmp(&a.raw(), &b.raw(), n, &mut out)
+    ret out
+}
+
+!package !inline
+!versioned(base="1.0.0", new="1.0.0")
 fun mem_copy[T](dest: &mut T, src: &T, n: USize, dest_index: USize = 0_uz, src_index: USize = 0_uz) -> Void {
     # Copies a block of memory from one location to another. This is typically used for copying values, or for moving
     # values out of a reference. Whilst this might be considered "unsafe", it is never exposed to the user, as it is
