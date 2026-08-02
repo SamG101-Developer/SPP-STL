@@ -40,21 +40,18 @@ sup [T] Fut[T] {
     }
 
     !public
-    !intrinsic(name="std.future.Fut.await_all")
     !versioned(base="1.0.0", new="1.0.0")
-    fun await_all(..futures: Fut[T]) -> Void {
+    fun await_all(..futures: Fut[T]) -> Vec[T] {
         # The `await_all` method is used to wait for multiple futures to resolve. It takes a variable number of futures
         # as arguments and waits for all of them to resolve before returning. This is useful when you have multiple
         # asynchronous operations that need to be completed before proceeding, and you want to wait for all of them to
         # finish before moving on to the next step in your program. The method will block until all of the provided
-        # futures have resolved.
+        # futures have resolved. Note that it doesn't wait for one, then the next, but rather waits for all of them to
+        # resolve in parallel, and returns when the last one has resolved.
         # @let ..futures: A variable number of futures that we want to wait on. The method will block until all of these
         # futures have resolved.
-    }
-}
+        # @ret: A vector containing the resolved values of all the futures.
 
-sup [T] Fut[T] ext Del {
-    fun del(&mut self) -> Void {
-        sppc::async_done(self.handle)
+        ret Vec[T]() # TODO
     }
 }
