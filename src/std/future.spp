@@ -3,8 +3,8 @@ use std::annotations::private
 use std::annotations::public
 use std::annotations::versioned
 use std::function::Fun
-use std::number::U8
 use std::number::U64
+use std::number::U8
 use std::option::None
 use std::option::Opt
 use std::vector::Vec
@@ -56,4 +56,19 @@ sup [T] Fut[T] {
 
         ret Vec[T]() # TODO
     }
+}
+
+!private
+!versioned(base="1.0.0", new="1.0.0")
+fun call[F: FunMov[(Ts), T], ..Ts](f: F, ..args: Ts) -> U64 {
+    #
+    # @type F:
+    # @type Ts:
+    # @let f:
+    # @let ..args:
+    # @ret:
+
+    let mut handle = 0_u64
+    let err = sppc::async_(&mut handle, f, ..args)
+    ret handle
 }
