@@ -29,15 +29,13 @@ cls Fut[T] {
 sup [T] Fut[T] {
     !private
     !versioned(base="1.0.0", new="1.0.0")
-    fun async_[F, ..Ts](f: FunMov[(Ts), T], ..args: Ts) -> Self {
+    fun async_[F: FunMov[(Ts), T], ..Ts](f: F, ..args: Ts) -> Self {
         #
         # @type F:
         # @type Ts:
         # @let f:
         # @let ..args:
         # @ret:
-
-        # F : FunMov[(Ts), T]
 
         let mut handle = 0_u64
         let err = sppc::async_(&mut handle, f, ..args)
