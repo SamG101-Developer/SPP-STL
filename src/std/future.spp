@@ -29,7 +29,7 @@ cls Fut[T] {
 sup [T] Fut[T] {
     !private
     !versioned(base="1.0.0", new="1.0.0")
-    fun async_[F: Fun, ..Ts](f: F, ..args: Ts) -> Self {
+    fun async_[F, ..Ts](f: F, ..args: Ts) -> Self {
         #
         # @type F:
         # @type Ts:
