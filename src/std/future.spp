@@ -56,7 +56,7 @@ sup [T] Fut[T] {
         let val = NonNull[U8]::from_ptr(sppc::await(self.handle))
             .expect("C async runtime failed")
             .cast[T]()
-        ret val.take()
+        ret val.read()
     }
 
     !public
