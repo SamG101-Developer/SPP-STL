@@ -53,7 +53,9 @@ sup [T] Fut[T] {
         # point it will return the value of type `T` that the future resolves to. If the future is already resolved when
         # this method is called, it will return the resolved value immediately without blocking.
 
-        let val = NonNull[U8]::from_ptr(sppc::await(self.handle)).cast[T]()
+        let val = NonNull[U8]::from_ptr(sppc::await(self.handle))
+            .expect("C async runtime failed")
+            .cast[T]()
         ret val.take()
     }
 
