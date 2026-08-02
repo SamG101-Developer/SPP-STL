@@ -39,7 +39,7 @@ sup [T] Fut[T] {
         # @ret:
 
         let mut handle = 0_u64
-        let err = sppc::async_(&mut handle, f, ..args)
+        # let err = sppc::async_(&mut handle, f, ..args)
         ret Self(handle)
     }
 
