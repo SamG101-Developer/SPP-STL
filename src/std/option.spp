@@ -618,6 +618,18 @@ sup [T] Opt[T] ext Try[Some[T], None, T] {
     }
 
     !versioned(base="1.0.0", new="1.0.0")
+    fun op_as_residual(self) -> None {
+        # The `op_as_residual` method produces the value to propagate when this optional is in the empty state. There is
+        # nothing to extract, because `None` carries no data, so this simply produces one. Dropping the value type is
+        # what lets the "?" operator propagate this out of a function whose own success type differs from this
+        # optional's, because a `None` is accepted by any `Opt[U]`.
+        # @ret: Returns `None`, the residual of an optional.
+
+        # There is no state to carry over, so build a fresh `None`.
+        ret None()
+    }
+
+    !versioned(base="1.0.0", new="1.0.0")
     fun op_as_value(self) -> T {
         # The `op_as_value` method extracts the value from this optional if it is in the value state. This method is
         # used by the "?" operator to extract the value from an optional when it is in the value state, and to propagate

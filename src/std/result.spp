@@ -557,6 +557,23 @@ sup [T, E] Res[T, E] ext Try[Pass[T], Fail[E], T] {
     }
 
     !versioned(base="1.0.0", new="1.0.0")
+    fun op_as_residual(self) -> Fail[E] {
+        # The `op_as_residual` method extracts the error state from this result, as a bare `Fail[E]` rather than as a
+        # `Res[T, E]`. Dropping the value type is what lets the "?" operator propagate this error out of a function
+        # whose own success type differs from this result's, because a `Fail[E]` is accepted by any `Res[U, E]`. This
+        # method aborts if called on a `Pass` value, though in practice the `?` operator checks the state with
+        # `op_is_value` before calling this method.
+        # @ret: Returns the `Fail[E]` inside this result if it is in the error state (i.e., it is `Fail`).
+
+        # Pattern match and return the error if this is `Fail`,
+        # otherwise abort the program with an error message.
+        ret case self of {
+            is Fail[E](err) { Fail(err=err) }
+            else { std::abort::abort("called `op_as_residual` on a `Pass` value") }
+        }
+    }
+
+    !versioned(base="1.0.0", new="1.0.0")
     fun op_as_value(self) -> T {
         # The `op_as_value` method extracts the value from this result if it is in the value state. This method is used
         # by the "?" operator to extract the value from a result when it is in the value state, and to propagate the
