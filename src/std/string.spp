@@ -242,20 +242,12 @@ sup [A: Alloc] Str[A] {
             # but the second byte following the extremal leading bytes (`0xE0`,
             # `0xED`, `0xF0`, `0xF4`) has a narrower valid range, to rule out
             # overlong encodings, surrogates, and out-of-range code points.
-            let (second_min, second_max) = case first == 0xE0_u8 {
-                (0xA0_u8, 0xBF_u8)
-            }
-            else case first == 0xED_u8 {
-                (0x80_u8, 0x9F_u8)
-            }
-            else case first == 0xF0_u8 {
-                (0x90_u8, 0xBF_u8)
-            }
-            else case first == 0xF4_u8 {
-                (0x80_u8, 0x8F_u8)
-            }
-            else {
-                (0x80_u8, 0xBF_u8)
+            let (second_min, second_max) = case first of {
+                == 0xE0_u8 { (0xA0_u8, 0xBF_u8) }
+                == 0xED_u8 { (0x80_u8, 0x9F_u8) }
+                == 0xF0_u8 { (0x90_u8, 0xBF_u8) }
+                == 0xF4_u8 { (0x80_u8, 0x8F_u8) }
+                else { (0x80_u8, 0xBF_u8) }
             }
 
             let second = bytes[idx + 1_uz]@
