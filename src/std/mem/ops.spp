@@ -74,7 +74,8 @@ fun mem_set[T](dest: &mut NonNull[T], value: U8, n: USize, dest_index: USize = 0
     # @let ?dest_index: An optional index to start writing at, in bytes. This is typically used for writing to an offset
     # within a value, such as an array.
 
-    sppc::memset(&mut dest.raw(), S32::from(value), n, dest_index)
+    let mut dest_bytes = dest@.erase_type()
+    sppc::memset(&mut dest_bytes.raw(), S32::from(value), n, dest_index)
 }
 
 !package !inline
@@ -91,24 +92,28 @@ fun mem_cmp[T](a: &NonNull[T], b: &NonNull[T], n: USize) -> S32 {
     # positive value indicates that `a` is greater than `b`, and zero indicates that they are equal.
 
     let mut out = 0_s32
-    sppc::memcmp(&a.raw(), &b.raw(), n, &mut out)
+    let a_bytes = a@.erase_type()
+    let b_bytes = b@.erase_type()
+    sppc::memcmp(&a_bytes.raw(), &b_bytes.raw(), n, &mut out)
     ret out
 }
 
 !package !inline
 !versioned(base="1.0.0", new="1.0.0")
-fun mem_copy[T](dest: &mut T, src: &T, n: USize, dest_index: USize = 0_uz, src_index: USize = 0_uz) -> Void {
+fun mem_copy[T](dest: &mut NonNull[T], src: &NonNull[T], n: USize, dest_index: USize = 0_uz, src_index: USize = 0_uz) -> Void {
     # Copies a block of memory from one location to another. This is typically used for copying values, or for moving
     # values out of a reference. Whilst this might be considered "unsafe", it is never exposed to the user, as it is
     # hidden under allocators and the memory api.
-    # @type T: The type of the value to copy.
+    # @type T: The pointee type of the two pointers. The operation is byte-level and does not depend on it.
     # @let dest: A mutable reference to the value to copy to.
     # @let src: A reference to the value to copy from.
     # @let n: The number of bytes to copy.
     # @let ?dest_index: An optional index to start writing at, in bytes.
     # @let ?src_index: An optional index to start reading from, in bytes.
 
-    sppc::memcpy(dest, src, n, dest_index, src_index)
+    let mut dest_bytes = dest@.erase_type()
+    let src_bytes = src@.erase_type()
+    sppc::memcpy(&mut dest_bytes.raw(), &src_bytes.raw(), n, dest_index, src_index)
 }
 
 !public
