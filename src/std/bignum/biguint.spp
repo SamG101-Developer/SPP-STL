@@ -21,7 +21,7 @@ sup [cmp w: U32] BigUInt ext From[SizedIntegerUnsigned[w]] {
     fun from(that: SizedIntegerUnsigned[w]) -> Self {
         let mut val = BigUInt()
         let mut temp = that
-        loop temp != 0_u32 {
+        loop temp != SizedIntegerUnsigned[w]::Zero() {
             val.data.append(U32::from(temp & 0xFFFFFFFF_u32))
             temp >>= 32_u32
         }
