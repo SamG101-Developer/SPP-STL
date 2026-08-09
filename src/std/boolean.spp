@@ -39,6 +39,11 @@ cls Bool {
     # `bool` type.
 }
 
+sup Bool ext Copy {
+    # The `Bool` type is `Copy`, as it is a simple type that can be easily copied by value. This allows for efficient
+    # copying and passing of `Bool` values without the need for heap allocation or reference counting.
+}
+
 sup Bool ext Zero {
     # The `Bool` type has a zero value, which is `false`. This allows for the use of the `Zero` trait to create a `Bool`
     # value that is initialized to `false`, and can be used in generic contexts where a zero value is required.

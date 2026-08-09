@@ -6,6 +6,7 @@ use std::llvm::always_inline
 use std::llvm::inline
 use std::boolean::Bool
 use std::cast::From
+use std::copy::Copy
 use std::limits::Limits
 use std::number::S32
 use std::number::U32
@@ -48,6 +49,12 @@ cls SizedFloatingPoint[cmp w: U32] {
     # floating point (binary8) - `16`: Half precision floating point (binary16) - `32`: Single precision floating point
     # (binary32) - `64`: Double precision floating point (binary64) - `128`: Quadruple precision floating point
     # (binary128)
+}
+
+sup [cmp w: U32] SizedFloatingPoint[w] ext Copy {
+    # The `SizedFloatingPoint` class implements the `Copy` trait, which means that instances of sized floating point
+    # types can be copied by value. This allows for the creation of new instances of sized floating point types without
+    # having to explicitly clone or move the original instance.
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext FloatingPoint {

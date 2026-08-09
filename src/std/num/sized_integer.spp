@@ -6,6 +6,7 @@ use std::llvm::always_inline
 use std::llvm::inline
 use std::boolean::Bool
 use std::cast::From
+use std::copy::Copy
 use std::limits::Limits
 use std::number::U32
 use std::number::U64
@@ -46,6 +47,12 @@ use std::ops::sub::SubAssign
 cls SizedInteger[cmp w: U32, cmp signed: Bool] { }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Integer { }
+
+sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Copy {
+    # All SizedInteger types are Copy, as they are all fixed size and can be copied by value. This is a fundamental
+    # property of the type, and allows for efficient copying and passing of values without the need for heap allocation
+    # or reference counting.
+}
 
 cmp log_10_lookup_table: [U32; 256_uz] = [
     0_u32, 0_u32, 0_u32, 0_u32, 1_u32, 1_u32, 1_u32, 2_u32, 2_u32, 2_u32, 3_u32, 3_u32, 3_u32, 3_u32, 4_u32, 4_u32,
