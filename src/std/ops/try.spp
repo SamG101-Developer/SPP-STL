@@ -1,5 +1,4 @@
 use std::annotations::abstract_method
-use std::annotations::protected
 use std::annotations::public
 use std::boolean::Bool
 
@@ -19,7 +18,7 @@ cls Try[Output, Residual, Value] {
 }
 
 sup [Output, Residual, Value] Try[Output, Residual, Value] {
-    !protected
+    !public
     !abstract_method
     fun op_is_value(&self) -> Bool {
         # The `op_is_value` method determines whether the operand of the "?" operator represents a successful value (as
@@ -31,7 +30,19 @@ sup [Output, Residual, Value] Try[Output, Residual, Value] {
         # if it represents a failure that should be propagated.
     }
 
-    !protected
+    !public
+    !abstract_method
+    fun op_as_residual(self) -> Residual {
+        # The `op_as_residual` method extracts the value to propagate out of the enclosing function when the operand of
+        # the "?" operator represents a failure. It consumes the instance and returns a value of type `Residual`. It is
+        # only invoked when `op_is_value` has determined that the operand does not represent a success. Note that this
+        # is not the operand itself: the residual carries no success type, which is what allows "?" to be used in a
+        # function whose success type differs from the operand's.
+        # @ret: The residual extracted from the operand, of type `Residual`. This is the value that the "?" expression
+        # early-returns when the operand represents a failure.
+    }
+
+    !public
     !abstract_method
     fun op_as_value(self) -> Value {
         # The `op_as_value` method extracts the wrapped value from the operand of the "?" operator when it represents a

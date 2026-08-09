@@ -327,7 +327,7 @@ sup [T, A: Alloc] Vec[T, A] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun append_many(&mut self, that: Vec[T]) -> Void {
+    fun append_many(&mut self, that: Vec[T, A]) -> Void {
         #
         # @let that:
         # @ret:
@@ -365,7 +365,7 @@ sup [T, A: Alloc] Vec[T, A] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun insert_many_at(&mut self, index: USize, that: Vec[T]) -> Void {
+    fun insert_many_at(&mut self, index: USize, that: Vec[T, A]) -> Void {
         #
         # @let index:
         # @let that:
@@ -470,7 +470,7 @@ sup [T, A: Alloc] Vec[T, A] {
 
     !private
     !versioned(base="1.0.0", new="1.0.0")
-    fun append_many_unchecked(&mut self, that: Vec[T]) -> Void {
+    fun append_many_unchecked(&mut self, that: Vec[T, A]) -> Void {
         #
         # @let that:
         # @ret:
@@ -494,7 +494,7 @@ sup [T, A: Alloc] Vec[T, A] {
 
     !private
     !versioned(base="1.0.0", new="1.0.0")
-    fun insert_vec_at_unchecked(&mut self, index: USize, that: Vec[T]) -> Void {
+    fun insert_vec_at_unchecked(&mut self, index: USize, that: Vec[T, A]) -> Void {
         #
         # @let index:
         # @let that:

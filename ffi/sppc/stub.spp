@@ -503,3 +503,9 @@ fun stdout_write(buffer: &CCharPtr, size: CULong, count: CULong, out_n: &mut CLo
 
 !ffi(symbol="sppc_stderr_write")
 fun stderr_write(buffer: &CCharPtr, size: CULong, count: CULong, out_n: &mut CLong) -> CInt { }
+
+!ffi(symbol="sppc_async")
+fun async_[F0: FunMov[(CULong, &CULong), CVoidPtr], ..V](handle: &mut CULong, routine: F0, argc: CULong, ..varargs: V) -> CInt { }
+
+!ffi(symbol="sppc_await")
+fun await(handle: CULong) -> CVoidPtr { }
