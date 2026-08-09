@@ -5,6 +5,7 @@ use std::llvm::always_inline
 use std::llvm::inline
 use std::boolean::Bool
 use std::cast::From
+use std::copy::Copy
 use std::number::S32
 use std::number::U32
 use std::number::U64
@@ -24,6 +25,12 @@ use std::ops::rem::RemAssign
 
 !public
 type SizedIntegerUnsigned[cmp w: U32] = SizedInteger[w, false]
+
+sup [cmp w: U32] SizedIntegerUnsigned[w] ext Copy {
+    # All SizedIntegerUnsigned types are Copy, as they are all fixed size and can be copied by value. This is a
+    # fundamental property of the type, and allows for efficient copying and passing of values without the need for heap
+    # allocation or reference counting.
+}
 
 sup [cmp w: U32] SizedIntegerUnsigned[w] ext Div {
     cmp fun div(self, that: Self) -> Self {
