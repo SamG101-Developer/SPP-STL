@@ -190,7 +190,7 @@ sup [T: Integral] Atom[T] {
         # validates the memory order to ensure that it is not `mo_release` or `mo_acq_rel`, as these memory orders are
         # not meaningful for load operations. After validating the memory order, it calls the appropriate intrinsic
         # function to perform the atomic load operation and returns the loaded value.
-        # @let ?order: The memory ordering for the load operation. This must not be `mo_release` or `mo_acq_rel`. The
+        # @cmp order: The memory ordering for the load operation. This must not be `mo_release` or `mo_acq_rel`. The
         # default is `mo_seq_cst`, which provides sequential consistency guarantees.
         # @ret: The value loaded from the atomic variable.
 
@@ -207,7 +207,7 @@ sup [T: Integral] Atom[T] {
         # not meaningful for store operations. After validating the memory order, it calls the appropriate intrinsic
         # function to perform the atomic store operation.
         # @let val: The value to store in the atomic variable.
-        # @let ?order: The memory ordering for the store operation. This must not be `mo_acquire` or `mo_acq_rel`. The
+        # @cmp order: The memory ordering for the store operation. This must not be `mo_acquire` or `mo_acq_rel`. The
         # default is `mo_seq_cst`, which provides sequential consistency guarantees.
 
         abort_if(order == Self::mo_acquire, "Cannot use acquire memory order for store")
@@ -227,9 +227,9 @@ sup [T: Integral] Atom[T] {
         # appropriate intrinsic function to perform the compare-and-exchange operation..
         # @let old: The expected value to compare against the current value of the atomic variable.
         # @let new: The value to be stored in the atomic variable if the current value matches the expected `old` value.
-        # @let ?success_order: The memory ordering for the operation if the compare-and-exchange is successful. The
+        # @cmp success_order: The memory ordering for the operation if the compare-and-exchange is successful. The
         # default is `mo_seq_cst`, which provides sequential consistency guarantees.
-        # @let ?failure_order: The memory ordering for the operation if the compare-and-exchange fails. This must not be
+        # @cmp failure_order: The memory ordering for the operation if the compare-and-exchange fails. This must not be
         # `mo_release` or `mo_acq_rel`.
         # @ret: A tuple containing the current value of the atomic variable and a boolean indicating whether the
         # compare-and-exchange was successful (i.e., whether the current value matched the expected `old` value and was
@@ -252,9 +252,9 @@ sup [T: Integral] Atom[T] {
         # compare-and-exchange operation.
         # @let old: The expected value to compare against the current value of the atomic variable.
         # @let new: The value to be stored in the atomic variable if the current value matches the expected `old` value.
-        # @let ?success_order: The memory ordering for the operation if the weak compare-and-exchange is successful. The
+        # @cmp success_order: The memory ordering for the operation if the weak compare-and-exchange is successful. The
         # default is `mo_seq_cst`,
-        # @let ?failure_order: The memory ordering for the operation if the weak compare-and-exchange fails. This must
+        # @cmp failure_order: The memory ordering for the operation if the weak compare-and-exchange fails. This must
         # not be `mo_release` or `mo_acq_rel`.
         # @ret: A tuple containing the current value of the atomic variable and a boolean indicating whether the weak
         # compare-and-exchange was successful (i.e., whether the current value matched the expected `old` value and the
@@ -273,7 +273,7 @@ sup [T: Integral] Atom[T] {
         # returns the old value. After validating the memory order, it calls the appropriate intrinsic function to
         # perform the atomic exchange operation and returns the old value.
         # @let val: The value to be stored in the atomic variable, replacing the current value.
-        # @let ?order: The memory ordering for the exchange operation. The default is `mo_seq_cst`, which provides
+        # @cmp order: The memory ordering for the exchange operation. The default is `mo_seq_cst`, which provides
         # sequential consistency guarantees.
         # @ret: The old value that was replaced in the atomic variable.
     }
@@ -288,7 +288,7 @@ sup [T: Integral] Atom[T] {
         # The bitwise AND operation is a common atomic operation that can be used for various synchronization patterns.
         # @let val: The value to be bitwise ANDed with the current value of the atomic variable, and then stored back in
         # the atomic variable.
-        # @let ?order: The memory ordering for the fetch-and operation. The default is `mo_seq_cst`, which provides
+        # @cmp order: The memory ordering for the fetch-and operation. The default is `mo_seq_cst`, which provides
         # sequential consistency guarantees.
         # @ret: The old value of the atomic variable before the fetch-and operation was performed.
     }
@@ -303,7 +303,7 @@ sup [T: Integral] Atom[T] {
         # The bitwise NAND operation is defined as the negation of the bitwise AND operation.
         # @let val: The value to be bitwise NANDed with the current value of the atomic variable, and then stored back
         # in the atomic variable.
-        # @let ?order: The memory ordering for the fetch-and operation. The default is `mo_seq_cst`, which provides
+        # @cmp order: The memory ordering for the fetch-and operation. The default is `mo_seq_cst`, which provides
         # sequential consistency guarantees.
         # @ret: The old value of the atomic variable before the fetch-and operation was performed.
     }
@@ -318,7 +318,7 @@ sup [T: Integral] Atom[T] {
         # The bitwise OR operation is a common atomic operation that can be used for various synchronization patterns.
         # @let val: The value to be bitwise ORed with the current value of the atomic variable, and then stored back in
         # the atomic variable.
-        # @let ?order: The memory ordering for the fetch-or operation. The default is `mo_seq_cst`, which provides
+        # @cmp order: The memory ordering for the fetch-or operation. The default is `mo_seq_cst`, which provides
         # sequential consistency guarantees.
         # @ret: The old value of the atomic variable before the fetch-or operation was performed.
     }
@@ -334,7 +334,7 @@ sup [T: Integral] Atom[T] {
         # such as toggling specific bits in a value.
         # @let val: The value to be bitwise XORed with the current value of the atomic variable, and then stored back in
         # the atomic variable.
-        # @let ?order: The memory ordering for the fetch-xor operation. The default is `mo_seq_cst`, which provides
+        # @cmp order: The memory ordering for the fetch-xor operation. The default is `mo_seq_cst`, which provides
         # sequential consistency guarantees.
         # @ret: The old value of the atomic variable before the fetch-xor operation was performed.
     }
@@ -362,7 +362,7 @@ sup Atom[Bool] {
         # variable, stores the result back in the atomic variable, and returns the old value. This operation is only
         # defined for boolean atomic variables, where it effectively toggles the value between `true` and `false`. It
         # calls the appropriate intrinsic function to perform the atomic fetch-not operation and returns the old value.
-        # @let ?order: The memory ordering for the fetch-not operation. The default is `mo_seq_cst`, which provides
+        # @cmp order: The memory ordering for the fetch-not operation. The default is `mo_seq_cst`, which provides
         # sequential consistency guarantees.
         # @ret: The old value of the atomic variable before the fetch-not operation was performed.
     }
@@ -373,7 +373,7 @@ sup Atom[Bool] {
         # The `test_and_set` method atomically sets the value of the atomic variable to `true` and returns the old
         # value. This operation is typically used for implementing spinlocks or other synchronization primitives. It
         # calls the appropriate intrinsic function to perform the atomic set operation and returns the old value.
-        # @let ?order: The memory ordering for the set operation. The default is `mo_seq_cst`, which provides sequential
+        # @cmp order: The memory ordering for the set operation. The default is `mo_seq_cst`, which provides sequential
         # consistency guarantees.
         # @ret: The old value of the atomic variable before it was set to `true`.
 
@@ -386,7 +386,7 @@ sup Atom[Bool] {
         # The `set` method atomically sets the value of the atomic variable to `true`. This operation is typically used
         # for implementing spinlocks or other synchronization primitives. It reuses the `store` method to perform the
         # atomic set operation.
-        # @let ?order: The memory ordering for the set operation. The default is `mo_seq_cst`, which provides sequential
+        # @cmp order: The memory ordering for the set operation. The default is `mo_seq_cst`, which provides sequential
         # consistency guarantees.
 
         self.store[order=order](true)
@@ -398,7 +398,7 @@ sup Atom[Bool] {
         # The `clear` method atomically sets the value of the atomic variable to `false`. This operation is typically
         # used for implementing spinlocks or other synchronization primitives. It reuses the `store` method to perform
         # the atomic clear operation.
-        # @let ?order: The memory ordering for the clear operation. The default is `mo_seq_cst`, which provides
+        # @cmp order: The memory ordering for the clear operation. The default is `mo_seq_cst`, which provides
         # sequential consistency guarantees.
 
         self.store[order=order](false)
@@ -416,7 +416,7 @@ sup [T: Integer] Atom[T] {
         # operation that can be used for various synchronization patterns, such as implementing atomic counters.
         # @let val: The value to be added to the current value of the atomic variable, and then stored back in the
         # atomic variable.
-        # @let ?order: The memory ordering for the fetch-add operation. The default is `mo_seq_cst`, which provides
+        # @cmp order: The memory ordering for the fetch-add operation. The default is `mo_seq_cst`, which provides
         # sequential consistency guarantees.
         # @ret: The old value of the atomic variable before the fetch-add operation was performed.
     }
@@ -432,7 +432,7 @@ sup [T: Integer] Atom[T] {
         # or resource management.
         # @let val: The value to be subtracted from the current value of the atomic variable, and then stored back in
         # the atomic variable.
-        # @let ?order: The memory ordering for the fetch-sub operation. The default is `mo_seq_cst`, which provides
+        # @cmp order: The memory ordering for the fetch-sub operation. The default is `mo_seq_cst`, which provides
         # sequential consistency guarantees.
         # @ret: The old value of the atomic variable before the fetch-sub operation was performed.
     }
@@ -449,7 +449,7 @@ sup [cmp w: U32] Atom[SizedIntegerSigned[w]] {
         # various synchronization patterns, such as implementing atomic minimum tracking.
         # @let val: The value to be compared with the current value of the atomic variable, and the smaller of the two
         # will be stored back in the atomic variable.
-        # @let ?order: The memory ordering for the fetch-min operation. The default is `mo_seq_cst`, which provides
+        # @cmp order: The memory ordering for the fetch-min operation. The default is `mo_seq_cst`, which provides
         # sequential consistency guarantees.
         # @ret: The old value of the atomic variable before the fetch-min operation was performed.
     }
@@ -464,7 +464,7 @@ sup [cmp w: U32] Atom[SizedIntegerSigned[w]] {
         # various synchronization patterns, such as implementing atomic maximum tracking.
         # @let val: The value to be compared with the current value of the atomic variable, and the larger of the two
         # will be stored back in the atomic variable.
-        # @let ?order: The memory ordering for the fetch-max operation. The default is `mo_seq_cst`, which provides
+        # @cmp order: The memory ordering for the fetch-max operation. The default is `mo_seq_cst`, which provides
         # sequential consistency guarantees.
         # @ret: The old value of the atomic variable before the fetch-max operation was performed.
     }
@@ -481,7 +481,7 @@ sup [cmp w: U32] Atom[SizedIntegerUnsigned[w]] {
         # various synchronization patterns, such as implementing atomic minimum tracking.
         # @let val: The value to be compared with the current value of the atomic variable, and the smaller of the two
         # will be stored back in the atomic variable.
-        # @let ?order: The memory ordering for the fetch-min operation. The default is `mo_seq_cst`, which provides
+        # @cmp order: The memory ordering for the fetch-min operation. The default is `mo_seq_cst`, which provides
         # sequential consistency guarantees.
         # @ret: The old value of the atomic variable before the fetch-min operation was performed.
     }
@@ -496,7 +496,7 @@ sup [cmp w: U32] Atom[SizedIntegerUnsigned[w]] {
         # various synchronization patterns, such as implementing atomic maximum tracking.
         # @let val: The value to be compared with the current value of the atomic variable, and the larger of the two
         # will be stored back in the atomic variable.
-        # @let ?order: The memory ordering for the fetch-max operation. The default is `mo_seq_cst`, which provides
+        # @cmp order: The memory ordering for the fetch-max operation. The default is `mo_seq_cst`, which provides
         # sequential consistency guarantees.
         # @ret: The old value of the atomic variable before the fetch-max operation was performed.
     }
@@ -512,7 +512,7 @@ sup [T: FloatingPoint] Atom[T] {
         # types, so it uses the `fadd` atomic intrinsic, which has no signedness variant unlike the integer `add`.
         # @let val: The value to be added to the current value of the atomic variable, and then stored back in the
         # atomic variable.
-        # @let ?order: The memory ordering for the fetch-add operation. The default is `mo_seq_cst`, which provides
+        # @cmp order: The memory ordering for the fetch-add operation. The default is `mo_seq_cst`, which provides
         # sequential consistency guarantees.
         # @ret: The old value of the atomic variable before the fetch-add operation was performed.
     }
@@ -526,7 +526,7 @@ sup [T: FloatingPoint] Atom[T] {
         # point types, so it uses the `fsub` atomic intrinsic, which has no signedness variant unlike the integer `sub`.
         # @let val: The value to be subtracted from the current value of the atomic variable, and then stored back in
         # the atomic variable.
-        # @let ?order: The memory ordering for the fetch-sub operation. The default is `mo_seq_cst`, which provides
+        # @cmp order: The memory ordering for the fetch-sub operation. The default is `mo_seq_cst`, which provides
         # sequential consistency guarantees.
         # @ret: The old value of the atomic variable before the fetch-sub operation was performed.
     }
@@ -541,7 +541,7 @@ sup [T: FloatingPoint] Atom[T] {
         # split unlike the integer `smin`/`umin`.
         # @let val: The value to be compared with the current value of the atomic variable, and the smaller of the two
         # will be stored back in the atomic variable.
-        # @let ?order: The memory ordering for the fetch-min operation. The default is `mo_seq_cst`, which provides
+        # @cmp order: The memory ordering for the fetch-min operation. The default is `mo_seq_cst`, which provides
         # sequential consistency guarantees.
         # @ret: The old value of the atomic variable before the fetch-min operation was performed.
     }
@@ -556,7 +556,7 @@ sup [T: FloatingPoint] Atom[T] {
         # split unlike the integer `smax`/`umax`.
         # @let val: The value to be compared with the current value of the atomic variable, and the larger of the two
         # will be stored back in the atomic variable.
-        # @let ?order: The memory ordering for the fetch-max operation. The default is `mo_seq_cst`, which provides
+        # @cmp order: The memory ordering for the fetch-max operation. The default is `mo_seq_cst`, which provides
         # sequential consistency guarantees.
         # @ret: The old value of the atomic variable before the fetch-max operation was performed.
     }
