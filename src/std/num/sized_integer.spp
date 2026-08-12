@@ -73,88 +73,118 @@ cmp log_10_lookup_table: [U32; 256_uz] = [
     72_u32, 72_u32, 72_u32, 73_u32, 73_u32, 73_u32, 74_u32, 74_u32, 74_u32, 75_u32, 75_u32, 75_u32, 76_u32, 76_u32, 76_u32, 76_u32]
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Eq {
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
     cmp fun eq(&self, that: &Self) -> Bool {
         ret intrinsics::eq(self, that)
     }
 
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
     cmp fun ne(&self, that: &Self) -> Bool {
         ret intrinsics::ne(self, that)
     }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitAnd {
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
     cmp fun bit_and(self, that: Self) -> Self {
         ret intrinsics::bit_and(self, that)
     }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitAndAssign {
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
     cmp fun bit_and_assign(&mut self, that: Self) -> Void {
         intrinsics::bit_and_assign(self, that)
     }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitIor {
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
     cmp fun bit_ior(self, that: Self) -> Self {
         ret intrinsics::bit_ior(self, that)
     }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitIorAssign {
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
     cmp fun bit_ior_assign(&mut self, that: Self) -> Void {
         intrinsics::bit_ior_assign(self, that)
     }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitXor {
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
     cmp fun bit_xor(self, that: Self) -> Self {
         ret intrinsics::bit_xor(self, that)
     }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitXorAssign {
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
     cmp fun bit_xor_assign(&mut self, that: Self) -> Void {
         intrinsics::bit_xor_assign(self, that)
     }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitShl[Rhs=U32] {
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
     cmp fun bit_shl(self, that: U32) -> Self {
         ret intrinsics::bit_shl(self, that)
     }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitShlAssign[Rhs=U32] {
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
     cmp fun bit_shl_assign(&mut self, that: U32) -> Void {
         intrinsics::bit_shl_assign(self, that)
     }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitShr[Rhs=U32] {
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
     cmp fun bit_shr(self, that: U32) -> Self {
         ret intrinsics::bit_shr(self, that)
     }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitShrAssign[Rhs=U32] {
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
     cmp fun bit_shr_assign(&mut self, that: U32) -> Void {
         intrinsics::bit_shr_assign(self, that)
     }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitNot {
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
     cmp fun bit_not(self) -> Self {
         ret intrinsics::bit_not(self)
     }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitNotAssign {
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
     cmp fun bit_not_assign(&mut self) -> Void {
         intrinsics::bit_not_assign(self)
     }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Add {
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
     cmp fun add(self, that: Self) -> Self {
         ret intrinsics::add(self, that)
     }
@@ -162,30 +192,39 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Add {
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext AddAssign {
     !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
     cmp fun add_assign(&mut self, that: Self) -> Void {
         intrinsics::add_assign(self, that)
     }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Sub {
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
     cmp fun sub(self, that: Self) -> Self {
         ret intrinsics::sub(self, that)
     }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext SubAssign {
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
     cmp fun sub_assign(&mut self, that: Self) -> Void {
         intrinsics::sub_assign(self, that)
     }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Mul {
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
     cmp fun mul(self, that: Self) -> Self {
         ret intrinsics::mul(self, that)
     }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext MulAssign {
+    !always_inline
+    !versioned(base="1.0.0", new="1.0.0")
     cmp fun mul_assign(&mut self, that: Self) -> Void {
         intrinsics::mul_assign(self, that)
     }
