@@ -161,6 +161,7 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Add {
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext AddAssign {
+    !always_inline
     cmp fun add_assign(&mut self, that: Self) -> Void {
         intrinsics::add_assign(self, that)
     }
