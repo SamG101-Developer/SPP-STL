@@ -14,5 +14,7 @@ fun call_once[F: FunMov[(), Void]](func: F) -> Void {
     # on, but `sppc::pthread_once` takes only the function, so every call runs `func` afresh. Needs a `Once` control
     # object threaded through here and a matching `sppc` FFI signature change on both sides.
 
-    sppc::pthread_once(func)
+    let handle = 0
+    sppc::pthread_once_init(&mut handle)
+    sppc::pthread_once(&handle, func)
 }
