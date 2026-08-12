@@ -414,7 +414,7 @@ sup Path {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun copy_to(&self, new_path: &Path) -> Res[Void, PathErr] {
+    fun copy_to(&self, new_path: &Path) -> Res[USize, PathErr] {
         # The `copy_to` method attempts to copy the file at the current path to a new path. If the current path does not
         # exist, the new path already exists, or the operation fails for any reason, an error will be returned.
         # @let new_path: The new path to copy to.
@@ -427,8 +427,9 @@ sup Path {
 
         let file_in = File::open(&self, FileMode().read())?
         let file_out = File::open(new_path, FileMode().write())?
-        let err = sppc::copyfile(file_in.fd, file_out.fd, USize::from(file_length), 0)
-        ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
+        let mut out_size = 0_uz
+        let err = sppc::copyfile(file_in.fd, file_out.fd, USize::from(file_length), &mut out_size)
+        ret case err == 0 { Pass[USize](val=out_size) } else { Fail(err=PathErr::from_errno(err)) }
     }
 
     !public
