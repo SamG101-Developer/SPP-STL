@@ -274,29 +274,6 @@ sup [T, A: Alloc] Vec[T, A] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun resize(&mut self, new_len: USize, element: T) -> Void {
-        #
-        # @let new_len:
-        # @let element:
-        # @ret:
-
-        case new_len < self.len() {
-            self.truncate(new_len)
-            ret
-        }
-
-        let additional = new_len - self.len()
-        case self.len() + additional <= self.cap() {
-            self.append_many_unchecked(Vec[T, A]::new_filled(additional, element))
-            ret
-        }
-
-        self.capacity_reserve(additional)
-        self.append_many_unchecked(Vec[T, A]::new_filled(additional, element))
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
     fun append(&mut self, element: T) -> Void {
         #
         # @let element:
@@ -517,6 +494,29 @@ sup [T, A: Alloc] Vec[T, A] {
 }
 
 sup [T: Clone, A: Alloc] Vec[T, A] {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun resize(&mut self, new_len: USize, element: T) -> Void {
+        # Grows or shrinks the vector to `new_len`. Shrinking truncates and drops the trailing elements. Growing
+        # reserves the additional capacity once and clones `element` directly into the newly reserved slots, moving the
+        # original into the last slot instead of cloning it, so no intermediate `Vec` is built.
+        # @let new_len: The length the vector should have after this call.
+        # @let element: The value used to fill any newly added slots.
+        # @ret:
+
+        case new_len <= self.len() {
+            self.truncate(new_len)
+            ret
+        }
+
+        let additional = new_len - self.len()
+        self.capacity_reserve(additional)
+        loop i in Range[USize]::between(1_uz, additional) {
+            self.append_unchecked(element.clone())
+        }
+        self.append_unchecked(element)
+    }
+
     !public
     !versioned(base="1.0.0", new="1.0.0")
     fun append_from_view(&mut self, that: &View[T]) -> Void {
