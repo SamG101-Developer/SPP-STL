@@ -654,7 +654,10 @@ sup [T: Eq, A: Alloc] Vec[T, A] ext Eq {
     }
 }
 
-sup [T, A: Alloc] Vec[T, A] ext FromIterator[T] {
+sup [T] Vec[T] ext FromIterator[T] {
+    # Like `from(&View[T])` above, this needs a `Self` with no allocator supplied by the caller, so it can only build a
+    # `GlobalAlloc` vector.
+
     !versioned(base="1.0.0", new="1.0.0")
     fun from_iter[G: Gen[T]](iter: G) -> Self {
         # Build a new `Vec` from a generator. The generator is expected to yield elements of type `T`, and the function
