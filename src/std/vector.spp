@@ -530,27 +530,32 @@ sup [T: Clone, A: Alloc] Vec[T, A] {
         self.length += that.len()
     }
 
-}
-
-sup [T: Clone] Vec[T] {
-    # `from(&View[T])` needs a `Self` with no allocator supplied by the caller, so it can only build a `GlobalAlloc`
-    # vector - unlike `append_from_view`, above, which extends an already-allocated `Vec[T, A]` and so works for any
-    # `A`.
-
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun from(that: &View[T]) -> Self {
-        # Create the vector from a view, by copying the elements from the view.
+    fun from_in(that: &View[T], alloc: A) -> Self {
+        # Create the vector from a view, by copying the elements from the view, using the given allocator.
         # @let that: The view to create the vector from.
+        # @let alloc: The allocator used for the new vector's storage.
         # @ret: A new vector containing the elements from the view.
         # @todo: This doesn't respect clone steps.
 
-        # Allocate enough space and then memcpy the
-        # elements from the view into the vector.
-        let mut vec = Self::new_with_capacity(that.len())
-        std::mem::ops::mem_copy(&mut vec.buffer.ptr, &that.ptr, that.len())
-        vec.length = that.len()
+        let mut vec = Self::new_with_capacity_in(that.len(), alloc)
+        vec.append_from_view(that)
         ret vec
+    }
+}
+
+sup [T: Clone] Vec[T] {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(that: &View[T]) -> Self {
+        # Create the vector from a view, by copying the elements from the view, using the global allocator.
+        # @let that: The view to create the vector from.
+        # @ret: A new vector containing the elements from the view.
+
+        # Forward to the more general `from_in` function,
+        # specifying `GlobalAlloc` as the allocator.
+        ret Self::from_in(that, GlobalAlloc)
     }
 }
 
@@ -677,20 +682,32 @@ sup [T] Vec[T] ext FromIterator[T] {
     }
 }
 
-sup [T, cmp n: USize] Vec[T] ext From[Arr[T, n]] {
-    # Like `from(&View[T])` above, this needs a `Self` with no allocator supplied by the caller, so it can only build a
-    # `GlobalAlloc` vector.
-
+sup [T, cmp n: USize, A: Alloc] Vec[T, A] {
+    !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun from(that: Arr[T, n]) -> Self {
-        #
-        # @let that:
-        # @ret:
+    fun from_in(that: Arr[T, n], alloc: A) -> Self {
+        # Create the vector from an array, by copying the elements into a new buffer, using the given allocator.
+        # @let that: The array to create the vector from.
+        # @let alloc: The allocator used for the new vector's storage.
+        # @ret: A new vector containing the elements from the array.
 
-        let mut vec = Self::new_with_capacity(n)
+        let mut vec = Self::new_with_capacity_in(n, alloc)
         std::mem::ops::mem_copy(&mut vec.buffer.ptr, &that.ptr, n)
         vec.length = n
         ret vec
+    }
+}
+
+sup [T, cmp n: USize] Vec[T] ext From[Arr[T, n]] {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(that: Arr[T, n]) -> Self {
+        # Create the vector from an array, using the global allocator.
+        # @let that: The array to create the vector from.
+        # @ret: A new vector containing the elements from the array.
+
+        # Forward to the more general `from_in` function,
+        # specifying `GlobalAlloc` as the allocator.
+        ret Self::from_in(that, GlobalAlloc)
     }
 }
 
