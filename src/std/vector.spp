@@ -682,10 +682,10 @@ sup [T] Vec[T] ext FromIterator[T] {
     }
 }
 
-sup [T, cmp n: USize, A: Alloc] Vec[T, A] {
+sup [T, A: Alloc] Vec[T, A] {
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun from_in(that: Arr[T, n], alloc: A) -> Self {
+    fun from_in[cmp n: USize](that: Arr[T, n], alloc: A) -> Self {
         # Create the vector from an array, by copying the elements into a new buffer, using the given allocator.
         # @let that: The array to create the vector from.
         # @let alloc: The allocator used for the new vector's storage.
