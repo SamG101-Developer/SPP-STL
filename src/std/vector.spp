@@ -274,29 +274,6 @@ sup [T, A: Alloc] Vec[T, A] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun resize(&mut self, new_len: USize, element: T) -> Void {
-        #
-        # @let new_len:
-        # @let element:
-        # @ret:
-
-        case new_len < self.len() {
-            self.truncate(new_len)
-            ret
-        }
-
-        let additional = new_len - self.len()
-        case self.len() + additional <= self.cap() {
-            self.append_many_unchecked(Vec[T, A]::new_filled(additional, element))
-            ret
-        }
-
-        self.capacity_reserve(additional)
-        self.append_many_unchecked(Vec[T, A]::new_filled(additional, element))
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
     fun append(&mut self, element: T) -> Void {
         #
         # @let element:
@@ -519,6 +496,29 @@ sup [T, A: Alloc] Vec[T, A] {
 sup [T: Clone, A: Alloc] Vec[T, A] {
     !public
     !versioned(base="1.0.0", new="1.0.0")
+    fun resize(&mut self, new_len: USize, element: T) -> Void {
+        # Grows or shrinks the vector to `new_len`. Shrinking truncates and drops the trailing elements. Growing
+        # reserves the additional capacity once and clones `element` directly into the newly reserved slots, moving the
+        # original into the last slot instead of cloning it, so no intermediate `Vec` is built.
+        # @let new_len: The length the vector should have after this call.
+        # @let element: The value used to fill any newly added slots.
+        # @ret:
+
+        case new_len <= self.len() {
+            self.truncate(new_len)
+            ret
+        }
+
+        let additional = new_len - self.len()
+        self.capacity_reserve(additional)
+        loop i in Range[USize]::between(1_uz, additional) {
+            self.append_unchecked(element.clone())
+        }
+        self.append_unchecked(element)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun append_from_view(&mut self, that: &View[T]) -> Void {
         # Append all the elements from a view, by copying the elements from the view.
         # @let that: The view to append from.
@@ -532,18 +532,30 @@ sup [T: Clone, A: Alloc] Vec[T, A] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun from(that: &View[T]) -> Self {
-        # Create the vector from a view, by copying the elements from the view.
+    fun from_in(that: &View[T], alloc: A) -> Self {
+        # Create the vector from a view, by copying the elements from the view, using the given allocator.
         # @let that: The view to create the vector from.
+        # @let alloc: The allocator used for the new vector's storage.
         # @ret: A new vector containing the elements from the view.
         # @todo: This doesn't respect clone steps.
 
-        # Allocate enough space and then memcpy the
-        # elements from the view into the vector.
-        let mut vec = Self::new_with_capacity(that.len())
-        std::mem::ops::mem_copy(&mut vec.buffer.ptr, &that.ptr, that.len())
-        vec.length = that.len()
+        let mut vec = Self::new_with_capacity_in(that.len(), alloc)
+        vec.append_from_view(that)
         ret vec
+    }
+}
+
+sup [T: Clone] Vec[T] {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(that: &View[T]) -> Self {
+        # Create the vector from a view, by copying the elements from the view, using the global allocator.
+        # @let that: The view to create the vector from.
+        # @ret: A new vector containing the elements from the view.
+
+        # Forward to the more general `from_in` function,
+        # specifying `GlobalAlloc` as the allocator.
+        ret Self::from_in(that, GlobalAlloc)
     }
 }
 
@@ -647,7 +659,10 @@ sup [T: Eq, A: Alloc] Vec[T, A] ext Eq {
     }
 }
 
-sup [T, A: Alloc] Vec[T, A] ext FromIterator[T] {
+sup [T] Vec[T] ext FromIterator[T] {
+    # Like `from(&View[T])` above, this needs a `Self` with no allocator supplied by the caller, so it can only build a
+    # `GlobalAlloc` vector.
+
     !versioned(base="1.0.0", new="1.0.0")
     fun from_iter[G: Gen[T]](iter: G) -> Self {
         # Build a new `Vec` from a generator. The generator is expected to yield elements of type `T`, and the function
@@ -667,17 +682,32 @@ sup [T, A: Alloc] Vec[T, A] ext FromIterator[T] {
     }
 }
 
-sup [T, cmp n: USize, A: Alloc] Vec[T, A] ext From[Arr[T, n]] {
+sup [T, A: Alloc] Vec[T, A] {
+    !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun from(that: Arr[T, n]) -> Self {
-        #
-        # @let that:
-        # @ret:
+    fun from_in[cmp n: USize](that: Arr[T, n], alloc: A) -> Self {
+        # Create the vector from an array, by copying the elements into a new buffer, using the given allocator.
+        # @let that: The array to create the vector from.
+        # @let alloc: The allocator used for the new vector's storage.
+        # @ret: A new vector containing the elements from the array.
 
-        let mut vec = Self::new_with_capacity(n)
+        let mut vec = Self::new_with_capacity_in(n, alloc)
         std::mem::ops::mem_copy(&mut vec.buffer.ptr, &that.ptr, n)
         vec.length = n
         ret vec
+    }
+}
+
+sup [T, cmp n: USize] Vec[T] ext From[Arr[T, n]] {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun from(that: Arr[T, n]) -> Self {
+        # Create the vector from an array, using the global allocator.
+        # @let that: The array to create the vector from.
+        # @ret: A new vector containing the elements from the array.
+
+        # Forward to the more general `from_in` function,
+        # specifying `GlobalAlloc` as the allocator.
+        ret Self::from_in(that, GlobalAlloc)
     }
 }
 

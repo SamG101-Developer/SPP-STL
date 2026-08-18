@@ -151,30 +151,34 @@ sup [A: Alloc] Str[A] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun from(view: &StrView) -> Str {
+    fun from(view: &StrView, alloc: A = A()) -> Self {
         # The `from` method creates a new instance of the `Str` type from a given `StrView`. It takes a byte view of
         # `view` (`view_ref`, which just repackages the `StrView`'s existing pointer and length - no copy yet) and
-        # forwards to the `View[U8]`-based `from` below, which does the actual allocation and memcpy.
+        # forwards to the `View[U8]`-based `from` below, which does the actual allocation and memcpy, using the given
+        # allocator.
         # @let view: A reference to a `StrView` that contains the string data to be copied. The bytes from this view
         # will be used to initialize the internal vector of the new `Str` instance.
+        # @let ?alloc: An optional allocator instance that will be used for managing the memory of the string. If not
+        # provided, a default instance of the allocator type `A` will be used.
         # @ret: A new `Str` instance that contains a copy of the bytes from the provided `StrView`.
 
-        ret Str::from(view.view_ref())
+        ret Self::from(view.view_ref(), alloc)
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun from(that: &View[U8]) -> Self {
+    fun from(that: &View[U8], alloc: A = A()) -> Self {
         # The `from` method creates a new instance of the `Str` type from a view of bytes. This involves copying the
-        # bytes from the provided view into a new internal vector. The allocator used for the new string will be the
-        # default allocator for the `Str` type, ensuring consistent memory management.
+        # bytes from the provided view into a new internal vector, using the given allocator.
         # @let that: A reference to a view of bytes that contains the data to be copied into the new string. The bytes
         # from this view will be used to initialize the internal vector of the new `Str` instance.
+        # @let ?alloc: An optional allocator instance that will be used for managing the memory of the string. If not
+        # provided, a default instance of the allocator type `A` will be used.
         # @ret: A new `Str` instance that contains a copy of the bytes from the provided view.
 
         # Forward to the constructor of `Str`, creating a new `Vec`
         # filled with the bytes from the provided view.
-        ret Str(bytes=Vec[U8, A]::from(that))
+            ret Str(bytes=Vec[U8, A]::from_in(that, alloc))
     }
 
     !public
@@ -375,17 +379,16 @@ sup [A: Alloc] Str[A] {
     !versioned(base="1.0.0", new="1.0.0")
     fun add(self, that: &StrView) -> Self {
         # The `add` method concatenates the current string with another string view, creating a new `Str` instance that
-        # contains the combined data. This involves creating a new internal vector and copying the bytes from both the
-        # current string and the provided string view into it. The allocator used for the new string will be the same as
-        # the allocator used for the original string, ensuring consistent memory management.
+        # contains the combined data. `self` is already owned here, so its buffer is reused directly and `that`'s bytes
+        # are appended onto it, rather than default-constructing a fresh allocator and copying `self`'s bytes into it -
+        # this also means the same allocator instance backing `self` (which may be a stateful allocator) keeps being
+        # used, instead of a brand new default-constructed one.
         # @let that: A reference to a `StrView` that contains the string data to be concatenated with the current
-        # string. The bytes from this view will be copied into the new internal vector along with the bytes from the
-        # current string.
+        # string. The bytes from this view will be appended onto the current string's own buffer.
         # @ret: A new `Str` instance that contains the concatenated data from both the current string and the provided
         # string view.
 
-        let mut result = Self()
-        result.append_str(&self)
+        let mut result = self
         result.append_str(that)
         ret result
     }
@@ -434,17 +437,20 @@ sup [A: Alloc] Str[A] ext FwdRef[StrView] {
     }
 }
 
-sup [A: Alloc] Str[A] ext Clone {
+sup [A: Alloc & Clone] Str[A] ext Clone {
     !versioned(base="1.0.0", new="1.0.0")
     fun clone(&self) -> Self {
         # The `clone` method creates a new instance of the `Str` type that is a copy of the current instance. This
-        # involves creating a new internal vector and copying the bytes from the current string into it. The allocator
-        # used for the new string will be the same as the allocator used for the original string, ensuring that memory
-        # management is consistent between the two instances.
+        # involves creating a new internal vector and copying the bytes from the current string into it. `self` is only
+        # borrowed here, so `self.bytes` (a `Vec[U8, A]`) must actually be cloned rather than moved out - that's also why
+        # this impl needs `A: Clone` on top of `Vec`'s own `A: Alloc & Clone` bound for its `Clone` impl, so the
+        # allocator itself can be duplicated for the new buffer. The allocator used for the new string will be the same
+        # (cloned) allocator as the original string, ensuring that memory management is consistent between the two
+        # instances.
         # @ret: A new `Str` instance that is a clone of the current instance, with its own separate internal buffer
         # containing the same string data.
 
-        ret Str(bytes=self.bytes)
+        ret Str(bytes=self.bytes.clone())
     }
 }
 

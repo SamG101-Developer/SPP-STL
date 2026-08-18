@@ -38,7 +38,7 @@ fun size_of_val[T](value: &T) -> USize {
     # @ret: The size of the value in bytes.
 }
 
-!public !inline
+!public !always_inline
 !intrinsic(name="std.mem.ops.align_of")
 !versioned(base="1.0.0", new="1.0.0")
 cmp fun align_of[T]() -> USize {
@@ -78,7 +78,7 @@ fun mem_set[T](dest: &mut NonNull[T], value: U8, n: USize, dest_index: USize = 0
     sppc::memset(&mut dest_bytes.raw(), S32::from(value), n, dest_index)
 }
 
-!package !inline
+!package !always_inline
 !versioned(base="1.0.0", new="1.0.0")
 fun mem_cmp[T](a: &NonNull[T], b: &NonNull[T], n: USize) -> S32 {
     # Compares two blocks of memory. This is typically used for comparing values, or for comparing the contents of two
@@ -98,7 +98,7 @@ fun mem_cmp[T](a: &NonNull[T], b: &NonNull[T], n: USize) -> S32 {
     ret out
 }
 
-!package !inline
+!package !always_inline
 !versioned(base="1.0.0", new="1.0.0")
 fun mem_copy[T](dest: &mut NonNull[T], src: &NonNull[T], n: USize, dest_index: USize = 0_uz, src_index: USize = 0_uz) -> Void {
     # Copies a block of memory from one location to another. This is typically used for copying values, or for moving

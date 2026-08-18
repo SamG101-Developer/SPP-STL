@@ -168,7 +168,7 @@ sup Bool ext Eq {
 
     !inline
     !versioned(base="1.0.0", new="1.0.0")
-    fun eq(&self, that: &Self) -> Bool {
+    cmp fun eq(&self, that: &Self) -> Bool {
         # The `eq` method allows for `true == false` to be evaluated as `try.eq(false)`, which is intrinsically mapped
         # to the llvm `icmp eq` instruction.
         # @let that: The right-hand side of the equality comparison.
@@ -179,7 +179,7 @@ sup Bool ext Eq {
 
     !inline
     !versioned(base="1.0.0", new="1.0.0")
-    fun ne(&self, that: &Self) -> Bool {
+    cmp fun ne(&self, that: &Self) -> Bool {
         # The `ne` method allows for `true != false` to be evaluated as `try.ne(false)`, which is intrinsically mapped
         # to the llvm `icmp ne` instruction.
         # @let that: The right-hand side of the inequality comparison.
