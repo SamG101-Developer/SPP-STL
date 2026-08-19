@@ -682,35 +682,6 @@ sup [T] Vec[T] ext FromIterator[T] {
     }
 }
 
-sup [T, A: Alloc] Vec[T, A] {
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun from_in[cmp n: USize](that: Arr[T, n], alloc: A) -> Self {
-        # Create the vector from an array, by copying the elements into a new buffer, using the given allocator.
-        # @let that: The array to create the vector from.
-        # @let alloc: The allocator used for the new vector's storage.
-        # @ret: A new vector containing the elements from the array.
-
-        let mut vec = Self::new_with_capacity_in(n, alloc)
-        std::mem::ops::mem_copy(&mut vec.buffer.ptr, &that.ptr, n)
-        vec.length = n
-        ret vec
-    }
-}
-
-sup [T, cmp n: USize] Vec[T] ext From[Arr[T, n]] {
-    !versioned(base="1.0.0", new="1.0.0")
-    fun from(that: Arr[T, n]) -> Self {
-        # Create the vector from an array, using the global allocator.
-        # @let that: The array to create the vector from.
-        # @ret: A new vector containing the elements from the array.
-
-        # Forward to the more general `from_in` function,
-        # specifying `GlobalAlloc` as the allocator.
-        ret Self::from_in(that, GlobalAlloc)
-    }
-}
-
 sup [T, A: Alloc] Vec[T, A] ext FwdMut[View[T]] {
     !intrinsic(name="std.vector.Vec.fwd_mut")
     !versioned(base="1.0.0", new="1.0.0")
