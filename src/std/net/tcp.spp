@@ -373,7 +373,7 @@ sup TcpStream ext Read {
         # Use the kernel "recv" function to read data from the
         # socket, into the provided buffer.
         let mut bytes_read = 0_sz
-        let err = sppc::recv(self.fd, &mut buf.ptr, buf.len(), 0, &mut bytes_read)
+        let err = sppc::recv(self.fd, buf.ptr, buf.len(), 0, &mut bytes_read)
         case err != 0 { ret Fail(err=StreamErr::from_errno(err)) }
         ret Pass(val=USize::from(bytes_read))
     }
@@ -396,7 +396,7 @@ sup TcpStream ext Write {
         # Use the kernel "send" function to write data to the
         # socket, from the provided buffer.
         let mut bytes_written = 0_sz
-        let err = sppc::send(self.fd, &buf.ptr, buf.len(), 0, &mut bytes_written)
+        let err = sppc::send(self.fd, buf.ptr, buf.len(), 0, &mut bytes_written)
         case err != 0 { ret Fail(err=StreamErr::from_errno(err)) }
         ret Pass(val=USize::from(bytes_written))
     }

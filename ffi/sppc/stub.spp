@@ -202,46 +202,46 @@ fun aligned_alloc(size: CULong, alignment: CULong) -> CVoidPtr { }
 fun calloc(num: CULong, size: CULong) -> CVoidPtr { }
 
 !ffi(symbol="sppc_realloc")
-fun realloc(ptr: &mut CVoidPtr, new_size: CULong) -> CVoidPtr { }
+fun realloc(ptr: CVoidPtr, new_size: CULong) -> CVoidPtr { }
 
 !ffi(symbol="sppc_free")
-fun free(ptr: &mut CVoidPtr) -> CVoid { }
+fun free(ptr: CVoidPtr) -> CVoid { }
 
 !ffi(symbol="sppc_memcpy")
-fun memcpy(dest: &mut CVoidPtr, src: &CVoidPtr, size: CULong, dest_index: CULong, src_index: CULong) -> CInt { }
+fun memcpy(dest: CVoidPtr, src: CVoidPtr, size: CULong, dest_index: CULong, src_index: CULong) -> CInt { }
 
 !ffi(symbol="sppc_memmove")
-fun memmove(dest: &mut CVoidPtr, src: &CVoidPtr, size: CULong) -> CInt { }
+fun memmove(dest: CVoidPtr, src: CVoidPtr, size: CULong) -> CInt { }
 
 !ffi(symbol="sppc_memset")
-fun memset(dest: &mut CVoidPtr, value: CInt, size: CULong, dest_index: CULong) -> CInt { }
+fun memset(dest: CVoidPtr, value: CInt, size: CULong, dest_index: CULong) -> CInt { }
 
 !ffi(symbol="sppc_memcmp")
-fun memcmp(ptr1: &CVoidPtr, ptr2: &CVoidPtr, size: CULong, out: &mut CInt) -> CInt { }
+fun memcmp(ptr1: CVoidPtr, ptr2: CVoidPtr, size: CULong, out: &mut CInt) -> CInt { }
 
 !ffi(symbol="sppc_memmem")
-fun memmem(haystack: &CVoidPtr, haystack_size: CULong, needle: &CVoidPtr, needle_size: CULong, out: &mut CULong) -> CInt { }
+fun memmem(haystack: CVoidPtr, haystack_size: CULong, needle: CVoidPtr, needle_size: CULong, out: &mut CULong) -> CInt { }
 
 !ffi(symbol="sppc_read")
-fun read(buffer: &mut CCharPtr, size: CULong, count: CULong, fd: CInt, out_n: &mut CLong) -> CInt { }
+fun read(buffer: CCharPtr, size: CULong, count: CULong, fd: CInt, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="sppc_write")
-fun write(buffer: &CCharPtr, size: CULong, count: CULong, fd: CInt, out_n: &mut CLong) -> CInt { }
+fun write(buffer: CCharPtr, size: CULong, count: CULong, fd: CInt, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="sppc_open")
-fun open(path: &CCharPtr, flags: CInt, mode: CInt, out_fd: &mut CInt) -> CInt { }
+fun open(path: CCharPtr, flags: CInt, mode: CInt, out_fd: &mut CInt) -> CInt { }
 
 !ffi(symbol="sppc_close")
 fun close(fd: CInt) -> CInt { }
 
 !ffi(symbol="sppc_stat")
-fun stat(path: &CCharPtr, out: &mut CStat) -> CInt { }
+fun stat(path: CCharPtr, out: &mut CStat) -> CInt { }
 
 !ffi(symbol="sppc_fstat")
 fun fstat(fd: CInt, out: &mut CStat) -> CInt { }
 
 !ffi(symbol="sppc_lstat")
-fun lstat(path: &CCharPtr, out: &mut CStat) -> CInt { }
+fun lstat(path: CCharPtr, out: &mut CStat) -> CInt { }
 
 !ffi(symbol="sppc_poll")
 fun poll(fds: &mut CPollfd, count: CInt, timeout: CInt, out_n: &mut CInt) -> CInt { }
@@ -253,16 +253,16 @@ fun lseek(fd: CInt, offset: CLong, whence: CInt, out_pos: &mut CLong) -> CInt { 
 fun mmap(fd: CInt, length: CULong, prot: CInt, flags: CInt, offset: CLong) -> CVoidPtr { }
 
 !ffi(symbol="sppc_memprotect")
-fun memprotect(addr: &mut CVoidPtr, size: CULong, prot: CInt) -> CInt { }
+fun memprotect(addr: CVoidPtr, size: CULong, prot: CInt) -> CInt { }
 
 !ffi(symbol="sppc_munmap")
-fun munmap(addr: &mut CVoidPtr, length: &CULong) -> CInt { }
+fun munmap(addr: CVoidPtr, length: &CULong) -> CInt { }
 
 !ffi(symbol="sppc_pread")
-fun pread(fd: CInt, buffer: &mut CVoidPtr, size: CULong, count: CULong, offset: CLong, out_n: &mut CLong) -> CInt { }
+fun pread(fd: CInt, buffer: CVoidPtr, size: CULong, count: CULong, offset: CLong, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="sppc_pwrite")
-fun pwrite(fd: CInt, buffer: &CVoidPtr, size: CULong, count: CULong, offset: CLong, out_n: &mut CLong) -> CInt { }
+fun pwrite(fd: CInt, buffer: CVoidPtr, size: CULong, count: CULong, offset: CLong, out_n: &mut CLong) -> CInt { }
 
 # !ffi(symbol="sppc_readv")
 # fun readv(fd: CInt, iov: &CIovec, iov_count: CInt, out_n: &mut CLong) -> CInt { }
@@ -271,7 +271,7 @@ fun pwrite(fd: CInt, buffer: &CVoidPtr, size: CULong, count: CULong, offset: CLo
 # fun writev(fd: CInt, iov: &CIovec, iov_count: CInt, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="sppc_access")
-fun access(path: &CCharPtr, flags: CInt, out: &mut CInt) -> CInt { }
+fun access(path: CCharPtr, flags: CInt, out: &mut CInt) -> CInt { }
 
 !ffi(symbol="sppc_pipe")
 fun pipe(out_read_fd: &mut CInt, out_write_fd: &mut CInt) -> CInt { }
@@ -283,10 +283,10 @@ fun select(nfds: CInt, readfds: &mut CInt, writefds: &mut CInt, exceptfds: &mut 
 fun sched_yield() -> CVoid { }
 
 !ffi(symbol="sppc_msync")
-fun msync(addr: &mut CVoidPtr, length: &CULong, flags: CInt) -> CInt { }
+fun msync(addr: CVoidPtr, length: &CULong, flags: CInt) -> CInt { }
 
 !ffi(symbol="sppc_madvise")
-fun madvise(addr: &mut CVoidPtr, length: &CULong, advice: CInt) -> CInt { }
+fun madvise(addr: CVoidPtr, length: &CULong, advice: CInt) -> CInt { }
 
 !ffi(symbol="sppc_dup")
 fun dup(fd: CInt, out_fd: &mut CInt) -> CInt { }
@@ -310,16 +310,16 @@ fun connect(fd: CInt, storage: &CSockaddrStorage) -> CInt { }
 fun accept(fd: CInt, out_storage: &mut CSockaddrStorage, out_fd: &mut CInt) -> CInt { }
 
 !ffi(symbol="sppc_sendto")
-fun sendto(fd: CInt, data: &CCharPtr, size: CULong, storage: &CSockaddrStorage, out_n: &mut CLong) -> CInt { }
+fun sendto(fd: CInt, data: CCharPtr, size: CULong, storage: &CSockaddrStorage, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="sppc_recvfrom")
-fun recvfrom(fd: CInt, buffer: &mut CCharPtr, size: CULong, out_storage: &mut CSockaddrStorage, out_n: &mut CLong) -> CInt { }
+fun recvfrom(fd: CInt, buffer: CCharPtr, size: CULong, out_storage: &mut CSockaddrStorage, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="sppc_send")
-fun send(fd: CInt, data: &CCharPtr, size: CULong, flags: CInt, out_n: &mut CLong) -> CInt { }
+fun send(fd: CInt, data: CCharPtr, size: CULong, flags: CInt, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="sppc_recv")
-fun recv(fd: CInt, buffer: &mut CCharPtr, size: CULong, flags: CInt, out_n: &mut CLong) -> CInt { }
+fun recv(fd: CInt, buffer: CCharPtr, size: CULong, flags: CInt, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="sppc_shutdown")
 fun shutdown(fd: CInt, how: CInt) -> CInt { }
@@ -352,55 +352,55 @@ fun fsync(fd: CInt) -> CInt { }
 fun fdatasync(fd: CInt) -> CInt { }
 
 !ffi(symbol="sppc_truncate")
-fun truncate(path: &CCharPtr, length: CLong) -> CInt { }
+fun truncate(path: CCharPtr, length: CLong) -> CInt { }
 
 !ffi(symbol="sppc_ftruncate")
 fun ftruncate(fd: CInt, length: CLong) -> CInt { }
 
 !ffi(symbol="sppc_getcwd")
-fun getcwd(buffer: &mut CCharPtr, size: CULong) -> CInt { }
+fun getcwd(buffer: CCharPtr, size: CULong) -> CInt { }
 
 !ffi(symbol="sppc_chdir")
-fun chdir(path: &CCharPtr) -> CInt { }
+fun chdir(path: CCharPtr) -> CInt { }
 
 !ffi(symbol="sppc_rename")
-fun rename(old_path: &CCharPtr, new_path: &CCharPtr) -> CInt { }
+fun rename(old_path: CCharPtr, new_path: CCharPtr) -> CInt { }
 
 !ffi(symbol="sppc_mkdir")
-fun mkdir(path: &CCharPtr, mode: CInt) -> CInt { }
+fun mkdir(path: CCharPtr, mode: CInt) -> CInt { }
 
 !ffi(symbol="sppc_rmdir")
-fun rmdir(path: &CCharPtr) -> CInt { }
+fun rmdir(path: CCharPtr) -> CInt { }
 
 !ffi(symbol="sppc_link")
-fun link(target: &CCharPtr, linkpath: &CCharPtr) -> CInt { }
+fun link(target: CCharPtr, linkpath: CCharPtr) -> CInt { }
 
 !ffi(symbol="sppc_symlink")
-fun symlink(target: &CCharPtr, linkpath: &CCharPtr) -> CInt { }
+fun symlink(target: CCharPtr, linkpath: CCharPtr) -> CInt { }
 
 !ffi(symbol="sppc_unlink")
-fun unlink(path: &CCharPtr) -> CInt { }
+fun unlink(path: CCharPtr) -> CInt { }
 
 !ffi(symbol="sppc_readlink")
-fun readlink(path: &CCharPtr, buffer: &mut CCharPtr, buffer_size: CULong) -> CInt { }
+fun readlink(path: CCharPtr, buffer: CCharPtr, buffer_size: CULong) -> CInt { }
 
 !ffi(symbol="sppc_chmod")
-fun chmod(path: &CCharPtr, mode: CInt) -> CInt { }
+fun chmod(path: CCharPtr, mode: CInt) -> CInt { }
 
 !ffi(symbol="sppc_chown")
-fun chown(path: &CCharPtr, owner: CInt, group: CInt) -> CInt { }
+fun chown(path: CCharPtr, owner: CInt, group: CInt) -> CInt { }
 
 !ffi(symbol="sppc_lchown")
-fun lchown(path: &CCharPtr, owner: CInt, group: CInt) -> CInt { }
+fun lchown(path: CCharPtr, owner: CInt, group: CInt) -> CInt { }
 
 !ffi(symbol="sppc_get_ppid")
 fun get_ppid(out_ppid: &mut CInt) -> CVoid { }
 
 !ffi(symbol="sppc_mlock")
-fun mlock(addr: &CVoidPtr, size: CULong) -> CInt { }
+fun mlock(addr: CVoidPtr, size: CULong) -> CInt { }
 
 !ffi(symbol="sppc_munlock")
-fun munlock(addr: &CVoidPtr, size: CULong) -> CInt { }
+fun munlock(addr: CVoidPtr, size: CULong) -> CInt { }
 
 !ffi(symbol="sppc_clock_gettime")
 fun clock_gettime(clock_id: CInt, out_tp: &mut CTimespec) -> CInt { }
@@ -409,67 +409,67 @@ fun clock_gettime(clock_id: CInt, out_tp: &mut CTimespec) -> CInt { }
 fun clock_nanosleep(clock: CInt, flags: CInt, duration: &CTimespec) -> CInt { }
 
 !ffi(symbol="sppc_utimensat")
-fun utimensat(path: &CCharPtr, flags: CInt) -> CInt { }
+fun utimensat(path: CCharPtr, flags: CInt) -> CInt { }
 
 !ffi(symbol="sppc_getrandom")
-fun getrandom(size: CULong, out: &mut CCharPtr) -> CInt { }
+fun getrandom(size: CULong, out: CCharPtr) -> CInt { }
 
 !ffi(symbol="sppc_realpath")
-fun realpath(path: &CCharPtr, buffer: &mut CCharPtr) -> CInt { }
+fun realpath(path: CCharPtr, buffer: CCharPtr) -> CInt { }
 
 !ffi(symbol="sppc_mktemp")
-fun mktemp(path: &mut CCharPtr, out_fd: &mut CInt) -> CInt { }
+fun mktemp(path: CCharPtr, out_fd: &mut CInt) -> CInt { }
 
 !ffi(symbol="sppc_mktemp_dir")
-fun mktemp_dir(path: &mut CCharPtr) -> CInt { }
+fun mktemp_dir(path: CCharPtr) -> CInt { }
 
 !ffi(symbol="sppc_statvfs")
-fun statvfs(path: &CCharPtr, out: &mut CStatvfs) -> CInt { }
+fun statvfs(path: CCharPtr, out: &mut CStatvfs) -> CInt { }
 
 !ffi(symbol="sppc_copyfile")
 fun copyfile(fd_in: CInt, fd_out: CInt, len: CULong, flags: CInt, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="sppc_strcpy")
-fun strcpy(dest: &mut CCharPtr, src: &CCharPtr) -> CInt { }
+fun strcpy(dest: CCharPtr, src: CCharPtr) -> CInt { }
 
 !ffi(symbol="sppc_strcat")
-fun strcat(dest: &mut CCharPtr, src: &CCharPtr) -> CInt { }
+fun strcat(dest: CCharPtr, src: CCharPtr) -> CInt { }
 
 !ffi(symbol="sppc_strcmp")
-fun strcmp(str1: &CCharPtr, str2: &CCharPtr, out: &mut CBool) -> CInt { }
+fun strcmp(str1: CCharPtr, str2: CCharPtr, out: &mut CBool) -> CInt { }
 
 !ffi(symbol="sppc_strcasecmp")
-fun strcasecmp(str1: &CCharPtr, str2: &CCharPtr, out: &mut CBool) -> CInt { }
+fun strcasecmp(str1: CCharPtr, str2: CCharPtr, out: &mut CBool) -> CInt { }
 
 !ffi(symbol="sppc_strchr")
-fun strchr(str: &CCharPtr, ch: CUChar, out_idx: &mut CULong) -> CInt { }
+fun strchr(str: CCharPtr, ch: CUChar, out_idx: &mut CULong) -> CInt { }
 
 !ffi(symbol="sppc_strrchr")
-fun strrchr(str: &CCharPtr, ch: CUChar, out_idx: &mut CULong) -> CInt { }
+fun strrchr(str: CCharPtr, ch: CUChar, out_idx: &mut CULong) -> CInt { }
 
 !ffi(symbol="sppc_strstr")
-fun strstr(haystack: &CCharPtr, needle: &CCharPtr, out_idx: &mut CULong) -> CInt { }
+fun strstr(haystack: CCharPtr, needle: CCharPtr, out_idx: &mut CULong) -> CInt { }
 
 !ffi(symbol="sppc_strrstr")
-fun strrstr(haystack: &CCharPtr, needle: &CCharPtr, out_idx: &mut CULong) -> CInt { }
+fun strrstr(haystack: CCharPtr, needle: CCharPtr, out_idx: &mut CULong) -> CInt { }
 
 !ffi(symbol="sppc_strcasestr")
-fun strcasestr(haystack: &CCharPtr, needle: &CCharPtr, out_idx: &mut CULong) -> CInt { }
+fun strcasestr(haystack: CCharPtr, needle: CCharPtr, out_idx: &mut CULong) -> CInt { }
 
 !ffi(symbol="sppc_strpbrk")
-fun strpbrk(string: &CCharPtr, accept: &CCharPtr, out_idx: &mut CULong) -> CInt { }
+fun strpbrk(string: CCharPtr, accept: CCharPtr, out_idx: &mut CULong) -> CInt { }
 
 !ffi(symbol="sppc_strdup")
-fun strdup(str: &CCharPtr) -> CVoidPtr { }
+fun strdup(str: CCharPtr) -> CVoidPtr { }
 
 !ffi(symbol="sppc_getenv")
-fun getenv(key: &CCharPtr, out: &mut CCharPtr, size: CULong) -> CInt { }
+fun getenv(key: CCharPtr, out: CCharPtr, size: CULong) -> CInt { }
 
 !ffi(symbol="sppc_setenv")
-fun setenv(key: &CCharPtr, val: &CCharPtr, overwrite: CBool) -> CInt { }
+fun setenv(key: CCharPtr, val: CCharPtr, overwrite: CBool) -> CInt { }
 
 !ffi(symbol="sppc_unsetenv")
-fun unsetenv(key: &CCharPtr) -> CInt { }
+fun unsetenv(key: CCharPtr) -> CInt { }
 
 !ffi(symbol="sppc_halt")
 fun halt(status: CInt) -> ! { }
@@ -499,13 +499,13 @@ fun setsockopt(fd: CInt, level: CInt, optname: CInt, optval: &CInt) -> CInt { }
 fun getsockopt(fd: CInt, level: CInt, optname: CInt, optval: &mut CInt) -> CInt { }
 
 !ffi(symbol="sppc_stdin_read")
-fun stdin_read(buffer: &mut CCharPtr, size: CULong, count: CULong, out_n: &mut CLong) -> CInt { }
+fun stdin_read(buffer: CCharPtr, size: CULong, count: CULong, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="sppc_stdout_write")
-fun stdout_write(buffer: &CCharPtr, size: CULong, count: CULong, out_n: &mut CLong) -> CInt { }
+fun stdout_write(buffer: CCharPtr, size: CULong, count: CULong, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="sppc_stderr_write")
-fun stderr_write(buffer: &CCharPtr, size: CULong, count: CULong, out_n: &mut CLong) -> CInt { }
+fun stderr_write(buffer: CCharPtr, size: CULong, count: CULong, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="sppc_async")
 fun async_[F0: FunMov[(CULong, &CULong), CVoidPtr], ..V](handle: &mut CULong, routine: F0, argc: CULong, ..varargs: V) -> CInt { }
