@@ -274,7 +274,7 @@ sup Path {
         # @ret: `true` if the path exists, `false` otherwise.
 
         let mut exists = 0
-        let err = sppc::access(&self.inner.ptr, cffi::f_ok, &mut exists)
+        let err = sppc::access(self.inner.ptr, cffi::f_ok, &mut exists)
         ret case err != cffi::enoent { false } else { exists != 0 }
     }
 
@@ -287,7 +287,7 @@ sup Path {
         # the check fails.
 
         let mut exists = 0
-        let err = sppc::access(&self.inner.ptr, cffi::f_ok, &mut exists)
+        let err = sppc::access(self.inner.ptr, cffi::f_ok, &mut exists)
         ret case err != 0 { Fail(err=PathErr::from_errno(err)) } else { Pass(val=exists != 0) }
     }
 
@@ -299,7 +299,7 @@ sup Path {
         # @ret: `true` if the path is a regular file, `false` otherwise.
 
         let mut info = sppc::CStat()
-        let err = sppc::stat(&self.inner.ptr, &mut info)
+        let err = sppc::stat(self.inner.ptr, &mut info)
         ret case err != 0 { false } else { (S32::from(info.mode) & cffi::s_ifmt) == cffi::s_ifreg }
     }
 
@@ -311,7 +311,7 @@ sup Path {
         # @ret: `true` if the path is a directory, `false` otherwise.
 
         let mut info = sppc::CStat()
-        let err = sppc::stat(&self.inner.ptr, &mut info)
+        let err = sppc::stat(self.inner.ptr, &mut info)
         ret case err != 0 { false } else { (S32::from(info.mode) & cffi::s_ifmt) == cffi::s_ifdir }
     }
 
@@ -323,7 +323,7 @@ sup Path {
         # @ret: `true` if the path is a symbolic link, `false` otherwise.
 
         let mut info = sppc::CStat()
-        let err = sppc::lstat(&self.inner.ptr, &mut info)
+        let err = sppc::lstat(self.inner.ptr, &mut info)
         ret case err != 0 { false } else { (S32::from(info.mode) & cffi::s_ifmt) == cffi::s_iflnk }
     }
 
@@ -335,7 +335,7 @@ sup Path {
         # @ret: A `Res` type containing the canonicalized `Path` on success, or an error message if the operation fails.
 
         let mut canonical_path = Str::new_with_capacity(path_max)
-        let err = sppc::realpath(&self.inner.ptr, &mut canonical_path.ptr)
+        let err = sppc::realpath(self.inner.ptr, canonical_path.ptr)
         canonical_path.capacity_shrink()
         ret case err == 0 { Pass(val=Path(inner=canonical_path)) } else { Fail(err=PathErr::from_errno(err)) }
     }
@@ -348,7 +348,7 @@ sup Path {
         # @ret: A `Res` type containing `Pass()` if the directory is successfully created, or an error message if the
         # operation fails.
 
-        let err = sppc::mkdir(&self.inner.ptr, FileMode().create().to_flags())
+        let err = sppc::mkdir(self.inner.ptr, FileMode().create().to_flags())
         ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
     }
 
@@ -365,7 +365,7 @@ sup Path {
         loop component in components.iter_ref() {
             current_path /= Path(inner=component.clone())
             case current_path.exists() { skip }
-            let err = sppc::mkdir(&current_path.inner.ptr, FileMode().create().to_flags())
+            let err = sppc::mkdir(current_path.inner.ptr, FileMode().create().to_flags())
             case err == 0 { skip } else { ret Fail(err=PathErr::from_errno(err)) }
         }
         ret Pass[Void]()
@@ -379,7 +379,7 @@ sup Path {
         # @ret: A `Res` type containing `Pass()` if the file is successfully removed, or an error message if the
         # operation fails.
 
-        let err = sppc::unlink(&self.inner.ptr)
+        let err = sppc::unlink(self.inner.ptr)
         ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
     }
 
@@ -394,7 +394,7 @@ sup Path {
         # operation fails.
         # @todo: Implement the `force` parameter to recursively remove non-empty directories.
 
-        let err = sppc::rmdir(&self.inner.ptr)
+        let err = sppc::rmdir(self.inner.ptr)
         ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
     }
 
@@ -408,7 +408,7 @@ sup Path {
         # @ret: A `Res` type containing `Pass()` if the rename is successful, or an error message if the operation
         # fails.
 
-        let err = sppc::rename(&self.inner.ptr, &new_path.inner.ptr)
+        let err = sppc::rename(self.inner.ptr, new_path.inner.ptr)
         ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
     }
 
@@ -421,7 +421,7 @@ sup Path {
         # @ret: A `Res` type containing `Pass()` if the copy is successful, or an error message if the operation fails.
 
         let mut info = sppc::CStat()
-        let err = sppc::stat(&self.inner.ptr, &mut info)
+        let err = sppc::stat(self.inner.ptr, &mut info)
         case err != 0 { ret Fail(err=PathErr::from_errno(err)) }
         let file_length = info.size
 
@@ -442,7 +442,7 @@ sup Path {
         # @ret: A `Res` type containing `Pass()` if the hard link is successfully created, or an error message if the
         # operation fails.
 
-        let err = sppc::link(&self.inner.ptr, &new_path.inner.ptr)
+        let err = sppc::link(self.inner.ptr, new_path.inner.ptr)
         ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
     }
 
@@ -456,7 +456,7 @@ sup Path {
         # @ret: A `Res` type containing `Pass()` if the symbolic link is successfully created, or an error message if
         # the operation fails.
 
-        let err = sppc::symlink(&self.inner.ptr, &new_path.inner.ptr)
+        let err = sppc::symlink(self.inner.ptr, new_path.inner.ptr)
         ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
     }
 }

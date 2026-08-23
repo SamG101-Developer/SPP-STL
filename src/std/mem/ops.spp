@@ -75,7 +75,7 @@ fun mem_set[T](dest: &mut NonNull[T], value: U8, n: USize, dest_index: USize = 0
     # within a value, such as an array.
 
     let mut dest_bytes = dest@.erase_type()
-    sppc::memset(&mut dest_bytes.raw(), S32::from(value), n, dest_index)
+    sppc::memset(dest_bytes.raw(), S32::from(value), n, dest_index)
 }
 
 !package !always_inline
@@ -94,7 +94,7 @@ fun mem_cmp[T](a: &NonNull[T], b: &NonNull[T], n: USize) -> S32 {
     let mut out = 0_s32
     let a_bytes = a@.erase_type()
     let b_bytes = b@.erase_type()
-    sppc::memcmp(&a_bytes.raw(), &b_bytes.raw(), n, &mut out)
+    sppc::memcmp(a_bytes.raw(), b_bytes.raw(), n, &mut out)
     ret out
 }
 
@@ -113,7 +113,7 @@ fun mem_copy[T](dest: &mut NonNull[T], src: &NonNull[T], n: USize, dest_index: U
 
     let mut dest_bytes = dest@.erase_type()
     let src_bytes = src@.erase_type()
-    sppc::memcpy(&mut dest_bytes.raw(), &src_bytes.raw(), n, dest_index, src_index)
+    sppc::memcpy(dest_bytes.raw(), src_bytes.raw(), n, dest_index, src_index)
 }
 
 !public

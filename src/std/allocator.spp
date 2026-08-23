@@ -368,7 +368,7 @@ sup GlobalAlloc ext Alloc {
         # again.
         # @let layout: The `Layout` the block was allocated with. Unused by `GlobalAlloc`.
 
-        sppc::free(&mut ptr.raw())
+        sppc::free(ptr.raw())
     }
 
     !inline
@@ -402,7 +402,7 @@ sup GlobalAlloc ext Alloc {
         # @let new_layout: The `Layout` to reallocate the block to.
         # @ret: The new byte pointer on success, or an `AllocErr` on failure.
 
-        let new_ptr = NonNull[U8]::from_ptr(sppc::realloc(&mut ptr.raw(), new_layout.size)).map_err((e: NullptrErr) AllocOomErr)?
+        let new_ptr = NonNull[U8]::from_ptr(sppc::realloc(ptr.raw(), new_layout.size)).map_err((e: NullptrErr) AllocOomErr)?
         ret Pass(val=new_ptr)
     }
 
@@ -416,7 +416,7 @@ sup GlobalAlloc ext Alloc {
         # @let new_layout: The `Layout` to reallocate the block to.
         # @ret: The new byte pointer on success, or an `AllocErr` on failure.
 
-        let new_raw = sppc::realloc(&mut ptr.raw(), new_layout.size)
+        let new_raw = sppc::realloc(ptr.raw(), new_layout.size)
         let mut new_ptr = NonNull[U8]::from_ptr(new_raw).map_err((e: NullptrErr) AllocOomErr)?
         std::mem::ops::mem_set(&mut new_ptr, 0_u8, new_layout.size - old_layout.size, old_layout.size)
         ret Pass(val=new_ptr)
