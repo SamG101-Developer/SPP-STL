@@ -139,10 +139,7 @@ sup FileMode {
 
         let mut flags: S32 = 0
         case self.is_read and self.is_write { flags |= 0x2 }
-        else {
-            case self.is_read { flags |= 0x1 }
-            case self.is_write { flags |= 0x2 }
-        }
+        else case self.is_write { flags |= 0x1 }
 
         case self.is_create { flags |= 0x40 }
         case self.is_truncate { flags |= 0x200 }
@@ -154,7 +151,11 @@ sup FileMode {
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls File {
-    !package fd: S32
+    # @let fd: The underlying file descriptor, or `-1` once the file has been closed. The default is `-1` rather than
+    # `0` so that a `File` that never reached a successful `open` does not describe stdin, which `close` and `del`
+    # would otherwise happily close.
+
+    !package fd: S32 = -1
 }
 
 sup File {
@@ -173,9 +174,34 @@ sup File {
         # @ret: A `Res` type containing a `File` object if the file is successfully opened, or an error message if the
         # operation fails.
 
+        # The creation mode is only consulted when `O_CREAT` is in
+        # the flags; the process umask is applied on top of it.
         let mut file = File()
-        let err = sppc::open(path.inner.ptr, mode.to_flags(), 0, &mut file.fd)
+        let err = sppc::open(path.inner.ptr, mode.to_flags(), 0x1B6, &mut file.fd)
         ret case err == 0 { Pass(val=file) } else { Fail(err=PathErr::from_errno(err)) }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun close(&mut self) -> Res[Void, StreamErr] {
+        # The `close` method releases the underlying file descriptor early, rather than waiting for the `File` to go out
+        # of scope. It is idempotent: closing an already-closed `File` is a no-op that reports success, so an explicit
+        # `close` followed by the scope-exit `del` never closes the same descriptor twice. Note that a descriptor is
+        # released by the operating system even when `close` reports an error, so the error is reported to the caller
+        # but the descriptor is not retained for a retry.
+        # @ret: A `Res` type containing an empty value if the file was closed (or was already closed), or an error
+        # message if the operation fails.
+
+        # Nothing to do for a `File` that was never opened, or
+        # that some earlier call already closed.
+        case self.fd < 0 { ret Pass[Void]() }
+
+        # Mark the descriptor dead before reporting the outcome,
+        # so a failed close cannot be retried onto a number the
+        # kernel has already handed back out.
+        let err = sppc::close(self.fd)
+        self.fd = -1
+        ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
     }
 
     !public
@@ -351,9 +377,11 @@ sup File ext Del {
     fun del(&mut self) -> Void {
         # The `del` method is called when the `File` object goes out of scope. It ensures that the file descriptor is
         # properly closed to free system resources. This is important for preventing resource leaks and ensuring that
-        # the operating system can manage file descriptors efficiently.
+        # the operating system can manage file descriptors efficiently. This defers to `close`, which is a no-op on a
+        # `File` that was closed manually or never opened, so an explicit `close` earlier in the scope does not lead to
+        # a double close here. The result is discarded because a destructor has nowhere to report it.
 
-        case self.fd >= 0 { sppc::close(self.fd) }
+        self.close()
     }
 }
 
