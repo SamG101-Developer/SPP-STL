@@ -99,6 +99,16 @@ cls Path {
 sup Path {
     !public
     !versioned(base="1.0.0", new="1.0.0")
+    fun new(inner: &StrView) -> Path {
+        #
+        # @let inner:
+        # @ret:
+
+        ret Self(inner=Str::from(inner))
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun parent(&self) -> Path {
         # The `parent` method returns the parent directory of the path (left of the right-most separator). If the path
         # has no parent, it returns an empty path.
