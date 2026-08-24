@@ -373,7 +373,7 @@ sup [T, A: Alloc] Vec[T, A] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun take_last_if(&mut self, f: FunMov[(&mut T,), Bool]) -> Opt[T] {
+    fun take_last_if(&mut self, mut f: FunMov[(&mut T,), Bool]) -> Opt[T] {
         #
         # @let f:
         # @ret:

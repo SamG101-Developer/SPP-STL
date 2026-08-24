@@ -70,7 +70,7 @@ sup [T] Opt[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun is_some_and[P: FunMov[(T,), Bool]](self, pred: P) -> Bool {
+    fun is_some_and[P: FunMov[(T,), Bool]](self, mut pred: P) -> Bool {
         # The `is_some_and` method checks if the optional contains a value, and if so, applies the predicate to that
         # value. If the optional is `None`, or if the predicate returns false, then `is_some_and` returns `false`. If
         # the optional contains a value and the predicate returns true, then `is_some_and` returns `true`. This is a
@@ -100,7 +100,7 @@ sup [T] Opt[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun is_none_or[P: FunMov[(T,), Bool]](self, pred: P) -> Bool {
+    fun is_none_or[P: FunMov[(T,), Bool]](self, mut pred: P) -> Bool {
         # The `is_none_or` method checks if the optional is `None`, or if it is `Some` and the predicate returns true
         # for the value inside. If the optional is `None`, then `is_none_or` returns `true`. If the optional is `Some`
         # and the predicate returns true for the value inside, then `is_none_or` returns `true`. If the optional is
@@ -152,7 +152,7 @@ sup [T] Opt[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun and_then[U, P: FunMov[(T,), Opt[U]]](self, pred: P) -> Opt[U] {
+    fun and_then[U, P: FunMov[(T,), Opt[U]]](self, mut pred: P) -> Opt[U] {
         # The `and_then` method checks if this optional contains a value, and if so, applies the predicate to that value
         # and returns the result. If this optional is `None`, then `and_then` returns `None`. This is a convenient
         # method for chaining together multiple optional computations, where you want to return `None` if any of the
@@ -196,7 +196,7 @@ sup [T] Opt[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun ior_else(self, that: FunMov[(), Opt[T]]) -> Opt[T] {
+    fun ior_else(self, mut that: FunMov[(), Opt[T]]) -> Opt[T] {
         # The `ior_else` method checks if this optional contains a value, and if so, returns this optional. If this
         # optional is `None`, then `ior_else` returns the result of invoking the provided function to get the other
         # optional. This is a convenient method for chaining together multiple optional computations, where you want to
@@ -239,7 +239,7 @@ sup [T] Opt[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun filter[P: FunMov[(&T,), Bool]](self, pred: P) -> Opt[T] {
+    fun filter[P: FunMov[(&T,), Bool]](self, mut pred: P) -> Opt[T] {
         # The `filter` method checks if this optional contains a value, and if so, applies the predicate to that value.
         # If this optional is `None`, then `filter` returns `None`. If this optional is `Some` and the predicate returns
         # true for the value inside, then `filter` returns this optional. If this optional is `Some` and the predicate
@@ -265,7 +265,7 @@ sup [T] Opt[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun map[U, F: FunMov[(T,), U]](self, func: F) -> Opt[U] {
+    fun map[U, F: FunMov[(T,), U]](self, mut func: F) -> Opt[U] {
         # The `map` method checks if this optional contains a value, and if so, applies the predicate to that value and
         # returns the result wrapped in `Some`. If this optional is `None`, then `map` returns `None`. This is a
         # convenient method for transforming the value inside an optional based on a certain function, without having to
@@ -290,7 +290,7 @@ sup [T] Opt[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun map_or[U](self, default: U, f: FunMov[(T,), U]) -> U {
+    fun map_or[U](self, default: U, mut f: FunMov[(T,), U]) -> U {
         # The `map_or` method checks if this optional contains a value, and if so, applies the function to that value
         # and returns the result. If this optional is `None`, then `map_or` returns the provided default value. This is
         # a convenient method for transforming the value inside an optional based on a certain function, and providing a
@@ -317,7 +317,7 @@ sup [T] Opt[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun map_or_else[U, D: FunMov[(), U], F: FunMov[(T,), U]](self, default: D, f: F) -> U {
+    fun map_or_else[U, D: FunMov[(), U], F: FunMov[(T,), U]](self, mut default: D, mut f: F) -> U {
         # The `map_or_else` method checks if this optional contains a value, and if so, applies the function to that
         # value and returns the result. If this optional is `None`, then `map_or_else` returns the result of invoking
         # the provided default function to get the default value. This is a convenient method for transforming the value
@@ -373,7 +373,7 @@ sup [T] Opt[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun pass_or_else[E, F: FunMov[(), E]](self, err: F) -> Res[T, E] {
+    fun pass_or_else[E, F: FunMov[(), E]](self, mut err: F) -> Res[T, E] {
         # The `pass_or_else` method checks if this optional contains a value, and if so, returns the value wrapped in
         # `Pass`. If this optional is `None`, then `pass_or_else` returns the result of invoking the provided error
         # function wrapped in `Fail`. This is a convenient method for converting an optional into a result, where `Some`
@@ -451,7 +451,7 @@ sup [T] Opt[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun unwrap_or_else[F: FunMov[(), T]](self, default: F) -> T {
+    fun unwrap_or_else[F: FunMov[(), T]](self, mut default: F) -> T {
         # The `unwrap_or_else` method checks if this optional contains a value, and if so, returns the value. If this
         # optional is `None`, then `unwrap_or_else` returns the result of invoking the provided default function. This
         # is a convenient method for extracting the value inside an optional, while providing a fallback value in case
@@ -522,7 +522,7 @@ sup [T] Opt[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun take_if(&mut self, pred: FunMov[(&T,), Bool]) -> Opt[T] {
+    fun take_if(&mut self, mut pred: FunMov[(&T,), Bool]) -> Opt[T] {
         # The `take_if` method takes the value out of this optional if it satisfies the provided predicate, leaving a
         # `None` in its place. If this optional is `Some` and the predicate returns true for the value inside, then
         # `take_if` returns the value wrapped in `Some`, and sets this optional to `None`. If this optional is `None`,
