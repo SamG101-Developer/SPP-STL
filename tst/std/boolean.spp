@@ -1,0 +1,24 @@
+!test(group="std/boolean")
+fun test_logical_not() -> Void {
+    std::debug::assert(true.not.not, "not is an involution")
+    std::debug::assert(false.not, "not false is true")
+}
+
+!test(group="std/boolean")
+fun test_equality() -> Void {
+    std::debug::assert(true == true, "true equals true")
+    std::debug::assert(false == false, "false equals false")
+    std::debug::assert(true != false, "true differs from false")
+}
+
+!test(group="std/boolean")
+fun test_zero_and_is_zero() -> Void {
+    std::debug::assert(false.is_zero(), "false is the zero value")
+    std::debug::assert(true.is_zero().not, "true is not the zero value")
+}
+
+!test(group="std/boolean")
+fun test_conversion_from_integers() -> Void {
+    std::debug::assert(Bool::from(1_u32), "a non-zero integer is true")
+    std::debug::assert(Bool::from(0_u32).not, "zero is false")
+}

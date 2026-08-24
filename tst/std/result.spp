@@ -1,6 +1,3 @@
-# Coverage for "std::result".
-
-
 !test(group="std/result")
 fun test_predicates_report_the_state() -> Void {
     let p: Res[S32, Bool] = Pass(val=7)

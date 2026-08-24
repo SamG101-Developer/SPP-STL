@@ -1,7 +1,3 @@
-# Coverage for "std::option". Each test names the behaviour it pins rather than the function, so a failure says what
-# broke rather than only where.
-
-
 !test(group="std/option")
 fun test_predicates_report_the_state() -> Void {
     let s: Opt[S32] = Some(val=7)
