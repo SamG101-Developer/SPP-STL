@@ -1,0 +1,119 @@
+# Coverage for "std::option". Each test names the behaviour it pins rather than the function, so a failure says what
+# broke rather than only where.
+
+
+!test(group="std/option")
+fun test_predicates_report_the_state() -> Void {
+    let s: Opt[S32] = Some(val=7)
+    let n: Opt[S32] = None()
+    std::debug::assert(s.is_some(), "Some is some")
+    std::debug::assert(s.is_none().not, "Some is not none")
+    std::debug::assert(n.is_none(), "None is none")
+    std::debug::assert(n.is_some().not, "None is not some")
+}
+
+!test(group="std/option")
+fun test_unwrap_returns_the_contained_value() -> Void {
+    let a: Opt[S32] = Some(val=7)
+    let b: Opt[S32] = Some(val=7)
+    std::debug::assert(a.unwrap() == 7, "unwrap")
+    std::debug::assert(b.expect("present") == 7, "expect")
+}
+
+!test(group="std/option")
+fun test_unwrap_or_falls_back_only_for_none() -> Void {
+    let s: Opt[S32] = Some(val=7)
+    let n: Opt[S32] = None()
+    std::debug::assert(s.unwrap_or(3) == 7, "Some ignores the fallback")
+    std::debug::assert(n.unwrap_or(3) == 3, "None takes the fallback")
+}
+
+!test(group="std/option")
+fun test_unwrap_or_default_uses_the_types_default() -> Void {
+    let n: Opt[S32] = None()
+    std::debug::assert(n.unwrap_or_default() == 0, "None gives the default")
+    let s: Opt[S32] = Some(val=9)
+    std::debug::assert(s.unwrap_or_default() == 9, "Some keeps its value")
+}
+
+!test(group="std/option")
+fun test_take_moves_the_value_out_and_empties_the_slot() -> Void {
+    let mut o: Opt[S32] = Some(val=7)
+    let taken = o.take()
+    std::debug::assert(taken.unwrap() == 7, "the value came out")
+    std::debug::assert(o.is_none(), "the slot is now none")
+}
+
+!test(group="std/option")
+fun test_take_on_none_leaves_none() -> Void {
+    let mut o: Opt[S32] = None()
+    let taken = o.take()
+    std::debug::assert(taken.is_none(), "nothing came out")
+    std::debug::assert(o.is_none(), "the slot is still none")
+}
+
+!test(group="std/option")
+fun test_replace_returns_the_previous_value() -> Void {
+    let mut o: Opt[S32] = Some(val=1)
+    let old = o.replace(2)
+    std::debug::assert(old.unwrap() == 1, "the previous value came out")
+    std::debug::assert(o.unwrap() == 2, "the new value is in place")
+}
+
+!test(group="std/option")
+fun test_replace_on_none_reports_no_previous_value() -> Void {
+    let mut o: Opt[S32] = None()
+    let old = o.replace(5)
+    std::debug::assert(old.is_none(), "there was no previous value")
+    std::debug::assert(o.unwrap() == 5, "the new value is in place")
+}
+
+!test(group="std/option")
+fun test_and_keeps_the_second_only_when_the_first_is_some() -> Void {
+    let s: Opt[S32] = Some(val=1)
+    let n: Opt[S32] = None()
+    let other: Opt[S32] = Some(val=2)
+    let other2: Opt[S32] = Some(val=2)
+    std::debug::assert(s.and_(other).unwrap() == 2, "Some and Some gives the second")
+    std::debug::assert(n.and_(other2).is_none(), "None and anything is none")
+}
+
+!test(group="std/option")
+fun test_ior_keeps_the_first_when_it_is_some() -> Void {
+    let s: Opt[S32] = Some(val=1)
+    let n: Opt[S32] = None()
+    let fallback: Opt[S32] = Some(val=2)
+    let fallback2: Opt[S32] = Some(val=2)
+    std::debug::assert(s.ior_(fallback).unwrap() == 1, "Some keeps itself")
+    std::debug::assert(n.ior_(fallback2).unwrap() == 2, "None takes the other")
+}
+
+!test(group="std/option")
+fun test_xor_yields_a_value_only_when_exactly_one_is_some() -> Void {
+    let a: Opt[S32] = Some(val=1)
+    let b: Opt[S32] = None()
+    std::debug::assert(a.xor(b).unwrap() == 1, "exactly one is some")
+
+    let c: Opt[S32] = Some(val=1)
+    let d: Opt[S32] = Some(val=2)
+    std::debug::assert(c.xor(d).is_none(), "both some gives none")
+
+    let e: Opt[S32] = None()
+    let f: Opt[S32] = None()
+    std::debug::assert(e.xor(f).is_none(), "neither some gives none")
+}
+
+!test(group="std/option")
+fun test_pass_or_converts_into_a_result() -> Void {
+    let s: Opt[S32] = Some(val=1)
+    std::debug::assert(s.pass_or(false).is_pass(), "Some becomes a pass")
+    let n: Opt[S32] = None()
+    std::debug::assert(n.pass_or(false).is_fail(), "None becomes a fail")
+}
+
+!test(group="std/option")
+fun test_flatten_removes_one_layer() -> Void {
+    let inner: Opt[S32] = Some(val=3)
+    let nested: Opt[Opt[S32]] = Some(val=inner)
+    std::debug::assert(nested.flatten().unwrap() == 3, "the inner value survives")
+}

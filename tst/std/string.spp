@@ -1,0 +1,32 @@
+!test(group="std/string")
+fun test_string_from_view() -> Void {
+    let s = Str::from("hello")
+    std::debug::assert(s.len() == 5_uz, "length")
+}
+
+!test(group="std/string")
+fun test_string_append_grows_and_preserves() -> Void {
+    let mut s = Str::from("abc")
+    s.append_str(&Str::from("defghijklmnop"))
+    std::debug::assert(s.len() == 16_uz, "length after growth")
+    std::debug::assert(s.starts_with("abc"), "head survived the reallocation")
+    std::debug::assert(s.ends_with("mnop"), "tail after the reallocation")
+}
+
+!test(group="std/string")
+fun test_string_starts_and_ends_with() -> Void {
+    let s = Str::from("hello world")
+    std::debug::assert(s.starts_with("hello"), "starts_with a prefix")
+    std::debug::assert(s.starts_with("world").not, "not a prefix")
+    std::debug::assert(s.ends_with("world"), "ends_with a suffix")
+    std::debug::assert(s.ends_with("hello").not, "not a suffix")
+}
+
+!test(group="std/string")
+fun test_string_view_equality_is_bounded_by_length() -> Void {
+    # "StrView" is a "{ptr, length}" slice with no terminator, so equality must compare exactly "length" bytes.
+    std::debug::assert("abc" == "abc", "equal views")
+    std::debug::assert("abc" != "xyz", "differing views of the same length")
+    std::debug::assert("abc" != "abcd", "a prefix is not equal")
+    std::debug::assert("" == "", "empty views")
+}
