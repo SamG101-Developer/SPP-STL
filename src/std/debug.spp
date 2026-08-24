@@ -4,6 +4,8 @@ use std::annotations::private
 use std::annotations::public
 use std::annotations::versioned
 use std::annotations::zero_type
+use std::boolean::Bool
+use std::string_view::StrView
 use std::void::Void
 
 !public !zero_type
@@ -51,4 +53,15 @@ fun breakpoint_internal() -> Void {
     # the flow of the program. The function does not take any parameters and does not return any value. Only trips on
     # debug builds, and is a no-op on release builds. This hooks into the `llvm` intrinsic `llvm.debugtrap`, which is a
     # low-level instruction that triggers a breakpoint in the debugger.
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun assert(condition: Bool, msg: &StrView = "") -> Void {
+    #
+    # @let condition:
+    # @let ?msg:
+    # @ret:
+
+    std::abort::abort_if(condition.not, msg)
 }

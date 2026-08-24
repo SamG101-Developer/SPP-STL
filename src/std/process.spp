@@ -88,10 +88,16 @@ fun get_env(key: &StrView) -> Opt[Str] {
     # @let key: The name of the environment variable to retrieve.
     # @ret: An `Opt` type containing the value of the environment variable if it is set, or `None` if it is not set.
 
+    # Null terminate the string for C safety.
+    let key_z = key.to_c_str()
+
+    # Get the value into a pre-sized buffer, with a capacity
+    # of 1024 so that any value fits it.
     let max_size = 1024_uz
-    let mut val = Str::new_with_capacity(max_size)
-    let err = sppc::getenv(key.ptr, val.ptr, max_size)
-    ret case err == 0 { Some(val) } else { None() }
+    let mut buffer = Str::new_with_capacity(max_size)
+    let err = sppc::getenv(key_z.ptr, buffer.ptr, max_size)
+    case err != 0 { ret None() }
+    ret Some(val=Str::from_c_str(buffer.ptr))
 }
 
 !public

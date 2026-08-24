@@ -1,0 +1,90 @@
+# Coverage for "std::array" and the "std::view" it forwards to.
+
+
+!test(group="std/array")
+fun test_literal_holds_its_elements_in_order() -> Void {
+    let a = [10, 20, 30, 40]
+    std::debug::assert(a.len() == 4_uz, "length")
+    std::debug::assert(a[0_uz]@ == 10, "first")
+    std::debug::assert(a[2_uz]@ == 30, "middle")
+    std::debug::assert(a[3_uz]@ == 40, "last")
+}
+
+!test(group="std/array")
+fun test_repeated_element_literal_fills_every_slot() -> Void {
+    let a = [7; 5_uz]
+    std::debug::assert(a.len() == 5_uz, "length")
+    std::debug::assert(a[0_uz]@ == 7, "first")
+    std::debug::assert(a[4_uz]@ == 7, "last")
+}
+
+!test(group="std/array")
+fun test_fill_overwrites_every_slot() -> Void {
+    let mut a = [0; 4_uz]
+    a.fill(9)
+    std::debug::assert(a[0_uz]@ == 9, "first")
+    std::debug::assert(a[3_uz]@ == 9, "last")
+}
+
+!test(group="std/array")
+fun test_swap_exchanges_two_slots() -> Void {
+    let mut a = [1, 2, 3]
+    a.swap(0_uz, 2_uz)
+    std::debug::assert(a[0_uz]@ == 3, "first took the last")
+    std::debug::assert(a[2_uz]@ == 1, "last took the first")
+    std::debug::assert(a[1_uz]@ == 2, "the middle is untouched")
+}
+
+!test(group="std/array")
+fun test_is_empty_reflects_the_length() -> Void {
+    let a = [1, 2, 3]
+    std::debug::assert(a.is_empty().not, "a populated array is not empty")
+}
+
+!test(group="std/array")
+fun test_contains_and_find_locate_an_element() -> Void {
+    let a = [10, 20, 30]
+    std::debug::assert(a.contains(&20), "contains an element that is there")
+    std::debug::assert(a.contains(&99).not, "does not contain one that is not")
+    std::debug::assert(a.find(&30).unwrap() == 2_uz, "find gives the index")
+    std::debug::assert(a.find(&99).is_none(), "find gives none when absent")
+}
+
+!test(group="std/array")
+fun test_iteration_visits_every_element_in_order() -> Void {
+    let a = [1, 2, 3, 4]
+    let mut sum = 0
+    let mut count = 0_uz
+    loop e in a.iter_ref() {
+        sum += e@
+        count += 1_uz
+    }
+    std::debug::assert(count == 4_uz, "visited every element")
+    std::debug::assert(sum == 10, "in-order sum")
+}
+
+!test(group="std/array")
+fun test_mutable_iteration_writes_through() -> Void {
+    let mut a = [1, 2, 3]
+    loop e in a.iter_mut() { e@ = e@ * 10 }
+    std::debug::assert(a[0_uz]@ == 10, "first")
+    std::debug::assert(a[2_uz]@ == 30, "last")
+}
+
+# Todo: re-enable once "reverse_iter_ref" links. It emits "llvm.usub.with.overflow" without the type suffix that names
+#  the overload, so the linker sees a call to an undefined external and the whole build fails - which is why this is
+#  commented out rather than left red: a link failure takes every test with it, where a failing assertion costs one.
+#  "RepairMisnamedIntrinsics" is meant to cover exactly this and does not catch this one.
+#
+# !test(group="std/array")
+# fun test_reverse_iteration_visits_back_to_front() -> Void {
+#     let a = [1, 2, 3]
+#     let mut first_seen = 0
+#     let mut count = 0_uz
+#     loop e in a.reverse_iter_ref() {
+#         case count == 0_uz { first_seen = e@ }
+#         count += 1_uz
+#     }
+#     std::debug::assert(count == 3_uz, "visited every element")
+#     std::debug::assert(first_seen == 3, "started from the back")
+# }

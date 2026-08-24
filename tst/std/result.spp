@@ -1,0 +1,57 @@
+!test(group="std/result")
+fun test_predicates_report_the_state() -> Void {
+    let p: Res[S32, Bool] = Pass(val=7)
+    let f: Res[S32, Bool] = Fail(err=false)
+    std::debug::assert(p.is_pass(), "Pass is a pass")
+    std::debug::assert(p.is_fail().not, "Pass is not a fail")
+    std::debug::assert(f.is_fail(), "Fail is a fail")
+    std::debug::assert(f.is_pass().not, "Fail is not a pass")
+}
+
+!test(group="std/result")
+fun test_unwrap_returns_the_passed_value() -> Void {
+    let a: Res[S32, Bool] = Pass(val=7)
+    let b: Res[S32, Bool] = Pass(val=7)
+    std::debug::assert(a.unwrap() == 7, "unwrap")
+    std::debug::assert(b.expect("present") == 7, "expect")
+}
+
+!test(group="std/result")
+fun test_unwrap_err_returns_the_failure() -> Void {
+    let a: Res[S32, Bool] = Fail(err=true)
+    let b: Res[S32, Bool] = Fail(err=true)
+    std::debug::assert(a.unwrap_err(), "unwrap_err")
+    std::debug::assert(b.expect_err("failed"), "expect_err")
+}
+
+!test(group="std/result")
+fun test_unwrap_or_falls_back_only_for_fail() -> Void {
+    let p: Res[S32, Bool] = Pass(val=7)
+    let f: Res[S32, Bool] = Fail(err=false)
+    std::debug::assert(p.unwrap_or(3) == 7, "Pass ignores the fallback")
+    std::debug::assert(f.unwrap_or(3) == 3, "Fail takes the fallback")
+}
+
+!test(group="std/result")
+fun test_conversion_to_option_keeps_only_the_matching_side() -> Void {
+    let p: Res[S32, Bool] = Pass(val=7)
+    std::debug::assert(p.pass_opt().unwrap() == 7, "a pass has a pass value")
+    let p2: Res[S32, Bool] = Pass(val=7)
+    std::debug::assert(p2.fail_opt().is_none(), "a pass has no failure")
+
+    let f: Res[S32, Bool] = Fail(err=true)
+    std::debug::assert(f.fail_opt().unwrap(), "a fail has a failure")
+    let f2: Res[S32, Bool] = Fail(err=true)
+    std::debug::assert(f2.pass_opt().is_none(), "a fail has no pass value")
+}
+
+!test(group="std/result")
+fun test_and_keeps_the_second_only_when_the_first_passed() -> Void {
+    let p: Res[S32, Bool] = Pass(val=1)
+    let other: Res[S32, Bool] = Pass(val=2)
+    std::debug::assert(p.and_(other).unwrap() == 2, "Pass and Pass gives the second")
+
+    let f: Res[S32, Bool] = Fail(err=true)
+    let other2: Res[S32, Bool] = Pass(val=2)
+    std::debug::assert(f.and_(other2).is_fail(), "Fail and anything is the failure")
+}

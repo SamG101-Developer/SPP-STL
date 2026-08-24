@@ -1,0 +1,74 @@
+!test(group="std/vector")
+fun test_vector_grows_across_reallocation() -> Void {
+    let mut vec = Vec[S32]::new_with_capacity(2_uz)
+    vec.append(7)
+    vec.append(9)
+    vec.append(11)
+    std::debug::assert(vec.len() == 3_uz, "length after growth")
+    std::debug::assert(vec[0_uz]@ == 7, "first survived realloc")
+    std::debug::assert(vec[2_uz]@ == 11, "last after growth")
+}
+
+!test(group="std/vector")
+fun test_raw_buf_is_package_visible_from_tests() -> Void {
+    # Reaches a "!package" member, which only works because a library's tests sit in its own package.
+    let buf = std::mem::raw_buf::RawBuf[S32]::new_with_capacity(4_uz)
+    std::debug::assert(buf.cap() == 4_uz, "capacity")
+}
+
+!test(group="std/vector")
+fun test_vector_from_view_copies_every_element() -> Void {
+    let arr = [0, 1, 2, 3, 4, 5, 6, 7]
+    let vec = Vec[S32]::from(&arr)
+    std::debug::assert(vec.len() == 8_uz, "length")
+    std::debug::assert(vec[0_uz]@ == 0, "first")
+    std::debug::assert(vec[3_uz]@ == 3, "middle")
+    std::debug::assert(vec[7_uz]@ == 7, "last")
+}
+
+!test(group="std/vector")
+fun test_vector_append_many_appends_rather_than_overwrites() -> Void {
+    let a = Vec[S32]::from(&[1, 2, 3])
+    let b = Vec[S32]::from(&[4, 5])
+    let mut m = a.clone()
+    m.append_many(b.clone())
+    std::debug::assert(m.len() == 5_uz, "length")
+    std::debug::assert(m[0_uz]@ == 1, "kept its own first element")
+    std::debug::assert(m[3_uz]@ == 4, "appended after its own, not over them")
+    std::debug::assert(m[4_uz]@ == 5, "last")
+}
+
+!test(group="std/vector")
+fun test_vector_insert_many_at_shifts_the_tail() -> Void {
+    let mut v = Vec[S32]::from(&[1, 2, 3])
+    v.insert_many_at(1_uz, Vec[S32]::from(&[4, 5]))
+    std::debug::assert(v.len() == 5_uz, "length")
+    std::debug::assert(v[0_uz]@ == 1, "head")
+    std::debug::assert(v[1_uz]@ == 4, "inserted")
+    std::debug::assert(v[2_uz]@ == 5, "inserted")
+    std::debug::assert(v[3_uz]@ == 2, "shifted tail")
+    std::debug::assert(v[4_uz]@ == 3, "shifted tail")
+}
+
+!test(group="std/vector")
+fun test_vector_clone_is_independent() -> Void {
+    let v = Vec[S32]::from(&[1, 2, 3])
+    let mut c = v.clone()
+    c.append(4)
+    std::debug::assert(v.len() == 3_uz, "original is untouched")
+    std::debug::assert(c.len() == 4_uz, "clone grew")
+    std::debug::assert(c[0_uz]@ == 1, "clone kept the contents")
+}
+
+!test(group="std/vector")
+fun test_vector_iteration_visits_every_element_in_order() -> Void {
+    let v = Vec[S32]::from(&[1, 2, 3, 4])
+    let mut sum = 0
+    let mut count = 0_uz
+    loop e in v.iter_ref() {
+        sum += e@
+        count += 1_uz
+    }
+    std::debug::assert(count == 4_uz, "visited every element")
+    std::debug::assert(sum == 10, "in-order sum")
+}
