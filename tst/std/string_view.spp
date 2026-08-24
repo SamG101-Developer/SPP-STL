@@ -48,6 +48,27 @@ fun test_rfind_gives_the_last_index() -> Void {
     let s = "abcabc"
     std::debug::assert(s.rfind("abc").unwrap() == 3_uz, "the last occurrence")
     std::debug::assert(s.rfind("zzz").is_none(), "an absent needle")
+    std::debug::assert(s.rfind("a").unwrap() == 3_uz, "the last of a repeated single byte")
+    std::debug::assert(s.rfind("c").unwrap() == 5_uz, "a match at the very end")
+    std::debug::assert(s.rfind("abcabc").unwrap() == 0_uz, "the whole haystack matches at zero")
+    std::debug::assert(s.rfind("abcabcx").is_none(), "a needle longer than the haystack")
+}
+
+!test(group="std/string_view")
+fun test_rfind_handles_overlapping_matches() -> Void {
+    # "aaa" contains "aa" at 0 and at 1; the later one wins. Advancing past each hit by one rather than by the needle
+    # length is what makes the overlap visible.
+    let s = "aaa"
+    std::debug::assert(s.rfind("aa").unwrap() == 1_uz, "the later of two overlapping matches")
+    std::debug::assert(s.rfind("a").unwrap() == 2_uz, "the last single byte")
+}
+
+!test(group="std/string_view")
+fun test_find_and_rfind_agree_on_a_unique_match() -> Void {
+    let s = "hello world"
+    std::debug::assert(s.find("world").unwrap() == s.rfind("world").unwrap(), "one match, one index")
+    std::debug::assert(s.find("").unwrap() == 0_uz, "an empty needle is at the front")
+    std::debug::assert(s.rfind("").unwrap() == s.len(), "and at the back")
 }
 
 !test(group="std/string_view")
