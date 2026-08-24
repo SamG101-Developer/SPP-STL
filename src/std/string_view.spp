@@ -200,9 +200,16 @@ sup StrView {
         # @let needle: The `StrView` to search for in this `StrView`. It must be valid UTF-8 and null-terminated.
         # @ret: The byte index of the start of the `needle` if found, or `None` if not found.
 
-        let mut idx = 0_uz
-        let err = sppc::strstr(self.ptr, needle.ptr, &mut idx)
-        case err != 0 { ret None }
+        # Simple guards for guaranteed results - an empty needle
+        # or a needle larger than the haystack.
+        case needle.length == 0_uz { ret Some(val=0_uz) }
+        case needle.length > self.length { ret None }
+
+        # Find the match using the "memmem" C function, mapping
+        # the result into the Opt type.
+        let mut idx = self.length
+        sppc::memmem(self.ptr.raw(), self.length, needle.ptr.raw(), needle.length, &mut idx)
+        case idx >= self.length { ret None }
         ret Some(val=idx)
     }
 
@@ -243,10 +250,25 @@ sup StrView {
         # @let needle:
         # @ret:
 
-        let mut idx = 0_uz
-        let err = sppc::strrstr(self.ptr, needle.ptr, &mut idx)
-        case err != 0 { ret None }
-        ret Some(val=idx)
+        # Simple guards for guaranteed results - an empty needle
+        # or a needle larger than the haystack.
+        case needle.length == 0_uz { ret Some(val=self.length) }
+        case needle.length > self.length { ret None }
+
+        let mut best = 0_uz
+        let mut found = false
+        let mut from = 0_uz
+
+        loop from + needle.length <= self.length {
+            let hit = self[from to self.length]@.find(&needle@)
+            case hit.is_none() { exit }
+            best = from + hit.unwrap()
+            found = true
+            from = best + 1_uz
+        }
+
+        case found.not { ret None }
+        ret Some(val=best)
     }
 
     !public
@@ -306,9 +328,7 @@ sup StrView {
         # @let needle:
         # @ret:
 
-        let mut idx = 0_uz
-        let err = sppc::strstr(self.ptr, needle.ptr, &mut idx)
-        ret err == 0
+        ret self.find(needle).is_some()
     }
 
     !public
@@ -484,6 +504,21 @@ sup StrView {
         case self.starts_with(&prefix).not { gen &self }
         case self.ends_with(&suffix).not { gen &self }
         gen self[prefix.length to self.length - suffix.length]
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun to_c_str(&self) -> Str {
+        # A nul-terminated copy of this view, for handing to a c api. A view is a `{ptr, length}` slice into bytes that
+        # carry no terminator of their own, so a c function given `self.ptr` directly reads past the end of it - which
+        # is what made every terminator-based search here return whatever followed the view in memory.
+        # @ret: An owned copy whose buffer has a `0` byte after the last character. The returned string's own `len`
+        # does not count that byte, so it still reports the number of characters.
+
+        let mut out = Str::from(self)
+        out.bytes.append(0_u8)
+        out.bytes.length -= 1_uz
+        ret out
     }
 
     !public
@@ -821,7 +856,7 @@ sup U8 {
         # (0x20). For non-ASCII bytes, we return the byte unchanged.
         # @ret: The lowercase version of this byte if it is ASCII, or the original byte if it is not ASCII.
 
-        ret self@ | U8::from(self.is_ascii_lowercase()) * 0x20_u8
+        ret self@ | U8::from(self.is_ascii_uppercase()) * 0x20_u8
     }
 
     !public
@@ -831,7 +866,7 @@ sup U8 {
         # (0x20). For non-ASCII bytes, we return the byte unchanged.
         # @ret: The uppercase version of this byte if it is ASCII, or the original byte if it is not ASCII.
 
-        ret self@ ^ U8::from(self.is_ascii_uppercase()) * 0x20_u8
+        ret self@ ^ U8::from(self.is_ascii_lowercase()) * 0x20_u8
     }
 
     !public
@@ -840,7 +875,7 @@ sup U8 {
         # In-place version of `to_ascii_lowercase`. This modifies the byte directly, rather than returning a new byte.
         # This is an in-place mutator.
 
-        self@ |= self.to_ascii_lowercase()
+        self@ = self.to_ascii_lowercase()
     }
 
     !public
@@ -849,6 +884,6 @@ sup U8 {
         # In-place version of `to_ascii_uppercase`. This modifies the byte directly, rather than returning a new byte.
         # This is an in-place mutator.
 
-        self@ ^= self.to_ascii_uppercase()
+        self@ = self.to_ascii_uppercase()
     }
 }
