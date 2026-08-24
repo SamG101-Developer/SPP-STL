@@ -452,7 +452,10 @@ sup [T, A: Alloc] Vec[T, A] {
         # @let that:
         # @ret:
 
-        std::mem::ops::mem_copy(&mut self.buffer.ptr, &that.buffer.ptr, that.len())
+        let elem_size = std::mem::ops::size_of[T]()
+        std::mem::ops::mem_copy(
+            &mut self.buffer.ptr, &that.buffer.ptr,
+            that.len() * elem_size, self.len() * elem_size)
         self.length += that.len()
     }
 
@@ -478,7 +481,10 @@ sup [T, A: Alloc] Vec[T, A] {
         # @ret:
 
         self.buffer.shift(index, index + that.len(), self.len() - index)
-        std::mem::ops::mem_copy(&mut self.buffer.ptr, &that.buffer.ptr, that.len(), index)
+        let elem_size = std::mem::ops::size_of[T]()
+        std::mem::ops::mem_copy(
+            &mut self.buffer.ptr, &that.buffer.ptr,
+            that.len() * elem_size, index * elem_size)
         self.length += that.len()
     }
 
@@ -526,7 +532,10 @@ sup [T: Clone, A: Alloc] Vec[T, A] {
         # Allocate enough space and them memcpy the
         # elements from the view into the vector.
         self.capacity_reserve(that.len())
-        std::mem::ops::mem_copy(&mut self.buffer.ptr, &that.ptr, that.len(), self.len())
+        let elem_size = std::mem::ops::size_of[T]()
+        std::mem::ops::mem_copy(
+            &mut self.buffer.ptr, &that.ptr,
+            that.len() * elem_size, self.len() * elem_size)
         self.length += that.len()
     }
 
@@ -601,7 +610,9 @@ sup [T: Clone, A: Alloc & Clone] Vec[T, A] ext Clone {
 
         let alloc = self.buffer.alloc.clone()
         let mut vec = Self::new_with_capacity_in(self.len(), alloc)
-        std::mem::ops::mem_copy(&mut vec.buffer.ptr, &self.buffer.ptr, self.len())
+        std::mem::ops::mem_copy(
+            &mut vec.buffer.ptr, &self.buffer.ptr,
+            self.len() * std::mem::ops::size_of[T]())
         vec.length = self.len()
         ret vec
     }

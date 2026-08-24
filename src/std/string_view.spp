@@ -646,9 +646,8 @@ sup StrView ext Eq {
         # @ret:
 
         case self.length != that.length { ret false }
-        let mut matched = false
-        sppc::strcmp(self.ptr, that.ptr, &mut matched)
-        ret matched
+        case self.length == 0_uz { ret true }
+        ret std::mem::ops::mem_cmp(&self.ptr, &that.ptr, self.length) == 0
     }
 
     !versioned(base="1.0.0", new="1.0.0")
@@ -658,9 +657,8 @@ sup StrView ext Eq {
         # @ret:
 
         case self.length != that.length { ret true }
-        let mut matched = false
-        sppc::strcmp(self.ptr, that.ptr, &mut matched)
-        ret matched.not
+        case self.length == 0_uz { ret false }
+        ret std::mem::ops::mem_cmp(&self.ptr, &that.ptr, self.length) != 0
     }
 }
 

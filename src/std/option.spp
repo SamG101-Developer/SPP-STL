@@ -504,19 +504,8 @@ sup [T] Opt[T] {
         # returned wrapped in `Some`, otherwise `None` is returned.
         # @ret: Returns the old value wrapped in `Some` if this optional was `Some`, otherwise returns `None`.
 
-        # Pattern match and replace the value if this is `Some`,
-        # otherwise set the value to `Some(val)` and return `None`.
-        # todo: test if this errors when missing "mut" on "val" in the pattern match.
-        ret case self of {
-            is Some[T](mut val as old_val) {
-                std::mem::ops::swap(&mut old_val, &mut val)
-                Some(val=old_val)
-            }
-            else {
-                self@ = Some(val)
-                None
-            }
-        }
+        let new_val: Opt[T] = Some(val=val)
+        ret std::mem::ops::replace(self, new_val)
     }
 
     !public
@@ -527,12 +516,8 @@ sup [T] Opt[T] {
         # @ret: Returns the value inside the optional wrapped in `Some` if this optional is `Some`, otherwise returns
         # `None`.
 
-        # Pattern match and take the value if this is `Some`, otherwise
-        # return `None`.
-        ret case self of {
-            is Some[T](..) { self }
-            else { None }
-        }
+        let empty: Opt[T] = None()
+        ret std::mem::ops::replace(self, empty)
     }
 
     !public
