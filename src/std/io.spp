@@ -2,6 +2,7 @@ use std::annotations::abstract_method
 use std::annotations::package
 use std::annotations::private
 use std::annotations::public
+use std::annotations::zero_type
 use std::annotations::versioned
 use std::annotations::virtual_method
 use std::boolean::Bool
@@ -19,34 +20,34 @@ use std::vector::Vec
 use std::view::View
 use std::void::Void
 
-!public
+!public !zero_type
 cls StreamEofError { }
 
-!public
+!public !zero_type
 cls StreamInterruptedError { }
 
-!public
+!public !zero_type
 cls StreamWouldBlockError { }
 
-!public
+!public !zero_type
 cls StreamInvalidInputError { }
 
-!public
+!public !zero_type
 cls StreamInvalidDataError { }
 
-!public
+!public !zero_type
 cls StreamPermissionDeniedError { }
 
-!public
+!public !zero_type
 cls StreamNotFoundError { }
 
-!public
+!public !zero_type
 cls StreamAlreadyExistsError { }
 
-!public
+!public !zero_type
 cls StreamWriteZeroError { }
 
-!public
+!public !zero_type
 cls StreamOtherError { }
 
 !public
@@ -190,7 +191,11 @@ sup Read {
 
             # Ignore interruption errors and conintue.
             let try = self.read(buf[mut filled to target])
-            case try is Fail[StreamErr](err) and err is StreamInterruptedError() { skip }
+            case try is Fail[StreamErr](err) and err is StreamInterruptedError() {
+                std::mem::ops::drop(err)
+                std::mem::ops::drop(try)
+                skip
+            }
 
             # Read the number of bytes into the buffer.
             let n = try?
@@ -219,6 +224,7 @@ sup Read {
 
         # Define a temporary chunk buffer to read into.
         let mut chunk = Vec[U8]::new_with_capacity(4096_uz)
+        defer chunk.drop()
         let mut total = 0_uz
 
         # Loop until we encounter an EOF (0 byte read).
@@ -226,7 +232,11 @@ sup Read {
 
             # Ignore interruption errors and continue.
             let try = self.read(&mut chunk)
-            case try is Fail[StreamErr](err) and err is StreamInterruptedError() { skip }
+            case try is Fail[StreamErr](err) and err is StreamInterruptedError() {
+                std::mem::ops::drop(err)
+                std::mem::ops::drop(try)
+                skip
+            }
 
             # Read the number of bytes into the chunk buffer.
             let n = try?
@@ -278,7 +288,11 @@ sup Write {
             # If the write was interrupted, we just ignore
             # the error and try again.
             let try = self.write(buf[written to target])
-            case try is Fail[StreamErr](err) and err is StreamInterruptedError() { skip }
+            case try is Fail[StreamErr](err) and err is StreamInterruptedError() {
+                std::mem::ops::drop(err)
+                std::mem::ops::drop(try)
+                skip
+            }
 
             # Unwrap the number of bytes written from the buffer
             # (propagate other errors).
@@ -317,12 +331,15 @@ sup Seek {
         # or a `StreamErr` on failure. The specific behavior of the seek method (how it handles seeking beyond the
         # bounds of the stream) is determined by the implementation in the concrete type that implements the `Seek`
         # interface.
-        # @let offset: The offset to seek by. If `whence` is:   * `seek_set`: The offset is an absolute position from
-        # the start of the stream.   * `seek_cur`: The offset is a relative position from the current position in the
-        # stream.   * `seek_end`: The offset is a relative position from the end of the stream.
+        # @let offset: The offset to seek by. If `whence` is:
+        #   * `seek_set`: The offset is an absolute position from the start of the stream.
+        #   * `seek_cur`: The offset is a relative position from the current position in the stream.
+        #   * `seek_end`: The offset is a relative position from the end of the stream.
         # @let whence: An integer indicating how to interpret the offset parameter. It should be one of the following
-        # values:   * `seek_set` (0): Seek from the start of the stream.   * `seek_cur` (1): Seek from the current
-        # position in the stream.   * `seek_end` (2): Seek from the end of the stream.
+        # values:
+        #   * `seek_set` (0): Seek from the start of the stream.
+        #   * `seek_cur` (1): Seek from the current position in the stream.
+        #   * `seek_end` (2): Seek from the end of the stream.
         # @ret:
         # @note: Once enums are supported, the whence parameter should be changed to an enum type for better type safety
         # and readability.
@@ -430,8 +447,8 @@ sup [R: Read] BufRead[R] {
 
     !public
     cor fill_buf(&mut self) -> GenOnce[&View[U8]] {
-        self.refill().expect("Failed to refill buffer") # TODO
-        gen self.buf[self.pos to self.filled]
+        let filled = self.refill().expect("Failed to refill buffer")
+        gen self.buf[self.pos to filled]
     }
 
     !public

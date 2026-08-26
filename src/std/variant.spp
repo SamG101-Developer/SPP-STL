@@ -1,6 +1,13 @@
 use std::annotations::public
 use std::annotations::versioned
+use std::copy::Copy
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls Var[..Variants] { }
+
+sup [..Variants: Copy] Var[Variants] ext Copy {
+    # A variant is copyable exactly when every alternative it can hold is. The variant itself adds no storage of its
+    # own - it is the tag plus whichever alternative is active - so if none of the alternatives owns anything, neither
+    # does the variant, and duplicating it copies whichever one is there.
+}

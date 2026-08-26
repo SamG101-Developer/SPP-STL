@@ -2,7 +2,10 @@ use std::annotations::abstract_method
 use std::annotations::package
 use std::annotations::public
 use std::annotations::versioned
+use std::copy::Copy
 use std::tuple::TupLike
+use std::void::Void
+use std::ops::drop::Drop
 
 !package
 !versioned(base="1.0.0", new="1.0.0")
@@ -104,4 +107,11 @@ sup [Args: TupLike, Out] FunRef[Args, Out] ext FunMut[Args, Out] {
 
         ret self.call_ref(args)
     }
+}
+
+sup [Args: TupLike, Out] FunRef[Args, Out] ext Copy {
+    # A `FunRef` owns nothing: it either captures nothing at all, or captures only shared borrows, and both of those
+    # are free to duplicate. Copying one is therefore harmless. It also means a closure that is never called is not a
+    # value somebody still owes, which matters because a `FunRef` is called through a borrow and so calling it never
+    # consumes it.
 }

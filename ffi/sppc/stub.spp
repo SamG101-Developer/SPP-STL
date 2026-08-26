@@ -478,16 +478,16 @@ fun halt(status: CInt) -> ! { }
 fun abort() -> ! { }
 
 !ffi(symbol="sppc_set_sockaddr_v4")
-fun set_sockaddr_v4(octets: &CUChar, port: CUShort, out_storage: &mut CSockaddrStorage) -> CInt { }
+fun set_sockaddr_v4(octets: &CUChar, port: CUShort, out_storage: &mut CSockaddrStorage) -> CVoid { }
 
 !ffi(symbol="sppc_set_sockaddr_v6")
-fun set_sockaddr_v6(segments: &CUShort, port: CUShort, out_storage: &mut CSockaddrStorage) -> CInt { }
+fun set_sockaddr_v6(segments: &CUShort, port: CUShort, out_storage: &mut CSockaddrStorage) -> CVoid { }
 
 !ffi(symbol="sppc_get_sockaddr_v4")
-fun get_sockaddr_v4(storage: &CSockaddrStorage, out_octets: &mut CUChar, out_port: &mut CUShort) -> CInt { }
+fun get_sockaddr_v4(storage: &CSockaddrStorage, out_octets: &mut CUChar, out_port: &mut CUShort) -> CVoid { }
 
 !ffi(symbol="sppc_get_sockaddr_v6")
-fun get_sockaddr_v6(storage: &CSockaddrStorage, out_segments: &mut CUShort, out_port: &mut CUShort) -> CInt { }
+fun get_sockaddr_v6(storage: &CSockaddrStorage, out_segments: &mut CUShort, out_port: &mut CUShort) -> CVoid { }
 
 !ffi(symbol="sppc_sockaddr_family")
 fun sockaddr_family(storage: &CSockaddrStorage, out_family: &mut CInt) -> CVoid { }

@@ -283,3 +283,13 @@ sup BigInt ext Ord {
         ret self.data.ord(&that.data)
     }
 }
+
+sup BigInt ext std::ops::drop::Drop {
+    # A `BigInt` owns the magnitude it wraps; the sign is a `Bool` and so owes nothing.
+
+    !public
+    fun drop(self) -> Void {
+        let BigInt(sign, data) = self
+        data.drop()
+    }
+}

@@ -3,11 +3,13 @@ use std::annotations::versioned
 use std::annotations::zero_type
 use std::boolean::Bool
 use std::copy::Copy
+use std::ops::drop::Drop
 use std::function::FunMov
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
 use std::string_view::StrView
+use std::void::Void
 use std::ops::eq::Eq
 use std::ops::try::Try
 
@@ -686,6 +688,19 @@ sup [T: Eq] Opt[T] ext Eq {
             is (Some[T](val as a), Some[T](val as b)) { a != b }
             is (None(), None()) { false }
             else { true }
+        }
+    }
+}
+
+sup [T: Drop] Opt[T] ext Drop {
+    # An optional is discarded by discarding the value it holds, if it holds one. That needs `T` to be discardable in
+    # turn, which is what `T: Drop` says; an `Opt[T]` for a `T` with no way to discard it has to be unwrapped instead.
+
+    !versioned(base="1.0.0", new="1.0.0")
+    fun drop(self) -> Void {
+        case self of {
+            is Some[T](val) { val.drop() }
+            else { }
         }
     }
 }

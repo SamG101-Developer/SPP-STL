@@ -11,7 +11,8 @@ use std::result::Pass
 use std::result::Res
 use std::slot::Slot
 use std::void::Void
-use std::ops::del::Del
+use std::ops::drop::Drop
+use std::threading::cond_var::TimedOut
 use std::threading::mutex::WouldBlock
 use std::threading::safe::ThreadSafe
 use std::threading::thread::ThreadErr
@@ -30,11 +31,12 @@ cls RwLockUnlockGuard {
     !package handle: U64
 }
 
-sup RwLockUnlockGuard ext Del {
+sup RwLockUnlockGuard ext Drop {
     !versioned(base="1.0.0", new="1.0.0")
-    fun del(&mut self) -> Void {
+    fun drop(self) -> Void {
         # Release the rwlock when the guard leaves scope.
-        sppc::pthread_rwlock_unlock(&self.handle)
+        let RwLockUnlockGuard(handle) = self
+        let err = sppc::pthread_rwlock_unlock(&handle)
     }
 }
 
@@ -50,56 +52,35 @@ sup [T] RwLock[T] {
     !versioned(base="1.0.0", new="1.0.0")
     fun new(val: T) -> RwLock[T] {
         # Create a new rwlock using the sppc threading API.
+        # Todo: Error handling - "new" should report a failed init rather than swallowing it.
         let mut handle = 0_u64
-        sppc::pthread_rwlock_init(&mut handle)
+        let err = sppc::pthread_rwlock_init(&mut handle)
         ret RwLock(handle, val=Slot[T]::new(val))
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    cor read(&self) -> GenOnce[&T] {
-        # Lock the rwlock for reading using the sppc threading API.
-        sppc::pthread_rwlock_rdlock(&self.handle)
+    cor read(&self) -> GenOnce[&T or ThreadErr] {
+        # Lock the rwlock for reading using the sppc threading API. A failed lock yields the error instead of the
+        # guarded value; the alternatives are a bare variant rather than a "Res", because "Pass[T]" would store the
+        # borrow in its "val" attribute and second-class borrows do not allow that.
+        let err = sppc::pthread_rwlock_rdlock(&self.handle)
+        case err != 0 {
+            gen ThreadErr::from_errno(err)
+            ret
+        }
         let guard = RwLockUnlockGuard(handle=self.handle)
         gen self.val.get_ref()
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    cor write(&self) -> GenOnce[&mut T] {
-        # Lock the rwlock for writing using the sppc threading API.
-        sppc::pthread_rwlock_wrlock(&self.handle)
-        let guard = RwLockUnlockGuard(handle=self.handle)
-        gen self.val.get_mut()
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    cor timed_read(&self, timeout: Duration, clock: U32 = 1_u32) -> GenOnce[&T] {
-        # Timed lock the rwlock for reading using the sppc threadinging API.
-        let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
-        sppc::pthread_rwlock_clockrdlock(&self.handle, S32::from(clock), &timespec)
-        let guard = RwLockUnlockGuard(handle=self.handle)
-        gen self.val.get_ref()
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    cor timed_write(&self, timeout: Duration, clock: U32 = 1_u32) -> GenOnce[&mut T] {
-        # Timed lock the rwlock for writing using the sppc threading API.
-        let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
-        sppc::pthread_rwlock_clockwrlock(&self.handle, S32::from(clock), &timespec)
-        let guard = RwLockUnlockGuard(handle=self.handle)
-        gen self.val.get_mut()
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    cor try_write(&self) -> GenOnce[&mut T or WouldBlock] {
-        # Try to lock the rwlock for writing using the sppc threading API.
-        let code = sppc::pthread_rwlock_trywrlock(&self.handle)
-        case code == cffi::ebusy {
-            gen WouldBlock
+    cor write(&self) -> GenOnce[&mut T or ThreadErr] {
+        # Lock the rwlock for writing using the sppc threading API. A failed lock yields the error instead of the
+        # guarded value.
+        let err = sppc::pthread_rwlock_wrlock(&self.handle)
+        case err != 0 {
+            gen ThreadErr::from_errno(err)
             ret
         }
         let guard = RwLockUnlockGuard(handle=self.handle)
@@ -108,11 +89,72 @@ sup [T] RwLock[T] {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    cor try_read(&self) -> GenOnce[&T or WouldBlock] {
-        # Try to lock the rwlock for reading using the sppc threading API.
+    cor timed_read(&self, timeout: Duration, clock: U32 = 1_u32) -> GenOnce[&T or TimedOut or ThreadErr] {
+        # Timed lock the rwlock for reading using the sppc threading API. The deadline elapsing yields "TimedOut", and
+        # any other failure yields the error; neither hands out the guarded value.
+        let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
+        let err = sppc::pthread_rwlock_clockrdlock(&self.handle, S32::from(clock), &timespec)
+        case err == cffi::etimedout {
+            gen TimedOut
+            ret
+        }
+        case err != 0 {
+            gen ThreadErr::from_errno(err)
+            ret
+        }
+        let guard = RwLockUnlockGuard(handle=self.handle)
+        gen self.val.get_ref()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    cor timed_write(&self, timeout: Duration, clock: U32 = 1_u32) -> GenOnce[&mut T or TimedOut or ThreadErr] {
+        # Timed lock the rwlock for writing using the sppc threading API. The deadline elapsing yields "TimedOut", and
+        # any other failure yields the error.
+        let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
+        let err = sppc::pthread_rwlock_clockwrlock(&self.handle, S32::from(clock), &timespec)
+        case err == cffi::etimedout {
+            gen TimedOut
+            ret
+        }
+        case err != 0 {
+            gen ThreadErr::from_errno(err)
+            ret
+        }
+        let guard = RwLockUnlockGuard(handle=self.handle)
+        gen self.val.get_mut()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    cor try_write(&self) -> GenOnce[&mut T or WouldBlock or ThreadErr] {
+        # Try to lock the rwlock for writing using the sppc threading API. A busy lock yields "WouldBlock"; any other
+        # failure yields the error rather than being swallowed.
+        let code = sppc::pthread_rwlock_trywrlock(&self.handle)
+        case code == cffi::ebusy {
+            gen WouldBlock
+            ret
+        }
+        case code != 0 {
+            gen ThreadErr::from_errno(code)
+            ret
+        }
+        let guard = RwLockUnlockGuard(handle=self.handle)
+        gen self.val.get_mut()
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    cor try_read(&self) -> GenOnce[&T or WouldBlock or ThreadErr] {
+        # Try to lock the rwlock for reading using the sppc threading API. A busy lock yields "WouldBlock"; any other
+        # failure yields the error rather than being swallowed.
         let code = sppc::pthread_rwlock_tryrdlock(&self.handle)
         case code == cffi::ebusy {
             gen WouldBlock
+            ret
+        }
+        case code != 0 {
+            gen ThreadErr::from_errno(code)
             ret
         }
         let guard = RwLockUnlockGuard(handle=self.handle)
@@ -120,10 +162,14 @@ sup [T] RwLock[T] {
     }
 }
 
-sup [T] RwLock[T] ext Del {
+sup [T: Drop] RwLock[T] ext Drop {
+    !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun del(&mut self) -> Void {
-        # Destroy the rwlock using the sppc threading API.
-        sppc::pthread_rwlock_destroy(&self.handle)
+    fun drop(self) -> Void {
+        # Destroy the rwlock using the sppc threading API, and discard the value it was guarding. The guarded value has
+        # to go somewhere, which is why this needs "T: Drop"; a caller that wants the value back should use "take".
+        let RwLock[T](handle, val) = self
+        let err = sppc::pthread_rwlock_destroy(&handle)
+        val.take().drop()
     }
 }

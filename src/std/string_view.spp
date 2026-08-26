@@ -208,7 +208,7 @@ sup StrView {
         # Find the match using the "memmem" C function, mapping
         # the result into the Opt type.
         let mut idx = self.length
-        sppc::memmem(self.ptr.raw(), self.length, needle.ptr.raw(), needle.length, &mut idx)
+        let err = sppc::memmem(self.ptr.raw(), self.length, needle.ptr.raw(), needle.length, &mut idx) # Todo: Error handling.
         case idx >= self.length { ret None }
         ret Some(val=idx)
     }
@@ -643,7 +643,7 @@ sup StrView {
             case c is Char(..) {
                 let char_len = USize::from(c.len_utf8())
                 let start = self.len() - idx
-                c.encode_utf8(self[mut start to start + char_len].view_mut())
+                let n = c.encode_utf8(self[mut start to start + char_len].view_mut())
                 idx -= char_len
             }
         }

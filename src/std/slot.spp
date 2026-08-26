@@ -23,7 +23,7 @@ sup [T] Slot[T] {
     !public
     !versioned(base="1.0.0", new="1.0.0")
     fun set(&self, val: T) -> Void {
-        self.replace(val)
+        let old = self.replace(val)
     }
 
     !public

@@ -58,12 +58,13 @@ sup Barrier {
     }
 }
 
-sup Barrier ext std::ops::del::Del {
+sup Barrier ext std::ops::drop::Drop {
+    !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun del(&mut self) -> Void {
-        # When a barrier object goes out of scope, the `del` method is called to clean up the underlying barrier
-        # resources. This is important to prevent resource leaks and ensure that the system can manage barriers
-        # efficiently.
-        sppc::pthread_barrier_destroy(&self.handle)
+    fun drop(self) -> Void {
+        # Discard the barrier, releasing the underlying resources. This is the discard path; anything that wants to
+        # know whether the destroy succeeded should call the named consumer instead.
+        let Barrier(handle) = self
+        let err = sppc::pthread_barrier_destroy(&handle)
     }
 }

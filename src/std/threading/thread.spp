@@ -12,7 +12,7 @@ use std::result::Pass
 use std::result::Res
 use std::string_view::StrView
 use std::void::Void
-use std::ops::del::Del
+use std::ops::drop::Drop
 use std::ops::eq::Eq
 use std::threading::safe::ThreadSafe
 
@@ -140,10 +140,11 @@ sup [R] JoinHandle[R] ext Eq {
 }
 ##
 
-sup [R] JoinHandle[R] ext Del {
+sup [R] JoinHandle[R] ext Drop {
     !versioned(base="1.0.0", new="1.0.0")
-    fun del(&mut self) -> Void {
+    fun drop(self) -> Void {
         # Ensure the thread is detached before deletion.
-        case self.detached.not { sppc::pthread_detach(&self.handle) }
+        let JoinHandle[R](handle, detached) = self
+        case detached.not { let err = sppc::pthread_detach(&handle) }
     }
 }

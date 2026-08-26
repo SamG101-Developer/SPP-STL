@@ -31,7 +31,7 @@ use std::void::Void
 use std::mem::raw_buf::RawBuf
 use std::ops::add::Add
 use std::ops::add::AddAssign
-use std::ops::del::Del
+use std::ops::drop::Drop
 use std::ops::eq::Eq
 use std::ops::fwd::FwdMut
 use std::ops::fwd::FwdRef
@@ -705,9 +705,9 @@ sup [T, A: Alloc] Vec[T, A] ext FwdRef[View[T]] {
     cor fwd_ref(&self) -> GenOnce[&View[T]] { }
 }
 
-sup [T, A: Alloc] Vec[T, A] ext Del {
+sup [T, A: Alloc] Vec[T, A] ext Drop {
     !versioned(base="1.0.0", new="1.0.0")
-    fun del(&mut self) -> Void {
+    fun drop(self) -> Void {
         # The `del` function runs the destructors of the vector's live elements when it is dropped, then lets the
         # underlying buffer drop, which frees the backing memory. The live elements are the range `[start, length)`,
         # which `clear_range` destroys in place. For any vector in normal use `start` is `0`, so this is `[0, length)`;
@@ -716,6 +716,8 @@ sup [T, A: Alloc] Vec[T, A] ext Del {
         # elements, so there is no double drop; it runs after this body as part of normal field destruction.
         # @ret: Nothing; this is invoked for its cleanup side effect when a `Vec` is destroyed.
 
-        self.buffer.clear_range(self.start, self.length - self.start)
+        let Vec[T, A](mut buffer, length, start) = self
+        buffer.clear_range(start, length - start)
+        buffer.drop()
     }
 }

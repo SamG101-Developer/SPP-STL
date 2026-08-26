@@ -9,7 +9,7 @@ use std::generator::GenOnce
 use std::number::USize
 use std::void::Void
 use std::mem::pointer::NonNull
-use std::ops::del::Del
+use std::ops::drop::Drop
 use std::ops::fwd::FwdRef
 use std::rc::weak::Weak
 
@@ -121,9 +121,9 @@ sup [T, A: Alloc & Clone] Rc[T, A] ext Clone {
     }
 }
 
-sup [T, A: Alloc] Rc[T, A] ext Del {
+sup [T, A: Alloc] Rc[T, A] ext Drop {
     !versioned(base="1.0.0", new="1.0.0")
-    fun del(&mut self) -> Void {
+    fun drop(self) -> Void {
         # Drop one share. When the strong count reaches zero the value is no longer reachable through any `Rc`, so its
         # destructor must run: `drop_in_place` destroys the `val` field of the control block directly, leaving the
         # counters intact for any surviving weak pointers. Deallocation is a pure memory operation that never runs
@@ -133,11 +133,12 @@ sup [T, A: Alloc] Rc[T, A] ext Del {
         # the value never reads it, as `upgrade` returns `None` once the strong count is zero, so the destroyed `val`
         # slot is never observed.
 
-        self.ptr.strong_counter -= 1_uz
-        case self.ptr.strong_counter == 0_uz {
-            std::mem::ops::drop_in_place(&mut self.ptr.val)
-            case self.ptr.weak_counter == 0_uz {
-                self.alloc.deallocate_array(self.ptr, 1_uz)
+        let Rc[T, A](mut ptr, alloc) = self
+        ptr.strong_counter -= 1_uz
+        case ptr.strong_counter == 0_uz {
+            std::mem::ops::drop_in_place(&mut ptr.val)
+            case ptr.weak_counter == 0_uz {
+                alloc.deallocate_array(ptr, 1_uz)
             }
         }
     }

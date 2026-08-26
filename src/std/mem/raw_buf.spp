@@ -24,7 +24,7 @@ use std::string::Str
 use std::string_view::StrView
 use std::void::Void
 use std::mem::pointer::NonNull
-use std::ops::del::Del
+use std::ops::drop::Drop
 use std::ops::idx::IndexMut
 use std::ops::idx::IndexRef
 
@@ -257,9 +257,9 @@ sup [T, A: Alloc] RawBuf[T, A] ext IndexRef[T, USize] {
     cor index_ref(&self, index: USize) -> Indexed[&T or None] { }
 }
 
-sup [T, A: Alloc] RawBuf[T, A] ext Del {
+sup [T, A: Alloc] RawBuf[T, A] ext Drop {
     !versioned(base="1.0.0", new="1.0.0")
-    fun del(&mut self) -> Void {
+    fun drop(self) -> Void {
         # The `del` function frees the buffer's memory when the `RawBuf` is dropped. It returns the current allocation
         # to the allocator sized for the current `capacity`, which `try_capacity_grow_to` and `try_capacity_shrink_to`
         # keep in step with the real allocation size. If the buffer occupies no bytes (an empty buffer, or a zero-sized
@@ -269,7 +269,8 @@ sup [T, A: Alloc] RawBuf[T, A] ext Del {
         # its buffer is dropped.
         # @ret: Nothing; this is invoked for its cleanup side effect when a `RawBuf` is destroyed.
 
-        case Self::is_storage_free(self.capacity) { ret }
-        self.alloc.deallocate_array(self.ptr, self.capacity)
+        let RawBuf[T, A](ptr, capacity, alloc) = self
+        case Self::is_storage_free(capacity) { ret }
+        alloc.deallocate_array(ptr, capacity)
     }
 }

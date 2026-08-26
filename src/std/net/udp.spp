@@ -46,13 +46,15 @@ sup UdpSocket {
 
         # Create the file descriptor from the address.
         let mut fd = 0
-        sppc::socket(addr.ip().family(), cffi::sock_dgram, cffi::ipproto_udp, &mut fd)
-        case fd < 0 { ret Fail(err=SockErr::from_errno(fd)) }
+        let err = sppc::socket(addr.ip().family(), cffi::sock_dgram, cffi::ipproto_udp, &mut fd)
+        case fd < 0 or err < 0 { ret Fail(err=SockErr::from_errno(fd)) }
 
         # Create the `UdpSocket` object with the file descriptor.
         let listener = UdpSocket(fd)
         let err = sppc::bind(listener.fd, &addr.storage())
-        case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+        case err == 0 {
+            std::mem::ops::drop(listener)
+            ret Fail(err=SockErr::from_errno(err)) }
         ret Pass(val=listener)
     }
 
@@ -85,8 +87,13 @@ sup UdpSocket {
         let mut bytes_received = 0_sz
         let mut storage = sppc::CSockaddrStorage()
         let err = sppc::recvfrom(self.fd, buf.ptr, buf.len(), &mut storage, &mut bytes_received)
-        case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
-        ret Pass(val=(USize::from(bytes_received), SockAddr::from_storage(&storage)))
+        case err != 0 {
+            std::mem::ops::drop(storage)
+            ret Fail(err=SockErr::from_errno(err))
+        }
+        let addr = SockAddr::from_storage(&storage)
+        std::mem::ops::drop(storage)
+        ret Pass(val=(USize::from(bytes_received), addr))
     }
 
     !public
@@ -161,7 +168,8 @@ sup UdpSocket {
         # Call the `getsockopt` function to get the receive
         # timeout for the socket (milliseconds).
         let mut timeout = 0
-        let err = sppc::getsockopt(self.fd, cffi::sol_socket, cffi::so_rcvtimeo, &mut timeout)
+        let err = sppc::getsockopt(
+            self.fd, cffi::sol_socket, cffi::so_rcvtimeo, &mut timeout)
 
         # Convert the timeout from milliseconds to a `Duration`
         # object and return it (or error).

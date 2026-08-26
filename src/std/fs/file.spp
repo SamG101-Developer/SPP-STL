@@ -18,7 +18,7 @@ use std::view::View
 use std::void::Void
 use std::fs::path::Path
 use std::fs::path::PathErr
-use std::ops::del::Del
+use std::ops::drop::Drop
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
@@ -183,24 +183,21 @@ sup File {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun close(&mut self) -> Res[Void, StreamErr] {
-        # The `close` method releases the underlying file descriptor early, rather than waiting for the `File` to go out
-        # of scope. It is idempotent: closing an already-closed `File` is a no-op that reports success, so an explicit
-        # `close` followed by the scope-exit `del` never closes the same descriptor twice. Note that a descriptor is
-        # released by the operating system even when `close` reports an error, so the error is reported to the caller
-        # but the descriptor is not retained for a retry.
-        # @ret: A `Res` type containing an empty value if the file was closed (or was already closed), or an error
-        # message if the operation fails.
+    fun close(self) -> Res[Void, StreamErr] {
+        # The `close` method releases the underlying file descriptor, consuming the `File` as it does. Consuming it is
+        # what makes closing safe rather than idempotent: a closed `File` no longer exists, so there is nothing left to
+        # close a second time, and a `File` that is never closed is a compile time error rather than a leaked
+        # descriptor. Note that a descriptor is released by the operating system even when `close` reports an error, so
+        # the error is reported to the caller but the descriptor is not retained for a retry.
+        # @ret: A `Res` type containing an empty value if the file was closed, or an error message if the operation
+        # fails.
 
-        # Nothing to do for a `File` that was never opened, or
-        # that some earlier call already closed.
-        case self.fd < 0 { ret Pass[Void]() }
+        # Nothing to do for a `File` that never reached a
+        # successful `open`.
+        let File(fd) = self
+        case fd < 0 { ret Pass[Void]() }
 
-        # Mark the descriptor dead before reporting the outcome,
-        # so a failed close cannot be retried onto a number the
-        # kernel has already handed back out.
-        let err = sppc::close(self.fd)
-        self.fd = -1
+        let err = sppc::close(fd)
         ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
     }
 
@@ -373,18 +370,6 @@ sup File ext Seek {
     }
 }
 
-sup File ext Del {
-    fun del(&mut self) -> Void {
-        # The `del` method is called when the `File` object goes out of scope. It ensures that the file descriptor is
-        # properly closed to free system resources. This is important for preventing resource leaks and ensuring that
-        # the operating system can manage file descriptors efficiently. This defers to `close`, which is a no-op on a
-        # `File` that was closed manually or never opened, so an explicit `close` earlier in the scope does not lead to
-        # a double close here. The result is discarded because a destructor has nowhere to report it.
-
-        self.close()
-    }
-}
-
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun get_cwd() -> Res[Path, PathErr] {
@@ -408,4 +393,21 @@ fun set_cwd(path: &Path) -> Res[Void, PathErr] {
 
     let err = sppc::chdir(path.inner.ptr)
     ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
+}
+
+sup File ext Drop {
+    # A `File` owns a descriptor, so discarding one closes it. This is the discard path, for a caller that will not
+    # look at the outcome; anything that wants to know whether the close succeeded should call `close` directly, which
+    # is the same operation with the result handed back.
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun drop(self) -> Void {
+        # Written out rather than routed through `close`, because that hands back a `Res` which would itself have to be
+        # discarded, and a zero type does not satisfy a `Drop` constraint - `!zero_type` grants copyability through a
+        # flag rather than by superimposing `Copy`, so `Res[Void, StreamErr]` has no `drop` to call.
+        let File(fd) = self
+        case fd < 0 { ret }
+        let err = sppc::close(fd)
+    }
 }

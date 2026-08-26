@@ -10,7 +10,7 @@ use std::result::Pass
 use std::result::Res
 use std::void::Void
 use std::mem::pointer::NonNull
-use std::ops::del::Del
+use std::ops::drop::Drop
 use std::ops::fwd::FwdMut
 use std::ops::fwd::FwdRef
 
@@ -162,9 +162,9 @@ sup [T, A: Alloc] Single[T, A] ext FwdRef[T] {
     }
 }
 
-sup [T, A: Alloc] Single[T, A] ext Del {
+sup [T, A: Alloc] Single[T, A] ext Drop {
     !versioned(base="1.0.0", new="1.0.0")
-    fun del(&mut self) -> Void {
+    fun drop(self) -> Void {
         # The `del` function is called when the `Single` instance is dropped. It first runs the destructor of the owned
         # value in place, then deallocates the heap storage. Deallocation is a pure memory operation that never runs
         # destructors, so the value must be destroyed explicitly first; otherwise any resources it owns would leak. The
@@ -172,7 +172,8 @@ sup [T, A: Alloc] Single[T, A] ext Del {
         # on the pointee rather than the pointer itself. The `Del` trait allows for custom cleanup logic to be defined for
         # types, and this ensures the `Single` behaves correctly when it goes out of scope.
 
-        std::mem::ops::drop_in_place(&mut self.ptr)
-        self.alloc.deallocate_array(self.ptr, 1_uz)
+        let Self(mut ptr, alloc) = self
+        std::mem::ops::drop_in_place(&mut ptr)
+        alloc.deallocate_array(ptr, 1_uz)
     }
 }

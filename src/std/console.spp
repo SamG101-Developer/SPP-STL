@@ -1,6 +1,7 @@
 use std::annotations::package
 use std::annotations::private
 use std::annotations::public
+use std::annotations::zero_type
 use std::annotations::versioned
 use std::io::BufRead
 use std::io::Read
@@ -131,75 +132,67 @@ sup StderrStream ext Write {
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-fun print(str: &StrView) -> Opt[USize] {
+fun print(str: &StrView) -> Void {
     # The `print` function writes the provided string to the standard output stream without a newline. It creates a new
     # `StdoutStream` instance and uses its `write_str` method to write the string to the standard output. Generally, a
     # `print` won't fail unless the stdout stream is in a very bad state, so we use `Opt` here for simplicity.
     # @let str: The string to be printed to the standard output.
-    # @ret: An `Opt[USize]` that is `Some(USize)` containing the number of bytes successfully written to the standard
-    # error, or `None` if the write operation failed.
 
     # Create a new `StdoutStream` instance and write the
     # string to the standard output.
     let mut out = StdoutStream()
-    ret out.write_all(str.view_ref()).pass_opt()
+    let n = out.write_all(str.view_ref()).expect("Failed to print")
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-fun println(str: &StrView) -> Opt[USize] {
+fun println(str: &StrView) -> Void {
     # The `println` function writes the provided string to the standard output stream followed by a newline. It creates
     # a new `StdoutStream` instance and uses its `write_str` method to write the string followed by a newline character
     # to the standard output. Generally, a `println` won't fail unless the stdout stream is in a very bad state, so we
     # use `Opt` here for simplicity.
     # @let str: The string to be printed to the standard output, followed by a newline.
-    # @ret: An `Opt[USize]` that is `Some(USize)` containing the number of bytes successfully written to the standard
-    # error, or `None` if the write operation failed.
 
     # Create a new `StdoutStream` instance and write the
     # string followed by a newline to the standard output.
     let mut out = StdoutStream()
-    out.write_all(str.view_ref()).pass_opt()?
-    ret out.write_all(b"\n").pass_opt()
+    let n = out.write_all(str.view_ref()).expect("Failed to print")
+    let n_nl = out.write_all(b"\n").expect("Failed to print")
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-fun eprint(str: &StrView) -> Opt[USize] {
+fun eprint(str: &StrView) -> Void {
     # The `eprint` function writes the provided string to the standard error stream without a newline. It creates a new
     # `StderrStream` instance and uses its `write_str` method to write the string to the standard error. Generally, an
     # `eprint` won't fail unless the stderr stream is in a very bad state, so we use `Opt` here for simplicity.
     # @let str: The string to be printed to the standard error.
-    # @ret: An `Opt[USize]` that is `Some(USize)` containing the number of bytes successfully written to the standard
-    # error, or `None` if the write operation failed.
 
     # Create a new `StderrStream` instance and write the
     # string to the standard error.
     let mut out = StderrStream()
-    ret out.write_all(str.view_ref()).pass_opt()
+    let n = out.write_all(str.view_ref()).expect("Failed to print")
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-fun eprintln(str: &StrView) -> Opt[USize] {
+fun eprintln(str: &StrView) -> Void {
     # The `eprintln` function writes the provided string to the standard error stream followed by a newline. It creates
     # a new `StderrStream` instance and uses its `write_str` method to write the string followed by a newline character
     # to the standard error. Generally, an `eprintln` won't fail unless the stderr stream is in a very bad state, so we
     # use `Opt` here for simplicity.
     # @let str: The string to be printed to the standard error, followed by a newline.
-    # @ret: An `Opt[USize]` that is `Some(USize)` containing the number of bytes successfully written to the standard
-    # error, or `None` if the write operation failed.
 
     # Create a new `StderrStream` instance and write the
     # string followed by a newline to the standard error.
     let mut out = StderrStream()
-    out.write_all(str.view_ref()).pass_opt()?
-    ret out.write_all(b"\n").pass_opt()
+    let n = out.write_all(str.view_ref()).expect("Failed to print")
+    let n_nl = out.write_all(b"\n").expect("Failed to print")
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-fun input(prompt: &StrView = "") -> Opt[Str] {
+fun input(prompt: &StrView = "") -> Str {
     # The `input` function reads a line of input from the standard input stream. It optionally takes a `prompt` string
     # that is printed to the standard output before reading the input. The function creates a new `StdinStream` instance
     # and uses its `read_line` method to read a line of input from the standard input. Generally, an `input` won't fail
@@ -217,6 +210,6 @@ fun input(prompt: &StrView = "") -> Opt[Str] {
     # input from the standard input.
     let mut stdin = BufRead[StdinStream]()
     let mut out = Str::new()
-    stdin.read_line(&mut out).pass_opt()?
-    ret Some(val=out)
+    let n = stdin.read_line(&mut out).expect("Failed to read")
+    ret out
 }

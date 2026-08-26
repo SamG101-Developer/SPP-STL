@@ -1,6 +1,8 @@
 use std::annotations::public
 use std::annotations::versioned
 use std::clone::Clone
+use std::ops::drop::Drop
+use std::void::Void
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
@@ -23,5 +25,17 @@ sup Copy ext Clone {
         # @ret: A new instance of the same value, as `Copy` types are trivially copyable.
 
         ret self@
+    }
+}
+
+sup Copy ext Drop {
+    # All `Copy` types are also `Drop`. A copyable value owns nothing that has to be released - copying it leaves the
+    # original in place, so there was never a single owner to answer for it - which means discarding one is a no-op.
+    # This is what lets a generic constrained by `Drop` be instantiated with a number, a boolean, or any other copyable
+    # type, without every such type having to write the same empty method out.
+
+    !versioned(base="1.0.0", new="1.0.0")
+    fun drop(self) -> Void {
+        # Discarding a copyable value does nothing at all.
     }
 }

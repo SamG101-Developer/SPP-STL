@@ -7,6 +7,8 @@ use std::option::None
 use std::option::Opt
 use std::option::Some
 use std::string_view::StrView
+use std::void::Void
+use std::ops::drop::Drop
 use std::ops::eq::Eq
 use std::ops::try::Try
 
@@ -625,6 +627,20 @@ sup [T: Eq, E: Eq] Res[T, E] ext Eq {
             is (Pass[T](val as a), Pass[T](val as b)) { a != b }
             is (Fail[E](err as a), Fail[E](err as b)) { a != b }
             else { true }
+        }
+    }
+}
+
+sup [T: Drop, E: Drop] Res[T, E] ext Drop {
+    # A result is discarded by discarding whichever of the two values it holds. Both sides need to be discardable in
+    # turn, which is what the constraints say. Discarding a result throws away whether the operation succeeded, so a
+    # caller that cares should match on it or unwrap it rather than dropping it.
+
+    !versioned(base="1.0.0", new="1.0.0")
+    fun drop(self) -> Void {
+        case self of {
+            is Pass[T](val) { val.drop() }
+            is Fail[E](err) { err.drop() }
         }
     }
 }

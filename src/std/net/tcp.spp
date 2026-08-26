@@ -53,7 +53,10 @@ sup TcpListener {
         # Create the `TcpListener` object with the file descriptor.
         let listener = TcpListener(fd)
         let err = sppc::bind(listener.fd, &addr.storage())
-        case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+        case err == 0 {
+            std::mem::ops::drop(listener)
+            ret Fail(err=SockErr::from_errno(err))
+        }
         ret Pass(val=listener)
     }
 
@@ -89,12 +92,17 @@ sup TcpListener {
         let mut new_fd = 0
         let mut storage = sppc::CSockaddrStorage()
         let err = sppc::accept(self.fd, &mut storage, &mut new_fd)
-        case new_fd < 0 { ret Fail(err=SockErr::from_errno(err)) }
+        case new_fd < 0 {
+            std::mem::ops::drop(storage)
+            ret Fail(err=SockErr::from_errno(err))
+        }
 
         # Create a new `TcpStream` object with the accepted
         # file descriptor.
         let stream = TcpStream(fd=new_fd)
-        ret Pass(val=(stream, SockAddr::from_storage(&storage)))
+        let addr = SockAddr::from_storage(&storage)
+        std::mem::ops::drop(storage)
+        ret Pass(val=(stream, addr))
     }
 }
 
@@ -119,7 +127,10 @@ sup TcpStream {
         # Create the `TcpStream` object with the file descriptor.
         let stream = TcpStream(fd)
         let err = sppc::connect(stream.fd, &addr.storage())
-        case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+        case err == 0 {
+            std::mem::ops::drop(stream)
+            ret Fail(err=SockErr::from_errno(err))
+        }
         ret Pass(val=stream)
     }
 
@@ -354,8 +365,14 @@ sup TcpStream {
 
         let mut storage = sppc::CSockaddrStorage()
         let err = sppc::getpeername(self.fd, &mut storage)
-        case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
-        ret Pass(val=SockAddr::from_storage(&storage))
+        case err < 0 {
+            std::mem::ops::drop(storage)
+            ret Fail(err=SockErr::from_errno(err))
+        }
+
+        let addr =SockAddr::from_storage(&storage)
+        std::mem::ops::drop(storage)
+        ret Pass(val=addr)
     }
 }
 

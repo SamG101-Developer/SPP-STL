@@ -3,6 +3,7 @@ use std::annotations::private
 use std::annotations::public
 use std::annotations::versioned
 use std::option::None
+use std::ops::drop::Drop
 use std::void::Void
 
 # Note:
@@ -62,4 +63,30 @@ sup [Yield] GenOnce[Yield] {
 cls Generated[Yield] {
     # An internal, compiler known type, requires for the safety of coroutines. This is not seen by user code.
     # @type Yield: The type of value that the generator yields.
+}
+
+sup [Yield, Send] Gen[Yield, Send] ext Drop {
+    # A generator owns the coroutine frame its handle refers to, and nothing else frees that frame: one that ran to
+    # completion is parked on its final suspend, and one abandoned part-way is parked mid-body, and both hold their
+    # frame until someone destroys them. Discarding the handle is what destroys it.
+
+    !public
+    !intrinsic(name="std.generator.Gen.drop")
+    fun drop(self) -> Void {
+        # Destroy the coroutine frame this handle refers to. Consuming the handle is what makes this safe: nothing can
+        # resume a generator that has been dropped, because the handle is gone.
+        # Todo: The frame's own locals are not destroyed with it - "llvm.coro.destroy" releases the frame's storage but
+        #  runs no destructors for the values living in it, so a generator abandoned while holding owned locals still
+        #  leaks those.
+    }
+}
+
+sup [Yield] GenOnce[Yield] ext Drop {
+    # As for `Gen`: a `GenOnce` handle owns its coroutine frame, and discarding the handle destroys it.
+
+    !public
+    !intrinsic(name="std.generator.GenOnce.drop")
+    fun drop(self) -> Void {
+        # Destroy the coroutine frame this handle refers to.
+    }
 }

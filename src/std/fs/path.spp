@@ -17,6 +17,7 @@ use std::vector::Vec
 use std::void::Void
 use std::fs::file::File
 use std::fs::file::FileMode
+use std::ops::drop::Drop
 use std::ops::div::Div
 use std::ops::div::DivAssign
 
@@ -504,5 +505,18 @@ sup Path ext DivAssign {
         # @ret: The original `Path` object is modified to represent the joined path.
 
         self@ = self.join(&that)
+    }
+}
+
+sup Path ext Drop {
+    # A path owns the string backing it, so discarding one discards that. A `Path` is a value that gets kept and
+    # queried - nearly all of its methods borrow - so it is discarded by the code that made it rather than swallowed by
+    # whatever it is handed to.
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun drop(self) -> Void {
+        let Path(inner) = self
+        inner.drop()
     }
 }

@@ -12,7 +12,7 @@ use std::rc::rc::ControlBlock
 use std::rc::rc::Rc
 use std::void::Void
 use std::mem::pointer::NonNull
-use std::ops::del::Del
+use std::ops::drop::Drop
 
 !public !thread_hazard
 !versioned(base="1.0.0", new="1.0.0")
@@ -68,18 +68,19 @@ sup [T, A: Alloc & Clone] Weak[T, A] ext Clone {
     }
 }
 
-sup [T, A: Alloc] Weak[T, A] ext Del {
+sup [T, A: Alloc] Weak[T, A] ext Drop {
     !versioned(base="1.0.0", new="1.0.0")
-    fun del(&mut self) -> Void {
+    fun drop(self) -> Void {
         # Drop one weak handle. A weak handle never owns the value, so no value destructor runs here; only the shadow
         # count is decremented. The control block is deallocated only when this was the very last handle of any kind -
         # no shares keeping the value alive and no other weak handles keeping the block alive - in which case the value
         # has already been destroyed by the last `Rc` and only the raw storage remains to be freed.
         # @ret: Nothing; this is invoked for its cleanup side effects when a `Weak` is destroyed.
 
-        self.ptr.weak_counter -= 1_uz
-        case self.ptr.strong_counter == 0_uz and self.ptr.weak_counter == 0_uz {
-            self.alloc.deallocate_array(self.ptr, 1_uz)
+        let Weak[T, A](mut ptr, alloc) = self
+        ptr.weak_counter -= 1_uz
+        case ptr.strong_counter == 0_uz and ptr.weak_counter == 0_uz {
+            alloc.deallocate_array(ptr, 1_uz)
         }
     }
 }

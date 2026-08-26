@@ -1,6 +1,7 @@
 use std::annotations::private
 use std::annotations::public
 use std::annotations::versioned
+use std::annotations::zero_type
 use std::generator::Gen
 use std::generator::GenOnce
 use std::number::F64
@@ -11,6 +12,9 @@ use std::number::U64
 use std::number::U8
 use std::number::USize
 use std::range::Range
+use std::result::Fail
+use std::result::Pass
+use std::result::Res
 use std::string_view::StrView
 use std::vector::Vec
 use std::void::Void
@@ -37,6 +41,11 @@ cls OsRng {
     # provides methods for generating random bytes, integers, and floating-point numbers within specified ranges. The
     # underlying implementation of the CSPRNG is based on the operating system's entropy sources, which may include
     # hardware random number generators, user input, and other sources of entropy.
+}
+
+!zero_type
+cls RngErr {
+    # The `RngErr` type represents an error that can occur when generating random numbers with the `Rng` type.
 }
 
 !private
@@ -67,11 +76,13 @@ sup Rng {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun from_os_seed() -> Rng {
+    fun from_os_seed() -> Res[Rng, RngErr] {
         let mut buffer = [0_u8; 8_uz]
-        sppc::getrandom(8_uz, buffer.ptr)
+        let err = sppc::getrandom(8_uz, buffer.ptr)
+        case err < 0 { ret Fail(err=RngErr) }
+
         let seed = U64::from_le_bytes(&buffer)
-        ret Rng::from_seed(seed)
+        ret Pass(val=Rng::from_seed(seed))
     }
 
     !public
@@ -131,25 +142,25 @@ sup OsRng {
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun next_u64() -> U64 {
+    fun next_u64() -> Res[U64, RngErr] {
         let mut buffer = [0_u8; 8_uz]
-        sppc::getrandom(8_uz, buffer.ptr)
-        ret U64::from_le_bytes(&buffer)
+        let err = sppc::getrandom(8_uz, buffer.ptr)
+        ret case err != 0 { Fail(err=RngErr) } else { Pass(val=U64::from_le_bytes(&buffer)) }
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun next_u32() -> U32 {
+    fun next_u32() -> Res[U32, RngErr] {
         let mut buffer = [0_u8; 4_uz]
-        sppc::getrandom(4_uz, buffer.ptr)
-        ret U32::from_le_bytes(&buffer)
+        let err = sppc::getrandom(4_uz, buffer.ptr)
+        ret case err != 0 { Fail(err=RngErr) } else { Pass(val=U32::from_le_bytes(&buffer)) }
     }
 
     !public
     !versioned(base="1.0.0", new="1.0.0")
-    fun next_bytes(n: USize) -> Vec[U8] {
+    fun next_bytes(n: USize) -> Res[Vec[U8], RngErr] {
         let mut buffer = Vec[U8]::new_with_capacity(n)
-        sppc::getrandom(n, buffer.ptr)
-        ret buffer
+        let err = sppc::getrandom(n, buffer.ptr)
+        ret case err != 0 { Fail(err=RngErr) } else { Pass(val=buffer) }
     }
 }

@@ -15,6 +15,6 @@ fun call_once[F: FunMov[(), Void]](func: F) -> Void {
     # object threaded through here and a matching `sppc` FFI signature change on both sides.
 
     let mut handle = 0_u64
-    sppc::pthread_once_init(&mut handle)
-    sppc::pthread_once(&handle, func)
+    let init_err = sppc::pthread_once_init(&mut handle) # Todo: Error handling.
+    let once_err = sppc::pthread_once(&handle, func) # Todo: Error handling.
 }

@@ -1,7 +1,8 @@
 use std::annotations::public
 use std::annotations::versioned
+use std::annotations::zero_type
 
-!public
+!public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
 cls Void {
     # The `Void` type represents the absence of a value. It has no fields or methods. It can be used as a return type,
