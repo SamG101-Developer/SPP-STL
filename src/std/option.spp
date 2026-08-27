@@ -207,12 +207,13 @@ sup [T] Opt[T] {
     # `Some`, then `that` is not evaluated, and this optional is returned instead.
     # @ret: Returns this optional if it is `Some`, otherwise returns the result of invoking `that()`.
 
-    defer std::mem::ops::drop(that)
-
     # Pattern match and return this optional if it is `Some`,
     # otherwise return the result of invoking the provided function.
     ret case self of {
-      is Some[T](..) { self }
+      is Some[T](..) {
+        std::mem::ops::drop(that)
+        self
+      }
       else { that() }
     }
   }
@@ -309,14 +310,17 @@ sup [T] Opt[T] {
     # @ret: Returns the result of applying `f` to the value inside the optional if this optional is `Some`, otherwise
     # returns `default`.
 
-    defer std::mem::ops::drop(default)
-    defer std::mem::ops::drop(f)
-
     # Pattern match and apply the function to the value if
     # this is `Some`, otherwise return the default value.
     ret case self of {
-      is Some[T](val) { f(val) }
-      else { default }
+      is Some[T](val) {
+        std::mem::ops::drop(default)
+        f(val)
+      }
+      else {
+        std::mem::ops::drop(f)
+        default
+      }
     }
   }
 
@@ -344,14 +348,18 @@ sup [T] Opt[T] {
     # @ret: Returns the result of applying `func` to the value inside the optional if this optional is `Some`, otherwise
     # returns the result of invoking `default()`.
 
-    defer std::mem::ops::drop(default)
-
     # Pattern match and apply the function to the value if this is
     # `Some`, otherwise return the result of invoking the default
     # function.
     ret case self of {
-      is Some[T](val) { f(val) }
-      else { default() }
+      is Some[T](val) {
+        std::mem::ops::drop(default)
+        f(val)
+      }
+      else {
+        std::mem::ops::drop(f)
+        default()
+      }
     }
   }
 
@@ -368,13 +376,14 @@ sup [T] Opt[T] {
     # @ret: Returns the value inside the optional wrapped in `Pass` if this optional is `Some`, otherwise returns `err`
     # wrapped in `Fail`.
 
-    defer std::mem::ops::drop(err)
-
     # Pattern match and return the value wrapped in `Pass` if
     # this is `Some`, otherwise return the error value wrapped
     # in `Fail`.
     ret case self of {
-      is Some[T](val) { Pass(val) }
+      is Some[T](val) {
+        std::mem::ops::drop(err)
+        Pass(val)
+      }
       else { Fail(err) }
     }
   }
@@ -395,13 +404,14 @@ sup [T] Opt[T] {
     # @ret: Returns the value inside the optional wrapped in `Pass` if this optional is `Some`, otherwise returns the
     # result of invoking `err()` wrapped in `Fail`.
 
-    defer std::mem::ops::drop(err)
-
     # Pattern match and return the value wrapped in `Pass` if
     # this is `Some`, otherwise return the result of invoking the
     # provided error function wrapped in `Fail`.
     ret case self of {
-      is Some[T](val) { Pass(val) }
+      is Some[T](val) {
+        std::mem::ops::drop(err)
+        Pass(val)
+      }
       else { Fail(err=err()) }
     }
   }
@@ -433,12 +443,13 @@ sup [T] Opt[T] {
     # `default` is not evaluated, and the value inside is returned instead.
     # @ret: Returns the value inside the optional if this optional is `Some`, otherwise returns `default`.
 
-    defer std::mem::ops::drop(default)
-
     # Pattern match and return the value if this is `Some`,
     # otherwise return the default value.
     ret case self of {
-      is Some[T](val) { val }
+      is Some[T](val) {
+        std::mem::ops::drop(default)
+        val
+      }
       else { default }
     }
   }
@@ -475,12 +486,13 @@ sup [T] Opt[T] {
     # @ret: Returns the value inside the optional if this optional is `Some`, otherwise returns the result of invoking
     # `default()`.
 
-    defer std::mem::ops::drop(default)
-
     # Pattern match and return the value if this is `Some`, otherwise
     # return the result of invoking the provided default function.
     ret case self of {
-      is Some[T](val) { val }
+      is Some[T](val) {
+        std::mem::ops::drop(default)
+        val
+      }
       else { default() }
     }
   }

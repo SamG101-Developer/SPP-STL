@@ -98,12 +98,13 @@ sup [T, E] Res[T, E] {
     # @ret: Returns `true` if the result is `Pass` and the predicate returns `true` for the value inside, otherwise
     # returns `false`.
 
-    defer std::mem::ops::drop(pred)
-
     # Pattern match and test against the predicate.
     ret case self of {
       is Pass[T](val) { pred(val) }
-      else { false }
+      else {
+        std::mem::ops::drop(pred)
+        false
+      }
     }
   }
 
@@ -129,12 +130,13 @@ sup [T, E] Res[T, E] {
     # @ret: Returns `true` if the result is `Fail` and the predicate returns `true` for the error inside, otherwise
     # returns `false`.
 
-    defer std::mem::ops::drop(pred)
-
     # Pattern match and test against the predicate.
     ret case self of {
       is Fail[E](err) { pred(err) }
-      else { false }
+      else {
+        std::mem::ops::drop(pred)
+        false
+      }
     }
   }
 
@@ -161,12 +163,13 @@ sup [T, E] Res[T, E] {
     # @ret: Returns `true` if the result is `Fail`, or if it is `Pass` and the predicate returns `true` for the value
     # inside, otherwise returns `false`.
 
-    defer std::mem::ops::drop(pred)
-
     # Pattern match and test against the predicate.
     ret case self of {
       is Pass[T](val) { pred(val) }
-      else { true }
+      else {
+        std::mem::ops::drop(pred)
+        true
+      }
     }
   }
 
@@ -183,12 +186,13 @@ sup [T, E] Res[T, E] {
     # not evaluated, and `Fail` is returned with the same error instead.
     # @ret: Returns `that` if this result is `Pass`, otherwise returns `Fail` with the same error.
 
-    defer std::mem::ops::drop(that)
-
     # Pattern match and return the other result if this is
     # `Pass`, otherwise return `Fail` with the same error.
     ret case self of {
-      is Fail[E](err) { Fail(err) }
+      is Fail[E](err) {
+        std::mem::ops::drop(that)
+        Fail(err)
+      }
       else { that }
     }
   }
@@ -210,13 +214,16 @@ sup [T, E] Res[T, E] {
     # instead.
     # @ret: Returns the result of `pred` if this result is `Pass`, otherwise returns `Fail` with the same error.
 
-    defer std::mem::ops::drop(pred)
-
     # Pattern match and apply the predicate to the value if
     # this is `Pass`, otherwise return `Fail` with the same error.
     ret case self of {
-      is Pass[T](val) { pred(val) }
-      is Fail[E](err) { Fail(err) }
+      is Pass[T](val) {
+        pred(val)
+      }
+      is Fail[E](err) {
+        std::mem::ops::drop(pred)
+        Fail(err)
+      }
       else { std::abort::unreachable() }
     }
   }
@@ -234,12 +241,13 @@ sup [T, E] Res[T, E] {
     # not evaluated, and this result is returned wrapped in `Pass` instead.
     # @ret: Returns this result wrapped in `Pass` if it is `Pass`, otherwise returns `that`.
 
-    defer std::mem::ops::drop(that)
-
     # Pattern match and return this result wrapped in `Pass` if it
     # is `Pass`, otherwise return the other result.
     ret case self of {
-      is Pass[T](val) { Pass(val) }
+      is Pass[T](val) {
+        std::mem::ops::drop(that)
+        Pass(val)
+      }
       else { that }
     }
   }
@@ -258,13 +266,14 @@ sup [T, E] Res[T, E] {
     # then `pred` is not evaluated, and this result is returned wrapped in `Pass` instead.
     # @ret: Returns this result wrapped in `Pass` if it is `Pass`, otherwise returns the result of invoking `pred(err)`.
 
-    defer std::mem::ops::drop(pred)
-
     # Pattern match and return this result wrapped in `Pass` if
     # it is `Pass`, otherwise return the result of invoking the
     # provided predicate on the error.
     ret case self of {
-      is Pass[T](val) { Pass(val) }
+      is Pass[T](val) {
+        std::mem::ops::drop(pred)
+        Pass(val)
+      }
       is Fail[E](err) { pred(err) }
       else { std::abort::unreachable() }
     }
@@ -286,14 +295,18 @@ sup [T, E] Res[T, E] {
     # @ret: Returns the result of `pred` wrapped in `Pass` if this result is `Pass`, otherwise returns `Fail` with the
     # same error.
 
-    defer std::mem::ops::drop(pred)
-
     # Pattern match and apply the predicate to the value if
     # this is `Pass`, otherwise return `Fail` with the same error.
     ret case self of {
       is Pass[T](val) { Pass(val=pred(val)) }
-      is Fail[E](err) { Fail(err) }
-      else { std::abort::unreachable() }
+      is Fail[E](err) {
+        std::mem::ops::drop(pred)
+        Fail(err)
+      }
+      else {
+        std::mem::ops::drop(pred)
+        std::abort::unreachable()
+      }
     }
   }
 
@@ -312,13 +325,14 @@ sup [T, E] Res[T, E] {
     # instead.
     # @ret: Returns `Pass` unchanged if this result is `Pass`, otherwise returns the result of `pred` wrapped in `Fail`.
 
-    defer std::mem::ops::drop(pred)
-
     # Pattern match and return `Pass` unchanged if this is `Pass`,
     # otherwise apply the predicate to the error and return it
     # wrapped in `Fail`.
     ret case self of {
-      is Pass[T](val) { Pass(val) }
+      is Pass[T](val) {
+        std::mem::ops::drop(pred)
+        Pass(val)
+      }
       is Fail[E](err) { Fail(err=pred(err)) }
       else { std::abort::unreachable() }
     }
@@ -342,14 +356,17 @@ sup [T, E] Res[T, E] {
     # @ret: Returns the result of applying `f` to the value inside the result if this result is `Pass`, otherwise
     # returns `default`.
 
-    defer std::mem::ops::drop(default)
-    defer std::mem::ops::drop(f)
-
     # Pattern match and apply the function to the value if
     # this is `Pass`, otherwise return the default value.
     ret case self of {
-      is Pass[T](val) { f(val) }
-      else { default }
+      is Pass[T](val) {
+        std::mem::ops::drop(default)
+        f(val)
+      }
+      else {
+        std::mem::ops::drop(f)
+        default
+      }
     }
   }
 
@@ -373,13 +390,14 @@ sup [T, E] Res[T, E] {
     # @ret: Returns the result of applying `f` to the value inside the result if this result is `Pass`, otherwise
     # returns the result of invoking `default(err)`.
 
-    defer std::mem::ops::drop(default)
-
     # Pattern match and apply the function to the value if this is
     # `Pass`, otherwise return the result of invoking the default
     # function on the error.
     ret case self of {
-      is Pass[T](val) { f(val) }
+      is Pass[T](val) {
+        std::mem::ops::drop(default)
+        f(val)
+      }
       is Fail[E](err) { default(err) }
       else { std::abort::unreachable() }
     }
@@ -445,13 +463,16 @@ sup [T, E] Res[T, E] {
     # `default` is not evaluated, and the value inside is returned instead.
     # @ret: Returns the value inside the result if this result is `Pass`, otherwise returns `default`.
 
-    defer std::mem::ops::drop(default)
-
     # Pattern match and return the value if this is `Pass`,
     # otherwise return the default value.
     ret case self of {
-      is Pass[T](val) { val }
-      else { default }
+      is Pass[T](val) {
+        std::mem::ops::drop(default)
+        val
+      }
+      else {
+        default
+      }
     }
   }
 
@@ -467,13 +488,14 @@ sup [T, E] Res[T, E] {
     # @ret: Returns the value inside the result if this result is `Pass`, otherwise returns the result of invoking
     # `default(err)`.
 
-    defer std::mem::ops::drop(default)
-
     # Pattern match and return the value if this is `Pass`, otherwise
     # return the result of invoking the provided default function on
     # the error.
     ret case self of {
-      is Pass[T](val) { val }
+      is Pass[T](val) {
+        std::mem::ops::drop(default)
+        val
+      }
       is Fail[E](err) { default(err) }
       else { std::abort::unreachable() }
     }

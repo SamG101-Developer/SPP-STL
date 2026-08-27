@@ -126,9 +126,11 @@ sup [T] Iterator[T] {
     # Only yield items until the specified count is reached.
     let mut index = 0_uz
     loop item in self {
-      defer std::mem::ops::drop(item)
       case index < count { gen item }
-      else { exit }
+      else {
+        std::mem::ops::drop(item)
+        exit
+      }
       index += 1_uz
     }
   }
@@ -226,8 +228,6 @@ sup [T] Iterator[T] {
     # The `count` method is a function that takes an iterator and returns the number of items produced by the iterator.
     # The iterator will collapse, and be consumed by this method, as it iterates through all the items to count them.
     # @ret: The number of items produced by the iterator.
-
-    defer std::mem::ops::drop(self)
 
     # Count the number of items by iterating through the entire
     # iterator and incrementing a counter for each item.
@@ -401,8 +401,10 @@ sup [T] Iterator[T] {
     # returning the item when a match is found.
     let mut index = 0_uz
     loop item in self {
-      defer std::mem::ops::drop(item)
+      # Discarded at the end of the iteration rather than deferred: the matching iteration returns "item", and a
+      # deferred discard would free the value being handed back.
       case index == n { ret Some(val=item) }
+      std::mem::ops::drop(item)
       index += 1_uz
     }
     ret None

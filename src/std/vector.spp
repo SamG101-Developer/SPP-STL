@@ -383,8 +383,12 @@ sup [T, A: Alloc] Vec[T, A] {
     # @let f:
     # @ret:
 
-    defer std::mem::ops::drop(f)
-    case self.is_empty() { ret None }
+    # Discharged on the early path rather than deferred: past the emptiness check "f" is consumed by being called, so
+    # a deferred discard would consume it a second time on every path that got that far.
+    case self.is_empty() {
+      std::mem::ops::drop(f)
+      ret None
+    }
     let last_index = self.len() - 1_uz
 
     case f(self[mut last_index]).not { ret None }
