@@ -188,8 +188,7 @@ sup Read {
 
       # Ignore interruption errors and conintue.
       let try = self.read(buf[mut filled to target])
-      case try is Fail[StreamErr](err) and err is StreamInterruptedError() {
-        std::mem::ops::drop(err)
+      case try is Fail[StreamErr](&err) and err is StreamInterruptedError() {
         std::mem::ops::drop(try)
         skip
       }
@@ -229,8 +228,7 @@ sup Read {
 
       # Ignore interruption errors and continue.
       let try = self.read(&mut chunk)
-      case try is Fail[StreamErr](err) and err is StreamInterruptedError() {
-        std::mem::ops::drop(err)
+      case try is Fail[StreamErr](&err) and err is StreamInterruptedError() {
         std::mem::ops::drop(try)
         skip
       }
@@ -285,8 +283,9 @@ sup Write {
       # If the write was interrupted, we just ignore
       # the error and try again.
       let try = self.write(buf[written to target])
-      case try is Fail[StreamErr](err) and err is StreamInterruptedError() {
-        std::mem::ops::drop(err)
+      # Bound by borrow: a binary "is" matches on one path only, so binding the error by value would leave "try"
+      # partially moved on that path and whole on the other, which is not a state it can be discarded from.
+      case try is Fail[StreamErr](&err) and err is StreamInterruptedError() {
         std::mem::ops::drop(try)
         skip
       }
@@ -427,7 +426,10 @@ sup [R: Read] BufRead[R] {
 
     loop true {
       let try = self.inner.read(&mut self.buf)
-      case try is Fail[StreamErr](err) and err is StreamInterruptedError() { skip }
+      case try is Fail[StreamErr](&err) and err is StreamInterruptedError() {
+        std::mem::ops::drop(try)
+        skip
+      }
 
       let n = try?
       self.pos = 0_uz
@@ -540,7 +542,7 @@ sup [W: Write] BufWrite[W] {
   #
   #         loop written < target {
   #             let try = self.inner.write(self.buf[written to target])
-  #             case try is Fail[StreamErr](err) and err is StreamInterruptedError() { skip }
+  #             case try is Fail[StreamErr](&err) and err is StreamInterruptedError() { skip }
   #
   #             let n = try?
   #             case n == 0_uz { ret Pass(val=Fail(err=StreamWriteZeroError())) }
