@@ -7,86 +7,101 @@ use std::result::Fail
 use std::result::Pass
 use std::result::Res
 use std::void::Void
-use std::ops::del::Del
+use std::ops::drop::Drop
 use std::threading::thread::ThreadErr
 
 !public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
 cls TimedOut {
-    # The `TimedOut` type is a zero sized type yielded by `Mutex.lock_when_timeout` to indicate that the deadline
-    # elapsed before the wait predicate became satisfied. When it is yielded, the mutex has already been released and no
-    # guarded reference is handed out, so a caller that needs to inspect the protected value after a timeout must
-    # re-lock explicitly.
+  # The `TimedOut` type is a zero sized type yielded by `Mutex.lock_when_timeout` to indicate that the deadline elapsed
+  # before the wait predicate became satisfied. When it is yielded, the mutex has already been released and no guarded
+  # reference is handed out, so a caller that needs to inspect the protected value after a timeout must re-lock
+  # explicitly.
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls CondVar {
-    # A `CondVar` is a notification primitive that lets threads block until another thread signals that some condition
-    # over shared state may have changed. It carries no data of its own and is not tied to any particular mutex. The
-    # blocking half of the protocol lives on `Mutex` (`lock_when` / `lock_when_timeout`), which owns the lock lifetime,
-    # so a `CondVar` only exposes the waking half (`signal_one` / `signal_all`). Keeping the wait on the mutex means the
-    # guarded value is reachable through exactly one path -- the mutex guard -- so there is no way to fabricate a
-    # second, aliasing reference to it while a waiter holds the lock.
-    # @let handle: A handle to the underlying condition variable object in the sppc threading API.
+  # A `CondVar` is a notification primitive that lets threads block until another thread signals that some condition
+  # over shared state may have changed. It carries no data of its own and is not tied to any particular mutex. The
+  # blocking half of the protocol lives on `Mutex` (`lock_when` / `lock_when_timeout`), which owns the lock lifetime, so
+  # a `CondVar` only exposes the waking half (`signal_one` / `signal_all`). Keeping the wait on the mutex means the
+  # guarded value is reachable through exactly one path -- the mutex guard -- so there is no way to fabricate a second,
+  # aliasing reference to it while a waiter holds the lock.
+  # @let handle: A handle to the underlying condition variable object in the sppc threading API.
 
-    !package handle: U64
+  !package handle: U64
 }
 
 sup CondVar {
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun new() -> Res[CondVar, ThreadErr] {
-        # The `new` function creates a new `CondVar` instance. It initializes the condition variable using the sppc
-        # threading API and returns a `Res` type that indicates success or failure. The `C` `errno` value is used to
-        # determine if the condition variable was successfully created, and an appropriate error message is returned if
-        # it fails.
-        # @ret: A `Res` type containing a `CondVar` instance if the condition variable is successfully created, or an
-        # error if the operation fails.
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun new() -> Res[CondVar, ThreadErr] {
+    # The `new` function creates a new `CondVar` instance. It initializes the condition variable using the sppc
+    # threading API and returns a `Res` type that indicates success or failure. The `C` `errno` value is used to
+    # determine if the condition variable was successfully created, and an appropriate error message is returned if it
+    # fails.
+    # @ret: A `Res` type containing a `CondVar` instance if the condition variable is successfully created, or an error
+    # if the operation fails.
 
-        # Get a conditional variable handle from C.
-        let mut handle = 0_u64
-        let err = sppc::pthread_cond_init(&mut handle)
-        case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
-        ret Pass(val=CondVar(handle))
-    }
+    # Get a conditional variable handle from C.
+    let mut handle = 0_u64
+    let err = sppc::pthread_cond_init(&mut handle)
+    case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
+    ret Pass(val=CondVar(handle))
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun signal_one(&self) -> Res[Void, ThreadErr] {
-        # Wake up one thread waiting on the condition variable. This function will unblock one of the threads that are
-        # currently waiting on the condition variable. If no threads are waiting, the function has no effect. The
-        # function returns a `Res` type indicating whether the signal operation was successful or not.
-        # @ret: A `Res` type indicating whether the signal operation was successful or not. If the signal operation
-        # fails, it will return an error indicating the reason for the failure.
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun signal_one(&self) -> Res[Void, ThreadErr] {
+    # Wake up one thread waiting on the condition variable. This function will unblock one of the threads that are
+    # currently waiting on the condition variable. If no threads are waiting, the function has no effect. The function
+    # returns a `Res` type indicating whether the signal operation was successful or not.
+    # @ret: A `Res` type indicating whether the signal operation was successful or not. If the signal operation fails,
+    # it will return an error indicating the reason for the failure.
 
-        let err = sppc::pthread_cond_signal(&self.handle)
-        case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
-        ret Pass[Void]()
-    }
+    let err = sppc::pthread_cond_signal(&self.handle)
+    case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
+    ret Pass[Void]()
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun signal_all(&self) -> Res[Void, ThreadErr] {
-        # Wake up all threads waiting on the condition variable. This function will unblock all of the threads that are
-        # currently waiting on the condition variable. If no threads are waiting, the function has no effect. The
-        # function returns a `Res` type indicating whether the signal operation was successful or not.
-        # @ret: A `Res` type indicating whether the signal operation was successful or not. If the signal operation
-        # fails, it will return an error indicating the reason for the failure.
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun signal_all(&self) -> Res[Void, ThreadErr] {
+    # Wake up all threads waiting on the condition variable. This function will unblock all of the threads that are
+    # currently waiting on the condition variable. If no threads are waiting, the function has no effect. The function
+    # returns a `Res` type indicating whether the signal operation was successful or not.
+    # @ret: A `Res` type indicating whether the signal operation was successful or not. If the signal operation fails,
+    # it will return an error indicating the reason for the failure.
 
-        let err = sppc::pthread_cond_broadcast(&self.handle)
-        case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
-        ret Pass[Void]()
-    }
+    let err = sppc::pthread_cond_broadcast(&self.handle)
+    case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
+    ret Pass[Void]()
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun destroy(self) -> Res[Void, ThreadErr] {
+    # Destroy the condition variable, consuming it and reporting whether the destroy succeeded. This is the fallible
+    # consumer; `drop` is the same thing with the result swallowed. It is important to ensure that no threads are
+    # waiting on the condition variable when it is destroyed, as this can lead to undefined behaviour.
+    # @ret: A `Res` indicating whether the destroy operation succeeded.
+
+    let CondVar(handle) = self
+    let err = sppc::pthread_cond_destroy(&handle)
+    case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
+    ret Pass[Void]()
+  }
 }
 
-sup CondVar ext Del {
-    !versioned(base="1.0.0", new="1.0.0")
-    fun del(&mut self) -> Void {
-        # Destroy the condition variable. This function is called when the `CondVar` instance is dropped, and it cleans
-        # up any resources associated with the condition variable. It is important to ensure that no threads are waiting
-        # on the condition variable when it is destroyed, as this can lead to undefined behavior.
+sup CondVar ext Drop {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun drop(self) -> Void {
+    # Destroy the condition variable, ignoring whether the destroy succeeded. This is the discard path, for generic code
+    # holding a `CondVar` it has to get rid of; anything that wants to know whether the destroy worked should call
+    # `destroy` instead. No thread may be waiting on the condition variable when it is destroyed.
 
-        sppc::pthread_cond_destroy(&self.handle)
-    }
+    let CondVar(handle) = self
+    let err = sppc::pthread_cond_destroy(&handle)
+  }
 }

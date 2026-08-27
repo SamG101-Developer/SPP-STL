@@ -92,107 +92,94 @@ sup BigUInt {
 
 sup BigUInt ext Clone {
     fun clone(&self) -> Self {
-        let mut val = BigUInt()
-        val.data = self.data
-        ret val
+        # Cloned, not moved: "self" is a shared borrow, so the digits belong to whoever lent them.
+        ret BigUInt(data=self.data.clone())
     }
 }
 
 sup BigUInt ext std::ops::bit_and::BitAnd {
-    fun bit_and(self, that: Self) -> Self {
-        let mut val = self.clone()
-        val &= that
-        ret val
+    fun bit_and(mut self, that: Self) -> Self {
+        self &= that
+        ret self
     }
 }
 
 sup BigUInt ext std::ops::bit_ior::BitIor {
-    fun bit_ior(self, that: Self) -> Self {
-        let mut val = self.clone()
-        val |= that
-        ret val
+    fun bit_ior(mut self, that: Self) -> Self {
+        self |= that
+        ret self
     }
 }
 
 sup BigUInt ext std::ops::bit_xor::BitXor {
-    fun bit_xor(self, that: Self) -> Self {
-        let mut val = self.clone()
-        val ^= that
-        ret val
+    fun bit_xor(mut self, that: Self) -> Self {
+        self ^= that
+        ret self
     }
 }
 
 sup BigUInt ext std::ops::bit_not::BitNot {
-    fun bit_not(self) -> Self {
-        let mut val = self.clone()
-        loop i in Range[USize]::between(0_uz, val.data.len()) {
-            val.data[i].bit_not_assign()
+    fun bit_not(mut self) -> Self {
+        loop i in Range[USize]::between(0_uz, self.data.len()) {
+            self.data[i].bit_not_assign()
         }
-        ret val
+        ret self
     }
 }
 
 sup BigUInt ext std::ops::bit_shl::BitShl {
-    fun bit_shl(self, that: Self) -> Self {
-        let mut val = self.clone()
-        val <<= that
-        ret val
+    fun bit_shl(mut self, that: Self) -> Self {
+        self <<= that
+        ret self
     }
 }
 
 sup BigUInt ext std::ops::bit_shr::BitShr {
-    fun bit_shr(self, that: Self) -> Self {
-        let mut val = self.clone()
-        val >>= that
-        ret val
+    fun bit_shr(mut self, that: Self) -> Self {
+        self >>= that
+        ret self
     }
 }
 
 sup BigUInt ext std::ops::add::Add {
-    fun add(self, that: Self) -> Self {
-        let mut val = self.clone()
-        val += that
-        ret val
+    fun add(mut self, that: Self) -> Self {
+        self += that
+        ret self
     }
 }
 
 sup BigUInt ext std::ops::sub::Sub {
-    fun sub(self, that: Self) -> Self {
-        let mut val = self.clone()
-        val -= that
-        ret val
+    fun sub(mut self, that: Self) -> Self {
+        self -= that
+        ret self
     }
 }
 
 sup BigUInt ext std::ops::mul::Mul {
-    fun mul(self, that: Self) -> Self {
-        let mut val = self.clone()
-        val *= that
-        ret val
+    fun mul(mut self, that: Self) -> Self {
+        self *= that
+        ret self
     }
 }
 
 sup BigUInt ext std::ops::div::Div {
-    fun div(self, that: Self) -> Self {
-        let mut val = self.clone()
-        val /= that
-        ret val
+    fun div(mut self, that: Self) -> Self {
+        self /= that
+        ret self
     }
 }
 
 sup BigUInt ext std::ops::rem::Rem {
-    fun rem(self, that: Self) -> Self {
-        let mut val = self.clone()
-        val %= that
-        ret val
+    fun rem(mut self, that: Self) -> Self {
+        self %= that
+        ret self
     }
 }
 
 sup BigUInt ext std::ops::pow::Pow {
-    fun pow(self, that: Self) -> Self {
-        let mut val = self.clone()
-        val **= that
-        ret val
+    fun pow(mut self, that: Self) -> Self {
+        self **= that
+        ret self
     }
 }
 
@@ -204,6 +191,7 @@ sup BigUInt ext std::ops::bit_and::BitAndAssign {
             self.data[mut i] &= that.data[i]@
         }
         self.trim()
+        that.drop() # "that" is taken by move, so this is where it goes.
     }
 }
 
@@ -217,6 +205,7 @@ sup BigUInt ext std::ops::bit_ior::BitIorAssign {
             self.data[mut i]@ = a | b
         }
         self.trim()
+        that.drop() # "that" is taken by move, so this is where it goes.
     }
 }
 
@@ -230,14 +219,20 @@ sup BigUInt ext std::ops::bit_xor::BitXorAssign {
             self.data[mut i]@ = a ^ b
         }
         self.trim()
+        that.drop() # "that" is taken by move, so this is where it goes.
     }
 }
 
 sup BigUInt ext std::ops::bit_shl::BitShlAssign {
     fun bit_shl_assign(&mut self, that: Self) -> Void {
-        case that.is_zero() { ret }
-        let word_shift = that.bit_length() / 32_uz
-        let bit_shift = that.bit_length() % 32_uz
+        # "that" is taken by move, so it is discarded here, once everything needed from it has been read.
+        let that_is_zero = that.is_zero()
+        let that_bits = that.bit_length()
+        that.drop()
+
+        case that_is_zero { ret }
+        let word_shift = that_bits / 32_uz
+        let bit_shift = that_bits % 32_uz
 
         let mut val = self.clone()
         val.data.resize(self.data.len() + USize::from(word_shift) + 1_uz, 0_u32)
@@ -255,17 +250,24 @@ sup BigUInt ext std::ops::bit_shl::BitShlAssign {
 
 sup BigUInt ext std::ops::bit_shr::BitShrAssign {
     fun bit_shr_assign(&mut self, that: Self) -> Void {
-        case that.is_zero() { ret }
-        let word_shift = that.bit_length() / 32_uz
-        let bit_shift = that.bit_length() % 32_uz
-        let mut val = self.clone()
+        # "that" is taken by move, so it is discarded here, once everything needed from it has been read.
+        let that_is_zero = that.is_zero()
+        let that_bits = that.bit_length()
+        that.drop()
 
+        case that_is_zero { ret }
+        let word_shift = that_bits / 32_uz
+        let bit_shift = that_bits % 32_uz
+
+        # Shifting everything out answers zero without looking at the digits, so the working copy is only made once
+        # that case is out of the way - it was being cloned and then abandoned on this path.
         case USize::from(word_shift) >= self.data.len() {
             self.data.clear()
             self.data.append(0_u32)
             ret
         }
 
+        let mut val = self.clone()
         loop i in Range[USize]::between(word_shift, self.data.len()) {
             let mut shifted = U64::from(self.data[i]@)
             case i + 1_uz < self.data.len() { shifted |= U64::from(self.data[i + 1_uz]@) << 32_u32 }
@@ -293,6 +295,7 @@ sup BigUInt ext std::ops::add::AddAssign {
         }
 
         case carry != 0_u64 { self.data.append(U32::from(carry)) }
+        that.drop() # "that" is taken by move, so this is where it goes.
     }
 }
 
@@ -310,6 +313,7 @@ sup BigUInt ext std::ops::sub::SubAssign {
         }
 
         self.trim()
+        that.drop() # "that" is taken by move, so this is where it goes.
     }
 }
 
@@ -319,6 +323,7 @@ sup BigUInt ext std::ops::mul::MulAssign {
         case self.is_zero() or that.is_zero() {
             self.data.clear()
             self.data.append(0_u32)
+            that.drop()
             ret
         }
 
@@ -344,6 +349,7 @@ sup BigUInt ext std::ops::mul::MulAssign {
             }
         }
 
+        that.drop()
         self.data = val.data
         self.trim()
     }
@@ -353,17 +359,20 @@ sup BigUInt ext std::ops::div::DivAssign {
     fun div_assign(&mut self, that: Self) -> Void {
         # Skip for known answers.
         case that.is_zero() { std::abort::abort("BigUInt::div: division by zero") }
-        case that.is_one() {  ret }
+        case that.is_one() {
+            that.drop()
+            ret
+        }
         case self < that {
             self.data.clear()
             self.data.append(0_u32)
+            that.drop()
             ret
         }
 
         let mut dividend = self.clone()
-        let mut divisor = that.clone()
+        let mut divisor = that # Taken by move, so there is nothing to clone.
         let mut quotient = BigUInt::zero()
-        let mut current_quotient = BigUInt::one()
 
         let mut shift = BigUInt::from(dividend.bit_length() - divisor.bit_length())
         divisor <<= shift.clone()  # TODO: remove clones at some point (memory moves)
@@ -377,6 +386,12 @@ sup BigUInt ext std::ops::div::DivAssign {
             divisor >>= Self::one()
             shift -= Self::one()
         }
+
+        # "quotient" is taken apart by the assignment below - its only attribute moves out of it - but the working
+        # values are still whole and have to go somewhere.
+        dividend.drop()
+        divisor.drop()
+        shift.drop()
 
         self.data = quotient.data
         self.trim()
@@ -393,13 +408,17 @@ sup BigUInt ext std::ops::pow::PowAssign {
     fun pow_assign(&mut self, that: Self) -> Void {
         let mut val = BigUInt::one()
         let mut base = self.clone()
-        let mut exponent = that.clone()
+        let mut exponent = that # Taken by move, so there is nothing to clone.
 
         loop exponent != BigUInt::zero() {
             case (exponent.data[0_uz] & 1_u32) != 0_u32 { val *= base.clone() }
             base *= base.clone()
             exponent >>= BigUInt::one()
         }
+
+        # "val" is taken apart by the assignment below; the working values are still whole.
+        base.drop()
+        exponent.drop()
 
         self.data = val.data
     }
@@ -419,5 +438,14 @@ sup BigUInt ext std::ops::ord::Ord {
     # TODO: Implement this properly.
     fun ord(&self, that: &Self) -> S32 {
         ret 0_s32  # Placeholder
+    }
+}
+
+sup BigUInt ext std::ops::drop::Drop {
+    # A `BigUInt` owns the vector holding its digits, so discarding one discards that.
+
+    fun drop(self) -> Void {
+        let BigUInt(data) = self
+        data.drop()
     }
 }

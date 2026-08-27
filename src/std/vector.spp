@@ -31,7 +31,7 @@ use std::void::Void
 use std::mem::raw_buf::RawBuf
 use std::ops::add::Add
 use std::ops::add::AddAssign
-use std::ops::del::Del
+use std::ops::drop::Drop
 use std::ops::eq::Eq
 use std::ops::fwd::FwdMut
 use std::ops::fwd::FwdRef
@@ -47,675 +47,694 @@ use std::ops::iter::RevIterRef
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls Vec[T, A: Alloc=GlobalAlloc] {
-    # The `Vec` type is a growable array that provides efficient storage and access to a sequence of elements. It is the
-    # length-aware version of `RawBuf`, which is the lowest level contiguous buffer type. The `Vec` type manages the
-    # length of the buffer and provides methods for adding, removing, and accessing elements. It also handles memory
-    # management through the use of an allocator, allowing for flexible memory allocation strategies. It forwards to the
-    # `View[T]` type, specifically `&View[T]` and `&mut View[T]`.
-    # @type T: The type of elements stored in the vector.
-    # @type A: The allocator type used for memory management. Defaults to `GlobalAlloc` if not specified.
-    # @let buffer: The underlying raw buffer that holds the elements of the vector. It is of type `RawBuf[T, A]`, which
-    # is a low-level contiguous buffer that manages memory allocation and deallocation.
-    # @let length: The current number of elements in the vector. It is of type `USize` and is used to track how many
-    # elements are currently stored in the vector. The length is always less than or equal to the capacity of the
-    # buffer.
-    # @let start: The index of the first live element. It is `0` for every vector in normal use - all length-based
-    # access treats the live region as `[0, length)`. It is only advanced by the by-value forward move-iterator
-    # (`iter_mov`) as it consumes elements from the front, so that if iteration stops early the destructor drops only
-    # the elements that were not yet yielded (`[start, length)`). Because `iter_mov` consumes the vector by value, no
-    # other method ever observes a non-zero `start`; it participates only in destruction.
+  # The `Vec` type is a growable array that provides efficient storage and access to a sequence of elements. It is the
+  # length-aware version of `RawBuf`, which is the lowest level contiguous buffer type. The `Vec` type manages the
+  # length of the buffer and provides methods for adding, removing, and accessing elements. It also handles memory
+  # management through the use of an allocator, allowing for flexible memory allocation strategies. It forwards to the
+  # `View[T]` type, specifically `&View[T]` and `&mut View[T]`.
+  # @type T: The type of elements stored in the vector.
+  # @type A: The allocator type used for memory management. Defaults to `GlobalAlloc` if not specified.
+  # @let buffer: The underlying raw buffer that holds the elements of the vector. It is of type `RawBuf[T, A]`, which is
+  # a low-level contiguous buffer that manages memory allocation and deallocation.
+  # @let length: The current number of elements in the vector. It is of type `USize` and is used to track how many
+  # elements are currently stored in the vector. The length is always less than or equal to the capacity of the buffer.
+  # @let start: The index of the first live element. It is `0` for every vector in normal use - all length-based access
+  # treats the live region as `[0, length)`. It is only advanced by the by-value forward move-iterator (`iter_mov`) as
+  # it consumes elements from the front, so that if iteration stops early the destructor drops only the elements that
+  # were not yet yielded (`[start, length)`). Because `iter_mov` consumes the vector by value, no other method ever
+  # observes a non-zero `start`; it participates only in destruction.
 
-    !package buffer: RawBuf[T, A]
-    !package length: USize
-    !package start: USize
+  !package buffer: RawBuf[T, A]
+  !package length: USize
+  !package start: USize
 }
 
 sup [T] Vec[T] {
-    # These are a collection of methods that are only usable with `A=GlobalAlloc`, which is the most common case. They
-    # provide simple ways to create a vector, either empty, with a specified capacity, filled with a specific element,
-    # or generated from a function or generator. They all forward to the more general methods that take an allocator as
-    # a parameter, using `GlobalAlloc` as the default allocator. This design allows for flexibility while also providing
-    # convenient defaults for common use cases.
+  # These are a collection of methods that are only usable with `A=GlobalAlloc`, which is the most common case. They
+  # provide simple ways to create a vector, either empty, with a specified capacity, filled with a specific element, or
+  # generated from a function or generator. They all forward to the more general methods that take an allocator as a
+  # parameter, using `GlobalAlloc` as the default allocator. This design allows for flexibility while also providing
+  # convenient defaults for common use cases.
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun new() -> Self {
-        # The `new` function creates a new, empty `Vec` with the default allocator (`GlobalAlloc`). It initializes the
-        # underlying buffer to a dangling pointer and sets the length to zero. This function is infallible and does not
-        # perform any memory allocation until elements are added to the vector. It is a convenient way to create an
-        # empty vector that can be populated later.
-        # @ret: A new, empty `Vec` instance with the default allocator.
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun new() -> Self {
+    # The `new` function creates a new, empty `Vec` with the default allocator (`GlobalAlloc`). It initializes the
+    # underlying buffer to a dangling pointer and sets the length to zero. This function is infallible and does not
+    # perform any memory allocation until elements are added to the vector. It is a convenient way to create an empty
+    # vector that can be populated later.
+    # @ret: A new, empty `Vec` instance with the default allocator.
 
-        # Forward to the more general `new_in` function, specifying
-        # `GlobalAlloc` as the allocator.
-        ret Self::new_in(GlobalAlloc)
-    }
+    # Forward to the more general `new_in` function, specifying
+    # `GlobalAlloc` as the allocator.
+    ret Self::new_in(GlobalAlloc)
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun new_with_capacity(cap: USize) -> Self {
-        #
-        # @let cap:
-        # @ret:
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun new_with_capacity(cap: USize) -> Self {
+    #
+    # @let cap:
+    # @ret:
 
-        ret Self::new_with_capacity_in(cap, GlobalAlloc)
-    }
+    ret Self::new_with_capacity_in(cap, GlobalAlloc)
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun new_filled(len: USize, element: T) -> Self {
-        #
-        # @let len:
-        # @let element:
-        # @ret:
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun new_filled(len: USize, element: T) -> Self {
+    #
+    # @let len:
+    # @let element:
+    # @ret:
 
-        ret Self::new_filled_in(len, element, GlobalAlloc)
-    }
+    ret Self::new_filled_in(len, element, GlobalAlloc)
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun new_from_fun(len: USize, mut f: FunMut[(USize,), T]) -> Self {
-        #
-        # @let len:
-        # @let f:
-        # @ret:
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun new_from_fun(len: USize, mut f: FunMut[(USize,), T]) -> Self {
+    #
+    # @let len:
+    # @let f:
+    # @ret:
 
-        let mut vec = Self::new_with_capacity_in(len, GlobalAlloc)
-        loop i in Range[USize]::between(0_uz, len) { vec.append_unchecked(f(i)) }
-        vec.length = len
-        ret vec
-    }
+    let mut vec = Self::new_with_capacity_in(len, GlobalAlloc)
+    loop i in Range[USize]::between(0_uz, len) { vec.append_unchecked(f(i)) }
+    std::mem::ops::drop(f)
+
+    vec.length = len
+    ret vec
+  }
 }
 
 sup [T, A: Alloc] Vec[T, A] {
-    # These are the core methods of the `Vec` type that provide the main functionality for managing the vector's
-    # capacity, length, and elements. They include methods for creating a vector with a specific allocator, reserving
-    # and shrinking capacity, accessing the length and emptiness of the vector, modifying the length through truncation
-    # and resizing, and adding, inserting, and removing elements.
-    # @type Element: An alias for the element type `T` stored in the vector.
-    # @type Allocator: An alias for the allocator type `A` used for memory management.
+  # These are the core methods of the `Vec` type that provide the main functionality for managing the vector's capacity,
+  # length, and elements. They include methods for creating a vector with a specific allocator, reserving and shrinking
+  # capacity, accessing the length and emptiness of the vector, modifying the length through truncation and resizing,
+  # and adding, inserting, and removing elements.
+  # @type Element: An alias for the element type `T` stored in the vector.
+  # @type Allocator: An alias for the allocator type `A` used for memory management.
 
-    type Element = T
-    type Allocator = A
+  type Element = T
+  type Allocator = A
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun new_in(alloc: A) -> Self {
-        #
-        # @let alloc:
-        # @ret:
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun new_in(alloc: A) -> Self {
+    #
+    # @let alloc:
+    # @ret:
 
-        ret Vec(buffer=RawBuf[T, A]::new_with_capacity_in(0_uz, alloc), length=0_uz, start=0_uz)
+    ret Vec(buffer=RawBuf[T, A]::new_with_capacity_in(0_uz, alloc), length=0_uz, start=0_uz)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun new_with_capacity_in(cap: USize, alloc: A) -> Self {
+    #
+    # @let cap:
+    # @let alloc:
+    # @ret:
+
+    ret Vec(buffer=RawBuf[T, A]::new_with_capacity_in(cap, alloc), length=0_uz, start=0_uz)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun new_filled_in(len: USize, element: T, alloc: A) -> Self {
+    #
+    # @let len:
+    # @let element:
+    # @let alloc:
+    # @ret:
+
+    let mut vec = Self::new_with_capacity_in(len, alloc)
+    # std::mem::ops::mem_set(&mut vec.buffer.ptr, element, len) # todo
+    std::mem::ops::drop(element) # TODO ^^^
+    vec.length = len
+    ret vec
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun cap(&self) -> USize {
+    #
+    # @ret:
+
+    ret self.buffer.cap()
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun capacity_reserve(&mut self, additional: USize) -> Void {
+    #
+    # @let additional:
+    # @ret:
+
+    self.try_capacity_reserve(additional).expect("Failed to reserve capacity for Vec")
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun try_capacity_reserve(&mut self, additional: USize) -> Res[Void, AllocErr] {
+    #
+    # @let additional:
+    # @ret:
+
+    ret self.buffer.try_capacity_reserve(self.len(), additional)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun capacity_reserve_exact(&mut self, required_cap: USize) -> Void {
+    #
+    # @let required_cap:
+    # @ret:
+
+    self.try_capacity_reserve_exact(required_cap).expect("Failed to reserve exact capacity for Vec")
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun try_capacity_reserve_exact(&mut self, required_cap: USize) -> Res[Void, AllocErr] {
+    # @let required_cap:
+    # @ret:
+
+    ret self.buffer.try_capacity_reserve_exact(self.len(), required_cap)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun capacity_shrink_to(&mut self, min_capacity: USize) -> Void {
+    #
+    # @let min_capacity:
+    # @ret:
+
+    self.try_capacity_shrink_to(min_capacity).expect("Failed to shrink capacity for Vec")
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun try_capacity_shrink_to(&mut self, min_capacity: USize) -> Res[Void, AllocErr] {
+    #
+    # @let min_capacity:
+    # @ret:
+
+    ret self.buffer.try_capacity_shrink_to(min_capacity)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun capacity_shrink(&mut self) -> Void {
+    #
+    # @ret:
+
+    self.try_capacity_shrink().expect("Failed to shrink capacity for Vec")
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun try_capacity_shrink(&mut self) -> Res[Void, AllocErr] {
+    #
+    # @ret:
+
+    ret self.buffer.try_capacity_shrink_to(self.len())
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun truncate(&mut self, new_len: USize) -> Void {
+    #
+    # @let new_len:
+    # @ret:
+
+    case new_len >= self.len() { ret }
+    self.buffer.clear_range(new_len, self.len() - new_len)
+    self.length = new_len
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun append(&mut self, element: T) -> Void {
+    #
+    # @let element:
+    # @ret:
+
+    case self.len() < self.cap() {
+      self.append_unchecked(element)
+      ret
+    }
+    self.grow_one()
+    self.append_unchecked(element)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun append_within_capacity(&mut self, element: T) -> Res[Void, AllocErr] {
+    #
+    # @let element:
+    # @ret:
+
+    case self.len() < self.cap() {
+      self.append_unchecked(element)
+      ret
+    }
+    else {
+      std::mem::ops::drop(element)
     }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun new_with_capacity_in(cap: USize, alloc: A) -> Self {
-        #
-        # @let cap:
-        # @let alloc:
-        # @ret:
+    ret Fail(err=AllocOverflowErr)
+  }
 
-        ret Vec(buffer=RawBuf[T, A]::new_with_capacity_in(cap, alloc), length=0_uz, start=0_uz)
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun append_many(&mut self, that: Vec[T, A]) -> Void {
+    #
+    # @let that:
+    # @ret:
+
+    let required_cap = self.len() + that.len()
+    case required_cap <= self.cap() {
+      self.append_many_unchecked(that)
+      ret
     }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun new_filled_in(len: USize, element: T, alloc: A) -> Self {
-        #
-        # @let len:
-        # @let element:
-        # @let alloc:
-        # @ret:
+    # Reserve enough capacity to hold the new elements,
+    # then append them.
+    self.capacity_reserve(that.len())
+    self.append_many_unchecked(that)
+  }
 
-        let mut vec = Self::new_with_capacity_in(len, alloc)
-        # std::mem::ops::mem_set(&mut vec.buffer.ptr, element, len) # todo
-        vec.length = len
-        ret vec
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun insert_at(&mut self, index: USize, element: T) -> Void {
+    #
+    # @let index:
+    # @let element:
+    # @ret:
+
+    case self.len() < self.cap() {
+      self.insert_at_unchecked(index, element)
+      ret
     }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun cap(&self) -> USize {
-        #
-        # @ret:
+    # Reserve enough capacity to hold the new element,
+    # then insert it.
+    self.grow_one()
+    self.insert_at_unchecked(index, element)
+  }
 
-        ret self.buffer.cap()
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun insert_many_at(&mut self, index: USize, that: Vec[T, A]) -> Void {
+    #
+    # @let index:
+    # @let that:
+    # @ret:
+
+    let required_cap = self.len() + that.len()
+    case required_cap <= self.cap() {
+      self.insert_vec_at_unchecked(index, that)
+      ret
     }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun capacity_reserve(&mut self, additional: USize) -> Void {
-        #
-        # @let additional:
-        # @ret:
+    # Reserve enough capacity to hold the new elements,
+    # then insert them.
+    self.capacity_reserve(that.len())
+    self.insert_vec_at_unchecked(index, that)
+  }
 
-        self.try_capacity_reserve(additional).expect("Failed to reserve capacity for Vec")
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun take_last(&mut self) -> Opt[T] {
+    #
+    # @ret:
+
+    case self.is_empty() { ret None }
+    self.length -= 1_uz
+    ret self.buffer.take_at(self.len())
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun take_last_if(&mut self, mut f: FunMov[(&mut T,), Bool]) -> Opt[T] {
+    #
+    # @let f:
+    # @ret:
+
+    # Discharged on the early path rather than deferred: past the emptiness check "f" is consumed by being called, so
+    # a deferred discard would consume it a second time on every path that got that far.
+    case self.is_empty() {
+      std::mem::ops::drop(f)
+      ret None
     }
+    let last_index = self.len() - 1_uz
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun try_capacity_reserve(&mut self, additional: USize) -> Res[Void, AllocErr] {
-        #
-        # @let additional:
-        # @ret:
+    case f(self[mut last_index]).not { ret None }
+    self.length -= 1_uz
+    ret self.buffer.take_at(last_index)
+  }
 
-        ret self.buffer.try_capacity_reserve(self.len(), additional)
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun take_at(&mut self, index: USize) -> Opt[T] {
+    #
+    # @let index:
+    # @ret:
+
+    case index >= self.len() { ret None }
+    let element = self.buffer.take_at(index)
+    self.buffer.shift(index + 1_uz, index, self.len() - index - 1_uz)
+    self.length -= 1_uz
+    ret element
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun clear(&mut self) -> Void {
+    # Removes every element from the vector, running each one's destructor, and resets the length to zero. The capacity
+    # is left unchanged. Delegates to `truncate(0)`, which drops the whole live range in place.
+    # @ret: Nothing; the vector is left empty.
+
+    self.truncate(0_uz)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun make_reverse(&mut self) -> Void {
+    #
+    # @ret:
+
+    let (mut l, mut r) = (0_uz, self.len() - 1_uz)
+    loop l < r {
+      self.swap(l, r)
+      l += 1_uz
+      r -= 1_uz
     }
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun capacity_reserve_exact(&mut self, required_cap: USize) -> Void {
-        #
-        # @let required_cap:
-        # @ret:
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun swap(&mut self, i: USize, j: USize) -> Void {
+    #
+    # @let i:
+    # @let j:
+    # @ret:
 
-        self.try_capacity_reserve_exact(required_cap).expect("Failed to reserve exact capacity for Vec")
-    }
+    std::mem::ops::swap(self[mut i], self[mut j])
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun try_capacity_reserve_exact(&mut self, required_cap: USize) -> Res[Void, AllocErr] {
-        # @let required_cap:
-        # @ret:
+  !private
+  !versioned(base="1.0.0", new="1.0.0")
+  fun append_unchecked(&mut self, element: T) -> Void {
+    #
+    # @let element:
+    # @ret:
 
-        ret self.buffer.try_capacity_reserve_exact(self.len(), required_cap)
-    }
+    self.buffer.place_at(self.len(), element)
+    self.length += 1_uz
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun capacity_shrink_to(&mut self, min_capacity: USize) -> Void {
-        #
-        # @let min_capacity:
-        # @ret:
+  !private
+  !versioned(base="1.0.0", new="1.0.0")
+  fun append_many_unchecked(&mut self, that: Vec[T, A]) -> Void {
+    #
+    # @let that:
+    # @ret:
 
-        self.try_capacity_shrink_to(min_capacity).expect("Failed to shrink capacity for Vec")
-    }
+    let elem_size = std::mem::ops::size_of[T]()
+    std::mem::ops::mem_copy(
+      &mut self.buffer.ptr, &that.buffer.ptr,
+      that.len() * elem_size, self.len() * elem_size)
+    self.length += that.len()
+    std::mem::ops::drop(that)
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun try_capacity_shrink_to(&mut self, min_capacity: USize) -> Res[Void, AllocErr] {
-        #
-        # @let min_capacity:
-        # @ret:
+  !private
+  !versioned(base="1.0.0", new="1.0.0")
+  fun insert_at_unchecked(&mut self, index: USize, element: T) -> Void {
+    #
+    # @let index:
+    # @let element:
+    # @ret:
 
-        ret self.buffer.try_capacity_shrink_to(min_capacity)
-    }
+    self.buffer.shift(index, index + 1_uz, self.len() - index)
+    self.buffer.place_at(index, element)
+    self.length += 1_uz
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun capacity_shrink(&mut self) -> Void {
-        #
-        # @ret:
+  !private
+  !versioned(base="1.0.0", new="1.0.0")
+  fun insert_vec_at_unchecked(&mut self, index: USize, that: Vec[T, A]) -> Void {
+    #
+    # @let index:
+    # @let that:
+    # @ret:
 
-        self.try_capacity_shrink().expect("Failed to shrink capacity for Vec")
-    }
+    self.buffer.shift(index, index + that.len(), self.len() - index)
+    let elem_size = std::mem::ops::size_of[T]()
+    std::mem::ops::mem_copy(
+      &mut self.buffer.ptr, &that.buffer.ptr,
+      that.len() * elem_size, index * elem_size)
+    self.length += that.len()
+    std::mem::ops::drop(that)
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun try_capacity_shrink(&mut self) -> Res[Void, AllocErr] {
-        #
-        # @ret:
+  !private
+  !versioned(base="1.0.0", new="1.0.0")
+  fun grow_one(&mut self) -> Void {
+    #
+    # @ret:
 
-        ret self.buffer.try_capacity_shrink_to(self.len())
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun truncate(&mut self, new_len: USize) -> Void {
-        #
-        # @let new_len:
-        # @ret:
-
-        case new_len >= self.len() { ret }
-        self.buffer.clear_range(new_len, self.len() - new_len)
-        self.length = new_len
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun append(&mut self, element: T) -> Void {
-        #
-        # @let element:
-        # @ret:
-
-        case self.len() < self.cap() {
-            self.append_unchecked(element)
-            ret
-        }
-        self.grow_one()
-        self.append_unchecked(element)
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun append_within_capacity(&mut self, element: T) -> Res[Void, AllocErr] {
-        #
-        # @let element:
-        # @ret:
-
-        case self.len() < self.cap() {
-            self.append_unchecked(element)
-            ret
-        }
-
-        ret Fail(err=AllocOverflowErr)
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun append_many(&mut self, that: Vec[T, A]) -> Void {
-        #
-        # @let that:
-        # @ret:
-
-        let required_cap = self.len() + that.len()
-        case required_cap <= self.cap() {
-            self.append_many_unchecked(that)
-            ret
-        }
-
-        # Reserve enough capacity to hold the new elements,
-        # then append them.
-        self.capacity_reserve(that.len())
-        self.append_many_unchecked(that)
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun insert_at(&mut self, index: USize, element: T) -> Void {
-        #
-        # @let index:
-        # @let element:
-        # @ret:
-
-        case self.len() < self.cap() {
-            self.insert_at_unchecked(index, element)
-            ret
-        }
-
-        # Reserve enough capacity to hold the new element,
-        # then insert it.
-        self.grow_one()
-        self.insert_at_unchecked(index, element)
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun insert_many_at(&mut self, index: USize, that: Vec[T, A]) -> Void {
-        #
-        # @let index:
-        # @let that:
-        # @ret:
-
-        let required_cap = self.len() + that.len()
-        case required_cap <= self.cap() {
-            self.insert_vec_at_unchecked(index, that)
-            ret
-        }
-
-        # Reserve enough capacity to hold the new elements,
-        # then insert them.
-        self.capacity_reserve(that.len())
-        self.insert_vec_at_unchecked(index, that)
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun take_last(&mut self) -> Opt[T] {
-        #
-        # @ret:
-
-        case self.is_empty() { ret None }
-        self.length -= 1_uz
-        ret self.buffer.take_at(self.len())
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun take_last_if(&mut self, mut f: FunMov[(&mut T,), Bool]) -> Opt[T] {
-        #
-        # @let f:
-        # @ret:
-
-        case self.is_empty() { ret None }
-        let last_index = self.len() - 1_uz
-        case f(self[mut last_index]).not { ret None }
-        self.length -= 1_uz
-        ret self.buffer.take_at(last_index)
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun take_at(&mut self, index: USize) -> Opt[T] {
-        #
-        # @let index:
-        # @ret:
-
-        case index >= self.len() { ret None }
-        let element = self.buffer.take_at(index)
-        self.buffer.shift(index + 1_uz, index, self.len() - index - 1_uz)
-        self.length -= 1_uz
-        ret element
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun clear(&mut self) -> Void {
-        # Removes every element from the vector, running each one's destructor, and resets the length to zero. The
-        # capacity is left unchanged. Delegates to `truncate(0)`, which drops the whole live range in place.
-        # @ret: Nothing; the vector is left empty.
-
-        self.truncate(0_uz)
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun make_reverse(&mut self) -> Void {
-        #
-        # @ret:
-
-        let (mut l, mut r) = (0_uz, self.len() - 1_uz)
-        loop l < r {
-            self.swap(l, r)
-            l += 1_uz
-            r -= 1_uz
-        }
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun swap(&mut self, i: USize, j: USize) -> Void {
-        #
-        # @let i:
-        # @let j:
-        # @ret:
-
-        std::mem::ops::swap(self[mut i], self[mut j])
-    }
-
-    !private
-    !versioned(base="1.0.0", new="1.0.0")
-    fun append_unchecked(&mut self, element: T) -> Void {
-        #
-        # @let element:
-        # @ret:
-
-        self.buffer.place_at(self.len(), element)
-        self.length += 1_uz
-    }
-
-    !private
-    !versioned(base="1.0.0", new="1.0.0")
-    fun append_many_unchecked(&mut self, that: Vec[T, A]) -> Void {
-        #
-        # @let that:
-        # @ret:
-
-        let elem_size = std::mem::ops::size_of[T]()
-        std::mem::ops::mem_copy(
-            &mut self.buffer.ptr, &that.buffer.ptr,
-            that.len() * elem_size, self.len() * elem_size)
-        self.length += that.len()
-    }
-
-    !private
-    !versioned(base="1.0.0", new="1.0.0")
-    fun insert_at_unchecked(&mut self, index: USize, element: T) -> Void {
-        #
-        # @let index:
-        # @let element:
-        # @ret:
-
-        self.buffer.shift(index, index + 1_uz, self.len() - index)
-        self.buffer.place_at(index, element)
-        self.length += 1_uz
-    }
-
-    !private
-    !versioned(base="1.0.0", new="1.0.0")
-    fun insert_vec_at_unchecked(&mut self, index: USize, that: Vec[T, A]) -> Void {
-        #
-        # @let index:
-        # @let that:
-        # @ret:
-
-        self.buffer.shift(index, index + that.len(), self.len() - index)
-        let elem_size = std::mem::ops::size_of[T]()
-        std::mem::ops::mem_copy(
-            &mut self.buffer.ptr, &that.buffer.ptr,
-            that.len() * elem_size, index * elem_size)
-        self.length += that.len()
-    }
-
-    !private
-    !versioned(base="1.0.0", new="1.0.0")
-    fun grow_one(&mut self) -> Void {
-        #
-        # @ret:
-
-        let new_cap = case self.cap() == 0_uz { 1_uz } else { self.cap() * 2_uz }
-        self.buffer.try_capacity_grow_to(new_cap).expect("Failed to grow capacity for Vec")
-    }
+    let new_cap = case self.cap() == 0_uz { 1_uz } else { self.cap() * 2_uz }
+    self.buffer.try_capacity_grow_to(new_cap).expect("Failed to grow capacity for Vec")
+  }
 }
 
 sup [T: Clone, A: Alloc] Vec[T, A] {
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun resize(&mut self, new_len: USize, element: T) -> Void {
-        # Grows or shrinks the vector to `new_len`. Shrinking truncates and drops the trailing elements. Growing
-        # reserves the additional capacity once and clones `element` directly into the newly reserved slots, moving the
-        # original into the last slot instead of cloning it, so no intermediate `Vec` is built.
-        # @let new_len: The length the vector should have after this call.
-        # @let element: The value used to fill any newly added slots.
-        # @ret:
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun resize(&mut self, new_len: USize, element: T) -> Void {
+    # Grows or shrinks the vector to `new_len`. Shrinking truncates and drops the trailing elements. Growing reserves
+    # the additional capacity once and clones `element` directly into the newly reserved slots, moving the original into
+    # the last slot instead of cloning it, so no intermediate `Vec` is built.
+    # @let new_len: The length the vector should have after this call.
+    # @let element: The value used to fill any newly added slots.
+    # @ret:
 
-        case new_len <= self.len() {
-            self.truncate(new_len)
-            ret
-        }
-
-        let additional = new_len - self.len()
-        self.capacity_reserve(additional)
-        loop i in Range[USize]::between(1_uz, additional) {
-            self.append_unchecked(element.clone())
-        }
-        self.append_unchecked(element)
+    case new_len <= self.len() {
+      self.truncate(new_len)
+      std::mem::ops::drop(element)
+      ret
     }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun append_from_view(&mut self, that: &View[T]) -> Void {
-        # Append all the elements from a view, by copying the elements from the view.
-        # @let that: The view to append from.
-
-        # Allocate enough space and them memcpy the
-        # elements from the view into the vector.
-        self.capacity_reserve(that.len())
-        let elem_size = std::mem::ops::size_of[T]()
-        std::mem::ops::mem_copy(
-            &mut self.buffer.ptr, &that.ptr,
-            that.len() * elem_size, self.len() * elem_size)
-        self.length += that.len()
+    let additional = new_len - self.len()
+    self.capacity_reserve(additional)
+    loop i in Range[USize]::between(1_uz, additional) {
+      self.append_unchecked(element.clone())
     }
+    self.append_unchecked(element)
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun from_in(that: &View[T], alloc: A) -> Self {
-        # Create the vector from a view, by copying the elements from the view, using the given allocator.
-        # @let that: The view to create the vector from.
-        # @let alloc: The allocator used for the new vector's storage.
-        # @ret: A new vector containing the elements from the view.
-        # @todo: This doesn't respect clone steps.
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun append_from_view(&mut self, that: &View[T]) -> Void {
+    # Append all the elements from a view, by copying the elements from the view.
+    # @let that: The view to append from.
 
-        let mut vec = Self::new_with_capacity_in(that.len(), alloc)
-        vec.append_from_view(that)
-        ret vec
-    }
+    # Allocate enough space and them memcpy the
+    # elements from the view into the vector.
+    self.capacity_reserve(that.len())
+    let elem_size = std::mem::ops::size_of[T]()
+    std::mem::ops::mem_copy(
+      &mut self.buffer.ptr, &that.ptr,
+      that.len() * elem_size, self.len() * elem_size)
+    self.length += that.len()
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from_in(that: &View[T], alloc: A) -> Self {
+    # Create the vector from a view, by copying the elements from the view, using the given allocator.
+    # @let that: The view to create the vector from.
+    # @let alloc: The allocator used for the new vector's storage.
+    # @ret: A new vector containing the elements from the view.
+    # @todo: This doesn't respect clone steps.
+
+    let mut vec = Self::new_with_capacity_in(that.len(), alloc)
+    vec.append_from_view(that)
+    ret vec
+  }
 }
 
 sup [T: Clone] Vec[T] {
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun from(that: &View[T]) -> Self {
-        # Create the vector from a view, by copying the elements from the view, using the global allocator.
-        # @let that: The view to create the vector from.
-        # @ret: A new vector containing the elements from the view.
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from(that: &View[T]) -> Self {
+    # Create the vector from a view, by copying the elements from the view, using the global allocator.
+    # @let that: The view to create the vector from.
+    # @ret: A new vector containing the elements from the view.
 
-        # Forward to the more general `from_in` function,
-        # specifying `GlobalAlloc` as the allocator.
-        ret Self::from_in(that, GlobalAlloc)
-    }
+    # Forward to the more general `from_in` function,
+    # specifying `GlobalAlloc` as the allocator.
+    ret Self::from_in(that, GlobalAlloc)
+  }
 }
 
 sup [T, A: Alloc] Vec[T, A] ext IterMov[T] {
-    !versioned(base="1.0.0", new="1.0.0")
-    cor iter_mov(mut self) -> Iterator[T] {
-        # Yields the elements from front to back, moving each one out of the buffer. Consuming from the front leaves the
-        # remaining live elements as the suffix `[start, length)`, so `start` is advanced to just past each element
-        # before it is yielded. If iteration is abandoned early, `Vec::del` then drops exactly the un-yielded remainder
-        # via `clear_range(start, length - start)`, with no double drop and no leak; if it runs to completion `start`
-        # equals `length` and nothing is left to drop. `length` is left untouched, since `start` alone tracks progress.
-        # @ret: An iterator that moves the vector's elements out in order.
+  !versioned(base="1.0.0", new="1.0.0")
+  cor iter_mov(mut self) -> Iterator[T] {
+    # Yields the elements from front to back, moving each one out of the buffer. Consuming from the front leaves the
+    # remaining live elements as the suffix `[start, length)`, so `start` is advanced to just past each element before
+    # it is yielded. If iteration is abandoned early, `Vec::del` then drops exactly the un-yielded remainder via
+    # `clear_range(start, length - start)`, with no double drop and no leak; if it runs to completion `start` equals
+    # `length` and nothing is left to drop. `length` is left untouched, since `start` alone tracks progress.
+    # @ret: An iterator that moves the vector's elements out in order.
 
-        loop i in Range[USize]::between(0_uz, self.length) {
-            self.start = i + 1_uz
-            gen self.buffer.take_at(i).unwrap()
-        }
+    defer std::mem::ops::drop(self) # TODO: Refactor to remove "start".
+    loop i in Range[USize]::between(0_uz, self.length) {
+      self.start = i + 1_uz
+      gen self.buffer.take_at(i).unwrap()
     }
+  }
 }
 
 sup [T, A: Alloc] Vec[T, A] ext RevIterMov[T] {
-    !versioned(base="1.0.0", new="1.0.0")
-    cor reverse_iter_mov(mut self) -> Iterator[T] {
-        # Yields the elements from back to front, moving each one out of the buffer. The length is decremented before
-        # each yield, so the still-live elements are always exactly the prefix `[0, length)`. That keeps `Vec::del`
-        # correct even if iteration is abandoned early: it drops precisely the elements that were never yielded, with no
-        # double drop and no leak.
-        # @ret: An iterator that moves the vector's elements out in reverse order.
+  !versioned(base="1.0.0", new="1.0.0")
+  cor reverse_iter_mov(mut self) -> Iterator[T] {
+    # Yields the elements from back to front, moving each one out of the buffer. The length is decremented before each
+    # yield, so the still-live elements are always exactly the prefix `[0, length)`. That keeps `Vec::del` correct even
+    # if iteration is abandoned early: it drops precisely the elements that were never yielded, with no double drop and
+    # no leak.
+    # @ret: An iterator that moves the vector's elements out in reverse order.
 
-        loop true {
-            case self.length == 0_uz { ret }
-            self.length -= 1_uz
-            gen self.buffer.take_at(self.length).unwrap()
-        }
+    defer std::mem::ops::drop(self) # TODO: Refactor to remove "start".
+    loop true {
+      case self.length == 0_uz { ret }
+      self.length -= 1_uz
+      gen self.buffer.take_at(self.length).unwrap()
     }
+  }
 }
 
 sup [T: Clone, A: Alloc & Clone] Vec[T, A] ext Clone {
-    !versioned(base="1.0.0", new="1.0.0")
-    fun clone(&self) -> Self {
-        #
-        # @ret:
+  !versioned(base="1.0.0", new="1.0.0")
+  fun clone(&self) -> Self {
+    #
+    # @ret:
 
-        let alloc = self.buffer.alloc.clone()
-        let mut vec = Self::new_with_capacity_in(self.len(), alloc)
-        std::mem::ops::mem_copy(
-            &mut vec.buffer.ptr, &self.buffer.ptr,
-            self.len() * std::mem::ops::size_of[T]())
-        vec.length = self.len()
-        ret vec
-    }
+    let alloc = self.buffer.alloc.clone()
+    let mut vec = Self::new_with_capacity_in(self.len(), alloc)
+    std::mem::ops::mem_copy(
+      &mut vec.buffer.ptr, &self.buffer.ptr,
+      self.len() * std::mem::ops::size_of[T]())
+    vec.length = self.len()
+    ret vec
+  }
 }
 
 sup [T, A: Alloc] Vec[T, A] ext Add {
-    !versioned(base="1.0.0", new="1.0.0")
-    fun add(self, that: Self) -> Self {
-        #
-        # @let that:
-        # @ret:
+  !versioned(base="1.0.0", new="1.0.0")
+  fun add(self, that: Self) -> Self {
+    #
+    # @let that:
+    # @ret:
 
-        let mut result = self
-        result.append_many(that)
-        ret result
-    }
+    let mut result = self
+    result.append_many(that)
+    ret result
+  }
 }
 
 sup [T, A: Alloc] Vec[T, A] ext AddAssign {
-    !versioned(base="1.0.0", new="1.0.0")
-    fun add_assign(&mut self, that: Self) -> Void {
-        #
-        # @let that:
-        # @ret:
+  !versioned(base="1.0.0", new="1.0.0")
+  fun add_assign(&mut self, that: Self) -> Void {
+    #
+    # @let that:
+    # @ret:
 
-        self.append_many(that)
-    }
+    self.append_many(that)
+  }
 }
 
 sup [T: Eq, A: Alloc] Vec[T, A] ext Eq {
-    !versioned(base="1.0.0", new="1.0.0")
-    fun eq(&self, that: &Self) -> Bool {
-        #
-        # @let that:
-        # @ret:
+  !versioned(base="1.0.0", new="1.0.0")
+  fun eq(&self, that: &Self) -> Bool {
+    #
+    # @let that:
+    # @ret:
 
-        case self.len() != that.len() { ret false }
-        loop i in Range[USize]::between(0_uz, self.len()) {
-            case self[i] != that[i] { ret false }
-        }
-        ret true
+    case self.len() != that.len() { ret false }
+    loop i in Range[USize]::between(0_uz, self.len()) {
+      case self[i] != that[i] { ret false }
     }
+    ret true
+  }
 
-    !versioned(base="1.0.0", new="1.0.0")
-    fun ne(&self, that: &Self) -> Bool {
-        #
-        # @let that:
-        # @ret:
+  !versioned(base="1.0.0", new="1.0.0")
+  fun ne(&self, that: &Self) -> Bool {
+    #
+    # @let that:
+    # @ret:
 
-        case self.len() != that.len() { ret true }
-        loop i in Range[USize]::between(0_uz, self.len()) {
-            case self[i] == that[i] { ret true }
-        }
-        ret false
+    case self.len() != that.len() { ret true }
+    loop i in Range[USize]::between(0_uz, self.len()) {
+      case self[i] == that[i] { ret true }
     }
+    ret false
+  }
 }
 
 sup [T] Vec[T] ext FromIterator[T] {
-    # Like `from(&View[T])` above, this needs a `Self` with no allocator supplied by the caller, so it can only build a
-    # `GlobalAlloc` vector.
+  # Like `from(&View[T])` above, this needs a `Self` with no allocator supplied by the caller, so it can only build a
+  # `GlobalAlloc` vector.
 
-    !versioned(base="1.0.0", new="1.0.0")
-    fun from_iter[G: Gen[T]](iter: G) -> Self {
-        # Build a new `Vec` from a generator. The generator is expected to yield elements of type `T`, and the function
-        # will collect these elements into a new `Vec`. The function will continue to call the generator until it
-        # returns `None`, indicating that there are no more elements to yield. The resulting `Vec` will contain all the
-        # elements produced by the generator, in the order they were generated.
-        # @type G: The type of the generator that produces elements of type `T`. This must be a generator type that
-        # yields elements of type `T`.
-        # @let iter: The generator instance that will be used to produce elements for the new `Vec`.
-        # @ret: A new `Vec` instance containing all the elements produced by the generator.
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from_iter[G: Gen[T]](iter: G) -> Self {
+    # Build a new `Vec` from a generator. The generator is expected to yield elements of type `T`, and the function will
+    # collect these elements into a new `Vec`. The function will continue to call the generator until it returns `None`,
+    # indicating that there are no more elements to yield. The resulting `Vec` will contain all the elements produced by
+    # the generator, in the order they were generated.
+    # @type G: The type of the generator that produces elements of type `T`. This must be a generator type that yields
+    # elements of type `T`.
+    # @let iter: The generator instance that will be used to produce elements for the new `Vec`.
+    # @ret: A new `Vec` instance containing all the elements produced by the generator.
 
-        # Create the vector and yield all the elements
-        # from the generator into it.
-        let mut vec = Self::new()
-        # loop generator.res() is T() { vec.append(val) } # todo
-        ret vec
-    }
+    # Create the vector and yield all the elements
+    # from the generator into it.
+    let mut vec = Self::new()
+    # loop generator.res() is T() { vec.append(val) } # todo
+    std::mem::ops::drop(iter)
+    ret vec
+  }
 }
 
 sup [T, A: Alloc] Vec[T, A] ext FwdMut[View[T]] {
-    !intrinsic(name="std.vector.Vec.fwd_mut")
-    !versioned(base="1.0.0", new="1.0.0")
-    cor fwd_mut(&mut self) -> GenOnce[&mut View[T]] { }
+  !intrinsic(name="std.vector.Vec.fwd_mut")
+  !versioned(base="1.0.0", new="1.0.0")
+  cor fwd_mut(&mut self) -> GenOnce[&mut View[T]] { }
 }
 
 sup [T, A: Alloc] Vec[T, A] ext FwdRef[View[T]] {
-    !intrinsic(name="std.vector.Vec.fwd_ref")
-    !versioned(base="1.0.0", new="1.0.0")
-    cor fwd_ref(&self) -> GenOnce[&View[T]] { }
+  !intrinsic(name="std.vector.Vec.fwd_ref")
+  !versioned(base="1.0.0", new="1.0.0")
+  cor fwd_ref(&self) -> GenOnce[&View[T]] { }
 }
 
-sup [T, A: Alloc] Vec[T, A] ext Del {
-    !versioned(base="1.0.0", new="1.0.0")
-    fun del(&mut self) -> Void {
-        # The `del` function runs the destructors of the vector's live elements when it is dropped, then lets the
-        # underlying buffer drop, which frees the backing memory. The live elements are the range `[start, length)`,
-        # which `clear_range` destroys in place. For any vector in normal use `start` is `0`, so this is `[0, length)`;
-        # a forward move-iterator abandoned early leaves `start` advanced past the elements it already yielded, so only
-        # the un-yielded remainder is dropped. The buffer's own destructor only frees memory and never touches the
-        # elements, so there is no double drop; it runs after this body as part of normal field destruction.
-        # @ret: Nothing; this is invoked for its cleanup side effect when a `Vec` is destroyed.
+sup [T, A: Alloc] Vec[T, A] ext Drop {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun drop(self) -> Void {
+    # The `del` function runs the destructors of the vector's live elements when it is dropped, then lets the underlying
+    # buffer drop, which frees the backing memory. The live elements are the range `[start, length)`, which
+    # `clear_range` destroys in place. For any vector in normal use `start` is `0`, so this is `[0, length)`; a forward
+    # move-iterator abandoned early leaves `start` advanced past the elements it already yielded, so only the un-yielded
+    # remainder is dropped. The buffer's own destructor only frees memory and never touches the elements, so there is no
+    # double drop; it runs after this body as part of normal field destruction.
+    # @ret: Nothing; this is invoked for its cleanup side effect when a `Vec` is destroyed.
 
-        self.buffer.clear_range(self.start, self.length - self.start)
-    }
+    let Vec[T, A](mut buffer, length, start) = self
+    buffer.clear_range(start, length - start)
+    buffer.drop()
+  }
 }

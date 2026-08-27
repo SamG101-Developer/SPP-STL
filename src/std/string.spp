@@ -25,6 +25,7 @@ use std::void::Void
 use std::mem::pointer::NonNull
 use std::ops::add::Add
 use std::ops::add::AddAssign
+use std::ops::drop::Drop
 use std::ops::fwd::FwdMut
 use std::ops::fwd::FwdRef
 
@@ -68,7 +69,7 @@ sup Str {
     # @ret: An owned copy of the bytes before the terminator.
 
     let mut length = 0_uz
-    sppc::strchr(ptr, 0_u8, &mut length)
+    let err = sppc::strchr(ptr, 0_u8, &mut length) # Todo: Error handling.
     let view = StrView(ptr=ptr, length=length)
     ret Str::from(&view)
   }
@@ -480,5 +481,15 @@ sup [A: Alloc] Str[A] ext From[Char] {
     let mut result = Self()
     result.append(that)
     ret result
+  }
+}
+
+sup [A: Alloc] Str[A] ext Drop {
+  # A string owns the byte vector backing it, so discarding one discards that.
+
+  !versioned(base="1.0.0", new="1.0.0")
+  fun drop(self) -> Void {
+    let Str[A](bytes) = self
+    bytes.drop()
   }
 }

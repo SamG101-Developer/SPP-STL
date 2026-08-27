@@ -12,6 +12,7 @@ use std::result::Fail
 use std::result::Pass
 use std::result::Res
 use std::void::Void
+use std::ops::drop::Drop
 use std::net::ip::IpAddr
 use std::net::ip::IpV4Addr
 use std::net::ip::IpV6Addr
@@ -46,6 +47,26 @@ cls Socket {
 sup Socket {
     !public
     !versioned(base="1.0.0", new="1.0.0")
+    fun close(self) -> Res[Void, SockErr] {
+        # The `close` method releases the underlying file descriptor, consuming the socket as it does. Consuming it is
+        # what makes closing safe: a closed socket no longer exists, so there is nothing left to close a second time,
+        # and a socket that is never closed is a compile time error rather than a leaked descriptor. Note that a
+        # descriptor is released by the operating system even when `close` reports an error, so the error is reported
+        # to the caller but the descriptor is not retained for a retry.
+        # @ret: A `Res` containing an empty value if the socket was closed, or an error if the operation fails.
+
+        # "Self" rather than "Socket": the value is whichever
+        # socket type superimposed this, and the descriptor is
+        # the only attribute any of them has.
+        let Self(fd) = self
+        case fd < 0 { ret Pass[Void]() }
+
+        let err = sppc::close(fd)
+        ret case err == 0 { Pass[Void]() } else { Fail(err=SockErr::from_errno(err)) }
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
     fun set_nonblocking(&self, yes: Bool) -> Res[Void, SockErr] {
         # The `set_nonblocking` method sets the socket to non-blocking mode. This means that all operations on the
         # socket will return immediately, even if they would normally block. This is useful for asynchronous
@@ -57,13 +78,14 @@ sup Socket {
         # Convert the boolean value to an integer (1 for true,
         # 0 for false) to be used in the `fcntl` function.
         let mut flags = Flags::new()
-        sppc::fcntl(self.fd, cffi::f_getfl, 0, &mut flags.bits)
+        let err = sppc::fcntl(self.fd, cffi::f_getfl, 0, &mut flags.bits)
+        case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
         flags.set(Flags::bit(U32::from(cffi::o_nonblock)), yes)
 
         # Call the `setsockopt` function to set the broadcast
         # option for the socket.
         let err = sppc::fcntl(self.fd, cffi::f_setfl, flags.bits)
-        case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+        case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
         ret Pass[Void]()
     }
 
@@ -130,8 +152,14 @@ sup Socket {
 
         let mut storage = sppc::CSockaddrStorage()
         let err = sppc::getsockname(self.fd, &mut storage)
-        case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
-        ret Pass(val=SockAddr::from_storage(&storage))
+        case err < 0 {
+            std::mem::ops::drop(storage)
+            ret Fail(err=SockErr::from_errno(err))
+        }
+
+        let addr = SockAddr::from_storage(&storage)
+        std::mem::ops::drop(storage)
+        ret Pass(val=addr)
     }
 }
 
@@ -217,7 +245,7 @@ sup SockAddr {
         ret case self of {
             # For IpV4, create a new CSockaddrStorage and fill it with
             # the octets of the IpV4Addr and the port.
-            is SockV4Addr(ip, port) {
+            is SockV4Addr(&ip, port) {
                 let mut storage = sppc::CSockaddrStorage()
                 sppc::set_sockaddr_v4(&ip.octets.ptr, port, &mut storage)
                 storage
@@ -225,7 +253,7 @@ sup SockAddr {
 
             # For IpV6, create a new CSockaddrStorage and fill it with
             # the segments of the IpV6Addr and the port.
-            is SockV6Addr(ip, port) {
+            is SockV6Addr(&ip, port) {
                 let mut storage = sppc::CSockaddrStorage()
                 sppc::set_sockaddr_v6(&ip.segments.ptr, port, &mut storage)
                 storage
@@ -237,5 +265,18 @@ sup SockAddr {
                 std::abort::abort("Unsupported address family")
             }
         }
+    }
+}
+
+sup Socket ext Drop {
+    # A socket owns a descriptor, so discarding one closes it. This is the discard path, for a caller that will not look
+    # at the outcome; anything that wants to know whether the close succeeded should call `close` directly, which is the
+    # same operation with the result handed back.
+
+    !versioned(base="1.0.0", new="1.0.0")
+    fun drop(self) -> Void {
+        let Self(fd) = self
+        case fd < 0 { ret }
+        let err = sppc::close(fd)
     }
 }

@@ -8,78 +8,81 @@ use std::clone::Clone
 use std::option::None
 use std::option::Opt
 use std::option::Some
-use std::rc::rc::ControlBlock
-use std::rc::rc::Rc
 use std::void::Void
 use std::mem::pointer::NonNull
-use std::ops::del::Del
+use std::ops::drop::Drop
+use std::rc::rc::ControlBlock
+use std::rc::rc::Rc
 
 !public !thread_hazard
 !versioned(base="1.0.0", new="1.0.0")
 cls Weak[T, A: Alloc=GlobalAlloc] {
-    # The `Weak` type is a non-owning handle to the control block of an `Rc`. It does not keep the value alive, only the
-    # control block, so it can be upgraded back to an `Rc` while at least one strong share still exists. Like `Rc`, its
-    # counters are non-atomic, so `Weak` is a thread hazard and must never cross a thread boundary; use the `Weak` from
-    # `std::threading` (paired with `Arc`) for that.
-    # @type T: The type of the value the control block holds.
-    # @type A: The allocator type used to deallocate the control block. Defaults to `GlobalAlloc`.
-    # @let ptr: A non-null pointer to the shared control block.
-    # @let alloc: The allocator used to deallocate the control block once no handles of any kind remain.
+  # The `Weak` type is a non-owning handle to the control block of an `Rc`. It does not keep the value alive, only the
+  # control block, so it can be upgraded back to an `Rc` while at least one strong share still exists. Like `Rc`, its
+  # counters are non-atomic, so `Weak` is a thread hazard and must never cross a thread boundary; use the `Weak` from
+  # `std::threading` (paired with `Arc`) for that.
+  # @type T: The type of the value the control block holds.
+  # @type A: The allocator type used to deallocate the control block. Defaults to `GlobalAlloc`.
+  # @let ptr: A non-null pointer to the shared control block.
+  # @let alloc: The allocator used to deallocate the control block once no handles of any kind remain.
 
-    !package ptr: NonNull[ControlBlock[T]]
-    !package alloc: A
+  !package ptr: NonNull[ControlBlock[T]]
+  !package alloc: A
 }
 
 sup [T, A: Alloc] Weak[T, A] {
-    !public type Element = T
+  !public type Element = T
 }
 
 sup [T, A: Alloc & Clone] Weak[T, A] {
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun upgrade(&self) -> Opt[Rc[T, A]] {
-        # Attempt to revive a strong `Rc` handle from this weak `Weak`. If the share count has already reached zero then
-        # the value has been dropped and cannot be revived, so `None` is returned. Otherwise the share count is
-        # incremented and a new `Rc` handle to the same control block is returned wrapped in `Some`. A fresh `NonNull`
-        # to the same block is fabricated from the raw address; as a locally owned `mut` pointer it provides the mutable
-        # access needed to bump the counter through the shared `&self` borrow, and is then moved into the returned `Rc`.
-        # The allocator is cloned so the revived share can deallocate the block independently.
-        # @ret: `Some` containing a new `Rc` handle if the value is still alive, otherwise `None`.
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun upgrade(&self) -> Opt[Rc[T, A]] {
+    # Attempt to revive a strong `Rc` handle from this weak `Weak`. If the share count has already reached zero then the
+    # value has been dropped and cannot be revived, so `None` is returned. Otherwise the share count is incremented and
+    # a new `Rc` handle to the same control block is returned wrapped in `Some`. A fresh `NonNull` to the same block is
+    # fabricated from the raw address; as a locally owned `mut` pointer it provides the mutable access needed to bump
+    # the counter through the shared `&self` borrow, and is then moved into the returned `Rc`. The allocator is cloned
+    # so the revived share can deallocate the block independently.
+    # @ret: `Some` containing a new `Rc` handle if the value is still alive, otherwise `None`.
 
-        case self.ptr.strong_counter == 0_uz { ret None }
-        let mut cb = self.ptr.clone()
-        cb.strong_counter += 1_uz
-        ret Some(val=Rc(ptr=cb, alloc=self.alloc.clone()))
-    }
+    case self.ptr.strong_counter == 0_uz { ret None }
+    let mut cb = self.ptr.clone()
+    cb.strong_counter += 1_uz
+    ret Some(val=Rc(ptr=cb, alloc=self.alloc.clone()))
+  }
 }
 
 sup [T, A: Alloc & Clone] Weak[T, A] ext Clone {
-    !versioned(base="1.0.0", new="1.0.0")
-    fun clone(&self) -> Self {
-        # Create another weak handle to the same control block. Like `Rc::downgrade`, this increments the weak count so
-        # the block stays alive while any weak handle exists, and never touches the share count or the value. A fresh
-        # `NonNull` to the block is created to provide the mutable access needed to bump the counter through `&self`,
-        # then moved into the new handle; the allocator is cloned so each weak handle can deallocate independently.
-        # @ret: A new `Weak` sharing this handle's control block.
+  !versioned(base="1.0.0", new="1.0.0")
+  fun clone(&self) -> Self {
+    # Create another weak handle to the same control block. Like `Rc::downgrade`, this increments the weak count so the
+    # block stays alive while any weak handle exists, and never touches the share count or the value. A fresh `NonNull`
+    # to the block is created to provide the mutable access needed to bump the counter through `&self`, then moved into
+    # the new handle; the allocator is cloned so each weak handle can deallocate independently.
+    # @ret: A new `Weak` sharing this handle's control block.
 
-        let mut cb = self.ptr.clone()
-        cb.weak_counter += 1_uz
-        ret Weak(ptr=cb, alloc=self.alloc.clone())
-    }
+    let mut cb = self.ptr.clone()
+    cb.weak_counter += 1_uz
+    ret Weak(ptr=cb, alloc=self.alloc.clone())
+  }
 }
 
-sup [T, A: Alloc] Weak[T, A] ext Del {
-    !versioned(base="1.0.0", new="1.0.0")
-    fun del(&mut self) -> Void {
-        # Drop one weak handle. A weak handle never owns the value, so no value destructor runs here; only the shadow
-        # count is decremented. The control block is deallocated only when this was the very last handle of any kind -
-        # no shares keeping the value alive and no other weak handles keeping the block alive - in which case the value
-        # has already been destroyed by the last `Rc` and only the raw storage remains to be freed.
-        # @ret: Nothing; this is invoked for its cleanup side effects when a `Weak` is destroyed.
+sup [T, A: Alloc] Weak[T, A] ext Drop {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun drop(self) -> Void {
+    # Drop one weak handle. A weak handle never owns the value, so no value destructor runs here; only the shadow count
+    # is decremented. The control block is deallocated only when this was the very last handle of any kind - no shares
+    # keeping the value alive and no other weak handles keeping the block alive - in which case the value has already
+    # been destroyed by the last `Rc` and only the raw storage remains to be freed.
+    # @ret: Nothing; this is invoked for its cleanup side effects when a `Weak` is destroyed.
 
-        self.ptr.weak_counter -= 1_uz
-        case self.ptr.strong_counter == 0_uz and self.ptr.weak_counter == 0_uz {
-            self.alloc.deallocate_array(self.ptr, 1_uz)
-        }
+    let Weak[T, A](mut ptr, alloc) = self
+    defer std::mem::ops::drop(alloc)
+    ptr.weak_counter -= 1_uz
+
+    case ptr.strong_counter == 0_uz and ptr.weak_counter == 0_uz {
+      alloc.deallocate_array(ptr, 1_uz)
     }
+  }
 }

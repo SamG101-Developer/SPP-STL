@@ -1,6 +1,7 @@
 use std::annotations::private
 use std::annotations::public
 use std::annotations::versioned
+use std::annotations::zero_type
 use std::generator::Gen
 use std::generator::GenOnce
 use std::number::F64
@@ -11,145 +12,163 @@ use std::number::U64
 use std::number::U8
 use std::number::USize
 use std::range::Range
+use std::result::Fail
+use std::result::Pass
+use std::result::Res
 use std::string_view::StrView
 use std::vector::Vec
 use std::void::Void
 
 cls Rng {
-    # The `Rng` type is a pseudo-random number generator (PRNG) that provides methods for generating random numbers and
-    # sequences. It is designed to be used in a single-threaded context, and it is not safe to use across multiple
-    # threads without proper synchronization. The `Rng` type can be seeded with a specific value to ensure
-    # reproducibility of random sequences, and it provides methods for generating random bytes, integers, and
-    # floating-point numbers within specified ranges. The underlying implementation of the PRNG is based on the
-    # "Xoshiro256**" algorithm, which is known for its speed and quality of randomness.
-    # @let state: The internal state of the PRNG, represented as an array of four 64-bit unsigned integers. This state
-    # is used to generate random numbers and cannot be modified directly by the user. It is initialized with a seed
-    # value and updated with each random number generation.
+  # The `Rng` type is a pseudo-random number generator (PRNG) that provides methods for generating random numbers and
+  # sequences. It is designed to be used in a single-threaded context, and it is not safe to use across multiple threads
+  # without proper synchronization. The `Rng` type can be seeded with a specific value to ensure reproducibility of
+  # random sequences, and it provides methods for generating random bytes, integers, and floating-point numbers within
+  # specified ranges. The underlying implementation of the PRNG is based on the "Xoshiro256**" algorithm, which is known
+  # for its speed and quality of randomness.
+  # @let state: The internal state of the PRNG, represented as an array of four 64-bit unsigned integers. This state is
+  # used to generate random numbers and cannot be modified directly by the user. It is initialized with a seed value and
+  # updated with each random number generation.
 
-    state: [U64; 4_uz]
+  state: [U64; 4_uz]
 }
 
 cls OsRng {
-    # The `OsRng` type is a cryptographically secure random number generator (CSPRNG) that provides methods for
-    # generating random numbers and sequences. It is designed to be used in a single-threaded context, and it is not
-    # safe to use across multiple threads without proper synchronization. The `OsRng` type uses the operating system's
-    # native random number generator to provide high-quality randomness suitable for cryptographic applications. It
-    # provides methods for generating random bytes, integers, and floating-point numbers within specified ranges. The
-    # underlying implementation of the CSPRNG is based on the operating system's entropy sources, which may include
-    # hardware random number generators, user input, and other sources of entropy.
+  # The `OsRng` type is a cryptographically secure random number generator (CSPRNG) that provides methods for generating
+  # random numbers and sequences. It is designed to be used in a single-threaded context, and it is not safe to use
+  # across multiple threads without proper synchronization. The `OsRng` type uses the operating system's native random
+  # number generator to provide high-quality randomness suitable for cryptographic applications. It provides methods for
+  # generating random bytes, integers, and floating-point numbers within specified ranges. The underlying implementation
+  # of the CSPRNG is based on the operating system's entropy sources, which may include hardware random number
+  # generators, user input, and other sources of entropy.
+}
+
+!zero_type
+cls RngErr {
+  # The `RngErr` type represents an error that can occur when generating random numbers with the `Rng` type.
 }
 
 !private
 !versioned(base="1.0.0", new="1.0.0")
 fun rotl64(x: U64, k: U32) -> U64 {
-    ret x << k | x >> (64_u32 - k)
+  ret x << k | x >> (64_u32 - k)
 }
 
 !private
 !versioned(base="1.0.0", new="1.0.0")
 fun splitmix64(x: &mut U64) -> U64 {
-    x += 0x9e3779b97f4a7c15_u64
-    let mut z = x@
-    z = (z ^ z >> 30_u32) * 0xbf58476d1ce4e5b9_u64
-    z = (z ^ z >> 27_u32) * 0x94d049bb133111eb_u64
-    ret z ^ z >> 31_u32
+  x += 0x9e3779b97f4a7c15_u64
+  let mut z = x@
+  z = (z ^ z >> 30_u32) * 0xbf58476d1ce4e5b9_u64
+  z = (z ^ z >> 27_u32) * 0x94d049bb133111eb_u64
+  ret z ^ z >> 31_u32
 }
 
 sup Rng {
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun from_seed(seed: U64) -> Rng {
-        let mut sm = seed
-        ret Rng(state=[
-            splitmix64(&mut sm), splitmix64(&mut sm),
-            splitmix64(&mut sm), splitmix64(&mut sm)])
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from_seed(seed: U64) -> Rng {
+    let mut sm = seed
+    ret Rng(state=[
+      splitmix64(&mut sm), splitmix64(&mut sm),
+      splitmix64(&mut sm), splitmix64(&mut sm)])
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from_os_seed() -> Res[Rng, RngErr] {
+    let mut buffer = [0_u8; 8_uz]
+    let err = sppc::getrandom(8_uz, buffer.ptr)
+    case err < 0 { ret Fail(err=RngErr) }
+
+    let seed = U64::from_le_bytes(&buffer)
+    ret Pass(val=Rng::from_seed(seed))
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun next_u64(&mut self) -> U64 {
+    let mut result = rotl64(self.state[0_uz]@ * 5_u64, 7_u32) * 9_u64
+    let t = self.state[1_uz]@ << 17_u32
+
+    self.state[mut 2_uz] ^= self.state[0_uz]@
+    self.state[mut 3_uz] ^= self.state[1_uz]@
+    self.state[mut 1_uz] ^= self.state[2_uz]@
+    self.state[mut 0_uz] ^= self.state[3_uz]@
+    self.state[mut 2_uz] ^= t
+    self.state[mut 3_uz]@ = rotl64(self.state[3_uz]@, 45_u32)
+
+    ret result
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun next_u32(&mut self) -> U32 {
+    ret U32::from(self.next_u64() >> 32_u32)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun next_double(&mut self) -> F64 {
+    ret F64::from(self.next_u64() >> 11_u32) * (1.0_f64 / 9007199254740992.0_f64)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun next_bytes(&mut self, n: USize) -> Vec[U8] {
+    let mut buffer = Vec[U8]::new_with_capacity(n)
+    loop i in Range[USize]::between(0_uz, n) {
+      buffer.append(U8::from(self.next_u64() & 0xFF_u64))
     }
+    ret buffer
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun from_os_seed() -> Rng {
-        let mut buffer = [0_u8; 8_uz]
-        sppc::getrandom(8_uz, buffer.ptr)
-        let seed = U64::from_le_bytes(&buffer)
-        ret Rng::from_seed(seed)
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun between(&mut self, min: U64, max: U64) -> U64 {
+    case max == 0_u64 { ret self.next_u64() }
+    let t = 0_u64.sub_wrapping(max) % max
+    loop true {
+      let r = self.next_u64()
+      let m = U128::from(r) * U128::from(max)
+      let l = U64::from(m)
+      case l >= t { ret U64::from(m >> 64_u32) }
     }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun next_u64(&mut self) -> U64 {
-        let mut result = rotl64(self.state[0_uz]@ * 5_u64, 7_u32) * 9_u64
-        let t = self.state[1_uz]@ << 17_u32
-
-        self.state[mut 2_uz] ^= self.state[0_uz]@
-        self.state[mut 3_uz] ^= self.state[1_uz]@
-        self.state[mut 1_uz] ^= self.state[2_uz]@
-        self.state[mut 0_uz] ^= self.state[3_uz]@
-        self.state[mut 2_uz] ^= t
-        self.state[mut 3_uz]@ = rotl64(self.state[3_uz]@, 45_u32)
-
-        ret result
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun next_u32(&mut self) -> U32 {
-        ret U32::from(self.next_u64() >> 32_u32)
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun next_double(&mut self) -> F64 {
-        ret F64::from(self.next_u64() >> 11_u32) * (1.0_f64 / 9007199254740992.0_f64)
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun next_bytes(&mut self, n: USize) -> Vec[U8] {
-        let mut buffer = Vec[U8]::new_with_capacity(n)
-        loop i in Range[USize]::between(0_uz, n) {
-            buffer.append(U8::from(self.next_u64() & 0xFF_u64))
-        }
-        ret buffer
-    }
-
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun between(&mut self, min: U64, max: U64) -> U64 {
-        case max == 0_u64 { ret self.next_u64() }
-        let t = 0_u64.sub_wrapping(max) % max
-        loop true {
-            let r = self.next_u64()
-            let m = U128::from(r) * U128::from(max)
-            let l = U64::from(m)
-            case l >= t { ret U64::from(m >> 64_u32) }
-        }
-    }
+  }
 }
 
 sup OsRng {
-    #
+  #
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun next_u64() -> U64 {
-        let mut buffer = [0_u8; 8_uz]
-        sppc::getrandom(8_uz, buffer.ptr)
-        ret U64::from_le_bytes(&buffer)
-    }
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun next_u64() -> Res[U64, RngErr] {
+    let mut buffer = [0_u8; 8_uz]
+    defer std::mem::ops::drop(buffer)
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun next_u32() -> U32 {
-        let mut buffer = [0_u8; 4_uz]
-        sppc::getrandom(4_uz, buffer.ptr)
-        ret U32::from_le_bytes(&buffer)
-    }
+    let err = sppc::getrandom(8_uz, buffer.ptr)
+    ret case err != 0 { Fail(err=RngErr) } else { Pass(val=U64::from_le_bytes(&buffer)) }
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun next_bytes(n: USize) -> Vec[U8] {
-        let mut buffer = Vec[U8]::new_with_capacity(n)
-        sppc::getrandom(n, buffer.ptr)
-        ret buffer
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun next_u32() -> Res[U32, RngErr] {
+    let mut buffer = [0_u8; 4_uz]
+    defer std::mem::ops::drop(buffer)
+
+    let err = sppc::getrandom(4_uz, buffer.ptr)
+    ret case err != 0 { Fail(err=RngErr) } else { Pass(val=U32::from_le_bytes(&buffer)) }
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun next_bytes(n: USize) -> Res[Vec[U8], RngErr] {
+    let mut buffer = Vec[U8]::new_with_capacity(n)
+    let err = sppc::getrandom(n, buffer.ptr)
+    ret case err != 0 {
+      std::mem::ops::drop(buffer)
+      Fail(err=RngErr)
     }
+    else { Pass(val=buffer) }
+  }
 }

@@ -1,5 +1,6 @@
 use std::annotations::public
 use std::annotations::versioned
+use std::copy::Copy
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
@@ -14,6 +15,12 @@ cls TupLike {
 cls Tup[..Items] { }
 
 sup [..Items] Tup[Items] ext TupLike { }
+
+sup [..Items: Copy] Tup[Items] ext Copy {
+    # A tuple is copyable exactly when everything in it is: it owns nothing beyond its elements, so if each of those is
+    # duplicated rather than moved then so is the tuple. This is what lets a variadic parameter pack of numbers be used
+    # without the function having to discard it, the same way `Var` is copyable over copyable alternatives.
+}
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
