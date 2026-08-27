@@ -90,11 +90,14 @@ fun get_env(key: &StrView) -> Opt[Str] {
 
     # Null terminate the string for C safety.
     let key_z = key.to_c_str()
+    defer key_z.drop()
 
     # Get the value into a pre-sized buffer, with a capacity
     # of 1024 so that any value fits it.
     let max_size = 1024_uz
     let mut buffer = Str::new_with_capacity(max_size)
+    defer buffer.drop()
+
     let err = sppc::getenv(key_z.ptr, buffer.ptr, max_size)
     case err != 0 { ret None() }
     ret Some(val=Str::from_c_str(buffer.ptr))
