@@ -31,246 +31,245 @@ use std::ops::idx::IndexRef
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls RawBuf[T, A: Alloc=GlobalAlloc] {
-    # The `RawBuf` type is a low level container for contiguous elements in memory. It is capacity aware, but not length
-    # aware. It is used as the underlying container inside a Vec. Elements are not guaranteed to be initialized, so all
-    # accessors are `Opt`-returning.
-    # @type T: The type of the elements in the buffer.
-    # @type A: The allocator type used to allocate and deallocate the buffer. Defaults to `GlobalAlloc`.
-    # @let ptr: A non-null pointer to the buffer memory.
-    # @let capacity: The capacity of the buffer, in number of elements.
-    # @let alloc: The allocator used to allocate and deallocate the buffer.
+  # The `RawBuf` type is a low level container for contiguous elements in memory. It is capacity aware, but not length
+  # aware. It is used as the underlying container inside a Vec. Elements are not guaranteed to be initialized, so all
+  # accessors are `Opt`-returning.
+  # @type T: The type of the elements in the buffer.
+  # @type A: The allocator type used to allocate and deallocate the buffer. Defaults to `GlobalAlloc`.
+  # @let ptr: A non-null pointer to the buffer memory.
+  # @let capacity: The capacity of the buffer, in number of elements.
+  # @let alloc: The allocator used to allocate and deallocate the buffer.
 
-    !package ptr: NonNull[T]
-    !package capacity: USize
-    !package alloc: A
+  !package ptr: NonNull[T]
+  !package capacity: USize
+  !package alloc: A
 }
 
 sup [T] RawBuf[T, GlobalAlloc] {
-    !package
-    !versioned(base="1.0.0", new="1.0.0")
-    fun new_with_capacity(cap: USize) -> Self {
-        ret Self::new_with_capacity_in(cap, GlobalAlloc)
-    }
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
+  fun new_with_capacity(cap: USize) -> Self {
+    ret Self::new_with_capacity_in(cap, GlobalAlloc)
+  }
 
-    !package
-    !versioned(base="1.0.0", new="1.0.0")
-    fun new_with_capacity_zeroed(cap: USize) -> Self {
-        ret Self::new_with_capacity_zeroed_in(cap, GlobalAlloc)
-    }
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
+  fun new_with_capacity_zeroed(cap: USize) -> Self {
+    ret Self::new_with_capacity_zeroed_in(cap, GlobalAlloc)
+  }
 }
 
 sup [T, A: Alloc] RawBuf[T, A] {
-    type Element = T
-    type Allocator = A
+  type Element = T
+  type Allocator = A
 
-    !package
-    !versioned(base="1.0.0", new="1.0.0")
-    fun new_with_capacity_in(cap: USize, alloc: A) -> Self {
-        # A capacity that occupies no bytes (a zero-sized `T`, or `cap == 0`) needs no allocation; the buffer holds a
-        # dangling sentinel instead. This is why an empty `Vec` never calls the allocator.
-        case Self::is_storage_free(cap) { ret RawBuf(ptr=NonNull[T]::dangling(), capacity=cap, alloc) }
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
+  fun new_with_capacity_in(cap: USize, alloc: A) -> Self {
+    # A capacity that occupies no bytes (a zero-sized `T`, or `cap == 0`) needs no allocation; the buffer holds a
+    # dangling sentinel instead. This is why an empty `Vec` never calls the allocator.
+    case Self::is_storage_free(cap) { ret RawBuf(ptr=NonNull[T]::dangling(), capacity=cap, alloc) }
 
-        let ptr = alloc.allocate_array[T](cap).expect("Allocation failed")
-        ret RawBuf(ptr, capacity=cap, alloc)
+    let ptr = alloc.allocate_array[T](cap).expect("Allocation failed")
+    ret RawBuf(ptr, capacity=cap, alloc)
+  }
+
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
+  fun new_with_capacity_zeroed_in(cap: USize, alloc: A) -> Self {
+    # As `new_with_capacity_in`, but zeroed. A storage-free capacity still needs no allocation - a zero-byte block is
+    # trivially already zeroed - so it uses a dangling sentinel.
+    case Self::is_storage_free(cap) { ret RawBuf(ptr=NonNull[T]::dangling(), capacity=cap, alloc) }
+
+    let ptr = alloc.allocate_array_zeroed[T](cap).expect("Allocation failed")
+    ret RawBuf(ptr, capacity=cap, alloc)
+  }
+
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
+  fun cap(&self) -> USize {
+    ret self.capacity
+  }
+
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
+  fun is_storage_free(cap: USize) -> Bool {
+    # A buffer of `cap` elements of `T` occupies no bytes - and so needs no real allocation - when `T` is zero-sized or
+    # `cap` is zero. In that case the buffer's pointer is a `NonNull::dangling` sentinel rather than a heap allocation,
+    # and must never be grown, shrunk, or freed through the allocator.
+    # @let cap: The capacity to test.
+    # @ret: `true` if `cap` elements of `T` occupy zero bytes, `false` otherwise.
+
+    ret std::mem::ops::size_of[T]() * cap == 0_uz
+  }
+
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
+  fun try_capacity_grow_to(&mut self, new_cap: USize) -> Res[Void, AllocErr] {
+    # The `try_capacity_grow_to` method attempts to grow the buffer to the new capacity. The new capacity must be larger
+    # than the current capacity, and the existing elements in the buffer will be preserved. This is useful for a `Vec`
+    # type to grow the buffer when elements are added and the capacity is exceeded.
+    # @let new_cap: The new capacity to grow the buffer to. Must be larger than the current capacity.
+    # @ret: `Pass()` if the grow was successful, or an `AllocErr` if the grow failed.
+
+    # If the target still occupies no bytes (a zero-sized type),
+    # there is nothing to allocate; just record the capacity.
+    case Self::is_storage_free(new_cap) {
+      self.capacity = new_cap
+      ret Pass[Void]()
     }
 
-    !package
-    !versioned(base="1.0.0", new="1.0.0")
-    fun new_with_capacity_zeroed_in(cap: USize, alloc: A) -> Self {
-        # As `new_with_capacity_in`, but zeroed. A storage-free capacity still needs no allocation - a zero-byte block
-        # is trivially already zeroed - so it uses a dangling sentinel.
-        case Self::is_storage_free(cap) { ret RawBuf(ptr=NonNull[T]::dangling(), capacity=cap, alloc) }
-
-        let ptr = alloc.allocate_array_zeroed[T](cap).expect("Allocation failed")
-        ret RawBuf(ptr, capacity=cap, alloc)
+    # If the buffer currently has no real allocation (it was empty, so
+    # its pointer is dangling), allocate a fresh block rather than asking
+    # the allocator to grow a dangling pointer. Propagate errors, then
+    # record the new capacity.
+    case Self::is_storage_free(self.capacity) {
+      self.ptr = self.alloc.allocate_array[T](new_cap)?
+      self.capacity = new_cap
+      ret Pass[Void]()
     }
 
-    !package
-    !versioned(base="1.0.0", new="1.0.0")
-    fun cap(&self) -> USize {
-        ret self.capacity
+    # Otherwise grow the existing allocation in place, and propagate
+    # allocation errors.
+    self.alloc.grow_array[T](&mut self.ptr, self.capacity, new_cap)?
+    self.capacity = new_cap
+    ret Pass[Void]()
+  }
+
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
+  fun try_capacity_shrink_to(&mut self, new_cap: USize) -> Res[Void, AllocErr] {
+    # The `try_capacity_shrink_to` method attempts to shrink the buffer to the new capacity. The new capacity must be
+    # smaller than the current capacity, and all elements above the new capacity will be dropped. This is useful for a
+    # `Vec` type to shrink the buffer after elements have been removed.
+    # @let new_cap: The new capacity to shrink the buffer to. Must be smaller than the current capacity.
+    # @ret: `Pass()` if the shrink was successful, or an `AllocErr` if the shrink failed.
+
+    # If the target occupies no bytes, there is no allocation to keep:
+    # free the current block (if it is real) and drop back to a dangling
+    # sentinel. This is infallible, so it returns directly.
+    case Self::is_storage_free(new_cap) {
+      case Self::is_storage_free(self.capacity).not { self.alloc.deallocate_array[T](self.ptr, self.capacity) }
+      self.ptr = NonNull[T]::dangling()
+      self.capacity = new_cap
+      ret Pass[Void]()
     }
 
-    !package
-    !versioned(base="1.0.0", new="1.0.0")
-    fun is_storage_free(cap: USize) -> Bool {
-        # A buffer of `cap` elements of `T` occupies no bytes - and so needs no real allocation - when `T` is zero-sized
-        # or `cap` is zero. In that case the buffer's pointer is a `NonNull::dangling` sentinel rather than a heap
-        # allocation, and must never be grown, shrunk, or freed through the allocator.
-        # @let cap: The capacity to test.
-        # @ret: `true` if `cap` elements of `T` occupy zero bytes, `false` otherwise.
+    # Otherwise shrink the existing allocation in place, and propagate
+    # allocation errors.
+    self.alloc.shrink_array[T](&mut self.ptr, self.capacity, new_cap)?
 
-        ret std::mem::ops::size_of[T]() * cap == 0_uz
-    }
+    # Update the capacity if successful, returning the pass
+    # state.
+    self.capacity = new_cap
+    ret Pass[Void]()
+  }
 
-    !package
-    !versioned(base="1.0.0", new="1.0.0")
-    fun try_capacity_grow_to(&mut self, new_cap: USize) -> Res[Void, AllocErr] {
-        # The `try_capacity_grow_to` method attempts to grow the buffer to the new capacity. The new capacity must be
-        # larger than the current capacity, and the existing elements in the buffer will be preserved. This is useful
-        # for a `Vec` type to grow the buffer when elements are added and the capacity is exceeded.
-        # @let new_cap: The new capacity to grow the buffer to. Must be larger than the current capacity.
-        # @ret: `Pass()` if the grow was successful, or an `AllocErr` if the grow failed.
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
+  fun try_capacity_reserve(&mut self, len: USize, mut additional: USize) -> Res[Void, AllocErr] {
+    #
+    # @let len:
+    # @let additional:
+    # @ret:
 
-        # If the target still occupies no bytes (a zero-sized type),
-        # there is nothing to allocate; just record the capacity.
-        case Self::is_storage_free(new_cap) {
-            self.capacity = new_cap
-            ret Pass[Void]()
-        }
+    # Round up "additional" to the nearest power of two.
+    additional = additional.next_pow_of_two()
 
-        # If the buffer currently has no real allocation (it was empty, so
-        # its pointer is dangling), allocate a fresh block rather than asking
-        # the allocator to grow a dangling pointer. Propagate errors, then
-        # record the new capacity.
-        case Self::is_storage_free(self.capacity) {
-            self.ptr = self.alloc.allocate_array[T](new_cap)?
-            self.capacity = new_cap
-            ret Pass[Void]()
-        }
+    # Calculate the required capacity, checking for overflow.
+    # If the calculation overflows, return an `AllocErr`.
+    let new_cap = len.add_checked(additional).pass_or(AllocOverflowErr)?
+    case new_cap <= self.capacity { ret Pass[Void]() }
+    ret self.try_capacity_grow_to(new_cap)
+  }
 
-        # Otherwise grow the existing allocation in place, and propagate
-        # allocation errors.
-        self.alloc.grow_array[T](&mut self.ptr, self.capacity, new_cap)?
-        self.capacity = new_cap
-        ret Pass[Void]()
-    }
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
+  fun try_capacity_reserve_exact(&mut self, len: USize, additional: USize) -> Res[Void, AllocErr] {
+    #
+    # @let len:
+    # @let additional:
+    # @ret:
 
-    !package
-    !versioned(base="1.0.0", new="1.0.0")
-    fun try_capacity_shrink_to(&mut self, new_cap: USize) -> Res[Void, AllocErr] {
-        # The `try_capacity_shrink_to` method attempts to shrink the buffer to the new capacity. The new capacity must
-        # be smaller than the current capacity, and all elements above the new capacity will be dropped. This is useful
-        # for a `Vec` type to shrink the buffer after elements have been removed.
-        # @let new_cap: The new capacity to shrink the buffer to. Must be smaller than the current capacity.
-        # @ret: `Pass()` if the shrink was successful, or an `AllocErr` if the shrink failed.
+    # Calculate the required capacity, checking for overflow.
+    # If the calculation overflows, return an `AllocErr`.
+    let new_cap = len.add_checked(additional).pass_or(AllocOverflowErr)?
+    case new_cap <= self.capacity { ret Pass[Void]() }
+    ret self.try_capacity_grow_to(new_cap)
+  }
 
-        # If the target occupies no bytes, there is no allocation to keep:
-        # free the current block (if it is real) and drop back to a dangling
-        # sentinel. This is infallible, so it returns directly.
-        case Self::is_storage_free(new_cap) {
-            case Self::is_storage_free(self.capacity).not { self.alloc.deallocate_array[T](self.ptr, self.capacity) }
-            self.ptr = NonNull[T]::dangling()
-            self.capacity = new_cap
-            ret Pass[Void]()
-        }
+  !package
+  !intrinsic(name="std.mem.raw_buf.RawBuf.take_at")
+  !versioned(base="1.0.0", new="1.0.0")
+  fun take_at(&mut self, index: USize) -> Opt[T] {
+    # Takes the element at the specified index, returning `Some(element)` if it is initialized, or `None` if it is not.
+    # The slot at the index is left uninitialized after this operation, and indexing to it will subsequently return
+    # `None` too.
+    # @let index: The index of the element to take.
+    # @ret: `Some(element)` if the element at the specified index is initialized, or `None` if it is not.
+  }
 
-        # Otherwise shrink the existing allocation in place, and propagate
-        # allocation errors.
-        self.alloc.shrink_array[T](&mut self.ptr, self.capacity, new_cap)?
+  !package
+  !intrinsic(name="std.mem.raw_buf.RawBuf.place_at")
+  !versioned(base="1.0.0", new="1.0.0")
+  fun place_at(&mut self, index: USize, element: T) -> Void {
+    # Places the element at the specified index, overwriting any existing element at that index. The slot at the index
+    # is considered initialized after this operation, and indexing to it will subsequently return `Some(val=element)`.
+    # @let index: The index at which to place the element.
+    # @let element: The element to place at the specified index.
+  }
 
-        # Update the capacity if successful, returning the pass
-        # state.
-        self.capacity = new_cap
-        ret Pass[Void]()
-    }
+  !package
+  !intrinsic(name="std.mem.raw_buf.RawBuf.shift")
+  !versioned(base="1.0.0", new="1.0.0")
+  fun shift(&mut self, from: USize, upto: USize, count: USize) -> Void {
+    # Moves `count` elements starting at index `from` to starting at index `to`. Handles overlapping regions correctly
+    # (behaves like memmove). Used by Vec to open or close gaps when inserting or removing elements.
+    # @let from: The index of the first element to move.
+    # @let upto: The destination index for the first element.
+    # @let count: The number of elements to move.
+  }
 
-    !package
-    !versioned(base="1.0.0", new="1.0.0")
-    fun try_capacity_reserve(&mut self, len: USize, mut additional: USize) -> Res[Void, AllocErr] {
-        #
-        # @let len:
-        # @let additional:
-        # @ret:
-
-        # Round up "additional" to the nearest power of two.
-        additional = additional.next_pow_of_two()
-
-        # Calculate the required capacity, checking for overflow.
-        # If the calculation overflows, return an `AllocErr`.
-        let new_cap = len.add_checked(additional).pass_or(AllocOverflowErr)?
-        case new_cap <= self.capacity { ret Pass[Void]() }
-        ret self.try_capacity_grow_to(new_cap)
-    }
-
-    !package
-    !versioned(base="1.0.0", new="1.0.0")
-    fun try_capacity_reserve_exact(&mut self, len: USize, additional: USize) -> Res[Void, AllocErr] {
-        #
-        # @let len:
-        # @let additional:
-        # @ret:
-
-        # Calculate the required capacity, checking for overflow.
-        # If the calculation overflows, return an `AllocErr`.
-        let new_cap = len.add_checked(additional).pass_or(AllocOverflowErr)?
-        case new_cap <= self.capacity { ret Pass[Void]() }
-        ret self.try_capacity_grow_to(new_cap)
-    }
-
-    !package
-    !intrinsic(name="std.mem.raw_buf.RawBuf.take_at")
-    !versioned(base="1.0.0", new="1.0.0")
-    fun take_at(&mut self, index: USize) -> Opt[T] {
-        # Takes the element at the specified index, returning `Some(element)` if it is initialized, or `None` if it is
-        # not. The slot at the index is left uninitialized after this operation, and indexing to it will subsequently
-        # return `None` too.
-        # @let index: The index of the element to take.
-        # @ret: `Some(element)` if the element at the specified index is initialized, or `None` if it is not.
-    }
-
-    !package
-    !intrinsic(name="std.mem.raw_buf.RawBuf.place_at")
-    !versioned(base="1.0.0", new="1.0.0")
-    fun place_at(&mut self, index: USize, element: T) -> Void {
-        # Places the element at the specified index, overwriting any existing element at that index. The slot at the
-        # index is considered initialized after this operation, and indexing to it will subsequently return
-        # `Some(val=element)`.
-        # @let index: The index at which to place the element.
-        # @let element: The element to place at the specified index.
-    }
-
-    !package
-    !intrinsic(name="std.mem.raw_buf.RawBuf.shift")
-    !versioned(base="1.0.0", new="1.0.0")
-    fun shift(&mut self, from: USize, upto: USize, count: USize) -> Void {
-        # Moves `count` elements starting at index `from` to starting at index `to`. Handles overlapping regions
-        # correctly (behaves like memmove). Used by Vec to open or close gaps when inserting or removing elements.
-        # @let from: The index of the first element to move.
-        # @let upto: The destination index for the first element.
-        # @let count: The number of elements to move.
-    }
-
-    !package
-    !intrinsic(name="std.mem.raw_buf.RawBuf.clear_range")
-    !versioned(base="1.0.0", new="1.0.0")
-    fun clear_range(&mut self, start: USize, count: USize) -> Void {
-        # Runs the destructor of each element in the range `[start, start + count)` in place, leaving those slots
-        # uninitialized. This is the bulk, in-place counterpart of `take_at`: it drops elements without moving each one
-        # out through an `Opt`, and is what `Vec` uses to destroy elements on `truncate`, `clear`, and destruction. The
-        # caller must guarantee every element in the range is initialized - a `Vec` always is over its length - as this
-        # does not check slots individually.
-        # @let start: The index of the first element to destroy.
-        # @let count: The number of elements to destroy.
-    }
+  !package
+  !intrinsic(name="std.mem.raw_buf.RawBuf.clear_range")
+  !versioned(base="1.0.0", new="1.0.0")
+  fun clear_range(&mut self, start: USize, count: USize) -> Void {
+    # Runs the destructor of each element in the range `[start, start + count)` in place, leaving those slots
+    # uninitialized. This is the bulk, in-place counterpart of `take_at`: it drops elements without moving each one out
+    # through an `Opt`, and is what `Vec` uses to destroy elements on `truncate`, `clear`, and destruction. The caller
+    # must guarantee every element in the range is initialized - a `Vec` always is over its length - as this does not
+    # check slots individually.
+    # @let start: The index of the first element to destroy.
+    # @let count: The number of elements to destroy.
+  }
 }
 
 sup [T, A: Alloc] RawBuf[T, A] ext IndexMut[T, USize] {
-    !intrinsic(name="std.mem.raw_buf.RawBuf.index_mut")
-    !versioned(base="1.0.0", new="1.0.0")
-    cor index_mut(&mut self, index: USize) -> Indexed[&mut T or None] { }
+  !intrinsic(name="std.mem.raw_buf.RawBuf.index_mut")
+  !versioned(base="1.0.0", new="1.0.0")
+  cor index_mut(&mut self, index: USize) -> Indexed[&mut T or None] { }
 }
 
 sup [T, A: Alloc] RawBuf[T, A] ext IndexRef[T, USize] {
-    !intrinsic(name="std.mem.raw_buf.RawBuf.index_ref")
-    !versioned(base="1.0.0", new="1.0.0")
-    cor index_ref(&self, index: USize) -> Indexed[&T or None] { }
+  !intrinsic(name="std.mem.raw_buf.RawBuf.index_ref")
+  !versioned(base="1.0.0", new="1.0.0")
+  cor index_ref(&self, index: USize) -> Indexed[&T or None] { }
 }
 
 sup [T, A: Alloc] RawBuf[T, A] ext Drop {
-    !versioned(base="1.0.0", new="1.0.0")
-    fun drop(self) -> Void {
-        # The `del` function frees the buffer's memory when the `RawBuf` is dropped. It returns the current allocation
-        # to the allocator sized for the current `capacity`, which `try_capacity_grow_to` and `try_capacity_shrink_to`
-        # keep in step with the real allocation size. If the buffer occupies no bytes (an empty buffer, or a zero-sized
-        # type) its pointer is a dangling sentinel and there is nothing to free, so the deallocation is skipped. It does
-        # not drop the elements: a `RawBuf` is not length-aware and does not know which slots are initialized, so
-        # dropping the live elements is the responsibility of the length-aware owner (`Vec`), which must do so before
-        # its buffer is dropped.
-        # @ret: Nothing; this is invoked for its cleanup side effect when a `RawBuf` is destroyed.
+  !versioned(base="1.0.0", new="1.0.0")
+  fun drop(self) -> Void {
+    # The `del` function frees the buffer's memory when the `RawBuf` is dropped. It returns the current allocation to
+    # the allocator sized for the current `capacity`, which `try_capacity_grow_to` and `try_capacity_shrink_to` keep in
+    # step with the real allocation size. If the buffer occupies no bytes (an empty buffer, or a zero-sized type) its
+    # pointer is a dangling sentinel and there is nothing to free, so the deallocation is skipped. It does not drop the
+    # elements: a `RawBuf` is not length-aware and does not know which slots are initialized, so dropping the live
+    # elements is the responsibility of the length-aware owner (`Vec`), which must do so before its buffer is dropped.
+    # @ret: Nothing; this is invoked for its cleanup side effect when a `RawBuf` is destroyed.
 
-        let RawBuf[T, A](ptr, capacity, alloc) = self
-        case Self::is_storage_free(capacity) { ret }
-        alloc.deallocate_array(ptr, capacity)
-    }
+    let Self(ptr, capacity, alloc) = self
+    defer std::mem::ops::drop(alloc)
+    case Self::is_storage_free(capacity) { ret }
+    alloc.deallocate_array(ptr, capacity)
+  }
 }

@@ -6,39 +6,39 @@ use std::void::Void
 cls Annotation { }
 
 sup Annotation {
-    !public cmp function: S32 = 1
-    !public cmp method: S32 = 2
-    !public cmp ext_method: S32 = 4
-    !public cmp class: S32 = 8
-    !public cmp new_type: S32 = 16
-    !public cmp constant: S32 = 32
+  !public cmp function: S32 = 1
+  !public cmp method: S32 = 2
+  !public cmp ext_method: S32 = 4
+  !public cmp class: S32 = 8
+  !public cmp new_type: S32 = 16
+  !public cmp constant: S32 = 32
 
-    !public cmp all: S32 = Self::function | Self::method | Self::ext_method | Self::class | Self::new_type | Self::constant
-    !public cmp mod: S32 = Self::function | Self::method | Self::class | Self::new_type | Self::constant
+  !public cmp all: S32 = Self::function | Self::method | Self::ext_method | Self::class | Self::new_type | Self::constant
+  !public cmp mod: S32 = Self::function | Self::method | Self::class | Self::new_type | Self::constant
 }
 
 !public
 !annotation(target=Annotation::function)
 !versioned(base="1.0.0", new="1.0.0")
 cmp fun annotation(target: S32) -> Void {
-    # The master annotation that is used to define other annotations. This annotation is used to indicate that the
-    # annotated item is an annotation, and it specifies the target of the annotation - a function, because all
-    # annotations are defined as a function.
-    # @let target: The valid AST types that the annotation can be applied to. This is a bitmask of the `Annotation` enum
-    # values, which can be combined using the bitwise OR operator. For example, using the target of
-    # `Annotation::function | Annotation::method` indicates that the annotation can be applied to both functions and
-    # sup-methods, but not overriding methods; this would require the addiotnation `| Annotation::ext_method`.
+  # The master annotation that is used to define other annotations. This annotation is used to indicate that the
+  # annotated item is an annotation, and it specifies the target of the annotation - a function, because all annotations
+  # are defined as a function.
+  # @let target: The valid AST types that the annotation can be applied to. This is a bitmask of the `Annotation` enum
+  # values, which can be combined using the bitwise OR operator. For example, using the target of `Annotation::function
+  # | Annotation::method` indicates that the annotation can be applied to both functions and sup-methods, but not
+  # overriding methods; this would require the addiotnation `| Annotation::ext_method`.
 }
 
 !public
 !annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
 !versioned(base="1.0.0", new="1.0.0")
 cmp fun intrinsic(name: &StrView = "") -> Void {
-    # The `intrinsic` annotation is used to indicate that the annotated function is an intrinsic function, which means
-    # that it is a built-in function provided by the compiler or runtime environment. Intrinsic functions are
-    # implemented in LLVM IR, and are optimized for performance. They may provide access to special hardware features or
-    # perform operations that are not available in the standard library.
-    # @let ?name: The name of the intrinsic, that the compiler wilkl match and inject IR for.
+  # The `intrinsic` annotation is used to indicate that the annotated function is an intrinsic function, which means
+  # that it is a built-in function provided by the compiler or runtime environment. Intrinsic functions are implemented
+  # in LLVM IR, and are optimized for performance. They may provide access to special hardware features or perform
+  # operations that are not available in the standard library.
+  # @let ?name: The name of the intrinsic, that the compiler wilkl match and inject IR for.
 }
 
 !public
@@ -100,22 +100,22 @@ cmp fun sealed() -> Void { }
 !annotation(target=Annotation::function)
 !versioned(base="1.0.0", new="1.0.0")
 cmp fun test(group: &StrView = "") -> Void {
-    # The `test` annotation marks a function as a unit test. Such a function is discovered by "spp test", which
-    # generates the entry point that runs it, and cannot be called from s++ code. It must be a plain `fun` taking no
-    # parameters and returning `Void`.
-    # @let ?group: The group the test is reported and filtered under. Defaults to the module the test is written in.
+  # The `test` annotation marks a function as a unit test. Such a function is discovered by "spp test", which generates
+  # the entry point that runs it, and cannot be called from s++ code. It must be a plain `fun` taking no parameters and
+  # returning `Void`.
+  # @let ?group: The group the test is reported and filtered under. Defaults to the module the test is written in.
 }
 
 !public
 !annotation(target=Annotation::all)
 !versioned(base="1.0.0", new="1.0.0")
 cmp fun versioned(base: &StrView, new: &StrView) -> Void {
-    # The `versioned` annotation is used to indicate the version that a function/class etc was introduced into the
-    # standard library, and when it was last updated. For example, `!versioned(base="1.0.0", new="1.1.0")` indicates
-    # that the annotated item was introduced in version `1.0.0` of the standard library, and was last updated in version
-    # `1.1.0`. This information can be used by tools and documentation generators to provide versioning information
-    # about the standard library.
-    # @let base: A string that represents the version of the STL when the annotated item was first introduced.
-    # @let new: A string that represents the version of the STL when the annotated item was last updated. This can be
-    # the same as `base` if the item has not been updated since it was introduced.
+  # The `versioned` annotation is used to indicate the version that a function/class etc was introduced into the
+  # standard library, and when it was last updated. For example, `!versioned(base="1.0.0", new="1.1.0")` indicates that
+  # the annotated item was introduced in version `1.0.0` of the standard library, and was last updated in version
+  # `1.1.0`. This information can be used by tools and documentation generators to provide versioning information about
+  # the standard library.
+  # @let base: A string that represents the version of the STL when the annotated item was first introduced.
+  # @let new: A string that represents the version of the STL when the annotated item was last updated. This can be the
+  # same as `base` if the item has not been updated since it was introduced.
 }

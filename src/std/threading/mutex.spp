@@ -221,7 +221,6 @@ sup [T] Mutex[T] {
 }
 
 sup [T: Drop] Mutex[T] ext Drop {
-  !public
   !versioned(base="1.0.0", new="1.0.0")
   fun drop(self) -> Void {
     # Destroy the mutex using the sppc threading API, and discard the value it was guarding. The guarded value has to go

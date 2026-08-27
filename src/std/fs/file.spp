@@ -403,7 +403,6 @@ sup File ext Drop {
   # at the outcome; anything that wants to know whether the close succeeded should call `close` directly, which is the
   # same operation with the result handed back.
 
-  !public
   !versioned(base="1.0.0", new="1.0.0")
   fun drop(self) -> Void {
     # Written out rather than routed through `close`, because that hands back a `Res` which would itself have to be

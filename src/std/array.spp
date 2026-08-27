@@ -32,90 +32,90 @@ use std::ops::iter::RevIterRef
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls Arr[T, cmp n: USize] {
-    # A fixed size, inline array of element type T. The length is a compiletime constant, so storage lives on the stack
-    # with no heap allocations, and therefore no allocation generic type parameter. The layout is statically known. All
-    # methods for the array type are intrinsic as the Arr[T, n] type lowers to the llvm array type, where all methods
-    # are defined in llvm directly.
-    # @type T: The type of elements stored in the array. This is a generic type parameter that can be any type, there
-    # are no constraints.
-    # @cmp n: The length of the array. This is a compile-time constant that determines how many elements the array can
-    # hold. The length is fixed and cannot be changed after the array is created.
+  # A fixed size, inline array of element type T. The length is a compiletime constant, so storage lives on the stack
+  # with no heap allocations, and therefore no allocation generic type parameter. The layout is statically known. All
+  # methods for the array type are intrinsic as the Arr[T, n] type lowers to the llvm array type, where all methods are
+  # defined in llvm directly.
+  # @type T: The type of elements stored in the array. This is a generic type parameter that can be any type, there are
+  # no constraints.
+  # @cmp n: The length of the array. This is a compile-time constant that determines how many elements the array can
+  # hold. The length is fixed and cannot be changed after the array is created.
 }
 
 sup [T, cmp n: USize] Arr[T, n] {
-    !public
-    !intrinsic(name="std.array.Arr.new")
-    !versioned(base="1.0.0", new="1.0.0")
-    fun new() -> Self { }
+  !public
+  !intrinsic(name="std.array.Arr.new")
+  !versioned(base="1.0.0", new="1.0.0")
+  fun new() -> Self { }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun fill(&mut self, val: T) -> Void {
-        # std::mem::ops::mem_set(&mut self.ptr, n, val) TODO
-        std::mem::ops::drop(val) # TODO ^^^
-    }
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun fill(&mut self, val: T) -> Void {
+    # std::mem::ops::mem_set(&mut self.ptr, n, val) TODO
+    std::mem::ops::drop(val) # TODO ^^^
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun swap(&mut self, i: USize, j: USize) -> Void {
-        std::mem::ops::swap(self[mut i], self[mut j])
-    }
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun swap(&mut self, i: USize, j: USize) -> Void {
+    std::mem::ops::swap(self[mut i], self[mut j])
+  }
 }
 
 sup [T: Copy, cmp n: USize] Arr[T, n] {
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun new_filled(val: T) -> Self {
-        let mut arr = Self::new()
-        arr.fill(val)
-        ret arr
-    }
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun new_filled(val: T) -> Self {
+    let mut arr = Self::new()
+    arr.fill(val)
+    ret arr
+  }
 }
 
 sup [T: Copy, cmp n: USize] Arr[T, n] ext Copy { }
 
 sup [T, cmp n: USize] Arr[T, n] ext IterMov[T] {
-    !intrinsic(name="std.array.Arr.iter_mov")
-    !versioned(base="1.0.0", new="1.0.0")
-    cor iter_mov(self) -> Iterator[T] { }
+  !intrinsic(name="std.array.Arr.iter_mov")
+  !versioned(base="1.0.0", new="1.0.0")
+  cor iter_mov(self) -> Iterator[T] { }
 }
 
 sup [T, cmp n: USize] Arr[T, n] ext RevIterMov[T] {
-    !intrinsic(name="std.array.Arr.reverse_iter_mov")
-    !versioned(base="1.0.0", new="1.0.0")
-    cor reverse_iter_mov(self) -> Iterator[T] { }
+  !intrinsic(name="std.array.Arr.reverse_iter_mov")
+  !versioned(base="1.0.0", new="1.0.0")
+  cor reverse_iter_mov(self) -> Iterator[T] { }
 }
 
 sup [T, cmp n: USize] Arr[T, n] ext Eq {
-    !versioned(base="1.0.0", new="1.0.0")
-    fun eq(&self, that: &Self) -> Bool {
-        # Use the `sppc::memcpy` function to compare the memory of the two arrays. This is a fast and efficient way to
-        # check for equality, as it compares the raw bytes of the arrays directly.
-        # @let that: The other array to compare against. This is a reference to another instance of the same array type.
-        # @ret: A boolean value indicating whether the two arrays are equal.
+  !versioned(base="1.0.0", new="1.0.0")
+  fun eq(&self, that: &Self) -> Bool {
+    # Use the `sppc::memcpy` function to compare the memory of the two arrays. This is a fast and efficient way to check
+    # for equality, as it compares the raw bytes of the arrays directly.
+    # @let that: The other array to compare against. This is a reference to another instance of the same array type.
+    # @ret: A boolean value indicating whether the two arrays are equal.
 
-        ret std::mem::ops::mem_cmp(&self.ptr, &that.ptr, n * std::mem::ops::size_of[T]()) == 0
-    }
+    ret std::mem::ops::mem_cmp(&self.ptr, &that.ptr, n * std::mem::ops::size_of[T]()) == 0
+  }
 
-    !versioned(base="1.0.0", new="1.0.0")
-    fun ne(&self, that: &Self) -> Bool {
-        # @let that: The other array to compare against. This is a reference to another instance of the same array type.
-        # @ret: A boolean value indicating whether the two arrays are not equal.
+  !versioned(base="1.0.0", new="1.0.0")
+  fun ne(&self, that: &Self) -> Bool {
+    # @let that: The other array to compare against. This is a reference to another instance of the same array type.
+    # @ret: A boolean value indicating whether the two arrays are not equal.
 
-        ret std::mem::ops::mem_cmp(&self.ptr, &that.ptr, n * std::mem::ops::size_of[T]()) != 0
-    }
+    ret std::mem::ops::mem_cmp(&self.ptr, &that.ptr, n * std::mem::ops::size_of[T]()) != 0
+  }
 }
 
 sup [T, cmp n: USize] Arr[T, n] ext FwdMut[View[T]] {
-    !intrinsic(name="std.array.Arr.fwd_mut")
-    !versioned(base="1.0.0", new="1.0.0")
-    cor fwd_mut(&mut self) -> GenOnce[&mut View[T]] { }
+  !intrinsic(name="std.array.Arr.fwd_mut")
+  !versioned(base="1.0.0", new="1.0.0")
+  cor fwd_mut(&mut self) -> GenOnce[&mut View[T]] { }
 }
 
 sup [T, cmp n: USize] Arr[T, n] ext FwdRef[View[T]] {
-    !intrinsic(name="std.array.Arr.fwd_ref")
-    !versioned(base="1.0.0", new="1.0.0")
-    cor fwd_ref(&self) -> GenOnce[&View[T]] { }
+  !intrinsic(name="std.array.Arr.fwd_ref")
+  !versioned(base="1.0.0", new="1.0.0")
+  cor fwd_ref(&self) -> GenOnce[&View[T]] { }
 }
 
 type HeapArr[T, cmp n: USize, A: Alloc] = Single[Arr[T, n], A]

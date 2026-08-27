@@ -485,12 +485,11 @@ sup [A: Alloc] Str[A] ext From[Char] {
 }
 
 sup [A: Alloc] Str[A] ext Drop {
-    # A string owns the byte vector backing it, so discarding one discards that.
+  # A string owns the byte vector backing it, so discarding one discards that.
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun drop(self) -> Void {
-        let Str[A](bytes) = self
-        bytes.drop()
-    }
+  !versioned(base="1.0.0", new="1.0.0")
+  fun drop(self) -> Void {
+    let Str[A](bytes) = self
+    bytes.drop()
+  }
 }

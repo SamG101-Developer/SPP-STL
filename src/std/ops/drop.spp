@@ -4,20 +4,20 @@ use std::void::Void
 
 !public
 cls Drop {
-    # The `Drop` class marks a type as having a way to discard a value of it without saying anything about what the
-    # value was for. Ownership is linear, so a value must be used exactly once; generic code holding a `T` it has to
-    # get rid of has no method of its own to call, and `Drop` is what gives it one. Concrete resource types should
-    # also offer a named, fallible consumer -- `close`, `destroy`, `free` -- and keep `drop` as the "discard it, I am
-    # not checking" path. It takes no type parameters, as the behaviour operates solely on the instance.
+  # The `Drop` class marks a type as having a way to discard a value of it without saying anything about what the value
+  # was for. Ownership is linear, so a value must be used exactly once; generic code holding a `T` it has to get rid of
+  # has no method of its own to call, and `Drop` is what gives it one. Concrete resource types should also offer a
+  # named, fallible consumer -- `close`, `destroy`, `free` -- and keep `drop` as the "discard it, I am not checking"
+  # path. It takes no type parameters, as the behaviour operates solely on the instance.
 }
 
 sup Drop {
-    !public
-    !abstract_method
-    fun drop(self) -> Void {
-        # The `drop` method discards a value, releasing whatever it holds. It takes `self` **by move**, not by borrow:
-        # that is the point of it, because consuming the value is what discharges its linear obligation. It is an
-        # ordinary method, called explicitly, and is never inserted by the compiler. Any failure the release runs into
-        # is swallowed; a caller that needs to know should call the type's named consumer instead.
-    }
+  !public
+  !abstract_method
+  fun drop(self) -> Void {
+    # The `drop` method discards a value, releasing whatever it holds. It takes `self` **by move**, not by borrow: that
+    # is the point of it, because consuming the value is what discharges its linear obligation. It is an ordinary
+    # method, called explicitly, and is never inserted by the compiler. Any failure the release runs into is swallowed;
+    # a caller that needs to know should call the type's named consumer instead.
+  }
 }

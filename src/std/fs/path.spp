@@ -551,7 +551,6 @@ sup Path ext Drop {
   # nearly all of its methods borrow - so it is discarded by the code that made it rather than swallowed by whatever it
   # is handed to.
 
-  !public
   !versioned(base="1.0.0", new="1.0.0")
   fun drop(self) -> Void {
     let Path(inner) = self

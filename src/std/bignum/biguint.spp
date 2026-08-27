@@ -92,9 +92,8 @@ sup BigUInt {
 
 sup BigUInt ext Clone {
     fun clone(&self) -> Self {
-        let mut val = BigUInt()
-        val.data = self.data
-        ret val
+        # Cloned, not moved: "self" is a shared borrow, so the digits belong to whoever lent them.
+        ret BigUInt(data=self.data.clone())
     }
 }
 
@@ -445,7 +444,6 @@ sup BigUInt ext std::ops::ord::Ord {
 sup BigUInt ext std::ops::drop::Drop {
     # A `BigUInt` owns the vector holding its digits, so discarding one discards that.
 
-    !public
     fun drop(self) -> Void {
         let BigUInt(data) = self
         data.drop()

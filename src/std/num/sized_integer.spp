@@ -49,470 +49,470 @@ cls SizedInteger[cmp w: U32, cmp signed: Bool] { }
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Integer { }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Copy {
-    # All SizedInteger types are Copy, as they are all fixed size and can be copied by value. This is a fundamental
-    # property of the type, and allows for efficient copying and passing of values without the need for heap allocation
-    # or reference counting.
+  # All SizedInteger types are Copy, as they are all fixed size and can be copied by value. This is a fundamental
+  # property of the type, and allows for efficient copying and passing of values without the need for heap allocation or
+  # reference counting.
 }
 
 cmp log_10_lookup_table: [U32; 256_uz] = [
-    0_u32, 0_u32, 0_u32, 0_u32, 1_u32, 1_u32, 1_u32, 2_u32, 2_u32, 2_u32, 3_u32, 3_u32, 3_u32, 3_u32, 4_u32, 4_u32,
-    4_u32, 5_u32, 5_u32, 5_u32, 6_u32, 6_u32, 6_u32, 6_u32, 7_u32, 7_u32, 7_u32, 8_u32, 8_u32, 8_u32, 9_u32, 9_u32,
-    9_u32, 10_u32, 10_u32, 10_u32, 10_u32, 11_u32, 11_u32, 11_u32, 12_u32, 12_u32, 12_u32, 13_u32, 13_u32, 13_u32, 13_u32, 14_u32,
-    14_u32, 14_u32, 15_u32, 15_u32, 15_u32, 16_u32, 16_u32, 16_u32, 16_u32, 17_u32, 17_u32, 17_u32, 18_u32, 18_u32, 18_u32, 19_u32,
-    19_u32, 19_u32, 19_u32, 20_u32, 20_u32, 20_u32, 21_u32, 21_u32, 21_u32, 22_u32, 22_u32, 22_u32, 22_u32, 23_u32, 23_u32, 23_u32,
-    24_u32, 24_u32, 24_u32, 25_u32, 25_u32, 25_u32, 25_u32, 26_u32, 26_u32, 26_u32, 27_u32, 27_u32, 27_u32, 28_u32, 28_u32, 28_u32,
-    28_u32, 29_u32, 29_u32, 29_u32, 30_u32, 30_u32, 30_u32, 31_u32, 31_u32, 31_u32, 31_u32, 32_u32, 32_u32, 32_u32, 33_u32, 33_u32,
-    33_u32, 34_u32, 34_u32, 34_u32, 34_u32, 35_u32, 35_u32, 35_u32, 36_u32, 36_u32, 36_u32, 37_u32, 37_u32, 37_u32, 37_u32, 38_u32,
-    38_u32, 38_u32, 39_u32, 39_u32, 39_u32, 40_u32, 40_u32, 40_u32, 40_u32, 41_u32, 41_u32, 41_u32, 42_u32, 42_u32, 42_u32, 43_u32,
-    43_u32, 43_u32, 43_u32, 44_u32, 44_u32, 44_u32, 45_u32, 45_u32, 45_u32, 46_u32, 46_u32, 46_u32, 46_u32, 47_u32, 47_u32, 47_u32,
-    48_u32, 48_u32, 48_u32, 49_u32, 49_u32, 49_u32, 49_u32, 50_u32, 50_u32, 50_u32, 51_u32, 51_u32, 51_u32, 52_u32, 52_u32, 52_u32,
-    52_u32, 53_u32, 53_u32, 53_u32, 54_u32, 54_u32, 54_u32, 55_u32, 55_u32, 55_u32, 55_u32, 56_u32, 56_u32, 56_u32, 57_u32, 57_u32,
-    57_u32, 58_u32, 58_u32, 58_u32, 59_u32, 59_u32, 59_u32, 59_u32, 60_u32, 60_u32, 60_u32, 61_u32, 61_u32, 61_u32, 62_u32, 62_u32,
-    62_u32, 62_u32, 63_u32, 63_u32, 63_u32, 64_u32, 64_u32, 64_u32, 65_u32, 65_u32, 65_u32, 65_u32, 66_u32, 66_u32, 66_u32, 67_u32,
-    67_u32, 67_u32, 68_u32, 68_u32, 68_u32, 69_u32, 69_u32, 69_u32, 69_u32, 70_u32, 70_u32, 70_u32, 71_u32, 71_u32, 71_u32, 72_u32,
-    72_u32, 72_u32, 72_u32, 73_u32, 73_u32, 73_u32, 74_u32, 74_u32, 74_u32, 75_u32, 75_u32, 75_u32, 76_u32, 76_u32, 76_u32, 76_u32]
+  0_u32, 0_u32, 0_u32, 0_u32, 1_u32, 1_u32, 1_u32, 2_u32, 2_u32, 2_u32, 3_u32, 3_u32, 3_u32, 3_u32, 4_u32, 4_u32,
+  4_u32, 5_u32, 5_u32, 5_u32, 6_u32, 6_u32, 6_u32, 6_u32, 7_u32, 7_u32, 7_u32, 8_u32, 8_u32, 8_u32, 9_u32, 9_u32,
+  9_u32, 10_u32, 10_u32, 10_u32, 10_u32, 11_u32, 11_u32, 11_u32, 12_u32, 12_u32, 12_u32, 13_u32, 13_u32, 13_u32, 13_u32, 14_u32,
+  14_u32, 14_u32, 15_u32, 15_u32, 15_u32, 16_u32, 16_u32, 16_u32, 16_u32, 17_u32, 17_u32, 17_u32, 18_u32, 18_u32, 18_u32, 19_u32,
+  19_u32, 19_u32, 19_u32, 20_u32, 20_u32, 20_u32, 21_u32, 21_u32, 21_u32, 22_u32, 22_u32, 22_u32, 22_u32, 23_u32, 23_u32, 23_u32,
+  24_u32, 24_u32, 24_u32, 25_u32, 25_u32, 25_u32, 25_u32, 26_u32, 26_u32, 26_u32, 27_u32, 27_u32, 27_u32, 28_u32, 28_u32, 28_u32,
+  28_u32, 29_u32, 29_u32, 29_u32, 30_u32, 30_u32, 30_u32, 31_u32, 31_u32, 31_u32, 31_u32, 32_u32, 32_u32, 32_u32, 33_u32, 33_u32,
+  33_u32, 34_u32, 34_u32, 34_u32, 34_u32, 35_u32, 35_u32, 35_u32, 36_u32, 36_u32, 36_u32, 37_u32, 37_u32, 37_u32, 37_u32, 38_u32,
+  38_u32, 38_u32, 39_u32, 39_u32, 39_u32, 40_u32, 40_u32, 40_u32, 40_u32, 41_u32, 41_u32, 41_u32, 42_u32, 42_u32, 42_u32, 43_u32,
+  43_u32, 43_u32, 43_u32, 44_u32, 44_u32, 44_u32, 45_u32, 45_u32, 45_u32, 46_u32, 46_u32, 46_u32, 46_u32, 47_u32, 47_u32, 47_u32,
+  48_u32, 48_u32, 48_u32, 49_u32, 49_u32, 49_u32, 49_u32, 50_u32, 50_u32, 50_u32, 51_u32, 51_u32, 51_u32, 52_u32, 52_u32, 52_u32,
+  52_u32, 53_u32, 53_u32, 53_u32, 54_u32, 54_u32, 54_u32, 55_u32, 55_u32, 55_u32, 55_u32, 56_u32, 56_u32, 56_u32, 57_u32, 57_u32,
+  57_u32, 58_u32, 58_u32, 58_u32, 59_u32, 59_u32, 59_u32, 59_u32, 60_u32, 60_u32, 60_u32, 61_u32, 61_u32, 61_u32, 62_u32, 62_u32,
+  62_u32, 62_u32, 63_u32, 63_u32, 63_u32, 64_u32, 64_u32, 64_u32, 65_u32, 65_u32, 65_u32, 65_u32, 66_u32, 66_u32, 66_u32, 67_u32,
+  67_u32, 67_u32, 68_u32, 68_u32, 68_u32, 69_u32, 69_u32, 69_u32, 69_u32, 70_u32, 70_u32, 70_u32, 71_u32, 71_u32, 71_u32, 72_u32,
+  72_u32, 72_u32, 72_u32, 73_u32, 73_u32, 73_u32, 74_u32, 74_u32, 74_u32, 75_u32, 75_u32, 75_u32, 76_u32, 76_u32, 76_u32, 76_u32]
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Eq {
-    !always_inline
-    !versioned(base="1.0.0", new="1.0.0")
-    cmp fun eq(&self, that: &Self) -> Bool {
-        ret intrinsics::eq(self, that)
-    }
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun eq(&self, that: &Self) -> Bool {
+    ret intrinsics::eq(self, that)
+  }
 
-    !always_inline
-    !versioned(base="1.0.0", new="1.0.0")
-    cmp fun ne(&self, that: &Self) -> Bool {
-        ret intrinsics::ne(self, that)
-    }
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun ne(&self, that: &Self) -> Bool {
+    ret intrinsics::ne(self, that)
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitAnd {
-    !always_inline
-    !versioned(base="1.0.0", new="1.0.0")
-    cmp fun bit_and(self, that: Self) -> Self {
-        ret intrinsics::bit_and(self, that)
-    }
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun bit_and(self, that: Self) -> Self {
+    ret intrinsics::bit_and(self, that)
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitAndAssign {
-    !always_inline
-    !versioned(base="1.0.0", new="1.0.0")
-    cmp fun bit_and_assign(&mut self, that: Self) -> Void {
-        intrinsics::bit_and_assign(self, that)
-    }
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun bit_and_assign(&mut self, that: Self) -> Void {
+    intrinsics::bit_and_assign(self, that)
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitIor {
-    !always_inline
-    !versioned(base="1.0.0", new="1.0.0")
-    cmp fun bit_ior(self, that: Self) -> Self {
-        ret intrinsics::bit_ior(self, that)
-    }
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun bit_ior(self, that: Self) -> Self {
+    ret intrinsics::bit_ior(self, that)
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitIorAssign {
-    !always_inline
-    !versioned(base="1.0.0", new="1.0.0")
-    cmp fun bit_ior_assign(&mut self, that: Self) -> Void {
-        intrinsics::bit_ior_assign(self, that)
-    }
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun bit_ior_assign(&mut self, that: Self) -> Void {
+    intrinsics::bit_ior_assign(self, that)
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitXor {
-    !always_inline
-    !versioned(base="1.0.0", new="1.0.0")
-    cmp fun bit_xor(self, that: Self) -> Self {
-        ret intrinsics::bit_xor(self, that)
-    }
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun bit_xor(self, that: Self) -> Self {
+    ret intrinsics::bit_xor(self, that)
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitXorAssign {
-    !always_inline
-    !versioned(base="1.0.0", new="1.0.0")
-    cmp fun bit_xor_assign(&mut self, that: Self) -> Void {
-        intrinsics::bit_xor_assign(self, that)
-    }
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun bit_xor_assign(&mut self, that: Self) -> Void {
+    intrinsics::bit_xor_assign(self, that)
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitShl[Rhs=U32] {
-    !always_inline
-    !versioned(base="1.0.0", new="1.0.0")
-    cmp fun bit_shl(self, that: U32) -> Self {
-        ret intrinsics::bit_shl(self, that)
-    }
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun bit_shl(self, that: U32) -> Self {
+    ret intrinsics::bit_shl(self, that)
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitShlAssign[Rhs=U32] {
-    !always_inline
-    !versioned(base="1.0.0", new="1.0.0")
-    cmp fun bit_shl_assign(&mut self, that: U32) -> Void {
-        intrinsics::bit_shl_assign(self, that)
-    }
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun bit_shl_assign(&mut self, that: U32) -> Void {
+    intrinsics::bit_shl_assign(self, that)
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitShr[Rhs=U32] {
-    !always_inline
-    !versioned(base="1.0.0", new="1.0.0")
-    cmp fun bit_shr(self, that: U32) -> Self {
-        ret intrinsics::bit_shr(self, that)
-    }
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun bit_shr(self, that: U32) -> Self {
+    ret intrinsics::bit_shr(self, that)
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitShrAssign[Rhs=U32] {
-    !always_inline
-    !versioned(base="1.0.0", new="1.0.0")
-    cmp fun bit_shr_assign(&mut self, that: U32) -> Void {
-        intrinsics::bit_shr_assign(self, that)
-    }
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun bit_shr_assign(&mut self, that: U32) -> Void {
+    intrinsics::bit_shr_assign(self, that)
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitNot {
-    !always_inline
-    !versioned(base="1.0.0", new="1.0.0")
-    cmp fun bit_not(self) -> Self {
-        ret intrinsics::bit_not(self)
-    }
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun bit_not(self) -> Self {
+    ret intrinsics::bit_not(self)
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitNotAssign {
-    !always_inline
-    !versioned(base="1.0.0", new="1.0.0")
-    cmp fun bit_not_assign(&mut self) -> Void {
-        intrinsics::bit_not_assign(self)
-    }
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun bit_not_assign(&mut self) -> Void {
+    intrinsics::bit_not_assign(self)
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Add {
-    !always_inline
-    !versioned(base="1.0.0", new="1.0.0")
-    cmp fun add(self, that: Self) -> Self {
-        ret intrinsics::add(self, that)
-    }
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun add(self, that: Self) -> Self {
+    ret intrinsics::add(self, that)
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext AddAssign {
-    !always_inline
-    !versioned(base="1.0.0", new="1.0.0")
-    cmp fun add_assign(&mut self, that: Self) -> Void {
-        intrinsics::add_assign(self, that)
-    }
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun add_assign(&mut self, that: Self) -> Void {
+    intrinsics::add_assign(self, that)
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Sub {
-    !always_inline
-    !versioned(base="1.0.0", new="1.0.0")
-    cmp fun sub(self, that: Self) -> Self {
-        ret intrinsics::sub(self, that)
-    }
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun sub(self, that: Self) -> Self {
+    ret intrinsics::sub(self, that)
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext SubAssign {
-    !always_inline
-    !versioned(base="1.0.0", new="1.0.0")
-    cmp fun sub_assign(&mut self, that: Self) -> Void {
-        intrinsics::sub_assign(self, that)
-    }
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun sub_assign(&mut self, that: Self) -> Void {
+    intrinsics::sub_assign(self, that)
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Mul {
-    !always_inline
-    !versioned(base="1.0.0", new="1.0.0")
-    cmp fun mul(self, that: Self) -> Self {
-        ret intrinsics::mul(self, that)
-    }
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun mul(self, that: Self) -> Self {
+    ret intrinsics::mul(self, that)
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext MulAssign {
-    !always_inline
-    !versioned(base="1.0.0", new="1.0.0")
-    cmp fun mul_assign(&mut self, that: Self) -> Void {
-        intrinsics::mul_assign(self, that)
-    }
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun mul_assign(&mut self, that: Self) -> Void {
+    intrinsics::mul_assign(self, that)
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext From[Bool] {
-    !always_inline
-    !versioned(base="1.0.0", new="1.0.0")
-    fun from(that: Bool) -> Self {
-        # The `from` method defines how to convert a boolean value to an unsigned integer type of potentially different
-        # sizes. The conversion is performed by mapping the boolean value to an unsigned integer representation. The
-        # following mapping is used:
-        # - If the boolean value is `true`, it is converted to the unsigned integer value `1`.
-        # - If the boolean value is `false`, it is converted to the unsigned integer value `0`.
-        # This conversion is useful when a boolean value needs to be represented as an unsigned integer for various
-        # purposes, such as bit manipulation or arithmetic operations.
-        # @let that: The boolean value that is being converted to the unsigned integer type.
-        # @ret: The converted unsigned integer value of the target type, which will be either `1` for `true` or `0` for
-        # `false`.
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from(that: Bool) -> Self {
+    # The `from` method defines how to convert a boolean value to an unsigned integer type of potentially different
+    # sizes. The conversion is performed by mapping the boolean value to an unsigned integer representation. The
+    # following mapping is used:
+    # - If the boolean value is `true`, it is converted to the unsigned integer value `1`.
+    # - If the boolean value is `false`, it is converted to the unsigned integer value `0`.
+    # This conversion is useful when a boolean value needs to be represented as an unsigned integer for various
+    # purposes, such as bit manipulation or arithmetic operations.
+    # @let that: The boolean value that is being converted to the unsigned integer type.
+    # @ret: The converted unsigned integer value of the target type, which will be either `1` for `true` or `0` for
+    # `false`.
 
-        ret case that { Self::one() } else { Self::zero() }
-    }
+    ret case that { Self::one() } else { Self::zero() }
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool, cmp that_w: U32] SizedInteger[w, signed] ext From[SizedIntegerUnsigned[that_w]] {
-    # Converting from an unsigned integer of any width to an integer of this width. This is defined on the generic
-    # `SizedInteger[w, signed]` base rather than the signed/unsigned subtypes because the conversion is chosen entirely
-    # by the source (unsigned) width: the target's signedness never affects the result, so a single implementation
-    # serves both signed and unsigned targets.
+  # Converting from an unsigned integer of any width to an integer of this width. This is defined on the generic
+  # `SizedInteger[w, signed]` base rather than the signed/unsigned subtypes because the conversion is chosen entirely by
+  # the source (unsigned) width: the target's signedness never affects the result, so a single implementation serves
+  # both signed and unsigned targets.
 
-    !always_inline
-    !versioned(base="1.0.0", new="1.0.0")
-    fun from(that: SizedIntegerUnsigned[that_w]) -> Self {
-        # Convert the unsigned source value to this integer type. If this type is narrower than the source (w < that_w)
-        # the value is truncated; if it is wider (w > that_w) the value is zero-extended; if the widths match the bit
-        # pattern is reinterpreted unchanged.
-        # @let that: The unsigned integer value of the source type that is being converted.
-        # @ret: The converted integer value of this type.
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from(that: SizedIntegerUnsigned[that_w]) -> Self {
+    # Convert the unsigned source value to this integer type. If this type is narrower than the source (w < that_w) the
+    # value is truncated; if it is wider (w > that_w) the value is zero-extended; if the widths match the bit pattern is
+    # reinterpreted unchanged.
+    # @let that: The unsigned integer value of the source type that is being converted.
+    # @ret: The converted integer value of this type.
 
-        ret case w of {
-            < that_w { intrinsics::utrunc[Self](that) }
-            > that_w { intrinsics::uzext[Self](that) }
-            else { intrinsics::bit_cast[Self](that) }
-        }
+    ret case w of {
+      < that_w { intrinsics::utrunc[Self](that) }
+      > that_w { intrinsics::uzext[Self](that) }
+      else { intrinsics::bit_cast[Self](that) }
     }
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool, cmp that_w: U32] SizedInteger[w, signed] ext From[SizedIntegerSigned[that_w]] {
-    # Converting from a signed integer of any width to an integer of this width. This is defined on the generic
-    # `SizedInteger[w, signed]` base rather than the signed/unsigned subtypes because the conversion is chosen entirely
-    # by the source (signed) width: the target's signedness never affects the result, so a single implementation serves
-    # both signed and unsigned targets.
+  # Converting from a signed integer of any width to an integer of this width. This is defined on the generic
+  # `SizedInteger[w, signed]` base rather than the signed/unsigned subtypes because the conversion is chosen entirely by
+  # the source (signed) width: the target's signedness never affects the result, so a single implementation serves both
+  # signed and unsigned targets.
 
-    !always_inline
-    !versioned(base="1.0.0", new="1.0.0")
-    fun from(that: SizedIntegerSigned[that_w]) -> Self {
-        # Convert the signed source value to this integer type. If this type is narrower than the source (w < that_w)
-        # the value is truncated; if it is wider (w > that_w) the value is sign-extended to preserve the 2's complement
-        # representation; if the widths match the bit pattern is reinterpreted unchanged.
-        # @let that: The signed integer value of the source type that is being converted.
-        # @ret: The converted integer value of this type.
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from(that: SizedIntegerSigned[that_w]) -> Self {
+    # Convert the signed source value to this integer type. If this type is narrower than the source (w < that_w) the
+    # value is truncated; if it is wider (w > that_w) the value is sign-extended to preserve the 2's complement
+    # representation; if the widths match the bit pattern is reinterpreted unchanged.
+    # @let that: The signed integer value of the source type that is being converted.
+    # @ret: The converted integer value of this type.
 
-        ret case w of {
-            < that_w { intrinsics::strunc[Self](that) }
-            > that_w { intrinsics::szext[Self](that) }
-            else { intrinsics::bit_cast[Self](that) }
-        }
+    ret case w of {
+      < that_w { intrinsics::strunc[Self](that) }
+      > that_w { intrinsics::szext[Self](that) }
+      else { intrinsics::bit_cast[Self](that) }
     }
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool, cmp that_w: U32] SizedInteger[w, signed] ext From[SizedFloatingPoint[that_w]] {
-    # Converting from a floating point value of any width to an integer of this width. This is a value conversion (the
-    # floating point value is rounded toward zero), not a bit reinterpretation. The correct intrinsic depends on this
-    # integer's signedness, so the implementation dispatches on the base's `signed` compiletime parameter.
+  # Converting from a floating point value of any width to an integer of this width. This is a value conversion (the
+  # floating point value is rounded toward zero), not a bit reinterpretation. The correct intrinsic depends on this
+  # integer's signedness, so the implementation dispatches on the base's `signed` compiletime parameter.
 
-    !always_inline
-    !versioned(base="1.0.0", new="1.0.0")
-    fun from(that: SizedFloatingPoint[that_w]) -> Self {
-        # Convert the floating point source value to this integer type, truncating the fractional part (rounding toward
-        # zero). A signed target uses `fptosi`, an unsigned target uses `fptoui`; the result is reinterpreted as `Self`.
-        # @let that: The floating point value of the source type that is being converted.
-        # @ret: The converted integer value of this type.
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from(that: SizedFloatingPoint[that_w]) -> Self {
+    # Convert the floating point source value to this integer type, truncating the fractional part (rounding toward
+    # zero). A signed target uses `fptosi`, an unsigned target uses `fptoui`; the result is reinterpreted as `Self`.
+    # @let that: The floating point value of the source type that is being converted.
+    # @ret: The converted integer value of this type.
 
-        ret case signed {
-            intrinsics::bit_cast[Self](intrinsics::fptosi[w](that))
-        }
-        else {
-            intrinsics::bit_cast[Self](intrinsics::fptoui[w](that))
-        }
+    ret case signed {
+      intrinsics::bit_cast[Self](intrinsics::fptosi[w](that))
     }
+    else {
+      intrinsics::bit_cast[Self](intrinsics::fptoui[w](that))
+    }
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
-    !public
-    !inline
-    fun leading_zeros(self) -> U32 {
-        ret intrinsics::ctlz(self)
-    }
+  !public
+  !inline
+  fun leading_zeros(self) -> U32 {
+    ret intrinsics::ctlz(self)
+  }
 
-    !public
-    !inline
-    fun is_even(self) -> Bool {
-        ret self & Self::one() == Self::zero()
-    }
+  !public
+  !inline
+  fun is_even(self) -> Bool {
+    ret self & Self::one() == Self::zero()
+  }
 
-    !public
-    !inline
-    fun is_odd(self) -> Bool {
-        ret self & Self::one() != Self::zero()
-    }
+  !public
+  !inline
+  fun is_odd(self) -> Bool {
+    ret self & Self::one() != Self::zero()
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
-    !public
-    !inline
-    fun bit_shl_checked(self, that: U32) -> Opt[Self] {
-        case that >= w { ret None }
-        ret Some(val=intrinsics::bit_shl(self, that))
-    }
+  !public
+  !inline
+  fun bit_shl_checked(self, that: U32) -> Opt[Self] {
+    case that >= w { ret None }
+    ret Some(val=intrinsics::bit_shl(self, that))
+  }
 
-    !public
-    !inline
-    fun bit_shl_overflow(self, that: U32) -> (Self, Bool) {
-        ret (self.bit_shl_wrapping(that), that >= w)
-    }
+  !public
+  !inline
+  fun bit_shl_overflow(self, that: U32) -> (Self, Bool) {
+    ret (self.bit_shl_wrapping(that), that >= w)
+  }
 
-    !public
-    !inline
-    fun bit_shl_wrapping(self, that: U32) -> Self {
-        ret intrinsics::bit_shl(self, that & (w - 1_u32))
-    }
+  !public
+  !inline
+  fun bit_shl_wrapping(self, that: U32) -> Self {
+    ret intrinsics::bit_shl(self, that & (w - 1_u32))
+  }
 
-    !public
-    !inline
-    fun bit_shr_checked(self, that: U32) -> Opt[Self] {
-        case that >= w { ret None }
-        ret Some(val=intrinsics::bit_shr(self, that))
-    }
+  !public
+  !inline
+  fun bit_shr_checked(self, that: U32) -> Opt[Self] {
+    case that >= w { ret None }
+    ret Some(val=intrinsics::bit_shr(self, that))
+  }
 
-    !public
-    !inline
-    fun bit_shr_overflow(self, that: U32) -> (Self, Bool) {
-        ret (self.bit_shr_wrapping(that), that >= w)
-    }
+  !public
+  !inline
+  fun bit_shr_overflow(self, that: U32) -> (Self, Bool) {
+    ret (self.bit_shr_wrapping(that), that >= w)
+  }
 
-    !public
-    !inline
-    fun bit_shr_wrapping(self, that: U32) -> Self {
-        ret intrinsics::bit_shr(self, that & (w - 1_u32))
-    }
+  !public
+  !inline
+  fun bit_shr_wrapping(self, that: U32) -> Self {
+    ret intrinsics::bit_shr(self, that & (w - 1_u32))
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
-    !public
-    !inline
-    fun ilog(self, base: Self) -> U32 {
-        case self.ilog_checked(base) is Some[U32](val) { ret val }
-        abort("ilog: base must be a positive integer")
-    }
+  !public
+  !inline
+  fun ilog(self, base: Self) -> U32 {
+    case self.ilog_checked(base) is Some[U32](val) { ret val }
+    abort("ilog: base must be a positive integer")
+  }
 
-    !public
-    !inline
-    fun ilog2(self) -> U32 {
-        case self.ilog2_checked() is Some[U32](val) { ret val }
-        abort("ilog2: base must be a positive integer")
-    }
+  !public
+  !inline
+  fun ilog2(self) -> U32 {
+    case self.ilog2_checked() is Some[U32](val) { ret val }
+    abort("ilog2: base must be a positive integer")
+  }
 
-    !public
-    !inline
-    fun ilog10(self) -> U32 {
-        case self.ilog10_checked() is Some[U32](val) { ret val }
-        abort("ilog10: base must be a positive integer")
-    }
+  !public
+  !inline
+  fun ilog10(self) -> U32 {
+    case self.ilog10_checked() is Some[U32](val) { ret val }
+    abort("ilog10: base must be a positive integer")
+  }
 
-    !public
-    !inline
-    fun ilog_checked(self, base: Self) -> Opt[U32] {
-        # Todo: self <= 0 or base <= 1 should return None. Todo: cant use ord on this base type, so do bit checking.
-        ret Some(val=self.ilog2_checked()? / base.ilog2_checked()?)
-    }
+  !public
+  !inline
+  fun ilog_checked(self, base: Self) -> Opt[U32] {
+    # Todo: self <= 0 or base <= 1 should return None. Todo: cant use ord on this base type, so do bit checking.
+    ret Some(val=self.ilog2_checked()? / base.ilog2_checked()?)
+  }
 
-    !public
-    !inline
-    fun ilog2_checked(self) -> Opt[U32] {
-        # Todo: self <= 0 should return None. Todo: cant use ord on this base type, so do bit checking.
-        ret Some(val=w - 1_u32 - intrinsics::ctlz(self))
-    }
+  !public
+  !inline
+  fun ilog2_checked(self) -> Opt[U32] {
+    # Todo: self <= 0 should return None. Todo: cant use ord on this base type, so do bit checking.
+    ret Some(val=w - 1_u32 - intrinsics::ctlz(self))
+  }
 
-    !public
-    !inline
-    fun ilog10_checked(self) -> Opt[U32] {
-        # Todo: self <= 0 or base <= 1 should return None. Todo: cant use ord on this base type, so do bit checking.
-        # Todo: no clue if this is right, probably not.
-        case self.ilog2_checked() of {
-            is Some[U32](val as i) { ret Some(val=log_10_lookup_table.index_ref(U64::from(i))@) }
-        }
-        ret None()
+  !public
+  !inline
+  fun ilog10_checked(self) -> Opt[U32] {
+    # Todo: self <= 0 or base <= 1 should return None. Todo: cant use ord on this base type, so do bit checking. Todo:
+    # no clue if this is right, probably not.
+    case self.ilog2_checked() of {
+      is Some[U32](val as i) { ret Some(val=log_10_lookup_table.index_ref(U64::from(i))@) }
     }
+    ret None()
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
-    !public
-    !inline
-    !intrinsic(name="std.num.sized_integer.SizedInteger.two")
-    fun two() -> Self { }
+  !public
+  !inline
+  !intrinsic(name="std.num.sized_integer.SizedInteger.two")
+  fun two() -> Self { }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Zero {
-    !inline
-    !intrinsic(name="std.num.sized_integer.SizedInteger.zero")
-    !versioned(base="1.0.0", new="1.0.0")
-    cmp fun zero() -> Self { }
+  !inline
+  !intrinsic(name="std.num.sized_integer.SizedInteger.zero")
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun zero() -> Self { }
 
-    !inline
-    !intrinsic(name="std.num.sized_integer.SizedInteger.is_zero")
-    !versioned(base="1.0.0", new="1.0.0")
-    fun is_zero(&self) -> Bool { }
+  !inline
+  !intrinsic(name="std.num.sized_integer.SizedInteger.is_zero")
+  !versioned(base="1.0.0", new="1.0.0")
+  fun is_zero(&self) -> Bool { }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext One {
-    !inline
-    !intrinsic(name="std.num.sized_integer.SizedInteger.one")
-    !versioned(base="1.0.0", new="1.0.0")
-    cmp fun one() -> Self { }
+  !inline
+  !intrinsic(name="std.num.sized_integer.SizedInteger.one")
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun one() -> Self { }
 
-    !inline
-    !versioned(base="1.0.0", new="1.0.0")
-    fun is_one(&self) -> Bool {
-        ret self == Self::one()
-    }
+  !inline
+  !versioned(base="1.0.0", new="1.0.0")
+  fun is_one(&self) -> Bool {
+    ret self == Self::one()
+  }
 }
 
 sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
-    # Byte-array conversions for integers of any width. These are defined on the generic `SizedInteger[w, signed]` base
-    # so that both signed and unsigned integers of every width gain them, mirroring the standard integer APIs. Each
-    # function reads exactly `w / 8` bytes from the view; the view must contain at least that many bytes (indexing
-    # aborts otherwise), and any trailing bytes are ignored.
+  # Byte-array conversions for integers of any width. These are defined on the generic `SizedInteger[w, signed]` base so
+  # that both signed and unsigned integers of every width gain them, mirroring the standard integer APIs. Each function
+  # reads exactly `w / 8` bytes from the view; the view must contain at least that many bytes (indexing aborts
+  # otherwise), and any trailing bytes are ignored.
 
-    !public
-    !inline
-    !versioned(base="1.0.0", new="1.0.0")
-    fun from_le_bytes(bytes: &View[U8]) -> Self {
-        # Reconstruct an integer from its little-endian byte representation, where `bytes[0]` is the least-significant
-        # byte. The reconstruction is done purely with shifts and bitwise-or, so the produced value is independent of
-        # the host's endianness.
-        # @let bytes: A view over the little-endian byte representation of the integer (at least `w / 8` bytes).
-        # @ret: The reconstructed integer value.
+  !public
+  !inline
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from_le_bytes(bytes: &View[U8]) -> Self {
+    # Reconstruct an integer from its little-endian byte representation, where `bytes[0]` is the least-significant byte.
+    # The reconstruction is done purely with shifts and bitwise-or, so the produced value is independent of the host's
+    # endianness.
+    # @let bytes: A view over the little-endian byte representation of the integer (at least `w / 8` bytes).
+    # @ret: The reconstructed integer value.
 
-        let byte_count = w / 8_u32
-        let mut result = Self::zero()
-        let mut i = 0_u32
-        loop i < byte_count {
-            result |= Self::from(bytes[USize::from(i)]@) << (i * 8_u32)
-            i += 1_u32
-        }
-        ret result
+    let byte_count = w / 8_u32
+    let mut result = Self::zero()
+    let mut i = 0_u32
+    loop i < byte_count {
+      result |= Self::from(bytes[USize::from(i)]@) << (i * 8_u32)
+      i += 1_u32
     }
+    ret result
+  }
 
-    !public
-    !inline
-    !versioned(base="1.0.0", new="1.0.0")
-    fun from_be_bytes(bytes: &View[U8]) -> Self {
-        # Reconstruct an integer from its big-endian byte representation, where `bytes[0]` is the most-significant byte.
-        # The reconstruction is done purely with shifts and bitwise-or, so the produced value is independent of the
-        # host's endianness.
-        # @let bytes: A view over the big-endian byte representation of the integer (at least `w / 8` bytes).
-        # @ret: The reconstructed integer value.
+  !public
+  !inline
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from_be_bytes(bytes: &View[U8]) -> Self {
+    # Reconstruct an integer from its big-endian byte representation, where `bytes[0]` is the most-significant byte. The
+    # reconstruction is done purely with shifts and bitwise-or, so the produced value is independent of the host's
+    # endianness.
+    # @let bytes: A view over the big-endian byte representation of the integer (at least `w / 8` bytes).
+    # @ret: The reconstructed integer value.
 
-        let byte_count = w / 8_u32
-        let mut result = Self::zero()
-        let mut i = 0_u32
-        loop i < byte_count {
-            result |= Self::from(bytes[USize::from(i)]@) << ((byte_count - 1_u32 - i) * 8_u32)
-            i += 1_u32
-        }
-        ret result
+    let byte_count = w / 8_u32
+    let mut result = Self::zero()
+    let mut i = 0_u32
+    loop i < byte_count {
+      result |= Self::from(bytes[USize::from(i)]@) << ((byte_count - 1_u32 - i) * 8_u32)
+      i += 1_u32
     }
+    ret result
+  }
 
-    !public
-    !inline
-    !versioned(base="1.0.0", new="1.0.0")
-    fun from_ne_bytes(bytes: &View[U8]) -> Self {
-        # Reconstruct an integer from its native-endian byte representation, matching the in-memory layout of the
-        # target. Every target currently supported by S++ is little-endian, so this forwards to `from_le_bytes`. Todo:
-        # when a big-endian target is supported, dispatch here on the target's endianness.
-        # @let bytes: A view over the native-endian byte representation of the integer (at least `w / 8` bytes).
-        # @ret: The reconstructed integer value.
+  !public
+  !inline
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from_ne_bytes(bytes: &View[U8]) -> Self {
+    # Reconstruct an integer from its native-endian byte representation, matching the in-memory layout of the target.
+    # Every target currently supported by S++ is little-endian, so this forwards to `from_le_bytes`. Todo: when a
+    # big-endian target is supported, dispatch here on the target's endianness.
+    # @let bytes: A view over the native-endian byte representation of the integer (at least `w / 8` bytes).
+    # @ret: The reconstructed integer value.
 
-        ret Self::from_le_bytes(bytes)
-    }
+    ret Self::from_le_bytes(bytes)
+  }
 }
