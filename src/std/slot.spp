@@ -24,6 +24,7 @@ sup [T] Slot[T] {
     !versioned(base="1.0.0", new="1.0.0")
     fun set(&self, val: T) -> Void {
         let old = self.replace(val)
+        std::mem::ops::drop(old)
     }
 
     !public

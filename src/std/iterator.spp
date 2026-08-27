@@ -126,6 +126,7 @@ sup [T] Iterator[T] {
     # Only yield items until the specified count is reached.
     let mut index = 0_uz
     loop item in self {
+      defer std::mem::ops::drop(item)
       case index < count { gen item }
       else { exit }
       index += 1_uz
@@ -148,6 +149,7 @@ sup [T] Iterator[T] {
     # the predicate.
 
     # Only yield items that satisfy the predicate.
+    defer std::mem::ops::drop(predicate)
     loop item in self { case predicate(&item) { gen item } }
   }
 
@@ -169,6 +171,7 @@ sup [T] Iterator[T] {
 
     # Yield the results of applying the mapping function to
     # each item.
+    defer std::mem::ops::drop(f)
     loop item in self { gen f(item) }
   }
 
@@ -224,10 +227,15 @@ sup [T] Iterator[T] {
     # The iterator will collapse, and be consumed by this method, as it iterates through all the items to count them.
     # @ret: The number of items produced by the iterator.
 
+    defer std::mem::ops::drop(self)
+
     # Count the number of items by iterating through the entire
     # iterator and incrementing a counter for each item.
     let mut count = 0_uz
-    loop item in self { count += 1_uz }
+    loop item in self {
+      defer std::mem::ops::drop(item)
+      count += 1_uz
+    }
     ret count
   }
 
@@ -279,6 +287,8 @@ sup [T] Iterator[T] {
     # @ret: A boolean value that indicates whether the predicate function returns `true` for all items produced by the
     # iterator. The cumulative result of applying the predicate to all items.
 
+    defer std::mem::ops::drop(f)
+
     # Check if the predicate returns true for all items by iterating
     # through the entire iterator and applying the predicate to each
     # item, short-circuiting on a `false` result.
@@ -302,6 +312,8 @@ sup [T] Iterator[T] {
     # item produced by the original iterator, and will return `true` if the predicate returns `true` for any item.
     # @ret: A boolean value that indicates whether the predicate function returns `true` for at least one item produced
     # by the iterator. The cumulative result of applying the predicate to all items.
+
+    defer std::mem::ops::drop(f)
 
     # Check if the predicate returns true for any item by iterating
     # through the entire iterator and applying the predicate to each
@@ -424,6 +436,7 @@ sup [T: Clone] Iterator[T] {
     # a "buffer-and-clone" approach, as the generator will be
     # exhausted after the first iteration.
     let mut buffer = self.collect[Vec[T]]()
+    defer std::mem::ops::drop(buffer)
     loop true { gen with buffer.clone().iter_mov() }
   }
 }
