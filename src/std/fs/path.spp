@@ -468,9 +468,9 @@ sup Path {
     # "in" file is where the contents are coming from, and the "out"
     # file is where the contents are going to. Defer their closing.
     let file_in = File::open(&self, FileMode().read())?
-    defer file_in.close().map_err((e: StreamErr) { PathOtherErr })?
+    defer std::mem::ops::drop(file_in)
     let file_out = File::open(new_path, FileMode().write())?
-    defer file_out.close().map_err((e: StreamErr) { PathOtherErr })?
+    defer std::mem::ops::drop(file_out)
 
     # Run the sppc copyfile system call to do the actual file
     # logic, and handle the error with the final returned value
