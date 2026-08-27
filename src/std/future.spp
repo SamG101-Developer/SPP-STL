@@ -16,62 +16,66 @@ use std::ops::drop::Drop
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls Fut[T] {
-    # The `Fut[T]` future type wraps any type, whe a function is called as `async`. Because the `async` gets placed at
-    # the function call site rather than the definition, we are able to avoid the coloring problem, and remove function
-    # duplication for async vs async definitions. The compiler lowers async calls into `sppc::async` calls with auto
-    # `Fut[T]` wrapping. The handle from `sppc::async` is stored inside this future, to work with `await`.
-    # @type T: The type of the value that the future will eventually resolve to.
-    # @let handle: An integer identifier, cast from an internal task struct pointer from the internal async runtime
-    # written in `C`.
+  # The `Fut[T]` future type wraps any type, whe a function is called as `async`. Because the `async` gets placed at the
+  # function call site rather than the definition, we are able to avoid the coloring problem, and remove function
+  # duplication for async vs async definitions. The compiler lowers async calls into `sppc::async` calls with auto
+  # `Fut[T]` wrapping. The handle from `sppc::async` is stored inside this future, to work with `await`.
+  # @type T: The type of the value that the future will eventually resolve to.
+  # @let handle: An integer identifier, cast from an internal task struct pointer from the internal async runtime
+  # written in `C`.
 
-    !private handle: U64
+  !private handle: U64
 }
 
 sup [T] Fut[T] {
-    !private
-    !versioned(base="1.0.0", new="1.0.0")
-    fun async_[F: FunMov[(Ts), T], ..Ts](f: F, ..args: Ts) -> Self {
-        #
-        # @type F:
-        # @type Ts:
-        # @let f:
-        # @let ..args:
-        # @ret:
+  !private
+  !versioned(base="1.0.0", new="1.0.0")
+  fun async_[F: FunMov[(Ts), T], ..Ts](f: F, ..args: Ts) -> Self {
+    #
+    # @type F:
+    # @type Ts:
+    # @let f:
+    # @let ..args:
+    # @ret:
 
-        let mut handle = 0_u64
-        # let err = sppc::async_(&mut handle, f, ..args)
-        ret Self(handle)
-    }
+    let mut handle = 0_u64
+    # let err = sppc::async_(&mut handle, f, ..args)
+    std::mem::ops::drop(f) # TODO ^^^
+    std::mem::ops::drop(args) # TODO ^^^
+    ret Self(handle)
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun await(self) -> T {
-        # The `await` method is used to retrieve the resolved value of the future. This isn't typically used, because if
-        # an `async` function call needs to be waited on, it can just be called synchronously in the first place.
-        # However, if we fire off multiple `async` calls, we can use this method to wait on specific ones.
-        # @ret: The resolved value of the future. This method will block until the future has been resolved, at which
-        # point it will return the value of type `T` that the future resolves to. If the future is already resolved when
-        # this method is called, it will return the resolved value immediately without blocking.
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun await(self) -> T {
+    # The `await` method is used to retrieve the resolved value of the future. This isn't typically used, because if an
+    # `async` function call needs to be waited on, it can just be called synchronously in the first place. However, if
+    # we fire off multiple `async` calls, we can use this method to wait on specific ones.
+    # @ret: The resolved value of the future. This method will block until the future has been resolved, at which point
+    # it will return the value of type `T` that the future resolves to. If the future is already resolved when this
+    # method is called, it will return the resolved value immediately without blocking.
 
-        let val = NonNull[U8]::from_ptr(sppc::await(self.handle))
-            .expect("C async runtime failed")
-            .cast[T]()
-        ret val.read()
-    }
+    let Self(handle) = self
+    let val = NonNull[U8]::from_ptr(sppc::await(handle))
+      .expect("C async runtime failed")
+      .cast[T]()
+    ret val.read()
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun await_all(..futures: Fut[T]) -> Vec[T] {
-        # The `await_all` method is used to wait for multiple futures to resolve. It takes a variable number of futures
-        # as arguments and waits for all of them to resolve before returning. This is useful when you have multiple
-        # asynchronous operations that need to be completed before proceeding, and you want to wait for all of them to
-        # finish before moving on to the next step in your program. The method will block until all of the provided
-        # futures have resolved. Note that it doesn't wait for one, then the next, but rather waits for all of them to
-        # resolve in parallel, and returns when the last one has resolved.
-        # @let ..futures: A variable number of futures that we want to wait on. The method will block until all of these
-        # futures have resolved.
-        # @ret: A vector containing the resolved values of all the futures.
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun await_all(..futures: Fut[T]) -> Vec[T] {
+    # The `await_all` method is used to wait for multiple futures to resolve. It takes a variable number of futures as
+    # arguments and waits for all of them to resolve before returning. This is useful when you have multiple
+    # asynchronous operations that need to be completed before proceeding, and you want to wait for all of them to
+    # finish before moving on to the next step in your program. The method will block until all of the provided futures
+    # have resolved. Note that it doesn't wait for one, then the next, but rather waits for all of them to resolve in
+    # parallel, and returns when the last one has resolved.
+    # @let ..futures: A variable number of futures that we want to wait on. The method will block until all of these
+    # futures have resolved.
+    # @ret: A vector containing the resolved values of all the futures.
 
-        ret Vec[T]() # TODO
-    }
+    std::mem::ops::drop(futures) # TODO: Remove.
+    ret Vec[T]() # TODO ^^^
+  }
 }

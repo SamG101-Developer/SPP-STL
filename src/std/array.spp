@@ -52,6 +52,7 @@ sup [T, cmp n: USize] Arr[T, n] {
     !versioned(base="1.0.0", new="1.0.0")
     fun fill(&mut self, val: T) -> Void {
         # std::mem::ops::mem_set(&mut self.ptr, n, val) TODO
+        std::mem::ops::drop(val) # TODO ^^^
     }
 
     !public

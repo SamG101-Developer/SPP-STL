@@ -23,391 +23,394 @@ use std::ops::drop::Drop
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls FileMode {
-    # The `FileMode` type represents the mode in which a file should be opened. It contains boolean flags that indicate
-    # whether the file should be opened for reading, writing, appending, truncating, creating, or exclusively creating a
-    # new file. This type is used to specify the desired access mode when opening a file.
-    #
-    # @let is_read:
-    # @let is_write:
-    # @let is_append:
-    # @let is_truncate:
-    # @let is_create:
-    # @let is_exclusive:
-    # @todo: Look at re-using the "Flags" type here? issue is the C mapping.
+  # The `FileMode` type represents the mode in which a file should be opened. It contains boolean flags that indicate
+  # whether the file should be opened for reading, writing, appending, truncating, creating, or exclusively creating a
+  # new file. This type is used to specify the desired access mode when opening a file.
+  #
+  # @let is_read:
+  # @let is_write:
+  # @let is_append:
+  # @let is_truncate:
+  # @let is_create:
+  # @let is_exclusive:
+  # @todo: Look at re-using the "Flags" type here? issue is the C mapping.
 
-    !public is_read: Bool = false
-    !public is_write: Bool = false
-    !public is_append: Bool = false
-    !public is_truncate: Bool = false
-    !public is_create: Bool = false
-    !public is_exclusive: Bool = false
+  !public is_read: Bool = false
+  !public is_write: Bool = false
+  !public is_append: Bool = false
+  !public is_truncate: Bool = false
+  !public is_create: Bool = false
+  !public is_exclusive: Bool = false
 }
 
 sup FileMode ext Copy { }
 
 sup FileMode {
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun read(self, yes: Bool = true) -> Self {
-        # Marks the file mode as readable. This method sets the `is_read` flag to the specified boolean value.
-        # @let ?yes: A boolean value indicating whether the file should be marked as readable. Defaults to `true`.
-        # @ret: A new `FileMode` instance with the `is_read` flag set to the specified value, and all other flags
-        # unchanged.
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun read(self, yes: Bool = true) -> Self {
+    # Marks the file mode as readable. This method sets the `is_read` flag to the specified boolean value.
+    # @let ?yes: A boolean value indicating whether the file should be marked as readable. Defaults to `true`.
+    # @ret: A new `FileMode` instance with the `is_read` flag set to the specified value, and all other flags unchanged.
 
-        # Set the `is_read` flag to the specified value while
-        # preserving the other flags in the `FileMode` instance.
-        ret Self(is_read=yes, ..self)
-    }
+    # Set the `is_read` flag to the specified value while
+    # preserving the other flags in the `FileMode` instance.
+    ret Self(is_read=yes, ..self)
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun write(self, yes: Bool = true) -> Self {
-        # Marks the file mode as writable. This method sets the `is_write` flag to the specified boolean value.
-        # @let ?yes: A boolean value indicating whether the file should be marked as writable. Defaults to `true`.
-        # @ret: A new `FileMode` instance with the `is_write` flag set to the specified value, and all other flags
-        # unchanged.
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun write(self, yes: Bool = true) -> Self {
+    # Marks the file mode as writable. This method sets the `is_write` flag to the specified boolean value.
+    # @let ?yes: A boolean value indicating whether the file should be marked as writable. Defaults to `true`.
+    # @ret: A new `FileMode` instance with the `is_write` flag set to the specified value, and all other flags
+    # unchanged.
 
-        # Set the `is_write` flag to the specified value while
-        # preserving the other flags in the `FileMode` instance.
-        ret Self(is_write=yes, ..self)
-    }
+    # Set the `is_write` flag to the specified value while
+    # preserving the other flags in the `FileMode` instance.
+    ret Self(is_write=yes, ..self)
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun append(self, yes: Bool = true) -> Self {
-        # Marks the file mode as appendable. This method sets the `is_append` flag to the specified boolean value.
-        # @let ?yes: A boolean value indicating whether the file should be marked as appendable. Defaults to `true`.
-        # @ret: A new `FileMode` instance with the `is_append` flag set to the specified value, and all other flags
-        # unchanged.
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun append(self, yes: Bool = true) -> Self {
+    # Marks the file mode as appendable. This method sets the `is_append` flag to the specified boolean value.
+    # @let ?yes: A boolean value indicating whether the file should be marked as appendable. Defaults to `true`.
+    # @ret: A new `FileMode` instance with the `is_append` flag set to the specified value, and all other flags
+    # unchanged.
 
-        # Set the `is_append` flag to the specified value while
-        # preserving the other flags in the `FileMode` instance.
-        ret Self(is_append=yes, ..self)
-    }
+    # Set the `is_append` flag to the specified value while
+    # preserving the other flags in the `FileMode` instance.
+    ret Self(is_append=yes, ..self)
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun truncate(self, yes: Bool = true) -> Self {
-        # Marks the file mode as truncatable. This method sets the `is_truncate` flag to the specified boolean value.
-        # @let ?yes: A boolean value indicating whether the file should be marked as truncatable. Defaults to `true`.
-        # @ret: A new `FileMode` instance with the `is_truncate` flag set to the specified value, and all other flags
-        # unchanged.
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun truncate(self, yes: Bool = true) -> Self {
+    # Marks the file mode as truncatable. This method sets the `is_truncate` flag to the specified boolean value.
+    # @let ?yes: A boolean value indicating whether the file should be marked as truncatable. Defaults to `true`.
+    # @ret: A new `FileMode` instance with the `is_truncate` flag set to the specified value, and all other flags
+    # unchanged.
 
-        # Set the `is_truncate` flag to the specified value while
-        # preserving the other flags in the `FileMode` instance.
-        ret Self(is_truncate=yes, ..self)
-    }
+    # Set the `is_truncate` flag to the specified value while
+    # preserving the other flags in the `FileMode` instance.
+    ret Self(is_truncate=yes, ..self)
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun create(self, yes: Bool = true) -> Self {
-        # Marks the file mode as creatable. This method sets the `is_create` flag to the specified boolean value.
-        # @let ?yes: A boolean value indicating whether the file should be marked as creatable. Defaults to `true`.
-        # @ret: A new `FileMode` instance with the `is_create` flag set to the specified value, and all other flags
-        # unchanged.
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun create(self, yes: Bool = true) -> Self {
+    # Marks the file mode as creatable. This method sets the `is_create` flag to the specified boolean value.
+    # @let ?yes: A boolean value indicating whether the file should be marked as creatable. Defaults to `true`.
+    # @ret: A new `FileMode` instance with the `is_create` flag set to the specified value, and all other flags
+    # unchanged.
 
-        # Set the `is_create` flag to the specified value while
-        # preserving the other flags in the `FileMode` instance.
-        ret Self(is_create=yes, ..self)
-    }
+    # Set the `is_create` flag to the specified value while
+    # preserving the other flags in the `FileMode` instance.
+    ret Self(is_create=yes, ..self)
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun create_new(self, yes: Bool = true) -> Self {
-        # Marks the file mode as exclusively creatable. This method sets both the `is_create` and `is_exclusive` flags
-        # to the specified boolean value.
-        # @let ?yes: A boolean value indicating whether the file should be marked as exclusively creatable. Defaults to
-        # `true`.
-        # @ret: A new `FileMode` instance with the `is_create` and `is_exclusive` flags set to the specified value, and
-        # all other flags unchanged.
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun create_new(self, yes: Bool = true) -> Self {
+    # Marks the file mode as exclusively creatable. This method sets both the `is_create` and `is_exclusive` flags to
+    # the specified boolean value.
+    # @let ?yes: A boolean value indicating whether the file should be marked as exclusively creatable. Defaults to
+    # `true`.
+    # @ret: A new `FileMode` instance with the `is_create` and `is_exclusive` flags set to the specified value, and all
+    # other flags unchanged.
 
-        # Set both the `is_create` and `is_exclusive` flags to the
-        # specified value while preserving the other flags in the
-        # `FileMode` instance.
-        ret Self(is_create=yes, is_exclusive=yes, ..self)
-    }
+    # Set both the `is_create` and `is_exclusive` flags to the
+    # specified value while preserving the other flags in the
+    # `FileMode` instance.
+    ret Self(is_create=yes, is_exclusive=yes, ..self)
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun to_flags(&self) -> S32 {
-        # Converts the `FileMode` instance into a set of flags that can be used with the underlying file system
-        # operations. The flags are represented as a 32-bit signed integer, where each bit corresponds to a specific
-        # file mode option. The method checks the boolean flags in the `FileMode` instance and sets the corresponding
-        # bits in the integer value. The resulting integer can be used to specify the desired file mode when opening a
-        # file.
-        # @ret:
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun to_flags(&self) -> S32 {
+    # Converts the `FileMode` instance into a set of flags that can be used with the underlying file system operations.
+    # The flags are represented as a 32-bit signed integer, where each bit corresponds to a specific file mode option.
+    # The method checks the boolean flags in the `FileMode` instance and sets the corresponding bits in the integer
+    # value. The resulting integer can be used to specify the desired file mode when opening a file.
+    # @ret:
 
-        let mut flags: S32 = 0
-        case self.is_read and self.is_write { flags |= 0x2 }
-        else case self.is_write { flags |= 0x1 }
+    let mut flags: S32 = 0
+    case self.is_read and self.is_write { flags |= 0x2 }
+    else case self.is_write { flags |= 0x1 }
 
-        case self.is_create { flags |= 0x40 }
-        case self.is_truncate { flags |= 0x200 }
-        case self.is_append { flags |= 0x400 }
-        ret flags
-    }
+    case self.is_create { flags |= 0x40 }
+    case self.is_truncate { flags |= 0x200 }
+    case self.is_append { flags |= 0x400 }
+    ret flags
+  }
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls File {
-    # @let fd: The underlying file descriptor, or `-1` once the file has been closed. The default is `-1` rather than
-    # `0` so that a `File` that never reached a successful `open` does not describe stdin, which `close` and `del`
-    # would otherwise happily close.
+  # @let fd: The underlying file descriptor, or `-1` once the file has been closed. The default is `-1` rather than `0`
+  # so that a `File` that never reached a successful `open` does not describe stdin, which `close` and `del` would
+  # otherwise happily close.
 
-    !package fd: S32 = -1
+  !package fd: S32 = -1
 }
 
 sup File {
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun open(path: &Path, mode: FileMode) -> Res[File, PathErr] {
-        # The `open` method attempts to open the file at the specified path and returns a `Res` type that indicates
-        # success or failure. The caller must have the necessary permissions to access the file, and the file must exist
-        # unless the `create` option is set. If the file is successfully opened, a `File` object containing the file
-        # descriptor and mode information is returned. If the operation fails, an error message is returned indicating
-        # the reason for the failure.
-        # @let path: The path to the file to be opened. This is a `Path` object that represents the location of the file
-        # in the filesystem.
-        # @let mode: A reference to a `FileMode` object that specifies the mode in which the file should be opened
-        # (e.g., read, write, append, etc.).
-        # @ret: A `Res` type containing a `File` object if the file is successfully opened, or an error message if the
-        # operation fails.
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun open(path: &Path, mode: FileMode) -> Res[File, PathErr] {
+    # The `open` method attempts to open the file at the specified path and returns a `Res` type that indicates success
+    # or failure. The caller must have the necessary permissions to access the file, and the file must exist unless the
+    # `create` option is set. If the file is successfully opened, a `File` object containing the file descriptor and
+    # mode information is returned. If the operation fails, an error message is returned indicating the reason for the
+    # failure.
+    # @let path: The path to the file to be opened. This is a `Path` object that represents the location of the file in
+    # the filesystem.
+    # @let mode: A reference to a `FileMode` object that specifies the mode in which the file should be opened (e.g.,
+    # read, write, append, etc.).
+    # @ret: A `Res` type containing a `File` object if the file is successfully opened, or an error message if the
+    # operation fails.
 
-        # The creation mode is only consulted when `O_CREAT` is in
-        # the flags; the process umask is applied on top of it.
-        let mut file = File()
-        let err = sppc::open(path.inner.ptr, mode.to_flags(), 0x1B6, &mut file.fd)
-        ret case err == 0 { Pass(val=file) } else { Fail(err=PathErr::from_errno(err)) }
-    }
+    # The creation mode is only consulted when `O_CREAT` is in
+    # the flags; the process umask is applied on top of it.
+    let mut file = File()
+    let err = sppc::open(path.inner.ptr, mode.to_flags(), 0x1B6, &mut file.fd)
+    ret case err == 0 { Pass(val=file) } else { Fail(err=PathErr::from_errno(err)) }
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun close(self) -> Res[Void, StreamErr] {
-        # The `close` method releases the underlying file descriptor, consuming the `File` as it does. Consuming it is
-        # what makes closing safe rather than idempotent: a closed `File` no longer exists, so there is nothing left to
-        # close a second time, and a `File` that is never closed is a compile time error rather than a leaked
-        # descriptor. Note that a descriptor is released by the operating system even when `close` reports an error, so
-        # the error is reported to the caller but the descriptor is not retained for a retry.
-        # @ret: A `Res` type containing an empty value if the file was closed, or an error message if the operation
-        # fails.
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun close(self) -> Res[Void, StreamErr] {
+    # The `close` method releases the underlying file descriptor, consuming the `File` as it does. Consuming it is what
+    # makes closing safe rather than idempotent: a closed `File` no longer exists, so there is nothing left to close a
+    # second time, and a `File` that is never closed is a compile time error rather than a leaked descriptor. Note that
+    # a descriptor is released by the operating system even when `close` reports an error, so the error is reported to
+    # the caller but the descriptor is not retained for a retry.
+    # @ret: A `Res` type containing an empty value if the file was closed, or an error message if the operation fails.
 
-        # Nothing to do for a `File` that never reached a
-        # successful `open`.
-        let File(fd) = self
-        case fd < 0 { ret Pass[Void]() }
+    # Nothing to do for a `File` that never reached a
+    # successful `open`.
+    let File(fd) = self
+    case fd < 0 { ret Pass[Void]() }
 
-        let err = sppc::close(fd)
-        ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
-    }
+    let err = sppc::close(fd)
+    ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun file_sync(&self) -> Res[Void, StreamErr] {
-        # The `file_sync` method synchronizes the file's in-memory state with the underlying storage device. This
-        # ensures that any changes made to the file are flushed to disk, providing durability guarantees. The method
-        # returns a `Res` type that indicates success or failure. On success, it returns an empty value. On failure, it
-        # returns an error message indicating the reason for the failure.
-        # @ret: A `Res` type containing an empty value if the synchronization is successful, or an error message if the
-        # operation fails.
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun file_sync(&self) -> Res[Void, StreamErr] {
+    # The `file_sync` method synchronizes the file's in-memory state with the underlying storage device. This ensures
+    # that any changes made to the file are flushed to disk, providing durability guarantees. The method returns a `Res`
+    # type that indicates success or failure. On success, it returns an empty value. On failure, it returns an error
+    # message indicating the reason for the failure.
+    # @ret: A `Res` type containing an empty value if the synchronization is successful, or an error message if the
+    # operation fails.
 
-        let err = sppc::fsync(self.fd)
-        ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
-    }
+    let err = sppc::fsync(self.fd)
+    ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun file_sync_data(&self) -> Res[Void, StreamErr] {
-        # The `file_sync_data` method synchronizes the file's in-memory data with the underlying storage device, but it
-        # does not necessarily flush metadata changes. This can be useful for improving performance when only the file's
-        # content has changed and not its metadata. The method returns a `Res` type that indicates success or failure.
-        # On success, it returns an empty value. On failure, it returns an error message indicating the reason for the
-        # failure.
-        # @ret: A `Res` type containing an empty value if the data synchronization is successful, or an error message if
-        # the operation fails.
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun file_sync_data(&self) -> Res[Void, StreamErr] {
+    # The `file_sync_data` method synchronizes the file's in-memory data with the underlying storage device, but it does
+    # not necessarily flush metadata changes. This can be useful for improving performance when only the file's content
+    # has changed and not its metadata. The method returns a `Res` type that indicates success or failure. On success,
+    # it returns an empty value. On failure, it returns an error message indicating the reason for the failure.
+    # @ret: A `Res` type containing an empty value if the data synchronization is successful, or an error message if the
+    # operation fails.
 
-        let err = sppc::fdatasync(self.fd)
-        ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
-    }
+    let err = sppc::fdatasync(self.fd)
+    ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun set_len(&self, len: USize) -> Res[Void, StreamErr] {
-        # The `set_len` method sets the length of the file to the specified value. If the new length is greater than the
-        # current length, the file is extended and the new space is filled with zeros. If the new length is less than
-        # the current length, the file is truncated.
-        # @let len: The new length of the file in bytes.
-        # @ret: A `Res` type containing an empty value if the operation is successful, or an error message if the
-        # operation fails.
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun set_len(&self, len: USize) -> Res[Void, StreamErr] {
+    # The `set_len` method sets the length of the file to the specified value. If the new length is greater than the
+    # current length, the file is extended and the new space is filled with zeros. If the new length is less than the
+    # current length, the file is truncated.
+    # @let len: The new length of the file in bytes.
+    # @ret: A `Res` type containing an empty value if the operation is successful, or an error message if the operation
+    # fails.
 
-        let err = sppc::ftruncate(self.fd, SSize::from(len))
-        ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
-    }
+    let err = sppc::ftruncate(self.fd, SSize::from(len))
+    ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun file_size(&self) -> USize {
-        # The `file_size` method retrieves the size of the file in bytes. It returns the size as a `USize` value. This
-        # method does not perform any error checking, so it is assumed that the file descriptor is valid and the file
-        # exists. If the file does not exist or the file descriptor is invalid, the behavior of this method is
-        # undefined.
-        # @ret: The size of the file in bytes as a `USize` value.
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun file_size(&self) -> USize {
+    # The `file_size` method retrieves the size of the file in bytes. It returns the size as a `USize` value. This
+    # method does not perform any error checking, so it is assumed that the file descriptor is valid and the file
+    # exists. If the file does not exist or the file descriptor is invalid, the behavior of this method is undefined.
+    # @ret: The size of the file in bytes as a `USize` value.
 
-        let mut info = sppc::CStat()
-        let err = sppc::fstat(self.fd, &mut info)
-        ret case err == 0 { USize::from(info.size) } else { 0_uz }
-    }
+    let mut info = sppc::CStat()
+    defer std::mem::ops::drop(info)
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun lock(&self, non_blocking: Bool = true) -> Res[Void, StreamErr] {
-        # The `lock` method attempts to acquire an exclusive lock on the file. This prevents other processes from
-        # accessing the file while it is locked. The method returns a `Res` type that indicates success or failure. On
-        # success, it returns an empty value. On failure, it returns an error message indicating the reason for the
-        # failure.
-        # @let non_blocking: A boolean value indicating whether the lock operation should be non-blocking. If set to
-        # `true`, the method will return immediately if the lock cannot be acquired. If set to `false`, the method will
-        # block until the lock is acquired.
-        # @ret: A `Res` type containing an empty value if the lock is successfully acquired, or an error message if the
-        # operation fails.
+    let err = sppc::fstat(self.fd, &mut info)
+    ret case err == 0 { USize::from(info.size) } else { 0_uz }
+  }
 
-        let fl = sppc::CFlock(type_=cffi::f_wrlck, whence=cffi::seek_set, start=0_sz, len=0_sz)
-        let err = sppc::fcntl(self.fd, case non_blocking { cffi::f_setlk } else { cffi::f_setlkw }, &fl)
-        ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
-    }
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun lock(&self, non_blocking: Bool = true) -> Res[Void, StreamErr] {
+    # The `lock` method attempts to acquire an exclusive lock on the file. This prevents other processes from accessing
+    # the file while it is locked. The method returns a `Res` type that indicates success or failure. On success, it
+    # returns an empty value. On failure, it returns an error message indicating the reason for the failure.
+    # @let non_blocking: A boolean value indicating whether the lock operation should be non-blocking. If set to `true`,
+    # the method will return immediately if the lock cannot be acquired. If set to `false`, the method will block until
+    # the lock is acquired.
+    # @ret: A `Res` type containing an empty value if the lock is successfully acquired, or an error message if the
+    # operation fails.
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun lock_shared(&self, non_blocking: Bool = true) -> Res[Void, StreamErr] {
-        # The `lock_shared` method attempts to acquire a shared lock on the file. This allows multiple processes to read
-        # from the file simultaneously, but prevents any process from writing to the file while it is locked. The method
-        # returns a `Res` type that indicates success or failure. On success, it returns an empty value. On failure, it
-        # returns an error message indicating the reason for the failure.
-        # @let non_blocking: A boolean value indicating whether the lock operation should be non-blocking. If set to
-        # `true`, the method will return immediately if the lock cannot be acquired. If set to `false`, the method will
-        # block until the lock is acquired.
-        # @ret: A `Res` type containing an empty value if the shared lock is successfully acquired, or an error message
-        # if the operation fails.
+    let fl = sppc::CFlock(type_=cffi::f_wrlck, whence=cffi::seek_set, start=0_sz, len=0_sz)
+    let err = sppc::fcntl(self.fd, case non_blocking { cffi::f_setlk } else { cffi::f_setlkw }, &fl)
+    std::mem::ops::drop(fl)
 
-        let fl = sppc::CFlock(type_=cffi::f_rdlck, whence=cffi::seek_set, start=0_sz, len=0_sz)
-        let err = sppc::fcntl(self.fd, case non_blocking { cffi::f_setlk } else { cffi::f_setlkw }, &fl)
-        ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
-    }
+    ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun unlock(&self) -> Res[Void, StreamErr] {
-        # The `unlock` method releases any lock (exclusive or shared) that has been acquired on the file. This allows
-        # other processes to access the file again. The method returns a `Res` type that indicates success or failure.
-        # On success, it returns an empty value. On failure, it returns an error message indicating the reason for the
-        # failure.
-        # @ret: A `Res` type containing an empty value if the lock is successfully released, or an error message if the
-        # operation fails.
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun lock_shared(&self, non_blocking: Bool = true) -> Res[Void, StreamErr] {
+    # The `lock_shared` method attempts to acquire a shared lock on the file. This allows multiple processes to read
+    # from the file simultaneously, but prevents any process from writing to the file while it is locked. The method
+    # returns a `Res` type that indicates success or failure. On success, it returns an empty value. On failure, it
+    # returns an error message indicating the reason for the failure.
+    # @let non_blocking: A boolean value indicating whether the lock operation should be non-blocking. If set to `true`,
+    # the method will return immediately if the lock cannot be acquired. If set to `false`, the method will block until
+    # the lock is acquired.
+    # @ret: A `Res` type containing an empty value if the shared lock is successfully acquired, or an error message if
+    # the operation fails.
 
-        let fl = sppc::CFlock(type_=cffi::f_unlck, whence=cffi::seek_set, start=0_sz, len=0_sz)
-        let err = sppc::fcntl(self.fd, cffi::f_setlk, &fl)
-        ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
-    }
+    let fl = sppc::CFlock(type_=cffi::f_rdlck, whence=cffi::seek_set, start=0_sz, len=0_sz)
+    let err = sppc::fcntl(self.fd, case non_blocking { cffi::f_setlk } else { cffi::f_setlkw }, &fl)
+    std::mem::ops::drop(fl)
+
+    ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun unlock(&self) -> Res[Void, StreamErr] {
+    # The `unlock` method releases any lock (exclusive or shared) that has been acquired on the file. This allows other
+    # processes to access the file again. The method returns a `Res` type that indicates success or failure. On success,
+    # it returns an empty value. On failure, it returns an error message indicating the reason for the failure.
+    # @ret: A `Res` type containing an empty value if the lock is successfully released, or an error message if the
+    # operation fails.
+
+    let fl = sppc::CFlock(type_=cffi::f_unlck, whence=cffi::seek_set, start=0_sz, len=0_sz)
+    let err = sppc::fcntl(self.fd, cffi::f_setlk, &fl)
+    std::mem::ops::drop(fl)
+
+    ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
+  }
 }
 
 sup File ext Read {
-    fun read(&mut self, mut buf: &mut View[U8]) -> Res[USize, StreamErr] {
-        # The `read` method reads data from the file into the provided buffer. It returns a `Res` type that indicates
-        # success or failure. On success, it returns the number of bytes read.
-        # @let buf: A mutable reference to a buffer where the read data will be stored.
-        # @ret: A `Res` type containing the number of bytes read if the operation is successful, or an error message if
-        # the operation fails.
+  fun read(&mut self, mut buf: &mut View[U8]) -> Res[USize, StreamErr] {
+    # The `read` method reads data from the file into the provided buffer. It returns a `Res` type that indicates
+    # success or failure. On success, it returns the number of bytes read.
+    # @let buf: A mutable reference to a buffer where the read data will be stored.
+    # @ret: A `Res` type containing the number of bytes read if the operation is successful, or an error message if the
+    # operation fails.
 
-        let mut bytes_read = 0_sz
-        let err = sppc::read(buf.ptr, 1_uz, self.file_size(), self.fd, &mut bytes_read)
-        ret case err == 0 { Pass(val=USize::from(bytes_read)) } else { Fail(err=StreamErr::from_errno(err)) }
-    }
+    let mut bytes_read = 0_sz
+    let err = sppc::read(buf.ptr, 1_uz, self.file_size(), self.fd, &mut bytes_read)
+    ret case err == 0 { Pass(val=USize::from(bytes_read)) } else { Fail(err=StreamErr::from_errno(err)) }
+  }
 }
 
 sup File ext Write {
-    fun write(&mut self, buf: &View[U8]) -> Res[USize, StreamErr] {
-        # The `write` method writes data from the provided buffer to the file. It returns a `Res` type that indicates
-        # success or failure. On success, it returns the number of bytes written.
-        # @let buf: A reference to a buffer containing the data to be written to the file.
-        # @ret: A `Res` type containing the number of bytes written if the operation is successful, or an error message
-        # if the operation fails.
+  fun write(&mut self, buf: &View[U8]) -> Res[USize, StreamErr] {
+    # The `write` method writes data from the provided buffer to the file. It returns a `Res` type that indicates
+    # success or failure. On success, it returns the number of bytes written.
+    # @let buf: A reference to a buffer containing the data to be written to the file.
+    # @ret: A `Res` type containing the number of bytes written if the operation is successful, or an error message if
+    # the operation fails.
 
-        let mut bytes_written = 0_sz
-        let err = sppc::write(buf.ptr, 1_uz, buf.len(), self.fd, &mut bytes_written)
-        ret case err == 0 { Pass(val=USize::from(bytes_written)) } else { Fail(err=StreamErr::from_errno(err)) }
-    }
+    let mut bytes_written = 0_sz
+    let err = sppc::write(buf.ptr, 1_uz, buf.len(), self.fd, &mut bytes_written)
+    ret case err == 0 { Pass(val=USize::from(bytes_written)) } else { Fail(err=StreamErr::from_errno(err)) }
+  }
 
-    fun flush(&mut self) -> Res[Void, StreamErr] {
-        # The `flush` method ensures that all buffered data is written to the underlying storage device. This can be
-        # important for ensuring data integrity, especially in cases where the program may crash or lose power before
-        # the data is automatically flushed.
-        # @ret: A `Res` type containing an empty value if the flush operation is successful, or an error message if the
-        # operation fails.
+  fun flush(&mut self) -> Res[Void, StreamErr] {
+    # The `flush` method ensures that all buffered data is written to the underlying storage device. This can be
+    # important for ensuring data integrity, especially in cases where the program may crash or lose power before the
+    # data is automatically flushed.
+    # @ret: A `Res` type containing an empty value if the flush operation is successful, or an error message if the
+    # operation fails.
 
-        let err = sppc::fsync(self.fd)
-        ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
-    }
+    let err = sppc::fsync(self.fd)
+    ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
+  }
 }
 
 sup File ext Seek {
-    fun seek(&mut self, offset: SSize, whence: S32) -> Res[SSize, StreamErr] {
-        let mut pos = 0_sz
-        let err = sppc::lseek(self.fd, offset, whence, &mut pos)
-        ret case err == 0 { Pass(val=pos) } else { Fail(err=StreamErr::from_errno(err)) }
-    }
+  fun seek(&mut self, offset: SSize, whence: S32) -> Res[SSize, StreamErr] {
+    let mut pos = 0_sz
+    let err = sppc::lseek(self.fd, offset, whence, &mut pos)
+    ret case err == 0 { Pass(val=pos) } else { Fail(err=StreamErr::from_errno(err)) }
+  }
 
-    fun stream_len(&mut self) -> Res[SSize, StreamErr] {
-        let mut info = sppc::CStat()
-        let err = sppc::fstat(self.fd, &mut info)
-        let len = SSize::from(info.size)
-        ret case err == 0 { Pass(val=len) } else { Fail(err=StreamErr::from_errno(err)) }
-    }
+  fun stream_len(&mut self) -> Res[SSize, StreamErr] {
+    let mut info = sppc::CStat()
+    let err = sppc::fstat(self.fd, &mut info)
 
-    fun stream_pos(&mut self) -> Res[SSize, StreamErr] {
-        let mut pos = 0_sz
-        let err = sppc::lseek(self.fd, 0_sz, Self::seek_cur, &mut pos)
-        ret case err == 0 { Pass(val=pos) } else { Fail(err=StreamErr::from_errno(err)) }
-    }
+    let len = SSize::from(info.size)
+    std::mem::ops::drop(info)
+    ret case err == 0 { Pass(val=len) } else { Fail(err=StreamErr::from_errno(err)) }
+  }
+
+  fun stream_pos(&mut self) -> Res[SSize, StreamErr] {
+    let mut pos = 0_sz
+    let err = sppc::lseek(self.fd, 0_sz, Self::seek_cur, &mut pos)
+    ret case err == 0 { Pass(val=pos) } else { Fail(err=StreamErr::from_errno(err)) }
+  }
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun get_cwd() -> Res[Path, PathErr] {
-    # The `get_cwd` function retrieves the current working directory as a `File` object. It returns a `Res` type that
-    # indicates success or failure. On success, it returns a `File` object representing the current directory.
-    # @ret: A `Res` type containing a `File` object if the current directory is successfully retrieved, or an error
-    # message if the operation fails.
+  # The `get_cwd` function retrieves the current working directory as a `File` object. It returns a `Res` type that
+  # indicates success or failure. On success, it returns a `File` object representing the current directory.
+  # @ret: A `Res` type containing a `File` object if the current directory is successfully retrieved, or an error
+  # message if the operation fails.
 
-    let mut cwd = Path()
-    let err = sppc::getcwd(cwd.inner.ptr, path::path_max)
-    ret case err == 0 { Pass(val=cwd) } else { Fail(err=PathErr::from_errno(err)) }
+  let mut cwd = Path()
+  let err = sppc::getcwd(cwd.inner.ptr, path::path_max)
+  ret case err == 0 { Pass(val=cwd) } else { Fail(err=PathErr::from_errno(err)) }
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun set_cwd(path: &Path) -> Res[Void, PathErr] {
-    # The `set_cwd` function changes the current working directory to the specified path.
-    # @let path: A reference to a `Path` object representing the new current working directory.
-    # @ret: A `Res` type containing an empty value if the current directory is successfully changed, or an error message
-    # if the operation fails.
+  # The `set_cwd` function changes the current working directory to the specified path.
+  # @let path: A reference to a `Path` object representing the new current working directory.
+  # @ret: A `Res` type containing an empty value if the current directory is successfully changed, or an error message
+  # if the operation fails.
 
-    let err = sppc::chdir(path.inner.ptr)
-    ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
+  let err = sppc::chdir(path.inner.ptr)
+  ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
 }
 
 sup File ext Drop {
-    # A `File` owns a descriptor, so discarding one closes it. This is the discard path, for a caller that will not
-    # look at the outcome; anything that wants to know whether the close succeeded should call `close` directly, which
-    # is the same operation with the result handed back.
+  # A `File` owns a descriptor, so discarding one closes it. This is the discard path, for a caller that will not look
+  # at the outcome; anything that wants to know whether the close succeeded should call `close` directly, which is the
+  # same operation with the result handed back.
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun drop(self) -> Void {
-        # Written out rather than routed through `close`, because that hands back a `Res` which would itself have to be
-        # discarded, and a zero type does not satisfy a `Drop` constraint - `!zero_type` grants copyability through a
-        # flag rather than by superimposing `Copy`, so `Res[Void, StreamErr]` has no `drop` to call.
-        let File(fd) = self
-        case fd < 0 { ret }
-        let err = sppc::close(fd)
-    }
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun drop(self) -> Void {
+    # Written out rather than routed through `close`, because that hands back a `Res` which would itself have to be
+    # discarded, and a zero type does not satisfy a `Drop` constraint - `!zero_type` grants copyability through a flag
+    # rather than by superimposing `Copy`, so `Res[Void, StreamErr]` has no `drop` to call.
+    let File(fd) = self
+    case fd < 0 { ret }
+    let err = sppc::close(fd)
+  }
 }
