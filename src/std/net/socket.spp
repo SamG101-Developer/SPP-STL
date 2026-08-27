@@ -3,6 +3,7 @@ use std::annotations::public
 use std::annotations::versioned
 use std::annotations::zero_type
 use std::boolean::Bool
+use std::copy::Copy
 use std::flags::Flags
 use std::number::S32
 use std::number::U16
@@ -180,6 +181,15 @@ cls SockV6Addr {
 !public
 !versioned(base="1.0.0", new="1.0.0")
 type SockAddr = SockV4Addr or SockV6Addr
+
+sup SockV4Addr ext Copy {
+    # An address is an IP and a port, both of which are copyable, so it owns nothing that copying would duplicate the
+    # ownership of. This is what makes "SockAddr" copyable in turn - a variant is copyable when its alternatives are.
+}
+
+sup SockV6Addr ext Copy {
+    # As "SockV4Addr" above.
+}
 
 sup SockAddr {
     !public

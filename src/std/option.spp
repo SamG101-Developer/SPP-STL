@@ -56,7 +56,7 @@ sup [T] Opt[T] {
     # @ret: Returns `true` if the optional is `Some`, and `false` if it is `None`.
 
     # Simple pattern match.
-    ret self@ is Some[T](..)
+    ret self is Some[T](..)
   }
 
   !public
@@ -67,7 +67,7 @@ sup [T] Opt[T] {
     # @ret: Returns `true` if the optional is `None`, and `false` if it is `Some`.
 
     # Simple pattern match.
-    ret self@ is None()
+    ret self is None()
   }
 
   !public
@@ -611,6 +611,16 @@ sup [T] Opt[Opt[T]] {
   }
 }
 
+sup [T: Copy] Some[T] ext Copy {
+    # A "Some" is copyable when what it holds is: it owns nothing beyond the value, so copying it duplicates a handle
+    # to nothing rather than an owner. This is what makes "Opt[T]" copyable for a copyable "T", a variant being
+    # copyable exactly when its alternatives are.
+}
+
+sup None ext Copy {
+    # A "None" holds nothing at all, so there is nothing for copying it to duplicate.
+}
+
 sup [T] Opt[T] ext Try[Some[T], None, T] {
   # In order to make the Opt type compatible with the "?" operator, we need to tell the compiler how to check if an
   # optional type is in the value state or not, so it knows whether to propagate the error state or not.
@@ -623,7 +633,7 @@ sup [T] Opt[T] ext Try[Some[T], None, T] {
 
     # Pattern match and return `true` if this is `Some`, otherwise
     # return `false`.
-    ret self@ is Some[T](..)
+    ret self is Some[T](..)
   }
 
   !versioned(base="1.0.0", new="1.0.0")
@@ -688,10 +698,21 @@ sup [T: Eq] Opt[T] ext Eq {
     # Pattern match on both optionals and return `true` if they are
     # both `None`, or if they are both `Some` and the values inside
     # are equal.
-    ret case (self@, that@) of {
-      is (Some[T](val as a), Some[T](val as b)) { a == b }
-      is (None(), None()) { true }
-      else { false }
+    # Matched one at a time rather than as a tuple of both: a borrow cannot be a tuple element, and dereferencing to
+    # build one would copy the whole variant - which an "Opt" over an unconstrained generic cannot do.
+    ret case self of {
+      is Some[T](&val as a) {
+        case that of {
+          is Some[T](&val as b) { a == b }
+          else { false }
+        }
+      }
+      else {
+        case that of {
+          is None() { true }
+          else { false }
+        }
+      }
     }
   }
 
@@ -705,10 +726,21 @@ sup [T: Eq] Opt[T] ext Eq {
     # Pattern match on both optionals and return `true` if they are
     # not both `None`, or if they are both `Some` and the values inside
     # are not equal.
-    ret case (self@, that@) of {
-      is (Some[T](val as a), Some[T](val as b)) { a != b }
-      is (None(), None()) { false }
-      else { true }
+    # Matched one at a time rather than as a tuple of both: a borrow cannot be a tuple element, and dereferencing to
+    # build one would copy the whole variant - which an "Opt" over an unconstrained generic cannot do.
+    ret case self of {
+      is Some[T](&val as a) {
+        case that of {
+          is Some[T](&val as b) { a != b }
+          else { true }
+        }
+      }
+      else {
+        case that of {
+          is None() { false }
+          else { true }
+        }
+      }
     }
   }
 }

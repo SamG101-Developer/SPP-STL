@@ -62,7 +62,7 @@ sup [T, E] Res[T, E] {
     # @ret: Returns `true` if the result is `Pass`, and `false` if it is `Fail`.
 
     # Simple pattern match.
-    ret self@ is Pass[T](..)
+    ret self is Pass[T](..)
   }
 
   !public
@@ -73,7 +73,7 @@ sup [T, E] Res[T, E] {
     # @ret: Returns `true` if the result is `Fail`, and `false` if it is `Pass`.
 
     # Simple pattern match.
-    ret self@ is Fail[E](..)
+    ret self is Fail[E](..)
   }
 
   !public
@@ -585,6 +585,14 @@ sup [T, E] Res[T, E] {
   }
 }
 
+sup [T: Copy] Pass[T] ext Copy {
+    # Copyable when the value it carries is - see "Some[T]" in "option.spp".
+}
+
+sup [E: Copy] Fail[E] ext Copy {
+    # Copyable when the error it carries is.
+}
+
 sup [T, E] Res[T, E] ext Try[Pass[T], Fail[E], T] {
   # In order to make the Res type compatible with the "?" operator, we need to tell the compiler how to check if a
   # result type is in the value state or not, so it knows whether to propagate the error state or not. In this case,
@@ -598,7 +606,7 @@ sup [T, E] Res[T, E] ext Try[Pass[T], Fail[E], T] {
 
     # Pattern match and return `true` if this is `Pass`, otherwise
     # return `false`.
-    ret self@ is Pass[T](..)
+    ret self is Pass[T](..)
   }
 
   !versioned(base="1.0.0", new="1.0.0")
@@ -649,9 +657,21 @@ sup [T: Eq, E: Eq] Res[T, E] ext Eq {
     # Pattern match on both results and return `true` if they are
     # both `Pass` with equal values, or both `Fail` with equal
     # errors.
-    ret case (self@, that@) of {
-      is (Pass[T](val as a), Pass[T](val as b)) { a == b }
-      is (Fail[E](err as a), Fail[E](err as b)) { a == b }
+    # Matched one at a time rather than as a tuple of both: a borrow cannot be a tuple element, and dereferencing to
+    # build one would copy the whole variant - which a "Res" over unconstrained generics cannot do.
+    ret case self of {
+      is Pass[T](&val as a) {
+        case that of {
+          is Pass[T](&val as b) { a == b }
+          else { false }
+        }
+      }
+      is Fail[E](&err as a) {
+        case that of {
+          is Fail[E](&err as b) { a == b }
+          else { false }
+        }
+      }
       else { false }
     }
   }
@@ -666,9 +686,20 @@ sup [T: Eq, E: Eq] Res[T, E] ext Eq {
     # Pattern match on both results and return `true` if they are
     # not both `Pass` with equal values, or not both `Fail` with
     # equal errors.
-    ret case (self@, that@) of {
-      is (Pass[T](val as a), Pass[T](val as b)) { a != b }
-      is (Fail[E](err as a), Fail[E](err as b)) { a != b }
+    # Matched one at a time, for the same reason as "eq" above.
+    ret case self of {
+      is Pass[T](&val as a) {
+        case that of {
+          is Pass[T](&val as b) { a != b }
+          else { true }
+        }
+      }
+      is Fail[E](&err as a) {
+        case that of {
+          is Fail[E](&err as b) { a != b }
+          else { true }
+        }
+      }
       else { true }
     }
   }
