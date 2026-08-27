@@ -19,26 +19,26 @@ use std::threading::safe::ThreadSafe
 !public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
 cls ThreadMemoryErr {
-    # Indicates an error related to thread memory management, such as stack overflow or insufficient memory for thread
-    # creation. This error type can be used to represent various memory-related issues that may arise during thread
-    # operations. Mapped from the `ENOMEM` error code in `C`.
+  # Indicates an error related to thread memory management, such as stack overflow or insufficient memory for thread
+  # creation. This error type can be used to represent various memory-related issues that may arise during thread
+  # operations. Mapped from the `ENOMEM` error code in `C`.
 }
 
 !public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
 cls ThreadPermissionErr {
-    # Indicates an error related to thread permissions, such as insufficient privileges to create or manage threads.
-    # This error type can be used to represent various permission-related issues that may arise during thread
-    # operations. Mapped from the `EPERM` error code in `C`.
+  # Indicates an error related to thread permissions, such as insufficient privileges to create or manage threads. This
+  # error type can be used to represent various permission-related issues that may arise during thread operations.
+  # Mapped from the `EPERM` error code in `C`.
 }
 
 !public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
 cls ThreadUnknownErr {
-    # Indicates an unknown error related to thread operations. This error type can be used to represent various
-    # unexpected issues that may arise during thread operations. Mapped from the `EAGAIN` error code in `C`, which
-    # typically indicates that a resource is temporarily unavailable or that the system is unable to create a new thread
-    # due to resource constraints.
+  # Indicates an unknown error related to thread operations. This error type can be used to represent various unexpected
+  # issues that may arise during thread operations. Mapped from the `EAGAIN` error code in `C`, which typically
+  # indicates that a resource is temporarily unavailable or that the system is unable to create a new thread due to
+  # resource constraints.
 }
 
 !public
@@ -46,105 +46,106 @@ cls ThreadUnknownErr {
 type ThreadErr = ThreadMemoryErr or ThreadPermissionErr or ThreadUnknownErr
 
 sup ThreadErr {
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun from_errno(errno: S32) -> Self {
-        #
-        # @let errno:
-        # @ret:
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from_errno(errno: S32) -> Self {
+    #
+    # @let errno:
+    # @ret:
 
-        ret case errno of {
-            == cffi::enomem { ThreadMemoryErr() }
-            == cffi::eperm { ThreadPermissionErr() }
-            else { ThreadUnknownErr() }
-        }
+    ret case errno of {
+      == cffi::enomem { ThreadMemoryErr() }
+      == cffi::eperm { ThreadPermissionErr() }
+      else { ThreadUnknownErr() }
     }
+  }
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls JoinHandle[Out] {
-    !package handle: U64
-    !private detached: Bool
+  !package handle: U64
+  !private detached: Bool
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls ThreadId {
-    !package handle: U64
+  !package handle: U64
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun spawn[Out, F: FunMov[(), Void] & ThreadSafe](function: F) -> Res[JoinHandle[Out], ThreadErr] {
-    # Spawn a new thread using the sppc threading API. The function to be executed in the new thread is passed as an
-    # argument.
-    # @type Out:
-    # @type F:
-    # @let function:
-    # @ret:
-    # @todo: Actually support "Out" type, currently just returns Void.
+  # Spawn a new thread using the sppc threading API. The function to be executed in the new thread is passed as an
+  # argument.
+  # @type Out:
+  # @type F:
+  # @let function:
+  # @ret:
+  # @todo: Actually support "Out" type, currently just returns Void.
 
-    let mut handle = 0_u64
-    let err = sppc::pthread_create(function, &mut handle)
-    case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
-    ret Pass(val=JoinHandle[Out](handle))
+  let mut handle = 0_u64
+  let err = sppc::pthread_create(function, &mut handle)
+  case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
+  ret Pass(val=JoinHandle[Out](handle))
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun current() -> ThreadId {
-    # Get the current thread using the sppc threading API. Todo: use a ThreadId type for equality check.
-    let mut handle = 0_u64
-    sppc::pthread_self(&mut handle)
-    ret ThreadId(handle)
+  # Get the current thread using the sppc threading API. Todo: use a ThreadId type for equality check.
+  let mut handle = 0_u64
+  sppc::pthread_self(&mut handle)
+  ret ThreadId(handle)
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun yield_now() -> Void {
-    # Yield the current thread using the sppc threading API.
-    sppc::sched_yield()
+  # Yield the current thread using the sppc threading API.
+  sppc::sched_yield()
 }
 
 sup [R] JoinHandle[R] {
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun detach(mut self) -> Res[Void, ThreadErr] {
-        # Detach the thread using the sppc threading API.
-        let err = sppc::pthread_detach(&self.handle)
-        case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
-        self.detached = true
-        ret Pass[Void]()
-    }
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun detach(mut self) -> Res[Void, ThreadErr] {
+    # Detach the thread using the sppc threading API.
+    let Self(handle, ..) = self
+    let err = sppc::pthread_detach(&handle)
+    case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
+    ret Pass[Void]()
+  }
 
-    !public
-    !versioned(base="1.0.0", new="1.0.0")
-    fun join(self) -> Res[R, ThreadErr] {
-        # Join the thread using the sppc threading API.
-        let err = sppc::pthread_join(&self.handle)
-        case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
-        ret Pass(val=R()) # Todo: get the value, maybe + transmute?
-    }
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun join(self) -> Res[R, ThreadErr] {
+    # Join the thread using the sppc threading API.
+    let Self(handle, ..) = self
+    let err = sppc::pthread_join(&handle)
+    case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
+    ret Pass(val=R()) # Todo: get the value, maybe + transmute?
+  }
 }
 
 ##
 
 sup [R] JoinHandle[R] ext Eq {
-    !versioned(base="1.0.0", new="1.0.0")
-    fun eq(&self, that: &Self) -> Bool {
-        # Compare thread IDs for equality.
-        let err = sppc::pthread_equal(&self.handle, &that.handle)
-        ret err != 0
-    }
+  !versioned(base="1.0.0", new="1.0.0")
+  fun eq(&self, that: &Self) -> Bool {
+    # Compare thread IDs for equality.
+    let err = sppc::pthread_equal(&self.handle, &that.handle)
+    ret err != 0
+  }
 }
 ##
 
 sup [R] JoinHandle[R] ext Drop {
-    !versioned(base="1.0.0", new="1.0.0")
-    fun drop(self) -> Void {
-        # Ensure the thread is detached before deletion.
-        let JoinHandle[R](handle, detached) = self
-        case detached.not { let err = sppc::pthread_detach(&handle) }
-    }
+  !versioned(base="1.0.0", new="1.0.0")
+  fun drop(self) -> Void {
+    # Ensure the thread is detached before deletion.
+    let JoinHandle[R](handle, detached) = self
+    case detached.not { let err = sppc::pthread_detach(&handle) }
+  }
 }
