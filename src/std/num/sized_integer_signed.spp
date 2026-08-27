@@ -309,13 +309,13 @@ sup [cmp w: U32] SizedIntegerSigned[w] {
         let mut exp = that
         loop exp > 0_u32 {
             case exp % 2_u32 == 1_u32 {
-                let r = out.mul_overflow(base)
-                case r.1 { ret (out, true) }
-                out = r.0
+                let (tmp, overflowed) = out.mul_overflow(base)
+                case overflowed { ret (out, true) }
+                out = tmp
             }
-            let r = base.mul_overflow(base)
-            case r.1 { ret (out, true) }
-            base = r.0
+            let (tmp, overflowed) = base.mul_overflow(base)
+            case overflowed { ret (out, true) }
+            base = tmp
             exp /= 2_u32
         }
         ret (out, false)
