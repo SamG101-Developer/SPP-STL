@@ -156,7 +156,7 @@ fun take[T](src: &mut T) -> T {
   ret replace(src, T())
 }
 
-!package
+!public
 !intrinsic(name="std.mem.ops.drop")
 !versioned(base="1.0.0", new="1.0.0")
 fun drop[T](val: T) -> Void {
@@ -164,10 +164,13 @@ fun drop[T](val: T) -> Void {
   # cannot be left behind in the caller's context (at runtime). It destroys structurally - a type's own `drop` first,
   # then its attributes - so unlike calling `Drop::drop` it needs no `Drop` implementation on `T`.
   #
-  # It is `package` rather than `public` on purpose: ordinary code has exactly one way to get rid of a value, which is
-  # to call the type's own `drop`, and having a second one that skips the type's say in the matter is how a closure's
-  # captures or an inherited destructor get quietly missed. This exists for the container internals that have to destroy
-  # a value they only reach through a pointer.
+  # Prefer the type's own `drop` wherever it has one: that is the type's say in what discarding it means, and this
+  # bypasses it structurally. It is `public` because a type with no `Drop` implementation has no other way to be
+  # discharged, and ownership being linear means every value needs one.
+  #
+  # Whether droppability should instead be universal - `Drop` becoming a customisation hook rather than a bound, at
+  # which point this could go back to being package-internal - is still open. The library currently answers it both
+  # ways: `Opt[T: Drop]` refuses to discard a `T` that `Vec[T]` discards structurally through this function.
   # @type T: The type of the value to drop.
   # @let val: The value to drop.
   # @ret: An empty value, as the function is only used for its side effect of dropping the value.
