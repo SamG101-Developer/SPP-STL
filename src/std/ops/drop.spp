@@ -1,4 +1,5 @@
 use std::annotations::abstract_method
+use std::annotations::protected
 use std::annotations::public
 use std::void::Void
 
@@ -12,12 +13,11 @@ cls Drop {
 }
 
 sup Drop {
-  !public
+  !protected
   !abstract_method
   fun drop(self) -> Void {
     # The `drop` method discards a value, releasing whatever it holds. It takes `self` **by move**, not by borrow: that
-    # is the point of it, because consuming the value is what discharges its linear obligation. It is an ordinary
-    # method, called explicitly, and is never inserted by the compiler. Any failure the release runs into is swallowed;
-    # a caller that needs to know should call the type's named consumer instead.
+    # is the point of it, because consuming the value is what discharges its linear obligation. Any failure the release
+    # runs into is swallowed; a caller that needs to know should call the type's named consumer instead.
   }
 }

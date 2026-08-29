@@ -19,6 +19,7 @@ use std::option::Some
 use std::string::Str
 use std::view::View
 use std::void::Void
+use std::mem::ops::drop
 use std::mem::pointer::NonNull
 use std::ops::eq::Eq
 use std::ops::idx::SliceMut
@@ -237,7 +238,7 @@ sup StrView {
     # @ret:
 
     let str = Str::from(needle)
-    defer str.drop()
+    defer drop(str)
     ret self.find(&str)
   }
 
@@ -293,7 +294,7 @@ sup StrView {
     # @ret:
 
     let str = Str::from(needle)
-    defer str.drop()
+    defer drop(str)
     ret self.rfind(&str)
   }
 

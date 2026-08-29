@@ -10,6 +10,7 @@ use std::option::None
 use std::option::Opt
 use std::vector::Vec
 use std::void::Void
+use std::mem::ops::drop
 use std::mem::pointer::NonNull
 use std::ops::drop::Drop
 
@@ -40,8 +41,8 @@ sup [T] Fut[T] {
 
     let mut handle = 0_u64
     # let err = sppc::async_(&mut handle, f, ..args)
-    std::mem::ops::drop(f) # TODO ^^^
-    std::mem::ops::drop(args) # TODO ^^^
+    drop(f) # TODO ^^^
+    drop(args) # TODO ^^^
     ret Self(handle)
   }
 
@@ -75,7 +76,7 @@ sup [T] Fut[T] {
     # futures have resolved.
     # @ret: A vector containing the resolved values of all the futures.
 
-    std::mem::ops::drop(futures) # TODO: Remove.
+    drop(futures) # TODO: Remove.
     ret Vec[T]() # TODO ^^^
   }
 }

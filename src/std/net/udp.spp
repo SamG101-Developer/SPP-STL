@@ -14,6 +14,7 @@ use std::result::Pass
 use std::result::Res
 use std::view::View
 use std::void::Void
+use std::mem::ops::drop
 use std::net::socket::SockAddr
 use std::net::socket::SockErr
 use std::net::socket::Socket
@@ -53,7 +54,7 @@ sup UdpSocket {
     let listener = UdpSocket(fd)
     let err = sppc::bind(listener.fd, &addr.storage())
     case err == 0 {
-      std::mem::ops::drop(listener)
+      drop(listener)
       ret Fail(err=SockErr::from_errno(err)) }
     ret Pass(val=listener)
   }
@@ -88,11 +89,11 @@ sup UdpSocket {
     let mut storage = sppc::CSockaddrStorage()
     let err = sppc::recvfrom(self.fd, buf.ptr, buf.len(), &mut storage, &mut bytes_received)
     case err != 0 {
-      std::mem::ops::drop(storage)
+      drop(storage)
       ret Fail(err=SockErr::from_errno(err))
     }
     let addr = SockAddr::from_storage(&storage)
-    std::mem::ops::drop(storage)
+    drop(storage)
     ret Pass(val=(USize::from(bytes_received), addr))
   }
 

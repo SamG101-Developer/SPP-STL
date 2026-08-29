@@ -7,6 +7,7 @@ use std::number::S64
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
+use std::mem::ops::drop
 use std::ops::add::Add
 use std::ops::sub::Sub
 use std::time::duration::Duration
@@ -39,7 +40,7 @@ sup TimePoint {
     case err != 0 { std::abort::abort("Failed to get current time") }
     let duration = Duration(seconds=time_now.sec, nanoseconds=time_now.nsec)
 
-    std::mem::ops::drop(time_now)
+    drop(time_now)
     ret TimePoint(duration)
   }
 

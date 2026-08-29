@@ -9,6 +9,7 @@ use std::result::Pass
 use std::result::Res
 use std::string_view::StrView
 use std::void::Void
+use std::mem::ops::drop
 use std::ops::drop::Drop
 use std::ops::eq::Eq
 use std::ops::try::Try
@@ -211,7 +212,7 @@ sup [T] Opt[T] {
     # otherwise return the result of invoking the provided function.
     ret case self of {
       is Some[T](..) {
-        std::mem::ops::drop(that)
+        drop(that)
         self
       }
       else { that() }
@@ -314,11 +315,11 @@ sup [T] Opt[T] {
     # this is `Some`, otherwise return the default value.
     ret case self of {
       is Some[T](val) {
-        std::mem::ops::drop(default)
+        drop(default)
         f(val)
       }
       else {
-        std::mem::ops::drop(f)
+        drop(f)
         default
       }
     }
@@ -353,11 +354,11 @@ sup [T] Opt[T] {
     # function.
     ret case self of {
       is Some[T](val) {
-        std::mem::ops::drop(default)
+        drop(default)
         f(val)
       }
       else {
-        std::mem::ops::drop(f)
+        drop(f)
         default()
       }
     }
@@ -381,7 +382,7 @@ sup [T] Opt[T] {
     # in `Fail`.
     ret case self of {
       is Some[T](val) {
-        std::mem::ops::drop(err)
+        drop(err)
         Pass(val)
       }
       else { Fail(err) }
@@ -409,7 +410,7 @@ sup [T] Opt[T] {
     # provided error function wrapped in `Fail`.
     ret case self of {
       is Some[T](val) {
-        std::mem::ops::drop(err)
+        drop(err)
         Pass(val)
       }
       else { Fail(err=err()) }
@@ -447,7 +448,7 @@ sup [T] Opt[T] {
     # otherwise return the default value.
     ret case self of {
       is Some[T](val) {
-        std::mem::ops::drop(default)
+        drop(default)
         val
       }
       else { default }
@@ -490,7 +491,7 @@ sup [T] Opt[T] {
     # return the result of invoking the provided default function.
     ret case self of {
       is Some[T](val) {
-        std::mem::ops::drop(default)
+        drop(default)
         val
       }
       else { default() }
@@ -612,13 +613,13 @@ sup [T] Opt[Opt[T]] {
 }
 
 sup [T: Copy] Some[T] ext Copy {
-    # A "Some" is copyable when what it holds is: it owns nothing beyond the value, so copying it duplicates a handle
-    # to nothing rather than an owner. This is what makes "Opt[T]" copyable for a copyable "T", a variant being
-    # copyable exactly when its alternatives are.
+  # A "Some" is copyable when what it holds is: it owns nothing beyond the value, so copying it duplicates a handle to
+  # nothing rather than an owner. This is what makes "Opt[T]" copyable for a copyable "T", a variant being copyable
+  # exactly when its alternatives are.
 }
 
 sup None ext Copy {
-    # A "None" holds nothing at all, so there is nothing for copying it to duplicate.
+  # A "None" holds nothing at all, so there is nothing for copying it to duplicate.
 }
 
 sup [T] Opt[T] ext Try[Some[T], None, T] {
@@ -752,7 +753,7 @@ sup [T: Drop] Opt[T] ext Drop {
   !versioned(base="1.0.0", new="1.0.0")
   fun drop(self) -> Void {
     case self of {
-      is Some[T](val) { val.drop() }
+      is Some[T](val) { drop(val) }
       else { }
     }
   }

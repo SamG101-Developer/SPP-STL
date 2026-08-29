@@ -7,6 +7,7 @@ use std::result::Pass
 use std::result::Res
 use std::string_view::StrView
 use std::void::Void
+use std::mem::ops::drop
 use std::time::duration::Duration
 use std::time::time_point::TimePoint
 
@@ -57,7 +58,7 @@ fun sleep(duration: Duration, clock: S32 = cffi::clock_realtime) -> Void {
   # function to hook into the system's sleep functionality.
   let timespec = sppc::CTimespec(sec=duration.seconds, nsec=duration.nanoseconds)
   let err = sppc::clock_nanosleep(clock, 0, &timespec) # != 0 -> error
-  std::mem::ops::drop(timespec)
+  drop(timespec)
 }
 
 !public
@@ -73,5 +74,5 @@ fun sleep_until(time_point: TimePoint, clock: S32 = cffi::clock_realtime) -> Voi
   # function to hook into the system's sleep functionality.
   let timespec = sppc::CTimespec(sec=time_point.duration.seconds, nsec=time_point.duration.nanoseconds)
   let err = sppc::clock_nanosleep(clock, 1, &timespec) # != 0 -> error
-  std::mem::ops::drop(timespec)
+  drop(timespec)
 }

@@ -14,6 +14,7 @@ use std::option::Opt
 use std::option::Some
 use std::vector::Vec
 use std::void::Void
+use std::mem::ops::drop
 use std::ops::drop::Drop
 
 !public
@@ -128,7 +129,7 @@ sup [T] Iterator[T] {
     loop item in self {
       case index < count { gen item }
       else {
-        std::mem::ops::drop(item)
+        drop(item)
         exit
       }
       index += 1_uz
@@ -151,7 +152,7 @@ sup [T] Iterator[T] {
     # the predicate.
 
     # Only yield items that satisfy the predicate.
-    defer std::mem::ops::drop(predicate)
+    defer drop(predicate)
     loop item in self { case predicate(&item) { gen item } }
   }
 
@@ -173,7 +174,7 @@ sup [T] Iterator[T] {
 
     # Yield the results of applying the mapping function to
     # each item.
-    defer std::mem::ops::drop(f)
+    defer drop(f)
     loop item in self { gen f(item) }
   }
 
@@ -233,7 +234,7 @@ sup [T] Iterator[T] {
     # iterator and incrementing a counter for each item.
     let mut count = 0_uz
     loop item in self {
-      defer std::mem::ops::drop(item)
+      defer drop(item)
       count += 1_uz
     }
     ret count
@@ -287,7 +288,7 @@ sup [T] Iterator[T] {
     # @ret: A boolean value that indicates whether the predicate function returns `true` for all items produced by the
     # iterator. The cumulative result of applying the predicate to all items.
 
-    defer std::mem::ops::drop(f)
+    defer drop(f)
 
     # Check if the predicate returns true for all items by iterating
     # through the entire iterator and applying the predicate to each
@@ -313,7 +314,7 @@ sup [T] Iterator[T] {
     # @ret: A boolean value that indicates whether the predicate function returns `true` for at least one item produced
     # by the iterator. The cumulative result of applying the predicate to all items.
 
-    defer std::mem::ops::drop(f)
+    defer drop(f)
 
     # Check if the predicate returns true for any item by iterating
     # through the entire iterator and applying the predicate to each
@@ -343,14 +344,14 @@ sup [T] Iterator[T] {
     # zero-based index of the item in the sequence produced by the iterator. If no such item is found, the method
     # returns `None`.
 
-    defer std::mem::ops::drop(predicate)
+    defer drop(predicate)
 
     # Find the index of the first item that satisfies the predicate by
     # iterating through the entire iterator and applying the predicate
     # to each item, returning the index when a match is found.
     let mut index = 0_uz
     loop item in self {
-      defer std::mem::ops::drop(item)
+      defer drop(item)
       case predicate(&item) { ret Some(val=index) }
       index += 1_uz
     }
@@ -377,7 +378,7 @@ sup [T] Iterator[T] {
     # Apply the function to each item by iterating through the entire
     # iterator and calling the function for each item.
     loop item in self { func(item) }
-    std::mem::ops::drop(func)
+    drop(func)
   }
 
   !public
@@ -404,7 +405,7 @@ sup [T] Iterator[T] {
       # Discarded at the end of the iteration rather than deferred: the matching iteration returns "item", and a
       # deferred discard would free the value being handed back.
       case index == n { ret Some(val=item) }
-      std::mem::ops::drop(item)
+      drop(item)
       index += 1_uz
     }
     ret None
@@ -438,7 +439,7 @@ sup [T: Clone] Iterator[T] {
     # a "buffer-and-clone" approach, as the generator will be
     # exhausted after the first iteration.
     let mut buffer = self.collect[Vec[T]]()
-    defer std::mem::ops::drop(buffer)
+    defer drop(buffer)
     loop true { gen with buffer.clone().iter_mov() }
   }
 }
