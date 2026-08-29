@@ -58,7 +58,7 @@ sup [Yield] GenOnce[Yield] {
   }
 }
 
-!private
+!public
 cls Generated[Yield] {
   # An internal, compiler known type, requires for the safety of coroutines. This is not seen by user code.
   # @type Yield: The type of value that the generator yields.
