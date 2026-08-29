@@ -8,6 +8,7 @@ use std::option::Opt
 use std::option::Some
 use std::string_view::StrView
 use std::void::Void
+use std::mem::ops::drop
 use std::ops::drop::Drop
 use std::ops::eq::Eq
 use std::ops::try::Try
@@ -102,7 +103,7 @@ sup [T, E] Res[T, E] {
     ret case self of {
       is Pass[T](val) { pred(val) }
       else {
-        std::mem::ops::drop(pred)
+        drop(pred)
         false
       }
     }
@@ -134,7 +135,7 @@ sup [T, E] Res[T, E] {
     ret case self of {
       is Fail[E](err) { pred(err) }
       else {
-        std::mem::ops::drop(pred)
+        drop(pred)
         false
       }
     }
@@ -167,7 +168,7 @@ sup [T, E] Res[T, E] {
     ret case self of {
       is Pass[T](val) { pred(val) }
       else {
-        std::mem::ops::drop(pred)
+        drop(pred)
         true
       }
     }
@@ -190,7 +191,7 @@ sup [T, E] Res[T, E] {
     # `Pass`, otherwise return `Fail` with the same error.
     ret case self of {
       is Fail[E](err) {
-        std::mem::ops::drop(that)
+        drop(that)
         Fail(err)
       }
       else { that }
@@ -221,7 +222,7 @@ sup [T, E] Res[T, E] {
         pred(val)
       }
       is Fail[E](err) {
-        std::mem::ops::drop(pred)
+        drop(pred)
         Fail(err)
       }
       else { std::abort::unreachable() }
@@ -245,7 +246,7 @@ sup [T, E] Res[T, E] {
     # is `Pass`, otherwise return the other result.
     ret case self of {
       is Pass[T](val) {
-        std::mem::ops::drop(that)
+        drop(that)
         Pass(val)
       }
       else { that }
@@ -271,7 +272,7 @@ sup [T, E] Res[T, E] {
     # provided predicate on the error.
     ret case self of {
       is Pass[T](val) {
-        std::mem::ops::drop(pred)
+        drop(pred)
         Pass(val)
       }
       is Fail[E](err) { pred(err) }
@@ -300,11 +301,11 @@ sup [T, E] Res[T, E] {
     ret case self of {
       is Pass[T](val) { Pass(val=pred(val)) }
       is Fail[E](err) {
-        std::mem::ops::drop(pred)
+        drop(pred)
         Fail(err)
       }
       else {
-        std::mem::ops::drop(pred)
+        drop(pred)
         std::abort::unreachable()
       }
     }
@@ -330,7 +331,7 @@ sup [T, E] Res[T, E] {
     # wrapped in `Fail`.
     ret case self of {
       is Pass[T](val) {
-        std::mem::ops::drop(pred)
+        drop(pred)
         Pass(val)
       }
       is Fail[E](err) { Fail(err=pred(err)) }
@@ -360,11 +361,11 @@ sup [T, E] Res[T, E] {
     # this is `Pass`, otherwise return the default value.
     ret case self of {
       is Pass[T](val) {
-        std::mem::ops::drop(default)
+        drop(default)
         f(val)
       }
       else {
-        std::mem::ops::drop(f)
+        drop(f)
         default
       }
     }
@@ -395,7 +396,7 @@ sup [T, E] Res[T, E] {
     # function on the error.
     ret case self of {
       is Pass[T](val) {
-        std::mem::ops::drop(default)
+        drop(default)
         f(val)
       }
       is Fail[E](err) { default(err) }
@@ -467,7 +468,7 @@ sup [T, E] Res[T, E] {
     # otherwise return the default value.
     ret case self of {
       is Pass[T](val) {
-        std::mem::ops::drop(default)
+        drop(default)
         val
       }
       else {
@@ -493,7 +494,7 @@ sup [T, E] Res[T, E] {
     # the error.
     ret case self of {
       is Pass[T](val) {
-        std::mem::ops::drop(default)
+        drop(default)
         val
       }
       is Fail[E](err) { default(err) }
@@ -586,11 +587,11 @@ sup [T, E] Res[T, E] {
 }
 
 sup [T: Copy] Pass[T] ext Copy {
-    # Copyable when the value it carries is - see "Some[T]" in "option.spp".
+  # Copyable when the value it carries is - see "Some[T]" in "option.spp".
 }
 
 sup [E: Copy] Fail[E] ext Copy {
-    # Copyable when the error it carries is.
+  # Copyable when the error it carries is.
 }
 
 sup [T, E] Res[T, E] ext Try[Pass[T], Fail[E], T] {
@@ -713,8 +714,8 @@ sup [T: Drop, E: Drop] Res[T, E] ext Drop {
   !versioned(base="1.0.0", new="1.0.0")
   fun drop(self) -> Void {
     case self of {
-      is Pass[T](val) { val.drop() }
-      is Fail[E](err) { err.drop() }
+      is Pass[T](val) { drop(val) }
+      is Fail[E](err) { drop(err) }
     }
   }
 }

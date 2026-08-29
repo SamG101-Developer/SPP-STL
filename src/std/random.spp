@@ -18,6 +18,7 @@ use std::result::Res
 use std::string_view::StrView
 use std::vector::Vec
 use std::void::Void
+use std::mem::ops::drop
 
 cls Rng {
   # The `Rng` type is a pseudo-random number generator (PRNG) that provides methods for generating random numbers and
@@ -144,7 +145,7 @@ sup OsRng {
   !versioned(base="1.0.0", new="1.0.0")
   fun next_u64() -> Res[U64, RngErr] {
     let mut buffer = [0_u8; 8_uz]
-    defer std::mem::ops::drop(buffer)
+    defer drop(buffer)
 
     let err = sppc::getrandom(8_uz, buffer.ptr)
     ret case err != 0 { Fail(err=RngErr) } else { Pass(val=U64::from_le_bytes(&buffer)) }
@@ -154,7 +155,7 @@ sup OsRng {
   !versioned(base="1.0.0", new="1.0.0")
   fun next_u32() -> Res[U32, RngErr] {
     let mut buffer = [0_u8; 4_uz]
-    defer std::mem::ops::drop(buffer)
+    defer drop(buffer)
 
     let err = sppc::getrandom(4_uz, buffer.ptr)
     ret case err != 0 { Fail(err=RngErr) } else { Pass(val=U32::from_le_bytes(&buffer)) }
@@ -166,7 +167,7 @@ sup OsRng {
     let mut buffer = Vec[U8]::new_with_capacity(n)
     let err = sppc::getrandom(n, buffer.ptr)
     ret case err != 0 {
-      std::mem::ops::drop(buffer)
+      drop(buffer)
       Fail(err=RngErr)
     }
     else { Pass(val=buffer) }

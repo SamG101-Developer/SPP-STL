@@ -14,6 +14,7 @@ use std::result::Res
 use std::slot::Slot
 use std::string_view::StrView
 use std::void::Void
+use std::mem::ops::drop
 use std::ops::drop::Drop
 use std::threading::cond_var::CondVar
 use std::threading::cond_var::TimedOut
@@ -82,7 +83,7 @@ sup [T] Mutex[T] {
       ret
     }
     let guard = MutexUnlockGuard(handle=self.handle)
-    defer guard.drop()
+    defer drop(guard)
     gen self.val.get_mut()
   }
 
@@ -93,7 +94,7 @@ sup [T] Mutex[T] {
     # yields the error; neither hands out the guarded value.
     let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
     let err = sppc::pthread_mutex_clocklock(&self.handle, S32::from(clock), &timespec)
-    std::mem::ops::drop(timespec)
+    drop(timespec)
 
     case err == cffi::etimedout {
       gen TimedOut
@@ -104,7 +105,7 @@ sup [T] Mutex[T] {
       ret
     }
     let guard = MutexUnlockGuard(handle=self.handle)
-    defer guard.drop()
+    defer drop(guard)
     gen self.val.get_mut()
   }
 
@@ -126,7 +127,7 @@ sup [T] Mutex[T] {
     # @ret: A generator that yields the guarded value by mutable reference once the predicate is satisfied, and releases
     # the mutex when the guard is dropped.
 
-    defer std::mem::ops::drop(pred)
+    defer drop(pred)
 
     let err = sppc::pthread_mutex_lock(&self.handle)
     case err != 0 {
@@ -134,7 +135,7 @@ sup [T] Mutex[T] {
       ret
     }
     let guard = MutexUnlockGuard(handle=self.handle)
-    defer guard.drop()
+    defer drop(guard)
     loop pred(self.val.get_mut()).not {
       let werr = sppc::pthread_cond_wait(&cond.handle, &self.handle)
       case werr != 0 {
@@ -163,7 +164,7 @@ sup [T] Mutex[T] {
     # @ret: A generator that yields the guarded value by mutable reference if the predicate is satisfied in time, or
     # `TimedOut` if the deadline elapses first.
 
-    defer std::mem::ops::drop(pred)
+    defer drop(pred)
 
     let deadline = TimePoint::now() + timeout
     let err = sppc::pthread_mutex_lock(&self.handle)
@@ -172,7 +173,7 @@ sup [T] Mutex[T] {
       ret
     }
     let guard = MutexUnlockGuard(handle=self.handle)
-    defer guard.drop()
+    defer drop(guard)
 
     loop pred(self.val.get_mut()).not {
       let remaining = deadline.duration_since_saturating(TimePoint::now())
@@ -182,7 +183,7 @@ sup [T] Mutex[T] {
       }
       let timespec = sppc::CTimespec(sec=remaining.seconds, nsec=remaining.nanoseconds)
       let werr = sppc::pthread_cond_clockwait(&cond.handle, &self.handle, S32::from(clock), &timespec)
-      std::mem::ops::drop(timespec)
+      drop(timespec)
 
       case werr != 0 and werr != cffi::etimedout {
         gen ThreadErr::from_errno(werr)
@@ -207,7 +208,7 @@ sup [T] Mutex[T] {
       ret
     }
     let guard = MutexUnlockGuard(handle=self.handle)
-    defer guard.drop()
+    defer drop(guard)
     gen self.val.get_mut()
   }
 
@@ -228,6 +229,6 @@ sup [T: Drop] Mutex[T] ext Drop {
     # Handling.
     let Mutex[T](handle, val) = self
     let err = sppc::pthread_mutex_destroy(&handle)
-    val.take().drop()
+    drop(val.take())
   }
 }

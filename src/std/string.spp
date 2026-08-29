@@ -22,6 +22,7 @@ use std::string_view::Utf8Err
 use std::vector::Vec
 use std::view::View
 use std::void::Void
+use std::mem::ops::drop
 use std::mem::pointer::NonNull
 use std::ops::add::Add
 use std::ops::add::AddAssign
@@ -490,6 +491,6 @@ sup [A: Alloc] Str[A] ext Drop {
   !versioned(base="1.0.0", new="1.0.0")
   fun drop(self) -> Void {
     let Str[A](bytes) = self
-    bytes.drop()
+    drop(bytes)
   }
 }

@@ -16,6 +16,7 @@ use std::string::Str
 use std::string_view::StrView
 use std::vector::Vec
 use std::void::Void
+use std::mem::ops::drop
 use std::fs::file::File
 use std::fs::file::FileMode
 use std::ops::div::Div
@@ -117,7 +118,7 @@ sup Path {
     # @ret: The parent directory as a `Path` object.
 
     let sep = Str::from(self.sep())
-    defer std::mem::ops::drop(sep)
+    defer drop(sep)
 
     let idx = self.inner.rfind(&sep)
     case idx.is_none() { ret Path(inner=Str::from("")) }
@@ -132,7 +133,7 @@ sup Path {
     # @ret: The file name as a `Str` object.
 
     let sep = Str::from(self.sep())
-    defer std::mem::ops::drop(sep)
+    defer drop(sep)
 
     let idx = self.inner.rfind(&sep)
     case idx.is_none() { ret self.inner.clone() }
@@ -151,7 +152,7 @@ sup Path {
     case idx.is_none() { ret file_name }
 
     let stem = Str::from(file_name[0_uz to idx.unwrap()])
-    std::mem::ops::drop(file_name)
+    drop(file_name)
     ret stem
   }
 
@@ -163,7 +164,7 @@ sup Path {
     # @ret: The file extension as a `Str` object.
 
     let file_name = self.file_name()
-    defer std::mem::ops::drop(file_name)
+    defer drop(file_name)
 
     let idx = file_name.rfind(&Str::from('.'))
     case idx.is_none() { ret Str::from("") }
@@ -177,7 +178,7 @@ sup Path {
     # @ret: A vector of path components as `Str` objects.
 
     let sep = Str::from(self.sep())
-    defer std::mem::ops::drop(sep)
+    defer drop(sep)
     ret self.inner
       .split(&sep)
       .map((part: &StrView) Str::from(part))
@@ -207,7 +208,7 @@ sup Path {
     # @todo: Implement platform-specific logic for Windows paths.
 
     let sep = Str::from(self.sep())
-    defer std::mem::ops::drop(sep)
+    defer drop(sep)
     ret self.inner.starts_with(&sep)
   }
 
@@ -255,7 +256,7 @@ sup Path {
 
     # Get the separator and clone this path.
     let sep = Str::from(self.sep())
-    defer std::mem::ops::drop(sep)
+    defer drop(sep)
     let Self(mut inner as new_path) = self
 
     # Only add the separator if neither part has it.
@@ -286,7 +287,7 @@ sup Path {
 
     let file_stem = self.file_stem()
     let new_file_name = case extension.is_empty() { file_stem } else { file_stem + "." + extension }
-    defer std::mem::ops::drop(new_file_name)
+    defer drop(new_file_name)
 
     ret self.with_file_name(&new_file_name)
   }
@@ -324,7 +325,7 @@ sup Path {
     # @ret: `true` if the path is a regular file, `false` otherwise.
 
     let mut info = sppc::CStat()
-    defer std::mem::ops::drop(info)
+    defer drop(info)
 
     let err = sppc::stat(self.inner.ptr, &mut info)
     ret case err != 0 { false } else { (S32::from(info.mode) & cffi::s_ifmt) == cffi::s_ifreg }
@@ -338,7 +339,7 @@ sup Path {
     # @ret: `true` if the path is a directory, `false` otherwise.
 
     let mut info = sppc::CStat()
-    defer std::mem::ops::drop(info)
+    defer drop(info)
 
     let err = sppc::stat(self.inner.ptr, &mut info)
     ret case err != 0 { false } else { (S32::from(info.mode) & cffi::s_ifmt) == cffi::s_ifdir }
@@ -352,7 +353,7 @@ sup Path {
     # @ret: `true` if the path is a symbolic link, `false` otherwise.
 
     let mut info = sppc::CStat()
-    defer std::mem::ops::drop(info)
+    defer drop(info)
 
     let err = sppc::lstat(self.inner.ptr, &mut info)
     ret case err != 0 { false } else { (S32::from(info.mode) & cffi::s_ifmt) == cffi::s_iflnk }
@@ -393,7 +394,7 @@ sup Path {
 
     let components = self.components()
     let mut current_path = Path()
-    defer std::mem::ops::drop(current_path)
+    defer drop(current_path)
 
     loop component in components.iter_mov() {
       current_path /= Path(inner=component)
@@ -456,7 +457,7 @@ sup Path {
     # as it won't be returned; it's strictly to go to C to get its
     # attributes set from the sppc library.
     let mut info = sppc::CStat()
-    defer std::mem::ops::drop(info)
+    defer drop(info)
 
     # Call the C function to fill the stat's attributes. Consider
     # the error where this function fails, and return the failure.
@@ -469,9 +470,9 @@ sup Path {
     # "in" file is where the contents are coming from, and the "out"
     # file is where the contents are going to. Defer their closing.
     let file_in = File::open(&self, FileMode().read())?
-    defer std::mem::ops::drop(file_in)
+    defer drop(file_in)
     let file_out = File::open(new_path, FileMode().write())?
-    defer std::mem::ops::drop(file_out)
+    defer drop(file_out)
 
     # Run the sppc copyfile system call to do the actual file
     # logic, and handle the error with the final returned value
@@ -528,7 +529,7 @@ sup Path ext Div {
     # @let that: The right-hand side path to join with the left-hand side path.
     # @ret: A new `Path` object representing the joined path.
 
-    defer std::mem::ops::drop(that)
+    defer drop(that)
     ret self.join(&that)
   }
 }
@@ -542,7 +543,7 @@ sup Path ext DivAssign {
     # @let that: The right-hand side path to join with the left-hand side path.
     # @ret: The original `Path` object is modified to represent the joined path.
 
-    defer std::mem::ops::drop(that)
+    defer drop(that)
     self@ = self.join(&that)
   }
 }
@@ -555,6 +556,6 @@ sup Path ext Drop {
   !versioned(base="1.0.0", new="1.0.0")
   fun drop(self) -> Void {
     let Path(inner) = self
-    inner.drop()
+    drop(inner)
   }
 }

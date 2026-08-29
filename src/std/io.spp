@@ -19,6 +19,8 @@ use std::string_view::Utf8Err
 use std::vector::Vec
 use std::view::View
 use std::void::Void
+use std::mem::ops::drop
+use std::ops::drop::Drop
 
 !public !zero_type
 cls StreamEofError { }
@@ -189,7 +191,7 @@ sup Read {
       # Ignore interruption errors and conintue.
       let try = self.read(buf[mut filled to target])
       case try is Fail[StreamErr](&err) and err is StreamInterruptedError() {
-        std::mem::ops::drop(try)
+        drop(try)
         skip
       }
 
@@ -220,7 +222,7 @@ sup Read {
 
     # Define a temporary chunk buffer to read into.
     let mut chunk = Vec[U8]::new_with_capacity(4096_uz)
-    defer chunk.drop()
+    defer drop(chunk)
     let mut total = 0_uz
 
     # Loop until we encounter an EOF (0 byte read).
@@ -229,7 +231,7 @@ sup Read {
       # Ignore interruption errors and continue.
       let try = self.read(&mut chunk)
       case try is Fail[StreamErr](&err) and err is StreamInterruptedError() {
-        std::mem::ops::drop(try)
+        drop(try)
         skip
       }
 
@@ -286,7 +288,7 @@ sup Write {
       # Bound by borrow: a binary "is" matches on one path only, so binding the error by value would leave "try"
       # partially moved on that path and whole on the other, which is not a state it can be discarded from.
       case try is Fail[StreamErr](&err) and err is StreamInterruptedError() {
-        std::mem::ops::drop(try)
+        drop(try)
         skip
       }
 
@@ -427,7 +429,7 @@ sup [R: Read] BufRead[R] {
     loop true {
       let try = self.inner.read(&mut self.buf)
       case try is Fail[StreamErr](&err) and err is StreamInterruptedError() {
-        std::mem::ops::drop(try)
+        drop(try)
         skip
       }
 
@@ -497,7 +499,7 @@ sup [R: Read] BufRead[R] {
   !public
   fun read_line(&mut self, out: &mut Str) -> Res[USize, StreamErr] {
     let mut bytes = Vec[U8]::new()
-    defer bytes.drop()
+    defer drop(bytes)
     let result = self.read_until(b'\n', &mut bytes)
     case result of {
       is Fail[StreamErr](err) { ret Fail(err) }
@@ -553,3 +555,5 @@ sup [W: Write] BufWrite[W] {
   #         ret Pass(val=Pass[Void]())
   #     }
 }
+
+# Todo: Discarding a `BufWrite` should flush whatever is still buffered

@@ -17,6 +17,7 @@ use std::result::Pass
 use std::result::Res
 use std::view::View
 use std::void::Void
+use std::mem::ops::drop
 use std::net::socket::SockAddr
 use std::net::socket::SockErr
 use std::net::socket::Socket
@@ -54,7 +55,7 @@ sup TcpListener {
     let listener = TcpListener(fd)
     let err = sppc::bind(listener.fd, &addr.storage())
     case err == 0 {
-      std::mem::ops::drop(listener)
+      drop(listener)
       ret Fail(err=SockErr::from_errno(err))
     }
     ret Pass(val=listener)
@@ -92,7 +93,7 @@ sup TcpListener {
     let mut storage = sppc::CSockaddrStorage()
     let err = sppc::accept(self.fd, &mut storage, &mut new_fd)
     case new_fd < 0 {
-      std::mem::ops::drop(storage)
+      drop(storage)
       ret Fail(err=SockErr::from_errno(err))
     }
 
@@ -100,7 +101,7 @@ sup TcpListener {
     # file descriptor.
     let stream = TcpStream(fd=new_fd)
     let addr = SockAddr::from_storage(&storage)
-    std::mem::ops::drop(storage)
+    drop(storage)
     ret Pass(val=(stream, addr))
   }
 }
@@ -127,7 +128,7 @@ sup TcpStream {
     let stream = TcpStream(fd)
     let err = sppc::connect(stream.fd, &addr.storage())
     case err == 0 {
-      std::mem::ops::drop(stream)
+      drop(stream)
       ret Fail(err=SockErr::from_errno(err))
     }
     ret Pass(val=stream)
@@ -363,12 +364,12 @@ sup TcpStream {
     let mut storage = sppc::CSockaddrStorage()
     let err = sppc::getpeername(self.fd, &mut storage)
     case err < 0 {
-      std::mem::ops::drop(storage)
+      drop(storage)
       ret Fail(err=SockErr::from_errno(err))
     }
 
     let addr = SockAddr::from_storage(&storage)
-    std::mem::ops::drop(storage)
+    drop(storage)
     ret Pass(val=addr)
   }
 }

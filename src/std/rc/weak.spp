@@ -9,6 +9,7 @@ use std::option::None
 use std::option::Opt
 use std::option::Some
 use std::void::Void
+use std::mem::ops::drop
 use std::mem::pointer::NonNull
 use std::ops::drop::Drop
 use std::rc::rc::ControlBlock
@@ -78,7 +79,7 @@ sup [T, A: Alloc] Weak[T, A] ext Drop {
     # @ret: Nothing; this is invoked for its cleanup side effects when a `Weak` is destroyed.
 
     let Weak[T, A](mut ptr, alloc) = self
-    defer std::mem::ops::drop(alloc)
+    defer drop(alloc)
     ptr.weak_counter -= 1_uz
 
     case ptr.strong_counter == 0_uz and ptr.weak_counter == 0_uz {

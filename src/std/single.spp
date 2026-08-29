@@ -10,6 +10,7 @@ use std::result::Fail
 use std::result::Pass
 use std::result::Res
 use std::void::Void
+use std::mem::ops::drop
 use std::mem::pointer::NonNull
 use std::ops::drop::Drop
 use std::ops::fwd::FwdMut
@@ -110,8 +111,8 @@ sup [T, A: Alloc] Single[T, A] {
     let mut ptr = case alloc.allocate_array[T](1_uz) of {
       is Pass[NonNull[T]](val as p) { p }
       is Fail[AllocErr](err as e) {
-        std::mem::ops::drop(val)
-        std::mem::ops::drop(alloc)
+        drop(val)
+        drop(alloc)
         ret Fail(err=e)
       }
       else { std::abort::unreachable() }
@@ -154,7 +155,7 @@ sup [T, A: Alloc] Single[T, A] {
     # is consumed, it is safe to do so.
     # @ret: The value owned by the `Single` instance.
 
-    defer std::mem::ops::drop(self)
+    defer drop(self)
     ret self.ptr.read()
   }
 }
@@ -182,7 +183,7 @@ sup [T, A: Alloc] Single[T, A] ext Drop {
     # types, and this ensures the `Single` behaves correctly when it goes out of scope.
 
     let Self(mut ptr, alloc) = self
-    defer std::mem::ops::drop(alloc)
+    defer drop(alloc)
 
     std::mem::ops::drop_in_place(&mut ptr)
     alloc.deallocate_array(ptr, 1_uz)

@@ -6,6 +6,7 @@ use std::annotations::versioned
 use std::copy::Copy
 use std::generator::GenOnce
 use std::void::Void
+use std::mem::ops::drop
 
 !public !thread_hazard
 !versioned(base="1.0.0", new="1.0.0")
@@ -24,7 +25,7 @@ sup [T] Slot[T] {
   !versioned(base="1.0.0", new="1.0.0")
   fun set(&self, val: T) -> Void {
     let old = self.replace(val)
-    std::mem::ops::drop(old)
+    drop(old)
   }
 
   !public

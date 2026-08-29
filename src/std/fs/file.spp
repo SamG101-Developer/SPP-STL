@@ -16,6 +16,7 @@ use std::result::Pass
 use std::result::Res
 use std::view::View
 use std::void::Void
+use std::mem::ops::drop
 use std::fs::path::Path
 use std::fs::path::PathErr
 use std::ops::drop::Drop
@@ -249,7 +250,7 @@ sup File {
     # @ret: The size of the file in bytes as a `USize` value.
 
     let mut info = sppc::CStat()
-    defer std::mem::ops::drop(info)
+    defer drop(info)
 
     let err = sppc::fstat(self.fd, &mut info)
     ret case err == 0 { USize::from(info.size) } else { 0_uz }
@@ -269,7 +270,7 @@ sup File {
 
     let fl = sppc::CFlock(type_=cffi::f_wrlck, whence=cffi::seek_set, start=0_sz, len=0_sz)
     let err = sppc::fcntl(self.fd, case non_blocking { cffi::f_setlk } else { cffi::f_setlkw }, &fl)
-    std::mem::ops::drop(fl)
+    drop(fl)
 
     ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
   }
@@ -289,7 +290,7 @@ sup File {
 
     let fl = sppc::CFlock(type_=cffi::f_rdlck, whence=cffi::seek_set, start=0_sz, len=0_sz)
     let err = sppc::fcntl(self.fd, case non_blocking { cffi::f_setlk } else { cffi::f_setlkw }, &fl)
-    std::mem::ops::drop(fl)
+    drop(fl)
 
     ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
   }
@@ -305,7 +306,7 @@ sup File {
 
     let fl = sppc::CFlock(type_=cffi::f_unlck, whence=cffi::seek_set, start=0_sz, len=0_sz)
     let err = sppc::fcntl(self.fd, cffi::f_setlk, &fl)
-    std::mem::ops::drop(fl)
+    drop(fl)
 
     ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
   }
@@ -362,7 +363,7 @@ sup File ext Seek {
     let err = sppc::fstat(self.fd, &mut info)
 
     let len = SSize::from(info.size)
-    std::mem::ops::drop(info)
+    drop(info)
     ret case err == 0 { Pass(val=len) } else { Fail(err=StreamErr::from_errno(err)) }
   }
 

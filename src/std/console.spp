@@ -19,6 +19,8 @@ use std::string::Str
 use std::string_view::StrView
 use std::view::View
 use std::void::Void
+use std::mem::ops::drop
+use std::ops::drop::Drop
 
 !package
 !versioned(base="1.0.0", new="1.0.0")
@@ -129,6 +131,11 @@ sup StderrStream ext Write {
   }
 }
 
+# A standard stream handle owns nothing: the descriptor belongs to the process and outlives any handle onto it, and the
+# writes go straight to it rather than through a buffer that would need flushing. None of the three needs a `Drop`,
+# then - `drop` destroys structurally, and a handle with no attributes has nothing to destroy. Anything that wants the
+# data on disk should call `flush` first, which reports whether it worked.
+
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun print(str: &StrView) -> Void {
@@ -140,7 +147,7 @@ fun print(str: &StrView) -> Void {
   # Create a new `StdoutStream` instance and write the
   # string to the standard output.
   let mut stdout = StdoutStream()
-  defer std::mem::ops::drop(stdout)
+  defer drop(stdout)
   let n = stdout.write_all(str.view_ref()).expect("Failed to print")
 }
 
@@ -156,7 +163,7 @@ fun println(str: &StrView) -> Void {
   # Create a new `StdoutStream` instance and write the
   # string followed by a newline to the standard output.
   let mut stdout = StdoutStream()
-  defer std::mem::ops::drop(stdout)
+  defer drop(stdout)
 
   let n = stdout.write_all(str.view_ref()).expect("Failed to print")
   let n = stdout.write_all(b"\n").expect("Failed to print")
@@ -173,7 +180,7 @@ fun eprint(str: &StrView) -> Void {
   # Create a new `StderrStream` instance and write the
   # string to the standard error.
   let mut stderr = StderrStream()
-  defer std::mem::ops::drop(stderr)
+  defer drop(stderr)
   let n = stderr.write_all(str.view_ref()).expect("Failed to print")
 }
 
@@ -189,7 +196,7 @@ fun eprintln(str: &StrView) -> Void {
   # Create a new `StderrStream` instance and write the
   # string followed by a newline to the standard error.
   let mut stderr = StderrStream()
-  defer std::mem::ops::drop(stderr)
+  defer drop(stderr)
 
   let n = stderr.write_all(str.view_ref()).expect("Failed to print")
   let n = stderr.write_all(b"\n").expect("Failed to print")
@@ -214,7 +221,7 @@ fun input(prompt: &StrView = "") -> Str {
   # Create a new `StdinStream` instance and read a line of
   # input from the standard input.
   let mut stdin = BufRead[StdinStream]()
-  defer std::mem::ops::drop(stdin)
+  defer drop(stdin)
   let mut out = Str::new()
 
   let n = stdin.read_line(&mut out).expect("Failed to read")

@@ -39,7 +39,8 @@ sup Clone {
     # operation. The `source` instance is not modified by this method, and the `self` instance is updated to be a clone
     # of the `source`.
 
-    # Set the internal value of this borrow from the source's clone.
+    # The default behaviour is to Set the internal value of
+    # this "self" borrow, from the source's clone.
     self@ = source.clone()
   }
 }

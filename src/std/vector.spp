@@ -28,6 +28,7 @@ use std::result::Fail
 use std::result::Res
 use std::view::View
 use std::void::Void
+use std::mem::ops::drop
 use std::mem::raw_buf::RawBuf
 use std::ops::add::Add
 use std::ops::add::AddAssign
@@ -121,7 +122,7 @@ sup [T] Vec[T] {
 
     let mut vec = Self::new_with_capacity_in(len, GlobalAlloc)
     loop i in Range[USize]::between(0_uz, len) { vec.append_unchecked(f(i)) }
-    std::mem::ops::drop(f)
+    drop(f)
 
     vec.length = len
     ret vec
@@ -171,7 +172,7 @@ sup [T, A: Alloc] Vec[T, A] {
 
     let mut vec = Self::new_with_capacity_in(len, alloc)
     # std::mem::ops::mem_set(&mut vec.buffer.ptr, element, len) # todo
-    std::mem::ops::drop(element) # TODO ^^^
+    drop(element) # TODO ^^^
     vec.length = len
     ret vec
   }
@@ -301,7 +302,7 @@ sup [T, A: Alloc] Vec[T, A] {
       ret
     }
     else {
-      std::mem::ops::drop(element)
+      drop(element)
     }
 
     ret Fail(err=AllocOverflowErr)
@@ -386,7 +387,7 @@ sup [T, A: Alloc] Vec[T, A] {
     # Discharged on the early path rather than deferred: past the emptiness check "f" is consumed by being called, so
     # a deferred discard would consume it a second time on every path that got that far.
     case self.is_empty() {
-      std::mem::ops::drop(f)
+      drop(f)
       ret None
     }
     let last_index = self.len() - 1_uz
@@ -468,7 +469,7 @@ sup [T, A: Alloc] Vec[T, A] {
       &mut self.buffer.ptr, &that.buffer.ptr,
       that.len() * elem_size, self.len() * elem_size)
     self.length += that.len()
-    std::mem::ops::drop(that)
+    drop(that)
   }
 
   !private
@@ -498,7 +499,7 @@ sup [T, A: Alloc] Vec[T, A] {
       &mut self.buffer.ptr, &that.buffer.ptr,
       that.len() * elem_size, index * elem_size)
     self.length += that.len()
-    std::mem::ops::drop(that)
+    drop(that)
   }
 
   !private
@@ -525,7 +526,7 @@ sup [T: Clone, A: Alloc] Vec[T, A] {
 
     case new_len <= self.len() {
       self.truncate(new_len)
-      std::mem::ops::drop(element)
+      drop(element)
       ret
     }
 
@@ -592,7 +593,7 @@ sup [T, A: Alloc] Vec[T, A] ext IterMov[T] {
     # `length` and nothing is left to drop. `length` is left untouched, since `start` alone tracks progress.
     # @ret: An iterator that moves the vector's elements out in order.
 
-    defer std::mem::ops::drop(self) # TODO: Refactor to remove "start".
+    defer drop(self) # TODO: Refactor to remove "start".
     loop i in Range[USize]::between(0_uz, self.length) {
       self.start = i + 1_uz
       gen self.buffer.take_at(i).unwrap()
@@ -609,7 +610,7 @@ sup [T, A: Alloc] Vec[T, A] ext RevIterMov[T] {
     # no leak.
     # @ret: An iterator that moves the vector's elements out in reverse order.
 
-    defer std::mem::ops::drop(self) # TODO: Refactor to remove "start".
+    defer drop(self) # TODO: Refactor to remove "start".
     loop true {
       case self.length == 0_uz { ret }
       self.length -= 1_uz
@@ -705,7 +706,7 @@ sup [T] Vec[T] ext FromIterator[T] {
     # from the generator into it.
     let mut vec = Self::new()
     # loop generator.res() is T() { vec.append(val) } # todo
-    std::mem::ops::drop(iter)
+    drop(iter)
     ret vec
   }
 }
@@ -735,6 +736,6 @@ sup [T, A: Alloc] Vec[T, A] ext Drop {
 
     let Vec[T, A](mut buffer, length, start) = self
     buffer.clear_range(start, length - start)
-    buffer.drop()
+    drop(buffer)
   }
 }

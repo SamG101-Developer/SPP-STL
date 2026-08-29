@@ -11,6 +11,7 @@ use std::result::Pass
 use std::result::Res
 use std::slot::Slot
 use std::void::Void
+use std::mem::ops::drop
 use std::ops::drop::Drop
 use std::threading::cond_var::TimedOut
 use std::threading::mutex::WouldBlock
@@ -73,7 +74,7 @@ sup [T] RwLock[T] {
       ret
     }
     let guard = RwLockUnlockGuard(handle=self.handle)
-    defer guard.drop()
+    defer drop(guard)
     gen self.val.get_ref()
   }
 
@@ -88,7 +89,7 @@ sup [T] RwLock[T] {
       ret
     }
     let guard = RwLockUnlockGuard(handle=self.handle)
-    defer guard.drop()
+    defer drop(guard)
     gen self.val.get_mut()
   }
 
@@ -99,7 +100,7 @@ sup [T] RwLock[T] {
     # other failure yields the error; neither hands out the guarded value.
     let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
     let err = sppc::pthread_rwlock_clockrdlock(&self.handle, S32::from(clock), &timespec)
-    std::mem::ops::drop(timespec)
+    drop(timespec)
 
     case err == cffi::etimedout {
       gen TimedOut
@@ -110,7 +111,7 @@ sup [T] RwLock[T] {
       ret
     }
     let guard = RwLockUnlockGuard(handle=self.handle)
-    defer guard.drop()
+    defer drop(guard)
     gen self.val.get_ref()
   }
 
@@ -121,7 +122,7 @@ sup [T] RwLock[T] {
     # other failure yields the error.
     let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
     let err = sppc::pthread_rwlock_clockwrlock(&self.handle, S32::from(clock), &timespec)
-    std::mem::ops::drop(timespec)
+    drop(timespec)
 
     case err == cffi::etimedout {
       gen TimedOut
@@ -132,7 +133,7 @@ sup [T] RwLock[T] {
       ret
     }
     let guard = RwLockUnlockGuard(handle=self.handle)
-    defer guard.drop()
+    defer drop(guard)
     gen self.val.get_mut()
   }
 
@@ -151,7 +152,7 @@ sup [T] RwLock[T] {
       ret
     }
     let guard = RwLockUnlockGuard(handle=self.handle)
-    defer guard.drop()
+    defer drop(guard)
     gen self.val.get_mut()
   }
 
@@ -170,7 +171,7 @@ sup [T] RwLock[T] {
       ret
     }
     let guard = RwLockUnlockGuard(handle=self.handle)
-    defer guard.drop()
+    defer drop(guard)
     gen self.val.get_ref()
   }
 }
@@ -182,6 +183,6 @@ sup [T: Drop] RwLock[T] ext Drop {
     # go somewhere, which is why this needs "T: Drop"; a caller that wants the value back should use "take".
     let RwLock[T](handle, val) = self
     let err = sppc::pthread_rwlock_destroy(&handle)
-    val.take().drop()
+    drop(val.take())
   }
 }
