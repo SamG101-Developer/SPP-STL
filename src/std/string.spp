@@ -9,6 +9,8 @@ use std::char::Char
 use std::clone::Clone
 use std::generator::GenOnce
 use std::number::U8
+use std::number::U32
+use std::number::U64
 use std::number::USize
 use std::option::None
 use std::option::Opt
@@ -17,6 +19,9 @@ use std::range::Range
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
+use std::num::sized_floating_point::SizedFloatingPoint
+use std::num::sized_integer_signed::SizedIntegerSigned
+use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 use std::string_view::StrView
 use std::string_view::Utf8Err
 use std::vector::Vec
@@ -492,5 +497,113 @@ sup [A: Alloc] Str[A] ext Drop {
   fun drop(self) -> Void {
     let Str[A](bytes) = self
     drop(bytes)
+  }
+}
+
+sup [cmp w: U32] Str ext From[SizedIntegerUnsigned[w]] {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from(mut that: SizedIntegerUnsigned[w]) -> Self {
+    # Render an unsigned integer in base ten.
+    # @let that: The value to render.
+    # @ret: The decimal digits of `that`, with no sign and no leading zeros.
+
+    case that.is_zero() { ret Str::from("0") }
+
+    let mut buf = [0_u8; 80_uz]
+    let mut pos = buf.len()
+    let ten = SizedIntegerUnsigned[w]::from(10_u32)
+
+    loop that.is_zero().not {
+      pos -= 1_uz
+      buf[mut pos]@ = b'0' + U8::from(that % ten)
+      that /= ten
+    }
+
+    ret Str::from_utf8(&buf[pos to buf.len()]).unwrap()
+  }
+}
+
+sup [cmp w: U32] Str ext From[SizedIntegerSigned[w]] {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from(mut that: SizedIntegerSigned[w]) -> Self {
+    # Render a signed integer in base ten.
+    #
+    # The digits are accumulated on the *negative* side rather than by taking `abs` first: the most negative value of a
+    # width has no positive counterpart, so `abs` on it overflows. Remainder truncates toward zero, so `that % ten` of
+    # a negative value is in `-9 ..= 0`, and negating that single digit is always in range.
+    # @let that: The value to render.
+    # @ret: The decimal digits of `that`, preceded by `-` when it is negative.
+
+    case that.is_zero() { ret Str::from("0") }
+
+    let negative = that.is_negative()
+    let mut buf = [0_u8; 80_uz]
+    let mut pos = buf.len()
+    let ten = SizedIntegerSigned[w]::from(10_u32)
+
+    # Force the value negative so that one loop covers both
+    # signs and neither end of the range overflows.
+    case negative.not { that = that.neg() }
+
+    loop that.is_zero().not {
+      pos -= 1_uz
+      buf[mut pos]@ = b'0' + U8::from((that % ten).neg())
+      that /= ten
+    }
+
+    case negative {
+      pos -= 1_uz
+      buf[mut pos]@ = b'-'
+    }
+
+    ret Str::from_utf8(&buf[pos to buf.len()]).unwrap()
+  }
+}
+
+sup [cmp w: U32] Str ext From[SizedFloatingPoint[w]] {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from(that: SizedFloatingPoint[w]) -> Self {
+    # Render a floating point value in base ten, as an integer part, a point, and `kFracDigits` fractional digits.
+    #
+    # Todo: this is a fixed-precision rendering, not a shortest round-tripping one - `Str::from(0.1_f64)` gives
+    #  "0.100000" rather than "0.1", and a value needing more than `kFracDigits` places is truncated rather than
+    #  rounded. Producing the shortest string that reads back as the same value needs a Ryu- or Grisu-style algorithm.
+    #  This is enough to report a number in a message, which is what it is currently used for.
+    # @let that: The value to render.
+    # @ret: The decimal rendering of `that`, or a name for the values that have no digits.
+
+    # The values with no decimal expansion at all are
+    # named rather than rendered.
+    case that.is_signaling_nan() or that.is_quiet_nan() { ret Str::from("nan") }
+    case that.is_positive_infinity() { ret Str::from("inf") }
+    case that.is_negative_infinity() { ret Str::from("-inf") }
+
+    let negative = that.is_negative()
+    let magnitude = that.abs()
+
+    # The integer part, taken through U64 so that the
+    # unsigned rendering above does the digits.
+    let whole = magnitude.trunc()
+    let mut out = case negative { Str::from("-") } else { Str::from("") }
+    let whole_str = Str::from(U64::from(whole))
+    out.append_str(&whole_str)
+    drop(whole_str)
+
+    # Then a fixed number of fractional digits, taken
+    # one at a time off the remaining fraction.
+    let mut frac = magnitude - whole
+    out.append('.')
+
+    let ten = SizedFloatingPoint[w]::from(10_u32)
+    let mut i = 0_uz
+    loop i < 6_uz {
+      frac *= ten
+      let digit = frac.trunc()
+      out.append(Char::from(48_u32 + U32::from(digit)))
+      frac -= digit
+      i += 1_uz
+    }
+
+    ret out
   }
 }
