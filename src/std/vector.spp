@@ -114,7 +114,7 @@ sup [T] Vec[T] {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun new_from_fun(len: USize, mut f: FunMut[(USize,), T]) -> Self {
+  fun new_from_fun[F: FunMut[(USize,), T]](len: USize, mut f: F) -> Self {
     #
     # @let len:
     # @let f:
@@ -379,7 +379,7 @@ sup [T, A: Alloc] Vec[T, A] {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun take_last_if(&mut self, mut f: FunMov[(&mut T,), Bool]) -> Opt[T] {
+  fun take_last_if[F: FunMov[(&mut T,), Bool]](&mut self, mut f: F) -> Opt[T] {
     #
     # @let f:
     # @ret:
@@ -681,7 +681,7 @@ sup [T: Eq, A: Alloc] Vec[T, A] ext Eq {
 
     case self.len() != that.len() { ret true }
     loop i in Range[USize]::between(0_uz, self.len()) {
-      case self[i] == that[i] { ret true }
+      case self[i] != that[i] { ret true }
     }
     ret false
   }
