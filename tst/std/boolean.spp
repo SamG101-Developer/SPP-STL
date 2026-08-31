@@ -1,24 +1,63 @@
 !test(group="std/boolean")
 fun test_logical_not() -> Void {
-    std::debug::assert(true.not.not, "not is an involution")
-    std::debug::assert(false.not, "not false is true")
+  std::debug::assert(true.not.not, "not is an involution")
+  std::debug::assert(false.not, "not false is true")
 }
 
 !test(group="std/boolean")
 fun test_equality() -> Void {
-    std::debug::assert(true == true, "true equals true")
-    std::debug::assert(false == false, "false equals false")
-    std::debug::assert(true != false, "true differs from false")
+  std::debug::assert(true == true, "true equals true")
+  std::debug::assert(false == false, "false equals false")
+  std::debug::assert(true != false, "true differs from false")
 }
 
 !test(group="std/boolean")
 fun test_zero_and_is_zero() -> Void {
-    std::debug::assert(false.is_zero(), "false is the zero value")
-    std::debug::assert(true.is_zero().not, "true is not the zero value")
+  std::debug::assert(false.is_zero(), "false is the zero value")
+  std::debug::assert(true.is_zero().not, "true is not the zero value")
 }
 
 !test(group="std/boolean")
 fun test_conversion_from_integers() -> Void {
-    std::debug::assert(Bool::from(1_u32), "a non-zero integer is true")
-    std::debug::assert(Bool::from(0_u32).not, "zero is false")
+  std::debug::assert(Bool::from(1_u32), "a non-zero integer is true")
+  std::debug::assert(Bool::from(0_u32).not, "zero is false")
+}
+
+!test(group="std/boolean")
+fun test_logical_and_short_circuits_on_false() -> Void {
+  std::debug::assert(true.and_(true), "true and true")
+  std::debug::assert(true.and_(false).not, "true and false")
+  std::debug::assert(false.and_(true).not, "false and true")
+  std::debug::assert(false.and_(false).not, "false and false")
+}
+
+!test(group="std/boolean")
+fun test_logical_ior_holds_when_either_side_does() -> Void {
+  std::debug::assert(true.ior_(true), "true or true")
+  std::debug::assert(true.ior_(false), "true or false")
+  std::debug::assert(false.ior_(true), "false or true")
+  std::debug::assert(false.ior_(false).not, "false or false")
+}
+
+!test(group="std/boolean")
+fun test_bitwise_operators_match_the_logical_ones() -> Void {
+  std::debug::assert(true.bit_and(true), "and")
+  std::debug::assert(true.bit_and(false).not, "and with false")
+  std::debug::assert(false.bit_ior(true), "ior")
+  std::debug::assert(false.bit_ior(false).not, "ior of two falses")
+  std::debug::assert(true.bit_xor(false), "xor of differing values")
+  std::debug::assert(true.bit_xor(true).not, "xor of equal values")
+  std::debug::assert(false.bit_xor(false).not, "xor of two falses")
+}
+
+!test(group="std/boolean")
+fun test_bit_not_inverts() -> Void {
+  std::debug::assert(true.bit_not().not, "not true")
+  std::debug::assert(false.bit_not(), "not false")
+}
+
+!test(group="std/boolean")
+fun test_double_negation_is_the_identity() -> Void {
+  std::debug::assert(true.not.not, "true survives two negations")
+  std::debug::assert(false.not.not.not, "and false does too")
 }

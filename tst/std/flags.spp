@@ -1,0 +1,100 @@
+# Coverage for "std::flags". "Flags" is a "Copy" type, so no value here needs discharging.
+
+!test(group="std/flags")
+fun test_new_is_empty_and_all_is_full() -> Void {
+  std::debug::assert(std::flags::Flags::new().is_empty(), "a fresh set holds nothing")
+  std::debug::assert(std::flags::Flags::new().is_all().not, "and is not full")
+  std::debug::assert(std::flags::Flags::all().is_all(), "the full set is full")
+  std::debug::assert(std::flags::Flags::all().is_empty().not, "and is not empty")
+}
+
+!test(group="std/flags")
+fun test_bit_selects_a_single_flag() -> Void {
+  let f = std::flags::Flags::bit(0_u32)
+  std::debug::assert(f.count() == 1_u32, "one bit set")
+  std::debug::assert(f.is_empty().not, "and so not empty")
+}
+
+!test(group="std/flags")
+fun test_from_bits_and_to_bits_round_trip() -> Void {
+  std::debug::assert(std::flags::Flags::from_bits(0_s32).to_bits() == 0_s32, "zero")
+  std::debug::assert(std::flags::Flags::from_bits(5_s32).to_bits() == 5_s32, "an arbitrary pattern")
+}
+
+!test(group="std/flags")
+fun test_has_reports_membership() -> Void {
+  let a = std::flags::Flags::bit(0_u32)
+  let b = std::flags::Flags::bit(1_u32)
+  let both = a.union(b)
+  std::debug::assert(both.has(a), "the first is present")
+  std::debug::assert(both.has(b), "the second is present")
+  std::debug::assert(std::flags::Flags::new().has(a).not, "an empty set holds nothing")
+}
+
+!test(group="std/flags")
+fun test_has_all_and_has_any_and_has_none() -> Void {
+  let a = std::flags::Flags::bit(0_u32)
+  let b = std::flags::Flags::bit(1_u32)
+  let c = std::flags::Flags::bit(2_u32)
+  let ab = a.union(b)
+  std::debug::assert(ab.has_all(ab), "a set contains itself")
+  std::debug::assert(ab.has_all(a.union(c)).not, "not every one of a wider set")
+  std::debug::assert(ab.has_any(a.union(c)), "but at least one of it")
+  std::debug::assert(ab.has_none(c), "and none of a disjoint one")
+  std::debug::assert(ab.has_none(a).not, "which an overlapping one is not")
+}
+
+!test(group="std/flags")
+fun test_count_reports_the_number_of_set_bits() -> Void {
+  let a = std::flags::Flags::bit(0_u32)
+  let b = std::flags::Flags::bit(1_u32)
+  std::debug::assert(std::flags::Flags::new().count() == 0_u32, "none")
+  std::debug::assert(a.count() == 1_u32, "one")
+  std::debug::assert(a.union(b).count() == 2_u32, "two")
+}
+
+!test(group="std/flags")
+fun test_add_and_remove_and_toggle_mutate_in_place() -> Void {
+  let a = std::flags::Flags::bit(0_u32)
+  let mut f = std::flags::Flags::new()
+
+  f.add(a)
+  std::debug::assert(f.has(a), "added")
+  f.remove(a)
+  std::debug::assert(f.has(a).not, "removed")
+  f.toggle(a)
+  std::debug::assert(f.has(a), "toggled on")
+  f.toggle(a)
+  std::debug::assert(f.has(a).not, "toggled off again")
+}
+
+!test(group="std/flags")
+fun test_set_adds_or_removes_by_a_boolean() -> Void {
+  let a = std::flags::Flags::bit(0_u32)
+  let mut f = std::flags::Flags::new()
+  f.set(a, true)
+  std::debug::assert(f.has(a), "set true adds")
+  f.set(a, false)
+  std::debug::assert(f.has(a).not, "set false removes")
+}
+
+!test(group="std/flags")
+fun test_clear_empties_the_set() -> Void {
+  let mut f = std::flags::Flags::all()
+  f.clear()
+  std::debug::assert(f.is_empty(), "cleared")
+  std::debug::assert(f.count() == 0_u32, "nothing left")
+}
+
+!test(group="std/flags")
+fun test_set_operations_combine_and_subtract() -> Void {
+  let a = std::flags::Flags::bit(0_u32)
+  let b = std::flags::Flags::bit(1_u32)
+  let ab = a.union(b)
+
+  std::debug::assert(ab.count() == 2_u32, "a union holds both")
+  std::debug::assert(ab.intersection(a).count() == 1_u32, "an intersection holds the common one")
+  std::debug::assert(ab.difference(a).has(b), "a difference keeps what the other lacks")
+  std::debug::assert(ab.difference(a).has(a).not, "and drops what it has")
+  std::debug::assert(a.intersection(b).is_empty(), "disjoint flags intersect to nothing")
+}

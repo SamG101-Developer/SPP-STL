@@ -1,0 +1,89 @@
+# Coverage for "std::mem::ops" - the size and alignment queries, and the value-moving helpers.
+
+!test(group="std/mem/ops")
+fun test_size_of_reports_the_layout_size() -> Void {
+  std::debug::assert(std::mem::ops::size_of[U8]() == 1_uz, "one byte")
+  std::debug::assert(std::mem::ops::size_of[U16]() == 2_uz, "two bytes")
+  std::debug::assert(std::mem::ops::size_of[U32]() == 4_uz, "four bytes")
+  std::debug::assert(std::mem::ops::size_of[U64]() == 8_uz, "eight bytes")
+  std::debug::assert(std::mem::ops::size_of[S32]() == 4_uz, "signedness does not change the width")
+}
+
+!test(group="std/mem/ops")
+fun test_align_of_reports_the_layout_alignment() -> Void {
+  std::debug::assert(std::mem::ops::align_of[U8]() == 1_uz, "a byte is byte-aligned")
+  std::debug::assert(std::mem::ops::align_of[U16]() == 2_uz, "two bytes")
+  std::debug::assert(std::mem::ops::align_of[U32]() == 4_uz, "four bytes")
+  std::debug::assert(std::mem::ops::align_of[U64]() == 8_uz, "eight bytes")
+}
+
+!test(group="std/mem/ops")
+fun test_size_of_val_agrees_with_size_of_for_a_sized_type() -> Void {
+  let x = 7_u32
+  std::debug::assert(std::mem::ops::size_of_val(&x) == std::mem::ops::size_of[U32](), "same answer for a fixed type")
+}
+
+!test(group="std/mem/ops")
+fun test_swap_exchanges_two_values() -> Void {
+  let mut a = 1
+  let mut b = 2
+  std::mem::ops::swap(&mut a, &mut b)
+  std::debug::assert(a == 2, "a took b's value")
+  std::debug::assert(b == 1, "b took a's value")
+}
+
+!test(group="std/mem/ops")
+fun test_swap_of_a_value_with_itself_is_a_no_op() -> Void {
+  let mut a = 5
+  let mut b = 5
+  std::mem::ops::swap(&mut a, &mut b)
+  std::debug::assert(a == 5, "unchanged")
+  std::debug::assert(b == 5, "unchanged")
+}
+
+!test(group="std/mem/ops")
+fun test_replace_returns_the_previous_value() -> Void {
+  let mut x = 1
+  let old = std::mem::ops::replace(&mut x, 2)
+  std::debug::assert(old == 1, "the previous value comes back")
+  std::debug::assert(x == 2, "and the new one is in place")
+}
+
+!test(group="std/mem/ops")
+fun test_take_leaves_the_default_behind() -> Void {
+  let mut x = 7
+  let old = std::mem::ops::take(&mut x)
+  std::debug::assert(old == 7, "the previous value comes back")
+  std::debug::assert(x == 0, "and the slot holds the type's default")
+}
+
+!test(group="std/mem/ops")
+fun test_copy_duplicates_through_a_borrow() -> Void {
+  let x = 9
+  let y = std::mem::ops::copy(&x)
+  std::debug::assert(y == 9, "the copy has the same value")
+  std::debug::assert(x == 9, "and the original is untouched")
+}
+
+!test(group="std/mem/ops")
+fun test_replace_on_a_linear_value_hands_back_the_old_one() -> Void {
+  # The point of "replace" for a non-Copy type: the previous value is returned rather than dropped, so it is still
+  # the caller's to discharge.
+  let mut s = Str::from("first")
+  let old = std::mem::ops::replace(&mut s, Str::from("second"))
+  std::debug::assert(old.len() == 5_uz, "the old value came back intact")
+  std::debug::assert(s.len() == 6_uz, "and the new one is in place")
+  drop(old)
+  drop(s)
+}
+
+!test(group="std/mem/ops")
+fun test_swap_on_linear_values_moves_neither_out() -> Void {
+  let mut a = Str::from("aaa")
+  let mut b = Str::from("bbbb")
+  std::mem::ops::swap(&mut a, &mut b)
+  std::debug::assert(a.len() == 4_uz, "a took b's value")
+  std::debug::assert(b.len() == 3_uz, "b took a's value")
+  drop(a)
+  drop(b)
+}

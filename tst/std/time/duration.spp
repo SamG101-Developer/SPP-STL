@@ -1,0 +1,82 @@
+# Coverage for "std::time::duration". "Duration" is a "Copy" type, so no value here needs discharging.
+
+!test(group="std/time/duration")
+fun test_constructors_agree_on_the_same_span() -> Void {
+  std::debug::assert(std::time::duration::Duration::from_secs(1_u64).as_millis() == 1000_u64, "a second in millis")
+  std::debug::assert(std::time::duration::Duration::from_mins(1_u64).as_secs() == 60_u64, "a minute in seconds")
+  std::debug::assert(std::time::duration::Duration::from_hours(1_u64).as_secs() == 3600_u64, "an hour in seconds")
+  std::debug::assert(std::time::duration::Duration::from_days(1_u64).as_secs() == 86400_u64, "a day in seconds")
+  std::debug::assert(std::time::duration::Duration::from_weeks(1_u64).as_secs() == 604800_u64, "a week in seconds")
+}
+
+!test(group="std/time/duration")
+fun test_sub_second_constructors_scale_correctly() -> Void {
+  std::debug::assert(std::time::duration::Duration::from_millis(1_u64).total_micros() == 1000_u64, "milli to micro")
+  std::debug::assert(std::time::duration::Duration::from_micros(1_u64).total_nanos() == 1000_u64, "micro to nano")
+  std::debug::assert(std::time::duration::Duration::from_secs(1_u64).total_nanos() == 1000000000_u64, "a second in nanos")
+}
+
+!test(group="std/time/duration")
+fun test_truncation_is_toward_zero() -> Void {
+  # "as_secs" reports whole seconds, so anything under one second is zero rather than rounded up.
+  std::debug::assert(std::time::duration::Duration::from_millis(999_u64).as_secs() == 0_u64, "under a second")
+  std::debug::assert(std::time::duration::Duration::from_millis(1999_u64).as_secs() == 1_u64, "just under two")
+}
+
+!test(group="std/time/duration")
+fun test_is_zero_reports_an_empty_span() -> Void {
+  std::debug::assert(std::time::duration::Duration::from_secs(0_u64).is_zero(), "zero seconds is zero")
+  std::debug::assert(std::time::duration::Duration::from_nanos(0_u64).is_zero(), "zero nanos is zero")
+  std::debug::assert(std::time::duration::Duration::from_nanos(1_u64).is_zero().not, "one nano is not zero")
+}
+
+!test(group="std/time/duration")
+fun test_addition_and_subtraction_combine_spans() -> Void {
+  let a = std::time::duration::Duration::from_secs(3_u64)
+  let b = std::time::duration::Duration::from_secs(2_u64)
+  std::debug::assert(a.add(b).as_secs() == 5_u64, "sum")
+  std::debug::assert(a.sub(b).as_secs() == 1_u64, "difference")
+}
+
+!test(group="std/time/duration")
+fun test_multiplication_and_division_scale_a_span() -> Void {
+  let d = std::time::duration::Duration::from_secs(10_u64)
+  std::debug::assert(d.mul(3_u32).as_secs() == 30_u64, "scaled up")
+  std::debug::assert(d.div(2_u32).as_secs() == 5_u64, "scaled down")
+}
+
+!test(group="std/time/duration")
+fun test_checked_arithmetic_reports_success() -> Void {
+  let a = std::time::duration::Duration::from_secs(3_u64)
+  let b = std::time::duration::Duration::from_secs(2_u64)
+  std::debug::assert(a.add_checked(b).unwrap().as_secs() == 5_u64, "a sum that fits")
+  std::debug::assert(a.sub_checked(b).unwrap().as_secs() == 1_u64, "a difference that fits")
+  std::debug::assert(a.mul_checked(2_u32).unwrap().as_secs() == 6_u64, "a product that fits")
+  std::debug::assert(a.div_checked(3_u32).unwrap().as_secs() == 1_u64, "a quotient that fits")
+}
+
+!test(group="std/time/duration")
+fun test_checked_subtraction_rejects_going_below_zero() -> Void {
+  # A duration is unsigned, so subtracting a longer span from a shorter one has no answer to give.
+  let small = std::time::duration::Duration::from_secs(1_u64)
+  let big = std::time::duration::Duration::from_secs(5_u64)
+  std::debug::assert(small.sub_checked(big).is_none(), "no negative durations")
+}
+
+# Red: "div_checked" documents itself as returning "None" "if there is an overflow or if `rhs` is zero", but the body
+# divides by "rhs" straight away with no zero guard. The doc states the intended contract, so the test asserts that
+# rather than the current behaviour.
+!test(group="std/time/duration")
+fun test_checked_division_rejects_zero() -> Void {
+  let d = std::time::duration::Duration::from_secs(10_u64)
+  std::debug::assert(d.div_checked(0_u32).is_none(), "dividing by zero has no answer")
+}
+
+!test(group="std/time/duration")
+fun test_saturating_arithmetic_clamps_instead_of_failing() -> Void {
+  let small = std::time::duration::Duration::from_secs(1_u64)
+  let big = std::time::duration::Duration::from_secs(5_u64)
+  std::debug::assert(small.sub_saturating(big).is_zero(), "clamped at zero rather than wrapping")
+  std::debug::assert(big.sub_saturating(small).as_secs() == 4_u64, "an ordinary difference is unaffected")
+  std::debug::assert(small.add_saturating(big).as_secs() == 6_u64, "an ordinary sum is unaffected")
+}

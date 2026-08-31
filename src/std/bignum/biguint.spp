@@ -20,13 +20,25 @@ cls BigUInt {
 
 sup [cmp w: U32] BigUInt ext From[SizedIntegerUnsigned[w]] {
   fun from(that: SizedIntegerUnsigned[w]) -> Self {
+    # One limb per 32 bits of `w`, counted out rather than stepped until the value runs out. The loop this replaces
+    # ended on `temp == 0` and advanced with `temp >>= 32_u32`, which for a 32-bit `w` - which is what every caller
+    # passes - is a shift by the operand's own width. That came back unchanged, the condition never went false, and
+    # the `append` inside ran until the process was killed by the kernel.
+    #
+    # Counting the limbs makes termination independent of the shift, and taking the last limb without a step after it
+    # means a full-width shift is never reached at all.
     let mut val = BigUInt()
     let mut temp = that
-    loop temp != SizedIntegerUnsigned[w]::zero() {
+    let limbs = (w + 31_u32) / 32_u32
+    let mut i = 0_u32
+
+    loop i < limbs {
       val.data.append(U32::from(temp & SizedIntegerUnsigned[w]::from(0xFFFFFFFF_u32)))
-      temp >>= 32_u32
+      i += 1_u32
+      case i < limbs { temp >>= 32_u32 }
     }
-    case val.data.len() == 0_uz { val.data.append(0_u32) }
+
+    val.trim()
     ret val
   }
 }
@@ -68,26 +80,54 @@ sup BigUInt {
 
   !public
   fun trim(&mut self) -> Void {
+    # Drop the leading zero limbs, so that a value has one representation rather than several. Everything that compares
+    # two of these - `is_zero`, `is_one`, `eq`, `ord` - reads `data.len()`, so an untrimmed result compares unequal to
+    # the same number arrived at another way. A limb count of one is the floor: zero is `[0]`, not `[]`.
     #
-
-    #         loop self.data.len() > 1_uz and self.data.get_tail_ref() == 0_u32 {
-    #             self.data.pop()
-    #         }
+    # Shrunk with `resize` rather than by popping, because `Vec::take_last` reaches `RawBuf::take_at`, whose body is
+    # not implemented.
+    let mut len = self.data.len()
+    loop len > 1_uz and self.data[len - 1_uz]@ == 0_u32 { len -= 1_uz }
+    self.data.resize(len, 0_u32)
   }
 
   !public
   fun bit_length(&self) -> USize {
+    # The position of the highest set bit, counting from one, or zero for a zero value. Every shift is expressed in
+    # terms of this, and `div_assign` aligns the divisor with it, so a placeholder answer of zero silently turned all
+    # of those into no-ops.
     #
+    # The most significant limb is found by scanning down rather than by taking the last one, so that the answer does
+    # not depend on `trim` having already run.
+    let mut i = self.data.len()
+    loop i > 0_uz {
+      i -= 1_uz
+      let mut limb = self.data[i]@
+      case limb != 0_u32 {
+        let mut bits = 32_uz * i
+        loop limb != 0_u32 {
+          limb >>= 1_u32
+          bits += 1_uz
+        }
+        ret bits
+      }
+    }
+    ret 0_uz
+  }
 
-    #         case self.is_zero() { ret 0_uz }
-    #         let last = self.data.get_tail_ref().clone()
-    #         let bits = 32_u32 * (self.data.len() - 1_uz)
-    #         loop last != 0_u32 {
-    #             last >>= 1_u32
-    #             bits += 1_u32
-    #         }
-    #         ret bits
-    ret 0_uz  # Placeholder
+  !public
+  fun to_usize(&self) -> USize {
+    # The number this holds, for the callers that need a count rather than a big number - a shift distance above all.
+    # Anything wider than one limb saturates: a distance past 32 bits is already past every width that could be
+    # shifted, so no caller can tell "very large" from "larger still".
+    case self.data.len() == 0_uz { ret 0_uz }
+
+    let mut i = self.data.len()
+    loop i > 1_uz {
+      case self.data[i - 1_uz]@ != 0_u32 { ret std::limits::Limits[USize]::max }
+      i -= 1_uz
+    }
+    ret USize::from(self.data[0_uz]@)
   }
 }
 
@@ -201,7 +241,7 @@ sup BigUInt ext std::ops::bit_ior::BitIorAssign {
     let len = self.data.len().max(that.data.len())
     self.data.resize(len, 0_u32)
     loop i in Range[USize]::between(0_uz, len) {
-      let a = self.data[i]
+      let a = self.data[i]@
       let b = case i < that.data.len() { that.data[i]@ } else { 0_u32 }
       self.data[mut i]@ = a | b
     }
@@ -215,7 +255,7 @@ sup BigUInt ext std::ops::bit_xor::BitXorAssign {
     let len = self.data.len().max(that.data.len())
     self.data.resize(len, 0_u32)
     loop i in Range[USize]::between(0_uz, len) {
-      let a = self.data[i]
+      let a = self.data[i]@
       let b = case i < that.data.len() { that.data[i]@ } else { 0_u32 }
       self.data[mut i]@ = a ^ b
     }
@@ -226,14 +266,16 @@ sup BigUInt ext std::ops::bit_xor::BitXorAssign {
 
 sup BigUInt ext std::ops::bit_shl::BitShlAssign {
   fun bit_shl_assign(&mut self, that: Self) -> Void {
-    # "that" is taken by move, so it is discarded here, once everything needed from it has been read.
+    # "that" is taken by move, so it is discarded here, once everything needed from it has been read. The distance is
+    # the number "that" holds, read with `to_usize`; it was being read with `bit_length`, which is where the top bit
+    # sits rather than what the value is, so every shift went by about the logarithm of the distance asked for.
     let that_is_zero = that.is_zero()
-    let that_bits = that.bit_length()
+    let distance = that.to_usize()
     drop(that)
 
     case that_is_zero { ret }
-    let word_shift = that_bits / 32_uz
-    let bit_shift = that_bits % 32_uz
+    let word_shift = distance / 32_uz
+    let bit_shift = distance % 32_uz
 
     let mut val = self.clone()
     val.data.resize(self.data.len() + USize::from(word_shift) + 1_uz, 0_u32)
@@ -251,14 +293,15 @@ sup BigUInt ext std::ops::bit_shl::BitShlAssign {
 
 sup BigUInt ext std::ops::bit_shr::BitShrAssign {
   fun bit_shr_assign(&mut self, that: Self) -> Void {
-    # "that" is taken by move, so it is discarded here, once everything needed from it has been read.
+    # "that" is taken by move, so it is discarded here, once everything needed from it has been read. As in the left
+    # shift, the distance is the number "that" holds rather than the position of its top bit.
     let that_is_zero = that.is_zero()
-    let that_bits = that.bit_length()
+    let distance = that.to_usize()
     drop(that)
 
     case that_is_zero { ret }
-    let word_shift = that_bits / 32_uz
-    let bit_shift = that_bits % 32_uz
+    let word_shift = distance / 32_uz
+    let bit_shift = distance % 32_uz
 
     # Shifting everything out answers zero without looking at the digits, so the working copy is only made once
     # that case is out of the way - it was being cloned and then abandoned on this path.
@@ -275,6 +318,10 @@ sup BigUInt ext std::ops::bit_shr::BitShrAssign {
       shifted >>= U32::from(bit_shift)
       val.data[mut i - USize::from(word_shift)]@ = U32::from(shifted & 0xFFFFFFFF_u64)
     }
+
+    # The working copy started at the full width but only the low "len - word_shift" limbs were written, so the ones
+    # above that still hold the pre-shift digits. Dropping them is not something `trim` can do - they are not zero.
+    val.data.resize(self.data.len() - USize::from(word_shift), 0_u32)
 
     self.data = val.data
     self.trim()
@@ -305,11 +352,13 @@ sup BigUInt ext std::ops::sub::SubAssign {
     case self < that { std::abort::abort("BigUInt::sub: subtraction would result in negative value") }
     let mut borrow = 0_u64
 
+    # Each difference replaces the limb it came from. This was appending instead, which left the operand limbs in
+    # place and put the answer after them - a result of twice the width, holding the wrong number.
     loop i in Range[USize]::between(0_uz, self.data.len()) {
       let a = U64::from(self.data[i]@)
       let b = case i < that.data.len() { U64::from(that.data[i]@) } else { 0_u64 }
       let sub = a - b - borrow
-      self.data.append(U32::from(sub & 0xFFFFFFFF_u64))
+      self.data[mut i]@ = U32::from(sub & 0xFFFFFFFF_u64)
       borrow = (sub >> 63_u32) & 0x1_u64
     }
 
@@ -333,7 +382,12 @@ sup BigUInt ext std::ops::mul::MulAssign {
       ret
     }
 
+    # The accumulator is indexed, not appended to, so it has to be the full width of the product before the loops
+    # start - "BigUInt()" leaves "data" empty, which is why "zero" and "from" both append to it explicitly. An
+    # n-limb by m-limb product occupies at most n+m limbs: the inner loop reaches "i + j" (at most n+m-2) and the
+    # carry below reaches "i + m" (at most n+m-1). Without this every one of those indexes was out of bounds.
     let mut val = BigUInt()
+    val.data.resize(self.data.len() + that.data.len(), 0_u32)
 
     loop i in Range[USize]::between(0_uz, self.data.len()) {
       let mut carry = 0_u64
@@ -372,27 +426,36 @@ sup BigUInt ext std::ops::div::DivAssign {
     }
 
     let mut dividend = self.clone()
-    let mut divisor = that # Taken by move, so there is nothing to clone.
+    let divisor = that # Taken by move, so there is nothing to clone.
     let mut quotient = BigUInt::zero()
 
-    let mut shift = BigUInt::from(dividend.bit_length() - divisor.bit_length())
-    divisor <<= shift.clone()  # TODO: remove clones at some point (memory moves)
-    quotient <<= shift.clone() + Self::one()
+    # Align a copy of the divisor with the dividend's top bit, then walk it back down one place at a time, taking it
+    # off whenever it still fits. The counter is a `USize` rather than a `BigUInt`, because an unsigned big number is
+    # never less than zero: a loop guarded on `shift >= zero` never ends, which is what this did.
+    let mut shift = dividend.bit_length() - divisor.bit_length()
+    let mut window = divisor.clone().bit_shl(BigUInt::from(shift))
+    let mut more = true
 
-    loop shift >= Self::zero() {
-      case dividend >= divisor {
-        dividend -= divisor.clone()
-        quotient.data[mut 0_uz]@ |= 1_u32 << shift.data[0_uz]@
+    loop more {
+      case dividend >= window {
+        dividend -= window.clone()
+
+        # Set bit `shift` of the quotient, through a shifted one rather than by indexing limb zero - the latter only
+        # ever reached the low 32 bits, so every quotient bit above that was dropped.
+        quotient |= BigUInt::one().bit_shl(BigUInt::from(shift))
       }
-      divisor >>= Self::one()
-      shift -= Self::one()
+      case shift == 0_uz { more = false }
+      else {
+        window >>= BigUInt::one()
+        shift -= 1_uz
+      }
     }
 
     # "quotient" is taken apart by the assignment below - its only attribute moves out of it - but the working
     # values are still whole and have to go somewhere.
     drop(dividend)
     drop(divisor)
-    drop(shift)
+    drop(window)
 
     self.data = quotient.data
     self.trim()
@@ -411,6 +474,8 @@ sup BigUInt ext std::ops::pow::PowAssign {
     let mut base = self.clone()
     let mut exponent = that # Taken by move, so there is nothing to clone.
 
+    # Todo: the base is squared on every pass including the last, where the result is never read. The squaring doubles
+    #  the limb count each time, so the wasted pass is the largest allocation the whole call makes.
     loop exponent != BigUInt::zero() {
       case (exponent.data[0_uz] & 1_u32) != 0_u32 { val *= base.clone() }
       base *= base.clone()
@@ -426,19 +491,41 @@ sup BigUInt ext std::ops::pow::PowAssign {
 }
 
 sup BigUInt ext std::ops::eq::Eq {
+  # Deferred to `ord` rather than comparing the limb vectors directly, so that two values holding the same number
+  # compare equal even when one of them carries leading zero limbs.
+
   fun eq(&self, that: &Self) -> Bool {
-    ret self.data == that.data
+    ret self.ord(that) == 0_s32
   }
 
   fun ne(&self, that: &Self) -> Bool {
-    ret self.data != that.data
+    ret self.ord(that) != 0_s32
   }
 }
 
 sup BigUInt ext std::ops::ord::Ord {
-  # TODO: Implement this properly.
+  # Ordering is by magnitude: the value with more significant limbs is the larger, and at equal width the first limb
+  # that differs, scanning down, decides. Leading zero limbs are skipped on both sides, so a value that has not been
+  # through `trim` orders the same as the trimmed form of the same number.
+
   fun ord(&self, that: &Self) -> S32 {
-    ret 0_s32  # Placeholder
+    let mut i = self.data.len()
+    loop i > 0_uz and self.data[i - 1_uz]@ == 0_u32 { i -= 1_uz }
+
+    let mut j = that.data.len()
+    loop j > 0_uz and that.data[j - 1_uz]@ == 0_u32 { j -= 1_uz }
+
+    case i < j { ret -1_s32 }
+    case i > j { ret 1_s32 }
+
+    loop i > 0_uz {
+      i -= 1_uz
+      let l = self.data[i]@
+      let r = that.data[i]@
+      case l < r { ret -1_s32 }
+      case l > r { ret 1_s32 }
+    }
+    ret 0_s32
   }
 }
 

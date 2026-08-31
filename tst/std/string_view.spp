@@ -1,103 +1,108 @@
 !test(group="std/string_view")
 fun test_length_and_emptiness() -> Void {
-    std::debug::assert("hello".len() == 5_uz, "length")
-    std::debug::assert("".len() == 0_uz, "an empty view has no length")
-    std::debug::assert("".is_empty(), "an empty view is empty")
-    std::debug::assert("x".is_empty().not, "a populated view is not empty")
+  std::debug::assert("hello".len() == 5_uz, "length")
+  std::debug::assert("".len() == 0_uz, "an empty view has no length")
+  std::debug::assert("".is_empty(), "an empty view is empty")
+  std::debug::assert("x".is_empty().not, "a populated view is not empty")
 }
 
 !test(group="std/string_view")
 fun test_equality_is_bounded_by_length() -> Void {
-    std::debug::assert("abc" == "abc", "equal views")
-    std::debug::assert("abc" != "xyz", "differing views of the same length")
-    std::debug::assert("abc" != "abcd", "a prefix is not equal")
-    std::debug::assert("abcd" != "abc", "an extension is not equal")
-    std::debug::assert("" == "", "empty views")
+  std::debug::assert("abc" == "abc", "equal views")
+  std::debug::assert("abc" != "xyz", "differing views of the same length")
+  std::debug::assert("abc" != "abcd", "a prefix is not equal")
+  std::debug::assert("abcd" != "abc", "an extension is not equal")
+  std::debug::assert("" == "", "empty views")
 }
 
 !test(group="std/string_view")
 fun test_starts_with_and_ends_with() -> Void {
-    let s = "hello world"
-    std::debug::assert(s.starts_with("hello"), "a prefix")
-    std::debug::assert(s.starts_with("world").not, "not a prefix")
-    std::debug::assert(s.ends_with("world"), "a suffix")
-    std::debug::assert(s.ends_with("hello").not, "not a suffix")
-    std::debug::assert(s.starts_with(""), "every view starts with nothing")
-    std::debug::assert(s.ends_with(""), "every view ends with nothing")
+  let s = "hello world"
+  std::debug::assert(s.starts_with("hello"), "a prefix")
+  std::debug::assert(s.starts_with("world").not, "not a prefix")
+  std::debug::assert(s.ends_with("world"), "a suffix")
+  std::debug::assert(s.ends_with("hello").not, "not a suffix")
+  std::debug::assert(s.starts_with(""), "every view starts with nothing")
+  std::debug::assert(s.ends_with(""), "every view ends with nothing")
 }
 
 !test(group="std/string_view")
 fun test_contains_reports_an_inner_match() -> Void {
-    let s = "hello world"
-    std::debug::assert(s.contains("lo wo"), "an inner match")
-    std::debug::assert(s.contains("hello"), "a prefix is contained")
-    std::debug::assert(s.contains("world"), "a suffix is contained")
-    std::debug::assert(s.contains("xyz").not, "an absent needle")
+  let s = "hello world"
+  std::debug::assert(s.contains("lo wo"), "an inner match")
+  std::debug::assert(s.contains("hello"), "a prefix is contained")
+  std::debug::assert(s.contains("world"), "a suffix is contained")
+  std::debug::assert(s.contains("xyz").not, "an absent needle")
 }
 
 !test(group="std/string_view")
 fun test_find_gives_the_first_index() -> Void {
-    let s = "abcabc"
-    std::debug::assert(s.find("abc").unwrap() == 0_uz, "the first occurrence")
-    std::debug::assert(s.find("bc").unwrap() == 1_uz, "an inner needle")
-    std::debug::assert(s.find("zzz").is_none(), "an absent needle")
+  let s = "abcabc"
+  std::debug::assert(s.find("abc").unwrap() == 0_uz, "the first occurrence")
+  std::debug::assert(s.find("bc").unwrap() == 1_uz, "an inner needle")
+  std::debug::assert(s.find("zzz").is_none(), "an absent needle")
 }
 
 !test(group="std/string_view")
 fun test_rfind_gives_the_last_index() -> Void {
-    let s = "abcabc"
-    std::debug::assert(s.rfind("abc").unwrap() == 3_uz, "the last occurrence")
-    std::debug::assert(s.rfind("zzz").is_none(), "an absent needle")
-    std::debug::assert(s.rfind("a").unwrap() == 3_uz, "the last of a repeated single byte")
-    std::debug::assert(s.rfind("c").unwrap() == 5_uz, "a match at the very end")
-    std::debug::assert(s.rfind("abcabc").unwrap() == 0_uz, "the whole haystack matches at zero")
-    std::debug::assert(s.rfind("abcabcx").is_none(), "a needle longer than the haystack")
+  let s = "abcabc"
+  std::debug::assert(s.rfind("abc").unwrap() == 3_uz, "the last occurrence")
+  std::debug::assert(s.rfind("zzz").is_none(), "an absent needle")
+  std::debug::assert(s.rfind("a").unwrap() == 3_uz, "the last of a repeated single byte")
+  std::debug::assert(s.rfind("c").unwrap() == 5_uz, "a match at the very end")
+  std::debug::assert(s.rfind("abcabc").unwrap() == 0_uz, "the whole haystack matches at zero")
+  std::debug::assert(s.rfind("abcabcx").is_none(), "a needle longer than the haystack")
 }
 
 !test(group="std/string_view")
 fun test_rfind_handles_overlapping_matches() -> Void {
-    # "aaa" contains "aa" at 0 and at 1; the later one wins. Advancing past each hit by one rather than by the needle
-    # length is what makes the overlap visible.
-    let s = "aaa"
-    std::debug::assert(s.rfind("aa").unwrap() == 1_uz, "the later of two overlapping matches")
-    std::debug::assert(s.rfind("a").unwrap() == 2_uz, "the last single byte")
+  # "aaa" contains "aa" at 0 and at 1; the later one wins. Advancing past each hit by one rather than by the needle
+  # length is what makes the overlap visible.
+  let s = "aaa"
+  std::debug::assert(s.rfind("aa").unwrap() == 1_uz, "the later of two overlapping matches")
+  std::debug::assert(s.rfind("a").unwrap() == 2_uz, "the last single byte")
 }
 
 !test(group="std/string_view")
 fun test_find_and_rfind_agree_on_a_unique_match() -> Void {
-    let s = "hello world"
-    std::debug::assert(s.find("world").unwrap() == s.rfind("world").unwrap(), "one match, one index")
-    std::debug::assert(s.find("").unwrap() == 0_uz, "an empty needle is at the front")
-    std::debug::assert(s.rfind("").unwrap() == s.len(), "and at the back")
+  let s = "hello world"
+  std::debug::assert(s.find("world").unwrap() == s.rfind("world").unwrap(), "one match, one index")
+  std::debug::assert(s.find("").unwrap() == 0_uz, "an empty needle is at the front")
+  std::debug::assert(s.rfind("").unwrap() == s.len(), "and at the back")
 }
 
 !test(group="std/string_view")
 fun test_find_char_locates_a_single_character() -> Void {
-    let s = "hello"
-    std::debug::assert(s.find_char('e').unwrap() == 1_uz, "the first match")
-    std::debug::assert(s.find_char('l').unwrap() == 2_uz, "the first of a repeat")
-    std::debug::assert(s.rfind_char('l').unwrap() == 3_uz, "the last of a repeat")
-    std::debug::assert(s.find_char('z').is_none(), "an absent character")
+  let s = "hello"
+  std::debug::assert(s.find_char('e').unwrap() == 1_uz, "the first match")
+  std::debug::assert(s.find_char('l').unwrap() == 2_uz, "the first of a repeat")
+  std::debug::assert(s.rfind_char('l').unwrap() == 3_uz, "the last of a repeat")
+  std::debug::assert(s.find_char('z').is_none(), "an absent character")
 }
 
 !test(group="std/string_view")
 fun test_case_conversion_produces_a_new_string() -> Void {
-    std::debug::assert(("Hello".to_uppercase()).ends_with("HELLO"), "uppercase")
-    std::debug::assert(("Hello".to_lowercase()).ends_with("hello"), "lowercase")
+  let upper = "Hello".to_uppercase()
+  std::debug::assert(upper.ends_with("HELLO"), "uppercase")
+  drop(upper)
+
+  let lower = "Hello".to_lowercase()
+  std::debug::assert(lower.ends_with("hello"), "lowercase")
+  drop(lower)
 }
 
 !test(group="std/string_view")
 fun test_byte_iteration_visits_every_byte() -> Void {
-    let s = "abc"
-    let mut count = 0_uz
-    loop b in s.bytes() { count += 1_uz }
-    std::debug::assert(count == 3_uz, "one step per byte")
+  let s = "abc"
+  let mut count = 0_uz
+  loop b in s.bytes() { count += 1_uz }
+  std::debug::assert(count == 3_uz, "one step per byte")
 }
 
 !test(group="std/string_view")
 fun test_char_iteration_visits_every_character() -> Void {
-    let s = "abc"
-    let mut count = 0_uz
-    loop c in s.chars() { count += 1_uz }
-    std::debug::assert(count == 3_uz, "one step per character")
+  let s = "abc"
+  let mut count = 0_uz
+  loop c in s.chars() { count += 1_uz }
+  std::debug::assert(count == 3_uz, "one step per character")
 }

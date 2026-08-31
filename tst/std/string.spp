@@ -1,32 +1,171 @@
 !test(group="std/string")
 fun test_string_from_view() -> Void {
-    let s = Str::from("hello")
-    std::debug::assert(s.len() == 5_uz, "length")
+  let s = Str::from("hello")
+  std::debug::assert(s.len() == 5_uz, "length")
+  drop(s)
 }
 
 !test(group="std/string")
 fun test_string_append_grows_and_preserves() -> Void {
-    let mut s = Str::from("abc")
-    s.append_str(&Str::from("defghijklmnop"))
-    std::debug::assert(s.len() == 16_uz, "length after growth")
-    std::debug::assert(s.starts_with("abc"), "head survived the reallocation")
-    std::debug::assert(s.ends_with("mnop"), "tail after the reallocation")
+  let mut s = Str::from("abc")
+  let tail = Str::from("defghijklmnop")
+  s.append_str(&tail)
+  std::debug::assert(s.len() == 16_uz, "length after growth")
+  std::debug::assert(s.starts_with("abc"), "head survived the reallocation")
+  std::debug::assert(s.ends_with("mnop"), "tail after the reallocation")
+  drop(tail)
+  drop(s)
 }
 
 !test(group="std/string")
 fun test_string_starts_and_ends_with() -> Void {
-    let s = Str::from("hello world")
-    std::debug::assert(s.starts_with("hello"), "starts_with a prefix")
-    std::debug::assert(s.starts_with("world").not, "not a prefix")
-    std::debug::assert(s.ends_with("world"), "ends_with a suffix")
-    std::debug::assert(s.ends_with("hello").not, "not a suffix")
+  let s = Str::from("hello world")
+  std::debug::assert(s.starts_with("hello"), "starts_with a prefix")
+  std::debug::assert(s.starts_with("world").not, "not a prefix")
+  std::debug::assert(s.ends_with("world"), "ends_with a suffix")
+  std::debug::assert(s.ends_with("hello").not, "not a suffix")
+  drop(s)
 }
 
 !test(group="std/string")
 fun test_string_view_equality_is_bounded_by_length() -> Void {
-    # "StrView" is a "{ptr, length}" slice with no terminator, so equality must compare exactly "length" bytes.
-    std::debug::assert("abc" == "abc", "equal views")
-    std::debug::assert("abc" != "xyz", "differing views of the same length")
-    std::debug::assert("abc" != "abcd", "a prefix is not equal")
-    std::debug::assert("" == "", "empty views")
+  # "StrView" is a "{ptr, length}" slice with no terminator, so equality must compare exactly "length" bytes.
+  std::debug::assert("abc" == "abc", "equal views")
+  std::debug::assert("abc" != "xyz", "differing views of the same length")
+  std::debug::assert("abc" != "abcd", "a prefix is not equal")
+  std::debug::assert("" == "", "empty views")
+}
+
+!test(group="std/string")
+fun test_an_empty_string_has_no_length() -> Void {
+  let s = Str::from("")
+  std::debug::assert(s.len() == 0_uz, "no bytes")
+  std::debug::assert(s.is_empty(), "and it says so")
+  drop(s)
+}
+
+!test(group="std/string")
+fun test_every_string_starts_and_ends_with_nothing() -> Void {
+  let s = Str::from("abc")
+  std::debug::assert(s.starts_with(""), "an empty prefix")
+  std::debug::assert(s.ends_with(""), "an empty suffix")
+  drop(s)
+}
+
+!test(group="std/string")
+fun test_a_string_starts_and_ends_with_itself() -> Void {
+  let s = Str::from("abc")
+  std::debug::assert(s.starts_with("abc"), "the whole thing is a prefix")
+  std::debug::assert(s.ends_with("abc"), "and a suffix")
+  std::debug::assert(s.starts_with("abcd").not, "but a longer needle is neither")
+  drop(s)
+}
+
+!test(group="std/string")
+fun test_appending_nothing_leaves_the_string_alone() -> Void {
+  let mut s = Str::from("abc")
+  let empty = Str::from("")
+  s.append_str(&empty)
+  std::debug::assert(s.len() == 3_uz, "unchanged")
+  std::debug::assert(s.starts_with("abc"), "and still itself")
+  drop(empty)
+  drop(s)
+}
+
+!test(group="std/string")
+fun test_clone_is_independent_of_its_source() -> Void {
+  let s = Str::from("abc")
+  let mut c = s.clone()
+  let extra = Str::from("d")
+  c.append_str(&extra)
+  drop(extra)
+  std::debug::assert(s.len() == 3_uz, "the original is untouched")
+  std::debug::assert(c.len() == 4_uz, "the clone grew")
+  drop(s)
+  drop(c)
+}
+
+!test(group="std/string")
+fun test_from_an_unsigned_integer_renders_the_digits() -> Void {
+  let zero = Str::from(0_u32)
+  std::debug::assert(
+    zero.starts_with("0") and zero.len() == 1_uz, "zero")
+  drop(zero)
+
+  let one = Str::from(1_u32)
+  std::debug::assert(
+    one.starts_with("1") and one.len() == 1_uz, "a single digit")
+  drop(one)
+
+  let many = Str::from(1234567890_u32)
+  std::debug::assert(
+    many.starts_with("1234567890") and many.len() == 10_uz, "many digits, in order and without leading zeros")
+  drop(many)
+}
+
+!test(group="std/string")
+fun test_from_an_unsigned_integer_at_the_width_maximum() -> Void {
+  let max8 = Str::from(255_u8)
+  std::debug::assert(
+    max8.starts_with("255") and max8.len() == 3_uz, "the largest byte")
+  drop(max8)
+
+  let max64 = Str::from(std::limits::Limits[U64]::max)
+  std::debug::assert(
+    max64.starts_with("18446744073709551615") and max64.len() == 20_uz, "the largest 64-bit value")
+  drop(max64)
+}
+
+!test(group="std/string")
+fun test_from_a_signed_integer_renders_the_sign() -> Void {
+  let zero = Str::from(0_s32)
+  std::debug::assert(
+    zero.starts_with("0") and zero.len() == 1_uz, "zero has no sign")
+  drop(zero)
+
+  let pos = Str::from(123_s32)
+  std::debug::assert(
+    pos.starts_with("123") and pos.len() == 3_uz, "a positive value has no sign")
+  drop(pos)
+
+  let neg = Str::from(-123_s32)
+  std::debug::assert(
+    neg.starts_with("-123") and neg.len() == 4_uz, "a negative value is prefixed")
+  drop(neg)
+}
+
+!test(group="std/string")
+fun test_from_a_signed_integer_at_the_width_extremes() -> Void {
+  # The most negative value of a width has no positive counterpart, so an implementation that took "abs" first would
+  # overflow here. The digits are accumulated on the negative side instead. Taken from "Limits" rather than written as
+  # a literal, because "-128_s8" parses as a negation of "128_s8" and 128 does not fit in an "S8".
+  let min8 = Str::from(std::limits::Limits[S8]::min)
+  std::debug::assert(
+    min8.starts_with("-128") and min8.len() == 4_uz, "the most negative byte")
+  drop(min8)
+
+  let max8 = Str::from(std::limits::Limits[S8]::max)
+  std::debug::assert(
+    max8.starts_with("127") and max8.len() == 3_uz, "the most positive byte")
+  drop(max8)
+
+  let min64 = Str::from(std::limits::Limits[S64]::min)
+  std::debug::assert(
+    min64.starts_with("-9223372036854775808") and min64.len() == 20_uz, "the most negative 64-bit value")
+  drop(min64)
+}
+
+!test(group="std/string")
+fun test_from_a_float_renders_an_integer_part_and_a_fraction() -> Void {
+  let half = Str::from(0.5_f64)
+  std::debug::assert(half.starts_with("0.5"), "a half")
+  drop(half)
+
+  let neg = Str::from(-2.25_f64)
+  std::debug::assert(neg.starts_with("-2.25"), "a negative value is prefixed")
+  drop(neg)
+
+  let whole = Str::from(7.0_f64)
+  std::debug::assert(whole.starts_with("7."), "a whole value still has a point")
+  drop(whole)
 }

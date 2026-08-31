@@ -131,10 +131,36 @@ sup StderrStream ext Write {
   }
 }
 
-# A standard stream handle owns nothing: the descriptor belongs to the process and outlives any handle onto it, and the
-# writes go straight to it rather than through a buffer that would need flushing. None of the three needs a `Drop`,
-# then - `drop` destroys structurally, and a handle with no attributes has nothing to destroy. Anything that wants the
-# data on disk should call `flush` first, which reports whether it worked.
+sup StdinStream ext Drop {
+  # A standard stream handle owns nothing: the descriptor belongs to the process and outlives any handle onto it, and
+  # the writes go straight to it rather than through a buffer that would need flushing. Discarding one is therefore a
+  # no-op, and exists so the handle can discharge its linear obligation by name rather than through
+  # `std::mem::ops::drop`. Anything that wants the data on disk should call `flush` first, which reports whether it
+  # worked.
+
+  !versioned(base="1.0.0", new="1.0.0")
+  fun drop(self) -> Void {
+    let Self(..) = self
+  }
+}
+
+sup StdoutStream ext Drop {
+  # Discarding a standard output handle releases nothing; see `StdinStream`'s `Drop`.
+
+  !versioned(base="1.0.0", new="1.0.0")
+  fun drop(self) -> Void {
+    let Self(..) = self
+  }
+}
+
+sup StderrStream ext Drop {
+  # Discarding a standard error handle releases nothing; see `StdinStream`'s `Drop`.
+
+  !versioned(base="1.0.0", new="1.0.0")
+  fun drop(self) -> Void {
+    let Self(..) = self
+  }
+}
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
