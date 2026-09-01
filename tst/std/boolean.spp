@@ -24,19 +24,19 @@ fun test_conversion_from_integers() -> Void {
 }
 
 !test(group="std/boolean")
-fun test_logical_and_short_circuits_on_false() -> Void {
-  std::debug::assert(true.and_(true), "true and true")
-  std::debug::assert(true.and_(false).not, "true and false")
-  std::debug::assert(false.and_(true).not, "false and true")
-  std::debug::assert(false.and_(false).not, "false and false")
+fun test_logical_and_holds_only_when_both_sides_do() -> Void {
+  std::debug::assert(true and true, "true and true")
+  std::debug::assert((true and false).not, "true and false")
+  std::debug::assert((false and true).not, "false and true")
+  std::debug::assert((false and false).not, "false and false")
 }
 
 !test(group="std/boolean")
 fun test_logical_ior_holds_when_either_side_does() -> Void {
-  std::debug::assert(true.ior_(true), "true or true")
-  std::debug::assert(true.ior_(false), "true or false")
-  std::debug::assert(false.ior_(true), "false or true")
-  std::debug::assert(false.ior_(false).not, "false or false")
+  std::debug::assert(true or true, "true or true")
+  std::debug::assert(true or false, "true or false")
+  std::debug::assert(false or true, "false or true")
+  std::debug::assert((false or false).not, "false or false")
 }
 
 !test(group="std/boolean")
