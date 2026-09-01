@@ -87,3 +87,9 @@ fun test_swap_on_linear_values_moves_neither_out() -> Void {
   drop(a)
   drop(b)
 }
+
+!test(group="std/mem/ops")
+fun test_a_layout_for_a_zero_sized_element() -> Void {
+  let layout = std::allocator::Layout::new_for_array[std::option::None](4_uz)
+  std::debug::assert(layout.size == 0_uz, "no bytes are needed for four of nothing")
+}

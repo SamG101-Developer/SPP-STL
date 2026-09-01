@@ -104,7 +104,8 @@ sup Layout {
     # type `T`.
 
     let elem = std::mem::ops::size_of[T]()
-    case elem != 0_uz and n > std::limits::Limits[USize]::max / elem {
+    let overflows = case elem == 0_uz { false } else { n > std::limits::Limits[USize]::max / elem }
+    case overflows {
       std::abort::abort("allocation layout overflows the address space")
     }
 
