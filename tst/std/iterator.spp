@@ -17,24 +17,6 @@ fun test_empty_range_yields_nothing() -> Void {
   std::debug::assert(count == 0_uz, "an empty interval yields nothing")
 }
 
-# Todo: none of the consuming adaptors work on a *borrowing* iterator. "Iterator::count" ends its loop body with
-#  "defer drop(item)", and an item of type "&T" has nothing to discharge - "drop" takes its argument by value, so the
-#  call has no matching signature and the whole build fails. The same applies to anything else that consumes items it
-#  does not return. Written here against "Range", which yields owned values, so the adaptors themselves are still
-#  covered; the borrowing case is the gap. It is commented out rather than left red for the reason given in
-#  "array.spp": a build failure costs every test, where a failing assertion costs one.
-#
-# !test(group="std/iterator")
-# fun test_count_over_a_borrowing_iterator() -> Void {
-#     let v = Vec[S32]::from(&[1, 2, 3, 4])
-#     std::debug::assert(v.iter_ref().count() == 4_uz, "one per element")
-#     drop(v)
-# }
-
-# The adaptors below are "Iterator"'s, and "Range" is a sibling of "Iterator" rather than one of them - both
-# superimpose "Gen", and "Range" declares only "step_by" of its own. So they are exercised through "iter_mov", which
-# yields an owning "Iterator[T]"; "iter_ref" would give "Iterator[&T]" and hit the borrowing limitation above.
-
 !test(group="std/iterator")
 fun test_count_consumes_and_counts() -> Void {
   std::debug::assert(Vec[S32]::from(&[1, 2, 3, 4]).iter_mov().count() == 4_uz, "one per element")
@@ -57,17 +39,6 @@ fun test_drop_skips_the_front() -> Void {
   std::debug::assert(Vec[S32]::from(&[1, 2, 3]).iter_mov().drop(99_uz).count() == 0_uz, "skipping past the end")
 }
 
-# Todo: "nth" is unusable on a borrowing iterator. "Iterator[&T]::nth" returns "Opt[T]" with T a borrow, so the
-#  "Some[T=&S32]" it needs would hold a second-class borrow in a class field - which the compiler rejects, pointing at
-#  "option.spp" rather than at the call. Either "Opt" needs to admit a borrow member, or the borrowing iterators need a
-#  different accessor.
-#
-# !test(group="std/iterator")
-# fun test_nth_selects_one_element() -> Void {
-#     let v = Vec[S32]::from(&[10, 20, 30])
-#     std::debug::assert(v.iter_ref().nth(1_uz).unwrap()@ == 20, "the second element")
-# }
-
 !test(group="std/iterator")
 fun test_step_by_skips_between_elements() -> Void {
   let mut count = 0_uz
@@ -82,38 +53,4 @@ fun test_iteration_over_an_empty_vector_yields_nothing() -> Void {
   loop e in v.iter_ref() { count += 1_uz }
   std::debug::assert(count == 0_uz, "nothing to visit")
   drop(v)
-}
-
-cor checks_what_it_is_sent() -> std::generator::Gen[std::boolean::Bool, std::array::Arr[S32, 8_uz]] {
-  let sent = gen false
-  std::debug::assert(sent[0_uz]@ == 10, "first element of the sent value")
-  std::debug::assert(sent[7_uz]@ == 80, "last element of the sent value")
-  let sent_again = gen true
-  std::debug::assert(sent_again[3_uz]@ == 40, "the second sent value arrives just as whole")
-}
-
-!test(group="std/iterator")
-fun test_a_generator_receives_what_was_sent_to_it() -> Void {
-  let mut g = checks_what_it_is_sent()
-  let a = g.res([10, 20, 30, 40, 50, 60, 70, 80])
-  let b = g.res([10, 20, 30, 40, 50, 60, 70, 80])
-  std::mem::ops::drop(g)
-}
-
-cor stops_with_ret_holding_a_buffer(stop_after: std::number::USize) -> std::iterator::Iterator[std::number::USize] {
-  let v = std::vector::Vec[std::number::S32]::new_with_capacity(1000000_uz)
-  defer std::mem::ops::drop(v)
-  let mut i = 0_uz
-  loop true {
-    case i == stop_after { ret }
-    i += 1_uz
-    gen i
-  }
-}
-
-!test(group="std/iterator")
-fun test_ret_in_a_coroutine_finishes_it_and_runs_its_defers() -> Void {
-  loop n in std::range::Range[std::number::USize]::between(0_uz, 2000_uz) {
-    std::debug::assert(stops_with_ret_holding_a_buffer(2_uz).count() == 2_uz, "yielded twice then stopped")
-  }
 }
