@@ -757,8 +757,10 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
   !public !inline
   !versioned(base="1.0.0", new="1.0.0")
   fun is_negative(self) -> Bool {
-    # Bit level checking for negative numbers. ret self.to_bits() >> (w - 1_u32) != Self::zero()
-    ret false  # todo
+    ret self.is_negative_infinity()
+      or self.is_negative_normal()
+      or self.is_negative_subnormal()
+      or self.is_negative_zero()
   }
 }
 
