@@ -163,3 +163,82 @@ fun test_mutable_iteration_writes_through() -> Void {
   std::debug::assert(v[2_uz]@ == 30, "last")
   drop(v)
 }
+
+!test(group="std/vector")
+fun test_dropping_a_vector_releases_its_buffer() -> Void {
+  loop i in std::range::Range[std::number::USize]::between(0_uz, 2000_uz) {
+    let v = std::vector::Vec[std::number::S32]::new_with_capacity(1000000_uz)
+    std::mem::ops::drop(v)
+  }
+}
+
+!test(group="std/vector")
+fun test_dropping_a_string_releases_its_buffer() -> Void {
+  loop i in std::range::Range[std::number::USize]::between(0_uz, 2000_uz) {
+    let s = std::string::Str::new_with_capacity(1000000_uz)
+    std::mem::ops::drop(s)
+  }
+}
+
+!test(group="std/vector")
+fun test_dropping_a_struct_releases_the_buffer_it_holds() -> Void {
+  loop i in std::range::Range[std::number::USize]::between(0_uz, 2000_uz) {
+    let s = std::option::Some(val=std::vector::Vec[std::number::S32]::new_with_capacity(1000000_uz))
+    std::mem::ops::drop(s)
+  }
+}
+
+!test(group="std/vector")
+fun test_dropping_a_variant_releases_the_buffer_it_holds() -> Void {
+  loop i in std::range::Range[std::number::USize]::between(0_uz, 2000_uz) {
+    let v: std::option::Opt[std::vector::Vec[std::number::S32]] = std::option::Some(
+      val=std::vector::Vec[std::number::S32]::new_with_capacity(1000000_uz))
+    std::mem::ops::drop(v)
+  }
+}
+
+!test(group="std/vector")
+fun test_abandoning_a_move_iteration_drops_only_the_remainder() -> Void {
+  let mut v = std::vector::Vec[std::single::Single[std::number::S32]]::new()
+  v.append(std::single::Single[std::number::S32]::new(1))
+  v.append(std::single::Single[std::number::S32]::new(2))
+  std::debug::assert(v.iter_mov().take(1_uz).count() == 1_uz, "consumed one of two")
+}
+
+!test(group="std/vector")
+fun test_move_iteration_over_wide_elements() -> Void {
+  let mut v = std::vector::Vec[std::array::Arr[std::number::S32, 8_uz]]::new()
+  v.append([1, 2, 3, 4, 5, 6, 7, 8])
+  v.append([9, 10, 11, 12, 13, 14, 15, 16])
+  let mut first = 0
+  loop e in v.iter_mov() {
+    case first == 0 { first = e[0_uz]@ }
+  }
+  std::debug::assert(first == 1, "the first element arrived intact")
+}
+
+!test(group="std/vector")
+fun test_move_iteration_over_elements_that_own_memory() -> Void {
+  let mut v = std::vector::Vec[std::string::Str]::new()
+  v.append(std::string::Str::from("a"))
+  v.append(std::string::Str::from("b"))
+  let mut n = 0_uz
+  loop e in v.iter_mov() {
+    n += 1_uz
+    std::mem::ops::drop(e)
+  }
+  std::debug::assert(n == 2_uz, "both strings came back")
+}
+
+!test(group="std/vector")
+fun test_move_iteration_over_nested_vectors() -> Void {
+  let mut v = std::vector::Vec[std::vector::Vec[std::number::S32]]::new()
+  v.append(std::vector::Vec[std::number::S32]::from(&[1, 2]))
+  v.append(std::vector::Vec[std::number::S32]::from(&[3, 4]))
+  let mut n = 0_uz
+  loop e in v.iter_mov() {
+    n += e.len()
+    std::mem::ops::drop(e)
+  }
+  std::debug::assert(n == 4_uz, "four elements across two inner vectors")
+}
