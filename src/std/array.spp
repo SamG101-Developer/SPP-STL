@@ -14,6 +14,7 @@ use std::generator::GenOnce
 use std::iterator::Indexed
 use std::iterator::Iterator
 use std::number::USize
+use std::range::Range
 use std::single::Single
 use std::view::View
 use std::void::Void
@@ -51,19 +52,18 @@ sup [T, cmp n: USize] Arr[T, n] {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun fill(&mut self, val: T) -> Void {
-    # std::mem::ops::mem_set(&mut self.ptr, n, val) TODO
-    drop(val) # TODO ^^^
-  }
-
-  !public
-  !versioned(base="1.0.0", new="1.0.0")
   fun swap(&mut self, i: USize, j: USize) -> Void {
     std::mem::ops::swap(self[mut i], self[mut j])
   }
 }
 
 sup [T: Copy, cmp n: USize] Arr[T, n] {
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun fill(&mut self, val: T) -> Void {
+    loop i in Range[USize]::between(0_uz, n) { self[mut i]@ = val }
+  }
+
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun new_filled(val: T) -> Self {

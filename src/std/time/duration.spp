@@ -311,6 +311,10 @@ sup Duration {
     # @ret: An `Opt[Duration]` that contains the result of dividing the duration by `rhs` if the operation is
     # successful, or `None` if there is an overflow or if `rhs` is zero.
 
+    # Nothing below is meaningful for a zero divisor;
+    # early rejection.
+    case rhs == 0_u32 { ret None() }
+
     let (secs, extra_secs) = (self.seconds / U64::from(rhs), self.seconds % U64::from(rhs))
     let (mut nanos, extra_nanos) = (self.nanoseconds / U64::from(rhs), self.nanoseconds % U64::from(rhs))
     nanos += (extra_secs * 1000000000_u64 + U64::from(extra_nanos)) / U64::from(rhs)

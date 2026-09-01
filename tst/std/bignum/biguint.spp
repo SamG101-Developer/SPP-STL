@@ -44,9 +44,6 @@ fun test_addition_and_subtraction() -> Void {
   drop(five)
 }
 
-# The two failures above are ordinary red ones and are left in place: "3 != 5" reports the two as equal, and
-# "9 - 4 == 5" does not hold, so equality/ordering and subtraction are wrong independently of anything below.
-
 !test(group="std/bignum/biguint")
 fun test_multiplication_and_division() -> Void {
   let prod = std::bignum::biguint::BigUInt::from(6_u32).mul(std::bignum::biguint::BigUInt::from(7_u32))

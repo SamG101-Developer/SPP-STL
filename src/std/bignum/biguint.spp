@@ -277,7 +277,7 @@ sup BigUInt ext std::ops::bit_shl::BitShlAssign {
     let word_shift = distance / 32_uz
     let bit_shift = distance % 32_uz
 
-    let mut val = self.clone()
+    let mut val = BigUInt::zero()
     val.data.resize(self.data.len() + USize::from(word_shift) + 1_uz, 0_u32)
 
     loop i in Range[USize]::between(0_uz, self.data.len()) {
@@ -510,10 +510,16 @@ sup BigUInt ext std::ops::ord::Ord {
 
   fun ord(&self, that: &Self) -> S32 {
     let mut i = self.data.len()
-    loop i > 0_uz and self.data[i - 1_uz]@ == 0_u32 { i -= 1_uz }
+    loop i > 0_uz {
+      case self.data[i - 1_uz]@ != 0_u32 { exit }
+      i -= 1_uz
+    }
 
     let mut j = that.data.len()
-    loop j > 0_uz and that.data[j - 1_uz]@ == 0_u32 { j -= 1_uz }
+    loop j > 0_uz {
+      case that.data[j - 1_uz]@ != 0_u32 { exit }
+      j -= 1_uz
+    }
 
     case i < j { ret -1_s32 }
     case i > j { ret 1_s32 }
