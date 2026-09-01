@@ -59,15 +59,9 @@ cls Vec[T, A: Alloc=GlobalAlloc] {
   # a low-level contiguous buffer that manages memory allocation and deallocation.
   # @let length: The current number of elements in the vector. It is of type `USize` and is used to track how many
   # elements are currently stored in the vector. The length is always less than or equal to the capacity of the buffer.
-  # @let start: The index of the first live element. It is `0` for every vector in normal use - all length-based access
-  # treats the live region as `[0, length)`. It is only advanced by the by-value forward move-iterator (`iter_mov`) as
-  # it consumes elements from the front, so that if iteration stops early the destructor drops only the elements that
-  # were not yet yielded (`[start, length)`). Because `iter_mov` consumes the vector by value, no other method ever
-  # observes a non-zero `start`; it participates only in destruction.
 
   !package buffer: RawBuf[T, A]
   !package length: USize
-  !package start: USize
 }
 
 sup [T] Vec[T] {
@@ -147,7 +141,7 @@ sup [T, A: Alloc] Vec[T, A] {
     # @let alloc:
     # @ret:
 
-    ret Vec(buffer=RawBuf[T, A]::new_with_capacity_in(0_uz, alloc), length=0_uz, start=0_uz)
+    ret Vec(buffer=RawBuf[T, A]::new_with_capacity_in(0_uz, alloc), length=0_uz)
   }
 
   !public
@@ -158,7 +152,7 @@ sup [T, A: Alloc] Vec[T, A] {
     # @let alloc:
     # @ret:
 
-    ret Vec(buffer=RawBuf[T, A]::new_with_capacity_in(cap, alloc), length=0_uz, start=0_uz)
+    ret Vec(buffer=RawBuf[T, A]::new_with_capacity_in(cap, alloc), length=0_uz)
   }
 
   !public
@@ -587,16 +581,19 @@ sup [T, A: Alloc] Vec[T, A] ext IterMov[T] {
   !versioned(base="1.0.0", new="1.0.0")
   cor iter_mov(mut self) -> Iterator[T] {
     # Yields the elements from front to back, moving each one out of the buffer. Consuming from the front leaves the
-    # remaining live elements as the suffix `[start, length)`, so `start` is advanced to just past each element before
-    # it is yielded. If iteration is abandoned early, `Vec::del` then drops exactly the un-yielded remainder via
-    # `clear_range(start, length - start)`, with no double drop and no leak; if it runs to completion `start` equals
-    # `length` and nothing is left to drop. `length` is left untouched, since `start` alone tracks progress.
+    # remaining live elements as the suffix `[i, length)`, which a `Vec` cannot describe - its live region is always a
+    # prefix - so the vector is destructured here and this coroutine answers for the remainder itself.
     # @ret: An iterator that moves the vector's elements out in order.
 
-    defer drop(self) # TODO: Refactor to remove "start".
-    loop i in Range[USize]::between(0_uz, self.length) {
-      self.start = i + 1_uz
-      gen self.buffer.take_at(i).unwrap()
+    let Vec[T, A](mut buffer, length) = self
+    let mut i = 0_uz
+    defer drop(buffer)
+    defer buffer.clear_range(i, length - i)
+
+    loop i < length {
+      let element = buffer.take_at(i).unwrap()
+      i += 1_uz
+      gen element
     }
   }
 }
@@ -610,9 +607,8 @@ sup [T, A: Alloc] Vec[T, A] ext RevIterMov[T] {
     # no leak.
     # @ret: An iterator that moves the vector's elements out in reverse order.
 
-    defer drop(self) # TODO: Refactor to remove "start".
-    loop true {
-      case self.length == 0_uz { ret }
+    defer drop(self)
+    loop self.length > 0_uz {
       self.length -= 1_uz
       gen self.buffer.take_at(self.length).unwrap()
     }
@@ -726,16 +722,13 @@ sup [T, A: Alloc] Vec[T, A] ext FwdRef[View[T]] {
 sup [T, A: Alloc] Vec[T, A] ext Drop {
   !versioned(base="1.0.0", new="1.0.0")
   fun drop(self) -> Void {
-    # The `del` function runs the destructors of the vector's live elements when it is dropped, then lets the underlying
-    # buffer drop, which frees the backing memory. The live elements are the range `[start, length)`, which
-    # `clear_range` destroys in place. For any vector in normal use `start` is `0`, so this is `[0, length)`; a forward
-    # move-iterator abandoned early leaves `start` advanced past the elements it already yielded, so only the un-yielded
-    # remainder is dropped. The buffer's own destructor only frees memory and never touches the elements, so there is no
-    # double drop; it runs after this body as part of normal field destruction.
+    # Runs the destructors of the vector's live elements, then lets the underlying buffer drop, which frees the backing
+    # memory. The live elements are always the prefix `[0, length)`, which `clear_range` destroys in place. The buffer's
+    # own destructor only frees memory and never touches the elements, so there is no double drop.
     # @ret: Nothing; this is invoked for its cleanup side effect when a `Vec` is destroyed.
 
-    let Vec[T, A](mut buffer, length, start) = self
-    buffer.clear_range(start, length - start)
+    let Vec[T, A](mut buffer, length) = self
+    buffer.clear_range(0_uz, length)
     drop(buffer)
   }
 }

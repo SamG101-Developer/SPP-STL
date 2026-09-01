@@ -242,3 +242,19 @@ fun test_move_iteration_over_nested_vectors() -> Void {
   }
   std::debug::assert(n == 4_uz, "four elements across two inner vectors")
 }
+
+# `reverse_iter_mov` had no coverage at all until this, which is how it went unnoticed that it was written on a
+# construct that did not work: `ret` in a coroutine used to reach neither the deferred expressions nor the final
+# suspend. Both ends of that are fixed now, but the conditional loop it was rewritten to is the clearer shape anyway.
+!test(group="std/vector")
+fun test_reverse_move_iteration_visits_back_to_front() -> Void {
+  let mut v = std::vector::Vec[std::number::S32]::from(&[1, 2, 3])
+  let mut first = 0
+  let mut n = 0_uz
+  loop e in v.reverse_iter_mov() {
+    case n == 0_uz { first = e }
+    n += 1_uz
+  }
+  std::debug::assert(n == 3_uz, "visited every element")
+  std::debug::assert(first == 3, "starting from the back")
+}

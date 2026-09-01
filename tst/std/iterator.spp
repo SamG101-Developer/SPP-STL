@@ -99,3 +99,21 @@ fun test_a_generator_receives_what_was_sent_to_it() -> Void {
   let b = g.res([10, 20, 30, 40, 50, 60, 70, 80])
   std::mem::ops::drop(g)
 }
+
+cor stops_with_ret_holding_a_buffer(stop_after: std::number::USize) -> std::iterator::Iterator[std::number::USize] {
+  let v = std::vector::Vec[std::number::S32]::new_with_capacity(1000000_uz)
+  defer std::mem::ops::drop(v)
+  let mut i = 0_uz
+  loop true {
+    case i == stop_after { ret }
+    i += 1_uz
+    gen i
+  }
+}
+
+!test(group="std/iterator")
+fun test_ret_in_a_coroutine_finishes_it_and_runs_its_defers() -> Void {
+  loop n in std::range::Range[std::number::USize]::between(0_uz, 2000_uz) {
+    std::debug::assert(stops_with_ret_holding_a_buffer(2_uz).count() == 2_uz, "yielded twice then stopped")
+  }
+}
