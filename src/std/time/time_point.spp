@@ -7,6 +7,7 @@ use std::number::S64
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
+use std::option::Some
 use std::mem::ops::drop
 use std::ops::add::Add
 use std::ops::sub::Sub
@@ -55,7 +56,8 @@ sup TimePoint {
     # @ret: A `Duration` representing the time elapsed between this `TimePoint` and the earlier `TimePoint`.
     # @todo: Tidy this
 
-    ret self.duration.sub_checked(earlier.duration).unwrap_or((earlier - self.duration).duration)
+    case self.duration.sub_checked(earlier.duration) is Some[Duration](val) { ret val }
+    std::abort::abort("TimePoint::duration_since: the instant given is later than this one")
   }
 
   !public
