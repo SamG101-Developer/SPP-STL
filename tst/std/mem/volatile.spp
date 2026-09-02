@@ -1,0 +1,72 @@
+!test(group="std/mem/volatile")
+fun test_a_volatile_cell_reads_back_what_it_holds() -> Void {
+  let v = std::mem::volatile::Vol[S32]::new(5)
+  std::debug::assert(v.read() == 5, "the wrapped value")
+  drop(v)
+}
+
+!test(group="std/mem/volatile")
+fun test_write_replaces_the_held_value() -> Void {
+  let mut v = std::mem::volatile::Vol[S32]::new(1)
+  v.write(2)
+  std::debug::assert(v.read() == 2, "the write landed")
+  drop(v)
+}
+
+!test(group="std/mem/volatile")
+fun test_replace_returns_the_previous_value() -> Void {
+  let mut v = std::mem::volatile::Vol[S32]::new(7)
+  let old = v.replace(9)
+  std::debug::assert(old == 7, "replace hands back the old value")
+  std::debug::assert(v.read() == 9, "and stores the new one")
+  drop(v)
+}
+
+!test(group="std/mem/volatile")
+fun test_repeated_writes_keep_only_the_last() -> Void {
+  # A volatile store may not be elided, but it is still a store: only the last one is observable afterwards.
+  let mut v = std::mem::volatile::Vol[S32]::new(0)
+  v.write(1)
+  v.write(2)
+  v.write(3)
+  std::debug::assert(v.read() == 3, "the last write wins")
+  drop(v)
+}
+
+!test(group="std/mem/volatile")
+fun test_repeated_reads_give_the_same_value() -> Void {
+  let v = std::mem::volatile::Vol[S32]::new(4)
+  std::debug::assert(v.read() == 4, "first read")
+  std::debug::assert(v.read() == 4, "second read")
+  std::debug::assert(v.read() == 4, "third read")
+  drop(v)
+}
+
+!test(group="std/mem/volatile")
+fun test_a_volatile_boolean() -> Void {
+  let mut v = std::mem::volatile::Vol[Bool]::new(false)
+  std::debug::assert(v.read().not, "starts false")
+  v.write(true)
+  std::debug::assert(v.read(), "and flips")
+  drop(v)
+}
+
+!test(group="std/mem/volatile")
+fun test_two_cells_are_independent() -> Void {
+  let mut a = std::mem::volatile::Vol[S32]::new(1)
+  let b = std::mem::volatile::Vol[S32]::new(2)
+  a.write(100)
+  std::debug::assert(b.read() == 2, "writing one leaves the other alone")
+  std::debug::assert(a.read() == 100, "and the written one holds its new value")
+  drop(a)
+  drop(b)
+}
+
+!test(group="std/mem/volatile")
+fun test_replacing_with_the_same_value_is_observable_as_a_no_op() -> Void {
+  let mut v = std::mem::volatile::Vol[S32]::new(6)
+  let old = v.replace(6)
+  std::debug::assert(old == 6, "the old value comes back")
+  std::debug::assert(v.read() == 6, "and the cell still holds it")
+  drop(v)
+}

@@ -1,0 +1,76 @@
+!test(group="std/num/sized_integer_unsigned")
+fun test_subtracting_below_zero_wraps_to_the_top() -> Void {
+  std::debug::assert(0_u8.sub_wrapping(1_u8) == 255_u8, "zero minus one wraps to the maximum")
+  std::debug::assert(0_u8.sub_checked(1_u8).is_none(), "the checked form refuses")
+  std::debug::assert(0_u8.sub_saturating(1_u8) == 0_u8, "and the saturating form stops at zero")
+}
+
+!test(group="std/num/sized_integer_unsigned")
+fun test_adding_past_the_top_wraps_to_zero() -> Void {
+  let max = std::limits::Limits[U8]::max
+  std::debug::assert(max.add_wrapping(1_u8) == 0_u8, "the maximum plus one wraps to zero")
+  std::debug::assert(max.add_checked(1_u8).is_none(), "the checked form refuses")
+  std::debug::assert(max.add_saturating(1_u8) == max, "and the saturating form stays at the top")
+}
+
+!test(group="std/num/sized_integer_unsigned")
+fun test_overflow_reports_both_the_value_and_the_flag() -> Void {
+  let (wrapped, overflowed) = 0_u8.sub_overflow(1_u8)
+  std::debug::assert(wrapped == 255_u8, "the wrapped value")
+  std::debug::assert(overflowed, "and the flag is set")
+
+  let (sum, fine) = 1_u8.add_overflow(1_u8)
+  std::debug::assert(sum == 2_u8, "an operation that fits")
+  std::debug::assert(fine.not, "leaves the flag clear")
+}
+
+!test(group="std/num/sized_integer_unsigned")
+fun test_mod_and_remainder_agree_without_a_sign() -> Void {
+  # There is no negative dividend to disagree about, so the two coincide at every input.
+  std::debug::assert(7_u32 % 2_u32 == 1_u32, "remainder")
+  std::debug::assert(7_u32.mod(2_u32) == 1_u32, "and mod gives the same")
+  std::debug::assert(8_u32.mod(4_u32) == 0_u32, "an exact division leaves nothing")
+}
+
+!test(group="std/num/sized_integer_unsigned")
+fun test_integer_square_root() -> Void {
+  std::debug::assert(9_u32.isqrt().unwrap() == 3_u32, "an exact square")
+  std::debug::assert(10_u32.isqrt().unwrap() == 3_u32, "rounded down between squares")
+  std::debug::assert(0_u32.isqrt().unwrap() == 0_u32, "zero")
+  std::debug::assert(1_u32.isqrt().unwrap() == 1_u32, "one")
+}
+
+!test(group="std/num/sized_integer_unsigned")
+fun test_powers() -> Void {
+  std::debug::assert(2_u32.pow(10_u32) == 1024_u32, "two to the ten")
+  std::debug::assert(2_u32.pow(0_u32) == 1_u32, "anything to the zero is one")
+  std::debug::assert(2_u8.pow_checked(9_u32).is_none(), "a power too wide for U8")
+  std::debug::assert(2_u8.pow_saturating(9_u32) == std::limits::Limits[U8]::max, "saturating stops at the top")
+}
+
+!test(group="std/num/sized_integer_unsigned")
+fun test_division_never_rounds_up() -> Void {
+  std::debug::assert(7_u32 / 2_u32 == 3_u32, "seven halves is three")
+  std::debug::assert(1_u32 / 2_u32 == 0_u32, "and a half is none")
+}
+
+!test(group="std/num/sized_integer_unsigned")
+fun test_dividing_by_zero_is_reported_rather_than_trapping() -> Void {
+  std::debug::assert(1_u32.div_checked(0_u32).is_none(), "division by zero has no answer")
+  std::debug::assert(1_u32.rem_checked(0_u32).is_none(), "nor does the remainder")
+}
+
+!test(group="std/num/sized_integer_unsigned")
+fun test_min_and_max_over_the_full_range() -> Void {
+  let low = std::limits::Limits[U16]::min
+  let high = std::limits::Limits[U16]::max
+  std::debug::assert(low.min(high) == low, "min picks the bottom")
+  std::debug::assert(low.max(high) == high, "max picks the top")
+}
+
+!test(group="std/num/sized_integer_unsigned")
+fun test_the_wider_widths_behave_the_same() -> Void {
+  std::debug::assert(0_u64.sub_wrapping(1_u64) == std::limits::Limits[U64]::max, "wrapping at U64")
+  std::debug::assert(100_u64.isqrt().unwrap() == 10_u64, "isqrt at U64")
+  std::debug::assert(7_u16.mod(3_u16) == 1_u16, "mod at U16")
+}

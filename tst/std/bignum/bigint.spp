@@ -1,0 +1,151 @@
+!test(group="std/bignum/bigint")
+fun test_from_a_signed_integer_keeps_the_value() -> Void {
+  let a = std::bignum::bigint::BigInt::from(7)
+  let b = std::bignum::bigint::BigInt::from(7)
+  std::debug::assert(a == b, "the same source gives equal values")
+  drop(a)
+  drop(b)
+}
+
+!test(group="std/bignum/bigint")
+fun test_a_negative_differs_from_its_magnitude() -> Void {
+  let neg = std::bignum::bigint::BigInt::from(-7)
+  let pos = std::bignum::bigint::BigInt::from(7)
+  std::debug::assert(neg != pos, "a negative is not its own magnitude")
+  drop(neg)
+  drop(pos)
+}
+
+!test(group="std/bignum/bigint")
+fun test_ordering_places_negatives_below_positives() -> Void {
+  let neg = std::bignum::bigint::BigInt::from(-1)
+  let zero = std::bignum::bigint::BigInt::from(0)
+  std::debug::assert(neg < zero, "a negative is below zero")
+  drop(neg)
+  drop(zero)
+
+  let zero2 = std::bignum::bigint::BigInt::from(0)
+  let pos = std::bignum::bigint::BigInt::from(1)
+  std::debug::assert(zero2 < pos, "zero is below a positive")
+  drop(zero2)
+  drop(pos)
+}
+
+!test(group="std/bignum/bigint")
+fun test_more_negative_is_smaller() -> Void {
+  let a = std::bignum::bigint::BigInt::from(-5)
+  let b = std::bignum::bigint::BigInt::from(-2)
+  std::debug::assert(a < b, "-5 is below -2")
+  drop(a)
+  drop(b)
+}
+
+!test(group="std/bignum/bigint")
+fun test_addition_across_zero() -> Void {
+  # The crossing is where a sign-and-magnitude representation has to borrow rather than add.
+  let sum = std::bignum::bigint::BigInt::from(-3) + std::bignum::bigint::BigInt::from(5)
+  let expected = std::bignum::bigint::BigInt::from(2)
+  std::debug::assert(sum == expected, "-3 + 5 is 2")
+  drop(sum)
+  drop(expected)
+}
+
+!test(group="std/bignum/bigint")
+fun test_addition_of_two_negatives_stays_negative() -> Void {
+  let sum = std::bignum::bigint::BigInt::from(-3) + std::bignum::bigint::BigInt::from(-4)
+  let expected = std::bignum::bigint::BigInt::from(-7)
+  std::debug::assert(sum == expected, "-3 + -4 is -7")
+  drop(sum)
+  drop(expected)
+}
+
+!test(group="std/bignum/bigint")
+fun test_subtraction_below_zero() -> Void {
+  let diff = std::bignum::bigint::BigInt::from(3) - std::bignum::bigint::BigInt::from(5)
+  let expected = std::bignum::bigint::BigInt::from(-2)
+  std::debug::assert(diff == expected, "3 - 5 is -2")
+  drop(diff)
+  drop(expected)
+}
+
+!test(group="std/bignum/bigint")
+fun test_subtracting_a_negative_adds() -> Void {
+  let diff = std::bignum::bigint::BigInt::from(3) - std::bignum::bigint::BigInt::from(-4)
+  let expected = std::bignum::bigint::BigInt::from(7)
+  std::debug::assert(diff == expected, "3 - -4 is 7")
+  drop(diff)
+  drop(expected)
+}
+
+!test(group="std/bignum/bigint")
+fun test_multiplication_follows_the_sign_rule() -> Void {
+  let a = std::bignum::bigint::BigInt::from(-3) * std::bignum::bigint::BigInt::from(4)
+  let a_expected = std::bignum::bigint::BigInt::from(-12)
+  std::debug::assert(a == a_expected, "a negative times a positive is negative")
+  drop(a)
+  drop(a_expected)
+
+  let b = std::bignum::bigint::BigInt::from(-3) * std::bignum::bigint::BigInt::from(-4)
+  let b_expected = std::bignum::bigint::BigInt::from(12)
+  std::debug::assert(b == b_expected, "two negatives make a positive")
+  drop(b)
+  drop(b_expected)
+}
+
+!test(group="std/bignum/bigint")
+fun test_multiplication_by_zero_is_zero() -> Void {
+  let product = std::bignum::bigint::BigInt::from(-9) * std::bignum::bigint::BigInt::from(0)
+  let expected = std::bignum::bigint::BigInt::from(0)
+  std::debug::assert(product == expected, "anything times zero is zero, with no sign left over")
+  drop(product)
+  drop(expected)
+}
+
+!test(group="std/bignum/bigint")
+fun test_division_truncates_toward_zero() -> Void {
+  let a = std::bignum::bigint::BigInt::from(-7) / std::bignum::bigint::BigInt::from(2)
+  let a_expected = std::bignum::bigint::BigInt::from(-3)
+  std::debug::assert(a == a_expected, "-7 / 2 truncates to -3, not -4")
+  drop(a)
+  drop(a_expected)
+}
+
+!test(group="std/bignum/bigint")
+fun test_remainder_takes_the_sign_of_the_dividend() -> Void {
+  let a = std::bignum::bigint::BigInt::from(-7) % std::bignum::bigint::BigInt::from(2)
+  let a_expected = std::bignum::bigint::BigInt::from(-1)
+  std::debug::assert(a == a_expected, "-7 % 2 is -1")
+  drop(a)
+  drop(a_expected)
+}
+
+!test(group="std/bignum/bigint")
+fun test_parity_ignores_the_sign() -> Void {
+  let a = std::bignum::bigint::BigInt::from(-4)
+  std::debug::assert(a.is_even(), "-4 is even")
+  drop(a)
+
+  let b = std::bignum::bigint::BigInt::from(-3)
+  std::debug::assert(b.is_odd(), "-3 is odd")
+  drop(b)
+}
+
+!test(group="std/bignum/bigint")
+fun test_a_clone_equals_its_source() -> Void {
+  let a = std::bignum::bigint::BigInt::from(-123)
+  let b = a.clone()
+  std::debug::assert(a == b, "a clone compares equal")
+  drop(a)
+  drop(b)
+}
+
+!test(group="std/bignum/bigint")
+fun test_a_value_wider_than_a_machine_word() -> Void {
+  # The point of the type: a product that no fixed-width integer holds.
+  let big = std::bignum::bigint::BigInt::from(9223372036854775807_s64)
+  let doubled = big * std::bignum::bigint::BigInt::from(2)
+  let smaller = std::bignum::bigint::BigInt::from(9223372036854775807_s64)
+  std::debug::assert(doubled > smaller, "twice the widest S64 exceeds it")
+  drop(doubled)
+  drop(smaller)
+}
