@@ -1,0 +1,95 @@
+!test(group="std/cast")
+fun test_widening_a_signed_integer_preserves_it() -> Void {
+  std::debug::assert(S64::from(5_s32) == 5_s64, "a positive widens")
+  std::debug::assert(S64::from(-5_s32) == -5_s64, "and a negative sign-extends")
+}
+
+!test(group="std/cast")
+fun test_widening_an_unsigned_integer_preserves_it() -> Void {
+  std::debug::assert(U64::from(200_u8) == 200_u64, "an unsigned value widens unchanged")
+  std::debug::assert(U32::from(255_u8) == 255_u32, "including the top of the source range")
+}
+
+!test(group="std/cast")
+fun test_narrowing_truncates_rather_than_saturating() -> Void {
+  # 300 is 0x12C; the low byte is 0x2C, which is 44.
+  std::debug::assert(U8::from(300_u32) == 44_u8, "the high bits are dropped")
+  std::debug::assert(U8::from(255_u32) == 255_u8, "a value that fits is unchanged")
+}
+
+!test(group="std/cast")
+fun test_a_signed_source_reinterprets_at_the_same_width() -> Void {
+  # Same width means the bit pattern is kept, so a negative arrives as a large positive.
+  std::debug::assert(U8::from(-1_s8) == 255_u8, "-1 reinterprets to the maximum")
+  std::debug::assert(S8::from(255_u8) == -1_s8, "and back again")
+}
+
+!test(group="std/cast")
+fun test_converting_an_integer_to_a_float() -> Void {
+  std::debug::assert(F64::from(3_s32) == 3.0_f64, "a small integer converts exactly")
+  std::debug::assert(F64::from(-3_s32) == -3.0_f64, "including a negative")
+  std::debug::assert(F64::from(3_u32) == 3.0_f64, "and an unsigned source")
+}
+
+!test(group="std/cast")
+fun test_converting_a_float_to_an_integer_rounds_toward_zero() -> Void {
+  std::debug::assert(S32::from(3.7_f64) == 3, "a positive truncates down")
+  std::debug::assert(S32::from(-3.7_f64) == -3, "a negative truncates up, toward zero")
+}
+
+!test(group="std/cast")
+fun test_converting_a_number_to_a_boolean() -> Void {
+  # "Bool::from" asks whether the value is above zero.
+  std::debug::assert(Bool::from(1), "a positive is true")
+  std::debug::assert(Bool::from(0).not, "zero is false")
+  std::debug::assert(Bool::from(-1).not, "and a negative is false")
+}
+
+!test(group="std/cast")
+fun test_a_float_narrows_between_widths() -> Void {
+  std::debug::assert(F32::from(1.5_f64) == 1.5_f32, "a value both widths hold exactly")
+  std::debug::assert(F64::from(1.5_f32) == 1.5_f64, "and back the other way")
+}
+
+!test(group="std/cast")
+fun test_clone_makes_an_independent_copy() -> Void {
+  let mut original = Vec[S32]::new()
+  original.append(1)
+
+  let mut copy = original.clone()
+  copy.append(2)
+  std::debug::assert(original.len() == 1_uz, "the source is untouched by the clone")
+  std::debug::assert(copy.len() == 2_uz, "and the clone grew on its own")
+  drop(original)
+  drop(copy)
+}
+
+!test(group="std/cast")
+fun test_a_clone_of_a_clone() -> Void {
+  let a = Str::from("abc")
+  let b = a.clone()
+  let c = b.clone()
+  std::debug::assert(a.len() == 3_uz, "the source")
+  std::debug::assert(b.len() == 3_uz, "the clone")
+  std::debug::assert(c.len() == 3_uz, "and the clone of the clone")
+  drop(a)
+  drop(b)
+  drop(c)
+}
+
+!test(group="std/cast")
+fun test_a_copyable_value_is_used_more_than_once() -> Void {
+  # "Copy" is what lets the same binding be read twice; a non-"Copy" value would be consumed by the first use.
+  let n = 7
+  let a = n
+  let b = n
+  std::debug::assert(a + b == 14, "both reads saw the value")
+}
+
+!test(group="std/cast")
+fun test_copy_implies_clone() -> Void {
+  # "sup Copy ext Clone" gives every copyable type a "clone" that is just the copy.
+  let n = 7
+  std::debug::assert(n.clone() == 7, "a copyable value clones to itself")
+  std::debug::assert(true.clone(), "including a boolean")
+}

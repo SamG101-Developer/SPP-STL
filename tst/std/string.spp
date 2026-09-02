@@ -169,3 +169,41 @@ fun test_from_a_float_renders_an_integer_part_and_a_fraction() -> Void {
   std::debug::assert(whole.starts_with("7."), "a whole value still has a point")
   drop(whole)
 }
+
+!test(group="std/string")
+fun test_two_equal_strings_compare_equal() -> Void {
+  # This was red until "Self" in a "&Self" parameter stopped binding to the call-site receiver: "Str == Str" reaches
+  # "StrView::eq" by forwarding, and the argument used to arrive un-forwarded and be read through "StrView"'s shape.
+  let a = Str::from("abc")
+  let b = Str::from("abc")
+  std::debug::assert(a == b, "two strings built from the same view are equal")
+  drop(a)
+  drop(b)
+}
+
+!test(group="std/string")
+fun test_differing_strings_do_not_compare_equal() -> Void {
+  let a = Str::from("abc")
+  let b = Str::from("abd")
+  std::debug::assert(a != b, "strings differing in one byte")
+  drop(a)
+  drop(b)
+
+  let c = Str::from("abc")
+  let d = Str::from("abcd")
+  std::debug::assert(c != d, "strings of differing length")
+  drop(c)
+  drop(d)
+}
+
+!test(group="std/string")
+fun test_an_appended_string_equals_the_whole() -> Void {
+  let mut built = Str::from("ab")
+  let tail = Str::from("cd")
+  built.append_str(&tail)
+  drop(tail)
+  let whole = Str::from("abcd")
+  std::debug::assert(built == whole, "appending builds the same string as writing it out")
+  drop(built)
+  drop(whole)
+}
