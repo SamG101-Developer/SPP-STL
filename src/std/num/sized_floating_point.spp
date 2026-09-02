@@ -442,10 +442,6 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext RemAssign {
   }
 }
 
-# Todo: Calling "pow" on a float segfaults the compiler in comptime resolution ("Resolving comptime constants"), for
-#  both overloads below - "2.0_f64.pow(3)" and "2.0_f64.pow(3.0_f64)" crash alike, so it is not the exponent type. It
-#  cannot be covered by a red test because the crash takes the whole run down; the case is noted in
-#  "std::tst::num::sized_floating_point::test_powers_of_two_are_exact" instead.
 sup [cmp w: U32] SizedFloatingPoint[w] ext Pow {
   # Provide exponentiation support to sized floating point numbers, allowing for the calculation of one floating point
   # value raised to the power of another floating point value of the same size. For differing sizes, the `From` trait
