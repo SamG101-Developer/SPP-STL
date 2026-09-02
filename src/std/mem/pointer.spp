@@ -193,7 +193,7 @@ sup [T] NonNull[T] ext Copy {
   # enforces. This mirrors how the reallocating allocator methods thread a pointer value in and out.
 }
 
-sup [T] NonNull[T] ext FwdMut[&mut T] {
+sup [T] NonNull[T] ext FwdMut[T] {
   # Provide a forwarding implementation for mutable references to the inner type of the `NonNull` pointer.
 
   !always_inline
@@ -206,7 +206,7 @@ sup [T] NonNull[T] ext FwdMut[&mut T] {
   }
 }
 
-sup [T] NonNull[T] ext FwdRef[&T] {
+sup [T] NonNull[T] ext FwdRef[T] {
   # Provide a forwarding implementation for immutable references to the inner type of the `NonNull` pointer.
 
   !always_inline
