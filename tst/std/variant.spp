@@ -1,0 +1,91 @@
+!test(group="std/variant")
+fun test_a_variant_reports_the_alternative_it_holds() -> Void {
+  let v: S32 or Bool = 5
+  let held = case v of {
+    is S32 { 1 }
+    is Bool { 2 }
+    else { 0 }
+  }
+  std::debug::assert(held == 1, "the integer alternative is selected")
+}
+
+!test(group="std/variant")
+fun test_the_other_alternative_selects_the_other_branch() -> Void {
+  let v: S32 or Bool = true
+  let held = case v of {
+    is S32 { 1 }
+    is Bool { 2 }
+    else { 0 }
+  }
+  std::debug::assert(held == 2, "the boolean alternative is selected")
+}
+
+!test(group="std/variant")
+fun test_a_variant_over_copyable_alternatives_is_copyable() -> Void {
+  # "Var" superimposes "Copy" exactly when every alternative does, so reading this twice is allowed.
+  let v: S32 or Bool = 7
+  let a = v
+  let b = v
+  let both = case a of {
+    is S32 { case b of { is S32 { true } else { false } } }
+    else { false }
+  }
+  std::debug::assert(both, "both copies hold the same alternative")
+}
+
+!test(group="std/variant")
+fun test_reassigning_changes_which_alternative_is_held() -> Void {
+  let mut v: S32 or Bool = 1
+  v = false
+  let held = case v of {
+    is S32 { 1 }
+    is Bool { 2 }
+    else { 0 }
+  }
+  std::debug::assert(held == 2, "the variant now holds the other alternative")
+}
+
+!test(group="std/variant")
+fun test_a_variant_of_three_alternatives() -> Void {
+  let v: S32 or Bool or USize = 3_uz
+  let held = case v of {
+    is S32 { 1 }
+    is Bool { 2 }
+    is USize { 3 }
+    else { 0 }
+  }
+  std::debug::assert(held == 3, "the third alternative is selected")
+}
+
+!test(group="std/variant")
+fun test_the_held_value_survives_the_narrowing() -> Void {
+  let v: S32 or Bool = 42
+  let got = case v of {
+    is S32 as n { n }
+    else { 0 }
+  }
+  std::debug::assert(got == 42, "the value is intact once narrowed")
+}
+
+!test(group="std/variant")
+fun test_a_variant_can_hold_a_non_copyable_alternative() -> Void {
+  let mut vec = Vec[S32]::new()
+  vec.append(8)
+
+  let v: Vec[S32] or Bool = vec
+  let len = case v of {
+    is Vec[S32] as held { held.len() }
+    else { 0_uz }
+  }
+  std::debug::assert(len == 1_uz, "the vector came through the variant whole")
+}
+
+!test(group="std/variant")
+fun test_an_unmatched_alternative_falls_through_to_else() -> Void {
+  let v: S32 or Bool = true
+  let got = case v of {
+    is S32 { 1 }
+    else { 99 }
+  }
+  std::debug::assert(got == 99, "no arm matched, so the else branch ran")
+}
