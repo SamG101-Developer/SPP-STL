@@ -154,10 +154,10 @@ fun test_map_or_falls_back_for_none() -> Void {
 !test(group="std/option")
 fun test_ior_else_computes_the_alternative_lazily() -> Void {
   let a: Opt[S32] = Some(val=1)
-  std::debug::assert(a.ior_else(() Some(val=2)).unwrap() == 1, "some keeps its own value")
+  std::debug::assert(a.ior_else(() -> Opt[S32] { ret Some(val=2) }).unwrap() == 1, "some keeps its own value")
 
   let n: Opt[S32] = None()
-  std::debug::assert(n.ior_else(() Some(val=2)).unwrap() == 2, "none calls for the alternative")
+  std::debug::assert(n.ior_else(() -> Opt[S32] { ret Some(val=2) }).unwrap() == 2, "none calls for the alternative")
 }
 
 !test(group="std/option")
@@ -174,16 +174,13 @@ fun test_take_if_removes_the_value_only_when_it_matches() -> Void {
 !test(group="std/option")
 fun test_and_then_chains_an_optional_step() -> Void {
   let a: Opt[S32] = Some(val=4)
-  std::debug::assert(a.and_then((x: S32) Some(val=x + 1)).unwrap() == 5, "the step runs on a value")
+  std::debug::assert(a.and_then((x: S32) -> Opt[S32] { ret Some(val=x + 1) }).unwrap() == 5, "the step runs on a value")
 
-  # Todo: "a step that itself yields none" cannot be written here, for the same reason as the "Fail" case in
-  #  "result.spp": "and_then[U, ...]" has nothing to infer "U" from when the closure only produces "None".
-  #
-  # let b: Opt[S32] = Some(val=4)
-  # std::debug::assert(b.and_then((x: S32) None()).is_none(), "a step may itself yield none")
+  let b: Opt[S32] = Some(val=4)
+  std::debug::assert(b.and_then((x: S32) -> Opt[S32] { ret None() }).is_none(), "a step may itself yield none")
 
   let n: Opt[S32] = None()
-  std::debug::assert(n.and_then((x: S32) Some(val=x + 1)).is_none(), "none short-circuits")
+  std::debug::assert(n.and_then((x: S32) -> Opt[S32] { ret Some(val=x + 1) }).is_none(), "none short-circuits")
 }
 
 !test(group="std/option")

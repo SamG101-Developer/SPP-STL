@@ -97,18 +97,16 @@ fun test_map_or_falls_back_for_a_failure() -> Void {
 !test(group="std/result")
 fun test_and_then_chains_a_fallible_step() -> Void {
   let p: Res[S32, Bool] = Pass(val=4)
-  std::debug::assert(p.and_then((x: S32) Pass(val=x + 1)).unwrap() == 5, "the step runs on a pass")
+  std::debug::assert(
+    p.and_then((x: S32) -> Res[S32, Bool] { ret Pass(val=x + 1) }).unwrap() == 5, "the step runs on a pass")
 
-  # Todo: "a step that itself fails" cannot be written here. "and_then[U, F: FunMov[(T,), Res[U, E]]]" has nothing to
-  #  infer "U" from when the closure only ever produces the "Fail" side, and a closure expression has no return-type
-  #  annotation to supply it. Reachable once either inference reads "U" from the call's own context or closures can be
-  #  annotated.
-  #
-  # let q: Res[S32, Bool] = Pass(val=4)
-  # std::debug::assert(q.and_then((x: S32) Fail(err=true)).is_fail(), "a step may itself fail")
+  let q: Res[S32, Bool] = Pass(val=4)
+  std::debug::assert(
+    q.and_then((x: S32) -> Res[S32, Bool] { ret Fail(err=true) }).is_fail(), "a step may itself fail")
 
   let f: Res[S32, Bool] = Fail(err=true)
-  std::debug::assert(f.and_then((x: S32) Pass(val=x + 1)).is_fail(), "a failure short-circuits")
+  std::debug::assert(
+    f.and_then((x: S32) -> Res[S32, Bool] { ret Pass(val=x + 1) }).is_fail(), "a failure short-circuits")
 }
 
 !test(group="std/result")

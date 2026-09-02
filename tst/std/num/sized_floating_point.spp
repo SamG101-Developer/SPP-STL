@@ -1,0 +1,99 @@
+!test(group="std/num/sized_floating_point")
+fun test_arithmetic_on_exactly_representable_values() -> Void {
+  std::debug::assert(1.5_f64 + 2.25_f64 == 3.75_f64, "addition")
+  std::debug::assert(3.75_f64 - 1.5_f64 == 2.25_f64, "subtraction")
+  std::debug::assert(1.5_f64 * 2.0_f64 == 3.0_f64, "multiplication")
+  std::debug::assert(3.0_f64 / 2.0_f64 == 1.5_f64, "division")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_comparison_orders_negatives_below_positives() -> Void {
+  std::debug::assert(-1.0_f64 < 0.0_f64, "a negative is below zero")
+  std::debug::assert(0.0_f64 < 1.0_f64, "zero is below a positive")
+  std::debug::assert(-2.5_f64 < -1.5_f64, "more negative is smaller")
+  std::debug::assert(2.5_f64 > 1.5_f64, "larger positive is greater")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_equality_and_inequality() -> Void {
+  std::debug::assert(1.25_f64 == 1.25_f64, "equal values")
+  std::debug::assert(1.25_f64 != 1.5_f64, "different values")
+  std::debug::assert((1.25_f64 == 1.5_f64).not, "equality is false for different values")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_abs_and_neg_flip_the_sign() -> Void {
+  std::debug::assert(-2.5_f64.abs() == 2.5_f64, "abs of a negative")
+  std::debug::assert(2.5_f64.abs() == 2.5_f64, "abs of a positive is itself")
+  std::debug::assert(2.5_f64.neg() == -2.5_f64, "neg of a positive")
+  std::debug::assert(-2.5_f64.neg() == 2.5_f64, "neg of a negative")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_rounding_towards_each_direction() -> Void {
+  std::debug::assert(1.5_f64.floor() == 1.0_f64, "floor goes down")
+  std::debug::assert(1.5_f64.ceil() == 2.0_f64, "ceil goes up")
+  std::debug::assert(1.5_f64.trunc() == 1.0_f64, "trunc drops the fraction")
+  std::debug::assert(-1.5_f64.floor() == -2.0_f64, "floor of a negative goes further down")
+  std::debug::assert(-1.5_f64.ceil() == -1.0_f64, "ceil of a negative goes up towards zero")
+  std::debug::assert(-1.5_f64.trunc() == -1.0_f64, "trunc of a negative goes towards zero")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_min_and_max_pick_the_right_side() -> Void {
+  std::debug::assert(1.5_f64.min(2.5_f64) == 1.5_f64, "min of two positives")
+  std::debug::assert(1.5_f64.max(2.5_f64) == 2.5_f64, "max of two positives")
+  std::debug::assert(-1.5_f64.min(1.5_f64) == -1.5_f64, "min spanning zero")
+  std::debug::assert(-1.5_f64.max(1.5_f64) == 1.5_f64, "max spanning zero")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_sqrt_of_exact_squares() -> Void {
+  std::debug::assert(4.0_f64.sqrt() == 2.0_f64, "sqrt of four")
+  std::debug::assert(9.0_f64.sqrt() == 3.0_f64, "sqrt of nine")
+  std::debug::assert(0.25_f64.sqrt() == 0.5_f64, "sqrt of a quarter")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_powers_of_two_are_exact() -> Void {
+  # "pow" is missing here on purpose: "2.0_f64.pow(3)" segfaults the compiler in comptime resolution, for either
+  # exponent overload. See the Todo on "SizedFloatingPoint::pow".
+  std::debug::assert(2.0_f64.exp2() == 4.0_f64, "exp2 is two to the power")
+  std::debug::assert(8.0_f64.log2() == 3.0_f64, "log2 undoes it")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_is_negative_reports_the_sign() -> Void {
+  std::debug::assert(-1.0_f64.is_negative(), "a negative value")
+  std::debug::assert(1.0_f64.is_negative().not, "a positive value")
+  std::debug::assert(0.0_f64.is_negative().not, "positive zero is not negative")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_zero_and_one_are_the_identities() -> Void {
+  std::debug::assert(F64::zero() == 0.0_f64, "the zero value")
+  std::debug::assert(F64::one() == 1.0_f64, "the one value")
+  std::debug::assert(2.5_f64 + F64::zero() == 2.5_f64, "zero is the additive identity")
+  std::debug::assert(2.5_f64 * F64::one() == 2.5_f64, "one is the multiplicative identity")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_compound_assignment_matches_the_binary_operator() -> Void {
+  let mut x = 1.5_f64
+  x += 2.25_f64
+  std::debug::assert(x == 3.75_f64, "add-assign")
+  x -= 0.75_f64
+  std::debug::assert(x == 3.0_f64, "sub-assign")
+  x *= 2.0_f64
+  std::debug::assert(x == 6.0_f64, "mul-assign")
+  x /= 4.0_f64
+  std::debug::assert(x == 1.5_f64, "div-assign")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_a_narrower_width_holds_the_same_small_values() -> Void {
+  # "F32" represents these exactly too, so the same assertions hold at the narrower width.
+  std::debug::assert(1.5_f32 + 2.25_f32 == 3.75_f32, "addition at F32")
+  std::debug::assert(4.0_f32.sqrt() == 2.0_f32, "sqrt at F32")
+  std::debug::assert(-1.5_f32.abs() == 1.5_f32, "abs at F32")
+}

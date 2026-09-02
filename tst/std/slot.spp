@@ -1,0 +1,77 @@
+# Coverage for "std::slot". A "Slot" is the way a value is mutated without a "&mut" path reaching it: "set", "replace"
+# and "get_mut" all take "&self", and the mutation happens intrinsically. So the tests here are mostly about writes
+# landing through a shared borrow, which is the whole reason the type exists.
+#
+# A "Slot[T]" is not itself "Copy", so every one of these ends by consuming it - with "take", or by dropping what take
+# hands back.
+
+!test(group="std/slot")
+fun test_new_holds_the_value_it_was_built_with() -> Void {
+  let s = std::slot::Slot[S32]::new(5)
+  std::debug::assert(s.get_ref()@ == 5, "the slot yields what it was built with")
+  std::debug::assert(s.take() == 5, "and take returns it")
+}
+
+!test(group="std/slot")
+fun test_set_overwrites_through_a_shared_borrow() -> Void {
+  # "set" takes "&self", not "&mut self" - the point of the type.
+  let s = std::slot::Slot[S32]::new(1)
+  s.set(2)
+  std::debug::assert(s.get() == 2, "set overwrote the held value")
+  std::debug::assert(s.take() == 2, "and take sees the new one")
+}
+
+!test(group="std/slot")
+fun test_replace_hands_back_the_previous_value() -> Void {
+  let s = std::slot::Slot[S32]::new(7)
+  let old = s.replace(9)
+  std::debug::assert(old == 7, "replace returns what was there")
+  std::debug::assert(s.take() == 9, "and leaves the new value behind")
+}
+
+!test(group="std/slot")
+fun test_get_mut_writes_through_a_shared_borrow() -> Void {
+  let s = std::slot::Slot[S32]::new(1)
+  s.get_mut()@ = 4
+  std::debug::assert(s.take() == 4, "the write through get_mut landed")
+}
+
+!test(group="std/slot")
+fun test_repeated_sets_keep_only_the_last() -> Void {
+  let s = std::slot::Slot[S32]::new(0)
+  s.set(1)
+  s.set(2)
+  s.set(3)
+  std::debug::assert(s.take() == 3, "only the last value survives")
+}
+
+!test(group="std/slot")
+fun test_a_slot_can_hold_a_non_copyable_value() -> Void {
+  # The held value is moved in and moved back out, so nothing is copied and nothing leaks.
+  let mut v = Vec[S32]::new()
+  v.append(3)
+  let s = std::slot::Slot[Vec[S32]]::new(v)
+  std::debug::assert(s.get_ref().len() == 1_uz, "the vector kept its element")
+  let back = s.take()
+  std::debug::assert(back[0_uz]@ == 3, "and its contents came back out intact")
+  drop(back)
+}
+
+!test(group="std/slot")
+fun test_replacing_a_non_copyable_value_returns_the_old_one() -> Void {
+  let mut first = Vec[S32]::new()
+  first.append(1)
+  let mut second = Vec[S32]::new()
+  second.append(2)
+  second.append(3)
+
+  # The names matter here. "MemRegionOverlap" used to compare rendered paths by raw string prefix, so a slot called "s"
+  # was reported as overlapping a variable called "second" - keep the two as they are, and this stays a regression test
+  # for that.
+  let s = std::slot::Slot[Vec[S32]]::new(first)
+  let old = s.replace(second)
+  std::debug::assert(old.len() == 1_uz, "the old vector came back whole")
+  std::debug::assert(s.get_ref().len() == 2_uz, "and the new one is held")
+  drop(old)
+  drop(s.take())
+}
