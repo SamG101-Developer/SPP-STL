@@ -31,12 +31,31 @@ sup [cmp w: U32] BigInt ext From[SizedIntegerUnsigned[w]] {
 
 sup [cmp w: U32] BigInt ext From[SizedIntegerSigned[w]] {
   fun from(that: SizedIntegerSigned[w]) -> Self {
-    let unsigned = SizedIntegerUnsigned[w]::from(that)
-    ret BigInt(sign=that.is_negative(), data=BigUInt::from(unsigned))
+    # Take the magnitude, not the bit pattern. Converting to the unsigned type of the same width reinterprets the two's
+    # complement bits, so "-7" would arrive as a very large positive number and every sign-aware operation would be
+    # built on it. "abs_wrapping" rather than "abs" because the minimum value has no positive counterpart at its own
+    # width - and its wrapped result reinterprets to exactly the magnitude wanted.
+    # @let that: The signed value to convert.
+    # @ret: A `BigInt` with the sign and magnitude of `that`.
+
+    let magnitude = SizedIntegerUnsigned[w]::from(that.abs_wrapping())
+    ret BigInt(sign=that.is_negative(), data=BigUInt::from(magnitude))
   }
 }
 
 sup BigInt {
+  !private
+  fun signed_from(sign: Bool, data: BigUInt) -> Self {
+    # Build a value from a computed magnitude, dropping the sign when that magnitude is zero. Zero has no sign, and
+    # leaving one on it makes "0" and "-0" two values that compare unequal - which is what "-9 * 0" used to produce.
+    # @let sign: The sign the operation worked out, ignored when `data` is zero.
+    # @let data: The magnitude of the result.
+    # @ret: A `BigInt` holding `data`, negative only if `data` is non-zero.
+
+    let signed = case data.is_zero() { false } else { sign }
+    ret BigInt(sign=signed, data=data)
+  }
+
   !public
   fun is_even(&self) -> Bool {
     ret self.data.is_even()
@@ -64,7 +83,7 @@ sup BigInt ext std::ops::bit_and::BitAnd {
     # Forward to BigUInt implementation for magnitude operation
     let result_data = self.data.bit_and(that.data)
     let result_sign = self.sign and that.sign
-    ret BigInt(sign=result_sign, data=result_data)
+    ret Self::signed_from(result_sign, result_data)
   }
 }
 
@@ -73,7 +92,7 @@ sup BigInt ext std::ops::bit_ior::BitIor {
     # Forward to BigUInt implementation for magnitude operation
     let result_data = self.data.bit_ior(that.data)
     let result_sign = self.sign or that.sign
-    ret BigInt(sign=result_sign, data=result_data)
+    ret Self::signed_from(result_sign, result_data)
   }
 }
 
@@ -82,7 +101,7 @@ sup BigInt ext std::ops::bit_xor::BitXor {
     # Forward to BigUInt implementation for magnitude operation
     let result_data = self.data.bit_xor(that.data)
     let result_sign = self.sign != that.sign
-    ret BigInt(sign=result_sign, data=result_data)
+    ret Self::signed_from(result_sign, result_data)
   }
 }
 
@@ -91,7 +110,7 @@ sup BigInt ext std::ops::bit_not::BitNot[Ret=Self] {
     # Forward to BigUInt implementation for magnitude operation
     let result_data = self.data.bit_not()
     let result_sign = self.sign.not
-    ret BigInt(sign=result_sign, data=result_data)
+    ret Self::signed_from(result_sign, result_data)
   }
 }
 
@@ -99,7 +118,7 @@ sup BigInt ext std::ops::bit_shl::BitShl {
   fun bit_shl(self, that: Self) -> Self {
     # Forward to BigUInt implementation for magnitude operation
     let result_data = self.data.bit_shl(that.data)
-    ret BigInt(sign=self.sign, data=result_data)
+    ret Self::signed_from(self.sign, result_data)
   }
 }
 
@@ -107,7 +126,7 @@ sup BigInt ext std::ops::bit_shr::BitShr {
   fun bit_shr(self, that: Self) -> Self {
     # Forward to BigUInt implementation for magnitude operation
     let result_data = self.data.bit_shr(that.data)
-    ret BigInt(sign=self.sign, data=result_data)
+    ret Self::signed_from(self.sign, result_data)
   }
 }
 
@@ -116,15 +135,15 @@ sup BigInt ext std::ops::add::Add {
     # Handle sign cases
     ret case self.sign == that.sign {
       let result_data = self.data.add(that.data)
-      BigInt(sign=self.sign, data=result_data)
+      Self::signed_from(self.sign, result_data)
     }
     else case self.data >= that.data {
       let result_data = self.data.sub(that.data)
-      BigInt(sign=self.sign, data=result_data)
+      Self::signed_from(self.sign, result_data)
     }
     else {
       let result_data = that.data.sub(self.data)
-      BigInt(sign=that.sign, data=result_data)
+      Self::signed_from(that.sign, result_data)
     }
   }
 }
@@ -134,15 +153,15 @@ sup BigInt ext std::ops::sub::Sub {
     # Handle sign cases
     ret case self.sign != that.sign {
       let result_data = self.data.add(that.data)
-      BigInt(sign=self.sign, data=result_data)
+      Self::signed_from(self.sign, result_data)
     }
     else case self.data >= that.data {
       let result_data = self.data.sub(that.data)
-      BigInt(sign=self.sign, data=result_data)
+      Self::signed_from(self.sign, result_data)
     }
     else {
       let result_data = that.data.sub(self.data)
-      BigInt(sign=self.sign.not, data=result_data)
+      Self::signed_from(self.sign.not, result_data)
     }
   }
 }
@@ -151,7 +170,7 @@ sup BigInt ext std::ops::mul::Mul {
   fun mul(self, that: Self) -> Self {
     let result_data = self.data.mul(that.data)
     let result_sign = self.sign != that.sign
-    ret BigInt(sign=result_sign, data=result_data)
+    ret Self::signed_from(result_sign, result_data)
   }
 }
 
@@ -159,14 +178,14 @@ sup BigInt ext std::ops::div::Div {
   fun div(self, that: Self) -> Self {
     let result_data = self.data.div(that.data)
     let result_sign = self.sign != that.sign
-    ret BigInt(sign=result_sign, data=result_data)
+    ret Self::signed_from(result_sign, result_data)
   }
 }
 
 sup BigInt ext std::ops::rem::Rem {
   fun rem(self, that: Self) -> Self {
     let result_data = self.data.rem(that.data)
-    ret BigInt(sign=self.sign, data=result_data)
+    ret Self::signed_from(self.sign, result_data)
   }
 }
 
@@ -174,7 +193,7 @@ sup BigInt ext std::ops::pow::Pow {
   fun pow(self, that: Self) -> Self {
     let result_sign = case that.is_even() { true } else { self.sign }
     let result_data = self.data.pow(that.data)
-    ret BigInt(sign=result_sign, data=result_data)
+    ret Self::signed_from(result_sign, result_data)
   }
 }
 
@@ -278,10 +297,16 @@ sup BigInt ext Eq {
 
 sup BigInt ext Ord {
   fun ord(&self, that: &Self) -> S32 {
+    # Differing signs settle it outright: the negative one is the smaller.
+    # @let that: The value to compare against.
+    # @ret: A negative, zero or positive `S32` as `self` is below, equal to or above `that`.
+
     case self.sign != that.sign {
       ret case self.sign { -1_s32 } else { 1_s32 }
     }
-    ret self.data.ord(&that.data)
+
+    let by_magnitude = self.data.ord(&that.data)
+    ret case self.sign { 0_s32 - by_magnitude } else { by_magnitude }
   }
 }
 
