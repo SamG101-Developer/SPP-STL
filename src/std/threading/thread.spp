@@ -3,7 +3,11 @@ use std::annotations::private
 use std::annotations::public
 use std::annotations::versioned
 use std::annotations::zero_type
+use std::allocator::Alloc
+use std::allocator::AllocErr
+use std::allocator::GlobalAlloc
 use std::boolean::Bool
+use std::copy::Copy
 use std::function::FunMov
 use std::number::S32
 use std::number::U64
@@ -12,6 +16,8 @@ use std::result::Pass
 use std::result::Res
 use std::string_view::StrView
 use std::void::Void
+use std::mem::ops::drop
+use std::mem::pointer::NonNull
 use std::ops::drop::Drop
 use std::ops::eq::Eq
 use std::threading::safe::ThreadSafe
@@ -64,38 +70,76 @@ sup ThreadErr {
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls JoinHandle[Out] {
+  # A handle on a running thread, and on the single heap cell that thread writes its result into. The cell is what makes
+  # `Out` a real type rather than a placeholder: `pthread_join`'s own result channel is one `void*`, which can carry a
+  # pointer and nothing wider, and the c side has no way to know the size or layout of an s++ type. Keeping the result
+  # on this side of the boundary means the thread body writes `Out` directly and c never sees it.
+  # @let handle: The `pthread_t` the thread was created with.
+  # @let result: The uninitialized cell the thread body writes its return value into. Reading it before the thread has
+  # been joined would be a data race, so `join` is the only thing that does.
+  # @let detached: Whether the thread has already been detached, so `drop` does not detach it twice.
+
   !package handle: U64
+  !package result: NonNull[Out]
   !private detached: Bool
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls ThreadId {
+  # Identifies a running thread. It is the `pthread_t` the thread was created with, and nothing more - holding one
+  # neither keeps the thread alive nor gives any control over it, which is what a `JoinHandle` is for. Two of them are
+  # compared with `pthread_equal` rather than by their bits, because `pthread_t` is opaque and a platform is free to
+  # make it something other than an integer that compares directly.
+  # @let handle: The `pthread_t` this identifies.
+
   !package handle: U64
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-# Todo: FunMov[(), Void] & ThreadSafe
-fun spawn[Out, F: FunMov[(), Void]](function: F) -> Res[JoinHandle[Out], ThreadErr] {
-  # Spawn a new thread using the sppc threading API. The function to be executed in the new thread is passed as an
-  # argument.
-  # @type Out:
-  # @type F:
-  # @let function:
-  # @ret:
-  # @todo: Actually support "Out" type, currently just returns Void.
+# Todo: constrain "F" to "ThreadSafe" as well, once thread safety is implemented.
+fun spawn[Out, F: FunMov[(), Out]](function: F) -> Res[JoinHandle[Out], ThreadErr] {
+  # Spawn a new thread running `function`, and return a handle that can be joined for its result. `Out` is read off the
+  # function's own return type rather than given at the call site.
+  # @type Out: The type the spawned function returns, and so the type `join` answers with.
+  # @type F: The type of the function to run. It is moved onto the new thread, so it must be a `FunMov`.
+  # @let function: The function to run on the new thread.
+  # @ret: A `Res` holding the join handle, or the error `pthread_create` reported.
 
+  # The result cell is allocated here rather than on the
+  # new thread, so that a failure to allocate is seen by
+  # the caller rather than by a thread with nowhere to
+  # report it.
+  let slot = case GlobalAlloc().allocate_array[Out](1_uz) of {
+    is Pass[NonNull[Out]](val as p) { p }
+    is Fail[AllocErr](err as e) {
+      drop(function)
+      drop(e)
+      ret Fail(err=ThreadMemoryErr())
+    }
+    else { std::abort::unreachable() }
+  }
+
+  # The body moves the function onto the new thread and
+  # takes a copy of the cell with it.
   let mut handle = 0_u64
-  let err = sppc::pthread_create(function, &mut handle)
-  case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
-  ret Pass(val=JoinHandle[Out](handle))
+  let err = sppc::pthread_create((caps function, slot) {
+    let mut into = slot
+    into.write(function())
+  }, &mut handle)
+
+  case err != 0 {
+    GlobalAlloc().deallocate_array(slot, 1_uz)
+    ret Fail(err=ThreadErr::from_errno(err))
+  }
+  ret Pass(val=JoinHandle[Out](handle, result=slot))
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun current() -> ThreadId {
-  # Get the current thread using the sppc threading API. Todo: use a ThreadId type for equality check.
+  # Get the current thread using the sppc threading API.
   let mut handle = 0_u64
   sppc::pthread_self(&mut handle)
   ret ThreadId(handle)
@@ -111,9 +155,23 @@ fun yield_now() -> Void {
 sup [R] JoinHandle[R] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
+  fun id(&self) -> ThreadId {
+    # Get the id of a thread, usually for comparison with another thread's identifier. Wraps the handle in a special
+    # comparable identifier type.
+    # @ret: The id of the spawned thread.
+
+    ret ThreadId(handle=self.handle)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
   fun detach(mut self) -> Res[Void, ThreadErr] {
-    # Detach the thread using the sppc threading API.
-    let Self(handle, ..) = self
+    # Detach the thread using the sppc threading API. A detached thread is never joined, so its result is never read and
+    # the cell holding it is released here - along with whatever the thread has written into it by the time it finishes,
+    # which is why detaching is only safe for a thread whose result is not wanted.
+
+    let Self(handle, result, ..) = self
+    GlobalAlloc().deallocate_array(result, 1_uz)
     let err = sppc::pthread_detach(&handle)
     case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
     ret Pass[Void]()
@@ -122,31 +180,48 @@ sup [R] JoinHandle[R] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun join(self) -> Res[R, ThreadErr] {
-    # Join the thread using the sppc threading API.
-    let Self(handle, ..) = self
+    # Wait for the thread to finish, and answer with what it returned. The read is only sound after the join has
+    # returned: until then the thread may not have written the cell yet.
+    let Self(handle, result, ..) = self
     let err = sppc::pthread_join(&handle)
-    case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
-    ret Pass(val=R()) # Todo: get the value, maybe + transmute?
+    case err != 0 {
+      GlobalAlloc().deallocate_array(result, 1_uz)
+      ret Fail(err=ThreadErr::from_errno(err))
+    }
+
+    let val = result.read()
+    GlobalAlloc().deallocate_array(result, 1_uz)
+    ret Pass(val=val)
   }
 }
 
-##
-
-sup [R] JoinHandle[R] ext Eq {
+sup ThreadId ext Eq {
   !versioned(base="1.0.0", new="1.0.0")
   fun eq(&self, that: &Self) -> Bool {
-    # Compare thread IDs for equality.
-    let err = sppc::pthread_equal(&self.handle, &that.handle)
-    ret err != 0
+    # Whether two ids name the same thread. Asked of `pthread_equal` rather than compared directly, because
+    # `pthread_t` is opaque: a platform may make it a struct, or leave padding in it that differs between two ids of
+    # the same thread.
+    # @let that: The id to compare against.
+    # @ret: Whether both ids name the same thread.
+
+    let mut same = 0_u64
+    sppc::pthread_equal(&self.handle, &that.handle, &mut same)
+    ret same != 0_u64
   }
 }
-##
+
+sup ThreadId ext Copy {
+  # An id is a name for a thread, not a claim on it: duplicating one costs nothing and lets go of nothing, so it is
+  # free to copy. Without this every comparison would consume the id it was asked about.
+}
+
 
 sup [R] JoinHandle[R] ext Drop {
   !versioned(base="1.0.0", new="1.0.0")
   fun drop(self) -> Void {
     # Ensure the thread is detached before deletion.
-    let JoinHandle[R](handle, detached) = self
+    let JoinHandle[R](handle, result, detached) = self
+    GlobalAlloc().deallocate_array(result, 1_uz)
     case detached.not { let err = sppc::pthread_detach(&handle) }
   }
 }
