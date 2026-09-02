@@ -1,5 +1,6 @@
 use std::cffi::CBool
 use std::cffi::CCharPtr
+use std::cffi::CClosure
 use std::cffi::CDouble
 use std::cffi::CInt
 use std::cffi::CLong
@@ -82,7 +83,7 @@ fun init() -> CInt { }
 fun cleanup() -> CInt { }
 
 !ffi(symbol="sppc_pthread_create")
-fun pthread_create[F0: FunMov[(), CVoid]](start_routine: F0, out: &mut CULong) -> CInt { }
+fun pthread_create[F0: CClosure[(), CVoid]](start_routine: F0, out: &mut CULong) -> CInt { }
 
 !ffi(symbol="sppc_pthread_join")
 fun pthread_join(handle: &CULong) -> CInt { }
@@ -121,7 +122,7 @@ fun pthread_mutex_destroy(mutex: &CULong) -> CInt { }
 fun pthread_once_init(out: &mut CULong) -> CInt { }
 
 !ffi(symbol="sppc_pthread_once")
-fun pthread_once[F0: FunMov[(), CVoid]](once: &CULong, func: F0) -> CInt { }
+fun pthread_once[F0: CClosure[(), CVoid]](once: &CULong, func: F0) -> CInt { }
 
 !ffi(symbol="sppc_pthread_cond_init")
 fun pthread_cond_init(out: &mut CULong) -> CInt { }
@@ -342,8 +343,17 @@ fun exit_(status: CInt) -> ! { }
 !ffi(symbol="sppc_signal")
 fun signal(pid: CInt, signal: CInt) -> CInt { }
 
-!ffi(symbol="sppc_fcntl")
-fun fcntl[..V](fd: CInt, cmd: CInt, ..varargs: V) -> CInt { }
+# F_GETFD, F_GETFL, F_GETOWN, F_GETSIG, F_GETLEASE, F_GETPIPE_SZ.
+!ffi(symbol="sppc_fcntl_get")
+fun fcntl_get(fd: CInt, cmd: CInt, out: &mut CInt) -> CInt { }
+
+# F_SETFD, F_SETFL, F_SETOWN, F_SETSIG, F_SETLEASE, F_SETPIPE_SZ, F_DUPFD, F_DUPFD_CLOEXEC.
+!ffi(symbol="sppc_fcntl_set")
+fun fcntl_set(fd: CInt, cmd: CInt, arg: CInt) -> CInt { }
+
+# F_GETLK, F_SETLK, F_SETLKW take a "CFlock" Todo: Constrain.
+!ffi(symbol="sppc_fcntl_ptr")
+fun fcntl_ptr[T](fd: CInt, cmd: CInt, arg: &T) -> CInt { }
 
 !ffi(symbol="sppc_fsync")
 fun fsync(fd: CInt) -> CInt { }
@@ -508,7 +518,7 @@ fun stdout_write(buffer: CCharPtr, size: CULong, count: CULong, out_n: &mut CLon
 fun stderr_write(buffer: CCharPtr, size: CULong, count: CULong, out_n: &mut CLong) -> CInt { }
 
 !ffi(symbol="sppc_async")
-fun async_[F0: FunMov[(CULong, &CULong), CVoidPtr], ..V](handle: &mut CULong, routine: F0, argc: CULong, ..varargs: V) -> CInt { }
+fun async_[F0: CClosure[(CULong, &CULong), CVoidPtr], ..V](handle: &mut CULong, routine: F0, argc: CULong, ..varargs: V) -> CInt { }
 
 !ffi(symbol="sppc_await")
 fun await(handle: CULong) -> CVoidPtr { }

@@ -22,6 +22,8 @@ use std::limits::Limits
 !public type CVoidPtr = std::mem::pointer::Ptr[CUChar]
 !public type CCharPtr = std::mem::pointer::NonNull[CUChar]
 
+!public type CClosure[Ts: std::tuple::TupLike, R] = std::function::FunMov[Ts, R]
+
 !public cmp eperm: CInt = 1 # Operation not permitted
 !public cmp enoent: CInt = 2 # No such file or directory
 !public cmp esrch: CInt = 3 # No such process
