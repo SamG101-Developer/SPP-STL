@@ -1,0 +1,93 @@
+# Coverage for "std::rc". An "Rc" is a shared owner: the value lives until the last strong handle goes, and a "Weak"
+# observes it without keeping it alive. The counts are the observable part, so most of these assert on
+# "strong_count"/"weak_count" either side of a clone or a drop.
+
+!test(group="std/rc")
+fun test_a_new_rc_has_one_strong_and_no_weak_handle() -> Void {
+  let rc = std::rc::rc::Rc[S32]::new(5)
+  std::debug::assert(rc.strong_count() == 1_uz, "one strong handle")
+  std::debug::assert(rc.weak_count() == 0_uz, "no weak handles")
+  drop(rc)
+}
+
+!test(group="std/rc")
+fun test_the_shared_value_reads_back() -> Void {
+  let rc = std::rc::rc::Rc[S32]::new(7)
+  std::debug::assert(rc.fwd_ref()@ == 7, "the value behind the handle")
+  drop(rc)
+}
+
+!test(group="std/rc")
+fun test_cloning_adds_a_strong_handle() -> Void {
+  let rc = std::rc::rc::Rc[S32]::new(1)
+  let other = rc.clone()
+  std::debug::assert(rc.strong_count() == 2_uz, "the clone is counted")
+  std::debug::assert(other.fwd_ref()@ == 1, "and sees the same value")
+  drop(other)
+  drop(rc)
+}
+
+!test(group="std/rc")
+fun test_dropping_a_clone_lowers_the_strong_count() -> Void {
+  let rc = std::rc::rc::Rc[S32]::new(1)
+  let other = rc.clone()
+  drop(other)
+  std::debug::assert(rc.strong_count() == 1_uz, "the count fell back after the clone went")
+  drop(rc)
+}
+
+!test(group="std/rc")
+fun test_downgrading_adds_a_weak_handle_without_a_strong_one() -> Void {
+  let rc = std::rc::rc::Rc[S32]::new(3)
+  let w = rc.downgrade()
+  std::debug::assert(rc.weak_count() == 1_uz, "the weak handle is counted")
+  std::debug::assert(rc.strong_count() == 1_uz, "and it is not a strong one")
+  drop(w)
+  drop(rc)
+}
+
+!test(group="std/rc")
+fun test_a_weak_handle_upgrades_while_the_value_lives() -> Void {
+  let rc = std::rc::rc::Rc[S32]::new(4)
+  let w = rc.downgrade()
+  let up = w.upgrade()
+  std::debug::assert(up.is_some(), "the value is still alive, so the upgrade succeeds")
+  drop(up)
+  drop(w)
+  drop(rc)
+}
+
+!test(group="std/rc")
+fun test_an_upgrade_yields_a_handle_onto_the_same_value() -> Void {
+  let rc = std::rc::rc::Rc[S32]::new(8)
+  let w = rc.downgrade()
+  let up = w.upgrade().unwrap()
+  std::debug::assert(up.fwd_ref()@ == 8, "the upgraded handle sees the shared value")
+  drop(up)
+  drop(w)
+  drop(rc)
+}
+
+!test(group="std/rc")
+fun test_an_rc_can_share_a_non_copyable_value() -> Void {
+  let mut v = Vec[S32]::new()
+  v.append(2)
+
+  let rc = std::rc::rc::Rc[Vec[S32]]::new(v)
+  let other = rc.clone()
+  std::debug::assert(other.fwd_ref().len() == 1_uz, "both handles see the one vector")
+  drop(other)
+  drop(rc)
+}
+
+!test(group="std/rc")
+fun test_cloning_a_weak_handle_adds_another_weak_handle() -> Void {
+  let rc = std::rc::rc::Rc[S32]::new(1)
+  let w = rc.downgrade()
+  let w2 = w.clone()
+  std::debug::assert(rc.weak_count() == 2_uz, "both weak handles are counted")
+  std::debug::assert(rc.strong_count() == 1_uz, "and neither is strong")
+  drop(w2)
+  drop(w)
+  drop(rc)
+}
