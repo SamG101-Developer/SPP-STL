@@ -56,8 +56,13 @@ fun test_sqrt_of_exact_squares() -> Void {
 
 !test(group="std/num/sized_floating_point")
 fun test_powers_of_two_are_exact() -> Void {
-  # "pow" is missing here on purpose: "2.0_f64.pow(3)" segfaults the compiler in comptime resolution, for either
-  # exponent overload. See the Todo on "SizedFloatingPoint::pow".
+  # Both "pow" overloads: the integer exponent goes to "llvm.powi", the float one to "llvm.pow". Keep both - the
+  # integer form is overloaded on two types in llvm, and getting that wrong took the whole compiler down when the
+  # module was printed rather than where the call was built.
+  std::debug::assert(2.0_f64.pow(3) == 8.0_f64, "two cubed, integer exponent")
+  std::debug::assert(2.0_f64.pow(0) == 1.0_f64, "anything to the zero")
+  std::debug::assert(2.0_f64.pow(3.0_f64) == 8.0_f64, "two cubed, float exponent")
+  std::debug::assert(9.0_f64.pow(0.5_f64) == 3.0_f64, "a fractional exponent is a root")
   std::debug::assert(2.0_f64.exp2() == 4.0_f64, "exp2 is two to the power")
   std::debug::assert(8.0_f64.log2() == 3.0_f64, "log2 undoes it")
 }
