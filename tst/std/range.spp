@@ -1,0 +1,94 @@
+# Coverage for "std::range". A "Range" is a generator, so it is walked with a loop rather than held.
+#
+# Note "Range" is a sibling of "Iterator" - both superimpose "Gen" - and declares only "step_by" of its own. The
+# consuming adaptors ("count", "take", "drop") belong to "Iterator" and are covered in "iterator.spp".
+
+!test(group="std/range")
+fun test_between_yields_the_half_open_interval() -> Void {
+  let mut count = 0_uz
+  let mut sum = 0
+  loop i in std::range::Range[S32]::between(0, 5) {
+    count += 1_uz
+    sum += i
+  }
+  std::debug::assert(count == 5_uz, "five steps for [0, 5)")
+  std::debug::assert(sum == 10, "0+1+2+3+4")
+}
+
+!test(group="std/range")
+fun test_an_empty_interval_yields_nothing() -> Void {
+  let mut count = 0_uz
+  loop i in std::range::Range[S32]::between(3, 3) { count += 1_uz }
+  std::debug::assert(count == 0_uz, "the end is exclusive, so [3, 3) is empty")
+}
+
+!test(group="std/range")
+fun test_an_inverted_interval_yields_nothing() -> Void {
+  # The loop condition is "current < end", so a start past the end stops immediately rather than running away.
+  let mut count = 0_uz
+  loop i in std::range::Range[S32]::between(5, 0) { count += 1_uz }
+  std::debug::assert(count == 0_uz, "a start beyond the end yields nothing")
+}
+
+!test(group="std/range")
+fun test_a_single_element_interval() -> Void {
+  let mut count = 0_uz
+  let mut seen = -1
+  loop i in std::range::Range[S32]::between(4, 5) {
+    count += 1_uz
+    seen = i
+  }
+  std::debug::assert(count == 1_uz, "one step for [4, 5)")
+  std::debug::assert(seen == 4, "the start is inclusive")
+}
+
+!test(group="std/range")
+fun test_a_negative_interval_walks_upward() -> Void {
+  let mut count = 0_uz
+  let mut sum = 0
+  loop i in std::range::Range[S32]::between(-2, 2) {
+    count += 1_uz
+    sum += i
+  }
+  std::debug::assert(count == 4_uz, "-2, -1, 0, 1")
+  std::debug::assert(sum == -2, "the negatives outweigh the positives by one step")
+}
+
+!test(group="std/range")
+fun test_step_by_visits_every_nth_value() -> Void {
+  let mut count = 0_uz
+  loop i in std::range::Range[S32]::between(0, 10).step_by(2_uz) { count += 1_uz }
+  std::debug::assert(count == 5_uz, "every other value of ten")
+}
+
+!test(group="std/range")
+fun test_step_by_one_is_the_whole_interval() -> Void {
+  let mut count = 0_uz
+  loop i in std::range::Range[S32]::between(0, 4).step_by(1_uz) { count += 1_uz }
+  std::debug::assert(count == 4_uz, "a step of one skips nothing")
+}
+
+!test(group="std/range")
+fun test_step_by_larger_than_the_interval_yields_only_the_first() -> Void {
+  let mut count = 0_uz
+  let mut seen = -1
+  loop i in std::range::Range[S32]::between(0, 3).step_by(99_uz) {
+    count += 1_uz
+    seen = i
+  }
+  std::debug::assert(count == 1_uz, "the first value, then nothing left to reach")
+  std::debug::assert(seen == 0, "and it is the start")
+}
+
+!test(group="std/range")
+fun test_range_over_an_unsigned_type() -> Void {
+  # "between" needs only "Ord & One & AddAssign & Copy", so it is not restricted to signed integers.
+  let mut count = 0_uz
+  let mut sum = 0_uz
+  loop i in std::range::Range[USize]::between(0_uz, 4_uz) {
+    count += 1_uz
+    sum += i
+  }
+  std::debug::assert(count == 4_uz, "four steps")
+  std::debug::assert(sum == 6_uz, "0+1+2+3")
+}

@@ -1,0 +1,105 @@
+!test(group="std/allocator")
+fun test_a_layout_is_the_element_size_times_the_count() -> Void {
+  let one = std::allocator::Layout::new_for_array[S32](1_uz)
+  let four = std::allocator::Layout::new_for_array[S32](4_uz)
+  std::debug::assert(four.size == one.size * 4_uz, "four elements is four times one")
+  std::debug::assert(four.align == one.align, "the alignment does not depend on the count")
+}
+
+!test(group="std/allocator")
+fun test_a_layout_for_no_elements_has_no_size() -> Void {
+  let none = std::allocator::Layout::new_for_array[S32](0_uz)
+  std::debug::assert(none.size == 0_uz, "no elements take no space")
+  std::debug::assert(none.align > 0_uz, "but the alignment is still meaningful")
+}
+
+!test(group="std/allocator")
+fun test_alignment_is_a_power_of_two() -> Void {
+  # Every alignment a target uses is a power of two, so "align & (align - 1)" is zero.
+  let layout = std::allocator::Layout::new_for_array[S32](1_uz)
+  std::debug::assert(layout.align & (layout.align - 1_uz) == 0_uz, "the alignment is a power of two")
+}
+
+!test(group="std/allocator")
+fun test_a_wider_element_needs_more_space() -> Void {
+  let narrow = std::allocator::Layout::new_for_array[U8](8_uz)
+  let wide = std::allocator::Layout::new_for_array[U64](8_uz)
+  std::debug::assert(wide.size > narrow.size, "eight words take more room than eight bytes")
+}
+
+!test(group="std/allocator")
+fun test_a_layout_is_copyable() -> Void {
+  let layout = std::allocator::Layout::new_for_array[S32](2_uz)
+  let a = layout
+  let b = layout
+  std::debug::assert(a.size == b.size, "both copies describe the same allocation")
+}
+
+!test(group="std/allocator")
+fun test_allocating_an_array_succeeds_and_can_be_freed() -> Void {
+  let alloc = std::allocator::GlobalAlloc
+  let ptr = alloc.allocate_array[S32](4_uz).expect("allocation failed")
+  alloc.deallocate_array(ptr, 4_uz)
+  drop(alloc)
+}
+
+!test(group="std/allocator")
+fun test_an_allocation_is_usable_storage() -> Void {
+  let alloc = std::allocator::GlobalAlloc
+  let mut ptr = alloc.allocate_array[S32](1_uz).expect("allocation failed")
+  ptr.write(42)
+  std::debug::assert(ptr.read() == 42, "the storage holds what was written to it")
+  drop(alloc)
+}
+
+!test(group="std/allocator")
+fun test_two_allocations_do_not_overlap() -> Void {
+  let alloc = std::allocator::GlobalAlloc
+  let mut a = alloc.allocate_array[S32](1_uz).expect("allocation failed")
+  let mut b = alloc.allocate_array[S32](1_uz).expect("allocation failed")
+  a.write(1)
+  b.write(2)
+  std::debug::assert(a.read() == 1, "the first allocation is untouched by the second")
+  std::debug::assert(b.read() == 2, "and the second holds its own value")
+  drop(alloc)
+}
+
+!test(group="std/allocator")
+fun test_a_zeroed_allocation_starts_at_zero() -> Void {
+  let alloc = std::allocator::GlobalAlloc
+  let ptr = alloc.allocate_array_zeroed[S32](1_uz).expect("allocation failed")
+  std::debug::assert(ptr.read() == 0, "zeroed storage reads back as zero")
+  drop(alloc)
+}
+
+!test(group="std/allocator")
+fun test_growing_an_array_keeps_what_was_stored() -> Void {
+  let alloc = std::allocator::GlobalAlloc
+  let mut ptr = alloc.allocate_array[S32](1_uz).expect("allocation failed")
+  ptr.write(7)
+  std::debug::assert(alloc.grow_array(&mut ptr, 1_uz, 8_uz).is_pass(), "the growth succeeded")
+  std::debug::assert(ptr.read() == 7, "the value survived the move")
+  alloc.deallocate_array(ptr, 8_uz)
+  drop(alloc)
+}
+
+!test(group="std/allocator")
+fun test_shrinking_an_array_keeps_the_head() -> Void {
+  let alloc = std::allocator::GlobalAlloc
+  let mut ptr = alloc.allocate_array[S32](8_uz).expect("allocation failed")
+  ptr.write(3)
+  std::debug::assert(alloc.shrink_array(&mut ptr, 8_uz, 1_uz).is_pass(), "the shrink succeeded")
+  std::debug::assert(ptr.read() == 3, "the first element survived")
+  alloc.deallocate_array(ptr, 1_uz)
+  drop(alloc)
+}
+
+!test(group="std/allocator")
+fun test_allocating_nothing_is_not_an_error() -> Void {
+  # A zero-length allocation has to give back something well-formed to be dropped later, rather than failing.
+  let alloc = std::allocator::GlobalAlloc
+  let r = alloc.allocate_array[S32](0_uz)
+  std::debug::assert(r.is_pass(), "asking for no elements succeeds")
+  alloc.deallocate_array(r.unwrap(), 0_uz)
+  drop(alloc)
+}

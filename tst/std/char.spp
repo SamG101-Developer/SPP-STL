@@ -1,0 +1,47 @@
+# Coverage for "std::char". "Char" is a "Copy" type, so no value here needs discharging.
+
+!test(group="std/char")
+fun test_equality_compares_the_scalar_value() -> Void {
+  std::debug::assert('a' == 'a', "the same character")
+  std::debug::assert('a' != 'b', "different characters")
+  std::debug::assert(('a' == 'A').not, "case matters")
+}
+
+!test(group="std/char")
+fun test_ordering_follows_the_scalar_value() -> Void {
+  std::debug::assert('a' < 'b', "earlier is less")
+  std::debug::assert('b' > 'a', "later is greater")
+  std::debug::assert('A' < 'a', "uppercase sorts before lowercase in ascii")
+  std::debug::assert('0' < '9', "digits ascend")
+}
+
+!test(group="std/char")
+fun test_len_utf8_reports_the_encoded_width() -> Void {
+  # One byte up to U+007F, two to U+07FF, three to U+FFFF, four beyond.
+  std::debug::assert('a'.len_utf8() == 1_u32, "ascii is one byte")
+  std::debug::assert('\0'.len_utf8() == 1_u32, "the null character is still one byte")
+}
+
+!test(group="std/char")
+fun test_is_whitespace_recognises_the_usual_separators() -> Void {
+  std::debug::assert(' '.is_whitespace(), "a space")
+  std::debug::assert('\t'.is_whitespace(), "a tab")
+  std::debug::assert('\n'.is_whitespace(), "a newline")
+  std::debug::assert('a'.is_whitespace().not, "a letter is not whitespace")
+  std::debug::assert('0'.is_whitespace().not, "a digit is not whitespace")
+}
+
+!test(group="std/char")
+fun test_from_builds_a_character_from_a_scalar() -> Void {
+  std::debug::assert(std::char::Char::from(97_u32) == 'a', "97 is 'a'")
+  std::debug::assert(std::char::Char::from(65_u32) == 'A', "65 is 'A'")
+  std::debug::assert(std::char::Char::from(48_u32) == '0', "48 is '0'")
+}
+
+!test(group="std/char")
+fun test_try_from_rejects_a_value_that_is_not_a_scalar() -> Void {
+  # The unicode range stops at U+10FFFF, and the surrogate range U+D800..U+DFFF is not a scalar value.
+  std::debug::assert(std::char::Char::try_from(97_u32).unwrap() == 'a', "a valid scalar")
+  std::debug::assert(std::char::Char::try_from(0x110000_u32).is_none(), "past the unicode maximum")
+  std::debug::assert(std::char::Char::try_from(0xD800_u32).is_none(), "a lone surrogate")
+}

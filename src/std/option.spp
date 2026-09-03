@@ -198,7 +198,7 @@ sup [T] Opt[T] {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun ior_else(self, mut that: FunMov[(), Opt[T]]) -> Opt[T] {
+  fun ior_else[F: FunMov[(), Opt[T]]](self, mut that: F) -> Opt[T] {
     # The `ior_else` method checks if this optional contains a value, and if so, returns this optional. If this optional
     # is `None`, then `ior_else` returns the result of invoking the provided function to get the other optional. This is
     # a convenient method for chaining together multiple optional computations, where you want to return the first
@@ -295,7 +295,7 @@ sup [T] Opt[T] {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun map_or[U](self, default: U, mut f: FunMov[(T,), U]) -> U {
+  fun map_or[U, F: FunMov[(T,), U]](self, default: U, mut f: F) -> U {
     # The `map_or` method checks if this optional contains a value, and if so, applies the function to that value and
     # returns the result. If this optional is `None`, then `map_or` returns the provided default value. This is a
     # convenient method for transforming the value inside an optional based on a certain function, and providing a
@@ -548,7 +548,7 @@ sup [T] Opt[T] {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun take_if(&mut self, mut pred: FunMov[(&T,), Bool]) -> Opt[T] {
+  fun take_if[P: FunMov[(&T,), Bool]](&mut self, mut pred: P) -> Opt[T] {
     # The `take_if` method takes the value out of this optional if it satisfies the provided predicate, leaving a `None`
     # in its place. If this optional is `Some` and the predicate returns true for the value inside, then `take_if`
     # returns the value wrapped in `Some`, and sets this optional to `None`. If this optional is `None`, or if the
@@ -559,10 +559,13 @@ sup [T] Opt[T] {
 
     # Pattern match and take the value if this is `Some` and
     # the predicate returns true, otherwise return `None`.
-    ret case self of {
-      is Some[T](&val) { case pred(val) { self } else { None } }
-      else { None }
+    let matches = case self of {
+      is Some[T](&val) { pred(val) }
+      else { false }
     }
+
+    case matches { ret self.take() }
+    ret None()
   }
 
   !public

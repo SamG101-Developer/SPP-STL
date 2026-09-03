@@ -1,0 +1,67 @@
+!test(group="std/tuple")
+fun test_a_tuple_holds_its_elements_in_order() -> Void {
+  let t = (1, 2, 3)
+  std::debug::assert(t.0 == 1, "first")
+  std::debug::assert(t.1 == 2, "second")
+  std::debug::assert(t.2 == 3, "third")
+}
+
+!test(group="std/tuple")
+fun test_a_tuple_of_mixed_types() -> Void {
+  let t = (1, true, 2_uz)
+  std::debug::assert(t.0 == 1, "the integer")
+  std::debug::assert(t.1, "the boolean")
+  std::debug::assert(t.2 == 2_uz, "the size")
+}
+
+!test(group="std/tuple")
+fun test_a_tuple_of_copyable_elements_is_itself_copyable() -> Void {
+  # Reading "t" twice is only allowed because the tuple is "Copy", which it is exactly when every element is.
+  let t = (4, 5)
+  let a = t
+  let b = t
+  std::debug::assert(a.0 == 4, "the first copy")
+  std::debug::assert(b.1 == 5, "the second copy")
+}
+
+!test(group="std/tuple")
+fun test_a_single_element_tuple() -> Void {
+  let t = (9,)
+  std::debug::assert(t.0 == 9, "the only element")
+}
+
+!test(group="std/tuple")
+fun test_a_nested_tuple() -> Void {
+  let t = (1, (2, 3))
+  std::debug::assert(t.0 == 1, "the outer element")
+  std::debug::assert(t.1.0 == 2, "the first inner element")
+  std::debug::assert(t.1.1 == 3, "the second inner element")
+}
+
+!test(group="std/tuple")
+fun test_a_tuple_destructures_into_its_elements() -> Void {
+  let (a, b, c) = (7, 8, 9)
+  std::debug::assert(a == 7, "first bound")
+  std::debug::assert(b == 8, "second bound")
+  std::debug::assert(c == 9, "third bound")
+}
+
+!test(group="std/tuple")
+fun test_a_pair_holds_a_key_and_a_value() -> Void {
+  # "Pair" is a plain class with no "Copy" superimposition, so it is linear even over copyable fields.
+  let p = std::tuple::Pair[S32, Bool](key=1, val=true)
+  std::debug::assert(p.key == 1, "the key")
+  std::debug::assert(p.val, "the value")
+  drop(p)
+}
+
+!test(group="std/tuple")
+fun test_a_pair_can_hold_a_non_copyable_value() -> Void {
+  let mut v = Vec[S32]::new()
+  v.append(6)
+
+  let p = std::tuple::Pair[S32, Vec[S32]](key=1, val=v)
+  std::debug::assert(p.key == 1, "the key is still readable")
+  std::debug::assert(p.val.len() == 1_uz, "and the vector came along whole")
+  drop(p)
+}

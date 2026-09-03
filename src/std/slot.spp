@@ -56,10 +56,13 @@ sup [T] Slot[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun take(self) -> T {
-    #
-    # @ret:
+    # Consumes the slot and hands back the value it was holding. The slot is taken apart rather than read through,
+    # because moving `val` out of `self` would leave `self` owning what is left of a value that has to be used exactly
+    # once.
+    # @ret: The value the slot held.
 
-    ret self.val
+    let Slot[T](val) = self
+    ret val
   }
 }
 

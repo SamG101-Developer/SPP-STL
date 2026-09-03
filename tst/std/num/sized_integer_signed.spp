@@ -1,0 +1,93 @@
+!test(group="std/num/sized_integer_signed")
+fun test_the_sign_predicates_partition_around_zero() -> Void {
+  std::debug::assert(5.is_positive(), "a positive")
+  std::debug::assert(5.is_negative().not, "a positive is not negative")
+  std::debug::assert((-5).is_negative(), "a negative")
+  std::debug::assert((-5).is_positive().not, "a negative is not positive")
+  std::debug::assert(0.is_positive().not, "zero is not positive")
+  std::debug::assert(0.is_negative().not, "and not negative either")
+}
+
+!test(group="std/num/sized_integer_signed")
+fun test_negation_flips_the_sign() -> Void {
+  std::debug::assert(5.neg() == -5, "a positive negates")
+  std::debug::assert((-5).neg() == 5, "and a negative negates back")
+  std::debug::assert(0.neg() == 0, "zero negates to itself")
+}
+
+!test(group="std/num/sized_integer_signed")
+fun test_abs_takes_the_magnitude() -> Void {
+  std::debug::assert((-5).abs() == 5, "a negative")
+  std::debug::assert(5.abs() == 5, "a positive is its own magnitude")
+  std::debug::assert(0.abs() == 0, "zero")
+}
+
+!test(group="std/num/sized_integer_signed")
+fun test_abs_of_the_minimum_has_no_representable_answer() -> Void {
+  # Two's complement has one more negative value than positive, so the minimum's magnitude does not fit. The checked
+  # form says so; the wrapping form comes back to the minimum itself.
+  let min = std::limits::Limits[S32]::min
+  std::debug::assert(min.abs_checked().is_none(), "there is no positive counterpart to the minimum")
+  std::debug::assert(min.abs_wrapping() == min, "wrapping lands back on the minimum")
+}
+
+!test(group="std/num/sized_integer_signed")
+fun test_mod_differs_from_remainder_for_a_negative_dividend() -> Void {
+  # "%" takes the sign of the dividend; "mod" takes the sign of the divisor, so it is never negative for a positive
+  # one. This is the whole reason both exist.
+  std::debug::assert(-7 % 2 == -1, "remainder follows the dividend")
+  std::debug::assert((-7).mod(2) == 1, "mod follows the divisor")
+  std::debug::assert(7 % 2 == 1, "they agree for a positive dividend")
+  std::debug::assert(7.mod(2) == 1, "as does mod")
+}
+
+!test(group="std/num/sized_integer_signed")
+fun test_integer_square_root_of_a_negative_is_rejected() -> Void {
+  std::debug::assert(9.isqrt() == 3, "an exact square")
+  std::debug::assert(10.isqrt() == 3, "rounded down between squares")
+  std::debug::assert((-1).isqrt_checked().is_none(), "a negative has no integer square root")
+  std::debug::assert(9.isqrt_checked().unwrap() == 3, "the checked form agrees for a positive")
+}
+
+!test(group="std/num/sized_integer_signed")
+fun test_division_and_remainder_of_negatives_truncate_toward_zero() -> Void {
+  std::debug::assert(-7 / 2 == -3, "-7 / 2 truncates to -3, not -4")
+  std::debug::assert(7 / -2 == -3, "and the same with the sign on the divisor")
+  std::debug::assert(-7 % -2 == -1, "the remainder keeps the dividend's sign")
+}
+
+!test(group="std/num/sized_integer_signed")
+fun test_negating_the_minimum_overflows() -> Void {
+  let min = std::limits::Limits[S32]::min
+  std::debug::assert(min.neg_checked().is_none(), "the minimum has no negation")
+  std::debug::assert(min.neg_wrapping() == min, "and wrapping stays put")
+}
+
+!test(group="std/num/sized_integer_signed")
+fun test_saturating_arithmetic_stops_at_the_signed_bounds() -> Void {
+  let min = std::limits::Limits[S32]::min
+  let max = std::limits::Limits[S32]::max
+  std::debug::assert(max.add_saturating(1) == max, "adding past the top stops there")
+  std::debug::assert(min.sub_saturating(1) == min, "and subtracting past the bottom")
+}
+
+!test(group="std/num/sized_integer_signed")
+fun test_powers_of_a_negative_alternate_in_sign() -> Void {
+  std::debug::assert((-2).pow(2_u32) == 4, "an even power is positive")
+  std::debug::assert((-2).pow(3_u32) == -8, "an odd power keeps the sign")
+  std::debug::assert((-2).pow(0_u32) == 1, "anything to the zero is one")
+}
+
+!test(group="std/num/sized_integer_signed")
+fun test_a_power_that_does_not_fit_is_reported() -> Void {
+  std::debug::assert(2.pow_checked(4_u32).unwrap() == 16, "a power that fits")
+  std::debug::assert(2.pow_checked(64_u32).is_none(), "one that does not")
+  std::debug::assert(2.pow_saturating(64_u32) == std::limits::Limits[S32]::max, "saturating stops at the top")
+}
+
+!test(group="std/num/sized_integer_signed")
+fun test_the_narrower_widths_behave_the_same() -> Void {
+  std::debug::assert((-5_s8).abs() == 5_s8, "abs at S8")
+  std::debug::assert((-5_s16).is_negative(), "the sign predicate at S16")
+  std::debug::assert((-7_s64).mod(2_s64) == 1_s64, "mod at S64")
+}

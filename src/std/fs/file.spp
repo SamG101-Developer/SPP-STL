@@ -269,7 +269,7 @@ sup File {
     # operation fails.
 
     let fl = sppc::CFlock(type_=cffi::f_wrlck, whence=cffi::seek_set, start=0_sz, len=0_sz)
-    let err = sppc::fcntl(self.fd, case non_blocking { cffi::f_setlk } else { cffi::f_setlkw }, &fl)
+    let err = sppc::fcntl_lock(self.fd, case non_blocking { cffi::f_setlk } else { cffi::f_setlkw }, &fl)
     drop(fl)
 
     ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
@@ -289,7 +289,7 @@ sup File {
     # the operation fails.
 
     let fl = sppc::CFlock(type_=cffi::f_rdlck, whence=cffi::seek_set, start=0_sz, len=0_sz)
-    let err = sppc::fcntl(self.fd, case non_blocking { cffi::f_setlk } else { cffi::f_setlkw }, &fl)
+    let err = sppc::fcntl_lock(self.fd, case non_blocking { cffi::f_setlk } else { cffi::f_setlkw }, &fl)
     drop(fl)
 
     ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
@@ -305,7 +305,7 @@ sup File {
     # operation fails.
 
     let fl = sppc::CFlock(type_=cffi::f_unlck, whence=cffi::seek_set, start=0_sz, len=0_sz)
-    let err = sppc::fcntl(self.fd, cffi::f_setlk, &fl)
+    let err = sppc::fcntl_lock(self.fd, cffi::f_setlk, &fl)
     drop(fl)
 
     ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }

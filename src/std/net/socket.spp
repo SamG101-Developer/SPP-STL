@@ -80,13 +80,13 @@ sup Socket {
     # Convert the boolean value to an integer (1 for true,
     # 0 for false) to be used in the `fcntl` function.
     let mut flags = Flags::new()
-    let err = sppc::fcntl(self.fd, cffi::f_getfl, 0, &mut flags.bits)
+    let err = sppc::fcntl_get(self.fd, cffi::f_getfl, &mut flags.bits)
     case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
     flags.set(Flags::bit(U32::from(cffi::o_nonblock)), yes)
 
     # Call the `setsockopt` function to set the broadcast
     # option for the socket.
-    let err = sppc::fcntl(self.fd, cffi::f_setfl, flags.bits)
+    let err = sppc::fcntl_set(self.fd, cffi::f_setfl, flags.bits)
     case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass[Void]()
   }
@@ -102,7 +102,7 @@ sup Socket {
     # Create the empty flags object and read the current
     # flags from the socket using `fcntl`.
     let mut flags = Flags::new()
-    let err = sppc::fcntl(self.fd, cffi::f_getfl, &mut flags.bits)
+    let err = sppc::fcntl_get(self.fd, cffi::f_getfl, &mut flags.bits)
 
     # Read the flags from the socket and check if the
     # non-blocking flag is set. Error on failure.

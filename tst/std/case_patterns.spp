@@ -1,0 +1,214 @@
+!test(group="std/case_patterns")
+fun test_plain_binding_matches_and_binds() -> Void {
+  # The control. This is the shape `Opt::map` uses, and `map` passes.
+  let a: std::option::Opt[std::number::S32] = std::option::Some(val=1)
+  let got = case a of {
+    is std::option::Some[std::number::S32](val) { val }
+    else { 0_s32 }
+  }
+  std::debug::assert(got == 1_s32, "a plain binding yields the value")
+}
+
+!test(group="std/case_patterns")
+fun test_borrow_binding_yields_the_value_not_the_address() -> Void {
+  # The shape `Opt::eq` uses. Two separately built values holding the same number must compare equal; comparing where
+  # they live rather than what they hold would make this false.
+  let a: std::option::Opt[std::number::S32] = std::option::Some(val=1)
+  let b: std::option::Opt[std::number::S32] = std::option::Some(val=1)
+
+  let same = case a of {
+    is std::option::Some[std::number::S32](&val as x) {
+      case b of {
+        is std::option::Some[std::number::S32](&val as y) { x == y }
+        else { false }
+      }
+    }
+    else { false }
+  }
+  std::debug::assert(same, "a borrow binding compares by value")
+}
+
+!test(group="std/case_patterns")
+fun test_nested_variant_pattern_matches_without_using_the_binding() -> Void {
+  # Splits the nested-variant pattern the same way the tuple one is split: whether it selects the right branch, and
+  # whether what it binds is usable. The pattern names `Some[Some[T]]`, but the subject's alternatives are
+  # `Some[Opt[T]]` and `None` - so `Some[T]` is an alternative of the payload, one level further in, and deciding
+  # this needs a second tag check on the payload rather than one on the subject.
+  let inner: std::option::Opt[std::number::S32] = std::option::Some(val=3)
+  let nested: std::option::Opt[std::option::Opt[std::number::S32]] = std::option::Some(val=inner)
+
+  let matched = case nested of {
+    is std::option::Some[std::option::Some[std::number::S32]](val) { true }
+    else { false }
+  }
+  std::debug::assert(matched, "a nested variant pattern selects the right branch")
+}
+
+!test(group="std/case_patterns")
+fun test_nested_variant_pattern_rejects_the_wrong_inner_alternative() -> Void {
+  # Red, and the more dangerous half of the nested-variant bug: only the subject's own tag is checked, so a value whose
+  # inner alternative is `None` still takes a `Some[Some[T]]` branch. The pattern claims more than is tested.
+  let inner: std::option::Opt[std::number::S32] = std::option::None()
+  let nested: std::option::Opt[std::option::Opt[std::number::S32]] = std::option::Some(val=inner)
+
+  let matched = case nested of {
+    is std::option::Some[std::option::Some[std::number::S32]](val) { true }
+    else { false }
+  }
+  std::debug::assert(matched.not, "an inner `None` does not match `Some[Some[T]]`")
+}
+
+!test(group="std/case_patterns")
+fun test_nested_variant_pattern_matches() -> Void {
+  # The shape `Opt::flatten` uses: the pattern names the inner variant, not just the outer one.
+  let inner: std::option::Opt[std::number::S32] = std::option::Some(val=3)
+  let nested: std::option::Opt[std::option::Opt[std::number::S32]] = std::option::Some(val=inner)
+
+  let got = case nested of {
+    is std::option::Some[std::option::Some[std::number::S32]](val) {
+      let inner: std::option::Opt[std::number::S32] = val
+      inner.unwrap()
+    }
+    else { 0_s32 }
+  }
+  std::debug::assert(got == 3_s32, "a nested variant pattern matches and the inner value survives")
+}
+
+!test(group="std/case_patterns")
+fun test_rest_pattern_matches() -> Void {
+  # The shape `Opt::ior_else` uses: the alternative is named but its fields are not bound at all.
+  let a: std::option::Opt[std::number::S32] = std::option::Some(val=1)
+  let matched = case a of {
+    is std::option::Some[std::number::S32](..) { true }
+    else { false }
+  }
+  std::debug::assert(matched, "a rest pattern matches")
+}
+
+!test(group="std/case_patterns")
+fun test_borrow_binding_without_a_rename_matches() -> Void {
+  # The shape `Opt::take_if` uses: a borrow binding that keeps the field's own name rather than aliasing it.
+  let a: std::option::Opt[std::number::S32] = std::option::Some(val=1)
+  let matched = case a of {
+    is std::option::Some[std::number::S32](&val) { val == 1_s32 }
+    else { false }
+  }
+  std::debug::assert(matched, "a borrow binding without a rename matches")
+}
+
+fun peek_borrowed(o: &std::option::Opt[std::number::S32]) -> Bool {
+  # Matching through a borrowed receiver, which is what every method taking "&self" does - `Opt::eq` above all.
+  ret case o of {
+    is std::option::Some[std::number::S32](&val as x) { x == 1_s32 }
+    else { false }
+  }
+}
+
+!test(group="std/case_patterns")
+fun test_matching_through_a_borrowed_receiver() -> Void {
+  let a: std::option::Opt[std::number::S32] = std::option::Some(val=1)
+  std::debug::assert(peek_borrowed(&a), "a borrowed receiver matches")
+}
+
+!test(group="std/case_patterns")
+fun test_calling_a_closure_with_a_bound_value() -> Void {
+  # The shape `Opt::and_then` uses: the bound value is handed straight to a closure parameter.
+  let a: std::option::Opt[std::number::S32] = std::option::Some(val=1)
+  let inc = (x: std::number::S32) x + 1_s32
+  let got = case a of {
+    is std::option::Some[std::number::S32](val) { inc(val) }
+    else { 0_s32 }
+  }
+  std::debug::assert(got == 2_s32, "a closure receives the bound value")
+}
+
+!test(group="std/case_patterns")
+fun test_tuple_of_patterns_matches_without_using_the_binding() -> Void {
+  # Separates the two halves of a tuple pattern: whether it selects the right branch at all, and whether the values it
+  # binds are usable. This one only asks the first question.
+  let a: std::option::Opt[std::number::S32] = std::option::Some(val=1)
+  let b: std::option::Opt[std::number::S32] = std::option::None()
+
+  let matched = case (a, b) of {
+    is (std::option::Some[std::number::S32](val), std::option::None()) { true }
+    else { false }
+  }
+  std::debug::assert(matched, "a tuple of patterns selects the right branch")
+}
+
+!test(group="std/case_patterns")
+fun test_tuple_of_patterns_matches() -> Void {
+  # The shape `Opt::xor` and `Opt::zip` use: a tuple whose elements are themselves patterns.
+  let a: std::option::Opt[std::number::S32] = std::option::Some(val=1)
+  let b: std::option::Opt[std::number::S32] = std::option::None()
+
+  let got = case (a, b) of {
+    is (std::option::Some[std::number::S32](val), std::option::None()) { val }
+    else { 0_s32 }
+  }
+  std::debug::assert(got == 1_s32, "a tuple of patterns matches and binds")
+}
+
+fun counted_opt(calls: &mut std::number::S32) -> std::option::Opt[std::number::S32] {
+  calls@ += 1
+  ret std::option::Some(val=7)
+}
+
+fun counted_tuple(calls: &mut std::number::S32) -> (std::number::S32, std::number::S32) {
+  calls@ += 1
+  ret (1, 2)
+}
+
+fun counted_array(calls: &mut std::number::S32) -> std::array::Arr[std::number::S32, 2_uz] {
+  calls@ += 1
+  ret [3, 4]
+}
+
+fun counted_nested(calls: &mut std::number::S32) -> (std::option::Some[std::number::S32], std::number::S32) {
+  calls@ += 1
+  ret (std::option::Some(val=5), 6)
+}
+
+!test(group="std/case_patterns")
+fun test_an_object_pattern_evaluates_its_subject_once() -> Void {
+  let mut calls = 0
+  let got = case counted_opt(&mut calls) of {
+    is std::option::Some[std::number::S32](val) { val }
+    else { 0 }
+  }
+  std::debug::assert(calls == 1, "the subject was evaluated once")
+  std::debug::assert(got == 7, "and the binding came from it")
+}
+
+!test(group="std/case_patterns")
+fun test_a_tuple_pattern_evaluates_its_subject_once() -> Void {
+  let mut calls = 0
+  let got = case counted_tuple(&mut calls) of {
+    is (a, b) { a + b }
+    else { 0 }
+  }
+  std::debug::assert(calls == 1, "the subject was evaluated once")
+  std::debug::assert(got == 3, "and the bindings came from it")
+}
+
+!test(group="std/case_patterns")
+fun test_an_array_pattern_evaluates_its_subject_once() -> Void {
+  let mut calls = 0
+  let got = case counted_array(&mut calls) of {
+    is [a, b] { a + b }
+    else { 0 }
+  }
+  std::debug::assert(calls == 1, "the subject was evaluated once")
+  std::debug::assert(got == 7, "and the bindings came from it")
+}
+
+!test(group="std/case_patterns")
+fun test_a_nested_pattern_evaluates_its_subject_once() -> Void {
+  let mut calls = 0
+  let got = case counted_nested(&mut calls) of {
+    is (std::option::Some[std::number::S32](val), rest) { val + rest }
+    else { 0 }
+  }
+  std::debug::assert(calls == 1, "the subject was evaluated once")
+  std::debug::assert(got == 11, "and both levels of binding came from it")
+}

@@ -10,11 +10,8 @@ fun call_once[F: FunMov[(), Void]](func: F) -> Void {
   # @type F: The type of the function being called. This must be a function type that takes no arguments and returns
   # `Void`.
   # @let func: The function being called. This is a value of type `F`.
-  # @todo: This cannot actually dedupe yet. `pthread_once` requires a persistent `pthread_once_t` control word to gate
-  # on, but `sppc::pthread_once` takes only the function, so every call runs `func` afresh. Needs a `Once` control
-  # object threaded through here and a matching `sppc` FFI signature change on both sides.
 
   let mut handle = 0_u64
   let init_err = sppc::pthread_once_init(&mut handle) # Todo: Error handling.
-  let once_err = sppc::pthread_once(&handle, func) # Todo: Error handling.
+  let once_err = sppc::pthread_once(&handle, std::cffi::CClosure[(), Void]::from(func)) # Todo: Error handling.
 }

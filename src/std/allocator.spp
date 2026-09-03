@@ -103,7 +103,13 @@ sup Layout {
     # @ret: A `Layout` instance that encapsulates the size and alignment requirements for an array of `n` elements of
     # type `T`.
 
-    let size = std::mem::ops::size_of[T]() * n
+    let elem = std::mem::ops::size_of[T]()
+    let overflows = case elem == 0_uz { false } else { n > std::limits::Limits[USize]::max / elem }
+    case overflows {
+      std::abort::abort("allocation layout overflows the address space")
+    }
+
+    let size = elem * n
     let align = std::mem::ops::align_of[T]()
     ret Self(size, align)
   }

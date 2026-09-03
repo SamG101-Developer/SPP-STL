@@ -1,0 +1,100 @@
+!test(group="std/random")
+fun test_the_same_seed_gives_the_same_sequence() -> Void {
+  let mut a = std::random::Rng::from_seed(42_u64)
+  let mut b = std::random::Rng::from_seed(42_u64)
+  std::debug::assert(a.next_u64() == b.next_u64(), "first draw")
+  std::debug::assert(a.next_u64() == b.next_u64(), "second draw")
+  std::debug::assert(a.next_u64() == b.next_u64(), "third draw")
+  drop(a)
+  drop(b)
+}
+
+!test(group="std/random")
+fun test_different_seeds_diverge() -> Void {
+  # Two streams could collide on one draw by chance, so this asks whether they differ anywhere in several.
+  let mut a = std::random::Rng::from_seed(1_u64)
+  let mut b = std::random::Rng::from_seed(2_u64)
+  let mut differed = false
+  loop i in std::range::Range[USize]::between(0_uz, 8_uz) {
+    differed = differed or a.next_u64() != b.next_u64()
+  }
+  std::debug::assert(differed, "two seeds do not produce one stream")
+  drop(a)
+  drop(b)
+}
+
+!test(group="std/random")
+fun test_a_stream_does_not_repeat_immediately() -> Void {
+  let mut r = std::random::Rng::from_seed(7_u64)
+  let first = r.next_u64()
+  let mut moved = false
+  loop i in std::range::Range[USize]::between(0_uz, 8_uz) {
+    moved = moved or r.next_u64() != first
+  }
+  std::debug::assert(moved, "the generator advances rather than repeating one value")
+  drop(r)
+}
+
+!test(group="std/random")
+fun test_between_stays_within_its_bounds() -> Void {
+  let mut r = std::random::Rng::from_seed(3_u64)
+  let mut all_inside = true
+  loop i in std::range::Range[USize]::between(0_uz, 64_uz) {
+    let n = r.between(10_u64, 20_u64)
+    all_inside = all_inside and n >= 10_u64 and n < 20_u64
+  }
+  std::debug::assert(all_inside, "every draw sat inside the requested range")
+  drop(r)
+}
+
+!test(group="std/random")
+fun test_a_single_value_range_is_that_value() -> Void {
+  let mut r = std::random::Rng::from_seed(5_u64)
+  let mut all_equal = true
+  loop i in std::range::Range[USize]::between(0_uz, 8_uz) {
+    all_equal = all_equal and r.between(4_u64, 5_u64) == 4_u64
+  }
+  std::debug::assert(all_equal, "a range of one has only one answer")
+  drop(r)
+}
+
+!test(group="std/random")
+fun test_next_u32_stays_within_a_word() -> Void {
+  let mut r = std::random::Rng::from_seed(11_u64)
+  let mut all_inside = true
+  loop i in std::range::Range[USize]::between(0_uz, 16_uz) {
+    all_inside = all_inside and U64::from(r.next_u32()) <= U64::from(std::limits::Limits[U32]::max)
+  }
+  std::debug::assert(all_inside, "a 32-bit draw fits in 32 bits")
+  drop(r)
+}
+
+!test(group="std/random")
+fun test_next_double_lies_in_the_unit_interval() -> Void {
+  let mut r = std::random::Rng::from_seed(13_u64)
+  let mut all_inside = true
+  loop i in std::range::Range[USize]::between(0_uz, 32_uz) {
+    let d = r.next_double()
+    all_inside = all_inside and d >= 0.0_f64 and d < 1.0_f64
+  }
+  std::debug::assert(all_inside, "every double sat in [0, 1)")
+  drop(r)
+}
+
+!test(group="std/random")
+fun test_next_bytes_returns_the_number_asked_for() -> Void {
+  let mut r = std::random::Rng::from_seed(17_u64)
+  let bytes = r.next_bytes(16_uz)
+  std::debug::assert(bytes.len() == 16_uz, "sixteen bytes were asked for")
+  drop(bytes)
+  drop(r)
+}
+
+!test(group="std/random")
+fun test_asking_for_no_bytes_gives_none() -> Void {
+  let mut r = std::random::Rng::from_seed(19_u64)
+  let bytes = r.next_bytes(0_uz)
+  std::debug::assert(bytes.is_empty(), "no bytes were asked for")
+  drop(bytes)
+  drop(r)
+}

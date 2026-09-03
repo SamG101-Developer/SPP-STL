@@ -1,0 +1,49 @@
+cor checks_what_it_is_sent() -> std::generator::Gen[std::boolean::Bool, std::array::Arr[S32, 8_uz]] {
+  let sent = gen false
+  std::debug::assert(sent[0_uz]@ == 10, "first element of the sent value")
+  std::debug::assert(sent[7_uz]@ == 80, "last element of the sent value")
+  let sent_again = gen true
+  std::debug::assert(sent_again[3_uz]@ == 40, "the second sent value arrives just as whole")
+}
+
+!test(group="std/generator")
+fun test_a_generator_receives_what_was_sent_to_it() -> Void {
+  let mut g = checks_what_it_is_sent()
+  let a = g.res([10, 20, 30, 40, 50, 60, 70, 80])
+  let b = g.res([10, 20, 30, 40, 50, 60, 70, 80])
+  std::mem::ops::drop(g)
+}
+
+cor stops_with_ret_holding_a_buffer(stop_after: std::number::USize) -> std::iterator::Iterator[std::number::USize] {
+  let v = std::vector::Vec[std::number::S32]::new_with_capacity(1000000_uz)
+  defer std::mem::ops::drop(v)
+  let mut i = 0_uz
+  loop true {
+    case i == stop_after { ret }
+    i += 1_uz
+    gen i
+  }
+}
+
+!test(group="std/generator")
+fun test_ret_in_a_coroutine_finishes_it_and_runs_its_defers() -> Void {
+  loop n in std::range::Range[std::number::USize]::between(0_uz, 2000_uz) {
+    std::debug::assert(stops_with_ret_holding_a_buffer(2_uz).count() == 2_uz, "yielded twice then stopped")
+  }
+}
+
+!test(group="std/generator")
+fun test_a_hand_driven_generator_yields_all_then_none_forever() -> Void {
+  let mut g = std::range::Range[std::number::S32]::between(0, 2)
+  let mut yielded = 0_uz
+  let mut exhausted = 0_uz
+  loop n in std::range::Range[std::number::USize]::between(0_uz, 6_uz) {
+    case g.res() of {
+      is std::option::None() { exhausted += 1_uz }
+      else { yielded += 1_uz }
+    }
+  }
+  std::debug::assert(yielded == 2_uz, "both elements came out")
+  std::debug::assert(exhausted == 4_uz, "and every later resumption answered None")
+  std::mem::ops::drop(g)
+}

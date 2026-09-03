@@ -1,0 +1,58 @@
+!test(group="std/limits")
+fun test_unsigned_bounds_are_the_full_width() -> Void {
+  std::debug::assert(std::limits::Limits[U8]::max == 255_u8, "U8 max")
+  std::debug::assert(std::limits::Limits[U8]::min == 0_u8, "U8 min")
+  std::debug::assert(std::limits::Limits[U16]::max == 65535_u16, "U16 max")
+  std::debug::assert(std::limits::Limits[U16]::min == 0_u16, "U16 min")
+  std::debug::assert(std::limits::Limits[U32]::max == 4294967295_u32, "U32 max")
+  std::debug::assert(std::limits::Limits[U64]::max == 18446744073709551615_u64, "U64 max")
+}
+
+!test(group="std/limits")
+fun test_signed_bounds_are_asymmetric() -> Void {
+  # Two's complement gives one more negative value than positive, at every width.
+  std::debug::assert(std::limits::Limits[S8]::max == 127_s8, "S8 max")
+  std::debug::assert(std::limits::Limits[S8]::min == -128_s8, "S8 min")
+  std::debug::assert(std::limits::Limits[S16]::max == 32767_s16, "S16 max")
+  std::debug::assert(std::limits::Limits[S16]::min == -32768_s16, "S16 min")
+  std::debug::assert(std::limits::Limits[S32]::max == 2147483647, "S32 max")
+  std::debug::assert(std::limits::Limits[S32]::min == -2147483648, "S32 min")
+  std::debug::assert(std::limits::Limits[S64]::max == 9223372036854775807_s64, "S64 max")
+  std::debug::assert(std::limits::Limits[S64]::min == -9223372036854775808_s64, "S64 min")
+}
+
+!test(group="std/limits")
+fun test_min_is_below_max_at_every_width_tested() -> Void {
+  std::debug::assert(std::limits::Limits[U8]::min < std::limits::Limits[U8]::max, "U8 ordered")
+  std::debug::assert(std::limits::Limits[S8]::min < std::limits::Limits[S8]::max, "S8 ordered")
+  std::debug::assert(std::limits::Limits[U32]::min < std::limits::Limits[U32]::max, "U32 ordered")
+  std::debug::assert(std::limits::Limits[S32]::min < std::limits::Limits[S32]::max, "S32 ordered")
+}
+
+!test(group="std/limits")
+fun test_one_step_inside_each_bound_stays_inside() -> Void {
+  # If "max" really is the largest value, then "max - 1" is smaller than it and still representable.
+  let u_max = std::limits::Limits[U8]::max
+  std::debug::assert(u_max - 1_u8 < u_max, "one below U8 max is smaller")
+
+  let s_min = std::limits::Limits[S8]::min
+  std::debug::assert(s_min + 1_s8 > s_min, "one above S8 min is larger")
+}
+
+!test(group="std/limits")
+fun test_the_bounds_are_usable_as_ordinary_values() -> Void {
+  # A "cmp" constant is a value like any other once read: it can be bound, compared and passed on.
+  let mut widest = std::limits::Limits[S32]::min
+  loop i in std::range::Range[S32]::between(-3, 4) {
+    widest = case i > widest { i } else { widest }
+  }
+  std::debug::assert(widest == 3, "the running maximum started from the true minimum")
+}
+
+!test(group="std/limits")
+fun test_an_unsigned_minimum_is_the_zero_value() -> Void {
+  std::debug::assert(std::limits::Limits[U8]::min == 0_u8, "U8 min is zero")
+  std::debug::assert(std::limits::Limits[U16]::min == 0_u16, "U16 min is zero")
+  std::debug::assert(std::limits::Limits[U32]::min == 0_u32, "U32 min is zero")
+  std::debug::assert(std::limits::Limits[U64]::min == 0_u64, "U64 min is zero")
+}

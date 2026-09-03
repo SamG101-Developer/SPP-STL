@@ -112,10 +112,13 @@ sup [Args: TupLike, Out] FunRef[Args, Out] ext FunMut[Args, Out] {
 }
 
 sup [Args: TupLike, Out] FunMov[Args, Out] ext Drop {
+  !intrinsic(name="std.function.FunMov.drop")
   !versioned(base="1.0.0", new="1.0.0")
   fun drop(self) -> Void {
-    # Todo: Intrinsic this to clear the env of moved captures.
-    let Self(..) = self
+    # Releases the closure's captured environment. A closure that captures anything it can carry away holds that
+    # environment on the heap, because it can be moved out of the frame that made it - onto another thread, most of all
+    # - so it is this that frees it. A `FunRef` captures nothing it owns, is `Copy`, and never reaches here.
+    # @todo: the captures inside the environment are not destroyed, only the storage holding them.
   }
 }
 

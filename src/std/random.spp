@@ -20,6 +20,7 @@ use std::vector::Vec
 use std::void::Void
 use std::mem::ops::drop
 
+!public
 cls Rng {
   # The `Rng` type is a pseudo-random number generator (PRNG) that provides methods for generating random numbers and
   # sequences. It is designed to be used in a single-threaded context, and it is not safe to use across multiple threads
@@ -34,6 +35,7 @@ cls Rng {
   state: [U64; 4_uz]
 }
 
+!public
 cls OsRng {
   # The `OsRng` type is a cryptographically secure random number generator (CSPRNG) that provides methods for generating
   # random numbers and sequences. It is designed to be used in a single-threaded context, and it is not safe to use
@@ -45,6 +47,7 @@ cls OsRng {
 }
 
 !zero_type
+!public
 cls RngErr {
   # The `RngErr` type represents an error that can occur when generating random numbers with the `Rng` type.
 }
@@ -127,13 +130,17 @@ sup Rng {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun between(&mut self, min: U64, max: U64) -> U64 {
-    case max == 0_u64 { ret self.next_u64() }
-    let t = 0_u64.sub_wrapping(max) % max
+    # The bounds are half-open, so "min" can come up and "max" cannot. The draw is taken over the width of the range
+    # and then offset - "min" used to be ignored outright, which put every result in "[0, max)" however the range was
+    # asked for.
+    case max <= min { ret min }
+    let span = max - min
+    let t = 0_u64.sub_wrapping(span) % span
     loop true {
       let r = self.next_u64()
-      let m = U128::from(r) * U128::from(max)
+      let m = U128::from(r) * U128::from(span)
       let l = U64::from(m)
-      case l >= t { ret U64::from(m >> 64_u32) }
+      case l >= t { ret min + U64::from(m >> 64_u32) }
     }
   }
 }

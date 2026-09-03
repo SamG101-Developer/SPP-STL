@@ -556,4 +556,30 @@ sup [W: Write] BufWrite[W] {
   #     }
 }
 
-# Todo: Discarding a `BufWrite` should flush whatever is still buffered
+sup [R: Read & Drop] BufRead[R] ext Drop {
+  # A buffered reader owns its buffer and the reader underneath it, so discarding one discards both. Reading buffers
+  # ahead, so bytes already pulled out of the inner reader and not yet consumed are lost here - that is what discarding
+  # a reader means, and a caller that still wants them should read them out first.
+
+  !versioned(base="1.0.0", new="1.0.0")
+  fun drop(self) -> Void {
+    let Self(inner, buf, pos, filled, eof) = self
+    drop(inner)
+    drop(buf)
+  }
+}
+
+sup [W: Write & Drop] BufWrite[W] ext Drop {
+  # A buffered writer owns its buffer and the writer underneath it, so discarding one discards both.
+
+  !versioned(base="1.0.0", new="1.0.0")
+  fun drop(self) -> Void {
+    # Todo: This should flush whatever is still buffered before letting the inner writer go, so that discarding a
+    # writer does not silently lose the bytes written into it. It cannot yet: `flush_buf` is commented out below,
+    # pending the coroutine return-type issue noted there. Until then a caller must flush explicitly.
+
+    let Self(inner, buf, cap) = self
+    drop(inner)
+    drop(buf)
+  }
+}

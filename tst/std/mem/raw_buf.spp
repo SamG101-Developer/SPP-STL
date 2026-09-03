@@ -1,0 +1,97 @@
+!test(group="std/mem/raw_buf")
+fun test_a_new_buffer_has_the_capacity_asked_for() -> Void {
+  let buf = std::mem::raw_buf::RawBuf[S32]::new_with_capacity(8_uz)
+  std::debug::assert(buf.cap() == 8_uz, "the capacity is what was requested")
+  drop(buf)
+}
+
+!test(group="std/mem/raw_buf")
+fun test_a_zero_capacity_buffer_allocates_nothing() -> Void {
+  let buf = std::mem::raw_buf::RawBuf[S32]::new_with_capacity(0_uz)
+  std::debug::assert(buf.cap() == 0_uz, "no capacity was asked for")
+  drop(buf)
+}
+
+# Todo: Red on purpose. "take_at" is documented to answer "None" for a slot that was never written, but "RawBuf" keeps
+#  no record of which slots are initialised, so it reads whatever the allocation happens to hold. See the Todo at the
+#  declaration.
+!test(group="std/mem/raw_buf")
+fun test_an_untouched_slot_holds_nothing() -> Void {
+  let mut buf = std::mem::raw_buf::RawBuf[S32]::new_with_capacity(4_uz)
+  std::debug::assert(buf.take_at(0_uz).is_none(), "a slot that was never written is empty")
+  drop(buf)
+}
+
+!test(group="std/mem/raw_buf")
+fun test_placing_then_taking_returns_the_value() -> Void {
+  let mut buf = std::mem::raw_buf::RawBuf[S32]::new_with_capacity(4_uz)
+  buf.place_at(0_uz, 7)
+  std::debug::assert(buf.take_at(0_uz).unwrap() == 7, "the value comes back")
+  drop(buf)
+}
+
+!test(group="std/mem/raw_buf")
+fun test_taking_a_slot_returns_what_was_placed() -> Void {
+  let mut buf = std::mem::raw_buf::RawBuf[S32]::new_with_capacity(4_uz)
+  buf.place_at(0_uz, 7)
+  std::debug::assert(buf.take_at(0_uz).unwrap() == 7, "the value placed is the value taken")
+  drop(buf)
+}
+
+!test(group="std/mem/raw_buf")
+fun test_slots_are_independent() -> Void {
+  let mut buf = std::mem::raw_buf::RawBuf[S32]::new_with_capacity(4_uz)
+  buf.place_at(0_uz, 1)
+  buf.place_at(2_uz, 3)
+  std::debug::assert(buf.take_at(0_uz).unwrap() == 1, "the first written slot")
+  std::debug::assert(buf.take_at(2_uz).unwrap() == 3, "and the third")
+  drop(buf)
+}
+
+!test(group="std/mem/raw_buf")
+fun test_growing_keeps_what_was_stored() -> Void {
+  let mut buf = std::mem::raw_buf::RawBuf[S32]::new_with_capacity(2_uz)
+  buf.place_at(0_uz, 5)
+  buf.place_at(1_uz, 6)
+  std::debug::assert(buf.try_capacity_grow_to(8_uz).is_pass(), "the growth succeeded")
+  std::debug::assert(buf.cap() == 8_uz, "the capacity grew")
+  std::debug::assert(buf.take_at(0_uz).unwrap() == 5, "the first element survived the move")
+  std::debug::assert(buf.take_at(1_uz).unwrap() == 6, "and the second")
+  drop(buf)
+}
+
+!test(group="std/mem/raw_buf")
+fun test_placing_over_a_taken_slot_works_again() -> Void {
+  # "RawBuf" indexes to "&T or None" rather than a plain borrow, because a slot may hold nothing - so a slot's
+  # contents are reached with "take_at" rather than the index operator.
+  let mut buf = std::mem::raw_buf::RawBuf[S32]::new_with_capacity(4_uz)
+  buf.place_at(1_uz, 9)
+  std::debug::assert(buf.take_at(1_uz).unwrap() == 9, "the first value")
+  buf.place_at(1_uz, 10)
+  std::debug::assert(buf.take_at(1_uz).unwrap() == 10, "and the slot takes a new one")
+  drop(buf)
+}
+
+!test(group="std/mem/raw_buf")
+fun test_clear_range_empties_the_slots_it_covers() -> Void {
+  let mut buf = std::mem::raw_buf::RawBuf[S32]::new_with_capacity(4_uz)
+  buf.place_at(0_uz, 1)
+  buf.place_at(1_uz, 2)
+  buf.place_at(2_uz, 3)
+  buf.clear_range(0_uz, 2_uz)
+  std::debug::assert(buf.take_at(2_uz).unwrap() == 3, "a slot outside the cleared range still holds its value")
+  drop(buf)
+}
+
+!test(group="std/mem/raw_buf")
+fun test_a_buffer_of_a_non_copyable_element() -> Void {
+  let mut inner = Vec[S32]::new()
+  inner.append(4)
+
+  let mut buf = std::mem::raw_buf::RawBuf[Vec[S32]]::new_with_capacity(2_uz)
+  buf.place_at(0_uz, inner)
+  let back = buf.take_at(0_uz).unwrap()
+  std::debug::assert(back.len() == 1_uz, "the vector came back out of the slot")
+  drop(back)
+  drop(buf)
+}

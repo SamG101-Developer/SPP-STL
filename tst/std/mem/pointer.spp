@@ -1,0 +1,57 @@
+!test(group="std/mem/pointer")
+fun test_write_then_read_round_trips() -> Void {
+  let alloc = std::allocator::GlobalAlloc
+  let mut ptr = alloc.allocate_array[S32](1_uz).expect("alloc")
+  ptr.write(7)
+  std::debug::assert(ptr.read() == 7, "write then read gives back the value")
+  drop(alloc)
+}
+
+!test(group="std/mem/pointer")
+fun test_write_then_read_through_a_shared_borrow() -> Void {
+  let alloc = std::allocator::GlobalAlloc
+  let mut ptr = alloc.allocate_array[S32](1_uz).expect("alloc")
+  ptr.write(11)
+  std::debug::assert(ptr.fwd_ref()@ == 11, "the borrow sees what was written")
+  drop(alloc)
+}
+
+!test(group="std/mem/pointer")
+fun test_write_through_a_mutable_borrow_then_read() -> Void {
+  let alloc = std::allocator::GlobalAlloc
+  let mut ptr = alloc.allocate_array[S32](1_uz).expect("alloc")
+  ptr.fwd_mut()@ = 13
+  std::debug::assert(ptr.read() == 13, "the write through the borrow landed")
+  drop(alloc)
+}
+
+!test(group="std/mem/pointer")
+fun test_the_last_write_is_the_one_read_back() -> Void {
+  let alloc = std::allocator::GlobalAlloc
+  let mut ptr = alloc.allocate_array[S32](1_uz).expect("alloc")
+  ptr.write(1)
+  ptr.write(2)
+  ptr.write(3)
+  std::debug::assert(ptr.read() == 3, "only the last write survives")
+  drop(alloc)
+}
+
+!test(group="std/mem/pointer")
+fun test_two_allocations_are_independent() -> Void {
+  let alloc = std::allocator::GlobalAlloc
+  let mut a = alloc.allocate_array[S32](1_uz).expect("alloc")
+  let mut b = alloc.allocate_array[S32](1_uz).expect("alloc")
+  a.write(1)
+  b.write(2)
+  std::debug::assert(a.read() == 1, "the first is untouched by the second")
+  std::debug::assert(b.read() == 2, "and the second holds its own value")
+  drop(alloc)
+}
+
+!test(group="std/mem/pointer")
+fun test_a_dangling_pointer_is_aligned_but_never_read() -> Void {
+  # "dangling" is the well-formed placeholder for an empty allocation. It is never dereferenced, so only its alignment
+  # is meaningful.
+  let ptr = std::mem::pointer::NonNull[S32]::dangling()
+  std::debug::assert(ptr.is_aligned(4_uz), "the placeholder is aligned for its type")
+}

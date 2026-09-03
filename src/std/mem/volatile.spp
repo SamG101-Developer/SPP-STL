@@ -28,6 +28,19 @@ cls Vol[T: Copy] {
 }
 
 sup [T: Copy] Vol[T] {
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun new(val: T) -> Self {
+    # Wrap a value so that every later access to it is a volatile load or store. The field is private, so this is the
+    # only way to build one from outside this module - without it the type is unreachable and none of the methods
+    # below can be called at all.
+    # @let val: The value to place in the wrapper.
+    # @ret: A `Vol` holding `val`.
+
+    ret Vol(val)
+  }
+
+  !public
   !inline
   !intrinsic(name="std.mem.volatile.Vol.read")
   !versioned(base="1.0.0", new="1.0.0")
@@ -38,6 +51,7 @@ sup [T: Copy] Vol[T] {
     # `Vol` class.
   }
 
+  !public
   !inline
   !intrinsic(name="std.mem.volatile.Vol.write")
   !versioned(base="1.0.0", new="1.0.0")
@@ -49,6 +63,7 @@ sup [T: Copy] Vol[T] {
     # field of the `Vol` class, replacing the previous value.
   }
 
+  !public
   !inline
   !intrinsic(name="std.mem.volatile.Vol.swap")
   !versioned(base="1.0.0", new="1.0.0")

@@ -1,0 +1,146 @@
+!test(group="std/fs/path")
+fun test_a_path_keeps_what_it_was_built_from() -> Void {
+  let p = std::fs::path::Path::new("/usr/local/bin")
+  let name = p.file_name()
+  std::debug::assert(name.len() == 3_uz, "the last component is there")
+  drop(name)
+  drop(p)
+}
+
+!test(group="std/fs/path")
+fun test_absolute_and_relative_are_opposites() -> Void {
+  let abs = std::fs::path::Path::new("/usr/local")
+  std::debug::assert(abs.is_absolute(), "a leading separator makes it absolute")
+  std::debug::assert(abs.is_relative().not, "so it is not relative")
+  drop(abs)
+
+  let rel = std::fs::path::Path::new("usr/local")
+  std::debug::assert(rel.is_relative(), "no leading separator makes it relative")
+  std::debug::assert(rel.is_absolute().not, "so it is not absolute")
+  drop(rel)
+}
+
+!test(group="std/fs/path")
+fun test_file_name_is_the_last_component() -> Void {
+  let p = std::fs::path::Path::new("/usr/local/notes.txt")
+  let name = p.file_name()
+  std::debug::assert(name.len() == 9_uz, "notes.txt is nine bytes")
+  drop(name)
+  drop(p)
+}
+
+!test(group="std/fs/path")
+fun test_file_stem_drops_the_extension() -> Void {
+  let p = std::fs::path::Path::new("/usr/local/notes.txt")
+  let stem = p.file_stem()
+  std::debug::assert(stem.len() == 5_uz, "notes is five bytes")
+  drop(stem)
+  drop(p)
+}
+
+!test(group="std/fs/path")
+fun test_extension_is_what_follows_the_last_dot() -> Void {
+  let p = std::fs::path::Path::new("/usr/local/notes.txt")
+  let suffix_str = p.extension()
+  std::debug::assert(suffix_str.len() == 3_uz, "txt is three bytes")
+  drop(suffix_str)
+  drop(p)
+}
+
+!test(group="std/fs/path")
+fun test_a_name_with_no_extension_has_an_empty_one() -> Void {
+  let p = std::fs::path::Path::new("/usr/local/README")
+  let suffix_str = p.extension()
+  std::debug::assert(suffix_str.is_empty(), "no dot means no extension")
+  drop(suffix_str)
+
+  let stem = p.file_stem()
+  std::debug::assert(stem.len() == 6_uz, "and the whole name is the stem")
+  drop(stem)
+  drop(p)
+}
+
+# Todo: This is red on purpose. "components" returns an empty vector for every path. "split" on its own yields the
+#  right parts (with a "StrView" separator and with a "Str" one), so the fault is further along the chain it builds -
+#  "split(..).map(..).collect[Vec[Str]]()" comes back with nothing. Everything else in this file avoids "components"
+#  for that reason.
+!test(group="std/fs/path")
+fun test_components_counts_the_segments() -> Void {
+  let p = std::fs::path::Path::new("usr/local/bin")
+  let parts = p.components()
+  std::debug::assert(parts.len() == 3_uz, "three segments")
+  drop(parts)
+  drop(p)
+}
+
+!test(group="std/fs/path")
+fun test_parent_drops_the_last_component() -> Void {
+  let p = std::fs::path::Path::new("/usr/local/bin")
+  let up = p.parent()
+  let name = up.file_name()
+  std::debug::assert(name.len() == 5_uz, "the parent's last component is now local")
+  drop(name)
+  drop(up)
+  drop(p)
+}
+
+!test(group="std/fs/path")
+fun test_joining_appends_a_component() -> Void {
+  let base = std::fs::path::Path::new("/usr/local")
+  let leaf = std::fs::path::Path::new("bin")
+  let joined = base.join(&leaf)
+  let name = joined.file_name()
+  std::debug::assert(name.len() == 3_uz, "the joined segment is now the last component")
+  std::debug::assert(joined.ends_with(&leaf), "and the path ends with it")
+  drop(name)
+  drop(joined)
+  drop(leaf)
+}
+
+!test(group="std/fs/path")
+fun test_starts_with_and_ends_with_compare_by_component() -> Void {
+  let p = std::fs::path::Path::new("/usr/local/bin")
+  let prefix = std::fs::path::Path::new("/usr")
+  let suffix = std::fs::path::Path::new("bin")
+  std::debug::assert(p.starts_with(&prefix), "the leading components match")
+  std::debug::assert(p.ends_with(&suffix), "and the trailing one")
+  drop(p)
+  drop(prefix)
+  drop(suffix)
+}
+
+!test(group="std/fs/path")
+fun test_a_path_that_is_not_a_prefix() -> Void {
+  let p = std::fs::path::Path::new("/usr/local/bin")
+  let other = std::fs::path::Path::new("/etc")
+  std::debug::assert(p.starts_with(&other).not, "a different first component is not a prefix")
+  drop(p)
+  drop(other)
+}
+
+!test(group="std/fs/path")
+fun test_with_extension_replaces_the_suffix() -> Void {
+  let p = std::fs::path::Path::new("/usr/local/notes.txt")
+  let suffix_str = Str::from("md")
+  let renamed = p.with_extension(&suffix_str)
+  let new_ext = renamed.extension()
+  std::debug::assert(new_ext.len() == 2_uz, "the extension is the new one")
+  drop(new_ext)
+  drop(renamed)
+  drop(suffix_str)
+  drop(p)
+}
+
+!test(group="std/fs/path")
+fun test_a_clone_has_the_same_shape() -> Void {
+  let p = std::fs::path::Path::new("/usr/local/bin")
+  let c = p.clone()
+  let a_name = p.file_name()
+  let b_name = c.file_name()
+  std::debug::assert(a_name.len() == b_name.len(), "the clone has the same last component")
+  std::debug::assert(c.is_absolute(), "and is absolute like its source")
+  drop(a_name)
+  drop(b_name)
+  drop(p)
+  drop(c)
+}
