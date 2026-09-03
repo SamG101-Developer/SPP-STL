@@ -1,3 +1,5 @@
+use std::annotations::intrinsic
+use std::annotations::package
 use std::annotations::public
 use std::limits::Limits
 
@@ -22,7 +24,17 @@ use std::limits::Limits
 !public type CVoidPtr = std::mem::pointer::Ptr[CUChar]
 !public type CCharPtr = std::mem::pointer::NonNull[CUChar]
 
-!public type CClosure[Ts: std::tuple::TupLike, R] = std::function::FunMov[Ts, R]
+!public
+cls CClosure[Ts: std::tuple::TupLike, R] {
+  !package fn: CCharPtr
+  !package env: CCharPtr
+}
+
+sup [Ts: std::tuple::TupLike, R] CClosure[Ts, R] {
+  !intrinsic(name="std.cffi.CClosure.from")
+  !public
+  fun from[F: std::function::FunMov[Ts, R]](that: F) -> Self { }
+}
 
 !public cmp eperm: CInt = 1 # Operation not permitted
 !public cmp enoent: CInt = 2 # No such file or directory

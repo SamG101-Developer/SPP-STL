@@ -124,10 +124,10 @@ fun spawn[Out, F: FunMov[(), Out]](function: F) -> Res[JoinHandle[Out], ThreadEr
   # The body moves the function onto the new thread and
   # takes a copy of the cell with it.
   let mut handle = 0_u64
-  let err = sppc::pthread_create((caps function, slot) {
+  let err = sppc::pthread_create(std::cffi::CClosure[(), Void]::from((caps function, slot) -> Void {
     let mut into = slot
     into.write(function())
-  }, &mut handle)
+  }), &mut handle)
 
   case err != 0 {
     GlobalAlloc().deallocate_array(slot, 1_uz)

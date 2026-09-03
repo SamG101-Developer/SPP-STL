@@ -14,63 +14,63 @@ use std::cffi::CVoidPtr
 
 !public
 cls CTimespec {
-    !public sec: U64
-    !public nsec: U64
+  !public sec: U64
+  !public nsec: U64
 }
 
 !public
 cls CTimeval {
-    !public sec: U64
-    !public usec: U64
+  !public sec: U64
+  !public usec: U64
 }
 
 !public
 cls CStatvfs {
-    !public block_size: CULong
-    !public frag_size: CULong
-    !public blocks: CULong
-    !public blocks_free: CULong
-    !public blocks_available: CULong
-    !public files: CULong
-    !public files_free: CULong
-    !public files_available: CULong
-    !public fs_id: CULong
-    !public flag: CULong
-    !public namemax: CULong
+  !public block_size: CULong
+  !public frag_size: CULong
+  !public blocks: CULong
+  !public blocks_free: CULong
+  !public blocks_available: CULong
+  !public files: CULong
+  !public files_free: CULong
+  !public files_available: CULong
+  !public fs_id: CULong
+  !public flag: CULong
+  !public namemax: CULong
 }
 
 !public
 cls CStat {
-    !public dev: CULong
-    !public ino: CULong
-    !public nlink: CULong
-    !public mode: CUInt
-    !public uid: CUInt
-    !public gid: CUInt
-    !public block_size: CLong
-    !private pad: CLong
-    !public rdev: CULong
-    !public size: CLong
-    !public blocks: CLong
-    !public atim: CTimespec
-    !public mtim: CTimespec
-    !public ctim: CTimespec
+  !public dev: CULong
+  !public ino: CULong
+  !public nlink: CULong
+  !public mode: CUInt
+  !public uid: CUInt
+  !public gid: CUInt
+  !public block_size: CLong
+  !private pad: CLong
+  !public rdev: CULong
+  !public size: CLong
+  !public blocks: CLong
+  !public atim: CTimespec
+  !public mtim: CTimespec
+  !public ctim: CTimespec
 }
 
 !public
 cls CPollfd {
-    !public fd: CInt
-    !public events: CShort
-    !public revents: CShort
+  !public fd: CInt
+  !public events: CShort
+  !public revents: CShort
 }
 
 !public
 cls CFlock {
-    !public type_: CShort
-    !public whence: CShort
-    !public start: CLong
-    !public len: CLong
-    !public pid: CInt
+  !public type_: CShort
+  !public whence: CShort
+  !public start: CLong
+  !public len: CLong
+  !public pid: CInt
 }
 
 !public
@@ -83,7 +83,7 @@ fun init() -> CInt { }
 fun cleanup() -> CInt { }
 
 !ffi(symbol="sppc_pthread_create")
-fun pthread_create[F0: CClosure[(), CVoid]](start_routine: F0, out: &mut CULong) -> CInt { }
+fun pthread_create(start_routine: CClosure[(), CVoid], out: &mut CULong) -> CInt { }
 
 !ffi(symbol="sppc_pthread_join")
 fun pthread_join(handle: &CULong) -> CInt { }
@@ -122,7 +122,7 @@ fun pthread_mutex_destroy(mutex: &CULong) -> CInt { }
 fun pthread_once_init(out: &mut CULong) -> CInt { }
 
 !ffi(symbol="sppc_pthread_once")
-fun pthread_once[F0: CClosure[(), CVoid]](once: &CULong, func: F0) -> CInt { }
+fun pthread_once(once: &CULong, func: CClosure[(), CVoid]) -> CInt { }
 
 !ffi(symbol="sppc_pthread_cond_init")
 fun pthread_cond_init(out: &mut CULong) -> CInt { }
@@ -351,9 +351,9 @@ fun fcntl_get(fd: CInt, cmd: CInt, out: &mut CInt) -> CInt { }
 !ffi(symbol="sppc_fcntl_set")
 fun fcntl_set(fd: CInt, cmd: CInt, arg: CInt) -> CInt { }
 
-# F_GETLK, F_SETLK, F_SETLKW take a "CFlock" Todo: Constrain.
+# F_GETLK, F_SETLK, F_SETLKW take a "CFlock".
 !ffi(symbol="sppc_fcntl_ptr")
-fun fcntl_ptr[T](fd: CInt, cmd: CInt, arg: &T) -> CInt { }
+fun fcntl_lock(fd: CInt, cmd: CInt, arg: &CFlock) -> CInt { }
 
 !ffi(symbol="sppc_fsync")
 fun fsync(fd: CInt) -> CInt { }
@@ -517,8 +517,9 @@ fun stdout_write(buffer: CCharPtr, size: CULong, count: CULong, out_n: &mut CLon
 !ffi(symbol="sppc_stderr_write")
 fun stderr_write(buffer: CCharPtr, size: CULong, count: CULong, out_n: &mut CLong) -> CInt { }
 
-!ffi(symbol="sppc_async")
-fun async_[F0: CClosure[(CULong, &CULong), CVoidPtr], ..V](handle: &mut CULong, routine: F0, argc: CULong, ..varargs: V) -> CInt { }
+# "sppc_async" has no binding: it takes a callback plus a c variadic argument list, and a variadic cannot be one c
+# prototype - the arguments after the pack would have to be passed as real c varargs rather than collapsed into a
+# tuple. "Fut::async_" is the caller waiting on it, and is stubbed out until then.
 
 !ffi(symbol="sppc_await")
 fun await(handle: CULong) -> CVoidPtr { }
