@@ -176,7 +176,7 @@ sup File {
     # The creation mode is only consulted when `O_CREAT` is in
     # the flags; the process umask is applied on top of it.
     let mut file = File()
-    let err = sppc::open(path.inner.ptr, mode.to_flags(), 0x1B6, &mut file.fd)
+    let err = sppc::open(path.inner.ptr, mode.to_flags(), 0x1b6, &mut file.fd)
     ret case err == 0 { Pass(val=file) } else { Fail(err=PathErr::from_errno(err)) }
   }
 

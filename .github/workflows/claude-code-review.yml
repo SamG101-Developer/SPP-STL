@@ -19,13 +19,24 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Check secret availability
+        run: |
+          echo "key present: ${{ secrets.ANTHROPIC_API_KEY != '' }}"
+          echo "key length: ${#KEY}"
+          echo "event: ${{ github.event_name }}"
+          echo "head repo: ${{ github.event.pull_request.head.repo.full_name }}"
+          echo "base repo: ${{ github.repository }}"
+        env:
+          KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
       - name: Run Claude Code Review
         id: claude-review
         uses: anthropics/claude-code-action@v1
         with:
+          show_full_output: true
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
           prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
           claude_args: |
-            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
+            --debug --verbose --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"

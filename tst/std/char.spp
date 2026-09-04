@@ -43,5 +43,5 @@ fun test_try_from_rejects_a_value_that_is_not_a_scalar() -> Void {
   # The unicode range stops at U+10FFFF, and the surrogate range U+D800..U+DFFF is not a scalar value.
   std::debug::assert(std::char::Char::try_from(97_u32).unwrap() == 'a', "a valid scalar")
   std::debug::assert(std::char::Char::try_from(0x110000_u32).is_none(), "past the unicode maximum")
-  std::debug::assert(std::char::Char::try_from(0xD800_u32).is_none(), "a lone surrogate")
+  std::debug::assert(std::char::Char::try_from(0xd800_u32).is_none(), "a lone surrogate")
 }
