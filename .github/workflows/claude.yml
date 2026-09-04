@@ -25,10 +25,16 @@ jobs:
       id-token: write
       actions: read
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c
+        with:
+          egress-policy: audit
+
       - name: Checkout Repository
         uses: actions/checkout@v7
         with:
-          fetch-depth: 1
+          fetch-depth: 0
+          persist-credentials: false
 
       - name: Run Claude Code
         id: claude
