@@ -222,9 +222,9 @@ sup [A: Alloc] Str[A] {
   fun from_utf8(bytes: &View[U8]) -> Res[Self, Utf8Err] {
     # The `from_utf8` method validates that `bytes` is well-formed UTF-8 and, if so, copies it into a new `Str`.
     # Validation walks the bytes one sequence at a time: the leading byte's range picks the sequence length (1-4 bytes),
-    # and every continuation byte must fall in `0x80..=0xBF`. The second byte of 3- and 4-byte sequences is additionally
-    # range-checked against the specific leading byte, to reject overlong encodings (`0xE0 0x80 ..`), UTF-16 surrogates
-    # smuggled through as UTF-8 (`0xED 0xA0..0xBF ..`), and code points past the Unicode maximum of `0x10FFFF` (`0xF4
+    # and every continuation byte must fall in `0x80..=0xbf`. The second byte of 3- and 4-byte sequences is additionally
+    # range-checked against the specific leading byte, to reject overlong encodings (`0xe0 0x80 ..`), UTF-16 surrogates
+    # smuggled through as UTF-8 (`0xed 0xa0..0xbf ..`), and code points past the Unicode maximum of `0x10ffff` (`0xf4
     # 0x90.. ..`).
     # @let bytes: The raw bytes to validate and, if valid, copy into a new `Str`.
     # @ret: A new `Str` containing a copy of `bytes` if it is valid UTF-8, or a `Utf8Err` describing the byte index and
@@ -242,18 +242,18 @@ sup [A: Alloc] Str[A] {
       }
 
       # Reject bytes that can never start a sequence: bare continuation
-      # bytes (`0x80..=0xBF`), and the two bytes reserved for overlong
-      # 2-byte encodings (`0xC0`, `0xC1`), and everything above the
-      # highest valid 4-byte leader (`0xF4`).
-      case first < 0xC2_u8 or first > 0xF4_u8 {
+      # bytes (`0x80..=0xbf`), and the two bytes reserved for overlong
+      # 2-byte encodings (`0xc0`, `0xc1`), and everything above the
+      # highest valid 4-byte leader (`0xf4`).
+      case first < 0xc2_u8 or first > 0xf4_u8 {
         ret Fail(err=Utf8Err(valid_up_to=idx, error_len=Some(val=1_uz)))
       }
 
       # The leading byte's range determines how many bytes make up this
       # sequence.
       let seq_len = case first of {
-        < 0xE0_u8 { 2_uz }
-        < 0xF0_u8 { 3_uz }
+        < 0xe0_u8 { 2_uz }
+        < 0xf0_u8 { 3_uz }
         else { 4_uz }
       }
 
@@ -264,16 +264,16 @@ sup [A: Alloc] Str[A] {
         ret Fail(err=Utf8Err(valid_up_to=idx, error_len=None))
       }
 
-      # Most continuation bytes are only constrained to `0x80..=0xBF`,
-      # but the second byte following the extremal leading bytes (`0xE0`,
-      # `0xED`, `0xF0`, `0xF4`) has a narrower valid range, to rule out
+      # Most continuation bytes are only constrained to `0x80..=0xbf`,
+      # but the second byte following the extremal leading bytes (`0xe0`,
+      # `0xed`, `0xf0`, `0xf4`) has a narrower valid range, to rule out
       # overlong encodings, surrogates, and out-of-range code points.
       let (second_min, second_max) = case first of {
-        == 0xE0_u8 { (0xA0_u8, 0xBF_u8) }
-        == 0xED_u8 { (0x80_u8, 0x9F_u8) }
-        == 0xF0_u8 { (0x90_u8, 0xBF_u8) }
-        == 0xF4_u8 { (0x80_u8, 0x8F_u8) }
-        else { (0x80_u8, 0xBF_u8) }
+        == 0xe0_u8 { (0xa0_u8, 0xbf_u8) }
+        == 0xed_u8 { (0x80_u8, 0x9f_u8) }
+        == 0xf0_u8 { (0x90_u8, 0xbf_u8) }
+        == 0xf4_u8 { (0x80_u8, 0x8f_u8) }
+        else { (0x80_u8, 0xbf_u8) }
       }
 
       let second = bytes[idx + 1_uz]@
@@ -285,7 +285,7 @@ sup [A: Alloc] Str[A] {
       # are only constrained to the plain continuation-byte range.
       loop k in Range[USize]::between(2_uz, seq_len) {
         let cont = bytes[idx + k]@
-        case cont < 0x80_u8 or cont > 0xBF_u8 {
+        case cont < 0x80_u8 or cont > 0xbf_u8 {
           ret Fail(err=Utf8Err(valid_up_to=idx, error_len=Some(val=k)))
         }
       }

@@ -116,12 +116,12 @@ sup StrView {
       case remaining == 0_u32 {
         case byte of {
           < 0x80_u8 { gen Char::from(U32::from(byte)) }
-          < 0xE0_u8 {
-            code_point = U32::from(byte & 0x1F_u8)
+          < 0xe0_u8 {
+            code_point = U32::from(byte & 0x1f_u8)
             remaining = 1_u32
           }
-          < 0xF0_u8 {
-            code_point = U32::from(byte & 0x0F_u8)
+          < 0xf0_u8 {
+            code_point = U32::from(byte & 0x0f_u8)
             remaining = 2_u32
           }
           else {
@@ -136,7 +136,7 @@ sup StrView {
       # decrement the remaining count. Yield if this was the last
       # continuation byte.
       else {
-        code_point = (code_point << 6_u32) | U32::from(byte & 0x3F_u8)
+        code_point = (code_point << 6_u32) | U32::from(byte & 0x3f_u8)
         remaining -= 1_u32
         case remaining == 0_u32 { gen Char::from(code_point) }
       }

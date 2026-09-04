@@ -1,0 +1,152 @@
+use std::annotations::package
+use std::annotations::public
+use std::annotations::versioned
+use std::allocator::Alloc
+use std::allocator::GlobalAlloc
+use std::clone::Clone
+use std::generator::GenOnce
+use std::number::USize
+use std::void::Void
+use std::threading::atomic::atomic_fence
+use std::mem::pointer::NonNull
+use std::ops::del::Del
+use std::ops::fwd::FwdRef
+use std::threading::atomic::Atom
+use std::threading::weak::Weak
+
+!package
+!versioned(base="1.0.0", new="1.0.0")
+cls AtomicControlBlock[T] {
+    !package strong_counter: Atom[USize]
+    !package weak_counter: Atom[USize]
+    !package val: T
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls Arc[T, A: Alloc=GlobalAlloc] {
+    # The `Arc` type is the thread-safe, atomically reference-counted shared owner of a heap-allocated value, the same
+    # as `Arc` in Rust. It is the cross-thread counterpart of `Rc` from `std::rc`: cloning produces another handle to
+    # the same value and the strong/weak counts are maintained with atomic operations, so handles may be sent and shared
+    # across threads without racing the counters. Wrap the shared value in a `Mutex` or `RwLock` (or make it an `Atom`)
+    # if the value itself needs concurrent mutation. `Arc` only makes the ownership thread-safe, not the value.
+    # @type T: The type of the shared value.
+    # @type A: The allocator type used to allocate and deallocate the control block. Defaults to `GlobalAlloc`.
+    # @let ptr: A non-null pointer to the heap-allocated control block holding the atomic counters and value.
+    # @let alloc: The allocator used to allocate and deallocate the control block.
+
+    !package ptr: NonNull[AtomicControlBlock[T]]
+    !package alloc: A
+}
+
+sup [T] Arc[T] {
+    !public type Element = T
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun new(val: T) -> Arc[T] {
+        ret Self::new_in(val, GlobalAlloc)
+    }
+}
+
+sup [T, A: Alloc] Arc[T, A] {
+    #
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun new_in(val: T, alloc: A) -> Arc[T, A] {
+        # Create a new `Arc` by allocating a control block with the given allocator and moving `val` into it. The share
+        # count starts at one, for the `Arc` being returned here. The weak count also starts at one: all live shares
+        # collectively hold a single weak reference, which the last `Arc` releases when it drops, so the control block
+        # outlives the value exactly as long as some `Weak` remains. The block is initialized with a single write, so
+        # there is no window in which it is only partially constructed.
+        # @let val: The value to be allocated on the heap and shared.
+        # @let alloc: The allocator used to allocate and deallocate the control block.
+        # @ret: An `Arc` instance owning the sole share of the newly allocated control block.
+
+        let mut ptr = alloc.allocate_array[AtomicControlBlock[T]](1_uz).expect("Allocation failed")
+        ptr.write(AtomicControlBlock(strong_counter=Atom[USize]::new(1_uz), weak_counter=Atom[USize]::new(1_uz), val))
+        ret Arc(ptr, alloc)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun strong_count(&self) -> USize {
+        # Read the current share count. This is an atomic acquire load; being a snapshot of a value other threads may be
+        # mutating, it is only meaningful for diagnostics, not for making liveness decisions.
+        # @ret: The number of live `Arc` shares of the control block at the moment of the load.
+
+        ret self.ptr.strong_counter.load(Atom[USize]::mo_acquire)
+    }
+
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun weak_count(&self) -> USize {
+        # Read the current weak count. As with `strong_count`, this is an atomic acquire load and only meaningful as a
+        # diagnostic snapshot. While any strong reference is alive the count includes the single internal reference held
+        # collectively by the strong references, so it reads one higher than the number of `Weak` handles.
+        # @ret: The raw weak counter of the control block at the moment of the load.
+
+        ret self.ptr.weak_counter.load(Atom[USize]::mo_acquire)
+    }
+}
+
+sup [T, A: Alloc & Clone] Arc[T, A] {
+    !public
+    !versioned(base="1.0.0", new="1.0.0")
+    fun downgrade(&self) -> Weak[T, A] {
+        # Create a `Weak` handle to the same control block. The weak count is incremented with a relaxed atomic
+        # fetch-add; the `NonNull` is `Copy` so the pointer is copied into the new handle, and the allocator is cloned
+        # so the weak handle can deallocate independently.
+        # @ret: A `Weak` handle pointing at the same control block as this `Arc`.
+
+        self.ptr.weak_counter.fetch_add(1_uz, Atom[USize]::mo_relaxed)
+        ret Weak(ptr=self.ptr, alloc=self.alloc.clone())
+    }
+}
+
+sup [T] Arc[T] ext FwdRef[T] {
+    !versioned(base="1.0.0", new="1.0.0")
+    cor fwd_ref(&self) -> GenOnce[&T] {
+        gen &self.ptr.val
+    }
+}
+
+sup [T, A: Alloc & Clone] Arc[T, A] ext Clone {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun clone(&self) -> Self {
+        # Create a new `Arc` handle to the same control block. The share count is incremented with a relaxed atomic
+        # fetch-add: no synchronization is established by cloning itself, only by the eventual drop, so relaxed ordering
+        # is sufficient here. Unlike `Rc`, no mutable pointer needs to be fabricated; the atomic counter is mutated
+        # through a shared borrow, and the `NonNull` is `Copy`, so the pointer is simply copied into the new handle. The
+        # allocator is cloned so the new share can deallocate the block independently.
+        # @ret: A new `Arc` handle pointing at the same control block as this one.
+
+        self.ptr.strong_counter.fetch_add(1_uz, Atom[USize]::mo_relaxed)
+        ret Arc(ptr=self.ptr, alloc=self.alloc.clone())
+    }
+}
+
+sup [T, A: Alloc] Arc[T, A] ext Del {
+    !versioned(base="1.0.0", new="1.0.0")
+    fun del(&mut self) -> Void {
+        # Drop one share. The share count is decremented with a release fetch-sub so that all prior writes to the value
+        # by this thread are visible to whichever thread performs the final drop. When this was the last share (the old
+        # count was one), an acquire fence pairs with the release decrements of every other share, ensuring this thread
+        # sees all their writes before it runs the value's destructor. `drop_in_place` then destroys the `val` field.
+        # The last share then releases the single weak reference held collectively by all shares; if that was in turn
+        # the last handle of any kind (no surviving `Weak`), the raw control-block storage is freed, again behind an
+        # acquire fence paired with the weak handles' release decrements.
+        # @ret: Nothing; this is invoked for its cleanup side effects when an `Arc` is destroyed.
+
+        let old = self.ptr.strong_counter.fetch_sub(1_uz, Atom[USize]::mo_release)
+        case old == 1_uz {
+            atomic_fence(Atom[USize]::mo_acquire)
+            std::mem::ops::drop_in_place(&mut self.ptr.val)
+            let old_weak = self.ptr.weak_counter.fetch_sub(1_uz, Atom[USize]::mo_release)
+            case old_weak == 1_uz {
+                atomic_fence(Atom[USize]::mo_acquire)
+                self.alloc.deallocate_array(self.ptr, 1_uz)
+            }
+        }
+    }
+}

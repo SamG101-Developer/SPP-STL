@@ -12,7 +12,7 @@ fun test_widening_an_unsigned_integer_preserves_it() -> Void {
 
 !test(group="std/cast")
 fun test_narrowing_truncates_rather_than_saturating() -> Void {
-  # 300 is 0x12C; the low byte is 0x2C, which is 44.
+  # 300 is 0x12c; the low byte is 0x2c, which is 44.
   std::debug::assert(U8::from(300_u32) == 44_u8, "the high bits are dropped")
   std::debug::assert(U8::from(255_u32) == 255_u8, "a value that fits is unchanged")
 }
