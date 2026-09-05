@@ -357,7 +357,7 @@ sup BigUInt ext std::ops::sub::SubAssign {
     loop i in Range[USize]::between(0_uz, self.data.len()) {
       let a = U64::from(self.data[i]@)
       let b = case i < that.data.len() { U64::from(that.data[i]@) } else { 0_u64 }
-      let sub = a - b - borrow
+      let sub = a.sub_wrapping(b).sub_wrapping(borrow)
       self.data[mut i]@ = U32::from(sub & 0xffffffff_u64)
       borrow = (sub >> 63_u32) & 0x1_u64
     }

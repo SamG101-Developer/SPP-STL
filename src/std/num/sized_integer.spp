@@ -23,8 +23,6 @@ use std::num::bases::Zero
 use std::num::sized_floating_point::SizedFloatingPoint
 use std::num::sized_integer_signed::SizedIntegerSigned
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
-use std::ops::add::Add
-use std::ops::add::AddAssign
 use std::ops::bit_and::BitAnd
 use std::ops::bit_and::BitAndAssign
 use std::ops::bit_ior::BitIor
@@ -38,10 +36,6 @@ use std::ops::bit_shr::BitShrAssign
 use std::ops::bit_xor::BitXor
 use std::ops::bit_xor::BitXorAssign
 use std::ops::eq::Eq
-use std::ops::mul::Mul
-use std::ops::mul::MulAssign
-use std::ops::sub::Sub
-use std::ops::sub::SubAssign
 
 !public
 cls SizedInteger[cmp w: U32, cmp signed: Bool] { }
@@ -179,54 +173,6 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext BitNotAssign {
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun bit_not_assign(&mut self) -> Void {
     intrinsics::bit_not_assign(self)
-  }
-}
-
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Add {
-  !always_inline
-  !versioned(base="1.0.0", new="1.0.0")
-  cmp fun add(self, that: Self) -> Self {
-    ret intrinsics::add(self, that)
-  }
-}
-
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext AddAssign {
-  !always_inline
-  !versioned(base="1.0.0", new="1.0.0")
-  cmp fun add_assign(&mut self, that: Self) -> Void {
-    intrinsics::add_assign(self, that)
-  }
-}
-
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Sub {
-  !always_inline
-  !versioned(base="1.0.0", new="1.0.0")
-  cmp fun sub(self, that: Self) -> Self {
-    ret intrinsics::sub(self, that)
-  }
-}
-
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext SubAssign {
-  !always_inline
-  !versioned(base="1.0.0", new="1.0.0")
-  cmp fun sub_assign(&mut self, that: Self) -> Void {
-    intrinsics::sub_assign(self, that)
-  }
-}
-
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext Mul {
-  !always_inline
-  !versioned(base="1.0.0", new="1.0.0")
-  cmp fun mul(self, that: Self) -> Self {
-    ret intrinsics::mul(self, that)
-  }
-}
-
-sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] ext MulAssign {
-  !always_inline
-  !versioned(base="1.0.0", new="1.0.0")
-  cmp fun mul_assign(&mut self, that: Self) -> Void {
-    intrinsics::mul_assign(self, that)
   }
 }
 

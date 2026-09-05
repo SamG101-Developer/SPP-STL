@@ -19,33 +19,63 @@ use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 
 !public
 !always_inline
-!intrinsic(name="std.intrinsics.add")
-cmp fun add[T: Integer](this: T, that: T) -> T { }
+!intrinsic(name="std.intrinsics.sadd")
+cmp fun sadd[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic(name="std.intrinsics.add_assign")
-cmp fun add_assign[T: Integer](this: &mut T, that: T) -> Void { }
+!intrinsic(name="std.intrinsics.sadd_assign")
+cmp fun sadd_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
-!intrinsic(name="std.intrinsics.sub")
-cmp fun sub[T: Integer](this: T, that: T) -> T { }
+!intrinsic(name="std.intrinsics.uadd")
+cmp fun uadd[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic(name="std.intrinsics.sub_assign")
-cmp fun sub_assign[T: Integer](this: &mut T, that: T) -> Void { }
+!intrinsic(name="std.intrinsics.uadd_assign")
+cmp fun uadd_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
-!intrinsic(name="std.intrinsics.mul")
-cmp fun mul[T: Integer](this: T, that: T) -> T { }
+!intrinsic(name="std.intrinsics.ssub")
+cmp fun ssub[T: Integer](this: T, that: T) -> T { }
 
 !public
 !always_inline
-!intrinsic(name="std.intrinsics.mul_assign")
-cmp fun mul_assign[T: Integer](this: &mut T, that: T) -> Void { }
+!intrinsic(name="std.intrinsics.ssub_assign")
+cmp fun ssub_assign[T: Integer](this: &mut T, that: T) -> Void { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.usub")
+cmp fun usub[T: Integer](this: T, that: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.usub_assign")
+cmp fun usub_assign[T: Integer](this: &mut T, that: T) -> Void { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.smul")
+cmp fun smul[T: Integer](this: T, that: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.smul_assign")
+cmp fun smul_assign[T: Integer](this: &mut T, that: T) -> Void { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.umul")
+cmp fun umul[T: Integer](this: T, that: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.umul_assign")
+cmp fun umul_assign[T: Integer](this: &mut T, that: T) -> Void { }
 
 !public
 !always_inline
