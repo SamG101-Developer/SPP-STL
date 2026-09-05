@@ -61,10 +61,13 @@ fun rotl64(x: U64, k: U32) -> U64 {
 !private
 !versioned(base="1.0.0", new="1.0.0")
 fun splitmix64(x: &mut U64) -> U64 {
-  x += 0x9e3779b97f4a7c15_u64
+  # Every step here is meant to wrap: the mixing is what the constants are for, and a state that stayed inside "U64"
+  # would not be a bit mixer. So the operations are spelled as the wrapping ones rather than "+" and "*", which abort
+  # on the overflow this depends on.
+  x@ = x@.add_wrapping(0x9e3779b97f4a7c15_u64)
   let mut z = x@
-  z = (z ^ z >> 30_u32) * 0xbf58476d1ce4e5b9_u64
-  z = (z ^ z >> 27_u32) * 0x94d049bb133111eb_u64
+  z = (z ^ z >> 30_u32).mul_wrapping(0xbf58476d1ce4e5b9_u64)
+  z = (z ^ z >> 27_u32).mul_wrapping(0x94d049bb133111eb_u64)
   ret z ^ z >> 31_u32
 }
 
@@ -92,7 +95,8 @@ sup Rng {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun next_u64(&mut self) -> U64 {
-    let mut result = rotl64(self.state[0_uz]@ * 5_u64, 7_u32) * 9_u64
+    # As "splitmix64": xoshiro's output function wraps by design, so it asks for the wrapping multiply by name.
+    let mut result = rotl64(self.state[0_uz]@.mul_wrapping(5_u64), 7_u32).mul_wrapping(9_u64)
     let t = self.state[1_uz]@ << 17_u32
 
     self.state[mut 2_uz] ^= self.state[0_uz]@

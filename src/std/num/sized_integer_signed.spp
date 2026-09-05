@@ -15,15 +15,69 @@ use std::void::Void
 use std::num::sized_floating_point::SizedFloatingPoint
 use std::num::sized_integer::SizedInteger
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
+use std::ops::add::Add
+use std::ops::add::AddAssign
 use std::ops::div::Div
 use std::ops::div::DivAssign
+use std::ops::mul::Mul
+use std::ops::mul::MulAssign
 use std::ops::ord::Ord
 use std::ops::pow::Pow
 use std::ops::rem::Rem
 use std::ops::rem::RemAssign
+use std::ops::sub::Sub
+use std::ops::sub::SubAssign
 
 !public
 type SizedIntegerSigned[cmp w: U32] = SizedInteger[w, true]
+
+sup [cmp w: U32] SizedIntegerSigned[w] ext Add {
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun add(self, that: Self) -> Self {
+    ret intrinsics::sadd(self, that)
+  }
+}
+
+sup [cmp w: U32] SizedIntegerSigned[w] ext AddAssign {
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun add_assign(&mut self, that: Self) -> Void {
+    intrinsics::sadd_assign(self, that)
+  }
+}
+
+sup [cmp w: U32] SizedIntegerSigned[w] ext Sub {
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun sub(self, that: Self) -> Self {
+    ret intrinsics::ssub(self, that)
+  }
+}
+
+sup [cmp w: U32] SizedIntegerSigned[w] ext SubAssign {
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun sub_assign(&mut self, that: Self) -> Void {
+    intrinsics::ssub_assign(self, that)
+  }
+}
+
+sup [cmp w: U32] SizedIntegerSigned[w] ext Mul {
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun mul(self, that: Self) -> Self {
+    ret intrinsics::smul(self, that)
+  }
+}
+
+sup [cmp w: U32] SizedIntegerSigned[w] ext MulAssign {
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun mul_assign(&mut self, that: Self) -> Void {
+    intrinsics::smul_assign(self, that)
+  }
+}
 
 sup [cmp w: U32] SizedIntegerSigned[w] ext Div {
   cmp fun div(self, that: Self) -> Self {
