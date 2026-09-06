@@ -22,6 +22,8 @@ use std::net::socket::SockV4Addr
 use std::net::socket::SockV6Addr
 use std::time::duration::Duration
 
+!public
+!versioned(base="1.0.0", new="1.0.0")
 cls UdpSocket {
   # The `UdpSocket` class represents a UDP socket, which is a connectionless protocol used for sending and receiving
   # datagrams. It provides methods for sending and receiving data, as well as configuring socket options such as
@@ -53,7 +55,7 @@ sup UdpSocket {
     # Create the `UdpSocket` object with the file descriptor.
     let listener = UdpSocket(fd)
     let err = sppc::bind(listener.fd, &addr.storage())
-    case err == 0 {
+    case err != 0 {
       drop(listener)
       ret Fail(err=SockErr::from_errno(err)) }
     ret Pass(val=listener)
@@ -114,7 +116,7 @@ sup UdpSocket {
     # Call the `setsockopt` function to set the broadcast
     # option for the socket.
     let err = sppc::setsockopt(self.fd, cffi::sol_socket, cffi::so_broadcast, &yes)
-    case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass[Void]()
   }
 
@@ -175,6 +177,7 @@ sup UdpSocket {
     # object and return it (or error).
     case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass(val=Duration::from_millis(U64::from(timeout)))
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
   }
 
   !public
@@ -197,6 +200,7 @@ sup UdpSocket {
     # timeout for the socket.
     let err = sppc::setsockopt(self.fd, cffi::sol_socket, cffi::so_sndtimeo, &timeout)
     case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass[Void]()
   }
 
@@ -217,5 +221,6 @@ sup UdpSocket {
     # object and return it (or error).
     case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass(val=Duration::from_millis(U64::from(timeout)))
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
   }
 }
