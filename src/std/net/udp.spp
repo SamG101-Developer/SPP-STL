@@ -156,6 +156,7 @@ sup UdpSocket {
     # timeout for the socket.
     let err = sppc::setsockopt(self.fd, cffi::sol_socket, cffi::so_rcvtimeo, &timeout)
     case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass[Void]()
   }
 
