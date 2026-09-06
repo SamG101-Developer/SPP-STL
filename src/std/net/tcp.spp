@@ -206,6 +206,7 @@ sup TcpStream {
     # for the socket.
     let err = sppc::setsockopt(self.fd, cffi::sol_socket, cffi::so_linger, &timeout)
     case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass[Void]()
   }
 
@@ -230,6 +231,7 @@ sup TcpStream {
     case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
     case timeout == 0 { ret Pass(val=None) }
     ret Pass(val=Some(val=Duration::from_millis(U64::from(timeout))))
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
   }
 
   !public
