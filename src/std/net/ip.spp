@@ -44,9 +44,9 @@ sup IpV4Addr {
   # @cmp localhost: The localhost address is an IP address that points back to the same device.
   # @cmp unspecified: The unspecified address is an IP address that has not been assigned a specific value.
 
-  cmp broadcast: Self = Self(octets=[255_u8, 255_u8, 255_u8, 255_u8])
-  cmp localhost: Self = Self(octets=[127_u8, 0_u8, 0_u8, 1_u8])
-  cmp unspecified: Self = Self(octets=[0_u8, 0_u8, 0_u8, 0_u8])
+  !public cmp broadcast: Self = Self(octets=[255_u8, 255_u8, 255_u8, 255_u8])
+  !public cmp localhost: Self = Self(octets=[127_u8, 0_u8, 0_u8, 1_u8])
+  !public cmp unspecified: Self = Self(octets=[0_u8, 0_u8, 0_u8, 0_u8])
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
@@ -218,8 +218,8 @@ sup IpV6Addr {
   # @cmp unspecified: The unspecified address is an IP address that has not been assigned a specific value. In IPv6, the
   # unspecified address is represented as `::`.
 
-  cmp loopback: Self = Self(segments=[0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16])
-  cmp unspecified: Self = Self(segments=[0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16])
+  !public cmp loopback: Self = Self(segments=[0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16])
+  !public cmp unspecified: Self = Self(segments=[0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16])
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
@@ -403,7 +403,7 @@ sup IpAddr {
     ret case self@ of {
       is IpV4Addr(..) { self.family() }
       is IpV6Addr(..) { self.family() }
-      else { std::abort::abort() }
+      else { std::abort::abort("Unsupported address family") }
     }
   }
 }
