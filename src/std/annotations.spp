@@ -92,19 +92,8 @@ cmp fun cfg(platform: &StrView = "", mode: &StrView = "") -> Void { }
 cmp fun thread_hazard() -> Void {
   # Marks a type that may never cross a thread boundary. Every type is thread-safe unless it is annotated with this, or
   # reaches an annotated type through one of its attributes or generic arguments. A borrow is exactly as safe as what it
-  # borrows, because the exclusivity law leaves no way to mutate through a `&`; `Slot` is the single primitive that
-  # breaks that law, which is why it is the one hazard the rest of the standard library is built to contain.
-}
-
-!public
-!annotation(target=Annotation::class | Annotation::new_type)
-!versioned(base="1.0.0", new="1.0.0")
-cmp fun thread_safe() -> Void {
-  # Re-asserts thread safety over internals that would otherwise make the type a hazard. `Mutex` and `RwLock` need it:
-  # both hold a `Slot`, and it is their lock - not the type system - that makes sharing one safe. Applying it is a claim
-  # that every access to those internals is synchronised, which nothing checks. The generic arguments are still checked,
-  # so `Mutex[S32]` is safe while `Mutex[Rc[S32]]` is not. No lock makes an `Rc` safe to move to another thread, because
-  # the handle left behind can still touch the same non-atomic count.
+  # borrows, because the exclusivity law leaves no way to mutate through a `&` - which is what lets this one marker
+  # stand for both of Rust's `Send` and `Sync` rather than needing a pair of them.
 }
 
 !public

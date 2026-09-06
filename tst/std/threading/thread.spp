@@ -90,3 +90,76 @@ fun test_a_thread_outlives_the_frame_that_spawned_it() -> Void {
   let junk = zz_clobber_the_stack(64)
   std::debug::assert(h.join().expect("join failed") == 13023, "the captures survived the spawning frame")
 }
+
+!test(group="std/threading/thread")
+fun test_a_mutex_can_cross_onto_a_spawned_thread() -> Void {
+  # A `Mutex` carries no marker of its own - it holds its value behind a pointer, so it is sendable exactly when its `T`
+  # is - and this is the case that has to keep working: a guarded value making the crossing.
+  let m = std::threading::mutex::Mutex[std::number::S32]::new(41)
+  let h = std::threading::thread::spawn((caps m) -> std::number::S32 { ret m.take() + 1 })
+    .expect("spawn failed")
+  std::debug::assert(h.join().expect("join failed") == 42, "the guarded value crossed onto the thread")
+}
+
+!test(group="std/threading/thread")
+fun test_an_rwlock_can_cross_onto_a_spawned_thread() -> Void {
+  # As for `Mutex`: an `RwLock` carries its value in its own cell and hands out a guard, so the value can be read on the
+  # far thread rather than merely released there.
+  let l = std::threading::rwlock::RwLock[std::number::S32]::new(7)
+  let h = std::threading::thread::spawn((caps l) -> std::number::S32 {
+    let g = l.read().expect("read failed")
+    let seen = g.get()@
+    std::mem::ops::drop(g)
+    std::mem::ops::drop(l)
+    ret seen * 3
+  }).expect("spawn failed")
+  std::debug::assert(h.join().expect("join failed") == 21, "the guarded value was read on the thread")
+}
+
+!test(group="std/threading/thread")
+fun test_two_threads_share_one_mutex() -> Void {
+  # The test everything here was built for: one value, two threads, each taking the lock and mutating what it guards. It
+  # needs `Arc` to share the mutex - `Rc` is a thread hazard that `spawn` refuses - and it needs a `lock` that actually
+  # holds the lock, which it did not until the guard replaced the deferred unlock inside a coroutine frame.
+  let m = std::threading::arc::Arc[std::threading::mutex::Mutex[std::number::S32]]::new(
+    std::threading::mutex::Mutex[std::number::S32]::new(0))
+  let a = m.clone()
+  let b = m.clone()
+
+  let ha = std::threading::thread::spawn((caps a) -> std::void::Void {
+    let mut g = a.lock().expect("lock failed")
+    let seen = g.get()@
+    g.get()@ = seen + 1
+    std::mem::ops::drop(g)
+    std::mem::ops::drop(a)
+  }).expect("spawn failed")
+  let hb = std::threading::thread::spawn((caps b) -> std::void::Void {
+    let mut g = b.lock().expect("lock failed")
+    let seen = g.get()@
+    g.get()@ = seen + 1
+    std::mem::ops::drop(g)
+    std::mem::ops::drop(b)
+  }).expect("spawn failed")
+
+  ha.join().expect("join failed")
+  hb.join().expect("join failed")
+  std::debug::assert(m.strong_count() == 1_uz, "both threads released their handle to the shared mutex")
+
+  let mut g = m.lock().expect("lock failed")
+  std::debug::assert(g.get()@ == 2, "both increments landed on the one guarded value")
+  std::mem::ops::drop(g)
+  std::mem::ops::drop(m)
+}
+
+!test(group="std/threading/thread")
+fun test_a_thread_carries_an_owned_value() -> Void {
+  # The plainest form of the same claim the mutex tests make: a value the closure owns outright - heap storage included
+  # - is moved onto the new thread and released there.
+  let mut v = std::vector::Vec[std::number::S32]::new()
+  v.append(5)
+  let h = std::threading::thread::spawn((caps v) -> std::number::S32 {
+    std::mem::ops::drop(v)
+    ret 3
+  }).expect("spawn failed")
+  std::debug::assert(h.join().expect("join failed") == 3, "the owned value crossed and was released")
+}
