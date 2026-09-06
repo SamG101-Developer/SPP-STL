@@ -1,0 +1,287 @@
+fun loopback(port: U16) -> std::net::socket::SockAddr {
+  ret std::net::socket::SockV4Addr(ip=std::net::ip::IpV4Addr::localhost, port=port)
+}
+
+fun listening() -> std::net::tcp::TcpListener {
+  # A bound, listening socket on a free port. The address it ended up on is read back with "local_addr".
+  let mut listener = std::net::tcp::TcpListener::bind(loopback(0_u16)).unwrap()
+  let listening = listener.listen(4)
+  std::debug::assert(listening.is_pass(), "the listener listens")
+  drop(listening)
+  ret listener
+}
+
+!test(group="std/net/tcp")
+fun test_a_listener_binds_to_a_kernel_chosen_port() -> Void {
+  let bound = std::net::tcp::TcpListener::bind(loopback(0_u16))
+  std::debug::assert(bound.is_pass(), "binding to the loopback succeeds")
+  let listener = bound.unwrap()
+
+  let got = listener.local_addr()
+  std::debug::assert(got.is_pass(), "a bound listener has a local address")
+  let addr = got.unwrap()
+  std::debug::assert(addr.port() != 0_u16, "and the port asked for as zero came back as a real one")
+
+  let closed = listener.close()
+  std::debug::assert(closed.is_pass(), "the listener closes")
+  drop(closed)
+}
+
+!test(group="std/net/tcp")
+fun test_a_listener_can_be_put_into_listening_mode() -> Void {
+  let mut listener = std::net::tcp::TcpListener::bind(loopback(0_u16)).unwrap()
+  let listening = listener.listen(1)
+  std::debug::assert(listening.is_pass(), "listen succeeds on a bound socket")
+  drop(listening)
+  let closed = listener.close()
+  drop(closed)
+}
+
+!test(group="std/net/tcp")
+fun test_a_client_connects_and_the_listener_accepts_it() -> Void {
+  let mut listener = listening()
+  let addr = listener.local_addr().unwrap()
+
+  let connected = std::net::tcp::TcpStream::connect(addr)
+  std::debug::assert(connected.is_pass(), "a client connects to the listening address")
+  let client = connected.unwrap()
+
+  let accepted = listener.accept()
+  std::debug::assert(accepted.is_pass(), "and the listener accepts it")
+  let (server, peer) = accepted.unwrap()
+  std::debug::assert(peer.port() != 0_u16, "the accepted connection names the client's port")
+
+  let c = client.close()
+  drop(c)
+  let s = server.close()
+  drop(s)
+  let l = listener.close()
+  drop(l)
+}
+
+!test(group="std/net/tcp")
+fun test_the_two_ends_agree_on_who_is_who() -> Void {
+  # The client's peer is the listener's address, and the accepted socket's peer is the client's own local address.
+  let mut listener = listening()
+  let addr = listener.local_addr().unwrap()
+
+  let client = std::net::tcp::TcpStream::connect(addr).unwrap()
+  let (server, peer) = listener.accept().unwrap()
+
+  let client_peer = client.peer_addr()
+  std::debug::assert(client_peer.is_pass(), "the client has a peer")
+  std::debug::assert(client_peer.unwrap().port() == addr.port(), "and it is the listener it dialled")
+
+  let client_local = client.local_addr().unwrap()
+  std::debug::assert(peer.port() == client_local.port(), "the address accept reported is the client's own")
+
+  let c = client.close()
+  drop(c)
+  let s = server.close()
+  drop(s)
+  let l = listener.close()
+  drop(l)
+}
+
+!test(group="std/net/tcp")
+fun test_bytes_written_at_one_end_are_read_at_the_other() -> Void {
+  let mut listener = listening()
+  let addr = listener.local_addr().unwrap()
+  let mut client = std::net::tcp::TcpStream::connect(addr).unwrap()
+  let (mut server, peer) = listener.accept().unwrap()
+
+  let payload = [1_u8, 2_u8, 3_u8, 4_u8, 5_u8]
+  let written = client.write(&payload)
+  std::debug::assert(written.is_pass(), "the write succeeds")
+  std::debug::assert(written.unwrap() == 5_uz, "and it took the whole payload")
+
+  let mut buf = [0_u8; 8_u64]
+  let read = server.read(&mut buf)
+  std::debug::assert(read.is_pass(), "the read succeeds")
+  std::debug::assert(read.unwrap() == 5_uz, "and it produced as many bytes as were sent")
+  std::debug::assert(buf[0_uz]@ == 1_u8, "the first byte")
+  std::debug::assert(buf[4_uz]@ == 5_u8, "the last byte")
+  std::debug::assert(buf[5_uz]@ == 0_u8, "and nothing past the end was touched")
+
+  let c = client.close()
+  drop(c)
+  let s = server.close()
+  drop(s)
+  let l = listener.close()
+  drop(l)
+}
+
+!test(group="std/net/tcp")
+fun test_a_stream_flushes_without_error() -> Void {
+  # There is no buffering of its own in a "TcpStream", so flushing is a no-op that still has to report success.
+  let mut listener = listening()
+  let addr = listener.local_addr().unwrap()
+  let mut client = std::net::tcp::TcpStream::connect(addr).unwrap()
+  let (server, peer) = listener.accept().unwrap()
+
+  let flushed = client.flush()
+  std::debug::assert(flushed.is_pass(), "flush succeeds")
+  drop(flushed)
+
+  let c = client.close()
+  drop(c)
+  let s = server.close()
+  drop(s)
+  let l = listener.close()
+  drop(l)
+}
+
+!test(group="std/net/tcp")
+fun test_no_delay_reads_back_as_it_was_set() -> Void {
+  let mut listener = listening()
+  let addr = listener.local_addr().unwrap()
+  let mut client = std::net::tcp::TcpStream::connect(addr).unwrap()
+  let (server, peer) = listener.accept().unwrap()
+
+  let off = client.no_delay()
+  std::debug::assert(off.is_pass() and off.unwrap().not, "a stream starts out coalescing")
+
+  let set_on = client.set_no_delay(true)
+  std::debug::assert(set_on.is_pass(), "setting it succeeds")
+  drop(set_on)
+  let on = client.no_delay()
+  std::debug::assert(on.is_pass() and on.unwrap(), "and it reads back as set")
+
+  let set_off = client.set_no_delay(false)
+  std::debug::assert(set_off.is_pass(), "clearing it succeeds")
+  drop(set_off)
+  let back_off = client.no_delay()
+  std::debug::assert(back_off.is_pass() and back_off.unwrap().not, "and it reads back as cleared")
+
+  let c = client.close()
+  drop(c)
+  let s = server.close()
+  drop(s)
+  let l = listener.close()
+  drop(l)
+}
+
+!test(group="std/net/tcp")
+fun test_keep_alive_reads_back_as_it_was_set() -> Void {
+  let mut listener = listening()
+  let addr = listener.local_addr().unwrap()
+  let mut client = std::net::tcp::TcpStream::connect(addr).unwrap()
+  let (server, peer) = listener.accept().unwrap()
+
+  let off = client.keep_alive()
+  std::debug::assert(off.is_pass() and off.unwrap().not, "a stream starts without keep-alive")
+
+  let set_on = client.set_keep_alive(true)
+  std::debug::assert(set_on.is_pass(), "setting it succeeds")
+  drop(set_on)
+  let on = client.keep_alive()
+  std::debug::assert(on.is_pass() and on.unwrap(), "and it reads back as set")
+
+  let c = client.close()
+  drop(c)
+  let s = server.close()
+  drop(s)
+  let l = listener.close()
+  drop(l)
+}
+
+!test(group="std/net/tcp")
+fun test_shutting_down_the_write_side_ends_the_other_end_s_read() -> Void {
+  # A read on a connection whose far end has shut down its write side reports zero bytes rather than blocking - that is
+  # what end-of-stream is on a socket.
+  let mut listener = listening()
+  let addr = listener.local_addr().unwrap()
+  let mut client = std::net::tcp::TcpStream::connect(addr).unwrap()
+  let (mut server, peer) = listener.accept().unwrap()
+
+  let down = client.shutdown(cffi::shut_wr)
+  std::debug::assert(down.is_pass(), "shutting down the write side succeeds")
+  drop(down)
+
+  let mut buf = [0_u8; 4_u64]
+  let read = server.read(&mut buf)
+  std::debug::assert(read.is_pass(), "the other end's read still succeeds")
+  std::debug::assert(read.unwrap() == 0_uz, "and reports end of stream")
+
+  let c = client.close()
+  drop(c)
+  let s = server.close()
+  drop(s)
+  let l = listener.close()
+  drop(l)
+}
+
+!test(group="std/net/tcp")
+fun test_a_read_timeout_reads_back_as_it_was_set() -> Void {
+  let mut listener = listening()
+  let addr = listener.local_addr().unwrap()
+  let mut client = std::net::tcp::TcpStream::connect(addr).unwrap()
+  let (server, peer) = listener.accept().unwrap()
+
+  let set = client.set_read_timeout(std::option::Some(val=std::time::duration::Duration::from_millis(250_u64)))
+  std::debug::assert(set.is_pass(), "setting a read timeout succeeds")
+  drop(set)
+
+  let got = client.read_timeout()
+  std::debug::assert(got.is_pass(), "reading it back succeeds")
+  let ms = got.unwrap().as_millis()
+  std::debug::assert(ms >= 250_u64 and ms <= 260_u64, "and it is the timeout that was set, to the tick the kernel rounds it to")
+
+  let c = client.close()
+  drop(c)
+  let s = server.close()
+  drop(s)
+  let l = listener.close()
+  drop(l)
+}
+
+!test(group="std/net/tcp")
+fun test_a_write_timeout_reads_back_as_it_was_set() -> Void {
+  let mut listener = listening()
+  let addr = listener.local_addr().unwrap()
+  let mut client = std::net::tcp::TcpStream::connect(addr).unwrap()
+  let (server, peer) = listener.accept().unwrap()
+
+  let set = client.set_write_timeout(std::option::Some(val=std::time::duration::Duration::from_millis(250_u64)))
+  std::debug::assert(set.is_pass(), "setting a write timeout succeeds")
+  drop(set)
+
+  let got = client.write_timeout()
+  std::debug::assert(got.is_pass(), "reading it back succeeds")
+  let ms = got.unwrap().as_millis()
+  std::debug::assert(ms >= 250_u64 and ms <= 260_u64, "and it is the timeout that was set, to the tick the kernel rounds it to")
+
+  let c = client.close()
+  drop(c)
+  let s = server.close()
+  drop(s)
+  let l = listener.close()
+  drop(l)
+}
+
+!test(group="std/net/tcp")
+fun test_linger_reads_back_as_it_was_set() -> Void {
+  let mut listener = listening()
+  let addr = listener.local_addr().unwrap()
+  let mut client = std::net::tcp::TcpStream::connect(addr).unwrap()
+  let (server, peer) = listener.accept().unwrap()
+
+  let none = client.linger()
+  std::debug::assert(none.is_pass(), "reading the linger of a fresh stream succeeds")
+  std::debug::assert(none.unwrap().is_none(), "and a fresh stream does not linger")
+
+  let set = client.set_linger(std::option::Some(val=std::time::duration::Duration::from_millis(1000_u64)))
+  std::debug::assert(set.is_pass(), "setting a linger succeeds")
+  drop(set)
+
+  let got = client.linger()
+  std::debug::assert(got.is_pass(), "reading it back succeeds")
+  std::debug::assert(got.unwrap().is_some(), "and the stream now lingers")
+
+  let c = client.close()
+  drop(c)
+  let s = server.close()
+  drop(s)
+  let l = listener.close()
+  drop(l)
+}

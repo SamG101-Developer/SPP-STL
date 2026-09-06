@@ -1,0 +1,208 @@
+# Coverage for "std::net::udp". Two sockets on the loopback interface, each on a kernel-chosen port, send datagrams to
+# each other inside this one process. A datagram sent to a bound loopback socket is already queued by the time the send
+# returns, so a blocking receive on the other socket finds it waiting rather than blocking.
+
+fun loopback(port: U16) -> std::net::socket::SockAddr {
+  ret std::net::socket::SockV4Addr(ip=std::net::ip::IpV4Addr::localhost, port=port)
+}
+
+fun bound() -> std::net::udp::UdpSocket {
+  ret std::net::udp::UdpSocket::bind(loopback(0_u16)).unwrap()
+}
+
+!test(group="std/net/udp")
+fun test_a_socket_binds_to_a_kernel_chosen_port() -> Void {
+  let result = std::net::udp::UdpSocket::bind(loopback(0_u16))
+  std::debug::assert(result.is_pass(), "binding to the loopback succeeds")
+  let sock = result.unwrap()
+
+  let got = sock.local_addr()
+  std::debug::assert(got.is_pass(), "a bound socket has a local address")
+  std::debug::assert(got.unwrap().port() != 0_u16, "and the port asked for as zero came back as a real one")
+
+  let closed = sock.close()
+  std::debug::assert(closed.is_pass(), "and it closes")
+  drop(closed)
+}
+
+!test(group="std/net/udp")
+fun test_two_sockets_get_different_ports() -> Void {
+  let a = bound()
+  let b = bound()
+  let a_addr = a.local_addr().unwrap()
+  let b_addr = b.local_addr().unwrap()
+  std::debug::assert(a_addr.port() != b_addr.port(), "two ephemeral ports are not the same port")
+
+  let ca = a.close()
+  drop(ca)
+  let cb = b.close()
+  drop(cb)
+}
+
+!test(group="std/net/udp")
+fun test_a_datagram_arrives_with_its_sender_s_address() -> Void {
+  let mut a = bound()
+  let mut b = bound()
+  let b_addr = b.local_addr().unwrap()
+  let a_addr = a.local_addr().unwrap()
+
+  let payload = [7_u8, 8_u8, 9_u8]
+  let sent = a.send_to(&payload, &b_addr)
+  std::debug::assert(sent.is_pass(), "the send succeeds")
+  std::debug::assert(sent.unwrap() == 3_uz, "and it took the whole datagram")
+
+  let mut buf = [0_u8; 8_u64]
+  let received = b.recv_from(&mut buf)
+  std::debug::assert(received.is_pass(), "the receive succeeds")
+  let (n, from) = received.unwrap()
+  std::debug::assert(n == 3_uz, "and produced as many bytes as were sent")
+  std::debug::assert(buf[0_uz]@ == 7_u8, "the first byte")
+  std::debug::assert(buf[2_uz]@ == 9_u8, "the last byte")
+  std::debug::assert(buf[3_uz]@ == 0_u8, "and nothing past the end was touched")
+  std::debug::assert(from.port() == a_addr.port(), "the datagram names the socket that sent it")
+
+  let ca = a.close()
+  drop(ca)
+  let cb = b.close()
+  drop(cb)
+}
+
+!test(group="std/net/udp")
+fun test_datagrams_keep_their_boundaries() -> Void {
+  # Two sends are two receives, unlike a stream where the two would run together. Each receive produces exactly one
+  # datagram, and never the two of them joined.
+  let mut a = bound()
+  let mut b = bound()
+  let b_addr = b.local_addr().unwrap()
+
+  let first = [1_u8, 2_u8]
+  let second = [3_u8, 4_u8, 5_u8]
+  let s1 = a.send_to(&first, &b_addr)
+  drop(s1)
+  let s2 = a.send_to(&second, &b_addr)
+  drop(s2)
+
+  let mut buf = [0_u8; 16_u64]
+  let r1 = b.recv_from(&mut buf)
+  let (n1, from1) = r1.unwrap()
+  std::debug::assert(n1 == 2_uz, "the first receive produced the first datagram, and only it")
+  std::debug::assert(buf[0_uz]@ == 1_u8, "with its own bytes")
+  std::debug::assert(buf[1_uz]@ == 2_u8, "with its own bytes")
+
+  let r2 = b.recv_from(&mut buf)
+  let (n2, from2) = r2.unwrap()
+  std::debug::assert(n2 == 3_uz, "the second receive produced the second datagram")
+  std::debug::assert(buf[0_uz]@ == 3_u8, "starting again at the front of the buffer")
+  std::debug::assert(buf[2_uz]@ == 5_u8, "through to its last byte")
+
+  let ca = a.close()
+  drop(ca)
+  let cb = b.close()
+  drop(cb)
+}
+
+!test(group="std/net/udp")
+fun test_an_empty_datagram_is_still_a_datagram() -> Void {
+  # Zero bytes is a real datagram on udp, not the end-of-stream that zero bytes means on a tcp read.
+  let mut a = bound()
+  let mut b = bound()
+  let b_addr = b.local_addr().unwrap()
+
+  let empty = [0_u8; 0_u64]
+  let sent = a.send_to(&empty, &b_addr)
+  std::debug::assert(sent.is_pass(), "sending nothing succeeds")
+  std::debug::assert(sent.unwrap() == 0_uz, "and reports no bytes")
+
+  let mut buf = [0_u8; 4_u64]
+  let received = b.recv_from(&mut buf)
+  std::debug::assert(received.is_pass(), "and it is received")
+  let (n, from) = received.unwrap()
+  std::debug::assert(n == 0_uz, "as a datagram of no bytes")
+
+  let ca = a.close()
+  drop(ca)
+  let cb = b.close()
+  drop(cb)
+}
+
+!test(group="std/net/udp")
+fun test_broadcast_reads_back_as_it_was_set() -> Void {
+  let mut sock = bound()
+
+  let off = sock.broadcast()
+  std::debug::assert(off.is_pass() and off.unwrap().not, "a socket starts without broadcast")
+
+  let set_on = sock.set_broadcast(true)
+  std::debug::assert(set_on.is_pass(), "setting it succeeds")
+  drop(set_on)
+  let on = sock.broadcast()
+  std::debug::assert(on.is_pass() and on.unwrap(), "and it reads back as set")
+
+  let set_off = sock.set_broadcast(false)
+  std::debug::assert(set_off.is_pass(), "clearing it succeeds")
+  drop(set_off)
+  let back_off = sock.broadcast()
+  std::debug::assert(back_off.is_pass() and back_off.unwrap().not, "and it reads back as cleared")
+
+  let closed = sock.close()
+  drop(closed)
+}
+
+!test(group="std/net/udp")
+fun test_a_udp_socket_carries_the_shared_socket_operations() -> Void {
+  # "UdpSocket" gets these by superimposing "Socket", so this is a check that the inherited ones reach it rather than a
+  # second test of what they do.
+  let mut sock = bound()
+
+  let set_ttl = sock.set_ttl(48_u32)
+  std::debug::assert(set_ttl.is_pass(), "the inherited time-to-live setter is reachable")
+  drop(set_ttl)
+  let ttl = sock.ttl()
+  std::debug::assert(ttl.is_pass() and ttl.unwrap() == 48_u32, "and it took")
+
+  let set_nb = sock.set_nonblocking(true)
+  std::debug::assert(set_nb.is_pass(), "the inherited non-blocking setter is reachable")
+  drop(set_nb)
+  let nb = sock.nonblocking()
+  std::debug::assert(nb.is_pass() and nb.unwrap(), "and it took")
+
+  let closed = sock.close()
+  drop(closed)
+}
+
+
+# Todo: Red on purpose, for the same reason as the timeout tests in "std/net/tcp": "SO_RCVTIMEO" and "SO_SNDTIMEO" want
+#  a "struct timeval" and the ffi's setsockopt only carries a "CInt". See the Todo at each definition.
+!test(group="std/net/udp")
+fun test_a_read_timeout_reads_back_as_it_was_set() -> Void {
+  let mut sock = bound()
+
+  let set = sock.set_read_timeout(std::option::Some(val=std::time::duration::Duration::from_millis(250_u64)))
+  std::debug::assert(set.is_pass(), "setting a read timeout succeeds")
+  drop(set)
+
+  let got = sock.read_timeout()
+  std::debug::assert(got.is_pass(), "reading it back succeeds")
+  let ms = got.unwrap().as_millis()
+  std::debug::assert(ms >= 250_u64 and ms <= 260_u64, "and it is the timeout that was set, to the tick the kernel rounds it to")
+
+  let closed = sock.close()
+  drop(closed)
+}
+
+!test(group="std/net/udp")
+fun test_a_write_timeout_reads_back_as_it_was_set() -> Void {
+  let mut sock = bound()
+
+  let set = sock.set_write_timeout(std::option::Some(val=std::time::duration::Duration::from_millis(250_u64)))
+  std::debug::assert(set.is_pass(), "setting a write timeout succeeds")
+  drop(set)
+
+  let got = sock.write_timeout()
+  std::debug::assert(got.is_pass(), "reading it back succeeds")
+  let ms = got.unwrap().as_millis()
+  std::debug::assert(ms >= 250_u64 and ms <= 260_u64, "and it is the timeout that was set, to the tick the kernel rounds it to")
+
+  let closed = sock.close()
+  drop(closed)
+}
