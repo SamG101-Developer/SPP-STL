@@ -1,0 +1,152 @@
+use std::annotations::package
+use std::annotations::public
+use std::annotations::versioned
+use std::allocator::Alloc
+use std::allocator::GlobalAlloc
+use std::clone::Clone
+use std::generator::GenOnce
+use std::number::USize
+use std::void::Void
+use std::mem::ops::drop
+use std::mem::pointer::NonNull
+use std::ops::drop::Drop
+use std::ops::fwd::FwdRef
+use std::threading::atomic::Atom
+use std::threading::weak::Weak
+
+!package
+!versioned(base="1.0.0", new="1.0.0")
+cls ControlBlock[T] {
+  # The thread-safe control block behind every handle to one shared value: the two counts, and the value itself. Both
+  # counts being `Atom` is the difference between this and `std::rc::rc::ControlBlock`, and the reason an `Arc` can
+  # leave the thread that made it (an `Rc` can't because it is not atomic => not thread-safe).
+  # @type T: The type of the shared value.
+  # @let strong_counter: How many `Arc` handles are keeping the value alive.
+  # @let weak_counter: How many `Weak` handles are keeping this block alive, plus one held collectively by all the
+  # strong handles. That extra one is what stops two threads both deciding they were last and freeing the block twice.
+  # @let val: The shared value.
+
+  !package strong_counter: Atom[USize]
+  !package weak_counter: Atom[USize]
+  !package val: T
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls Arc[T, A: Alloc=GlobalAlloc] {
+  # An atomically counted shared owner of a heap-allocated value: `Rc`, but safe to send and share. Cloning one hands
+  # back another handle to the same value and bumps an atomic count, and the value is destroyed when the last handle
+  # goes.
+  # @type T: The type of the shared value.
+  # @type A: The allocator type used to allocate and deallocate the control block. Defaults to `GlobalAlloc`.
+  # @let ptr: A non-null pointer to the heap-allocated control block holding the counts and the value.
+  # @let alloc: The allocator used to allocate and deallocate the control block.
+
+  !package ptr: NonNull[ControlBlock[T]]
+  !package alloc: A
+}
+
+sup [T] Arc[T] {
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun new(val: T) -> Arc[T] {
+    # Create a new `Arc` over `val`, using the global allocator for the control block.
+    # @let val: The value to be allocated on the heap and shared.
+    # @ret: An `Arc` owning the sole handle to the newly allocated control block.
+
+    ret Self::new_in(val, GlobalAlloc)
+  }
+}
+
+sup [T, A: Alloc] Arc[T, A] {
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun new_in(val: T, alloc: A) -> Arc[T, A] {
+    # Create a new `Arc` by allocating a control block with the given allocator and moving `val` into it. The strong
+    # count starts at one for the handle returned here, and the weak count at one for the strong handles collectively
+    # rather than at zero - see `ControlBlock`.
+    # @let val: The value to be allocated on the heap and shared.
+    # @let alloc: The allocator used to allocate and deallocate the control block.
+    # @ret: An `Arc` owning the sole handle to the newly allocated control block.
+
+    let mut ptr = alloc.allocate_array[ControlBlock[T]](1_uz).expect("Allocation failed")
+    ptr.write(ControlBlock(
+      strong_counter=Atom[USize]::new(1_uz),
+      weak_counter=Atom[USize]::new(1_uz),
+      val))
+    ret Arc(ptr, alloc)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun strong_count(&self) -> USize {
+    # How many `Arc` handles are currently sharing the value. Only a snapshot: another thread may add or drop a handle
+    # before the answer is read.
+    # @ret: The number of `Arc` handles sharing the value.
+
+    ret self.ptr.strong_counter.load()
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun weak_count(&self) -> USize {
+    # How many `Weak` handles currently point at the control block. The count held collectively by the strong handles is
+    # not one of them, so it is subtracted; asking through a live `Arc` means there is always one to subtract.
+    # @ret: The number of `Weak` handles pointing at the control block.
+
+    ret self.ptr.weak_counter.load() - 1_uz
+  }
+}
+
+sup [T, A: Alloc & Clone] Arc[T, A] {
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun downgrade(&self) -> Weak[T, A] {
+    # Create a `Weak` handle to the same control block. This never touches the strong count, so it never keeps the value
+    # alive; it only keeps the block itself alive while the weak handle exists.
+    # @ret: A `Weak` handle pointing at the same control block as this `Arc`.
+
+    let old_count = self.ptr.weak_counter.fetch_add(1_uz)
+    ret Weak(ptr=self.ptr, alloc=self.alloc.clone())
+  }
+}
+
+sup [T] Arc[T] ext FwdRef[T] {
+  !versioned(base="1.0.0", new="1.0.0")
+  cor fwd_ref(&self) -> GenOnce[&T] {
+    gen &self.ptr.val
+  }
+}
+
+sup [T, A: Alloc & Clone] Arc[T, A] ext Clone {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun clone(&self) -> Self {
+    # Another handle to the same control block. The count is bumped atomically, which is what lets this happen through a
+    # shared borrow and from any thread at once - the `Rc` version has to fabricate a mutable pointer to do it.
+    # @ret: A new `Arc` handle sharing this one's control block.
+
+    let old_count = self.ptr.strong_counter.fetch_add(1_uz)
+    ret Arc(ptr=self.ptr, alloc=self.alloc.clone())
+  }
+}
+
+sup [T, A: Alloc] Arc[T, A] ext Drop {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun drop(self) -> Void {
+    # Drop one handle. The thread that takes the strong count to zero is the one that destroys the value, and it is the
+    # only one: `fetch_sub` hands back the count from before, so exactly one caller sees the one. It then releases the
+    # count the strong handles held collectively, and whichever of that and the last `Weak` finishes second frees the
+    # block. The value is destroyed before the block is, and a `Weak` never reads a destroyed value because `upgrade`
+    # refuses once the strong count is zero.
+
+    let Self(mut ptr, alloc) = self
+    defer drop(alloc)
+
+    case ptr.strong_counter.fetch_sub(1_uz) == 1_uz {
+      std::mem::ops::drop_in_place(&mut ptr.val)
+      case ptr.weak_counter.fetch_sub(1_uz) == 1_uz {
+        alloc.deallocate_array(ptr, 1_uz)
+      }
+    }
+  }
+}
