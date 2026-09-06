@@ -22,6 +22,8 @@ use std::net::socket::SockV4Addr
 use std::net::socket::SockV6Addr
 use std::time::duration::Duration
 
+!public
+!versioned(base="1.0.0", new="1.0.0")
 cls UdpSocket {
   # The `UdpSocket` class represents a UDP socket, which is a connectionless protocol used for sending and receiving
   # datagrams. It provides methods for sending and receiving data, as well as configuring socket options such as
@@ -53,7 +55,7 @@ sup UdpSocket {
     # Create the `UdpSocket` object with the file descriptor.
     let listener = UdpSocket(fd)
     let err = sppc::bind(listener.fd, &addr.storage())
-    case err == 0 {
+    case err != 0 {
       drop(listener)
       ret Fail(err=SockErr::from_errno(err)) }
     ret Pass(val=listener)
@@ -114,7 +116,7 @@ sup UdpSocket {
     # Call the `setsockopt` function to set the broadcast
     # option for the socket.
     let err = sppc::setsockopt(self.fd, cffi::sol_socket, cffi::so_broadcast, &yes)
-    case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass[Void]()
   }
 
@@ -144,16 +146,20 @@ sup UdpSocket {
     # zero, then there is no timeout and the receive operation will block indefinitely until data is received.
     # @ret: A result indicating whether the operation was successful or not.
 
-    # Convert the duration to milliseconds, or use 0 if
-    # the timeout is None.
-    let timeout = S32::from(timeout
-      .and_then((t: Duration) Some(val=t.as_millis()))
-      .unwrap_or(0_u64))
+    # Milliseconds, or zero for "None" - zero being what
+    # an all-zero "timeval" says, which is "no timeout".
+    let millis = timeout.and_then((t: Duration) Some(val=t.as_millis())).unwrap_or(0_u64)
+    let tv = sppc::CTimeval(sec=millis / 1000_u64, usec=millis % 1000_u64 * 1000_u64)
 
-    # Call the `setsockopt` function to set the receive
-    # timeout for the socket.
-    let err = sppc::setsockopt(self.fd, cffi::sol_socket, cffi::so_rcvtimeo, &timeout)
-    case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+    # Call the `setsockopt` function to set the timeout
+    # for the socket.
+    let err = sppc::setsockopt_timeval(
+      self.fd, cffi::sol_socket, cffi::so_rcvtimeo, &tv)
+    drop(tv)
+
+    # Handle the error and return the error mapped or
+    # an empty pass.
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass[Void]()
   }
 
@@ -165,16 +171,20 @@ sup UdpSocket {
     # returns an error.
     # @ret: A result containing the receive timeout for the socket if successful, or a `SockErr` if there was an error.
 
-    # Call the `getsockopt` function to get the receive
-    # timeout for the socket (milliseconds).
-    let mut timeout = 0
-    let err = sppc::getsockopt(
-      self.fd, cffi::sol_socket, cffi::so_rcvtimeo, &mut timeout)
+    # Read the timeout back as the "struct timeval" it
+    # is stored as, and recombine the two fields into
+    # milliseconds.
+    let mut tv = sppc::CTimeval(sec=0_u64, usec=0_u64)
+    let err = sppc::getsockopt_timeval(
+      self.fd, cffi::sol_socket, cffi::so_rcvtimeo, &mut tv)
 
-    # Convert the timeout from milliseconds to a `Duration`
-    # object and return it (or error).
-    case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
-    ret Pass(val=Duration::from_millis(U64::from(timeout)))
+    let millis = tv.sec * 1000_u64 + tv.usec / 1000_u64
+    drop(tv)
+
+    # Handle the error and return the error mapped or
+    # an empty pass.
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
+    ret Pass(val=Duration::from_millis(millis))
   }
 
   !public
@@ -187,16 +197,26 @@ sup UdpSocket {
     # then there is no timeout and the send operation will block indefinitely until data is sent.
     # @ret: A result indicating whether the operation was successful or not.
 
-    # Convert the duration to milliseconds, or use 0 if
-    # the timeout is None.
-    let timeout = S32::from(timeout
+    # A timeout is a "struct timeval" - seconds and microseconds.
+    # "None" means no timeout, which is what an all-zero "timeval"
+    # says.
+    let millis = timeout
       .and_then((t: Duration) Some(val=t.as_millis()))
-      .unwrap_or(0_u64))
+      .unwrap_or(0_u64)
 
-    # Call the `setsockopt` function to set the receive
-    # timeout for the socket.
-    let err = sppc::setsockopt(self.fd, cffi::sol_socket, cffi::so_sndtimeo, &timeout)
-    case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+    let tv = sppc::CTimeval(
+      sec=millis / 1000_u64,
+      usec=millis % 1000_u64 * 1000_u64)
+
+    # Call the `setsockopt` function to set the timeout for the
+    # socket.
+    let err = sppc::setsockopt_timeval(
+      self.fd, cffi::sol_socket, cffi::so_sndtimeo, &tv)
+    drop(tv)
+
+    # Handle the error and return the error mapped or
+    # an empty pass.
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass[Void]()
   }
 
@@ -208,14 +228,18 @@ sup UdpSocket {
     # error.
     # @ret: A result containing the send timeout for the socket if successful, or a `SockErr` if there was an error.
 
-    # Call the `getsockopt` function to get the receive
-    # timeout for the socket (milliseconds).
-    let mut timeout = 0
-    let err = sppc::getsockopt(self.fd, cffi::sol_socket, cffi::so_sndtimeo, &mut timeout)
+    # Read the timeout back as the "struct timeval" it is stored
+    # as, and recombine the two fields into milliseconds.
+    let mut tv = sppc::CTimeval(sec=0_u64, usec=0_u64)
+    let err = sppc::getsockopt_timeval(
+      self.fd, cffi::sol_socket, cffi::so_sndtimeo, &mut tv)
 
-    # Convert the timeout from milliseconds to a `Duration`
-    # object and return it (or error).
-    case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
-    ret Pass(val=Duration::from_millis(U64::from(timeout)))
+    let millis = tv.sec * 1000_u64 + tv.usec / 1000_u64
+    drop(tv)
+
+    # Handle the error and return the error mapped or the
+    # duration, wrapped in a pass.
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
+    ret Pass(val=Duration::from_millis(millis))
   }
 }

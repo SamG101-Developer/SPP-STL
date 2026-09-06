@@ -290,6 +290,10 @@ sup [Ts: std::tuple::TupLike, R] CClosure[Ts, R] {
 !public cmp ipproto_mptcp: CInt = 262 # Maximum protocol number
 !public cmp ipproto_max: CInt = Limits[CInt]::max
 
+!public cmp shut_rd: CInt = 0 # SHUT_RD - no more receptions
+!public cmp shut_wr: CInt = 1 # SHUT_WR - no more transmissions
+!public cmp shut_rdwr: CInt = 2 # SHUT_RDWR - no more receptions or transmissions
+
 !public cmp tcp_nodelay: CInt = 1 # Don't delay send to coalesce packets
 !public cmp tcp_maxseg: CInt = 2 # Set maximum segment size
 !public cmp tcp_cork: CInt = 3 # Control sending of partial frames
@@ -341,7 +345,8 @@ sup [Ts: std::tuple::TupLike, R] CClosure[Ts, R] {
 !public cmp sock_rdm: CInt = 4 # SOCK_RDM
 !public cmp sock_seqpacket: CInt = 5 # SOCK_SEQPACKET
 
-!public cmp sol_socket: CInt = 65535 # SOL_SOCKET
+!public cmp sol_socket: CInt = 1 # SOL_SOCKET
+!public cmp sol_socket_win: CInt = 65535 # SOL_SOCKET
 
 !public cmp so_broadcast_win: CInt = 32 # SO_BROADCAST
 !public cmp so_error_win: CInt = 4103 # SO_ERROR

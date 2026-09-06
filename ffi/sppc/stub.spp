@@ -25,6 +25,12 @@ cls CTimeval {
 }
 
 !public
+cls CLinger {
+  !public onoff: CInt
+  !public linger: CInt
+}
+
+!public
 cls CStatvfs {
   !public block_size: CULong
   !public frag_size: CULong
@@ -507,6 +513,18 @@ fun setsockopt(fd: CInt, level: CInt, optname: CInt, optval: &CInt) -> CInt { }
 
 !ffi(symbol="sppc_getsockopt")
 fun getsockopt(fd: CInt, level: CInt, optname: CInt, optval: &mut CInt) -> CInt { }
+
+!ffi(symbol="sppc_setsockopt_timeval")
+fun setsockopt_timeval(fd: CInt, level: CInt, optname: CInt, optval: &CTimeval) -> CInt { }
+
+!ffi(symbol="sppc_getsockopt_timeval")
+fun getsockopt_timeval(fd: CInt, level: CInt, optname: CInt, optval: &mut CTimeval) -> CInt { }
+
+!ffi(symbol="sppc_setsockopt_linger")
+fun setsockopt_linger(fd: CInt, level: CInt, optname: CInt, optval: &CLinger) -> CInt { }
+
+!ffi(symbol="sppc_getsockopt_linger")
+fun getsockopt_linger(fd: CInt, level: CInt, optname: CInt, optval: &mut CLinger) -> CInt { }
 
 !ffi(symbol="sppc_stdin_read")
 fun stdin_read(buffer: CCharPtr, size: CULong, count: CULong, out_n: &mut CLong) -> CInt { }

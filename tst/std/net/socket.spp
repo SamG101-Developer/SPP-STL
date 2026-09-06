@@ -1,0 +1,198 @@
+fun v4_at(a: U8, b: U8, c: U8, d: U8, port: U16) -> std::net::socket::SockV4Addr {
+  ret std::net::socket::SockV4Addr(ip=std::net::ip::IpV4Addr(octets=[a, b, c, d]), port=port)
+}
+
+fun loopback_v4(port: U16) -> std::net::socket::SockAddr {
+  ret std::net::socket::SockV4Addr(ip=std::net::ip::IpV4Addr::localhost, port=port)
+}
+
+fun loopback_v6(port: U16) -> std::net::socket::SockAddr {
+  ret std::net::socket::SockV6Addr(ip=std::net::ip::IpV6Addr::loopback, port=port)
+}
+
+!test(group="std/net/socket")
+fun test_a_v4_address_keeps_its_ip_and_port() -> Void {
+  let a = v4_at(192_u8, 168_u8, 0_u8, 1_u8, 8080_u16)
+  std::debug::assert(a.port == 8080_u16, "the port")
+  std::debug::assert(a.ip.octets[0_uz]@ == 192_u8, "the first octet of the ip")
+  std::debug::assert(a.ip.octets[3_uz]@ == 1_u8, "the last octet of the ip")
+}
+
+!test(group="std/net/socket")
+fun test_a_v6_address_keeps_its_ip_and_port() -> Void {
+  let a = std::net::socket::SockV6Addr(ip=std::net::ip::IpV6Addr::loopback, port=8080_u16)
+  std::debug::assert(a.port == 8080_u16, "the port")
+  std::debug::assert(a.ip.segments[7_uz]@ == 1_u16, "the last segment of the ip")
+}
+
+!test(group="std/net/socket")
+fun test_the_variant_reports_the_port_of_either_alternative() -> Void {
+  let four = loopback_v4(4444_u16)
+  let six = loopback_v6(6666_u16)
+  std::debug::assert(four.port() == 4444_u16, "the v4 port through the variant")
+  std::debug::assert(six.port() == 6666_u16, "the v6 port through the variant")
+}
+
+!test(group="std/net/socket")
+fun test_a_socket_address_is_copyable() -> Void {
+  # An ip and a port, both plain data, so a socket address owns nothing and reads more than once.
+  let a = v4_at(10_u8, 0_u8, 0_u8, 5_u8, 1234_u16)
+  let b = a
+  let c = a
+  std::debug::assert(b.port == 1234_u16, "the first copy")
+  std::debug::assert(c.ip.octets[3_uz]@ == 5_u8, "the second copy")
+  std::debug::assert(a.port == 1234_u16, "and the original is still readable")
+}
+
+!test(group="std/net/socket")
+fun test_the_variant_reports_the_ip_of_either_alternative() -> Void {
+  let four = loopback_v4(4444_u16)
+  let ip = four.ip()
+  let v4_ok = case ip of {
+    is std::net::ip::IpV4Addr(..) { ip.is_loopback() }
+    else { false }
+  }
+  std::debug::assert(v4_ok, "the v4 address comes back as an IPv4 address, and is the one put in")
+
+  let six = loopback_v6(6666_u16)
+  let ip = six.ip()
+  let v6_ok = case ip of {
+    is std::net::ip::IpV6Addr(..) { ip.is_loopback() }
+    else { false }
+  }
+  std::debug::assert(v6_ok, "and the v6 address comes back as an IPv6 address")
+}
+
+!test(group="std/net/socket")
+fun test_a_v4_address_survives_the_round_trip_through_the_c_layout() -> Void {
+  # "storage" is what every socket call is handed, and "from_storage" is what every address comes back through, so the
+  # two together have to be the identity.
+  let a = loopback_v4(8080_u16)
+  let storage = a.storage()
+  let b = std::net::socket::SockAddr::from_storage(&storage)
+  drop(storage)
+
+  std::debug::assert(b.port() == 8080_u16, "the port came back")
+  let ip = b.ip()
+  let ok = case ip of {
+    is std::net::ip::IpV4Addr(..) { ip.is_loopback() }
+    else { false }
+  }
+  std::debug::assert(ok, "and so did the address, as an IPv4 address")
+}
+
+!test(group="std/net/socket")
+fun test_a_v6_address_survives_the_round_trip_through_the_c_layout() -> Void {
+  let a = loopback_v6(9090_u16)
+  let storage = a.storage()
+  let b = std::net::socket::SockAddr::from_storage(&storage)
+  drop(storage)
+
+  std::debug::assert(b.port() == 9090_u16, "the port came back")
+  let ip = b.ip()
+  let ok = case ip of {
+    is std::net::ip::IpV6Addr(..) { ip.is_loopback() }
+    else { false }
+  }
+  std::debug::assert(ok, "and so did the address, as an IPv6 address")
+}
+
+!test(group="std/net/socket")
+fun test_the_round_trip_keeps_every_octet_not_just_the_family() -> Void {
+  # A conversion that only carried the family would pass the tests above, so this one uses an address whose octets are
+  # all different from each other and from the loopback's.
+  let a: std::net::socket::SockAddr = v4_at(203_u8, 0_u8, 113_u8, 42_u8, 5353_u16)
+  let storage = a.storage()
+  let b = std::net::socket::SockAddr::from_storage(&storage)
+  drop(storage)
+
+  let ip = b.ip()
+  let ok = case ip of {
+    is std::net::ip::IpV4Addr(..) {
+      ip.octets[0_uz]@ == 203_u8 and ip.octets[1_uz]@ == 0_u8 and
+      ip.octets[2_uz]@ == 113_u8 and ip.octets[3_uz]@ == 42_u8
+    }
+    else { false }
+  }
+  std::debug::assert(ok, "every octet came back in place")
+  std::debug::assert(b.port() == 5353_u16, "and so did the port")
+}
+!test(group="std/net/socket")
+fun test_closing_a_socket_that_never_opened_one_is_not_an_error() -> Void {
+  # The default descriptor is negative, which stands for "no descriptor". Closing that is a no-op rather than a failed
+  # "close" of a bad number.
+  let s = std::net::socket::Socket()
+  let closed = s.close()
+  std::debug::assert(closed.is_pass(), "closing an unopened socket succeeds")
+  drop(closed)
+}
+
+!test(group="std/net/socket")
+fun test_a_bound_socket_reports_the_address_it_was_given() -> Void {
+  # Port zero asks the kernel for a free one, so the address a socket is actually on is only knowable afterwards - which
+  # is what "local_addr" is for.
+  let bound = std::net::udp::UdpSocket::bind(loopback_v4(0_u16))
+  std::debug::assert(bound.is_pass(), "binding to the loopback on an ephemeral port succeeds")
+  let mut sock = bound.unwrap()
+
+  let got = sock.local_addr()
+  std::debug::assert(got.is_pass(), "a bound socket has a local address")
+  let addr = got.unwrap()
+  std::debug::assert(addr.port() != 0_u16, "and the kernel filled the port in")
+
+  let ip = addr.ip()
+  let ok = case ip of {
+    is std::net::ip::IpV4Addr(..) { ip.is_loopback() }
+    else { false }
+  }
+  std::debug::assert(ok, "on the interface it was asked for")
+
+  let closed = sock.close()
+  std::debug::assert(closed.is_pass(), "and it closes")
+  drop(closed)
+}
+
+!test(group="std/net/socket")
+fun test_non_blocking_mode_reads_back_as_it_was_set() -> Void {
+  let sock = std::net::udp::UdpSocket::bind(loopback_v4(0_u16)).unwrap()
+
+  let initial = sock.nonblocking()
+  std::debug::assert(initial.is_pass() and initial.unwrap().not, "a socket starts out blocking")
+
+  let set_on = sock.set_nonblocking(true)
+  std::debug::assert(set_on.is_pass(), "setting it succeeds")
+  drop(set_on)
+  let now_on = sock.nonblocking()
+  std::debug::assert(now_on.is_pass() and now_on.unwrap(), "and it reads back as non-blocking")
+
+  let set_off = sock.set_nonblocking(false)
+  std::debug::assert(set_off.is_pass(), "clearing it succeeds")
+  drop(set_off)
+  let now_off = sock.nonblocking()
+  std::debug::assert(now_off.is_pass() and now_off.unwrap().not, "and it reads back as blocking again")
+
+
+  let closed = sock.close()
+  drop(closed)
+}
+
+!test(group="std/net/socket")
+fun test_the_time_to_live_reads_back_as_it_was_set() -> Void {
+  let mut sock = std::net::udp::UdpSocket::bind(loopback_v4(0_u16)).unwrap()
+
+  let set_64 = sock.set_ttl(64_u32)
+  std::debug::assert(set_64.is_pass(), "setting a time-to-live succeeds")
+  drop(set_64)
+
+  let read_64 = sock.ttl()
+  std::debug::assert(read_64.is_pass(), "reading it back succeeds")
+  std::debug::assert(read_64.unwrap() == 64_u32, "and it is the value that was set")
+
+  let set_32 = sock.set_ttl(32_u32)
+  drop(set_32)
+  let read_32 = sock.ttl()
+  std::debug::assert(read_32.unwrap() == 32_u32, "a second setting takes as well")
+
+  let closed = sock.close()
+  drop(closed)
+}

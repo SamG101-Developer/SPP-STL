@@ -82,7 +82,7 @@ sup Socket {
     let mut flags = Flags::new()
     let err = sppc::fcntl_get(self.fd, cffi::f_getfl, &mut flags.bits)
     case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
-    flags.set(Flags::bit(U32::from(cffi::o_nonblock)), yes)
+    flags.set(Flags::from_bits(cffi::o_nonblock), yes)
 
     # Call the `setsockopt` function to set the broadcast
     # option for the socket.
@@ -107,7 +107,7 @@ sup Socket {
     # Read the flags from the socket and check if the
     # non-blocking flag is set. Error on failure.
     case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
-    ret Pass(val=flags.has(Flags::bit(U32::from(cffi::o_nonblock))))
+    ret Pass(val=flags.has(Flags::from_bits(cffi::o_nonblock)))
   }
 
   !public
@@ -123,7 +123,7 @@ sup Socket {
     # Call the `setsockopt` function to set the ttl
     # option for the socket.
     let err = sppc::setsockopt(self.fd, cffi::ipproto_ip, cffi::ip_ttl, &S32::from(ttl))
-    case err == 0 { ret Fail(err=SockErr::from_errno(err)) }
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass[Void]()
   }
 

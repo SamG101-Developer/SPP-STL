@@ -1,0 +1,92 @@
+!test(group="std/threading/thread")
+fun test_raw_pthread_create_writes_the_handle_back() -> Void {
+  let mut handle = 0_u64
+  let err = sppc::pthread_create(std::cffi::CClosure[(), Void]::from(() -> Void { }), &mut handle)
+  std::debug::assert(err == 0, "create returned zero")
+  std::debug::assert(handle != 0_u64, "create wrote the handle back")
+  let jerr = sppc::pthread_join(&handle)
+  std::debug::assert(jerr == 0, "join returned zero")
+}
+
+!test(group="std/threading/thread")
+fun test_spawn_and_join() -> Void {
+  let h = std::threading::thread::spawn(() -> Void { }).expect("spawn failed")
+  h.join().expect("join failed")
+}
+
+!test(group="std/threading/thread")
+fun test_join_returns_the_value_the_thread_produced() -> Void {
+  let h = std::threading::thread::spawn(() -> std::number::S32 { ret 42 }).expect("spawn failed")
+  let val = h.join().expect("join failed")
+  std::debug::assert(val == 42, "join answered with what the thread returned")
+}
+
+!test(group="std/threading/thread")
+fun test_the_thread_body_sees_what_it_captured() -> Void {
+  let n = 7
+  let h = std::threading::thread::spawn((caps n) -> std::number::S32 { ret n * 3 }).expect("spawn failed")
+  std::debug::assert(h.join().expect("join failed") == 21, "the captured value crossed onto the thread")
+}
+
+!test(group="std/threading/thread")
+fun test_join_returns_a_value_wider_than_a_pointer() -> Void {
+  let h = std::threading::thread::spawn(() -> (std::number::S64, std::number::S64, std::number::S64) {
+    ret (1_s64, 2_s64, 3_s64)
+  }).expect("spawn failed")
+
+  let (a, b, c) = h.join().expect("join failed")
+  std::debug::assert(a == 1_s64 and b == 2_s64 and c == 3_s64, "all three fields survived")
+}
+
+!test(group="std/threading/thread")
+fun test_the_current_thread_id_equals_itself() -> Void {
+  let a = std::threading::thread::current()
+  let b = std::threading::thread::current()
+  std::debug::assert(a == b, "current() twice on one thread names the same thread")
+  std::debug::assert((a != b).not, "and so is not unequal")
+}
+
+!test(group="std/threading/thread")
+fun test_a_spawned_thread_has_a_different_id() -> Void {
+  let h = std::threading::thread::spawn(() -> Void { }).expect("spawn failed")
+  std::debug::assert(h.id() != std::threading::thread::current(), "a spawned thread is not the calling one")
+  h.join().expect("join failed")
+}
+
+!test(group="std/threading/thread")
+fun test_the_handle_id_matches_what_the_thread_reports() -> Void {
+  let h = std::threading::thread::spawn(() -> std::threading::thread::ThreadId {
+    ret std::threading::thread::current()
+  }).expect("spawn failed")
+
+  let from_handle = h.id()
+  let from_thread = h.join().expect("join failed")
+  std::debug::assert(from_handle == from_thread, "the handle names the thread the body ran on")
+}
+
+!test(group="std/threading/thread")
+fun test_an_id_survives_the_handle_it_came_from() -> Void {
+  let h = std::threading::thread::spawn(() -> Void { }).expect("spawn failed")
+  let id = h.id()
+  h.join().expect("join failed")
+  std::debug::assert(id != std::threading::thread::current(), "the id still compares after the thread is joined")
+}
+
+fun zz_spawn_from_a_dying_frame() -> std::threading::thread::JoinHandle[std::number::S32] {
+  let a = 12345
+  let b = 678
+  ret std::threading::thread::spawn((caps a, b) -> std::number::S32 { ret a + b }).expect("spawn failed")
+}
+
+fun zz_clobber_the_stack(n: std::number::S32) -> std::number::S32 {
+  case n <= 0 { ret 0 }
+  let pad = n * 7
+  ret pad + zz_clobber_the_stack(n - 1)
+}
+
+!test(group="std/threading/thread")
+fun test_a_thread_outlives_the_frame_that_spawned_it() -> Void {
+  let h = zz_spawn_from_a_dying_frame()
+  let junk = zz_clobber_the_stack(64)
+  std::debug::assert(h.join().expect("join failed") == 13023, "the captures survived the spawning frame")
+}

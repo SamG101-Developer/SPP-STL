@@ -1,0 +1,291 @@
+# Coverage for "std::net::ip" - the address types themselves, which are pure data and pure predicates, so every
+# assertion here is exact and none of it touches the network.
+
+fun v4(a: U8, b: U8, c: U8, d: U8) -> std::net::ip::IpV4Addr {
+  # Four octets read left to right, the way an address is written down.
+  ret std::net::ip::IpV4Addr(octets=[a, b, c, d])
+}
+
+fun v6(a: U16, b: U16, c: U16, d: U16, e: U16, f: U16, g: U16, h: U16) -> std::net::ip::IpV6Addr {
+  # Eight segments read left to right, the way an address is written down.
+  ret std::net::ip::IpV6Addr(segments=[a, b, c, d, e, f, g, h])
+}
+
+!test(group="std/net/ip")
+fun test_an_ipv4_address_keeps_the_octets_it_was_built_from() -> Void {
+  let a = v4(192_u8, 168_u8, 0_u8, 1_u8)
+  std::debug::assert(a.octets[0_uz]@ == 192_u8, "first octet")
+  std::debug::assert(a.octets[1_uz]@ == 168_u8, "second octet")
+  std::debug::assert(a.octets[2_uz]@ == 0_u8, "third octet")
+  std::debug::assert(a.octets[3_uz]@ == 1_u8, "fourth octet")
+}
+
+!test(group="std/net/ip")
+fun test_the_ipv4_constants_are_the_addresses_they_name() -> Void {
+  std::debug::assert(std::net::ip::IpV4Addr::broadcast.octets[0_uz]@ == 255_u8, "broadcast is 255.255.255.255")
+  std::debug::assert(std::net::ip::IpV4Addr::broadcast.octets[3_uz]@ == 255_u8, "broadcast is 255.255.255.255")
+  std::debug::assert(std::net::ip::IpV4Addr::localhost.octets[0_uz]@ == 127_u8, "localhost is 127.0.0.1")
+  std::debug::assert(std::net::ip::IpV4Addr::localhost.octets[3_uz]@ == 1_u8, "localhost is 127.0.0.1")
+  std::debug::assert(std::net::ip::IpV4Addr::unspecified.octets[0_uz]@ == 0_u8, "unspecified is 0.0.0.0")
+  std::debug::assert(std::net::ip::IpV4Addr::unspecified.octets[3_uz]@ == 0_u8, "unspecified is 0.0.0.0")
+}
+
+!test(group="std/net/ip")
+fun test_ipv4_loopback_is_the_whole_127_block() -> Void {
+  # 127.0.0.0/8 - the first octet alone decides it, so the rest of the address is free.
+  std::debug::assert(std::net::ip::IpV4Addr::localhost.is_loopback(), "127.0.0.1")
+  std::debug::assert(v4(127_u8, 255_u8, 255_u8, 254_u8).is_loopback(), "the far end of the block is still loopback")
+  std::debug::assert(v4(126_u8, 0_u8, 0_u8, 1_u8).is_loopback().not, "one below the block is not")
+  std::debug::assert(v4(128_u8, 0_u8, 0_u8, 1_u8).is_loopback().not, "one above the block is not")
+}
+
+!test(group="std/net/ip")
+fun test_ipv4_broadcast_is_only_the_all_ones_address() -> Void {
+  std::debug::assert(std::net::ip::IpV4Addr::broadcast.is_broadcast(), "255.255.255.255")
+  std::debug::assert(v4(255_u8, 255_u8, 255_u8, 254_u8).is_broadcast().not, "one short of it is not")
+  std::debug::assert(v4(255_u8, 255_u8, 255_u8, 255_u8).is_broadcast(), "rebuilt by hand, still broadcast")
+}
+
+!test(group="std/net/ip")
+fun test_ipv4_unspecified_is_only_the_all_zeroes_address() -> Void {
+  std::debug::assert(std::net::ip::IpV4Addr::unspecified.is_unspecified(), "0.0.0.0")
+  std::debug::assert(v4(0_u8, 0_u8, 0_u8, 1_u8).is_unspecified().not, "0.0.0.1 is a different address")
+}
+
+!test(group="std/net/ip")
+fun test_ipv4_private_covers_the_three_ranges_and_stops_at_their_edges() -> Void {
+  # 10/8, 172.16/12 and 192.168/16. The middle one is the only one with a boundary worth probing.
+  std::debug::assert(v4(10_u8, 0_u8, 0_u8, 1_u8).is_private(), "10/8")
+  std::debug::assert(v4(10_u8, 255_u8, 255_u8, 255_u8).is_private(), "the far end of 10/8")
+  std::debug::assert(v4(192_u8, 168_u8, 1_u8, 1_u8).is_private(), "192.168/16")
+
+  std::debug::assert(v4(172_u8, 15_u8, 0_u8, 1_u8).is_private().not, "172.15 is below the range")
+  std::debug::assert(v4(172_u8, 16_u8, 0_u8, 1_u8).is_private(), "172.16 opens it")
+  std::debug::assert(v4(172_u8, 31_u8, 255_u8, 255_u8).is_private(), "172.31 closes it")
+  std::debug::assert(v4(172_u8, 32_u8, 0_u8, 1_u8).is_private().not, "172.32 is above the range")
+
+  std::debug::assert(v4(11_u8, 0_u8, 0_u8, 1_u8).is_private().not, "11/8 is public")
+  std::debug::assert(v4(192_u8, 169_u8, 0_u8, 1_u8).is_private().not, "192.169 is public")
+}
+
+!test(group="std/net/ip")
+fun test_ipv4_link_local_is_the_169_254_block() -> Void {
+  std::debug::assert(v4(169_u8, 254_u8, 0_u8, 1_u8).is_link_local(), "169.254/16")
+  std::debug::assert(v4(169_u8, 254_u8, 255_u8, 255_u8).is_link_local(), "the far end of the block")
+  std::debug::assert(v4(169_u8, 253_u8, 0_u8, 1_u8).is_link_local().not, "one below the block")
+  std::debug::assert(v4(169_u8, 255_u8, 0_u8, 1_u8).is_link_local().not, "one above the block")
+}
+
+!test(group="std/net/ip")
+fun test_ipv4_multicast_runs_from_224_to_239() -> Void {
+  std::debug::assert(v4(223_u8, 255_u8, 255_u8, 255_u8).is_multicast().not, "223 is below the range")
+  std::debug::assert(v4(224_u8, 0_u8, 0_u8, 1_u8).is_multicast(), "224 opens it")
+  std::debug::assert(v4(239_u8, 255_u8, 255_u8, 255_u8).is_multicast(), "239 closes it")
+  std::debug::assert(v4(240_u8, 0_u8, 0_u8, 1_u8).is_multicast().not, "240 is above the range")
+}
+
+!test(group="std/net/ip")
+fun test_ipv4_documentation_is_the_three_reserved_examples() -> Void {
+  std::debug::assert(v4(192_u8, 0_u8, 2_u8, 1_u8).is_documentation(), "192.0.2/24")
+  std::debug::assert(v4(198_u8, 51_u8, 100_u8, 1_u8).is_documentation(), "198.51.100/24")
+  std::debug::assert(v4(203_u8, 0_u8, 113_u8, 1_u8).is_documentation(), "203.0.113/24")
+  std::debug::assert(v4(192_u8, 0_u8, 3_u8, 1_u8).is_documentation().not, "192.0.3 is not one of them")
+  std::debug::assert(v4(203_u8, 0_u8, 114_u8, 1_u8).is_documentation().not, "203.0.114 is not one of them")
+}
+
+!test(group="std/net/ip")
+fun test_ipv4_benchmarking_is_the_198_18_pair_of_blocks() -> Void {
+  # 198.18/15, so the second octet is 18 or 19 and nothing else.
+  std::debug::assert(v4(198_u8, 18_u8, 0_u8, 1_u8).is_benchmarking(), "198.18")
+  std::debug::assert(v4(198_u8, 19_u8, 255_u8, 255_u8).is_benchmarking(), "198.19")
+  std::debug::assert(v4(198_u8, 17_u8, 0_u8, 1_u8).is_benchmarking().not, "198.17 is below")
+  std::debug::assert(v4(198_u8, 20_u8, 0_u8, 1_u8).is_benchmarking().not, "198.20 is above")
+  std::debug::assert(v4(199_u8, 18_u8, 0_u8, 1_u8).is_benchmarking().not, "199.18 is a different first octet")
+}
+
+!test(group="std/net/ip")
+fun test_ipv4_shared_is_the_carrier_grade_nat_block() -> Void {
+  # 100.64/10, so the second octet runs 64 to 127.
+  std::debug::assert(v4(100_u8, 64_u8, 0_u8, 1_u8).is_shared(), "100.64 opens it")
+  std::debug::assert(v4(100_u8, 127_u8, 255_u8, 255_u8).is_shared(), "100.127 closes it")
+  std::debug::assert(v4(100_u8, 63_u8, 0_u8, 1_u8).is_shared().not, "100.63 is below")
+  std::debug::assert(v4(100_u8, 128_u8, 0_u8, 1_u8).is_shared().not, "100.128 is above")
+  std::debug::assert(v4(101_u8, 64_u8, 0_u8, 1_u8).is_shared().not, "101.64 is a different first octet")
+}
+
+!test(group="std/net/ip")
+fun test_ipv4_reserved_is_240_upwards_but_not_broadcast() -> Void {
+  std::debug::assert(v4(240_u8, 0_u8, 0_u8, 1_u8).is_reserved(), "240/4 opens it")
+  std::debug::assert(v4(255_u8, 255_u8, 255_u8, 254_u8).is_reserved(), "the last address before broadcast")
+  std::debug::assert(std::net::ip::IpV4Addr::broadcast.is_reserved().not, "broadcast is carved out of it")
+  std::debug::assert(v4(239_u8, 0_u8, 0_u8, 1_u8).is_reserved().not, "239 is below the block")
+}
+
+!test(group="std/net/ip")
+fun test_ipv4_global_excludes_every_special_range() -> Void {
+  std::debug::assert(v4(8_u8, 8_u8, 8_u8, 8_u8).is_global(), "an ordinary public address is global")
+  std::debug::assert(v4(1_u8, 1_u8, 1_u8, 1_u8).is_global(), "and so is another")
+
+  std::debug::assert(v4(10_u8, 0_u8, 0_u8, 1_u8).is_global().not, "private is not global")
+  std::debug::assert(std::net::ip::IpV4Addr::localhost.is_global().not, "loopback is not global")
+  std::debug::assert(v4(169_u8, 254_u8, 0_u8, 1_u8).is_global().not, "link-local is not global")
+  std::debug::assert(v4(192_u8, 0_u8, 2_u8, 1_u8).is_global().not, "documentation is not global")
+  std::debug::assert(v4(198_u8, 18_u8, 0_u8, 1_u8).is_global().not, "benchmarking is not global")
+  std::debug::assert(v4(100_u8, 64_u8, 0_u8, 1_u8).is_global().not, "shared is not global")
+  std::debug::assert(v4(240_u8, 0_u8, 0_u8, 1_u8).is_global().not, "reserved is not global")
+  std::debug::assert(std::net::ip::IpV4Addr::broadcast.is_global().not, "broadcast is not global")
+}
+
+!test(group="std/net/ip")
+fun test_ipv4_global_keeps_the_two_carved_out_protocol_addresses() -> Void {
+  # 192.0.0/24 is reserved for protocol assignments and is not global, except for 192.0.0.9 and 192.0.0.10, which are
+  # the two that are.
+  std::debug::assert(v4(192_u8, 0_u8, 0_u8, 9_u8).is_global(), "192.0.0.9 is global")
+  std::debug::assert(v4(192_u8, 0_u8, 0_u8, 10_u8).is_global(), "192.0.0.10 is global")
+  std::debug::assert(v4(192_u8, 0_u8, 0_u8, 8_u8).is_global().not, "its neighbour below is not")
+  std::debug::assert(v4(192_u8, 0_u8, 0_u8, 11_u8).is_global().not, "its neighbour above is not")
+}
+
+!test(group="std/net/ip")
+fun test_an_ipv4_address_is_copyable() -> Void {
+  # Four bytes owning nothing, so reading one twice is allowed and both reads see the same address.
+  let a = v4(203_u8, 0_u8, 113_u8, 7_u8)
+  let b = a
+  let c = a
+  std::debug::assert(b.octets[0_uz]@ == 203_u8, "the first copy")
+  std::debug::assert(c.octets[3_uz]@ == 7_u8, "the second copy")
+  std::debug::assert(a.octets[2_uz]@ == 113_u8, "and the original is still readable")
+}
+
+!test(group="std/net/ip")
+fun test_an_ipv6_address_keeps_the_segments_it_was_built_from() -> Void {
+  let a = v6(0x2001_u16, 0xdb8_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16)
+  std::debug::assert(a.segments[0_uz]@ == 0x2001_u16, "first segment")
+  std::debug::assert(a.segments[1_uz]@ == 0xdb8_u16, "second segment")
+  std::debug::assert(a.segments[7_uz]@ == 1_u16, "last segment")
+}
+
+!test(group="std/net/ip")
+fun test_the_ipv6_constants_are_the_addresses_they_name() -> Void {
+  std::debug::assert(std::net::ip::IpV6Addr::loopback.segments[0_uz]@ == 0_u16, "loopback is ::1")
+  std::debug::assert(std::net::ip::IpV6Addr::loopback.segments[7_uz]@ == 1_u16, "loopback is ::1")
+  std::debug::assert(std::net::ip::IpV6Addr::unspecified.segments[0_uz]@ == 0_u16, "unspecified is ::")
+  std::debug::assert(std::net::ip::IpV6Addr::unspecified.segments[7_uz]@ == 0_u16, "unspecified is ::")
+}
+
+!test(group="std/net/ip")
+fun test_ipv6_loopback_and_unspecified_are_one_address_each() -> Void {
+  std::debug::assert(std::net::ip::IpV6Addr::loopback.is_loopback(), "::1 is loopback")
+  std::debug::assert(std::net::ip::IpV6Addr::unspecified.is_loopback().not, ":: is not loopback")
+  std::debug::assert(std::net::ip::IpV6Addr::unspecified.is_unspecified(), ":: is unspecified")
+  std::debug::assert(std::net::ip::IpV6Addr::loopback.is_unspecified().not, "::1 is not unspecified")
+  std::debug::assert(v6(0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 2_u16).is_loopback().not, "::2 is neither")
+}
+
+!test(group="std/net/ip")
+fun test_ipv6_multicast_is_the_ff00_block() -> Void {
+  std::debug::assert(v6(0xff02_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).is_multicast(), "ff02::1")
+  std::debug::assert(v6(0xffff_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).is_multicast(), "the far end")
+  std::debug::assert(v6(0xfeff_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).is_multicast().not, "one below")
+  std::debug::assert(std::net::ip::IpV6Addr::loopback.is_multicast().not, "loopback is not multicast")
+}
+
+!test(group="std/net/ip")
+fun test_ipv6_unicast_is_exactly_what_multicast_is_not() -> Void {
+  let multi = v6(0xff02_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16)
+  std::debug::assert(multi.is_unicast().not, "a multicast address is not unicast")
+  std::debug::assert(std::net::ip::IpV6Addr::loopback.is_unicast(), "loopback is unicast")
+  std::debug::assert(v6(0x2001_u16, 0xdb8_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).is_unicast(), "so is a global")
+}
+
+!test(group="std/net/ip")
+fun test_ipv6_unique_local_is_the_fc00_block() -> Void {
+  # fc00::/7, so the leading byte is fc or fd.
+  std::debug::assert(v6(0xfc00_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).is_unique_local(), "fc00 opens it")
+  std::debug::assert(v6(0xfdff_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).is_unique_local(), "fdff closes it")
+  std::debug::assert(v6(0xfbff_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).is_unique_local().not, "below")
+  std::debug::assert(v6(0xfe00_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).is_unique_local().not, "above")
+}
+
+!test(group="std/net/ip")
+fun test_ipv6_link_local_is_the_fe80_block() -> Void {
+  # fe80::/10, so the leading ten bits are fixed and the six below them are free.
+  std::debug::assert(v6(0xfe80_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).is_unicast_link_local(), "fe80")
+  std::debug::assert(v6(0xfebf_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).is_unicast_link_local(), "febf")
+  std::debug::assert(v6(0xfe7f_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).is_unicast_link_local().not, "fe7f")
+  std::debug::assert(v6(0xfec0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).is_unicast_link_local().not, "fec0")
+}
+
+!test(group="std/net/ip")
+fun test_ipv6_documentation_covers_both_reserved_prefixes() -> Void {
+  std::debug::assert(v6(0x2001_u16, 0xdb8_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).is_documentation(), "2001:db8")
+  std::debug::assert(v6(0x3fff_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).is_documentation(), "3fff:0")
+  std::debug::assert(v6(0x3fff_u16, 0x0fff_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).is_documentation(), "3fff:0fff")
+  std::debug::assert(v6(0x3fff_u16, 0x1000_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).is_documentation().not, "3fff:1000 is past it")
+  std::debug::assert(v6(0x2001_u16, 0xdb9_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).is_documentation().not, "2001:db9 is not it")
+}
+
+!test(group="std/net/ip")
+fun test_ipv6_benchmarking_is_the_2001_2_prefix() -> Void {
+  std::debug::assert(v6(0x2001_u16, 2_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).is_benchmarking(), "2001:2::/48")
+  std::debug::assert(v6(0x2001_u16, 2_u16, 1_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).is_benchmarking().not, "a set third segment leaves the prefix")
+  std::debug::assert(v6(0x2001_u16, 3_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).is_benchmarking().not, "2001:3 is a different prefix")
+}
+
+!test(group="std/net/ip")
+fun test_ipv6_unicast_global_excludes_the_special_ranges() -> Void {
+  std::debug::assert(v6(0x2606_u16, 0x4700_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0x1111_u16).is_unicast_global(), "an ordinary public address")
+  std::debug::assert(std::net::ip::IpV6Addr::loopback.is_unicast_global().not, "loopback is not")
+  std::debug::assert(std::net::ip::IpV6Addr::unspecified.is_unicast_global().not, "unspecified is not")
+  std::debug::assert(v6(0xfe80_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).is_unicast_global().not, "link-local is not")
+  std::debug::assert(v6(0xfc00_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).is_unicast_global().not, "unique-local is not")
+  std::debug::assert(v6(0x2001_u16, 0xdb8_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).is_unicast_global().not, "documentation is not")
+  std::debug::assert(v6(0xff02_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).is_unicast_global().not, "multicast is not unicast at all")
+}
+
+!test(group="std/net/ip")
+fun test_an_ipv6_address_is_copyable() -> Void {
+  let a = v6(0x2001_u16, 0xdb8_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16)
+  let b = a
+  let c = a
+  std::debug::assert(b.segments[0_uz]@ == 0x2001_u16, "the first copy")
+  std::debug::assert(c.segments[7_uz]@ == 1_u16, "the second copy")
+  std::debug::assert(a.segments[1_uz]@ == 0xdb8_u16, "and the original is still readable")
+}
+
+!test(group="std/net/ip")
+fun test_the_two_families_are_told_apart() -> Void {
+  let four = std::net::ip::IpV4Addr::localhost
+  let six = std::net::ip::IpV6Addr::loopback
+  std::debug::assert(four.family() != six.family(), "an IPv4 address and an IPv6 address report different families")
+  std::debug::assert(four.family() == v4(8_u8, 8_u8, 8_u8, 8_u8).family(), "every IPv4 address reports the same family")
+  std::debug::assert(six.family() == v6(0xfe80_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 0_u16, 1_u16).family(), "and every IPv6 address reports the same family")
+}
+
+!test(group="std/net/ip")
+fun test_an_ip_address_variant_holds_either_family() -> Void {
+  let a: std::net::ip::IpAddr = std::net::ip::IpV4Addr::localhost
+  let held = case a of {
+    is std::net::ip::IpV4Addr(..) { 4 }
+    is std::net::ip::IpV6Addr(..) { 6 }
+    else { 0 }
+  }
+  std::debug::assert(held == 4, "the IPv4 alternative is selected")
+
+  let b: std::net::ip::IpAddr = std::net::ip::IpV6Addr::loopback
+  let held = case b of {
+    is std::net::ip::IpV4Addr(..) { 4 }
+    is std::net::ip::IpV6Addr(..) { 6 }
+    else { 0 }
+  }
+  std::debug::assert(held == 6, "the IPv6 alternative is selected")
+}
+
+!test(group="std/net/ip")
+fun test_the_variant_reports_the_family_of_whichever_address_it_holds() -> Void {
+  let four: std::net::ip::IpAddr = std::net::ip::IpV4Addr::localhost
+  let six: std::net::ip::IpAddr = std::net::ip::IpV6Addr::loopback
+  std::debug::assert(four.family() == std::net::ip::IpV4Addr::localhost.family(), "the variant defers to the IPv4 address")
+  std::debug::assert(six.family() == std::net::ip::IpV6Addr::loopback.family(), "the variant defers to the IPv6 address")
+  std::debug::assert(four.family() != six.family(), "so the two still differ through the variant")
+}
