@@ -1,5 +1,7 @@
 use std::annotations::package
 use std::annotations::public
+use std::annotations::thread_hazard
+use std::annotations::thread_safe
 use std::annotations::versioned
 use std::annotations::zero_type
 use std::boolean::Bool
@@ -18,7 +20,6 @@ use std::mem::ops::drop
 use std::ops::drop::Drop
 use std::threading::cond_var::CondVar
 use std::threading::cond_var::TimedOut
-use std::threading::safe::ThreadSafe
 use std::threading::thread::ThreadErr
 use std::time::duration::Duration
 use std::time::time_point::TimePoint
@@ -32,7 +33,7 @@ cls WouldBlock {
   # `WouldBlock` value to indicate that the operation would block if it were to be performed.
 }
 
-!package
+!package !thread_hazard
 !versioned(base="1.0.0", new="1.0.0")
 cls MutexUnlockGuard {
   # Internal RAII helper whose destructor unlocks the mutex. One is created as a local inside each locking coroutine
@@ -54,9 +55,17 @@ sup MutexUnlockGuard ext Drop {
   }
 }
 
-!public
+!public !thread_safe
 !versioned(base="1.0.0", new="1.0.0")
 cls Mutex[T] {
+  # Guards a `T` behind a pthread mutex, handing out an exclusive borrow of it for as long as the lock is held. The
+  # `!thread_safe` marker is what makes a thread sendable: the `Slot` holding the value is a thread hazard, because it
+  # is the one thing in the language that mutates through a shared borrow, and a `Mutex` is safe only because every path
+  # to that `Slot` goes through `lock`.
+  # @type T: The type of the guarded value. A `Mutex[T]` is only as sendable as its `T`.
+  # @let handle: The sppc handle for the underlying `pthread_mutex_t`, which lives behind it rather than in it.
+  # @let val: The guarded value.
+
   !package handle: U64
   !package val: Slot[T]
 }

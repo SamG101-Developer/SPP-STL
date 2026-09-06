@@ -1,6 +1,8 @@
 use std::annotations::package
 use std::annotations::private
 use std::annotations::public
+use std::annotations::thread_hazard
+use std::annotations::thread_safe
 use std::annotations::versioned
 use std::generator::GenOnce
 use std::number::S32
@@ -15,11 +17,10 @@ use std::mem::ops::drop
 use std::ops::drop::Drop
 use std::threading::cond_var::TimedOut
 use std::threading::mutex::WouldBlock
-use std::threading::safe::ThreadSafe
 use std::threading::thread::ThreadErr
 use std::time::duration::Duration
 
-!package
+!package !thread_hazard
 !versioned(base="1.0.0", new="1.0.0")
 cls RwLockUnlockGuard {
   # Internal helper whose `drop` unlocks the rwlock (a single `pthread_rwlock_unlock` releases both read and write
@@ -44,9 +45,16 @@ sup RwLockUnlockGuard ext Drop {
   }
 }
 
-!public
+!public !thread_safe
 !versioned(base="1.0.0", new="1.0.0")
 cls RwLock[T] {
+  # Guards a `T` behind a pthread rwlock, handing out a shared borrow to readers and an exclusive one to a writer. It
+  # carries `!thread_safe` for the same reason `Mutex` does: the `Slot` holding the value is a thread hazard, and only
+  # the lock around every path to it makes sharing one safe.
+  # @type T: The type of the guarded value. An `RwLock[T]` is only as sendable as its `T`.
+  # @let handle: The sppc handle for the underlying `pthread_rwlock_t`, which lives behind it rather than in it.
+  # @let val: The guarded value.
+
   !package handle: U64
   !package val: Slot[T]
 }
