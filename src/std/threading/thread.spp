@@ -98,12 +98,15 @@ cls ThreadId {
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-# Todo: constrain "F" to "ThreadSafe" as well, once thread safety is implemented.
-fun spawn[Out, F: FunMov[(), Out]](function: F) -> Res[JoinHandle[Out], ThreadErr] {
+fun spawn[Out: ThreadSafe, F: FunMov[(), Out] & ThreadSafe](function: F) -> Res[JoinHandle[Out], ThreadErr] {
   # Spawn a new thread running `function`, and return a handle that can be joined for its result. `Out` is read off the
-  # function's own return type rather than given at the call site.
-  # @type Out: The type the spawned function returns, and so the type `join` answers with.
-  # @type F: The type of the function to run. It is moved onto the new thread, so it must be a `FunMov`.
+  # function's own return type rather than given at the call site. Both types crossing the boundary have to be
+  # `ThreadSafe`: the function is moved onto the new thread, and its result is moved back off it by `join`.
+  # @type Out: The type the spawned function returns, and so the type `join` answers with. It crosses back from the
+  # spawned thread, so it is held to the same marker the function is.
+  # @type F: The type of the function to run. It is moved onto the new thread, so it must be a `FunMov`, and it must be
+  # `ThreadSafe` - which for a closure means it captured nothing hazardous, and captured nothing by borrow at all,
+  # because nothing yet keeps a borrow alive for as long as the thread holding it.
   # @let function: The function to run on the new thread.
   # @ret: A `Res` holding the join handle, or the error `pthread_create` reported.
 
@@ -198,9 +201,9 @@ sup [R] JoinHandle[R] {
 sup ThreadId ext Eq {
   !versioned(base="1.0.0", new="1.0.0")
   fun eq(&self, that: &Self) -> Bool {
-    # Whether two ids name the same thread. Asked of `pthread_equal` rather than compared directly, because
-    # `pthread_t` is opaque: a platform may make it a struct, or leave padding in it that differs between two ids of
-    # the same thread.
+    # Whether two ids name the same thread. Asked of `pthread_equal` rather than compared directly, because `pthread_t`
+    # is opaque: a platform may make it a struct, or leave padding in it that differs between two ids of the same
+    # thread.
     # @let that: The id to compare against.
     # @ret: Whether both ids name the same thread.
 
@@ -211,10 +214,9 @@ sup ThreadId ext Eq {
 }
 
 sup ThreadId ext Copy {
-  # An id is a name for a thread, not a claim on it: duplicating one costs nothing and lets go of nothing, so it is
-  # free to copy. Without this every comparison would consume the id it was asked about.
+  # An id is a name for a thread, not a claim on it: duplicating one costs nothing and lets go of nothing, so it is free
+  # to copy. Without this every comparison would consume the id it was asked about.
 }
-
 
 sup [R] JoinHandle[R] ext Drop {
   !versioned(base="1.0.0", new="1.0.0")

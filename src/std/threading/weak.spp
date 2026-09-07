@@ -1,0 +1,83 @@
+use std::annotations::package
+use std::annotations::public
+use std::annotations::versioned
+use std::allocator::Alloc
+use std::allocator::GlobalAlloc
+use std::clone::Clone
+use std::number::USize
+use std::option::None
+use std::option::Opt
+use std::option::Some
+use std::void::Void
+use std::mem::ops::drop
+use std::mem::pointer::NonNull
+use std::ops::drop::Drop
+use std::threading::arc::Arc
+use std::threading::arc::ControlBlock
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls Weak[T, A: Alloc=GlobalAlloc] {
+  # A non-owning handle to an `Arc`'s control block: it keeps the block alive but not the value, so it can be upgraded
+  # back to an `Arc` for as long as one strong handle still exists. This is the `std::rc::weak::Weak` of the threading
+  # module, and like `Arc` it needs no marker of its own - it is as sendable as its `T`.
+  # @type T: The type of the value the control block holds.
+  # @type A: The allocator type used to deallocate the control block. Defaults to `GlobalAlloc`.
+  # @let ptr: A non-null pointer to the shared control block.
+  # @let alloc: The allocator used to deallocate the control block once no handles of any kind remain.
+
+  !package ptr: NonNull[ControlBlock[T]]
+  !package alloc: A
+}
+
+sup [T, A: Alloc] Weak[T, A] {
+  !public type Element = T
+}
+
+sup [T, A: Alloc & Clone] Weak[T, A] {
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun upgrade(&self) -> Opt[Arc[T, A]] {
+    # Try to revive a strong handle. Reading the count and then incrementing it would not do: another thread can take
+    # the count to zero and destroy the value in between, and the handle returned here would name a destroyed value.
+    # The increment is therefore a compare-and-exchange against the count that was read, retried if it moved, and
+    # abandoned if it ever reaches zero - which is final, because nothing brings a count back up from zero.
+    # @ret: `Some` holding a new `Arc` if the value is still alive, otherwise `None`.
+
+    let mut seen = self.ptr.strong_counter.load()
+    loop seen != 0_uz {
+      let (found, swapped) = self.ptr.strong_counter.compex(seen, seen + 1_uz)
+      case swapped { ret Some(val=Arc(ptr=self.ptr, alloc=self.alloc.clone())) }
+      seen = found
+    }
+    ret None
+  }
+}
+
+sup [T, A: Alloc & Clone] Weak[T, A] ext Clone {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun clone(&self) -> Self {
+    # Another weak handle to the same control block. Like `Arc::downgrade` this bumps only the weak count, so the block
+    # stays alive while any weak handle does, and the value is untouched.
+    # @ret: A new `Weak` sharing this handle's control block.
+
+    let old_count = self.ptr.weak_counter.fetch_add(1_uz)
+    ret Weak(ptr=self.ptr, alloc=self.alloc.clone())
+  }
+}
+
+sup [T, A: Alloc] Weak[T, A] ext Drop {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun drop(self) -> Void {
+    # Drop one weak handle. A weak handle never owns the value, so nothing is destroyed here. The block is freed by
+    # whoever takes the weak count to zero, which is either the last `Weak` or the last `Arc` releasing the count the
+    # strong handles held collectively - and by then the value has already been destroyed.
+
+    let Weak[T, A](ptr, alloc) = self
+    defer drop(alloc)
+
+    case ptr.weak_counter.fetch_sub(1_uz) == 1_uz {
+      alloc.deallocate_array(ptr, 1_uz)
+    }
+  }
+}
