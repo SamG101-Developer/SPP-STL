@@ -38,11 +38,6 @@ cls None {
 !public
 type Opt[T] = Some[T] or None
 
-sup [T: Copy] Opt[T] ext Copy {
-  # If the internal type of this optional is copy, then the optional itself is also copy, as copying an optional just
-  # involves copying the internal value if it is Some, and doing nothing if it is None.
-}
-
 sup [T] Opt[T] {
   # Multiple methods are provided for the `Opt` type to allow for convenient manipulation and querying of optional
   # values. These methods include checking if the optional is `Some` or `None`, applying predicates to the value inside,

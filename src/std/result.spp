@@ -44,11 +44,6 @@ cls Fail[E] {
 !public
 type Res[T, E] = Pass[T] or Fail[E]
 
-sup [T: Copy, E: Copy] Res[T, E] ext Copy {
-  # If the internal types of this result are both copy, then the result itself is also copy, as copying a result just
-  # involves copying the internal value if it is Pass, or copying the internal error if it is Fail.
-}
-
 sup [T, E] Res[T, E] {
   # Multiple methods are provided for the `Res` type to allow for convenient manipulation and querying of result values.
   # These methods include checking if the result is `Pass` or `Fail`, applying predicates to the value or error inside,
