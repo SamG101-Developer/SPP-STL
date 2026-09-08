@@ -535,11 +535,3 @@ sup BigUInt ext std::ops::ord::Ord {
   }
 }
 
-sup BigUInt ext std::ops::drop::Drop {
-  # A `BigUInt` owns the vector holding its digits, so discarding one discards that.
-
-  fun drop(self) -> Void {
-    let BigUInt(data) = self
-    drop(data)
-  }
-}

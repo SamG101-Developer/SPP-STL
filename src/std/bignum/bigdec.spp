@@ -10,11 +10,3 @@ cls BigDec {
   scale: S64
 }
 
-sup BigDec ext std::ops::drop::Drop {
-  # A `BigDec` owns the integer it scales; the scale is an `S64` and so owes nothing.
-
-  fun drop(self) -> Void {
-    let BigDec(int_val, scale) = self
-    drop(int_val)
-  }
-}
