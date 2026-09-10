@@ -545,16 +545,9 @@ fun stdout_write(buffer: CCharPtr, size: CULong, count: CULong, out_n: &mut CLon
 !ffi(symbol="sppc_stderr_write")
 fun stderr_write(buffer: CCharPtr, size: CULong, count: CULong, out_n: &mut CLong) -> CInt { }
 
-# The task body crosses as a closure, the same shape "pthread_create" takes, rather than as a callback plus a c
-# variadic argument list: a variadic cannot be one c prototype, because the arguments after the pack would have to be
-# passed as real varargs rather than collapsed into a tuple, and nothing on the c side could know the size of what came
-# back. A closure carries its captures with it, and the result goes into a cell the caller allocated, so neither
-# problem arises.
-
 !ffi(symbol="sppc_async")
 fun async_(handle: &mut CInt, body: CClosure[(), CVoid]) -> CInt { }
 
-# Named with a trailing underscore for the same reason "async_" is: "await" is a keyword.
 !ffi(symbol="sppc_await")
 fun await_(handle: CInt) -> CInt { }
 
