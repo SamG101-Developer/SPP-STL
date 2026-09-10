@@ -30,6 +30,8 @@ cls NullptrErr {
   # to create a `NonNull` pointer from a raw pointer.
 }
 
+sup NullptrErr ext Copy { }
+
 !package
 !versioned(base="1.0.0", new="1.0.0")
 cls Ptr[T] {

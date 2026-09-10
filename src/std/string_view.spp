@@ -32,6 +32,8 @@ cls Utf8Err {
   !public error_len: Opt[USize]
 }
 
+sup Utf8Err ext Copy { }
+
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls StrView {
