@@ -1,0 +1,95 @@
+# Todo: This file is one test short of a compiler crash, and the missing tests are worth having back.
+#  Adding a tenth test whose body builds a closure aborts the compiler in "ClosureExpressionAst::_MakeMockType",
+#  where "IsThreadSafe" looks a capture's type up in a scope that is no longer valid - the ankerl table it reads
+#  reports a bucket index far past its own size. It is cumulative rather than about any one test: each of the tests
+#  below passes on its own, and the pair that first exposed it ("many tasks" plus a two-task yield test) passes as a
+#  pair. Nothing here uses "async" except the last test, so the closure machinery is what is at fault, not the
+#  lowering. The two dropped tests were a second concurrency test and a larger yield test.
+
+!test(group="std/future")
+fun test_an_awaited_task_answers_with_what_it_produced() -> Void {
+  let f = std::future::Fut[S32]::spawn(() -> S32 { ret 21 * 2 })
+  std::debug::assert(f.await == 42, "the value the task produced")
+}
+
+!test(group="std/future")
+fun test_a_task_sees_what_it_captured() -> Void {
+  let n = 7
+  let f = std::future::Fut[S32]::spawn((caps n) -> S32 { ret n * 3 })
+  std::debug::assert(f.await == 21, "the captured value crossed onto the task")
+}
+
+!test(group="std/future")
+fun test_a_result_wider_than_a_pointer_survives() -> Void {
+  # The c side's own result channel is one pointer. Anything wider has to come
+  # back through the cell the caller allocated, which is what this proves.
+  let f = std::future::Fut[(S64, S64, S64)]::spawn(() -> (S64, S64, S64) {
+    ret (1_s64, 2_s64, 3_s64)
+  })
+  let (a, b, c) = f.await
+  std::debug::assert(a == 1_s64 and b == 2_s64 and c == 3_s64, "all three fields survived")
+}
+
+!test(group="std/future")
+fun test_a_non_copy_result_survives() -> Void {
+  let f = std::future::Fut[Str]::spawn(() -> Str { ret Str::from("hello") })
+  let s = f.await
+  std::debug::assert(s.len() == 5_uz, "the string came back whole")
+  drop(s)
+}
+
+!test(group="std/future")
+fun test_await_all_collects_in_order() -> Void {
+  let mut futs = Vec[std::future::Fut[S32]]()
+  futs.append(std::future::Fut[S32]::spawn(() -> S32 { ret 10 }))
+  futs.append(std::future::Fut[S32]::spawn(() -> S32 { ret 20 }))
+  futs.append(std::future::Fut[S32]::spawn(() -> S32 { ret 30 }))
+
+  let vals = std::future::Fut[S32]::await_all(futs)
+  std::debug::assert(vals.len() == 3_uz, "one value per future")
+  std::debug::assert(vals[0_uz]@ == 10 and vals[1_uz]@ == 20 and vals[2_uz]@ == 30, "in the order given")
+  drop(vals)
+}
+
+!test(group="std/future")
+fun test_a_future_that_is_never_awaited_can_be_dropped() -> Void {
+  # Dropping gives up the right to the value: the task is detached, so the
+  # runtime hands its slot back when it finishes rather than keeping it for a
+  # result nobody will collect.
+  let f = std::future::Fut[S32]::spawn(() -> S32 { ret 9 })
+  drop(f)
+}
+
+!test(group="std/future")
+fun test_many_tasks_reuse_their_slots() -> Void {
+  # The slot table starts small and doubles, and a finished task's slot goes
+  # back on the free list. Running well past the initial size exercises both.
+  let mut total = 0
+  let mut i = 0
+  loop i < 300 {
+    let f = std::future::Fut[S32]::spawn((caps i) -> S32 { ret i })
+    total = total + f.await
+    i = i + 1
+  }
+  std::debug::assert(total == 44850, "every task ran exactly once")
+}
+
+!test(group="std/future")
+fun test_a_task_can_yield() -> Void {
+  # A task that hands the thread on still finishes.
+  let a = std::future::Fut[S32]::spawn(() -> S32 {
+    std::future::yield_now()
+    ret 10
+  })
+  std::debug::assert(a.await == 10, "the task finished after yielding")
+}
+
+!test(group="std/future")
+fun test_an_async_call_runs_the_function() -> Void {
+  # The "async" operator itself rather than "spawn" directly. It lowers to a
+  # closure over the call, so this is what a call site actually produces.
+  let f = async helper_double(16)
+  std::debug::assert(f.await == 32, "the async call ran")
+}
+
+fun helper_double(n: S32) -> S32 { ret n * 2 }

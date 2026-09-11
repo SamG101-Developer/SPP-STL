@@ -1,13 +1,16 @@
-use std::annotations::intrinsic
+use std::annotations::package
 use std::annotations::private
 use std::annotations::public
 use std::annotations::versioned
-use std::function::Fun
+use std::allocator::Alloc
+use std::allocator::AllocErr
+use std::allocator::GlobalAlloc
+use std::cffi::CClosure
+use std::cffi::CVoid
 use std::function::FunMov
-use std::number::U64
-use std::number::U8
-use std::option::None
-use std::option::Opt
+use std::number::S32
+use std::result::Fail
+use std::result::Pass
 use std::vector::Vec
 use std::void::Void
 use std::mem::ops::drop
@@ -17,66 +20,128 @@ use std::ops::drop::Drop
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls Fut[T] {
-  # The `Fut[T]` future type wraps any type, whe a function is called as `async`. Because the `async` gets placed at the
-  # function call site rather than the definition, we are able to avoid the coloring problem, and remove function
-  # duplication for async vs async definitions. The compiler lowers async calls into `sppc::async` calls with auto
-  # `Fut[T]` wrapping. The handle from `sppc::async` is stored inside this future, to work with `await`.
+  # The `Fut[T]` future type wraps any type, when a function is called as `async`. Because the `async` goes at the
+  # function call site rather than the definition, we avoid the coloring problem, and remove the duplication of every
+  # function into async and non-async forms. The compiler lowers an async call into a `Fut[T]::async_` call, which
+  # hands the work to the green-thread runtime in `sppc`.
   # @type T: The type of the value that the future will eventually resolve to.
-  # @let handle: An integer identifier, cast from an internal task struct pointer from the internal async runtime
-  # written in `C`.
+  # @let handle: Names the task inside the runtime. It carries a generation as well as an index, so a handle kept past
+  # the task it named fails to resolve rather than naming whichever task now occupies the slot.
+  # @let result: The uninitialized cell the task writes its return value into. `T` is a real type rather than a
+  # placeholder only because of this cell: the c side's own result channel is one pointer, which can carry nothing
+  # wider, and it has no way to know the size or layout of an s++ type. Keeping the result on this side means the task
+  # body writes `T` directly and c never sees it.
 
-  !private handle: U64
+  !private handle: S32
+  !private result: NonNull[T]
 }
 
 sup [T] Fut[T] {
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun spawn[F: FunMov[(), T]](f: F) -> Self {
+    # Start `f` as a task, and answer with the future standing for it. The function is moved onto the task, and its
+    # result comes back through a cell allocated here.
+    # @type F: The type of the function to run. It is moved onto the task, so it must be a `FunMov`.
+    # @let f: The function to run.
+    # @ret: The future standing for the running task.
+
+    # Allocated here rather than on the task, so that a failure to allocate is
+    # seen by the caller rather than by a task with nowhere to report it.
+    let slot = case GlobalAlloc().allocate_array[T](1_uz) of {
+      is Pass[NonNull[T]](val as p) { p }
+      is Fail[AllocErr](err as e) {
+        drop(e)
+        std::abort::abort("async: out of memory allocating the result cell")
+      }
+      else { std::abort::unreachable() }
+    }
+
+    # The body moves the function onto the task and takes a copy of the cell
+    # with it. Nothing comes back through the c boundary: the value is already
+    # in the cell by the time the task is awaited.
+    let mut handle = 0_s32
+    let err = sppc::async_(&mut handle, CClosure[(), CVoid]::from((caps f, slot) -> Void {
+      let mut into = slot
+      into.write(f())
+    }))
+
+    case err != 0 {
+      GlobalAlloc().deallocate_array(slot, 1_uz)
+      std::abort::abort("async: the runtime refused to start the task")
+    }
+    ret Self(handle, result=slot)
+  }
+
   !private
   !versioned(base="1.0.0", new="1.0.0")
-  fun async_[F: FunMov[(Ts), T], ..Ts](f: F, ..args: Ts) -> Self {
-    #
-    # @type F:
-    # @type Ts:
-    # @let f:
-    # @let ..args:
-    # @ret:
+  fun await_(self) -> T {
+    # What the `await` keyword lowers to. Private, because waiting has to go through the keyword rather than through a
+    # call: consuming a future is the one moment its escaping borrows can be released, and only the keyword's lowering
+    # is allowed to say so - it checks the receiver is a future first, where a plain method call would just be a move
+    # of a value carrying escaping borrows and refused as one.
+    # @ret: The resolved value. Blocks until the task has finished, or returns at once if it already had.
 
-    let mut handle = 0_u64
-    # let err = sppc::async_(&mut handle, f, ..args)
-    drop(f) # TODO ^^^
-    drop(args) # TODO ^^^
-    ret Self(handle)
+    let Self(handle, result) = self
+    let err = sppc::await_(handle)
+
+    # A handle that does not resolve names no task, so nothing ever wrote the
+    # cell and there is no value to hand back. Reading it anyway would be a
+    # read of uninitialized memory.
+    case err != 0 {
+      GlobalAlloc().deallocate_array(result, 1_uz)
+      std::abort::abort("await: the future does not name a running task")
+    }
+
+    # The read is only sound once the await has returned: until then the task
+    # may not have written the cell yet.
+    let val = result.read()
+    GlobalAlloc().deallocate_array(result, 1_uz)
+    ret val
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun await(self) -> T {
-    # The `await` method is used to retrieve the resolved value of the future. This isn't typically used, because if an
-    # `async` function call needs to be waited on, it can just be called synchronously in the first place. However, if
-    # we fire off multiple `async` calls, we can use this method to wait on specific ones.
-    # @ret: The resolved value of the future. This method will block until the future has been resolved, at which point
-    # it will return the value of type `T` that the future resolves to. If the future is already resolved when this
-    # method is called, it will return the resolved value immediately without blocking.
+  fun await_all(futures: Vec[Fut[T]]) -> Vec[T] {
+    # Wait for several futures and collect what they produced. The futures are all running already by the time this is
+    # called - what this does is collect them - so the total wait is that of the slowest rather than the sum of them
+    # all.
+    # @let futures: The futures to collect.
+    # @ret: A vector of the resolved values, in the order the futures were given.
 
-    let Self(handle) = self
-    let val = NonNull[U8]::from_ptr(sppc::await(handle))
-      .expect("C async runtime failed")
-      .cast[T]()
-    ret val.read()
+    # Todo: This wants to be variadic - "await_all(..futures: Fut[T])" - so that the futures can be listed at the call
+    #  site without building a vector first. A variadic pack is a tuple, and a tuple cannot be iterated: there is no
+    #  "iter_mov" on one, and no fold that would consume each element exactly once. Until a pack can be walked, taking
+    #  the vector is the form that can actually be written.
+
+    let mut out = Vec[T]()
+    loop future in futures.iter_mov() {
+      out.append(future.await)
+    }
+    ret out
   }
+}
 
-  !public
+sup [T] Fut[T] ext Drop {
   !versioned(base="1.0.0", new="1.0.0")
-  fun await_all(..futures: Fut[T]) -> Vec[T] {
-    # The `await_all` method is used to wait for multiple futures to resolve. It takes a variable number of futures as
-    # arguments and waits for all of them to resolve before returning. This is useful when you have multiple
-    # asynchronous operations that need to be completed before proceeding, and you want to wait for all of them to
-    # finish before moving on to the next step in your program. The method will block until all of the provided futures
-    # have resolved. Note that it doesn't wait for one, then the next, but rather waits for all of them to resolve in
-    # parallel, and returns when the last one has resolved.
-    # @let ..futures: A variable number of futures that we want to wait on. The method will block until all of these
-    # futures have resolved.
-    # @ret: A vector containing the resolved values of all the futures.
+  fun drop(self) -> Void {
+    # A dropped future still waits for its task. It cannot simply detach and release the cell: the task holds a pointer
+    # to that cell and writes its result through it, and a green task does not begin until the scheduler reaches it -
+    # so a task dropped before it ran would be handed a dangling pointer every time rather than occasionally. Waiting
+    # is also what lets the value it produced be dropped rather than leaked, which matters as soon as `T` owns
+    # anything.
 
-    drop(futures) # TODO: Remove.
-    ret Vec[T]() # TODO ^^^
+    let Self(handle, result) = self
+    let err = sppc::await_(handle)
+    case err == 0 { drop(result.read()) }
+    GlobalAlloc().deallocate_array(result, 1_uz)
   }
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun yield_now() -> Void {
+  # Hand the thread to whatever other task is ready to run. A task that neither yields nor blocks runs to completion,
+  # which is the point of a cooperative runtime; this is how a long computation lets the others in.
+  sppc::async_yield()
 }
