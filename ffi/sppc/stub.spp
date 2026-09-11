@@ -47,13 +47,6 @@ cls CStatvfs {
 
 !public
 cls CStat {
-  # Laid out to match the c "struct stat" on x86-64 field for field, including its padding and its trailing reserved
-  # words. Both parts matter: the order decides which field a read actually lands on, and the total size decides how
-  # much "fstat" writes into the caller's frame. This was 128 bytes against the real 144, so every "fstat" overran the
-  # caller by 16 bytes - which the stack canary caught - and "size" read what was really "st_blocks".
-  # Offsets: dev 0, ino 8, nlink 16, mode 24, uid 28, gid 32, pad0 36, rdev 40, size 48, block_size 56, blocks 64,
-  # atim 72, mtim 88, ctim 104, reserved 120..144.
-
   !public dev: CULong
   !public ino: CULong
   !public nlink: CULong
@@ -360,14 +353,17 @@ fun exit_(status: CInt) -> ! { }
 fun signal(pid: CInt, signal: CInt) -> CInt { }
 
 # F_GETFD, F_GETFL, F_GETOWN, F_GETSIG, F_GETLEASE, F_GETPIPE_SZ.
+
 !ffi(symbol="sppc_fcntl_get")
 fun fcntl_get(fd: CInt, cmd: CInt, out: &mut CInt) -> CInt { }
 
 # F_SETFD, F_SETFL, F_SETOWN, F_SETSIG, F_SETLEASE, F_SETPIPE_SZ, F_DUPFD, F_DUPFD_CLOEXEC.
+
 !ffi(symbol="sppc_fcntl_set")
 fun fcntl_set(fd: CInt, cmd: CInt, arg: CInt) -> CInt { }
 
 # F_GETLK, F_SETLK, F_SETLKW take a "CFlock".
+
 !ffi(symbol="sppc_fcntl_ptr")
 fun fcntl_lock(fd: CInt, cmd: CInt, arg: &CFlock) -> CInt { }
 
@@ -545,16 +541,9 @@ fun stdout_write(buffer: CCharPtr, size: CULong, count: CULong, out_n: &mut CLon
 !ffi(symbol="sppc_stderr_write")
 fun stderr_write(buffer: CCharPtr, size: CULong, count: CULong, out_n: &mut CLong) -> CInt { }
 
-# The task body crosses as a closure, the same shape "pthread_create" takes, rather than as a callback plus a c
-# variadic argument list: a variadic cannot be one c prototype, because the arguments after the pack would have to be
-# passed as real varargs rather than collapsed into a tuple, and nothing on the c side could know the size of what came
-# back. A closure carries its captures with it, and the result goes into a cell the caller allocated, so neither
-# problem arises.
-
 !ffi(symbol="sppc_async")
 fun async_(handle: &mut CInt, body: CClosure[(), CVoid]) -> CInt { }
 
-# Named with a trailing underscore for the same reason "async_" is: "await" is a keyword.
 !ffi(symbol="sppc_await")
 fun await_(handle: CInt) -> CInt { }
 
@@ -563,4 +552,3 @@ fun async_detach(handle: CInt) -> CInt { }
 
 !ffi(symbol="sppc_async_yield")
 fun async_yield() -> CVoid { }
-

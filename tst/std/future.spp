@@ -1,11 +1,3 @@
-# Todo: This file is one test short of a compiler crash, and the missing tests are worth having back.
-#  Adding a tenth test whose body builds a closure aborts the compiler in "ClosureExpressionAst::_MakeMockType",
-#  where "IsThreadSafe" looks a capture's type up in a scope that is no longer valid - the ankerl table it reads
-#  reports a bucket index far past its own size. It is cumulative rather than about any one test: each of the tests
-#  below passes on its own, and the pair that first exposed it ("many tasks" plus a two-task yield test) passes as a
-#  pair. Nothing here uses "async" except the last test, so the closure machinery is what is at fault, not the
-#  lowering. The two dropped tests were a second concurrency test and a larger yield test.
-
 !test(group="std/future")
 fun test_an_awaited_task_answers_with_what_it_produced() -> Void {
   let f = std::future::Fut[S32]::spawn(() -> S32 { ret 21 * 2 })
@@ -21,8 +13,8 @@ fun test_a_task_sees_what_it_captured() -> Void {
 
 !test(group="std/future")
 fun test_a_result_wider_than_a_pointer_survives() -> Void {
-  # The c side's own result channel is one pointer. Anything wider has to come
-  # back through the cell the caller allocated, which is what this proves.
+  # The c side's own result channel is one pointer. Anything wider has to come back through the cell the caller
+  # allocated, which is what this proves.
   let f = std::future::Fut[(S64, S64, S64)]::spawn(() -> (S64, S64, S64) {
     ret (1_s64, 2_s64, 3_s64)
   })
@@ -53,17 +45,16 @@ fun test_await_all_collects_in_order() -> Void {
 
 !test(group="std/future")
 fun test_a_future_that_is_never_awaited_can_be_dropped() -> Void {
-  # Dropping gives up the right to the value: the task is detached, so the
-  # runtime hands its slot back when it finishes rather than keeping it for a
-  # result nobody will collect.
+  # Dropping gives up the right to the value: the task is detached, so the runtime hands its slot back when it finishes
+  # rather than keeping it for a result nobody will collect.
   let f = std::future::Fut[S32]::spawn(() -> S32 { ret 9 })
   drop(f)
 }
 
 !test(group="std/future")
 fun test_many_tasks_reuse_their_slots() -> Void {
-  # The slot table starts small and doubles, and a finished task's slot goes
-  # back on the free list. Running well past the initial size exercises both.
+  # The slot table starts small and doubles, and a finished task's slot goes back on the free list. Running well past
+  # the initial size exercises both.
   let mut total = 0
   let mut i = 0
   loop i < 300 {
@@ -86,8 +77,8 @@ fun test_a_task_can_yield() -> Void {
 
 !test(group="std/future")
 fun test_an_async_call_runs_the_function() -> Void {
-  # The "async" operator itself rather than "spawn" directly. It lowers to a
-  # closure over the call, so this is what a call site actually produces.
+  # The "async" operator itself rather than "spawn" directly. It lowers to a closure over the call, so this is what a
+  # call site actually produces.
   let f = async helper_double(16)
   std::debug::assert(f.await == 32, "the async call ran")
 }
