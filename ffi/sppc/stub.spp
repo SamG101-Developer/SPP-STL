@@ -47,13 +47,6 @@ cls CStatvfs {
 
 !public
 cls CStat {
-  # Laid out to match the c "struct stat" on x86-64 field for field, including its padding and its trailing reserved
-  # words. Both parts matter: the order decides which field a read actually lands on, and the total size decides how
-  # much "fstat" writes into the caller's frame. This was 128 bytes against the real 144, so every "fstat" overran the
-  # caller by 16 bytes - which the stack canary caught - and "size" read what was really "st_blocks".
-  # Offsets: dev 0, ino 8, nlink 16, mode 24, uid 28, gid 32, pad0 36, rdev 40, size 48, block_size 56, blocks 64,
-  # atim 72, mtim 88, ctim 104, reserved 120..144.
-
   !public dev: CULong
   !public ino: CULong
   !public nlink: CULong
@@ -556,4 +549,3 @@ fun async_detach(handle: CInt) -> CInt { }
 
 !ffi(symbol="sppc_async_yield")
 fun async_yield() -> CVoid { }
-

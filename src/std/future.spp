@@ -22,15 +22,13 @@ use std::ops::drop::Drop
 cls Fut[T] {
   # The `Fut[T]` future type wraps any type, when a function is called as `async`. Because the `async` goes at the
   # function call site rather than the definition, we avoid the coloring problem, and remove the duplication of every
-  # function into async and non-async forms. The compiler lowers an async call into a `Fut[T]::async_` call, which
-  # hands the work to the green-thread runtime in `sppc`.
+  # function into async and non-async forms. The compiler lowers an async call into a `Fut[T]::async_` call, which hands
+  # the work to the green-thread runtime in `sppc`.
   # @type T: The type of the value that the future will eventually resolve to.
   # @let handle: Names the task inside the runtime. It carries a generation as well as an index, so a handle kept past
   # the task it named fails to resolve rather than naming whichever task now occupies the slot.
-  # @let result: The uninitialized cell the task writes its return value into. `T` is a real type rather than a
-  # placeholder only because of this cell: the c side's own result channel is one pointer, which can carry nothing
-  # wider, and it has no way to know the size or layout of an s++ type. Keeping the result on this side means the task
-  # body writes `T` directly and c never sees it.
+  # @let result: The uninitialized cell the task writes its return value into. The value casn never be access directly
+  # because of the access modifier, so `.await` must be used.
 
   !private handle: S32
   !private result: NonNull[T]
@@ -78,8 +76,8 @@ sup [T] Fut[T] {
   fun await_(self) -> T {
     # What the `await` keyword lowers to. Private, because waiting has to go through the keyword rather than through a
     # call: consuming a future is the one moment its escaping borrows can be released, and only the keyword's lowering
-    # is allowed to say so - it checks the receiver is a future first, where a plain method call would just be a move
-    # of a value carrying escaping borrows and refused as one.
+    # is allowed to say so - it checks the receiver is a future first, where a plain method call would just be a move of
+    # a value carrying escaping borrows and refused as one.
     # @ret: The resolved value. Blocks until the task has finished, or returns at once if it already had.
 
     let Self(handle, result) = self
@@ -109,11 +107,7 @@ sup [T] Fut[T] {
     # @let futures: The futures to collect.
     # @ret: A vector of the resolved values, in the order the futures were given.
 
-    # Todo: This wants to be variadic - "await_all(..futures: Fut[T])" - so that the futures can be listed at the call
-    #  site without building a vector first. A variadic pack is a tuple, and a tuple cannot be iterated: there is no
-    #  "iter_mov" on one, and no fold that would consume each element exactly once. Until a pack can be walked, taking
-    #  the vector is the form that can actually be written.
-
+    # Todo: Fix
     let mut out = Vec[T]()
     loop future in futures.iter_mov() {
       out.append(future.await)
@@ -125,11 +119,8 @@ sup [T] Fut[T] {
 sup [T] Fut[T] ext Drop {
   !versioned(base="1.0.0", new="1.0.0")
   fun drop(self) -> Void {
-    # A dropped future still waits for its task. It cannot simply detach and release the cell: the task holds a pointer
-    # to that cell and writes its result through it, and a green task does not begin until the scheduler reaches it -
-    # so a task dropped before it ran would be handed a dangling pointer every time rather than occasionally. Waiting
-    # is also what lets the value it produced be dropped rather than leaked, which matters as soon as `T` owns
-    # anything.
+    # A dropped future still waits for its task. It can't just detach and release the cell, because otherwise the green
+    # thread runtime would eventually reach this task and use uninitialized memory.
 
     let Self(handle, result) = self
     let err = sppc::await_(handle)
