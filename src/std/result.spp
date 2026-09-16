@@ -411,7 +411,10 @@ sup [T, E] Res[T, E] {
     # this is `Pass`, otherwise return `None`.
     ret case self of {
       is Pass[T](val) { Some(val) }
-      is Fail[E](..) { None }
+      is Fail[E](err) {
+        drop(err)
+        None
+      }
       else { std::abort::unreachable() }
     }
   }
@@ -428,7 +431,10 @@ sup [T, E] Res[T, E] {
     # this is `Fail`, otherwise return `None`.
     ret case self of {
       is Fail[E](err) { Some(val=err) }
-      is Pass[T](..) { None }
+      is Pass[T](val) {
+        drop(val)
+        None
+      }
       else { std::abort::unreachable() }
     }
   }
@@ -574,7 +580,10 @@ sup [T, E] Res[T, E] {
     # otherwise return the first `Fail` encountered.
     ret case (self, that) of {
       is (Pass[T](val as val1), Pass[U](val as val2)) { Pass(val=(val1, val2)) }
-      is (Pass[T](..), Fail[E](err)) { Fail(err) }
+      is (Pass[T](val), Fail[E](err)) {
+        drop(val)
+        Fail(err)
+      }
       is (Fail[E](err), ..) { Fail(err) }
       else { std::abort::unreachable() }
     }

@@ -143,8 +143,14 @@ sup [T] Opt[T] {
     # Pattern match and return the other optional if this is
     # `Some`, otherwise return `None`.
     ret case self of {
-      is Some[T](..) { that }
-      else { None }
+      is Some[T](val) {
+        drop(val)
+        that
+      }
+      else {
+        drop(that)
+        None
+      }
     }
   }
 
@@ -186,7 +192,10 @@ sup [T] Opt[T] {
     # Pattern match and return this optional if it is `Some`,
     # otherwise return the other optional.
     ret case self of {
-      is Some[T](..) { self }
+      is Some[T](..) {
+        drop(that)
+        self
+      }
       else { that }
     }
   }
@@ -644,6 +653,7 @@ sup [T] Opt[T] ext Try[Some[T], None, T] {
     # @ret: Returns `None`, the residual of an optional.
 
     # There is no state to carry over, so build a fresh `None`.
+    drop(self)
     ret None()
   }
 
