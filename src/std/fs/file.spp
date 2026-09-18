@@ -34,7 +34,7 @@ cls FileMode {
   # @let is_truncate:
   # @let is_create:
   # @let is_exclusive:
-  # @todo: Look at re-using the "Flags" type here? issue is the C mapping.
+  # @todo: Look at reusing the "Flags" type here? issue is the C mapping.
 
   !public is_read: Bool = false
   !public is_write: Bool = false
