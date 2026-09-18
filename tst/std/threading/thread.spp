@@ -163,3 +163,13 @@ fun test_a_thread_carries_an_owned_value() -> Void {
   }).expect("spawn failed")
   std::debug::assert(h.join().expect("join failed") == 3, "the owned value crossed and was released")
 }
+
+fun zz_named_thread_body() -> std::number::S32 { ret 42 }
+
+!test(group="std/threading/thread")
+fun test_a_named_function_can_be_the_thread_body() -> Void {
+  # Every other test here hands "spawn" a closure. A plain function name is a value of its own "$" type, and that value
+  # was a pair of null pointers, so the new thread jumped to address zero.
+  let h = std::threading::thread::spawn(zz_named_thread_body).expect("spawn failed")
+  std::debug::assert(h.join().expect("join failed") == 42, "the named function ran on the thread")
+}

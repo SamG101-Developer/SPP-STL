@@ -16,7 +16,7 @@ cls AssertErr { }
 !cfg(mode="dev")
 !versioned(base="1.0.0", new="1.0.0")
 fun breakpoint() -> Void {
-  # In debug mode, this function triggers a breakpoint in the debugger. It re-uses the `breakpoint_internal` function,
+  # In debug mode, this function triggers a breakpoint in the debugger. It reuses the `breakpoint_internal` function,
   # which is an intrinsic that hooks into the `llvm.debugtrap` instruction. This allows developers to pause execution
   # and inspect the state of the program at this point.
 
@@ -37,7 +37,7 @@ fun breakpoint() -> Void {
 fun breakpoint_always() -> Void {
   # This function always triggers a breakpoint in the debugger, regardless of whether the build is in debug or release
   # mode. This isn't used often, but can be useful in certain situations where there is a difference in thr debug and
-  # release builds, and you want to ensure that a breakpoint is hit in both cases. It re-uses the `breakpoint_internal`
+  # release builds, and you want to ensure that a breakpoint is hit in both cases. It reuses the `breakpoint_internal`
   # function, which is an intrinsic that hooks into the `llvm.debugtrap` instruction
 
   breakpoint_internal()
