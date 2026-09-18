@@ -8,6 +8,7 @@ use std::result::Pass
 use std::result::Res
 use std::void::Void
 use std::ops::drop::Drop
+use std::threading::mutex::WouldBlock
 use std::threading::thread::ThreadErr
 
 !public
@@ -44,9 +45,12 @@ sup SpinLock {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun try_lock(&self) -> Res[Void, ThreadErr] {
+  fun try_lock(&self) -> Res[Void, WouldBlock or ThreadErr] {
     # Try to acquire the spin lock using the sppc threading API.
+    # A held lock reports "WouldBlock"; any other failure reports
+    # the error.
     let err = sppc::pthread_spin_trylock(&self.handle)
+    case err == cffi::ebusy { ret Fail(err=WouldBlock) }
     case err != 0 { ret Fail(err=ThreadErr::from_errno(err))  }
     ret Pass[Void]()
   }
