@@ -160,8 +160,12 @@ fun println(str: &StrView) -> Void {
   let mut stdout = StdoutStream()
   defer drop(stdout)
 
-  let n = stdout.write_all(str.view_ref()).expect("Failed to print")
-  let n = stdout.write_all(b"\n").expect("Failed to print")
+  # One write, not two: each takes the stream's lock on its
+  # own, so a line written in two halves can have another
+  # task's output land between the text and its newline.
+  let line = Str::from(str) + "\n"
+  let n = stdout.write_all(line.view_ref()).expect("Failed to print")
+  drop(line)
 }
 
 !public
@@ -193,8 +197,12 @@ fun eprintln(str: &StrView) -> Void {
   let mut stderr = StderrStream()
   defer drop(stderr)
 
-  let n = stderr.write_all(str.view_ref()).expect("Failed to print")
-  let n = stderr.write_all(b"\n").expect("Failed to print")
+  # One write, not two: each takes the stream's lock on its
+  # own, so a line written in two halves can have another
+  # task's output land between the text and its newline.
+  let line = Str::from(str) + "\n"
+  let n = stderr.write_all(line.view_ref()).expect("Failed to print")
+  drop(line)
 }
 
 !public
