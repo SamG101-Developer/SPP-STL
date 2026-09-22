@@ -97,17 +97,6 @@ sup [T] Vec[T] {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun new_filled(len: USize, element: T) -> Self {
-    #
-    # @let len:
-    # @let element:
-    # @ret:
-
-    ret Self::new_filled_in(len, element, GlobalAlloc)
-  }
-
-  !public
-  !versioned(base="1.0.0", new="1.0.0")
   fun new_from_fun[F: FunMut[(USize,), T]](len: USize, mut f: F) -> Self {
     #
     # @let len:
@@ -153,22 +142,6 @@ sup [T, A: Alloc] Vec[T, A] {
     # @ret:
 
     ret Vec(buffer=RawBuf[T, A]::new_with_capacity_in(cap, alloc), length=0_uz)
-  }
-
-  !public
-  !versioned(base="1.0.0", new="1.0.0")
-  fun new_filled_in(len: USize, element: T, alloc: A) -> Self {
-    #
-    # @let len:
-    # @let element:
-    # @let alloc:
-    # @ret:
-
-    let mut vec = Self::new_with_capacity_in(len, alloc)
-    # std::mem::ops::mem_set(&mut vec.buffer.ptr, element, len) # todo
-    drop(element) # TODO ^^^
-    vec.length = len
-    ret vec
   }
 
   !public
@@ -517,6 +490,21 @@ sup [T, A: Alloc] Vec[T, A] {
 sup [T: Clone, A: Alloc] Vec[T, A] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
+  fun new_filled_in(len: USize, element: T, alloc: A) -> Self {
+    # Create a vector of `len` copies of `element`, using the given allocator. It needs `T: Clone`, as every slot but
+    # one holds a copy; it used to only set the length, leaving the elements as whatever the allocation held.
+    # @let len: The number of elements the vector holds.
+    # @let element: The value every element is a copy of.
+    # @let alloc: The allocator for the vector's buffer.
+    # @ret: The filled vector.
+
+    let mut vec = Self::new_with_capacity_in(len, alloc)
+    vec.resize(len, element)
+    ret vec
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
   fun resize(&mut self, new_len: USize, element: T) -> Void {
     # Grows or shrinks the vector to `new_len`. Shrinking truncates and drops the trailing elements. Growing reserves
     # the additional capacity once and clones `element` directly into the newly reserved slots, moving the original into
@@ -571,6 +559,17 @@ sup [T: Clone, A: Alloc] Vec[T, A] {
 }
 
 sup [T: Clone] Vec[T] {
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun new_filled(len: USize, element: T) -> Self {
+    # Create a vector of `len` copies of `element`, using the global allocator.
+    # @let len: The number of elements the vector holds.
+    # @let element: The value every element is a copy of.
+    # @ret: The filled vector.
+
+    ret Self::new_filled_in(len, element, GlobalAlloc)
+  }
+
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun from(that: &View[T]) -> Self {

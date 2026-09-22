@@ -1,5 +1,6 @@
 use std::annotations::intrinsic
 use std::annotations::package
+use std::annotations::private
 use std::annotations::public
 use std::annotations::versioned
 use std::allocator::Alloc
@@ -34,6 +35,34 @@ use std::ops::add::AddAssign
 use std::ops::drop::Drop
 use std::ops::fwd::FwdMut
 use std::ops::fwd::FwdRef
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls StrBuilder {
+  # Todo: Add loads more here, make Str immutable?
+  !private inner: Str
+}
+
+sup StrBuilder {
+  !public
+  fun append(mut self, other: &StrView) -> Self {
+    # Taken and handed back by value, so that a chain ending in "str()" moves the builder along it; handing back a
+    # "&mut" instead made "str()" move the string out through the borrow while the builder still owned it.
+    self.inner.append_str(other)
+    ret self
+  }
+
+  !public
+  fun str(self) -> Str {
+    ret self.inner
+  }
+}
+
+sup StrBuilder ext Clone {
+  fun clone(&self) -> Self {
+    ret StrBuilder(inner=self.inner.clone())
+  }
+}
 
 !public
 !versioned(base="1.0.0", new="1.0.0")

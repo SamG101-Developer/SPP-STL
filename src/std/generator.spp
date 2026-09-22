@@ -2,7 +2,8 @@ use std::annotations::intrinsic
 use std::annotations::private
 use std::annotations::public
 use std::annotations::versioned
-use std::option::None
+use std::annotations::zero_type
+use std::copy::Copy
 use std::void::Void
 use std::ops::drop::Drop
 
@@ -36,13 +37,13 @@ cls GenOnce[Yield] {
 sup [Yield, Send] Gen[Yield, Send] {
   !public
   !intrinsic(name="std.generator.Gen.send")
-  fun send(&mut self, value: Send) -> Generated[Yield or None] {
-    # Resume the generator, sending in a value of type `Send`. This method will return a `Generated[Yield or None]`,
+  fun send(&mut self, value: Send) -> Generated[Yield or GenDone] {
+    # Resume the generator, sending in a value of type `Send`. This method will return a `Generated[Yield or GenDone]`,
     # which can be pattern matched by the receiving context.
     # @let value: The value of type `Send` that is being sent into the generator. This value is passed by move
     # convention, and is forwarded into the `send` method of the generator. If `Send=Void`, then this parameter doesn't
     # exist.
-    # @ret: Either the value of type `Yield` that the generator yields, wrapped in `Some`, or `None` if the generator
+    # @ret: Either the value of type `Yield` that the generator yields, or `GenDone` if the generator
     # has completed and will not yield any more values.
   }
 }
@@ -53,10 +54,20 @@ sup [Yield] GenOnce[Yield] {
   fun send(&mut self) -> Generated[Yield] {
     # Resume the generator, without sending in any value. This method is used for `GenOnce` generators, where the first
     # yield is automatically unwrapped, so there is no need to send in a value. The method will return a
-    # `Generated[Yield]`, not `or None`, because `GenOnce` generators are guaranteed to yield at once before completing.
+    # `Generated[Yield]`, not `or GenDone`, because `GenOnce` generators are guaranteed to yield at once before completing.
     # @ret: The value of type `Yield` that the generator yields.
   }
 }
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls GenDone {
+  # The `GenDone` class is what resuming a finished generator answers with. It is a compiler-known sentinel, distinct
+  # from `None`, so that a generator can yield an `Opt` and still say when it has finished. A generator's `Yield` type
+  # cannot contain it.
+}
+
+sup GenDone ext Copy { }
 
 !public
 cls Generated[Yield] {

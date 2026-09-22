@@ -83,3 +83,55 @@ fun test_an_unmatched_alternative_falls_through_to_else() -> Void {
   }
   std::debug::assert(got == 99, "no arm matched, so the else branch ran")
 }
+type NarrowSB = std::number::S32 or std::boolean::Bool
+type NarrowOpt = std::option::Opt[std::number::S32]
+
+# A pattern naming several of the subject's members at once binds the value re-tagged as that narrower variant. The
+# members sit at different tags in the subject than in the pattern's own variant, so the discriminant is translated.
+!test(group="std/variant")
+fun test_a_narrowed_variant_keeps_the_alternative_it_held() -> Void {
+  let v: Bool or S32 = 5
+  let held = case v of {
+    is NarrowSB(..) { 1 }
+    else { 0 }
+  }
+  std::debug::assert(held == 1, "the narrower variant matched")
+}
+
+# The subject's payload is wider than the narrowed variant's, so only the narrower one's bytes are copied, and the
+# value read back through the narrowed binding is the one that was stored.
+!test(group="std/variant")
+fun test_a_narrowed_variant_reads_its_value_from_a_wider_subject() -> Void {
+  let v: std::option::Opt[S32] or U64 = std::option::Some[S32](val=7)
+  let got = case v of {
+    is NarrowOpt(..) { v.unwrap_or(0) }
+    else { 0 }
+  }
+  std::debug::assert(got == 7, "the value survived the narrowing")
+}
+
+cls NarrowHolder {
+  !public v: std::option::Opt[S32] or Bool
+}
+
+sup NarrowHolder {
+  !public
+  fun which(&self) -> S32 {
+    ret case self.v of {
+      is NarrowOpt(..) { 1 }
+      else { 0 }
+    }
+  }
+}
+
+# The subject is an attribute rather than a plain name, which takes the other path through the pattern codegen. A
+# narrowing pattern that does not hold must not match there either.
+!test(group="std/variant")
+fun test_a_narrowed_pattern_on_an_attribute_subject_matches_only_its_members() -> Void {
+  let held = NarrowHolder(v=std::option::Some[S32](val=1))
+  let not_held = NarrowHolder(v=false)
+  std::debug::assert(held.which() == 1, "the Opt alternative matched")
+  std::debug::assert(not_held.which() == 0, "the Bool alternative did not match")
+  let NarrowHolder(v) = held
+  let NarrowHolder(v) = not_held
+}

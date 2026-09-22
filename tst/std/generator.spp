@@ -33,17 +33,56 @@ fun test_ret_in_a_coroutine_finishes_it_and_runs_its_defers() -> Void {
 }
 
 !test(group="std/generator")
-fun test_a_hand_driven_generator_yields_all_then_none_forever() -> Void {
+fun test_a_hand_driven_generator_yields_all_then_gen_done_forever() -> Void {
   let mut g = std::range::Range[std::number::S32]::between(0, 2)
   let mut yielded = 0_uz
   let mut exhausted = 0_uz
   loop n in std::range::Range[std::number::USize]::between(0_uz, 6_uz) {
     case g.res() of {
-      is std::option::None() { exhausted += 1_uz }
+      is std::generator::GenDone() { exhausted += 1_uz }
       else { yielded += 1_uz }
     }
   }
   std::debug::assert(yielded == 2_uz, "both elements came out")
-  std::debug::assert(exhausted == 4_uz, "and every later resumption answered None")
+  std::debug::assert(exhausted == 4_uz, "and every later resumption answered GenDone")
   std::mem::ops::drop(g)
+}
+
+cor yields_optionals() -> std::iterator::Iterator[std::option::Opt[S32]] {
+  gen std::option::Some[S32](val=1)
+  gen std::option::None()
+  gen std::option::Some[S32](val=3)
+}
+
+!test(group="std/generator")
+fun test_a_generator_can_yield_none_without_finishing() -> Void {
+  let mut count = 0_uz
+  let mut nones = 0_uz
+  loop o in yields_optionals() {
+    count += 1_uz
+    case o of {
+      is std::option::None() { nones += 1_uz }
+      else { }
+    }
+    drop(o)
+  }
+  std::debug::assert(count == 3_uz, "the yielded None did not end the loop")
+  std::debug::assert(nones == 1_uz, "and it came out as a None")
+}
+
+!test(group="std/generator")
+fun test_a_pattern_naming_a_narrower_variant_matches_only_its_members() -> Void {
+  let a: std::option::Opt[S32] or std::boolean::Bool = true
+  let matched = case a of {
+    is std::option::Opt[S32](..) { true }
+    else { false }
+  }
+  std::debug::assert(matched == false, "a Bool is not an Opt[S32]")
+
+  let b: std::option::Opt[S32] or std::boolean::Bool = std::option::Some[S32](val=4)
+  let got = case b of {
+    is std::option::Opt[S32](..) { b.unwrap_or(0) }
+    else { 0 }
+  }
+  std::debug::assert(got == 4, "the Some came through re-tagged as an Opt[S32]")
 }

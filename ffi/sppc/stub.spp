@@ -83,7 +83,12 @@ cls CFlock {
 }
 
 !public
-cls CSockaddrStorage { }
+cls CSockaddrStorage {
+  # Stands in for C's "struct sockaddr_storage", which the C
+  # side reads and writes whole: 128 bytes, 8-byte aligned,
+  # on every supported platform.
+  !private bytes: [U64; 16_uz] = [0_u64; 16_uz]
+}
 
 !ffi(symbol="sppc_init")
 fun init() -> CInt { }
