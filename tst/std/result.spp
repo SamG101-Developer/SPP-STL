@@ -161,3 +161,24 @@ fun test_expect_and_expect_err_pick_the_matching_side() -> Void {
   let f: Res[S32, Bool] = Fail(err=true)
   std::debug::assert(f.expect_err("failed"), "expect_err on a fail")
 }
+
+fun store_through_a_captured_borrow(out: &mut std::string::Str) -> USize {
+  let r: Res[std::string::Str, Bool] = Pass(val=std::string::Str::from("hello"))
+  ret r.map((s: std::string::Str caps &mut out) {
+    let len = s.len()
+    out@ = s
+    len
+  }).unwrap()
+}
+
+# A closure capturing a parameter that is itself a borrow ("out: &mut Str") writes through to the caller's value. It
+# used to capture the local holding the pointer instead, so the write overwrote that local (a stack smash) and the
+# caller's string stayed empty - which is how "BufRead::read_line" lost every line.
+!test(group="std/result")
+fun test_a_closure_writes_through_a_captured_borrow_parameter() -> Void {
+  let mut s = std::string::Str()
+  let n = store_through_a_captured_borrow(&mut s)
+  std::debug::assert(n == 5_uz, "map returned the length")
+  std::debug::assert(s.len() == 5_uz, "the write reached the caller's string")
+  drop(s)
+}

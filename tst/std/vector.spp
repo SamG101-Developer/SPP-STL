@@ -258,3 +258,22 @@ fun test_reverse_move_iteration_visits_back_to_front() -> Void {
   std::debug::assert(n == 3_uz, "visited every element")
   std::debug::assert(first == 3, "starting from the back")
 }
+
+# Every element is the given value. "new_filled" used to set only the length, so the elements were whatever the
+# allocation happened to hold ("v[1]" read 232 for a vector filled with 10).
+!test(group="std/vector")
+fun test_new_filled_holds_the_value_in_every_slot() -> Void {
+  let v = Vec[U8]::new_filled(5_uz, 10_u8)
+  std::debug::assert(v.len() == 5_uz, "five elements")
+  loop i in std::range::Range[USize]::between(0_uz, 5_uz) {
+    std::debug::assert(v[i]@ == 10_u8, "every element is the fill value")
+  }
+  drop(v)
+}
+
+!test(group="std/vector")
+fun test_new_filled_with_no_elements_is_empty() -> Void {
+  let v = Vec[U8]::new_filled(0_uz, 10_u8)
+  std::debug::assert(v.len() == 0_uz, "empty")
+  drop(v)
+}

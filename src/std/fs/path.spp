@@ -544,7 +544,7 @@ sup Path ext DivAssign {
     # @ret: The original `Path` object is modified to represent the joined path.
 
     defer drop(that)
-    self@ = self.join(&that)
+    self@ = self.clone().join(&that)
   }
 }
 

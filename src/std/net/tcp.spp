@@ -53,6 +53,17 @@ sup TcpListener {
 
     # Create the `TcpListener` object with the file descriptor.
     let listener = TcpListener(fd)
+
+    # Allow rebinding an address whose previous connections
+    # are still in TIME_WAIT, so a restarted server does not
+    # fail with EADDRINUSE for a minute.
+    let yes = 1
+    let err = sppc::setsockopt(listener.fd, cffi::sol_socket, cffi::so_reuseaddr, &yes)
+    case err != 0 {
+      drop(listener)
+      ret Fail(err=SockErr::from_errno(err))
+    }
+
     let err = sppc::bind(listener.fd, &addr.storage())
     case err != 0 {
       drop(listener)
@@ -407,6 +418,19 @@ sup TcpStream {
     let addr = SockAddr::from_storage(&storage)
     drop(storage)
     ret Pass(val=addr)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun try_clone(&self) -> Res[TcpStream, SockErr] {
+    # The `try_clone` method creates a new `TcpStream` that shares the same underlying socket as the original. This is
+    # useful for creating multiple handles to the same connection, allowing for concurrent reads and writes.
+    # @ret: A result containing the cloned `TcpStream` if successful, or a `SockErr` if there was an error.
+
+    let mut new_fd = 0
+    let err = sppc::dup(self.fd, &mut new_fd)
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
+    ret Pass(val=TcpStream(fd=new_fd))
   }
 }
 

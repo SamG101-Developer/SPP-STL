@@ -7,10 +7,12 @@ use std::annotations::virtual_method
 use std::annotations::zero_type
 use std::boolean::Bool
 use std::generator::GenOnce
+use std::iterator::Iterator
 use std::number::S32
 use std::number::SSize
 use std::number::U8
 use std::number::USize
+use std::option::Opt
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
@@ -395,16 +397,18 @@ sup Seek {
 
 sup [R: Read] BufRead[R] {
   !public
-  fun new(&mut self, inner: R) -> Self {
+  fun new(inner: R) -> Self {
     # Use the default capacity of 4096 bytes for the internal buffer.
-    ret self.new_with_capacity(inner, 4096_uz)
+    ret Self::new_with_capacity(inner, 4096_uz)
   }
 
   !public
-  fun new_with_capacity(&mut self, inner: R, capacity: USize) -> Self {
+  fun new_with_capacity(inner: R, capacity: USize) -> Self {
     # Create a new buffer with the specified capacity, and initialize the position, filled byte count, and EOF flag to
     # the defaults.
-    let buf = Vec[U8]::new_with_capacity(capacity)
+    # The buffer is created at its full length, not just with that capacity, because it is read into as a view: an
+    # empty one asks the reader for zero bytes, which it answers with zero - indistinguishable from EOF.
+    let buf = Vec[U8]::new_filled(capacity, 0_u8)
     ret Self(inner, buf)
   }
 
@@ -506,8 +510,12 @@ sup [R: Read] BufRead[R] {
       is Pass[USize](val=0_uz) { ret Pass(val=0_uz) }
     }
 
-    case bytes[bytes.len() - 1_uz]@ of {
-      == b'\n' | b'\r' { bytes.truncate(bytes.len() - 1_uz) }
+    # Strip the line ending, "\n" or "\r\n". The values of a comparison branch are separated by commas: "a | b" is
+    # a bitwise or, so "== b'\n' | b'\r'" compared against 0x0f and never stripped anything.
+    # The "\r" check is nested because "and" does not short-circuit: an empty line would still be indexed at -1.
+    case bytes[bytes.len() - 1_uz]@ == b'\n' { bytes.truncate(bytes.len() - 1_uz) }
+    case bytes.len() > 0_uz {
+      case bytes[bytes.len() - 1_uz]@ == b'\r' { bytes.truncate(bytes.len() - 1_uz) }
     }
 
     # Validate the read bytes as UTF-8 and copy them into the
@@ -521,17 +529,41 @@ sup [R: Read] BufRead[R] {
         len
       })
   }
+
+  !public
+  cor lines(&mut self) -> Iterator[Res[Str, StreamErr]] {
+    # Yield each line without its line ending, until EOF
+    # finishes the iterator. An error is yielded once and
+    # then finishes it too, as a reader that failed cannot
+    # be relied on to carry on.
+    loop true {
+      let mut out = Str()
+      let result = self.read_line(&mut out)
+      case result of {
+        is Pass[USize](val=0_uz) {
+          drop(out)
+          ret
+        }
+        is Pass[USize](..) { gen Pass(val=out) }
+        is Fail[StreamErr](err) {
+          drop(out)
+          gen Fail(err)
+          ret
+        }
+      }
+    }
+  }
 }
 
 sup [W: Write] BufWrite[W] {
   !public
-  fun new(&mut self, inner: W) -> Self {
+  fun new(inner: W) -> Self {
     # Use the default capacity of 4096 bytes for the internal buffer.
-    ret self.new_with_capacity(inner, 4096_uz)
+    ret Self::new_with_capacity(inner, 4096_uz)
   }
 
   !public
-  fun new_with_capacity(&mut self, inner: W, capacity: USize) -> Self {
+  fun new_with_capacity(inner: W, capacity: USize) -> Self {
     # Create a new buffer with the specified capacity.
     let buf = Vec[U8]::new_with_capacity(capacity)
     ret Self(inner, buf)
@@ -561,9 +593,9 @@ sup [W: Write & Drop] BufWrite[W] ext Drop {
 
   !versioned(base="1.0.0", new="1.0.0")
   fun drop(self) -> Void {
-    # Todo: This should flush whatever is still buffered before letting the inner writer go, so that discarding a
-    # writer does not silently lose the bytes written into it. It cannot yet: `flush_buf` is commented out below,
-    # pending the coroutine return-type issue noted there. Until then a caller must flush explicitly.
+    # Todo: This should flush whatever is still buffered before letting the inner writer go, so that discarding a writer
+    # does not silently lose the bytes written into it. It cannot yet: `flush_buf` is commented out below, pending the
+    # coroutine return-type issue noted there. Until then a caller must flush explicitly.
 
     let Self(inner, buf, cap) = self
     drop(inner)
