@@ -92,7 +92,10 @@ sup [T] Opt[T] {
     # Pattern match and test against the predicate.
     ret case self of {
       is Some[T](val) { pred(val) }
-      else { false }
+      else {
+        drop(pred)
+        false
+      }
     }
   }
 
@@ -123,7 +126,10 @@ sup [T] Opt[T] {
     # Pattern match and test against the predicate.
     ret case self of {
       is Some[T](val) { pred(val) }
-      else { true }
+      else {
+        drop(pred)
+        true
+      }
     }
   }
 
@@ -174,7 +180,10 @@ sup [T] Opt[T] {
     # this is `Some`, otherwise return `None`.
     ret case self of {
       is Some[T](val) { pred(val) }
-      else { None }
+      else {
+        drop(pred)
+        None
+      }
     }
   }
 
@@ -196,7 +205,10 @@ sup [T] Opt[T] {
         drop(that)
         self
       }
-      else { that }
+      else {
+        drop(self)
+        that
+      }
     }
   }
 
@@ -219,7 +231,10 @@ sup [T] Opt[T] {
         drop(that)
         self
       }
-      else { that() }
+      else {
+        drop(self)
+        that()
+      }
     }
   }
 
@@ -239,11 +254,20 @@ sup [T] Opt[T] {
 
     # Pattern match on both optionals and return the value of
     # the `Some` if exactly one is `Some`, otherwise return `None`.
-    ret case (self, that) of {
-      is (Some[T](val), None()) { Some(val) }
-      is (None(), Some[T](val)) { Some(val) }
-      else { None }
+    # When both are `Some`, both values are dropped rather than lost.
+    case self of {
+      is Some[T](val) {
+        case that of {
+          is Some[T](val as other) {
+            drop(val)
+            drop(other)
+          }
+          else { ret Some(val=val) }
+        }
+      }
+      else { ret that }
     }
+    ret None
   }
 
   !public
@@ -266,10 +290,17 @@ sup [T] Opt[T] {
 
     # Pattern match and apply the predicate to a borrow of
     # the value if this is `Some`.
-    ret case self of {
-      is Some[T](&val) { case pred(val) { self } else { None } }
-      else { None }
+    case self of {
+      is Some[T](&val) {
+        case pred(val) { ret self }
+        else { drop(self) }
+      }
+      else {
+        drop(pred)
+        ret self
+      }
     }
+    ret None
   }
 
   !public
@@ -293,7 +324,10 @@ sup [T] Opt[T] {
     # if this is `Some`, otherwise return `None`.
     ret case self of {
       is Some[T](val) { Some(val=func(val)) }
-      else { None }
+      else {
+        drop(func)
+        None
+      }
     }
   }
 
@@ -565,7 +599,10 @@ sup [T] Opt[T] {
     # the predicate returns true, otherwise return `None`.
     let matches = case self of {
       is Some[T](&val) { pred(val) }
-      else { false }
+      else {
+        drop(pred)
+        false
+      }
     }
 
     case matches { ret self.take() }
@@ -589,11 +626,18 @@ sup [T] Opt[T] {
 
     # Pattern match on both optionals and return a new optional
     # containing a tuple of the values if they are both `Some`,
-    # otherwise return `None`.
-    ret case (self, that) of {
-      is (Some[T](val as val1), Some[U](val as val2)) { Some(val=(val1, val2)) }
-      else { None }
+    # otherwise return `None`. A value whose partner is missing
+    # is still owned here, so it is dropped rather than lost.
+    case self of {
+      is Some[T](val as val1) {
+        case that of {
+          is Some[U](val as val2) { ret Some(val=(val1, val2)) }
+          else { drop(val1) }
+        }
+      }
+      else { drop(that) }
     }
+    ret None
   }
 }
 

@@ -110,6 +110,7 @@ sup [T] Iterator[T] {
     let mut index = 0_uz
     loop item in self {
       case index >= count { gen item }
+      else { drop(item) }
       index += 1_uz
     }
   }
@@ -153,7 +154,10 @@ sup [T] Iterator[T] {
 
     # Only yield items that satisfy the predicate.
     defer drop(predicate)
-    loop item in self { case predicate(&item) { gen item } }
+    loop item in self {
+      case predicate(&item) { gen item }
+      else { drop(item) }
+    }
   }
 
   !public
@@ -197,8 +201,12 @@ sup [T] Iterator[T] {
     # of indices.
     let mut index = 0_uz
     loop item in self {
-      case index >= start and index < end { gen item }
-      case index >= end { exit }
+      case index >= end {
+        drop(item)
+        exit
+      }
+      case index >= start { gen item }
+      else { drop(item) }
       index += 1_uz
     }
   }
@@ -219,7 +227,8 @@ sup [T] Iterator[T] {
     let mut index = 0_uz
     loop item in self {
       case index % step == 0_uz { gen item }
-      index += step
+      else { drop(item) }
+      index += 1_uz
     }
   }
 

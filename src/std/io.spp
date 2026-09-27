@@ -544,12 +544,12 @@ sup [R: Read] BufRead[R] {
           drop(out)
           ret
         }
-        is Pass[USize](..) { gen Pass(val=out) }
         is Fail[StreamErr](err) {
           drop(out)
           gen Fail(err)
           ret
         }
+        else { gen Pass(val=out) }
       }
     }
   }
