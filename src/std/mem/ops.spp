@@ -172,6 +172,17 @@ fun drop[T](val: T) -> Void {
   # @ret: An empty value, as the function is only used for its side effect of dropping the value.
 }
 
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun drop[T](val: &T) -> Void {
+  # Discards a borrow. A borrow owns nothing, so there is nothing to destroy - this exists so that generic code over a
+  # `T` that is sometimes a borrow (an adaptor over `iter_ref`, say) can discard an item it skips the same way either
+  # way. A generic parameter cannot stand for a borrow, so the owned overload never matches one.
+  # @type T: The type behind the borrow.
+  # @let val: The borrow to discard.
+  # @ret: An empty value.
+}
+
 !package
 !intrinsic(name="std.mem.ops.drop_in_place")
 !versioned(base="1.0.0", new="1.0.0")

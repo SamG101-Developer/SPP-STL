@@ -394,7 +394,10 @@ sup [T, E] Res[T, E] {
         drop(default)
         f(val)
       }
-      is Fail[E](err) { default(err) }
+      is Fail[E](err) {
+        drop(f)
+        default(err)
+      }
       else { std::abort::unreachable() }
     }
   }
@@ -578,13 +581,21 @@ sup [T, E] Res[T, E] {
     # Pattern match on both results and return a new result
     # containing a tuple of the values if they are both `Pass`,
     # otherwise return the first `Fail` encountered.
-    ret case (self, that) of {
-      is (Pass[T](val as val1), Pass[U](val as val2)) { Pass(val=(val1, val2)) }
-      is (Pass[T](val), Fail[E](err)) {
-        drop(val)
+    ret case self of {
+      is Pass[T](val as val1) {
+        case that of {
+          is Pass[U](val as val2) { ret Pass(val=(val1, val2)) }
+          is Fail[E](err) {
+            drop(val1)
+            ret Fail(err)
+          }
+          else { std::abort::unreachable() }
+        }
+      }
+      is Fail[E](err) {
+        drop(that)
         Fail(err)
       }
-      is (Fail[E](err), ..) { Fail(err) }
       else { std::abort::unreachable() }
     }
   }

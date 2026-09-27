@@ -177,7 +177,10 @@ sup File {
     # the flags; the process umask is applied on top of it.
     let mut file = File()
     let err = sppc::open(path.inner.ptr, mode.to_flags(), 0x1b6, &mut file.fd)
-    ret case err == 0 { Pass(val=file) } else { Fail(err=PathErr::from_errno(err)) }
+    ret case err == 0 { Pass(val=file) } else {
+      drop(file)
+      Fail(err=PathErr::from_errno(err))
+    }
   }
 
   !public
@@ -384,7 +387,10 @@ fun get_cwd() -> Res[Path, PathErr] {
 
   let mut cwd = Path()
   let err = sppc::getcwd(cwd.inner.ptr, path::path_max)
-  ret case err == 0 { Pass(val=cwd) } else { Fail(err=PathErr::from_errno(err)) }
+  ret case err == 0 { Pass(val=cwd) } else {
+    drop(cwd)
+    Fail(err=PathErr::from_errno(err))
+  }
 }
 
 !public

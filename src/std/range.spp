@@ -70,6 +70,7 @@ sup [T: Ord] Range[T] {
     let mut index = 0_uz
     loop value in self {
       case index % step == 0_uz { gen value }
+      else { std::mem::ops::drop(value) }
       index += 1_uz
     }
   }
