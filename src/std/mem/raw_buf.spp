@@ -248,13 +248,13 @@ sup [T, A: Alloc] RawBuf[T, A] {
 sup [T, A: Alloc] RawBuf[T, A] ext IndexMut[T, USize] {
   !intrinsic(name="std.mem.raw_buf.RawBuf.index_mut")
   !versioned(base="1.0.0", new="1.0.0")
-  cor index_mut(&mut self, index: USize) -> Indexed[&mut T or None] { }
+  cor index_mut(&mut self, index: USize) -> Indexed[&mut T] { }
 }
 
 sup [T, A: Alloc] RawBuf[T, A] ext IndexRef[T, USize] {
   !intrinsic(name="std.mem.raw_buf.RawBuf.index_ref")
   !versioned(base="1.0.0", new="1.0.0")
-  cor index_ref(&self, index: USize) -> Indexed[&T or None] { }
+  cor index_ref(&self, index: USize) -> Indexed[&T] { }
 }
 
 sup [T, A: Alloc] RawBuf[T, A] ext Drop {
