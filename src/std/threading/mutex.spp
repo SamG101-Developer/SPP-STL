@@ -93,7 +93,7 @@ sup [T] Mutex[T] {
     # Create a new mutex using the sppc threading API. Todo: Error Handling.
     let mut handle = 0_u64
     let err = sppc::pthread_mutex_init(&mut handle)
-    let mut cell = GlobalAlloc().allocate_array[T](1_uz).expect("Allocation failed")
+    let mut cell = GlobalAlloc.allocate_array[T](1_uz).expect("Allocation failed")
     cell.write(val)
     ret Mutex(handle, val=cell)
   }
@@ -236,7 +236,7 @@ sup [T] Mutex[T] {
     let Self(handle, val) = self
     let err = sppc::pthread_mutex_destroy(&handle)
     let inner = val.read()
-    GlobalAlloc().deallocate_array(val, 1_uz)
+    GlobalAlloc.deallocate_array(val, 1_uz)
     ret inner
   }
 }
@@ -250,6 +250,6 @@ sup [T: Drop] Mutex[T] ext Drop {
     let Mutex[T](handle, val) = self
     let err = sppc::pthread_mutex_destroy(&handle)
     drop(val.read())
-    GlobalAlloc().deallocate_array(val, 1_uz)
+    GlobalAlloc.deallocate_array(val, 1_uz)
   }
 }

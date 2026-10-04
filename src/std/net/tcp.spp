@@ -247,7 +247,7 @@ sup TcpStream {
     # "on" flag, allowing the seconds to be interpreted
     # by the Duration type.
     case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
-    case on == 0 { ret Pass[Opt[Duration]](val=None()) }
+    case on == 0 { ret Pass[Opt[Duration]](val=None) }
     ret Pass(val=Some(val=Duration::from_secs(U64::from(seconds))))
   }
 

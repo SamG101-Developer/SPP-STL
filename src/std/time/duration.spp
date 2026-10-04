@@ -313,7 +313,7 @@ sup Duration {
 
     # Nothing below is meaningful for a zero divisor;
     # early rejection.
-    case rhs == 0_u32 { ret None() }
+    case rhs == 0_u32 { ret None }
 
     let (secs, extra_secs) = (self.seconds / U64::from(rhs), self.seconds % U64::from(rhs))
     let (mut nanos, extra_nanos) = (self.nanoseconds / U64::from(rhs), self.nanoseconds % U64::from(rhs))

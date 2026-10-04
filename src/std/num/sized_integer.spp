@@ -367,7 +367,7 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
     case self.ilog2_checked() of {
       is Some[U32](val as i) { ret Some(val=log_10_lookup_table.index_ref(U64::from(i))@) }
     }
-    ret None()
+    ret None
   }
 }
 

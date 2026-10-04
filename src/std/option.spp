@@ -580,7 +580,7 @@ sup [T] Opt[T] {
     # @ret: Returns the value inside the optional wrapped in `Some` if this optional is `Some`, otherwise returns
     # `None`.
 
-    let empty: Opt[T] = None()
+    let empty: Opt[T] = None
     ret std::mem::ops::replace(self, empty)
   }
 
@@ -606,7 +606,7 @@ sup [T] Opt[T] {
     }
 
     case matches { ret self.take() }
-    ret None()
+    ret None
   }
 
   !public
@@ -698,7 +698,7 @@ sup [T] Opt[T] ext Try[Some[T], None, T] {
 
     # There is no state to carry over, so build a fresh `None`.
     drop(self)
-    ret None()
+    ret None
   }
 
   !versioned(base="1.0.0", new="1.0.0")
