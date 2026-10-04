@@ -60,9 +60,9 @@ sup ThreadErr {
     # @ret:
 
     ret case errno of {
-      == cffi::enomem { ThreadMemoryErr() }
-      == cffi::eperm { ThreadPermissionErr() }
-      else { ThreadUnknownErr() }
+      == cffi::enomem { ThreadMemoryErr }
+      == cffi::eperm { ThreadPermissionErr }
+      else { ThreadUnknownErr }
     }
   }
 }
@@ -114,12 +114,12 @@ fun spawn[Out: ThreadSafe, F: FunMov[(), Out] & ThreadSafe](function: F) -> Res[
   # new thread, so that a failure to allocate is seen by
   # the caller rather than by a thread with nowhere to
   # report it.
-  let slot = case GlobalAlloc().allocate_array[Out](1_uz) of {
+  let slot = case GlobalAlloc.allocate_array[Out](1_uz) of {
     is Pass[NonNull[Out]](val as p) { p }
     is Fail[AllocErr](err as e) {
       drop(function)
       drop(e)
-      ret Fail(err=ThreadMemoryErr())
+      ret Fail(err=ThreadMemoryErr)
     }
     else { std::abort::unreachable() }
   }
@@ -133,7 +133,7 @@ fun spawn[Out: ThreadSafe, F: FunMov[(), Out] & ThreadSafe](function: F) -> Res[
   }), &mut handle)
 
   case err != 0 {
-    GlobalAlloc().deallocate_array(slot, 1_uz)
+    GlobalAlloc.deallocate_array(slot, 1_uz)
     ret Fail(err=ThreadErr::from_errno(err))
   }
   ret Pass(val=JoinHandle[Out](handle, result=slot))
@@ -174,7 +174,7 @@ sup [R] JoinHandle[R] {
     # which is why detaching is only safe for a thread whose result is not wanted.
 
     let Self(handle, result, ..) = self
-    GlobalAlloc().deallocate_array(result, 1_uz)
+    GlobalAlloc.deallocate_array(result, 1_uz)
     let err = sppc::pthread_detach(&handle)
     case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
     ret Pass[Void]()
@@ -188,12 +188,12 @@ sup [R] JoinHandle[R] {
     let Self(handle, result, ..) = self
     let err = sppc::pthread_join(&handle)
     case err != 0 {
-      GlobalAlloc().deallocate_array(result, 1_uz)
+      GlobalAlloc.deallocate_array(result, 1_uz)
       ret Fail(err=ThreadErr::from_errno(err))
     }
 
     let val = result.read()
-    GlobalAlloc().deallocate_array(result, 1_uz)
+    GlobalAlloc.deallocate_array(result, 1_uz)
     ret Pass(val=val)
   }
 }
@@ -223,7 +223,7 @@ sup [R] JoinHandle[R] ext Drop {
   fun drop(self) -> Void {
     # Ensure the thread is detached before deletion.
     let JoinHandle[R](handle, result, detached) = self
-    GlobalAlloc().deallocate_array(result, 1_uz)
+    GlobalAlloc.deallocate_array(result, 1_uz)
     case detached.not { let err = sppc::pthread_detach(&handle) }
   }
 }

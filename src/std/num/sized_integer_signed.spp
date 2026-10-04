@@ -163,7 +163,7 @@ sup [cmp w: U32] SizedIntegerSigned[w] {
   !inline
   fun add_checked(self, that: Self) -> Opt[Self] {
     let (val, overflowed) = intrinsics::sadd_overflow(self, that)
-    ret case overflowed { None() } else { Some(val) }
+    ret case overflowed { None } else { Some(val) }
   }
 
   !public
@@ -190,7 +190,7 @@ sup [cmp w: U32] SizedIntegerSigned[w] {
   !inline
   fun sub_checked(self, that: Self) -> Opt[Self] {
     let (val, overflowed) = intrinsics::ssub_overflow(self, that)
-    ret case overflowed { None() } else { Some(val) }
+    ret case overflowed { None } else { Some(val) }
   }
 
   !public
@@ -217,7 +217,7 @@ sup [cmp w: U32] SizedIntegerSigned[w] {
   !inline
   fun mul_checked(self, that: Self) -> Opt[Self] {
     let (val, overflowed) = intrinsics::smul_overflow(self, that)
-    ret case overflowed { None() } else { Some(val) }
+    ret case overflowed { None } else { Some(val) }
   }
 
   !public
@@ -248,7 +248,7 @@ sup [cmp w: U32] SizedIntegerSigned[w] {
   !inline
   fun div_checked(self, that: Self) -> Opt[Self] {
     case that == Self::zero() or (self == intrinsics::min_val[Self]() & that == Self::neg_one()) {
-      ret None()
+      ret None
     }
     ret Some(val=intrinsics::sdiv(self, that))
   }
@@ -311,7 +311,7 @@ sup [cmp w: U32] SizedIntegerSigned[w] {
   !inline
   fun rem_checked(self, that: Self) -> Opt[Self] {
     case that == Self::zero() or (self == intrinsics::min_val[Self]() & that == Self::neg_one()) {
-      ret None()
+      ret None
     }
     ret Some(val=intrinsics::srem(self, that))
   }
@@ -458,7 +458,7 @@ sup [cmp w: U32] SizedIntegerSigned[w] {
   !inline
   fun neg_checked(self) -> Opt[Self] {
     let (val, overflowed) = self.neg_overflow()
-    ret case overflowed { None() } else { Some(val) }
+    ret case overflowed { None } else { Some(val) }
   }
 
   !public

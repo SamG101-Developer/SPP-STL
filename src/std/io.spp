@@ -199,7 +199,7 @@ sup Read {
 
       # Read the number of bytes into the buffer.
       let n = try?
-      case n == 0_uz { ret Fail(err=StreamEofError()) }
+      case n == 0_uz { ret Fail(err=StreamEofError) }
       filled += n
     }
 
@@ -297,7 +297,7 @@ sup Write {
       # Unwrap the number of bytes written from the buffer
       # (propagate other errors).
       let n = try?
-      case n == 0_uz { ret Fail(err=StreamWriteZeroError()) }
+      case n == 0_uz { ret Fail(err=StreamWriteZeroError) }
       written += n
     }
 
@@ -579,7 +579,7 @@ sup [W: Write] BufWrite[W] {
   #             case try is Fail[StreamErr](&err) and err is StreamInterruptedError() { skip }
   #
   #             let n = try?
-  #             case n == 0_uz { ret Pass(val=Fail(err=StreamWriteZeroError())) }
+  #             case n == 0_uz { ret Pass(val=Fail(err=StreamWriteZeroError)) }
   #             written += n
   #         }
   #

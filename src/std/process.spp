@@ -100,7 +100,7 @@ fun get_env(key: &StrView) -> Opt[Str] {
   defer drop(buffer)
 
   let err = sppc::getenv(key_z.ptr, buffer.ptr, max_size)
-  case err != 0 { ret None() }
+  case err != 0 { ret None }
   ret Some(val=Str::from_c_str(buffer.ptr))
 }
 

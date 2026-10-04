@@ -46,7 +46,7 @@ sup [T] Fut[T] {
 
     # Allocated here rather than on the task, so that a failure to allocate is
     # seen by the caller rather than by a task with nowhere to report it.
-    let slot = case GlobalAlloc().allocate_array[T](1_uz) of {
+    let slot = case GlobalAlloc.allocate_array[T](1_uz) of {
       is Pass[NonNull[T]](val as p) { p }
       is Fail[AllocErr](err as e) {
         drop(e)
@@ -65,7 +65,7 @@ sup [T] Fut[T] {
     }))
 
     case err != 0 {
-      GlobalAlloc().deallocate_array(slot, 1_uz)
+      GlobalAlloc.deallocate_array(slot, 1_uz)
       std::abort::abort("async: the runtime refused to start the task")
     }
     ret Self(handle, result=slot)
@@ -87,14 +87,14 @@ sup [T] Fut[T] {
     # cell and there is no value to hand back. Reading it anyway would be a
     # read of uninitialized memory.
     case err != 0 {
-      GlobalAlloc().deallocate_array(result, 1_uz)
+      GlobalAlloc.deallocate_array(result, 1_uz)
       std::abort::abort("await: the future does not name a running task")
     }
 
     # The read is only sound once the await has returned: until then the task
     # may not have written the cell yet.
     let val = result.read()
-    GlobalAlloc().deallocate_array(result, 1_uz)
+    GlobalAlloc.deallocate_array(result, 1_uz)
     ret val
   }
 
@@ -125,7 +125,7 @@ sup [T] Fut[T] ext Drop {
     let Self(handle, result) = self
     let err = sppc::await_(handle)
     case err == 0 { drop(result.read()) }
-    GlobalAlloc().deallocate_array(result, 1_uz)
+    GlobalAlloc.deallocate_array(result, 1_uz)
   }
 }
 

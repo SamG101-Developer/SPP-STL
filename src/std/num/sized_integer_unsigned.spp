@@ -163,7 +163,7 @@ sup [cmp w: U32] SizedIntegerUnsigned[w] {
   !inline
   fun add_checked(self, that: Self) -> Opt[Self] {
     let (val, overflowed) = intrinsics::uadd_overflow(self, that)
-    ret case overflowed { None() } else { Some(val) }
+    ret case overflowed { None } else { Some(val) }
   }
 
   !public
@@ -190,7 +190,7 @@ sup [cmp w: U32] SizedIntegerUnsigned[w] {
   !inline
   fun sub_checked(self, that: Self) -> Opt[Self] {
     ret case self of {
-      < that { None() }
+      < that { None }
       else { Some(val=intrinsics::usub_wrapping(self, that)) }
     }
   }
@@ -219,7 +219,7 @@ sup [cmp w: U32] SizedIntegerUnsigned[w] {
   !inline
   fun mul_checked(self, that: Self) -> Opt[Self] {
     let (val, overflowed) = intrinsics::umul_overflow(self, that)
-    ret case overflowed { None() } else { Some(val) }
+    ret case overflowed { None } else { Some(val) }
   }
 
   !public
@@ -249,7 +249,7 @@ sup [cmp w: U32] SizedIntegerUnsigned[w] {
   !inline
   fun div_checked(self, that: Self) -> Opt[Self] {
     ret case that of {
-      == Self::zero() { None() }
+      == Self::zero() { None }
       else { Some(val=intrinsics::udiv(self, that)) }
     }
   }
@@ -298,7 +298,7 @@ sup [cmp w: U32] SizedIntegerUnsigned[w] {
   !inline
   fun rem_checked(self, that: Self) -> Opt[Self] {
     case that == Self::zero() {
-      ret None()
+      ret None
     }
     ret Some(val=intrinsics::urem(self, that))
   }
