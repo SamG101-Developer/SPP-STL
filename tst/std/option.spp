@@ -1,7 +1,7 @@
 !test(group="std/option")
 fun test_predicates_report_the_state() -> Void {
   let s: Opt[S32] = Some(val=7)
-  let n: Opt[S32] = None()
+  let n: Opt[S32] = None
   std::debug::assert(s.is_some(), "Some is some")
   std::debug::assert(s.is_none().not, "Some is not none")
   std::debug::assert(n.is_none(), "None is none")
@@ -19,14 +19,14 @@ fun test_unwrap_returns_the_contained_value() -> Void {
 !test(group="std/option")
 fun test_unwrap_or_falls_back_only_for_none() -> Void {
   let s: Opt[S32] = Some(val=7)
-  let n: Opt[S32] = None()
+  let n: Opt[S32] = None
   std::debug::assert(s.unwrap_or(3) == 7, "Some ignores the fallback")
   std::debug::assert(n.unwrap_or(3) == 3, "None takes the fallback")
 }
 
 !test(group="std/option")
 fun test_unwrap_or_default_uses_the_types_default() -> Void {
-  let n: Opt[S32] = None()
+  let n: Opt[S32] = None
   std::debug::assert(n.unwrap_or_default() == 0, "None gives the default")
   let s: Opt[S32] = Some(val=9)
   std::debug::assert(s.unwrap_or_default() == 9, "Some keeps its value")
@@ -42,7 +42,7 @@ fun test_take_moves_the_value_out_and_empties_the_slot() -> Void {
 
 !test(group="std/option")
 fun test_take_on_none_leaves_none() -> Void {
-  let mut o: Opt[S32] = None()
+  let mut o: Opt[S32] = None
   let taken = o.take()
   std::debug::assert(taken.is_none(), "nothing came out")
   std::debug::assert(o.is_none(), "the slot is still none")
@@ -58,7 +58,7 @@ fun test_replace_returns_the_previous_value() -> Void {
 
 !test(group="std/option")
 fun test_replace_on_none_reports_no_previous_value() -> Void {
-  let mut o: Opt[S32] = None()
+  let mut o: Opt[S32] = None
   let old = o.replace(5)
   std::debug::assert(old.is_none(), "there was no previous value")
   std::debug::assert(o.unwrap() == 5, "the new value is in place")
@@ -67,7 +67,7 @@ fun test_replace_on_none_reports_no_previous_value() -> Void {
 !test(group="std/option")
 fun test_and_keeps_the_second_only_when_the_first_is_some() -> Void {
   let s: Opt[S32] = Some(val=1)
-  let n: Opt[S32] = None()
+  let n: Opt[S32] = None
   let other: Opt[S32] = Some(val=2)
   let other2: Opt[S32] = Some(val=2)
   std::debug::assert(s.and_(other).unwrap() == 2, "Some and Some gives the second")
@@ -77,7 +77,7 @@ fun test_and_keeps_the_second_only_when_the_first_is_some() -> Void {
 !test(group="std/option")
 fun test_ior_keeps_the_first_when_it_is_some() -> Void {
   let s: Opt[S32] = Some(val=1)
-  let n: Opt[S32] = None()
+  let n: Opt[S32] = None
   let fallback: Opt[S32] = Some(val=2)
   let fallback2: Opt[S32] = Some(val=2)
   std::debug::assert(s.ior_(fallback).unwrap() == 1, "Some keeps itself")
@@ -87,15 +87,15 @@ fun test_ior_keeps_the_first_when_it_is_some() -> Void {
 !test(group="std/option")
 fun test_xor_yields_a_value_only_when_exactly_one_is_some() -> Void {
   let a: Opt[S32] = Some(val=1)
-  let b: Opt[S32] = None()
+  let b: Opt[S32] = None
   std::debug::assert(a.xor(b).unwrap() == 1, "exactly one is some")
 
   let c: Opt[S32] = Some(val=1)
   let d: Opt[S32] = Some(val=2)
   std::debug::assert(c.xor(d).is_none(), "both some gives none")
 
-  let e: Opt[S32] = None()
-  let f: Opt[S32] = None()
+  let e: Opt[S32] = None
+  let f: Opt[S32] = None
   std::debug::assert(e.xor(f).is_none(), "neither some gives none")
 }
 
@@ -103,7 +103,7 @@ fun test_xor_yields_a_value_only_when_exactly_one_is_some() -> Void {
 fun test_pass_or_converts_into_a_result() -> Void {
   let s: Opt[S32] = Some(val=1)
   std::debug::assert(s.pass_or(false).is_pass(), "Some becomes a pass")
-  let n: Opt[S32] = None()
+  let n: Opt[S32] = None
   std::debug::assert(n.pass_or(false).is_fail(), "None becomes a fail")
 }
 
@@ -119,10 +119,10 @@ fun test_equality_compares_both_the_state_and_the_value() -> Void {
   let a: Opt[S32] = Some(val=1)
   let b: Opt[S32] = Some(val=1)
   let c: Opt[S32] = Some(val=2)
-  let n: Opt[S32] = None()
+  let n: Opt[S32] = None
   std::debug::assert(a == b, "the same value")
   std::debug::assert(a != c, "different values")
-  let n2: Opt[S32] = None()
+  let n2: Opt[S32] = None
   std::debug::assert(a != n, "some is not none")
   std::debug::assert(n == n2, "none equals none")
 }
@@ -138,7 +138,7 @@ fun test_map_transforms_only_a_present_value() -> Void {
   let a: Opt[S32] = Some(val=3)
   std::debug::assert(a.map((x: S32) x * 2).unwrap() == 6, "the value is transformed")
 
-  let n: Opt[S32] = None()
+  let n: Opt[S32] = None
   std::debug::assert(n.map((x: S32) x * 2).is_none(), "none maps to none")
 }
 
@@ -147,7 +147,7 @@ fun test_map_or_falls_back_for_none() -> Void {
   let a: Opt[S32] = Some(val=3)
   std::debug::assert(a.map_or(99, (x: S32) x * 2) == 6, "some uses the mapper")
 
-  let n: Opt[S32] = None()
+  let n: Opt[S32] = None
   std::debug::assert(n.map_or(99, (x: S32) x * 2) == 99, "none uses the default")
 }
 
@@ -156,7 +156,7 @@ fun test_ior_else_computes_the_alternative_lazily() -> Void {
   let a: Opt[S32] = Some(val=1)
   std::debug::assert(a.ior_else(() -> Opt[S32] { ret Some(val=2) }).unwrap() == 1, "some keeps its own value")
 
-  let n: Opt[S32] = None()
+  let n: Opt[S32] = None
   std::debug::assert(n.ior_else(() -> Opt[S32] { ret Some(val=2) }).unwrap() == 2, "none calls for the alternative")
 }
 
@@ -177,9 +177,9 @@ fun test_and_then_chains_an_optional_step() -> Void {
   std::debug::assert(a.and_then((x: S32) -> Opt[S32] { ret Some(val=x + 1) }).unwrap() == 5, "the step runs on a value")
 
   let b: Opt[S32] = Some(val=4)
-  std::debug::assert(b.and_then((x: S32) -> Opt[S32] { ret None() }).is_none(), "a step may itself yield none")
+  std::debug::assert(b.and_then((x: S32) -> Opt[S32] { ret None }).is_none(), "a step may itself yield none")
 
-  let n: Opt[S32] = None()
+  let n: Opt[S32] = None
   std::debug::assert(n.and_then((x: S32) -> Opt[S32] { ret Some(val=x + 1) }).is_none(), "none short-circuits")
 }
 
@@ -191,7 +191,7 @@ fun test_filter_keeps_only_a_matching_value() -> Void {
   let b: Opt[S32] = Some(val=5)
   std::debug::assert(b.filter((x: &S32) x@ % 2 == 0).is_none(), "one that does not is dropped")
 
-  let n: Opt[S32] = None()
+  let n: Opt[S32] = None
   std::debug::assert(n.filter((x: &S32) true).is_none(), "none stays none")
 }
 
@@ -203,7 +203,7 @@ fun test_is_some_and_tests_the_contained_value() -> Void {
   let b: Opt[S32] = Some(val=1)
   std::debug::assert(b.is_some_and((x: S32) x > 3).not, "some, but the predicate fails")
 
-  let n: Opt[S32] = None()
+  let n: Opt[S32] = None
   std::debug::assert(n.is_some_and((x: S32) true).not, "none is never some-and")
 }
 
@@ -212,7 +212,7 @@ fun test_unwrap_or_else_computes_the_fallback_lazily() -> Void {
   let a: Opt[S32] = Some(val=7)
   std::debug::assert(a.unwrap_or_else(() 99) == 7, "some ignores the fallback")
 
-  let n: Opt[S32] = None()
+  let n: Opt[S32] = None
   std::debug::assert(n.unwrap_or_else(() 99) == 99, "none calls it")
 }
 
@@ -223,6 +223,6 @@ fun test_zip_pairs_two_options() -> Void {
   std::debug::assert(a.zip(b).is_some(), "two values pair up")
 
   let c: Opt[S32] = Some(val=1)
-  let n: Opt[S32] = None()
+  let n: Opt[S32] = None
   std::debug::assert(c.zip(n).is_none(), "a missing side gives none")
 }

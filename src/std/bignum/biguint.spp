@@ -286,7 +286,7 @@ sup BigUInt ext std::ops::bit_shl::BitShlAssign {
       val.data[mut i + USize::from(word_shift) + 1_uz]@ |= U32::from(shifted >> 32_u32)
     }
 
-    self.data = val.data
+    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, val.data))
     self.trim()
   }
 }
@@ -323,7 +323,7 @@ sup BigUInt ext std::ops::bit_shr::BitShrAssign {
     # above that still hold the pre-shift digits. Dropping them is not something `trim` can do - they are not zero.
     val.data.resize(self.data.len() - USize::from(word_shift), 0_u32)
 
-    self.data = val.data
+    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, val.data))
     self.trim()
   }
 }
@@ -378,7 +378,7 @@ sup BigUInt ext std::ops::mul::MulAssign {
     }
 
     case self.is_one() {
-      self.data = that.data
+      std::mem::ops::drop(std::mem::ops::replace(&mut self.data, that.data))
       ret
     }
 
@@ -405,7 +405,7 @@ sup BigUInt ext std::ops::mul::MulAssign {
     }
 
     drop(that)
-    self.data = val.data
+    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, val.data))
     self.trim()
   }
 }
@@ -457,7 +457,7 @@ sup BigUInt ext std::ops::div::DivAssign {
     drop(divisor)
     drop(window)
 
-    self.data = quotient.data
+    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, quotient.data))
     self.trim()
   }
 }
@@ -476,7 +476,7 @@ sup BigUInt ext std::ops::pow::PowAssign {
 
     # Todo: the base is squared on every pass including the last, where the result is never read. The squaring doubles
     #  the limb count each time, so the wasted pass is the largest allocation the whole call makes.
-    loop exponent != BigUInt::zero() {
+    loop exponent.is_zero().not {
       case (exponent.data[0_uz] & 1_u32) != 0_u32 { val *= base.clone() }
       base *= base.clone()
       exponent >>= BigUInt::one()
@@ -486,7 +486,7 @@ sup BigUInt ext std::ops::pow::PowAssign {
     drop(base)
     drop(exponent)
 
-    self.data = val.data
+    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, val.data))
   }
 }
 

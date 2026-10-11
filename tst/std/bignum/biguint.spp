@@ -2,10 +2,14 @@
 
 !test(group="std/bignum/biguint")
 fun test_zero_and_one_report_themselves() -> Void {
-  std::debug::assert(std::bignum::biguint::BigUInt::zero().is_zero(), "zero is zero")
-  std::debug::assert(std::bignum::biguint::BigUInt::one().is_one(), "one is one")
-  std::debug::assert(std::bignum::biguint::BigUInt::zero().is_one().not, "zero is not one")
-  std::debug::assert(std::bignum::biguint::BigUInt::one().is_zero().not, "one is not zero")
+  let zero = std::bignum::biguint::BigUInt::zero()
+  let one = std::bignum::biguint::BigUInt::one()
+  std::debug::assert(zero.is_zero(), "zero is zero")
+  std::debug::assert(one.is_one(), "one is one")
+  std::debug::assert(zero.is_one().not, "zero is not one")
+  std::debug::assert(one.is_zero().not, "one is not zero")
+  drop(zero)
+  drop(one)
 }
 
 !test(group="std/bignum/biguint")

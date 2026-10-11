@@ -117,18 +117,14 @@ fun mem_copy[T](dest: &mut NonNull[T], src: &NonNull[T], n: USize, dest_index: U
 }
 
 !public
+!intrinsic(name="std.mem.ops.swap")
 !versioned(base="1.0.0", new="1.0.0")
 fun swap[T](a: &mut T, b: &mut T) -> Void {
-  # Swaps the values of two mutable references. This is safe because the reference's value is replaced with the default
-  # value during mid-transformation, and the original value is then reinserted under the other borrow. There is no way
-  # that this function results in uninitialized memory.
+  # Swaps the values of two mutable references. Both values are read before either is written, so nothing stands in
+  # for either mid-way and nothing is dropped: through borrows, values are exchanged, never written over.
   # @type T: The type of the values to swap.
   # @let a: A mutable reference to the first value to swap.
   # @let b: A mutable reference to the second value to swap.
-
-  let temp = take(a)
-  a@ = take(b)
-  b@ = temp
 }
 
 !public

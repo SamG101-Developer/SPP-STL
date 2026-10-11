@@ -415,9 +415,8 @@ sup [T, A: Alloc] Vec[T, A] {
 
     case i == j { ret }
     let a = std::mem::ops::take(self[mut i])
-    let b = std::mem::ops::take(self[mut j])
-    self[mut i]@ = b
-    self[mut j]@ = a
+    let b = std::mem::ops::replace(self[mut j], a)
+    std::mem::ops::drop(std::mem::ops::replace(self[mut i], b))
   }
 
   !private
@@ -707,8 +706,7 @@ sup [T] Vec[T] ext FromIterator[T] {
     # Create the vector and yield all the elements
     # from the generator into it.
     let mut vec = Self::new()
-    # loop generator.res() is T() { vec.append(val) } # todo
-    drop(iter)
+    loop element in iter { vec.append(element) }
     ret vec
   }
 }

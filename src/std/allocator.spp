@@ -443,3 +443,8 @@ sup GlobalAlloc ext Clone {
     ret GlobalAlloc
   }
 }
+
+sup GlobalAlloc ext Copy {
+  # The global allocator holds no state - every instance is the same handle onto malloc and free - so it owns nothing
+  # and copying it is free. Methods on it borrow the receiver ("GlobalAlloc.allocate(..)"), which needs no value kept.
+}

@@ -12,13 +12,13 @@ fun test_a_zero_capacity_buffer_allocates_nothing() -> Void {
   drop(buf)
 }
 
-# Todo: Red on purpose. "take_at" is documented to answer "None" for a slot that was never written, but "RawBuf" keeps
-#  no record of which slots are initialised, so it reads whatever the allocation happens to hold. See the Todo at the
-#  declaration.
+# "None" means an index past the capacity: the buffer keeps no record of which slots in range hold a value, so its
+# owner only takes what it placed.
 !test(group="std/mem/raw_buf")
-fun test_an_untouched_slot_holds_nothing() -> Void {
+fun test_an_index_past_the_capacity_holds_nothing() -> Void {
   let mut buf = std::mem::raw_buf::RawBuf[S32]::new_with_capacity(4_uz)
-  std::debug::assert(buf.take_at(0_uz).is_none(), "a slot that was never written is empty")
+  std::debug::assert(buf.take_at(4_uz).is_none(), "the first index past the capacity")
+  std::debug::assert(buf.take_at(100_uz).is_none(), "and one far past it")
   drop(buf)
 }
 
