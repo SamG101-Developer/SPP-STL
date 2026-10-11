@@ -203,11 +203,12 @@ sup [T, A: Alloc] RawBuf[T, A] {
   !intrinsic(name="std.mem.raw_buf.RawBuf.take_at")
   !versioned(base="1.0.0", new="1.0.0")
   fun take_at(&mut self, index: USize) -> Opt[T] {
-    # Takes the element at the specified index, returning `Some(element)` if it is initialized, or `None` if it is not.
-    # The slot at the index is left uninitialized after this operation, and indexing to it will subsequently return
-    # `None` too.
+    # Takes the element at the specified index, returning `Some(element)` for an index within the capacity, or `None`
+    # for one past it. The buffer keeps no record of which slots hold a value: the slot must have been written
+    # (`place_at`) and not taken since, which the owner tracks (`Vec` by its length). Taking any other slot in range
+    # reads whatever the memory holds. The slot is left uninitialized after this operation.
     # @let index: The index of the element to take.
-    # @ret: `Some(element)` if the element at the specified index is initialized, or `None` if it is not.
+    # @ret: `Some(element)` if the index is within the capacity, or `None` if it is not.
   }
 
   !package

@@ -53,18 +53,16 @@ sup [T, cmp n: USize] Arr[T, n] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun swap(&mut self, i: USize, j: USize) -> Void {
-    # Handing "mem::ops::swap" two mutable borrows into one array is not safe, and the memory checker cannot say so:
-    # it compares the spelling of "self[mut i]" against "self[mut j]" and sees two different places, when "i == j"
-    # makes them one. So the swap happens here with a single element borrow live at a time, and the aliasing case is
-    # named rather than left to come out right by accident.
+    # Handing "mem::ops::swap" two mutable borrows into one array is refused: an index borrow names the whole array,
+    # since only the run-time indices could tell "self[mut i]" from "self[mut j]", and "i == j" makes them one. So the
+    # swap happens here with a single element borrow live at a time, and the aliasing case is named.
     # @let i: The index of the first element to swap.
     # @let j: The index of the second element to swap.
 
     case i == j { ret }
     let a = std::mem::ops::take(self[mut i])
-    let b = std::mem::ops::take(self[mut j])
-    self[mut i]@ = b
-    self[mut j]@ = a
+    let b = std::mem::ops::replace(self[mut j], a)
+    std::mem::ops::drop(std::mem::ops::replace(self[mut i], b))
   }
 }
 

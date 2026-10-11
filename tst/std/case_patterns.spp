@@ -48,7 +48,7 @@ fun test_nested_variant_pattern_matches_without_using_the_binding() -> Void {
 fun test_nested_variant_pattern_rejects_the_wrong_inner_alternative() -> Void {
   # Red, and the more dangerous half of the nested-variant bug: only the subject's own tag is checked, so a value whose
   # inner alternative is `None` still takes a `Some[Some[T]]` branch. The pattern claims more than is tested.
-  let inner: std::option::Opt[std::number::S32] = std::option::None()
+  let inner: std::option::Opt[std::number::S32] = std::option::None
   let nested: std::option::Opt[std::option::Opt[std::number::S32]] = std::option::Some(val=inner)
 
   let matched = case nested of {
@@ -127,7 +127,7 @@ fun test_tuple_of_patterns_matches_without_using_the_binding() -> Void {
   # Separates the two halves of a tuple pattern: whether it selects the right branch at all, and whether the values it
   # binds are usable. This one only asks the first question.
   let a: std::option::Opt[std::number::S32] = std::option::Some(val=1)
-  let b: std::option::Opt[std::number::S32] = std::option::None()
+  let b: std::option::Opt[std::number::S32] = std::option::None
 
   let matched = case (a, b) of {
     is (std::option::Some[std::number::S32](val), std::option::None()) { true }
@@ -140,7 +140,7 @@ fun test_tuple_of_patterns_matches_without_using_the_binding() -> Void {
 fun test_tuple_of_patterns_matches() -> Void {
   # The shape `Opt::xor` and `Opt::zip` use: a tuple whose elements are themselves patterns.
   let a: std::option::Opt[std::number::S32] = std::option::Some(val=1)
-  let b: std::option::Opt[std::number::S32] = std::option::None()
+  let b: std::option::Opt[std::number::S32] = std::option::None
 
   let got = case (a, b) of {
     is (std::option::Some[std::number::S32](val), std::option::None()) { val }
@@ -185,7 +185,6 @@ fun test_a_tuple_pattern_evaluates_its_subject_once() -> Void {
   let mut calls = 0
   let got = case counted_tuple(&mut calls) of {
     is (a, b) { a + b }
-    else { 0 }
   }
   std::debug::assert(calls == 1, "the subject was evaluated once")
   std::debug::assert(got == 3, "and the bindings came from it")
@@ -196,7 +195,6 @@ fun test_an_array_pattern_evaluates_its_subject_once() -> Void {
   let mut calls = 0
   let got = case counted_array(&mut calls) of {
     is [a, b] { a + b }
-    else { 0 }
   }
   std::debug::assert(calls == 1, "the subject was evaluated once")
   std::debug::assert(got == 7, "and the bindings came from it")
@@ -207,7 +205,6 @@ fun test_a_nested_pattern_evaluates_its_subject_once() -> Void {
   let mut calls = 0
   let got = case counted_nested(&mut calls) of {
     is (std::option::Some[std::number::S32](val), rest) { val + rest }
-    else { 0 }
   }
   std::debug::assert(calls == 1, "the subject was evaluated once")
   std::debug::assert(got == 11, "and both levels of binding came from it")

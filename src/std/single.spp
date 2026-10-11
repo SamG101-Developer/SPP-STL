@@ -115,7 +115,6 @@ sup [T, A: Alloc] Single[T, A] {
         drop(alloc)
         ret Fail(err=e)
       }
-      else { std::abort::unreachable() }
     }
     ptr.write(val)
     ret Pass(val=Single(ptr, alloc))

@@ -654,10 +654,10 @@ sup [T] Opt[Opt[T]] {
     # @ret: Returns a new optional containing the value inside the inner optional if it is `Some`, otherwise returns
     # `None`.
 
-    # Pattern match and return the value inside the inner optional if
-    # the outer optional is `Some`, otherwise return `None`.
+    # The inner optional is the flattened value: a `Some` holding a `Some` is that `Some`, and a `Some` holding a
+    # `None` is that `None`. An outer `None` holds nothing, so it is `None` too.
     ret case self of {
-      is Some[Some[T]](val) { val }
+      is Some[Opt[T]](val) { val }
       else { None }
     }
   }

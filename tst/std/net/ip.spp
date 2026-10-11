@@ -268,7 +268,6 @@ fun test_an_ip_address_variant_holds_either_family() -> Void {
   let held = case a of {
     is std::net::ip::IpV4Addr(..) { 4 }
     is std::net::ip::IpV6Addr(..) { 6 }
-    else { 0 }
   }
   std::debug::assert(held == 4, "the IPv4 alternative is selected")
 
@@ -276,7 +275,6 @@ fun test_an_ip_address_variant_holds_either_family() -> Void {
   let held = case b of {
     is std::net::ip::IpV4Addr(..) { 4 }
     is std::net::ip::IpV6Addr(..) { 6 }
-    else { 0 }
   }
   std::debug::assert(held == 6, "the IPv6 alternative is selected")
 }

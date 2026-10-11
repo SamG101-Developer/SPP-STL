@@ -98,6 +98,7 @@ sup [T, E] Res[T, E] {
     ret case self of {
       is Pass[T](val) { pred(val) }
       else {
+        drop(self)
         drop(pred)
         false
       }
@@ -130,6 +131,7 @@ sup [T, E] Res[T, E] {
     ret case self of {
       is Fail[E](err) { pred(err) }
       else {
+        drop(self)
         drop(pred)
         false
       }
@@ -163,6 +165,7 @@ sup [T, E] Res[T, E] {
     ret case self of {
       is Pass[T](val) { pred(val) }
       else {
+        drop(self)
         drop(pred)
         true
       }
@@ -189,7 +192,10 @@ sup [T, E] Res[T, E] {
         drop(that)
         Fail(err)
       }
-      else { that }
+      else {
+        drop(self)
+        that
+      }
     }
   }
 
@@ -220,7 +226,6 @@ sup [T, E] Res[T, E] {
         drop(pred)
         Fail(err)
       }
-      else { std::abort::unreachable() }
     }
   }
 
@@ -244,7 +249,10 @@ sup [T, E] Res[T, E] {
         drop(that)
         Pass(val)
       }
-      else { that }
+      else {
+        drop(self)
+        that
+      }
     }
   }
 
@@ -271,7 +279,6 @@ sup [T, E] Res[T, E] {
         Pass(val)
       }
       is Fail[E](err) { pred(err) }
-      else { std::abort::unreachable() }
     }
   }
 
@@ -298,10 +305,6 @@ sup [T, E] Res[T, E] {
       is Fail[E](err) {
         drop(pred)
         Fail(err)
-      }
-      else {
-        drop(pred)
-        std::abort::unreachable()
       }
     }
   }
@@ -330,7 +333,6 @@ sup [T, E] Res[T, E] {
         Pass(val)
       }
       is Fail[E](err) { Fail(err=pred(err)) }
-      else { std::abort::unreachable() }
     }
   }
 
@@ -360,6 +362,7 @@ sup [T, E] Res[T, E] {
         f(val)
       }
       else {
+        drop(self)
         drop(f)
         default
       }
@@ -398,7 +401,6 @@ sup [T, E] Res[T, E] {
         drop(f)
         default(err)
       }
-      else { std::abort::unreachable() }
     }
   }
 
@@ -418,7 +420,6 @@ sup [T, E] Res[T, E] {
         drop(err)
         None
       }
-      else { std::abort::unreachable() }
     }
   }
 
@@ -438,7 +439,6 @@ sup [T, E] Res[T, E] {
         drop(val)
         None
       }
-      else { std::abort::unreachable() }
     }
   }
 
@@ -476,6 +476,7 @@ sup [T, E] Res[T, E] {
         val
       }
       else {
+        drop(self)
         default
       }
     }
@@ -502,7 +503,6 @@ sup [T, E] Res[T, E] {
         val
       }
       is Fail[E](err) { default(err) }
-      else { std::abort::unreachable() }
     }
   }
 
@@ -589,14 +589,12 @@ sup [T, E] Res[T, E] {
             drop(val1)
             ret Fail(err)
           }
-          else { std::abort::unreachable() }
         }
       }
       is Fail[E](err) {
         drop(that)
         Fail(err)
       }
-      else { std::abort::unreachable() }
     }
   }
 }
@@ -688,7 +686,6 @@ sup [T: Eq, E: Eq] Res[T, E] ext Eq {
           else { false }
         }
       }
-      else { false }
     }
   }
 
@@ -716,7 +713,6 @@ sup [T: Eq, E: Eq] Res[T, E] ext Eq {
           else { true }
         }
       }
-      else { true }
     }
   }
 }

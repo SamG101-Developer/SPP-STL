@@ -52,7 +52,6 @@ sup [T] Fut[T] {
         drop(e)
         std::abort::abort("async: out of memory allocating the result cell")
       }
-      else { std::abort::unreachable() }
     }
 
     # The body moves the function onto the task and takes a copy of the cell

@@ -525,7 +525,7 @@ sup [R: Read] BufRead[R] {
       .map_err[StreamErr]((e: Utf8Err) { StreamInvalidDataError })
       .map((s: Str caps &mut out) {
         let len = s.len()
-        out@ = s
+        std::mem::ops::drop(std::mem::ops::replace(out, s))
         len
       })
   }

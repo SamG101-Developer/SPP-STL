@@ -121,7 +121,6 @@ fun spawn[Out: ThreadSafe, F: FunMov[(), Out] & ThreadSafe](function: F) -> Res[
       drop(e)
       ret Fail(err=ThreadMemoryErr)
     }
-    else { std::abort::unreachable() }
   }
 
   # The body moves the function onto the new thread and

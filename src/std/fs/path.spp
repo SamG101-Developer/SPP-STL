@@ -148,7 +148,7 @@ sup Path {
     # @ret: The file stem as a `Str` object.
 
     let file_name = self.file_name()
-    let idx = file_name.rfind(&Str::from('.'))
+    let idx = file_name.rfind_char('.')
     case idx.is_none() { ret file_name }
 
     let stem = Str::from(file_name[0_uz to idx.unwrap()])
@@ -166,7 +166,7 @@ sup Path {
     let file_name = self.file_name()
     defer drop(file_name)
 
-    let idx = file_name.rfind(&Str::from('.'))
+    let idx = file_name.rfind_char('.')
     case idx.is_none() { ret Str::from("") }
     ret Str::from(file_name[idx.unwrap() + 1_uz to file_name.len()])
   }
@@ -274,7 +274,10 @@ sup Path {
     # @ret: A new `Path` object with the updated file name.
 
     let parent = self.parent()
-    ret parent.join(&Path(inner=file_name.clone()))
+    let other = Path(inner=file_name.clone())
+    let joined = parent.join(&other)
+    drop(other)
+    ret joined
   }
 
   !public
@@ -547,7 +550,8 @@ sup Path ext DivAssign {
     # @ret: The original `Path` object is modified to represent the joined path.
 
     defer drop(that)
-    self@ = self.clone().join(&that)
+    let joined = self.clone().join(&that)
+    std::mem::ops::drop(std::mem::ops::replace(self, joined))
   }
 }
 

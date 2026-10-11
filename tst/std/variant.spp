@@ -4,7 +4,6 @@ fun test_a_variant_reports_the_alternative_it_holds() -> Void {
   let held = case v of {
     is S32() { 1 }
     is Bool() { 2 }
-    else { 0 }
   }
   std::debug::assert(held == 1, "the integer alternative is selected")
 }
@@ -15,7 +14,6 @@ fun test_the_other_alternative_selects_the_other_branch() -> Void {
   let held = case v of {
     is S32() { 1 }
     is Bool() { 2 }
-    else { 0 }
   }
   std::debug::assert(held == 2, "the boolean alternative is selected")
 }
@@ -45,7 +43,6 @@ fun test_reassigning_changes_which_alternative_is_held() -> Void {
   let held = case v of {
     is S32() { 1 }
     is Bool() { 2 }
-    else { 0 }
   }
   std::debug::assert(held == 2, "the variant now holds the other alternative")
 }
@@ -93,7 +90,6 @@ fun test_a_narrowed_variant_keeps_the_alternative_it_held() -> Void {
   let v: Bool or S32 = 5
   let held = case v of {
     is NarrowSB(..) { 1 }
-    else { 0 }
   }
   std::debug::assert(held == 1, "the narrower variant matched")
 }

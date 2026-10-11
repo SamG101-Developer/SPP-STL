@@ -201,7 +201,7 @@ sup BigInt ext std::ops::bit_and::BitAndAssign {
   fun bit_and_assign(&mut self, that: Self) -> Void {
     let result = self.clone().bit_and(that)
     self.sign = result.sign
-    self.data = result.data
+    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, result.data))
   }
 }
 
@@ -209,7 +209,7 @@ sup BigInt ext std::ops::bit_ior::BitIorAssign {
   fun bit_ior_assign(&mut self, that: Self) -> Void {
     let result = self.clone().bit_ior(that)
     self.sign = result.sign
-    self.data = result.data
+    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, result.data))
   }
 }
 
@@ -217,7 +217,7 @@ sup BigInt ext std::ops::bit_xor::BitXorAssign {
   fun bit_xor_assign(&mut self, that: Self) -> Void {
     let result = self.clone().bit_xor(that)
     self.sign = result.sign
-    self.data = result.data
+    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, result.data))
   }
 }
 
@@ -225,7 +225,7 @@ sup BigInt ext std::ops::bit_shl::BitShlAssign {
   fun bit_shl_assign(&mut self, that: Self) -> Void {
     let result = self.clone().bit_shl(that)
     self.sign = result.sign
-    self.data = result.data
+    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, result.data))
   }
 }
 
@@ -233,7 +233,7 @@ sup BigInt ext std::ops::bit_shr::BitShrAssign {
   fun bit_shr_assign(&mut self, that: Self) -> Void {
     let result = self.clone().bit_shr(that)
     self.sign = result.sign
-    self.data = result.data
+    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, result.data))
   }
 }
 
@@ -241,7 +241,7 @@ sup BigInt ext std::ops::add::AddAssign {
   fun add_assign(&mut self, that: Self) -> Void {
     let result = self.clone().add(that)
     self.sign = result.sign
-    self.data = result.data
+    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, result.data))
   }
 }
 
@@ -249,7 +249,7 @@ sup BigInt ext std::ops::sub::SubAssign {
   fun sub_assign(&mut self, that: Self) -> Void {
     let result = self.clone().sub(that)
     self.sign = result.sign
-    self.data = result.data
+    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, result.data))
   }
 }
 
@@ -257,7 +257,7 @@ sup BigInt ext std::ops::mul::MulAssign {
   fun mul_assign(&mut self, that: Self) -> Void {
     let result = self.clone().mul(that)
     self.sign = result.sign
-    self.data = result.data
+    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, result.data))
   }
 }
 
@@ -265,7 +265,7 @@ sup BigInt ext std::ops::div::DivAssign {
   fun div_assign(&mut self, that: Self) -> Void {
     let result = self.clone().div(that)
     self.sign = result.sign
-    self.data = result.data
+    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, result.data))
   }
 }
 
@@ -273,7 +273,7 @@ sup BigInt ext std::ops::rem::RemAssign {
   fun rem_assign(&mut self, that: Self) -> Void {
     let result = self.clone().rem(that)
     self.sign = result.sign
-    self.data = result.data
+    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, result.data))
   }
 }
 
@@ -281,7 +281,7 @@ sup BigInt ext std::ops::pow::PowAssign {
   fun pow_assign(&mut self, that: Self) -> Void {
     let result = self.clone().pow(that)
     self.sign = result.sign
-    self.data = result.data
+    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, result.data))
   }
 }
 

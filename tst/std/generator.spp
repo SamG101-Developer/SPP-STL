@@ -50,7 +50,7 @@ fun test_a_hand_driven_generator_yields_all_then_gen_done_forever() -> Void {
 
 cor yields_optionals() -> std::iterator::Iterator[std::option::Opt[S32]] {
   gen std::option::Some[S32](val=1)
-  gen std::option::None()
+  gen std::option::None
   gen std::option::Some[S32](val=3)
 }
 

@@ -199,7 +199,6 @@ sup SockAddr {
     ret case self of {
       is SockV4Addr(ip, ..) { ip }
       is SockV6Addr(ip, ..) { ip }
-      else { std::abort::abort("Unsupported address family") }
     }
   }
 
@@ -209,7 +208,6 @@ sup SockAddr {
     ret case self of {
       is SockV4Addr(.., port) { port }
       is SockV6Addr(.., port) { port }
-      else { std::abort::abort("Unsupported address family") }
     }
   }
 
@@ -268,12 +266,6 @@ sup SockAddr {
         let mut storage = sppc::CSockaddrStorage()
         sppc::set_sockaddr_v6(&ip.segments.ptr, port, &mut storage)
         storage
-      }
-
-      # For any other address family, abort the program with an
-      # error message.
-      else {
-        std::abort::abort("Unsupported address family")
       }
     }
   }
