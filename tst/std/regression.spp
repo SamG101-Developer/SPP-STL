@@ -1,0 +1,948 @@
+# Cases that were once miscompiled or crashed the compiler. Unlike the c++ suite these run, so they assert the value
+# produced rather than only that the code compiled - and every one of the bugs below was silent at compile time.
+
+# "+", "-" and "*" abort rather than wrap when the result does not fit, in every build profile. Only half of that
+# contract can be asserted from inside the harness: the abort kills the process, so what is checked here is that a
+# result which does fit is still the ordinary result right up to the boundary, plus the named methods that report an
+# overflow instead of aborting on it. See "EmitCheckedArith" for the shape of the check itself.
+
+!test(group="std/regression")
+fun test_checked_arithmetic_is_exact_up_to_the_boundary() -> Void {
+  # Unsigned, at both ends of the range.
+  let u_max = 4294967295_u32
+  std::debug::assert(u_max - 1_u32 + 1_u32 == u_max, "u32 add up to the maximum")
+  std::debug::assert(0_u32 + u_max == u_max, "u32 add from zero")
+  std::debug::assert(u_max - u_max == 0_u32, "u32 subtract down to zero")
+  std::debug::assert(2147483647_u32 * 2_u32 == 4294967294_u32, "u32 multiply just inside the range")
+
+  # Signed, at both ends of the range - including the multiply that lands exactly on the minimum, which is the one
+  # asymmetric case and the one an overflow check gets wrong if it is written as "divide the result back".
+  let s_max = 2147483647
+  let s_min = -2147483648
+  std::debug::assert(s_max - 1 + 1 == s_max, "s32 add up to the maximum")
+  std::debug::assert(s_min + 1 - 1 == s_min, "s32 subtract down to the minimum")
+  std::debug::assert(-1073741824 * 2 == s_min, "s32 multiply onto the minimum")
+  std::debug::assert(s_min + s_max == -1, "s32 add across zero")
+}
+
+!test(group="std/regression")
+fun test_overflow_reporting_methods() -> Void {
+  # These lower through the same expansion as "+" does, and none of them could run before it existed: the
+  # "with.overflow" intrinsics they were built on cannot survive module verification, so every one of them was
+  # unreachable code.
+  let u_max = 4294967295_u32
+  std::debug::assert(u_max.add_checked(1_u32).is_none(), "u32 add_checked reports an overflow")
+  std::debug::assert(u_max.add_checked(0_u32).is_some(), "u32 add_checked passes a result that fits")
+  std::debug::assert(0_u32.sub_checked(1_u32).is_none(), "u32 sub_checked reports an underflow")
+  std::debug::assert(u_max.mul_checked(2_u32).is_none(), "u32 mul_checked reports an overflow")
+  std::debug::assert(u_max.mul_checked(1_u32).unwrap() == u_max, "u32 mul_checked passes a result that fits")
+
+  let s_max = 2147483647
+  std::debug::assert(s_max.add_checked(1).is_none(), "s32 add_checked reports an overflow")
+  std::debug::assert((-2147483648).sub_checked(1).is_none(), "s32 sub_checked reports an underflow")
+  std::debug::assert(s_max.add_checked(0).unwrap() == s_max, "s32 add_checked passes a result that fits")
+
+  # The pair form reports the wrapped value alongside the flag, so the value is still defined on the overflow path.
+  let (wrapped, overflowed) = u_max.add_overflow(1_u32)
+  std::debug::assert(overflowed, "u32 add_overflow sets the flag")
+  std::debug::assert(wrapped == 0_u32, "u32 add_overflow still hands back the wrapped value")
+}
+
+cls SelfPinBase { }
+
+sup SelfPinBase {
+  !public !abstract_method
+  fun value(&self) -> S32 { }
+
+  !public !virtual_method
+  fun value_via_generic[T](&self) -> S32 {
+    ret self.value()
+  }
+}
+
+cls SelfPinDerived { }
+
+sup SelfPinDerived ext SelfPinBase {
+  fun value(&self) -> S32 { ret 42 }
+}
+
+# An inherited default method with generic parameters of its own lost the "Self=<implementer>" pin, so it instantiated
+# against the declaring class and reached the abstract "value" - whose body lowers to "unreachable".
+
+!test(group="std/regression")
+fun test_generic_inherited_method_reaches_override() -> Void {
+  let d = SelfPinDerived()
+  std::debug::assert(d.value() == 42, "direct call")
+  std::debug::assert(d.value_via_generic[S32]() == 42, "through the inherited generic method")
+  std::mem::ops::drop(d)
+}
+
+# A borrowed variant member was measured through the type it resolves to, which drops the convention, so "Opt[&S32]"
+# was built with a 4 byte payload. The borrow a generator yielded into it was stored with its top half outside the
+# buffer and read back as a truncated pointer.
+
+!test(group="std/regression")
+fun test_case_on_yielded_borrow_in_loop() -> Void {
+  let mut vec = Vec[S32]::new_with_capacity(4_uz)
+  vec.append(7)
+  vec.append(9)
+
+  let mut seen = 0
+  loop e in vec.iter_ref() {
+    case e@ == 7 { seen += 1 }
+    case e@ == 9 { seen += 10 }
+  }
+  std::debug::assert(seen == 11, "both elements matched their own value")
+  std::mem::ops::drop(vec)
+}
+
+!test(group="std/regression")
+fun test_assign_through_yielded_mut_borrow() -> Void {
+  let mut vec = Vec[S32]::new_with_capacity(4_uz)
+  vec.append(1)
+  vec.append(2)
+
+  loop e in vec.iter_mut() { e@ = e@ * 10 }
+  std::debug::assert(vec[0_uz]@ == 10, "first was written through the borrow")
+  std::debug::assert(vec[1_uz]@ == 20, "second was written through the borrow")
+  std::mem::ops::drop(vec)
+}
+
+# "RawBuf::place_at" stepped off the address of the buffer record rather than off the pointer it holds, so element 0
+# was written over the "ptr" field itself and a vector that grew reallocated through its own contents.
+
+!test(group="std/regression")
+fun test_vector_grows_across_reallocation() -> Void {
+  let mut vec = Vec[S32]::new_with_capacity(2_uz)
+  vec.append(7)
+  vec.append(9)
+  vec.append(11)
+  vec.append(13)
+  vec.append(15)
+
+  std::debug::assert(vec.len() == 5_uz, "length after two reallocations")
+  std::debug::assert(vec[0_uz]@ == 7, "first survived both reallocations")
+  std::debug::assert(vec[2_uz]@ == 11, "middle")
+  std::debug::assert(vec[4_uz]@ == 15, "last")
+  std::mem::ops::drop(vec)
+}
+
+!test(group="std/regression")
+fun test_string_grows_across_reallocation() -> Void {
+  let mut s = Str::from("abc")
+  let tail = Str::from("defghijklmnop")
+  s.append_str(&tail)
+  std::mem::ops::drop(tail)
+  std::debug::assert(s.len() == 16_uz, "length after growth")
+  std::debug::assert(s.ends_with("mnop"), "tail after growth")
+  std::debug::assert(s.starts_with("abcd"), "head after growth")
+
+  std::mem::ops::drop(s)
+  # Todo: assert the whole contents once "Str == Str" works - see the Todo in "overload_utils::ValidateArgsMatchParams".
+}
+
+# An argument whose type already is the parameter's own class was reported as a forwarding match, because the search
+# went around the "FwdRef" cycle and came back to where it started. The caller then rewrote the argument to
+# "x.fwd_ref()", so what the callee got was the pointee instead of the slot, and its write-back was lost.
+
+fun write_through(slot: &mut S32) -> Void {
+  slot@ = 99
+}
+
+!test(group="std/regression")
+fun test_mut_borrow_is_not_forwarded_to_itself() -> Void {
+  let mut n = 1
+  write_through(&mut n)
+  std::debug::assert(n == 99, "the callee wrote through the caller's slot")
+}
+
+# "is_zero" is declared "(&self)", so the parameter llvm holds for it is a pointer, but the intrinsic compared that
+# pointer directly against an integer constant - which llvm rejects, aborting code generation.
+
+fun count_digits[cmp w: U32](mut that: std::num::sized_integer_unsigned::SizedIntegerUnsigned[w]) -> USize {
+  case that.is_zero() { ret 1_uz }
+  let ten = std::num::sized_integer_unsigned::SizedIntegerUnsigned[w]::from(10)
+  let mut n = 0_uz
+  loop that.is_zero().not {
+    n += 1_uz
+    that /= ten
+  }
+  ret n
+}
+
+!test(group="std/regression")
+fun test_is_zero_on_generically_widthed_integer() -> Void {
+  std::debug::assert(count_digits(0_u32) == 1_uz, "zero")
+  std::debug::assert(count_digits(7_u32) == 1_uz, "one digit")
+  std::debug::assert(count_digits(1234_u32) == 4_uz, "four digits")
+  std::debug::assert(count_digits(255_u8) == 3_uz, "a different width")
+}
+
+# Compound assignment through a `&mut` borrow. The plain form above (`e@ = e@ * 10`) writes through fine, so what is
+# left is whether `@` on the left of a compound operator names the same storage the read side does - it used to name
+# the borrow itself, so the increment landed on the pointer and the borrowed variable never moved.
+!test(group="std/regression")
+fun test_compound_assignment_through_a_mut_borrow() -> Void {
+  let mut vec = Vec[S32]::new_with_capacity(4_uz)
+  vec.append(1)
+  vec.append(2)
+
+  loop e in vec.iter_mut() { e@ += 10 }
+  std::debug::assert(vec[0_uz]@ == 11, "first was incremented through the borrow")
+  std::debug::assert(vec[1_uz]@ == 12, "second was incremented through the borrow")
+  std::mem::ops::drop(vec)
+}
+
+# A "case" statement inside another one's body, with a terminating inner branch - the shape the allocator's overflow
+# guard was rewritten into when it stopped relying on "and" short-circuiting, and which segfaulted every test in the
+# module it sat in.
+#
+# The inner "case" has no "else", so it finishes without running any branch whenever its condition is false. Its type
+# was inferred from its branches alone, which made it "Never" - the one branch aborts - and the outer branch then
+# believed its own body could not complete and terminated the block the inner case falls through to with
+# "unreachable". That block is reached on exactly the path the guard is there to allow. Nothing about this needs the
+# generic, and it went unnoticed because the test runner was skipping this test.
+fun zz_nested_case_in_a_generic[T](n: USize) -> USize {
+  let elem = std::mem::ops::size_of[T]()
+  case elem != 0_uz {
+    case n > std::limits::Limits[USize]::max / elem { std::abort::abort("unreachable in this test") }
+  }
+  ret elem * n
+}
+
+!test(group="std/regression")
+fun test_a_nested_case_statement_in_a_generic_function() -> Void {
+  std::debug::assert(zz_nested_case_in_a_generic[S32](4_uz) == 16_uz, "four s32s are sixteen bytes")
+}
+
+# As above without the generic, which was never the part that mattered, and with the fall-through nested two deep to
+# check the type is carried out through more than one level.
+fun zz_nested_case_twice(n: USize) -> USize {
+  case n != 0_uz {
+    case n < 1000_uz {
+      case n > 100_uz { std::abort::abort("unreachable in this test") }
+    }
+  }
+  ret n
+}
+
+!test(group="std/regression")
+fun test_a_nested_case_statement_falls_through() -> Void {
+  std::debug::assert(zz_nested_case_twice(4_uz) == 4_uz, "the guard lets a small value through")
+  std::debug::assert(zz_nested_case_in_a_generic[U64](4_uz) == 32_uz, "four u64s are thirty two bytes")
+}
+
+# "and" and "or" are built in rather than mapped to a method, so their right operand is reached only when the left has
+# not already answered. A method call cannot express that - it evaluates its argument to pass it - so before this, an
+# index or a division guarded by the left operand ran anyway.
+fun zz_guarded_index(v: &std::vector::Vec[S32], i: USize) -> Bool {
+  ret i > 0_uz and v[i - 1_uz]@ == 0
+}
+
+fun zz_guarded_divide(n: USize, d: USize) -> Bool {
+  ret d == 0_uz or n / d > 1_uz
+}
+
+!test(group="std/regression")
+fun test_logical_operators_short_circuit() -> Void {
+  let v = std::vector::Vec[S32]::from(&[1, 2, 3])
+  std::debug::assert(zz_guarded_index(&v, 0_uz).not, "the index is not reached when the guard is false")
+  std::debug::assert(zz_guarded_index(&v, 1_uz).not, "and is reached when it is true")
+  std::mem::ops::drop(v)
+
+  std::debug::assert(zz_guarded_divide(4_uz, 0_uz), "the division is not reached when the guard is true")
+  std::debug::assert(zz_guarded_divide(4_uz, 2_uz), "and is reached when it is false")
+  std::debug::assert(zz_guarded_divide(1_uz, 2_uz).not, "with the right answer")
+}
+
+# "and", "or" and "not" require owned booleans, the way every other operator names one convention and holds every type
+# to it. A borrowed one is taken out of the borrow with "@", which is the same thing an owned-signature operator like
+# "add" needs.
+fun zz_and_over_borrows(a: &Bool, b: &Bool) -> Bool {
+  ret a@ and b@
+}
+
+!test(group="std/regression")
+fun test_logical_operators_over_borrowed_booleans() -> Void {
+  let t = true
+  let f = false
+  std::debug::assert(zz_and_over_borrows(&t, &t), "both true")
+  std::debug::assert(zz_and_over_borrows(&t, &f).not, "one false")
+}
+
+fun zz_bump_through_borrow(counter: &mut S32) -> Void {
+  counter@ += 1
+}
+
+# A "&mut" parameter used to be given llvm's "noalias", which s++ cannot honour: two "&mut" arguments may name the same
+# object, as "Arr::swap(1, 1)" does. This is the shape that exposed it. The miscompile never showed here, but in an
+# unrelated test much later in a single-process run, so keep this even though the test above looks like it covers it.
+!test(group="std/regression")
+fun test_compound_assignment_through_a_mut_borrow_parameter() -> Void {
+  let mut n = 0
+  zz_bump_through_borrow(&mut n)
+  zz_bump_through_borrow(&mut n)
+  std::debug::assert(n == 2, "both increments landed on the borrowed variable")
+}
+
+# A generic parameter's default is an expression, and it is read at the call site rather than where it was written, so
+# every name in it has to be translated out of the callee's terms first. Nothing did that until "SubstituteGenericsExpr"
+# existed: a default naming a sibling comp parameter arrived at the caller as a bare identifier naming nothing.
+fun zz_comp_default_from_sibling[cmp base: U8, cmp step: U8 = base]() -> U8 {
+  ret step
+}
+
+!test(group="std/regression")
+fun test_a_comp_default_naming_a_sibling_parameter() -> Void {
+  std::debug::assert(zz_comp_default_from_sibling[base=5_u8]() == 5_u8, "the default takes its sibling's value")
+  std::debug::assert(zz_comp_default_from_sibling[base=5_u8, step=2_u8]() == 2_u8, "and is overridden when given")
+}
+
+# The same translation for a default naming a constant on the owning type. This is the atomic module's shape - "load[cmp
+# order: U8 = Self::mo_seq_cst]" - reduced to the part that matters, on a generic class of its own so that "Self" is an
+# instantiation rather than a plain name.
+cls ZzOrdered[T] {
+  !public val: T
+}
+
+sup [T] ZzOrdered[T] {
+  !public cmp fallback: U8 = 9_u8
+
+  !public
+  fun pick[cmp choice: U8 = Self::fallback](&self) -> U8 {
+    ret choice
+  }
+}
+
+!test(group="std/regression")
+fun test_a_comp_default_naming_a_constant_on_self() -> Void {
+  let o = ZzOrdered[S32](val=1)
+  std::debug::assert(o.pick() == 9_u8, "the default reads the owner's constant")
+  std::debug::assert(o.pick[choice=3_u8]() == 3_u8, "and is overridden when given")
+  std::mem::ops::drop(o)
+}
+
+# A "Void" argument is allowed, because generic code instantiated at "T=Void" has no way to avoid writing one. The
+# parameter it would bind to is dropped and the value goes nowhere - but the expression that produced it still has to
+# run, which is the part that only shows at runtime.
+fun zz_bump_for_void(n: &mut S32) -> Void {
+  n@ += 1
+}
+
+fun zz_swallow[T](t: T) -> T {
+  ret t
+}
+
+!test(group="std/regression")
+fun test_a_discarded_void_argument_still_runs() -> Void {
+  let mut n = 0
+  zz_swallow(zz_bump_for_void(&mut n))
+  zz_swallow(zz_bump_for_void(&mut n))
+  std::debug::assert(n == 2, "both discarded arguments still ran their expression")
+}
+
+# The "Spp" layout sorts a struct's fields by alignment, so "val" here is physically first even though "key" is
+# declared first. Destroying a type field-by-field - the path taken only when it has no "Drop" of its own - has to map
+# the declaration index through to the physical one, and the symbol it maps through is the generic "T" that
+# "std::mem::ops::drop" was instantiated for. That stand-in adopted the lowered struct from the class symbol without
+# the field index map, so the map came back empty, the declaration order was used as-is, and "key" was loaded and
+# destroyed as if it were the "Vec". See "AdoptLlvmTypeInfo".
+cls ZzReorderedPair[K, V] {
+  !public key: K
+  !public val: V
+}
+
+!test(group="std/regression")
+fun test_dropping_a_reordered_struct_field_by_field() -> Void {
+  let mut v = Vec[S32]::new()
+  v.append(6)
+
+  let p = ZzReorderedPair[S32, Vec[S32]](key=1, val=v)
+  std::debug::assert(p.key == 1, "the key reads back from its physical slot")
+  std::debug::assert(p.val.len() == 1_uz, "and the vector came along whole")
+  std::mem::ops::drop(p)
+}
+
+# Flow narrowing used to reach a "case" subject only when it was written as a bare identifier. A subject written as a
+# dereferenced borrow still picked the right branch - the tag comparison is generated either way - but the branch body
+# resolved against the variant rather than against the alternative that matched, so a method call on it bound to the
+# variant's own method. For a variant method that dispatches to its alternatives that is unbounded recursion, which the
+# optimiser deletes rather than diagnoses, so the call quietly answered with whatever the "else" would have given.
+# "std::net::ip::IpAddr::family" is written "case self@ of" and answered for no address at all.
+#
+# "<name>@" now narrows the borrow it dereferences, so the branch reads the narrowed value as the plain name - the same
+# way it does for a borrowed subject written without the "@". Only "<name>@" is rewritten: a deref of anything else has
+# no name to narrow.
+cls ZzHeldA { !public a: S32 }
+cls ZzHeldB { !public b: S32 }
+type ZzHeld = ZzHeldA or ZzHeldB
+
+sup ZzHeldA ext std::copy::Copy { }
+sup ZzHeldB ext std::copy::Copy { }
+
+sup ZzHeldA {
+  !public
+  fun tag(&self) -> S32 { ret 1 }
+}
+
+sup ZzHeldB {
+  !public
+  fun tag(&self) -> S32 { ret 2 }
+}
+
+sup ZzHeld {
+  # The variant's own "tag", answering for neither alternative. A branch body that failed to narrow bound to this one,
+  # so the number it returns is how the misbinding is told apart from correct dispatch. In "IpAddr::family" the
+  # equivalent method was the enclosing one, which made the same misbinding unbounded recursion instead.
+  !public
+  fun tag(&self) -> S32 { ret 99 }
+}
+
+fun zz_dispatch_through_a_borrow(v: &ZzHeld) -> S32 {
+  ret case v of {
+    is ZzHeldA(..) { v.tag() }
+    is ZzHeldB(..) { v.tag() }
+  }
+}
+
+fun zz_dispatch_through_a_deref(v: &ZzHeld) -> S32 {
+  ret case v@ of {
+    is ZzHeldA(..) { v.tag() }
+    is ZzHeldB(..) { v.tag() }
+  }
+}
+
+!test(group="std/regression")
+fun test_a_case_on_a_borrowed_subject_narrows_for_dispatch() -> Void {
+  let a: ZzHeld = ZzHeldA(a=7)
+  let b: ZzHeld = ZzHeldB(b=9)
+  std::debug::assert(zz_dispatch_through_a_borrow(&a) == 1, "the first alternative answers for itself")
+  std::debug::assert(zz_dispatch_through_a_borrow(&b) == 2, "and so does the second")
+}
+
+!test(group="std/regression")
+fun test_a_case_on_a_dereferenced_subject_narrows_for_dispatch() -> Void {
+  let a: ZzHeld = ZzHeldA(a=7)
+  let b: ZzHeld = ZzHeldB(b=9)
+  std::debug::assert(zz_dispatch_through_a_deref(&a) == 1, "the first alternative answers for itself")
+  std::debug::assert(zz_dispatch_through_a_deref(&b) == 2, "and so does the second")
+}
+
+
+# Integer literals in a base other than ten reached code generation through a rewrite that predates "numex": the "o" of
+# an octal prefix was replaced with a zero and the result read as decimal, so "0o4000" was four thousand rather than
+# 2048. The constant-folding path never did this and read the prefix correctly, so the two disagreed about the same
+# literal. It surfaced in "std::net::socket", where "cffi::o_nonblock" is written "0o4000" and the mode it set was the
+# wrong one - a mask that happened to overlap the right bit, so the socket looked half-working rather than broken.
+!test(group="std/regression")
+fun test_octal_literals_are_read_in_base_eight() -> Void {
+  std::debug::assert(0o10 == 8, "0o10 is eight")
+  std::debug::assert(0o4000 == 2048, "0o4000 is two thousand and forty-eight")
+  std::debug::assert(0o777 == 511, "0o777 is five hundred and eleven")
+  std::debug::assert(0o0 == 0, "0o0 is zero")
+}
+
+!test(group="std/regression")
+fun test_hexadecimal_literals_are_read_in_base_sixteen() -> Void {
+  std::debug::assert(0x10 == 16, "0x10 is sixteen")
+  std::debug::assert(0xff == 255, "0xff is two hundred and fifty-five")
+  std::debug::assert(0x2001 == 8193, "0x2001 is eight thousand one hundred and ninety-three")
+}
+
+!test(group="std/regression")
+fun test_binary_literals_are_read_in_base_two() -> Void {
+  std::debug::assert(0b101 == 5, "0b101 is five")
+  std::debug::assert(0b11111111 == 255, "0b11111111 is two hundred and fifty-five")
+}
+
+!test(group="std/regression")
+fun test_the_bases_agree_with_each_other() -> Void {
+  # The same value written four ways. A base read wrongly shows up here even when every literal in one base is
+  # consistently wrong, which is what hid this for so long.
+  std::debug::assert(0o777 == 0x1ff, "octal and hexadecimal agree")
+  std::debug::assert(0b1000000000 == 0o1000, "binary and octal agree")
+  std::debug::assert(0x100 == 256, "hexadecimal and decimal agree")
+}
+
+
+# A "cmp" constant in a "sup" block may name its own type as "Self", and that is what the symbol carried: every other
+# type annotation resolves "Self" against the enclosing type, but this one was skipped. Read from anywhere that "Self"
+# means a different type or nothing at all, the constant's type came back as the literal "Self", so it could be read
+# but not bound to anything - "std::net::ip::IpV4Addr::localhost" would not go into an "IpAddr". See
+# "CmpStatementAst::Stage4_QualifyTypes".
+cls ZzSelfConst { !public n: S32 }
+type ZzSelfHolder = ZzSelfConst or Bool
+
+sup ZzSelfConst ext std::copy::Copy { }
+
+sup ZzSelfConst {
+  !public cmp origin: Self = Self(n=0)
+  !public cmp unit: Self = Self(n=1)
+}
+
+!test(group="std/regression")
+fun test_a_self_typed_cmp_constant_is_usable_outside_its_sup_block() -> Void {
+  std::debug::assert(ZzSelfConst::origin.n == 0, "the constant reads from outside the block that declares it")
+  std::debug::assert(ZzSelfConst::unit.n == 1, "and so does the one beside it")
+
+  # The part that was broken: binding it somewhere its declared type has to be matched against another.
+  let held: ZzSelfHolder = ZzSelfConst::unit
+  let n = case held of {
+    is ZzSelfConst(..) { held.n }
+    else { -1 }
+  }
+  std::debug::assert(n == 1, "the constant goes into a variant that covers its type, carrying its value")
+
+  let copied: ZzSelfConst = ZzSelfConst::origin
+  std::debug::assert(copied.n == 0, "and into a binding of the type it was declared with")
+}
+
+
+# A value of one alternative of a variant widens into that variant wherever one is wanted: into a binding, into an
+# attribute whose type is a variant, and into a variant's own alternative when that alternative is a *generic*
+# instantiation the value does not yet have - a "Pass[Some[T]]" where a "Pass[Opt[T]]" is the alternative.
+#
+# That last one is what the analyser already allows: an alternative is matched with the variant rule turned off, but
+# only at the top level, and the comparison of the generic arguments below it turns it back on. So "Pass[Opt[T]]"
+# answers to a "Pass[Some[T]]" and the call type-checks. Code generation used to copy the value into the payload as it
+# stood, leaving the narrower thing's bytes where the alternative's tag and payload belong, and the variant read back
+# as neither alternative - no error anywhere, just a wrong answer. It is now rebuilt attribute by attribute first. The
+# two have to agree: a shape the analyser accepts cannot be one code generation quietly mishandles.
+#
+# "std::net::tcp::linger" is the case that found it - "ret Pass(val=Some(..))" from a function returning
+# "Res[Opt[Duration], SockErr]" reported that a socket with a linger set had none.
+fun zz_inferred_none() -> std::result::Res[std::option::Opt[S32], Bool] {
+  ret std::result::Pass(val=std::option::None)
+}
+
+fun zz_inferred_some() -> std::result::Res[std::option::Opt[S32], Bool] {
+  ret std::result::Pass(val=std::option::Some(val=5))
+}
+
+fun zz_written_some() -> std::result::Res[std::option::Opt[S32], Bool] {
+  ret std::result::Pass[std::option::Opt[S32]](val=std::option::Some(val=5))
+}
+
+!test(group="std/regression")
+fun test_an_alternative_widens_into_a_generic_argument_of_a_variant_member() -> Void {
+  let empty = zz_inferred_none().unwrap()
+  std::debug::assert(empty.is_none(), "a None is still a None")
+  std::debug::assert(empty.is_some().not, "and is not a Some")
+
+  let filled = zz_inferred_some().unwrap()
+  std::debug::assert(filled.is_some(), "a Some is still a Some")
+  std::debug::assert(filled.is_none().not, "and is not a None")
+  std::debug::assert(filled.unwrap() == 5, "carrying the value it was given")
+}
+
+!test(group="std/regression")
+fun test_writing_the_generic_argument_gives_the_same_answer() -> Void {
+  # Writing it out is the other way to say the same thing, and has to agree.
+  let filled = zz_written_some().unwrap()
+  std::debug::assert(filled.is_some(), "a Some written into the argument is still a Some")
+  std::debug::assert(filled.unwrap() == 5, "carrying the value it was given")
+}
+
+
+# Two "case" blocks over two values that happen to share a name. The subject's storage is read through the symbol the
+# scope holds, and the branch's own scope holds the narrowed symbol under that same name - so the lookup has to go to
+# the scope the subject was declared in. Reading it from the branch scope instead found the narrowed symbol, which has
+# no storage of its own until later in the same routine, and code generation went through a null. Two lines of an
+# address-formatting routine, both calling their subject "ip", were enough to hit it.
+!test(group="std/regression")
+fun test_two_case_blocks_over_a_shadowed_subject_name() -> Void {
+  let a: ZzHeld = ZzHeldA(a=7)
+  let held = a
+  let first = case held of {
+    is ZzHeldA(..) { held.tag() }
+    else { 0 }
+  }
+  std::debug::assert(first == 1, "the first block reads the first value")
+
+  let b: ZzHeld = ZzHeldB(b=9)
+  let held = b
+  let second = case held of {
+    is ZzHeldB(..) { held.tag() }
+    else { 0 }
+  }
+  std::debug::assert(second == 2, "and the second block reads the second")
+}
+
+# A closure's type is its body's, so a body that builds one alternative of a variant has that alternative's type, not
+# the variant's. Passed where a constraint asks for the variant - "and_then[U, F: FunMov[(T,), Opt[U]]]" - the call
+# type-checks, and the closure is then called by the signature the constraint promised while the function it points at
+# was compiled with its own, narrower one. The result was read back as a value that was never written, so the chain
+# quietly answered the "unwrap_or" default. The call now goes through the signature the function actually has, and the
+# result is widened afterwards. This is what zeroed every socket timeout in "std::net".
+fun zz_chain_through_a_closure() -> U64 {
+  let some: std::option::Opt[std::time::duration::Duration] =
+    std::option::Some(val=std::time::duration::Duration::from_millis(250_u64))
+  ret some.and_then((t: std::time::duration::Duration) std::option::Some(val=t.as_millis())).unwrap_or(0_u64)
+}
+
+fun zz_chain_through_a_closure_on_none() -> U64 {
+  let none: std::option::Opt[std::time::duration::Duration] = std::option::None
+  ret none.and_then((t: std::time::duration::Duration) std::option::Some(val=t.as_millis())).unwrap_or(7_u64)
+}
+
+!test(group="std/regression")
+fun test_a_closure_returning_an_alternative_widens_into_the_variant_asked_for() -> Void {
+  std::debug::assert(zz_chain_through_a_closure() == 250_u64, "the closure's answer reaches the caller")
+  std::debug::assert(zz_chain_through_a_closure_on_none() == 7_u64, "and a None still falls through to the default")
+}
+
+# A function named as a value is the per-function "cmp" constant of its "$" mock type, which lowers to a "{fn, env}"
+# pair. That constant was emitted from the mock's empty object initializer, so both pointers were null, and calling it
+# jumped to address zero. A direct call never reads the constant, which is why nothing noticed until a thread was
+# started with "spawn(some_function)".
+fun zz_forty_two() -> S32 { ret 42 }
+
+fun zz_add_one(x: S32) -> S32 { ret x + 1 }
+
+fun zz_call_it[F: std::function::FunRef[(), S32]](f: F) -> S32 { ret f() }
+
+fun zz_apply_it[F: std::function::FunRef[(S32,), S32]](f: F, x: S32) -> S32 { ret f(x) }
+
+!test(group="std/regression")
+fun test_a_named_function_passed_by_value_is_callable() -> Void {
+  std::debug::assert(zz_call_it(zz_forty_two) == 42, "the function behind the name is the one called")
+  std::debug::assert(zz_apply_it(zz_add_one, 41) == 42, "and the arguments reach it")
+}
+
+# One "{fn, env}" pair holds one function, so an overloaded or generic name has no single value of its own: which
+# overload it means, and what a generic one is instantiated with, is read off the function type it is passed as. Before
+# that, an overloaded name was still two nulls, a generic one was rejected as not matching any function type at all,
+# and a generic body calling an overloaded name picked its return type from whichever overload came first.
+fun zz_overloaded(x: S32) -> S32 { ret x + 1 }
+
+fun zz_overloaded(x: Bool) -> Bool { ret x.not }
+
+fun zz_identity[T](x: T) -> T { ret x }
+
+fun zz_apply_bool[F: std::function::FunRef[(Bool,), Bool]](f: F, x: Bool) -> Bool { ret f(x) }
+
+fun zz_apply_concrete(f: std::function::FunRef[(S32,), S32], x: S32) -> S32 { ret f(x) }
+
+!test(group="std/regression")
+fun test_an_overloaded_function_passed_by_value_is_the_overload_asked_for() -> Void {
+  std::debug::assert(zz_apply_it(zz_overloaded, 41) == 42, "the S32 overload into a generic")
+  std::debug::assert(zz_apply_bool(zz_overloaded, false), "the Bool overload into a generic")
+  std::debug::assert(zz_apply_concrete(zz_overloaded, 41) == 42, "the S32 overload into a function type")
+}
+
+!test(group="std/regression")
+fun test_a_generic_function_passed_by_value_is_instantiated_for_its_target() -> Void {
+  std::debug::assert(zz_apply_it(zz_identity, 42) == 42, "instantiated with S32 for a generic")
+  std::debug::assert(zz_apply_bool(zz_identity, true), "and with Bool for another")
+  std::debug::assert(zz_apply_concrete(zz_identity, 42) == 42, "and for a function type")
+}
+
+# A call through a named function's value is resolved as a call to the function, so the value is not consumed by it -
+# the mock is "Copy", as it carries nothing at runtime - and the same value can be called and passed on again.
+fun zz_call_once[F: std::function::FunMov[(S32,), S32]](f: F, x: S32) -> S32 { ret f(x) }
+
+!test(group="std/regression")
+fun test_a_named_function_value_can_be_called_and_passed_more_than_once() -> Void {
+  let g = zz_add_one
+  std::debug::assert(g(g(40)) == 42, "both direct calls reached the function")
+  std::debug::assert(zz_call_once(g, 1) == 2, "passed as a FunMov")
+  std::debug::assert(zz_call_once(g, 41) == 42, "and passed again")
+}
+
+# A method named as a value: its "$" mock is declared in its "sup" block, so it is named through its owner, and its
+# function type takes "self" as the first parameter - through a generic parameter (resolved as a call to the method)
+# and through a written function type (a thunk forwarding every parameter, "self" included).
+cls ZzCounter {
+  !public n: S32
+}
+
+sup ZzCounter {
+  !public fun bump(&self, x: S32) -> S32 { ret self.n + x }
+  !public fun make(n: S32) -> ZzCounter { ret ZzCounter(n=n) }
+}
+
+fun zz_apply_method[F: std::function::FunRef[(&ZzCounter, S32), S32]](f: F, c: &ZzCounter, x: S32) -> S32 {
+  ret f(c, x)
+}
+
+fun zz_apply_method_concrete(f: std::function::FunRef[(&ZzCounter, S32), S32], c: &ZzCounter, x: S32) -> S32 {
+  ret f(c, x)
+}
+
+fun zz_apply_static(f: std::function::FunRef[(S32,), ZzCounter], n: S32) -> ZzCounter { ret f(n) }
+
+!test(group="std/regression")
+fun test_a_method_passed_by_value_takes_self_as_its_first_argument() -> Void {
+  let c = ZzCounter(n=40)
+  std::debug::assert(zz_apply_method(ZzCounter::bump, &c, 2) == 42, "through a generic parameter")
+  std::debug::assert(zz_apply_method_concrete(ZzCounter::bump, &c, 2) == 42, "through a function type")
+  let ZzCounter(n) = zz_apply_static(ZzCounter::make, 42)
+  std::debug::assert(n == 42, "a static method")
+  let ZzCounter(n as m) = c
+}
+
+# Overloads written in two "sup" blocks get a mock each; each mock is given the other's overloads, so the name reaches
+# both, whichever block the one asked for is in.
+sup ZzCounter {
+  !public fun make(flag: Bool) -> ZzCounter { ret ZzCounter(n=7) }
+}
+
+fun zz_apply_flag(f: std::function::FunRef[(Bool,), ZzCounter]) -> ZzCounter { ret f(true) }
+
+fun zz_apply_flag_generic[F: std::function::FunRef[(Bool,), ZzCounter]](f: F) -> ZzCounter { ret f(true) }
+
+!test(group="std/regression")
+fun test_a_method_overloaded_across_sup_blocks_is_the_overload_asked_for() -> Void {
+  let ZzCounter(n) = zz_apply_flag(ZzCounter::make)
+  std::debug::assert(n == 7, "the other block's overload through a function type")
+  let ZzCounter(n as m) = zz_apply_flag_generic(ZzCounter::make)
+  std::debug::assert(m == 7, "and through a generic parameter")
+  let ZzCounter(n as k) = zz_apply_static(ZzCounter::make, 42)
+  std::debug::assert(k == 42, "the first block's overload still reached")
+}
+
+# The same choice has to be made wherever else a function value meets a function type - a declared "let", a "ret", an
+# assignment, an attribute - or the name's own constant is read, and for an overloaded or generic name that is a pair of
+# nulls.
+cls ZzHoldsFn {
+  !public f: std::function::FunRef[(S32,), S32]
+}
+
+fun zz_return_overloaded() -> std::function::FunRef[(S32,), S32] { ret zz_overloaded }
+
+fun zz_return_identity() -> std::function::FunRef[(S32,), S32] { ret zz_identity }
+
+!test(group="std/regression")
+fun test_an_overloaded_or_generic_function_value_can_be_bound_returned_assigned_and_stored() -> Void {
+  let a: std::function::FunRef[(S32,), S32] = zz_overloaded
+  std::debug::assert(a(41) == 42, "bound by a declared let")
+
+  let b: std::function::FunRef[(S32,), S32] = zz_identity
+  std::debug::assert(b(42) == 42, "a generic one bound by a declared let")
+
+  let r = zz_return_overloaded()
+  std::debug::assert(r(41) == 42, "returned")
+
+  let s = zz_return_identity()
+  std::debug::assert(s(42) == 42, "a generic one returned")
+
+  let mut c: std::function::FunRef[(S32,), S32] = zz_add_one
+  c = zz_identity
+  std::debug::assert(c(42) == 42, "assigned")
+
+  let ZzHoldsFn(f) = ZzHoldsFn(f=zz_overloaded)
+  std::debug::assert(f(41) == 42, "stored in an attribute")
+}
+
+# A name declared twice in one scope: every stage after the first found a binding by name, and by then the name
+# belonged to the later binding - so the earlier one's storage went to it, and a value reading the earlier one read
+# the later. Each binding now keeps its own symbol, and the one it shadows.
+!test(group="std/regression")
+fun test_a_shadowed_binding_reads_the_one_before_it_and_then_holds_its_own() -> Void {
+  let x = 5
+  let x = x + 1
+  std::debug::assert(x == 6, "the second binding read the first")
+  let x = x == 6
+  std::debug::assert(x, "a third, of another type, read the second")
+
+  let v = std::vector::Vec[S32]::from(&[1, 2, 3])
+  let n = v.len()
+  std::mem::ops::drop(v)
+  let v = std::vector::Vec[Bool]::from(&[true])
+  std::debug::assert(n == 3_uz and v.len() == 1_uz, "each vector binding kept its own storage")
+  std::mem::ops::drop(v)
+}
+
+# The two tests below cover the gaps found while designing "dyn" (docs/dyn-dispatch-design.md), fixed 2026-10-09
+# (open-bugs #19): an inherited method was generated once, for the class that declared it, unless its signature named
+# "Self" or the class declaring it was abstract. A borrowed "self" pinned nothing - a borrow is an opaque pointer
+# either way - but the body was still compiled against the declaring class's layout and its own overload set. Any
+# method taking "self" is now one copy per receiver class ("PinSelfToReceiver").
+
+cls ZzInheritBase {
+  !public small: S32
+}
+
+sup ZzInheritBase {
+  !public
+  fun small_value(&self) -> S32 { ret self.small }
+}
+
+cls ZzInheritDerived {
+  !public wide: U64
+}
+
+sup ZzInheritDerived ext ZzInheritBase { }
+
+# Gap 1 (fixed): the layout. "SortMembersForSppLayout" orders every class by descending alignment then size, inherited
+# attributes included, so "small" sits at offset 0 in the base and after "wide" in the derived. "small_value" is
+# generated once, against the base's layout, then called with a pointer to the derived - so it reads the low half of
+# "wide". The base declaring no abstract methods is what makes this reachable: with one, "declared_on_abstract"
+# would mint a per-receiver copy and the offsets would line up. In the ir the accessor gets a single definition whose
+# "getelementptr" is through the base's struct at field 0, while the derived struct is "{ i64, i32 }" - so the call
+# below reads the low half of "wide" and answers 1234.
+!test(group="std/regression")
+fun test_inherited_borrowed_self_method_reads_the_derived_layout() -> Void {
+  let d = ZzInheritDerived(wide=1234_u64, small=7)
+  std::debug::assert(d.small_value() == 7, "the inherited accessor read the derived class's field offset")
+  std::mem::ops::drop(d)
+}
+
+cls ZzVirtualBase { }
+
+sup ZzVirtualBase {
+  !public !virtual_method
+  fun kind(&self) -> S32 { ret 1 }
+
+  !public !virtual_method
+  fun kind_via_default(&self) -> S32 { ret self.kind() }
+}
+
+cls ZzVirtualDerived { }
+
+sup ZzVirtualDerived ext ZzVirtualBase {
+  fun kind(&self) -> S32 { ret 2 }
+}
+
+# Gap 2 (fixed): the overload set. "kind_via_default" is likewise generated once, so the "self.kind()" inside it resolves
+# against the base and the override is never reached - the template-method pattern silently gets the default. The
+# generic form of this is already green ("test_generic_inherited_method_reaches_override" above), because a method
+# with generics of its own goes through the "Self=<implementer>" pin; the plain form does not. Note this is what
+# "!virtual_method" is supposed to mean. It had one definition, calling the base's "kind" ("ret i32 1"), while the
+# direct call reached the derived one ("ret i32 2"); each receiver now gets its own copy, which reaches its override.
+!test(group="std/regression")
+fun test_inherited_default_method_reaches_the_override() -> Void {
+  let d = ZzVirtualDerived()
+  std::debug::assert(d.kind() == 2, "the override answers a direct call")
+  std::debug::assert(d.kind_via_default() == 2, "the inherited default method reached the override")
+  std::mem::ops::drop(d)
+}
+
+# A default method a type inherits rather than overrides ("Eq::ne" from "eq") was resolved and called, but never given
+# a body: its instance read "Rhs=Self" (the default naming another parameter) as an open argument, so it was judged not
+# concrete, and only its declaration was emitted. Linking failed with an undefined reference.
+cls ZzOnlyEq {
+  !public x: S32
+}
+
+sup ZzOnlyEq ext std::copy::Copy { }
+
+sup ZzOnlyEq ext std::ops::eq::Eq {
+  fun eq(&self, that: &ZzOnlyEq) -> Bool { ret self.x == that.x }
+}
+
+!test(group="std/regression")
+fun test_an_inherited_default_method_is_given_a_body() -> Void {
+  let a = ZzOnlyEq(x=1)
+  let b = ZzOnlyEq(x=2)
+  let c = ZzOnlyEq(x=1)
+  std::debug::assert(a != b, "the inherited ne of two different values")
+  std::debug::assert((a != c).not, "and of two equal ones")
+}
+
+# A closure borrowed as a concrete function type is that type's fat pointer, so the call goes through the borrow to the
+# closure's own environment: a "&mut FunMut" call writes back to what the closure captured, and a "&FunRef" call
+# reads it. Calling through a "&FunRef" once asked for a "&mut", as though it were the "FunMut" it extends.
+fun call_twice_mut(c: &mut FunMut[(), Void]) -> Void {
+  c()
+  c()
+}
+
+fun call_ref(c: &FunRef[(), U32]) -> U32 {
+  ret c()
+}
+
+!test(group="std/regression")
+fun test_closure_called_through_a_borrowed_function_type() -> Void {
+  let mut n = 1_u32
+  let mut bump = (caps &mut n) { n@ = n@ + 1_u32 }
+  call_twice_mut(&mut bump)
+  std::mem::ops::drop(bump)
+  std::debug::assert(n == 3_u32, "a &mut FunMut call writes back to the capture")
+
+  let base = 10_u32
+  let read = (caps &base, &n) { ret base + n@ }
+  std::debug::assert(call_ref(&read) == 13_u32, "a &FunRef call reads the capture")
+  std::debug::assert(call_ref(&read) == 13_u32, "a &FunRef call leaves the closure callable")
+}
+
+# A closure's environment once typed each slot by the captured value's bare type, so an immutably borrowed "U32" had a
+# 4-byte slot that the 8-byte pointer to it was stored into. The read back came from beyond the slot.
+!test(group="std/regression")
+fun test_closure_reads_an_immutably_borrowed_capture() -> Void {
+  let a = 3_u32
+  let b = 4_u32
+  let read = (caps &a, &b) { ret a@ + b@ }
+  std::debug::assert(read() == 7_u32, "both borrowed captures read back their values")
+}
+
+# The iterator behind "loop ... in" is consumed on every way out of the loop: dropped after it when it ends, or an
+# "exit" leaves it, and by a "defer" when a "ret" or an "exit exit" leaves the enclosing scope as well. Each frame is
+# destroyed once (checked under valgrind when this was written; before it, every frame leaked).
+cor regression_count(n: U32) -> std::generator::Gen[U32] {
+  let mut i = 0_u32
+  loop i < n {
+    gen i
+    i = i + 1_u32
+  }
+}
+
+fun regression_first_over(n: U32, limit: U32) -> U32 {
+  loop x in regression_count(n) {
+    case x > limit { ret x }
+  }
+  ret 0_u32
+}
+
+fun regression_sum_until(n: U32, stop: U32) -> U32 {
+  let mut total = 0_u32
+  loop x in regression_count(n) {
+    case x == stop { exit }
+    total = total + x
+  }
+  ret total
+}
+
+fun regression_nested_exit(n: U32) -> U32 {
+  let mut hits = 0_u32
+  loop a in regression_count(n) {
+    loop b in regression_count(n) {
+      case b == 2_u32 { exit exit }
+      hits = hits + 1_u32
+    }
+  }
+  ret hits
+}
+
+!test(group="std/regression")
+fun test_loop_iterator_dropped_on_every_way_out() -> Void {
+  std::debug::assert(regression_first_over(10_u32, 3_u32) == 4_u32, "ret out of a loop")
+  std::debug::assert(regression_sum_until(10_u32, 4_u32) == 6_u32, "exit out of a loop")
+  std::debug::assert(regression_nested_exit(5_u32) == 2_u32, "exit exit out of two loops")
+  let mut all = 0_u32
+  loop x in regression_count(4_u32) { all = all + x }
+  std::debug::assert(all == 6_u32, "a loop that runs to its end")
+}
+
+# Calling a "FunMov" closure held by value consumes it, so nothing drops it after: the call releases its environment
+# (on the heap whenever it captures by value). It leaked one environment per call before - seen by the valgrind groups
+# (M9.6) as one block per "Fut::spawn" task.
+fun regression_call_once[F: std::function::FunMov[(), U32]](f: F) -> U32 {
+  ret f()
+}
+
+!test(group="std/regression")
+fun test_a_consumed_closure_releases_its_environment() -> Void {
+  let n = 5_u32
+  let s = Str::from("held by the environment")
+  let len = s.len()
+  std::debug::assert(regression_call_once((caps n) -> U32 { ret n + 1_u32 }) == 6_u32, "a value capture")
+  let mut total = 0_u32
+  let mut i = 0_u32
+  loop i < 50_u32 {
+    total = total + regression_call_once((caps i) -> U32 { ret i })
+    i = i + 1_u32
+  }
+  std::debug::assert(total == 1225_u32, "fifty environments, each released by its call")
+  std::mem::ops::drop(s)
+}

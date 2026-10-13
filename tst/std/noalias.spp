@@ -1,0 +1,200 @@
+# The legal shapes of "&mut" (M7.3). With "noalias" on every "&mut" parameter, the optimiser assumes nothing else
+# reaches what such a parameter points at while the call runs; the checker rejects every way two pointers to one place
+# could reach a call. Each test here takes one of the routes that stay legal, through calls the optimiser may inline or
+# reorder around, and asserts the values left behind: a pointer the checker missed shows up as a wrong value here, not
+# a compile error.
+
+cls NaPair {
+  !public x: S32
+  !public y: S32
+}
+
+sup NaPair ext std::copy::Copy { }
+
+sup NaPair {
+  # Writes through "self" and reads it back, around an argument that must not be "self".
+  !public fun add_from(&mut self, other: &NaPair) -> Void {
+    self.x = self.x + other.x
+    self.y = self.y + other.y
+    self.x = self.x + other.x
+  }
+
+  # Writes one field through "self", reading the other.
+  !public fun shift(&mut self) -> Void {
+    self.x = self.y
+    self.y = self.x + 1
+  }
+}
+
+fun na_swap(a: &mut S32, b: &mut S32) -> Void {
+  let t = a@
+  a@ = b@
+  b@ = t
+}
+
+# Read "src" twice around a write to "dst": with "dst" and "src" apart, the second read sees what the first did.
+fun na_add_twice(dst: &mut S32, src: &S32) -> Void {
+  dst@ = dst@ + src@
+  dst@ = dst@ + src@
+}
+
+fun na_bump_both(a: &mut S32, b: &mut S32) -> Void {
+  a@ = a@ + 1
+  b@ = b@ + 10
+  a@ = a@ + b@
+}
+
+fun na_through(p: &mut NaPair) -> Void {
+  na_bump_both(&mut p.x, &mut p.y)
+}
+
+fun na_sum_into(acc: &mut S32, n: S32) -> Void {
+  case n > 0 {
+    acc@ = acc@ + n
+    na_sum_into(acc, n - 1)
+  }
+}
+
+cor na_counter(n: &mut S32) -> std::generator::Gen[S32] {
+  n@ = n@ + 1
+  gen n@
+  n@ = n@ + 1
+  gen n@
+}
+
+!test(group="std/noalias")
+fun test_two_mut_params_of_two_values() -> Void {
+  let mut a = 1
+  let mut b = 2
+  na_swap(&mut a, &mut b)
+  std::debug::assert(a == 2 and b == 1, "swapped")
+}
+
+!test(group="std/noalias")
+fun test_mut_param_beside_a_ref_param_of_another_value() -> Void {
+  let mut dst = 1
+  let src = 5
+  na_add_twice(&mut dst, &src)
+  std::debug::assert(dst == 11, "src read twice, unchanged by the write to dst")
+}
+
+!test(group="std/noalias")
+fun test_mut_params_of_disjoint_fields() -> Void {
+  let mut p = NaPair(x=1, y=2)
+  na_bump_both(&mut p.x, &mut p.y)
+  std::debug::assert(p.x == 14 and p.y == 12, "each field written through its own parameter")
+}
+
+!test(group="std/noalias")
+fun test_disjoint_fields_through_a_mut_param() -> Void {
+  let mut p = NaPair(x=1, y=2)
+  na_through(&mut p)
+  std::debug::assert(p.x == 14 and p.y == 12, "the parameter's fields passed on apart")
+}
+
+!test(group="std/noalias")
+fun test_mut_self_beside_another_value() -> Void {
+  let mut p = NaPair(x=1, y=2)
+  let q = NaPair(x=10, y=20)
+  p.add_from(&q)
+  std::debug::assert(p.x == 21 and p.y == 22, "self written, the argument only read")
+}
+
+!test(group="std/noalias")
+fun test_mut_self_reading_and_writing_its_fields() -> Void {
+  let mut p = NaPair(x=1, y=2)
+  p.shift()
+  std::debug::assert(p.x == 2 and p.y == 3, "each write seen by the next read")
+}
+
+!test(group="std/noalias")
+fun test_mut_param_passed_down_recursively() -> Void {
+  let mut acc = 0
+  na_sum_into(&mut acc, 10)
+  std::debug::assert(acc == 55, "one accumulator through every call")
+}
+
+!test(group="std/noalias")
+fun test_index_borrows_one_after_another() -> Void {
+  let mut v = std::vector::Vec[S32]::from(&[1, 2, 3])
+  {
+    let a = v[mut 0_uz]
+    a@ = 5
+  }
+  {
+    let b = v[mut 1_uz]
+    b@ = 6
+  }
+  let first = v[0_uz]@
+  let second = v[1_uz]@
+  std::debug::assert(first == 5 and second == 6, "each element written through its own borrow")
+  std::mem::ops::drop(v)
+}
+
+!test(group="std/noalias")
+fun test_vec_swap_of_two_elements_and_of_one() -> Void {
+  let mut v = std::vector::Vec[S32]::from(&[1, 2, 3])
+  v.swap(0_uz, 2_uz)
+  v.swap(1_uz, 1_uz)
+  let a = v[0_uz]@
+  let b = v[1_uz]@
+  let c = v[2_uz]@
+  std::debug::assert(a == 3 and b == 2 and c == 1, "two elements swapped, one left alone")
+  std::mem::ops::drop(v)
+}
+
+!test(group="std/noalias")
+fun test_mem_swap_and_replace_of_owned_values() -> Void {
+  let mut a = Str::from("left")
+  let mut b = Str::from("right")
+  std::mem::ops::swap(&mut a, &mut b)
+  let old = std::mem::ops::replace(&mut a, Str::from("new"))
+  std::debug::assert(old.starts_with("right") and old.len() == 5_uz, "swap moved b into a")
+  std::debug::assert(b.starts_with("left") and b.len() == 4_uz, "and a into b")
+  std::debug::assert(a.starts_with("new") and a.len() == 3_uz, "replace wrote the new value")
+  std::mem::ops::drop(a)
+  std::mem::ops::drop(b)
+  std::mem::ops::drop(old)
+}
+
+!test(group="std/noalias")
+fun test_iter_mut_then_read() -> Void {
+  let mut v = std::vector::Vec[S32]::from(&[1, 2, 3])
+  loop e in v.iter_mut() { e@ = e@ * 10 }
+  let mut sum = 0
+  loop e in v.iter_ref() { sum = sum + e@ }
+  std::debug::assert(sum == 60, "every element written through the iterator")
+  std::mem::ops::drop(v)
+}
+
+!test(group="std/noalias")
+fun test_closure_holding_mut_then_value_read() -> Void {
+  let mut x = 1
+  {
+    let mut c = (caps &mut x) { x@ = x@ + 41 }
+    c()
+    std::mem::ops::drop(c)
+  }
+  std::debug::assert(x == 42, "the closure's write seen after it")
+}
+
+!test(group="std/noalias")
+fun test_generator_holding_mut_across_resumes() -> Void {
+  let mut n = 0
+  {
+    let mut g = na_counter(&mut n)
+    let a = g.res()
+    let b = g.res()
+    std::mem::ops::drop(g)
+  }
+  std::debug::assert(n == 2, "each resume wrote through the held borrow")
+}
+
+!test(group="std/noalias")
+fun test_pattern_borrow_written_then_subject_read() -> Void {
+  let mut p = NaPair(x=1, y=2)
+  case p of {
+    is NaPair(&mut x, ..) { x@ = 7 }
+  }
+  std::debug::assert(p.x == 7, "the pattern's borrow wrote into the subject")
+}
