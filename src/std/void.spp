@@ -1,12 +1,15 @@
 use std::annotations::public
 use std::annotations::versioned
 use std::annotations::zero_type
+use std::copy::Copy
 
 !public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
 cls Void {
-  # The `Void` type represents the absence of a value. It has no fields or methods. It can be used as a return type,
-  # but never as a parameter type, field type, or variable type, since it cannot be instantiated or used in any
-  # meaningful way. It serves as a marker for functions that do not return a value, similar to `void` in C/C++. It is
-  # differnt to `()`, which is a 0-size tuple.
+  # The `Void` type represents the absence of a value. It has no fields or methods. It is a function's return type when
+  # it returns nothing, similar to `void` in C/C++, and a generic bound to it ("T=Void") makes a parameter of that type
+  # no parameter and an attribute no field. Its one value is no value, so it is always initialized and copying it is
+  # free. It is different to `()`, which is a 0-size tuple.
 }
+
+sup Void ext Copy { }

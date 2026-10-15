@@ -77,6 +77,96 @@ fun test_generic_inherited_method_reaches_override() -> Void {
   std::mem::ops::drop(d)
 }
 
+cls FwdSelfPinBase { }
+
+sup FwdSelfPinBase {
+  !public !virtual_method
+  fun value(&self) -> S32 { ret 0 }
+
+  !public
+  fun value_via_default(&self) -> S32 {
+    ret self.value()
+  }
+}
+
+cls FwdSelfPinDerived { }
+
+sup FwdSelfPinDerived ext FwdSelfPinBase {
+  fun value(&self) -> S32 { ret 42 }
+}
+
+cls FwdSelfPinWrapper { !public inner: FwdSelfPinDerived }
+
+sup FwdSelfPinWrapper ext std::ops::fwd::FwdRef[FwdSelfPinDerived] {
+  cor fwd_ref(&self) -> std::generator::GenOnce[&FwdSelfPinDerived] { gen &self.inner }
+}
+
+# The same pin, for a method reached by forwarding: "CallSelf" gave no "Self" for a forwarded candidate, so the
+# inherited default instantiated against the declaring class and reached the base "value", not the override. The base
+# is virtual with a body rather than abstract: an abstract body lowers to "unreachable", which the release build folds
+# away, assert and all, so reaching it could not fail the test. Only the forwarded call is made: a direct call compiled
+# first leaves an instantiation the forwarded one reuses, which hides the fault.
+
+!test(group="std/regression")
+fun test_forwarded_inherited_method_reaches_override() -> Void {
+  let w = FwdSelfPinWrapper(inner=FwdSelfPinDerived())
+  std::debug::assert(w.value_via_default() == 42, "through forwarding")
+  std::mem::ops::drop(w)
+}
+
+cls AssocPinBase { }
+
+sup AssocPinBase {
+  !public !virtual_method
+  fun value() -> S32 { ret 0 }
+
+  !public
+  fun value_via_default() -> S32 {
+    ret Self::value()
+  }
+}
+
+cls AssocPinDerived { }
+
+sup AssocPinDerived ext AssocPinBase {
+  fun value() -> S32 { ret 42 }
+}
+
+# The same pin, for an associated function (no "self") inherited from a base that is not abstract: neither "self" nor
+# an abstract method on the base asked for the pin, so the default was compiled once against the base, and
+# "Self::value()" in it reached the base's "value" rather than the override.
+
+!test(group="std/regression")
+fun test_inherited_associated_function_reaches_override() -> Void {
+  std::debug::assert(AssocPinDerived::value_via_default() == 42, "through the implementer")
+}
+
+cls AssocPinBothBase { }
+
+sup AssocPinBothBase {
+  !public !virtual_method
+  fun value() -> S32 { ret 0 }
+
+  !public
+  fun value_via_default() -> S32 {
+    ret Self::value()
+  }
+}
+
+cls AssocPinBothDerived { }
+
+sup AssocPinBothDerived ext AssocPinBothBase {
+  fun value() -> S32 { ret 42 }
+}
+
+# Called on the base and on the implementer, the two calls need two instantiations, one per "Self".
+
+!test(group="std/regression")
+fun test_inherited_associated_function_on_base_and_implementer() -> Void {
+  std::debug::assert(AssocPinBothBase::value_via_default() == 0, "on the base")
+  std::debug::assert(AssocPinBothDerived::value_via_default() == 42, "through the implementer")
+}
+
 # A borrowed variant member was measured through the type it resolves to, which drops the convention, so "Opt[&S32]"
 # was built with a 4 byte payload. The borrow a generator yielded into it was stored with its top half outside the
 # buffer and read back as a truncated pointer.
@@ -945,4 +1035,23 @@ fun test_a_consumed_closure_releases_its_environment() -> Void {
   }
   std::debug::assert(total == 1225_u32, "fifty environments, each released by its call")
   std::mem::ops::drop(s)
+}
+
+# A closure capturing only by "&" keeps its environment on the stack, and was freed as if it were on the heap once it
+# was passed where a "FunMov" or "FunMut" was expected: the call (or drop) read the parameter's type, not where the
+# environment lived (N1.5). The environment now records that itself.
+fun regression_run_mov(f: std::function::FunMov[(), S32]) -> S32 {
+  ret f()
+}
+
+fun regression_drop_mut(f: std::function::FunMut[(), S32]) -> Void {
+  std::mem::ops::drop(f)
+}
+
+!test(group="std/regression")
+fun test_a_borrowing_closure_passed_as_a_fun_mov_keeps_its_stack_environment() -> Void {
+  let x = 41_s32
+  std::debug::assert(regression_run_mov((caps &x) -> S32 { ret x@ + 1 }) == 42, "called through the FunMov")
+  let z = 5_s32
+  regression_drop_mut((caps &z) -> S32 { ret z@ })
 }
