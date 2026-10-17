@@ -39,10 +39,10 @@ cls Arc[T, A: Alloc=GlobalAlloc] {
   # goes.
   # @type T: The type of the shared value.
   # @type A: The allocator type used to allocate and deallocate the control block. Defaults to `GlobalAlloc`.
-  # @let ptr: A non-null pointer to the heap-allocated control block holding the counts and the value.
+  # @let pointer: A non-null pointer to the heap-allocated control block holding the counts and the value.
   # @let alloc: The allocator used to allocate and deallocate the control block.
 
-  !package ptr: NonNull[ControlBlock[T]]
+  !package pointer: NonNull[ControlBlock[T]]
   !package alloc: A
 }
 
@@ -69,12 +69,12 @@ sup [T, A: Alloc] Arc[T, A] {
     # @let alloc: The allocator used to allocate and deallocate the control block.
     # @ret: An `Arc` owning the sole handle to the newly allocated control block.
 
-    let mut ptr = alloc.allocate_array[ControlBlock[T]](1_uz).expect("Allocation failed")
-    ptr.write(ControlBlock(
+    let mut pointer = alloc.allocate_array[ControlBlock[T]](1_uz).expect("Allocation failed")
+    pointer.write(ControlBlock(
       strong_counter=Atom[USize]::new(1_uz),
       weak_counter=Atom[USize]::new(1_uz),
       val))
-    ret Arc(ptr, alloc)
+    ret Arc(pointer, alloc)
   }
 
   !public
@@ -139,13 +139,13 @@ sup [T, A: Alloc] Arc[T, A] ext Drop {
     # block. The value is destroyed before the block is, and a `Weak` never reads a destroyed value because `upgrade`
     # refuses once the strong count is zero.
 
-    let Self(mut ptr, alloc) = self
+    let Self(mut pointer, alloc) = self
     defer drop(alloc)
 
-    case ptr.strong_counter.fetch_sub(1_uz) == 1_uz {
-      std::mem::ops::drop_in_place(&mut ptr.val)
-      case ptr.weak_counter.fetch_sub(1_uz) == 1_uz {
-        alloc.deallocate_array(ptr, 1_uz)
+    case pointer.strong_counter.fetch_sub(1_uz) == 1_uz {
+      std::mem::ops::drop_in_place(&mut pointer.val)
+      case pointer.weak_counter.fetch_sub(1_uz) == 1_uz {
+        alloc.deallocate_array(pointer, 1_uz)
       }
     }
   }
