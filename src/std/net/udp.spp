@@ -49,7 +49,7 @@ sup UdpSocket {
 
     # Create the file descriptor from the address.
     let mut fd = 0
-    let err = sppc::socket(addr.ip().family(), cffi::sock_dgram, cffi::ipproto_udp, &mut fd)
+    let err = sppc::socket(addr.ip().family(), sppc::sock_dgram, sppc::ipproto_udp, &mut fd)
     case fd < 0 or err < 0 { ret Fail(err=SockErr::from_errno(fd)) }
 
     # Create the `UdpSocket` object with the file descriptor.
@@ -115,7 +115,7 @@ sup UdpSocket {
 
     # Call the `setsockopt` function to set the broadcast
     # option for the socket.
-    let err = sppc::setsockopt(self.fd, cffi::sol_socket, cffi::so_broadcast, &yes)
+    let err = sppc::setsockopt(self.fd, sppc::sol_socket, sppc::so_broadcast, &yes)
     case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass[Void]()
   }
@@ -131,7 +131,7 @@ sup UdpSocket {
     # Call the `getsockopt` function to get the current
     # state of the broadcast option for the socket.
     let mut yes = 0
-    let err = sppc::getsockopt(self.fd, cffi::sol_socket, cffi::so_broadcast, &mut yes)
+    let err = sppc::getsockopt(self.fd, sppc::sol_socket, sppc::so_broadcast, &mut yes)
     case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass(val=yes != 0)
   }
@@ -154,7 +154,7 @@ sup UdpSocket {
     # Call the `setsockopt` function to set the timeout
     # for the socket.
     let err = sppc::setsockopt_timeval(
-      self.fd, cffi::sol_socket, cffi::so_rcvtimeo, &tv)
+      self.fd, sppc::sol_socket, sppc::so_rcvtimeo, &tv)
     drop(tv)
 
     # Handle the error and return the error mapped or
@@ -176,7 +176,7 @@ sup UdpSocket {
     # milliseconds.
     let mut tv = sppc::CTimeval(sec=0_u64, usec=0_u64)
     let err = sppc::getsockopt_timeval(
-      self.fd, cffi::sol_socket, cffi::so_rcvtimeo, &mut tv)
+      self.fd, sppc::sol_socket, sppc::so_rcvtimeo, &mut tv)
 
     let millis = tv.sec * 1000_u64 + tv.usec / 1000_u64
     drop(tv)
@@ -211,7 +211,7 @@ sup UdpSocket {
     # Call the `setsockopt` function to set the timeout for the
     # socket.
     let err = sppc::setsockopt_timeval(
-      self.fd, cffi::sol_socket, cffi::so_sndtimeo, &tv)
+      self.fd, sppc::sol_socket, sppc::so_sndtimeo, &tv)
     drop(tv)
 
     # Handle the error and return the error mapped or
@@ -232,7 +232,7 @@ sup UdpSocket {
     # as, and recombine the two fields into milliseconds.
     let mut tv = sppc::CTimeval(sec=0_u64, usec=0_u64)
     let err = sppc::getsockopt_timeval(
-      self.fd, cffi::sol_socket, cffi::so_sndtimeo, &mut tv)
+      self.fd, sppc::sol_socket, sppc::so_sndtimeo, &mut tv)
 
     let millis = tv.sec * 1000_u64 + tv.usec / 1000_u64
     drop(tv)

@@ -49,8 +49,8 @@ sup EnvErr {
     # @ret: An instance of `EnvErr` that corresponds to the provided `errno`.
 
     ret case errno of {
-      == cffi::einval { EnvInvalidKeyErr }
-      == cffi::enomem { EnvOomErr }
+      == sppc::einval { EnvInvalidKeyErr }
+      == sppc::enomem { EnvOomErr }
       else { EnvOtherErr }
     }
   }

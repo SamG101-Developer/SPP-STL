@@ -50,7 +50,7 @@ sup SpinLock {
     # A held lock reports "WouldBlock"; any other failure reports
     # the error.
     let err = sppc::pthread_spin_trylock(&self.handle)
-    case err == cffi::ebusy { ret Fail(err=WouldBlock) }
+    case err == sppc::ebusy { ret Fail(err=WouldBlock) }
     case err != 0 { ret Fail(err=ThreadErr::from_errno(err))  }
     ret Pass[Void]()
   }

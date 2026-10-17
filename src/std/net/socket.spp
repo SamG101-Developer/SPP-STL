@@ -80,13 +80,13 @@ sup Socket {
     # Convert the boolean value to an integer (1 for true,
     # 0 for false) to be used in the `fcntl` function.
     let mut flags = Flags::new()
-    let err = sppc::fcntl_get(self.fd, cffi::f_getfl, &mut flags.bits)
+    let err = sppc::fcntl_get(self.fd, sppc::f_getfl, &mut flags.bits)
     case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
-    flags.set(Flags::from_bits(cffi::o_nonblock), yes)
+    flags.set(Flags::from_bits(sppc::o_nonblock), yes)
 
     # Call the `setsockopt` function to set the broadcast
     # option for the socket.
-    let err = sppc::fcntl_set(self.fd, cffi::f_setfl, flags.bits)
+    let err = sppc::fcntl_set(self.fd, sppc::f_setfl, flags.bits)
     case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass[Void]()
   }
@@ -102,12 +102,12 @@ sup Socket {
     # Create the empty flags object and read the current
     # flags from the socket using `fcntl`.
     let mut flags = Flags::new()
-    let err = sppc::fcntl_get(self.fd, cffi::f_getfl, &mut flags.bits)
+    let err = sppc::fcntl_get(self.fd, sppc::f_getfl, &mut flags.bits)
 
     # Read the flags from the socket and check if the
     # non-blocking flag is set. Error on failure.
     case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
-    ret Pass(val=flags.has(Flags::from_bits(cffi::o_nonblock)))
+    ret Pass(val=flags.has(Flags::from_bits(sppc::o_nonblock)))
   }
 
   !public
@@ -122,7 +122,7 @@ sup Socket {
 
     # Call the `setsockopt` function to set the ttl
     # option for the socket.
-    let err = sppc::setsockopt(self.fd, cffi::ipproto_ip, cffi::ip_ttl, &S32::from(ttl))
+    let err = sppc::setsockopt(self.fd, sppc::ipproto_ip, sppc::ip_ttl, &S32::from(ttl))
     case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass[Void]()
   }
@@ -139,7 +139,7 @@ sup Socket {
     # Call the `getsockopt` function to get the current
     # state of the ttl option for the socket.
     let mut ttl = 0
-    let err = sppc::getsockopt(self.fd, cffi::ipproto_ip, cffi::ip_ttl, &mut ttl)
+    let err = sppc::getsockopt(self.fd, sppc::ipproto_ip, sppc::ip_ttl, &mut ttl)
     case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass(val=U32::from(ttl))
   }
@@ -223,7 +223,7 @@ sup SockAddr {
     ret case family of {
       # For IpV4, fill the octets of the IpV4Addr and the
       # port from the storage.
-      == cffi::af_inet {
+      == sppc::af_inet {
         let mut socket_address = SockV4Addr()
         sppc::get_sockaddr_v4(&storage, &mut socket_address.ip.octets.ptr(), &mut socket_address.port)
         socket_address
@@ -231,7 +231,7 @@ sup SockAddr {
 
       # For IpV6, fill the segments of the IpV6Addr and the
       # port from the storage.
-      == cffi::af_inet6 {
+      == sppc::af_inet6 {
         let mut socket_address = SockV6Addr()
         sppc::get_sockaddr_v6(&storage, &mut socket_address.ip.segments.ptr(), &mut socket_address.port)
         socket_address

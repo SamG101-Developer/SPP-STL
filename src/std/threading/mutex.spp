@@ -123,7 +123,7 @@ sup [T] Mutex[T] {
     let err = sppc::pthread_mutex_clocklock(&self.handle, S32::from(clock), &timespec)
     drop(timespec)
 
-    case err == cffi::etimedout { ret Fail(err=TimedOut) }
+    case err == sppc::etimedout { ret Fail(err=TimedOut) }
     case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
     ret Pass(val=MutexGuard(handle=self.handle, val=self.val))
   }
@@ -205,7 +205,7 @@ sup [T] Mutex[T] {
       let werr = sppc::pthread_cond_clockwait(&cond.handle, &self.handle, S32::from(clock), &timespec)
       drop(timespec)
 
-      case werr != 0 and werr != cffi::etimedout {
+      case werr != 0 and werr != sppc::etimedout {
         let uerr = sppc::pthread_mutex_unlock(&self.handle)
         ret Fail(err=ThreadErr::from_errno(werr))
       }
@@ -221,7 +221,7 @@ sup [T] Mutex[T] {
     # @ret: The guard, "WouldBlock" if the mutex was already held, or the error the lock reported.
 
     let code = sppc::pthread_mutex_trylock(&self.handle)
-    case code == cffi::ebusy { ret Fail(err=WouldBlock) }
+    case code == sppc::ebusy { ret Fail(err=WouldBlock) }
     case code != 0 { ret Fail(err=ThreadErr::from_errno(code)) }
     ret Pass(val=MutexGuard(handle=self.handle, val=self.val))
   }
