@@ -24,10 +24,10 @@ cls Weak[T, A: Alloc=GlobalAlloc] {
   # `std::threading` (paired with `Arc`) for that.
   # @type T: The type of the value the control block holds.
   # @type A: The allocator type used to deallocate the control block. Defaults to `GlobalAlloc`.
-  # @let ptr: A non-null pointer to the shared control block.
+  # @let pointer: A non-null pointer to the shared control block.
   # @let alloc: The allocator used to deallocate the control block once no handles of any kind remain.
 
-  !package ptr: NonNull[ControlBlock[T]]
+  !package pointer: NonNull[ControlBlock[T]]
   !package alloc: A
 }
 
@@ -78,12 +78,12 @@ sup [T, A: Alloc] Weak[T, A] ext Drop {
     # been destroyed by the last `Rc` and only the raw storage remains to be freed.
     # @ret: Nothing; this is invoked for its cleanup side effects when a `Weak` is destroyed.
 
-    let Weak[T, A](mut ptr, alloc) = self
+    let Weak[T, A](mut pointer, alloc) = self
     defer drop(alloc)
-    ptr.weak_counter -= 1_uz
+    pointer.weak_counter -= 1_uz
 
-    case ptr.strong_counter == 0_uz and ptr.weak_counter == 0_uz {
-      alloc.deallocate_array(ptr, 1_uz)
+    case pointer.strong_counter == 0_uz and pointer.weak_counter == 0_uz {
+      alloc.deallocate_array(pointer, 1_uz)
     }
   }
 }
