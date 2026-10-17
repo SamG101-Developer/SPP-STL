@@ -71,8 +71,8 @@ sup [T, A: Alloc] RawBuf[T, A] {
     # dangling sentinel instead. This is why an empty `Vec` never calls the allocator.
     case Self::is_storage_free(cap) { ret RawBuf(pointer=NonNull[T]::dangling(), capacity=cap, alloc) }
 
-    let ptr = alloc.allocate_array[T](cap).expect("Allocation failed")
-    ret RawBuf(ptr, capacity=cap, alloc)
+    let pointer = alloc.allocate_array[T](cap).expect("Allocation failed")
+    ret RawBuf(pointer, capacity=cap, alloc)
   }
 
   !package
@@ -82,8 +82,8 @@ sup [T, A: Alloc] RawBuf[T, A] {
     # trivially already zeroed - so it uses a dangling sentinel.
     case Self::is_storage_free(cap) { ret RawBuf(pointer=NonNull[T]::dangling(), capacity=cap, alloc) }
 
-    let ptr = alloc.allocate_array_zeroed[T](cap).expect("Allocation failed")
-    ret RawBuf(ptr, capacity=cap, alloc)
+    let pointer = alloc.allocate_array_zeroed[T](cap).expect("Allocation failed")
+    ret RawBuf(pointer, capacity=cap, alloc)
   }
 
   !package
