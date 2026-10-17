@@ -432,18 +432,28 @@ cls CLinger {
   !public linger: CInt
 }
 
+# The body is a closure rather than a function and an argument
+# list, which is what lets an s++ callable cross intact: its
+# captures ride along in the environment, and its result goes
+# to a cell the caller allocated and the closure captured.
 !ffi(symbol="sppc_async")
 fun async_(handle: &mut CInt, body: CClosure[(), CVoid]) -> CInt { }
 
+# Nothing is returned but the error: the value the task produced
+# is already in the caller's own cell by the time this returns.
 !ffi(symbol="sppc_await")
 fun await_(handle: CInt) -> CInt { }
 
+# Detach an asynchronous task by the handle.
 !ffi(symbol="sppc_async_detach")
 fun async_detach(handle: CInt) -> CInt { }
 
+# Yield an asynchronous task.
 !ffi(symbol="sppc_async_yield")
 fun async_yield() -> CVoid { }
 
+# Simple setter for the stack size for asynchronous tasks' private
+# stacks.
 !ffi(symbol="sppc_async_stack_size")
 fun async_stack_size(bytes: CSizeT) -> CVoid { }
 
@@ -801,8 +811,17 @@ fun unsetenv(key: CCharPtr) -> CInt { }
 !ffi(symbol="sppc_halt")
 fun halt(status: CInt) -> ! { }
 
+# End the process now, through the same path as a failed runtime check
+# ("sppc_check_failed"): a backtrace, then "_exit". Not libc's "abort",
+# whose "SIGABRT" runs whatever handler is installed for it.
 !ffi(symbol="sppc_abort")
 fun abort() -> ! { }
+
+# The one path a failed runtime check ends the process through: a fixed
+# message naming the check, with the values it was given, then a backtrace
+# and "_exit". Nothing allocates, and no code of the program's runs again.
+!ffi(symbol="sppc_check_failed")
+fun check_failed(check: CUInt, a: CULong, b: CULong) -> ! { }
 
 !ffi(symbol="sppc_set_sockaddr_v4")
 fun set_sockaddr_v4(octets: &CUChar, port: CUShort, out_storage: &mut CSockaddrStorage) -> CVoid { }
