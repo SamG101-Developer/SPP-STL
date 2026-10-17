@@ -105,7 +105,7 @@ sup Str {
 
     let mut length = 0_uz
     let err = sppc::strchr(ptr, 0_u8, &mut length) # Todo: Error handling.
-    let view = StrView(ptr=ptr, length=length)
+    let view = StrView(pointer=ptr, length=length)
     ret Str::from(&view)
   }
 
@@ -467,7 +467,7 @@ sup [A: Alloc] Str[A] ext FwdMut[StrView] {
     # in place and never grows the buffer) mutates this `Str`'s real storage.
     # @ret: A `StrView` aliasing this `Str`'s own bytes.
 
-    let mut view = StrView(ptr=self.bytes.buffer.ptr, length=self.bytes.length)
+    let mut view = StrView(pointer=self.bytes.buffer.ptr(), length=self.bytes.length)
     gen &mut view
   }
 }
@@ -480,7 +480,7 @@ sup [A: Alloc] Str[A] ext FwdRef[StrView] {
     # so reading through the yielded borrow (e.g. `chars`, `find`, etc.) reads this `Str`'s real storage.
     # @ret: A `StrView` aliasing this `Str`'s own bytes.
 
-    let view = StrView(ptr=self.bytes.buffer.ptr, length=self.bytes.length)
+    let view = StrView(pointer=self.bytes.buffer.ptr(), length=self.bytes.length)
     gen &view
   }
 }

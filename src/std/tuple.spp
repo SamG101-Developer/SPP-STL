@@ -5,9 +5,9 @@ use std::copy::Copy
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls TupLike {
-    # The `TupLike` is a non-generic marker trait, that allows any tyuple type to be used, without having to provide
-    # generics that cause monomorphization. This is especially useful for generic constraints, as seen in the function
-    # types.
+  # The `TupLike` is a non-generic marker trait, that allows any tyuple type to be used, without having to provide
+  # generics that cause monomorphization. This is especially useful for generic constraints, as seen in the function
+  # types.
 }
 
 !public
@@ -17,14 +17,14 @@ cls Tup[..Items] { }
 sup [..Items] Tup[Items] ext TupLike { }
 
 sup [..Items: Copy] Tup[Items] ext Copy {
-    # A tuple is copyable exactly when everything in it is: it owns nothing beyond its elements, so if each of those is
-    # duplicated rather than moved then so is the tuple. This is what lets a variadic parameter pack of numbers be used
-    # without the function having to discard it, the same way `Var` is copyable over copyable alternatives.
+  # A tuple is copyable exactly when everything in it is: it owns nothing beyond its elements, so if each of those is
+  # duplicated rather than moved then so is the tuple. This is what lets a variadic parameter pack of numbers be used
+  # without the function having to discard it, the same way `Var` is copyable over copyable alternatives.
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls Pair[K, V] {
-    !public key: K
-    !public val: V
+  !public key: K
+  !public val: V
 }

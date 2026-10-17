@@ -5,8 +5,13 @@ use std::annotations::public
 use std::annotations::versioned
 use std::annotations::zero_type
 use std::boolean::Bool
+use std::function::FunMov
+use std::result::Fail
+use std::result::Pass
+use std::result::Res
 use std::string_view::StrView
 use std::void::Void
+use std::mem::ops::drop
 
 !public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
@@ -64,4 +69,15 @@ fun assert(condition: Bool, msg: &StrView = "") -> Void {
   # @ret:
 
   std::abort::abort_if(condition.not, msg)
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun expect[T, F: FunMov[(&T,), Bool]](what: T, test: F) -> Res[T, AssertErr] {
+  ret case test(&what) of {
+    == true { Pass(val=what) }
+    else {
+      drop(what)
+      Fail(err=AssertErr) }
+  }
 }

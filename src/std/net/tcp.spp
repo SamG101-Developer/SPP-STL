@@ -48,7 +48,7 @@ sup TcpListener {
 
     # Create the file descriptor from the address.
     let mut fd = 0
-    let err = sppc::socket(addr.ip().family(), cffi::sock_stream, cffi::ipproto_tcp, &mut fd)
+    let err = sppc::socket(addr.ip().family(), sppc::sock_stream, sppc::ipproto_tcp, &mut fd)
     case fd < 0 { ret Fail(err=SockErr::from_errno(err)) }
 
     # Create the `TcpListener` object with the file descriptor.
@@ -58,7 +58,7 @@ sup TcpListener {
     # are still in TIME_WAIT, so a restarted server does not
     # fail with EADDRINUSE for a minute.
     let yes = 1
-    let err = sppc::setsockopt(listener.fd, cffi::sol_socket, cffi::so_reuseaddr, &yes)
+    let err = sppc::setsockopt(listener.fd, sppc::sol_socket, sppc::so_reuseaddr, &yes)
     case err != 0 {
       drop(listener)
       ret Fail(err=SockErr::from_errno(err))
@@ -132,7 +132,7 @@ sup TcpStream {
 
     # Create the file descriptor from the address.
     let mut fd = 0
-    let err = sppc::socket(addr.ip().family(), cffi::sock_stream, cffi::ipproto_tcp, &mut fd)
+    let err = sppc::socket(addr.ip().family(), sppc::sock_stream, sppc::ipproto_tcp, &mut fd)
     case fd < 0 { ret Fail(err=SockErr::from_errno(err)) }
 
     # Create the `TcpStream` object with the file descriptor.
@@ -175,7 +175,7 @@ sup TcpStream {
 
     # Call the `setsockopt` function to set the keepalive
     # option for the socket.
-    let err = sppc::setsockopt(self.fd, cffi::sol_socket, cffi::so_keepalive, &yes)
+    let err = sppc::setsockopt(self.fd, sppc::sol_socket, sppc::so_keepalive, &yes)
     case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass[Void]()
   }
@@ -191,7 +191,7 @@ sup TcpStream {
     # Call the `getsockopt` function to get the current
     # state of the keepalive option for the socket.
     let mut yes = 0
-    let err = sppc::getsockopt(self.fd, cffi::sol_socket, cffi::so_keepalive, &mut yes)
+    let err = sppc::getsockopt(self.fd, sppc::sol_socket, sppc::so_keepalive, &mut yes)
     case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass(val=yes != 0)
   }
@@ -216,7 +216,7 @@ sup TcpStream {
 
     # Call the `setsockopt` function to set the linger
     # for the socket.
-    let err = sppc::setsockopt_linger(self.fd, cffi::sol_socket, cffi::so_linger, &lg)
+    let err = sppc::setsockopt_linger(self.fd, sppc::sol_socket, sppc::so_linger, &lg)
     drop(lg)
 
     # Handle the error and return the error mapped or
@@ -238,7 +238,7 @@ sup TcpStream {
     # Call the `getsockopt` function to get the linger
     # for the socket (a flag and a count of seconds).
     let mut lg = sppc::CLinger(onoff=0, linger=0)
-    let err = sppc::getsockopt_linger(self.fd, cffi::sol_socket, cffi::so_linger, &mut lg)
+    let err = sppc::getsockopt_linger(self.fd, sppc::sol_socket, sppc::so_linger, &mut lg)
     let on = lg.onoff
     let seconds = lg.linger
     drop(lg)
@@ -267,7 +267,7 @@ sup TcpStream {
 
     # Call the `setsockopt` function to set the nodelay
     # option for the socket.
-    let err = sppc::setsockopt(self.fd, cffi::ipproto_tcp, cffi::tcp_nodelay, &yes)
+    let err = sppc::setsockopt(self.fd, sppc::ipproto_tcp, sppc::tcp_nodelay, &yes)
     case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass[Void]()
   }
@@ -284,7 +284,7 @@ sup TcpStream {
     # Call the `getsockopt` function to get the current
     # state of the nodelay option for the socket.
     let mut yes = 0
-    let err = sppc::getsockopt(self.fd, cffi::ipproto_tcp, cffi::tcp_nodelay, &mut yes)
+    let err = sppc::getsockopt(self.fd, sppc::ipproto_tcp, sppc::tcp_nodelay, &mut yes)
     case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass(val=yes != 0)
   }
@@ -312,7 +312,7 @@ sup TcpStream {
     # Call the `setsockopt` function to set the timeout
     # for the socket.
     let err = sppc::setsockopt_timeval(
-      self.fd, cffi::sol_socket, cffi::so_rcvtimeo, &tv)
+      self.fd, sppc::sol_socket, sppc::so_rcvtimeo, &tv)
     drop(tv)
 
     # Handle the error and return the error mapped or
@@ -334,7 +334,7 @@ sup TcpStream {
     # milliseconds.
     let mut tv = sppc::CTimeval(sec=0_u64, usec=0_u64)
     let err = sppc::getsockopt_timeval(
-      self.fd, cffi::sol_socket, cffi::so_rcvtimeo, &mut tv)
+      self.fd, sppc::sol_socket, sppc::so_rcvtimeo, &mut tv)
 
     let millis = tv.sec * 1000_u64 + tv.usec / 1000_u64
     drop(tv)
@@ -369,7 +369,7 @@ sup TcpStream {
     # Call the `setsockopt` function to set the timeout for the
     # socket.
     let err = sppc::setsockopt_timeval(
-      self.fd, cffi::sol_socket, cffi::so_sndtimeo, &tv)
+      self.fd, sppc::sol_socket, sppc::so_sndtimeo, &tv)
     drop(tv)
 
     # Handle the error and return the error mapped or
@@ -390,7 +390,7 @@ sup TcpStream {
     # as, and recombine the two fields into milliseconds.
     let mut tv = sppc::CTimeval(sec=0_u64, usec=0_u64)
     let err = sppc::getsockopt_timeval(
-      self.fd, cffi::sol_socket, cffi::so_sndtimeo, &mut tv)
+      self.fd, sppc::sol_socket, sppc::so_sndtimeo, &mut tv)
 
     let millis = tv.sec * 1000_u64 + tv.usec / 1000_u64
     drop(tv)
@@ -448,7 +448,7 @@ sup TcpStream ext Read {
     # Use the kernel "recv" function to read data from the
     # socket, into the provided buffer.
     let mut bytes_read = 0_sz
-    let err = sppc::recv(self.fd, buf.ptr, buf.len(), 0, &mut bytes_read)
+    let err = sppc::recv(self.fd, buf.ptr(), buf.len(), 0, &mut bytes_read)
     case err != 0 { ret Fail(err=StreamErr::from_errno(err)) }
     ret Pass(val=USize::from(bytes_read))
   }
@@ -471,7 +471,7 @@ sup TcpStream ext Write {
     # Use the kernel "send" function to write data to the
     # socket, from the provided buffer.
     let mut bytes_written = 0_sz
-    let err = sppc::send(self.fd, buf.ptr, buf.len(), 0, &mut bytes_written)
+    let err = sppc::send(self.fd, buf.ptr(), buf.len(), 0, &mut bytes_written)
     case err != 0 { ret Fail(err=StreamErr::from_errno(err)) }
     ret Pass(val=USize::from(bytes_written))
   }

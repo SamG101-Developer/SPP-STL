@@ -205,7 +205,7 @@ sup IpV4Addr {
     # IPv4 addresses is typically represented as `AF_INET`.
     # @ret: The address family of the IP address.
 
-    ret cffi::af_inet
+    ret sppc::af_inet
   }
 }
 
@@ -388,7 +388,7 @@ sup IpV6Addr {
     # IPv6 addresses is typically represented as `AF_INET6`.
     # @ret: The address family of the IP address.
 
-    ret cffi::af_inet6
+    ret sppc::af_inet6
   }
 }
 

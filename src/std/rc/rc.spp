@@ -34,7 +34,7 @@ cls Rc[T, A: Alloc=GlobalAlloc] {
   # @let ptr: A non-null pointer to the heap-allocated control block holding the counters and value.
   # @let alloc: The allocator used to allocate and deallocate the control block.
 
-  !package ptr: NonNull[ControlBlock[T]]
+  !package pointer: NonNull[ControlBlock[T]]
   !package alloc: A
 }
 
@@ -59,9 +59,9 @@ sup [T, A: Alloc] Rc[T, A] {
     # Allocate storage sized for the control block, then initialize
     # it with a single write, so there is no window in which the
     # block is only partially constructed.
-    let mut ptr = alloc.allocate_array[ControlBlock[T]](1_uz).expect("Allocation failed")
-    ptr.write(ControlBlock(strong_counter=1_uz, weak_counter=0_uz, val))
-    ret Rc(ptr, alloc)
+    let mut pointer = alloc.allocate_array[ControlBlock[T]](1_uz).expect("Allocation failed")
+    pointer.write(ControlBlock(strong_counter=1_uz, weak_counter=0_uz, val))
+    ret Rc(pointer, alloc)
   }
 
   !public
@@ -71,7 +71,7 @@ sup [T, A: Alloc] Rc[T, A] {
     # how many `Rc` handles are currently sharing ownership of the value.
     # @ret: The number of `Rc` handles currently sharing ownership of the value.
 
-    ret self.ptr.strong_counter
+    ret self.pointer.strong_counter
   }
 
   !public
@@ -81,7 +81,7 @@ sup [T, A: Alloc] Rc[T, A] {
     # many `Weak` handles are currently sharing ownership of the control block.
     # @ret: The number of `Weak` handles currently sharing ownership of the control block.
 
-    ret self.ptr.weak_counter
+    ret self.pointer.weak_counter
   }
 }
 
@@ -94,16 +94,16 @@ sup [T, A: Alloc & Clone] Rc[T, A] {
     # exists.  The allocator is cloned so the weak handle can deallocate the block independently.
     # @ret: A `Weak` handle pointing at the same control block as this `Rc`.
 
-    let mut cb = self.ptr.clone()
+    let mut cb = self.pointer.clone()
     cb.weak_counter += 1_uz
-    ret Weak(ptr=cb, alloc=self.alloc.clone())
+    ret Weak(pointer=cb, alloc=self.alloc.clone())
   }
 }
 
 sup [T] Rc[T] ext FwdRef[T] {
   !versioned(base="1.0.0", new="1.0.0")
   cor fwd_ref(&self) -> GenOnce[&T] {
-    gen &self.ptr.val
+    gen &self.pointer.val
   }
 }
 
@@ -116,9 +116,9 @@ sup [T, A: Alloc & Clone] Rc[T, A] ext Clone {
     # the returned `Rc`. The allocator is cloned so the new share can deallocate the block independently.
     # @ret: A new `Rc` handle pointing at the same control block as this one.
 
-    let mut cb = self.ptr.clone()
+    let mut cb = self.pointer.clone()
     cb.strong_counter += 1_uz
-    ret Rc(ptr=cb, alloc=self.alloc.clone())
+    ret Rc(pointer=cb, alloc=self.alloc.clone())
   }
 }
 
@@ -133,14 +133,14 @@ sup [T, A: Alloc] Rc[T, A] ext Drop {
     # last of them will deallocate the block when it is dropped. A weak pointer that outlives the value never reads it,
     # as `upgrade` returns `None` once the strong count is zero, so the destroyed `val` slot is never observed.
 
-    let Self(mut ptr, alloc) = self
+    let Self(mut pointer, alloc) = self
     defer drop(alloc)
-    ptr.strong_counter -= 1_uz
+    pointer.strong_counter -= 1_uz
 
-    case ptr.strong_counter == 0_uz {
-      std::mem::ops::drop_in_place(&mut ptr.val)
-      case ptr.weak_counter == 0_uz {
-        alloc.deallocate_array(ptr, 1_uz)
+    case pointer.strong_counter == 0_uz {
+      std::mem::ops::drop_in_place(&mut pointer.val)
+      case pointer.weak_counter == 0_uz {
+        alloc.deallocate_array(pointer, 1_uz)
       }
     }
   }

@@ -194,7 +194,7 @@ fun test_shutting_down_the_write_side_ends_the_other_end_s_read() -> Void {
   let mut client = std::net::tcp::TcpStream::connect(addr).unwrap()
   let (mut server, peer) = listener.accept().unwrap()
 
-  let down = client.shutdown(cffi::shut_wr)
+  let down = client.shutdown(sppc::shut_wr)
   std::debug::assert(down.is_pass(), "shutting down the write side succeeds")
   drop(down)
 

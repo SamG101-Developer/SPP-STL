@@ -85,7 +85,7 @@ sup Rng {
   !versioned(base="1.0.0", new="1.0.0")
   fun from_os_seed() -> Res[Rng, RngErr] {
     let mut buffer = [0_u8; 8_uz]
-    let err = sppc::getrandom(8_uz, buffer.ptr)
+    let err = sppc::getrandom(8_uz, buffer.ptr())
     case err < 0 { ret Fail(err=RngErr) }
 
     let seed = U64::from_le_bytes(&buffer)
@@ -158,7 +158,7 @@ sup OsRng {
     let mut buffer = [0_u8; 8_uz]
     defer drop(buffer)
 
-    let err = sppc::getrandom(8_uz, buffer.ptr)
+    let err = sppc::getrandom(8_uz, buffer.ptr())
     ret case err != 0 { Fail(err=RngErr) } else { Pass(val=U64::from_le_bytes(&buffer)) }
   }
 
@@ -168,7 +168,7 @@ sup OsRng {
     let mut buffer = [0_u8; 4_uz]
     defer drop(buffer)
 
-    let err = sppc::getrandom(4_uz, buffer.ptr)
+    let err = sppc::getrandom(4_uz, buffer.ptr())
     ret case err != 0 { Fail(err=RngErr) } else { Pass(val=U32::from_le_bytes(&buffer)) }
   }
 
@@ -176,7 +176,7 @@ sup OsRng {
   !versioned(base="1.0.0", new="1.0.0")
   fun next_bytes(n: USize) -> Res[Vec[U8], RngErr] {
     let mut buffer = Vec[U8]::new_with_capacity(n)
-    let err = sppc::getrandom(n, buffer.ptr)
+    let err = sppc::getrandom(n, buffer.ptr())
     ret case err != 0 {
       drop(buffer)
       Fail(err=RngErr)

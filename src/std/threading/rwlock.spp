@@ -146,7 +146,7 @@ sup [T] RwLock[T] {
     let err = sppc::pthread_rwlock_clockrdlock(&self.handle, S32::from(clock), &timespec)
     drop(timespec)
 
-    case err == cffi::etimedout {
+    case err == sppc::etimedout {
       ret Fail(err=TimedOut)
     }
     case err != 0 {
@@ -164,7 +164,7 @@ sup [T] RwLock[T] {
     let err = sppc::pthread_rwlock_clockwrlock(&self.handle, S32::from(clock), &timespec)
     drop(timespec)
 
-    case err == cffi::etimedout {
+    case err == sppc::etimedout {
       ret Fail(err=TimedOut)
     }
     case err != 0 {
@@ -179,7 +179,7 @@ sup [T] RwLock[T] {
     # Try to lock the rwlock for writing using the sppc threading API. A busy lock yields "WouldBlock"; any other
     # failure yields the error rather than being swallowed.
     let code = sppc::pthread_rwlock_trywrlock(&self.handle)
-    case code == cffi::ebusy {
+    case code == sppc::ebusy {
       ret Fail(err=WouldBlock)
     }
     case code != 0 {
@@ -196,7 +196,7 @@ sup [T] RwLock[T] {
     let code = sppc::pthread_rwlock_tryrdlock(&self.handle)
 
     ret case code of {
-      == cffi::ebusy { Fail(err=WouldBlock) }
+      == sppc::ebusy { Fail(err=WouldBlock) }
       != 0 { Fail(err=ThreadErr::from_errno(code)) }
       else { Pass(val=RwLockReadGuard(handle=self.handle, val=self.val)) }
     }

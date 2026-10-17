@@ -31,12 +31,12 @@ cls View[T] {
   # underlying data. The `View` type is designed to be used with collections that support slicing, such as arrays and
   # vectors. It allows you to create a view into a portion of a collection without copying the data.
   # @type T: The type of elements in the view.
-  # @let ptr: A non-null pointer to the first element of the view. This pointer is guaranteed to be valid for the
+  # @let pointer: A non-null pointer to the first element of the view. This pointer is guaranteed to be valid for the
   # lifetime of the view.
   # @let length: The number of elements in the view. This length is used to determine the bounds of the view and to
   # provide efficient access to the elements.
 
-  !package ptr: NonNull[T]
+  !package pointer: NonNull[T]
   !package length: USize
 }
 
@@ -56,6 +56,16 @@ sup [T] View[T] {
     # @ret: The number of elements in the view.
 
     ret self.length
+  }
+
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
+  fun ptr(&self) -> NonNull[T] {
+    # The `ptr` method returns a non-null pointer to the first element of the view. This pointer is guaranteed to be
+    # valid for the lifetime of the view and can be used to access the elements of the view directly.
+    # @ret: A non-null pointer to the first element of the view.
+
+    ret self.pointer
   }
 
   !public
