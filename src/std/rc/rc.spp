@@ -96,7 +96,7 @@ sup [T, A: Alloc & Clone] Rc[T, A] {
 
     let mut cb = self.pointer.clone()
     cb.weak_counter += 1_uz
-    ret Weak(ptr=cb, alloc=self.alloc.clone())
+    ret Weak(pointer=cb, alloc=self.alloc.clone())
   }
 }
 
@@ -118,7 +118,7 @@ sup [T, A: Alloc & Clone] Rc[T, A] ext Clone {
 
     let mut cb = self.pointer.clone()
     cb.strong_counter += 1_uz
-    ret Rc(ptr=cb, alloc=self.alloc.clone())
+    ret Rc(pointer=cb, alloc=self.alloc.clone())
   }
 }
 

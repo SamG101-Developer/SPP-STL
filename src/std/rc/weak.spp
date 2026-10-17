@@ -50,7 +50,7 @@ sup [T, A: Alloc & Clone] Weak[T, A] {
     case self.pointer.strong_counter == 0_uz { ret None }
     let mut cb = self.pointer.clone()
     cb.strong_counter += 1_uz
-    ret Some(val=Rc(ptr=cb, alloc=self.alloc.clone()))
+    ret Some(val=Rc(pointer=cb, alloc=self.alloc.clone()))
   }
 }
 
@@ -65,7 +65,7 @@ sup [T, A: Alloc & Clone] Weak[T, A] ext Clone {
 
     let mut cb = self.pointer.clone()
     cb.weak_counter += 1_uz
-    ret Weak(ptr=cb, alloc=self.alloc.clone())
+    ret Weak(pointer=cb, alloc=self.alloc.clone())
   }
 }
 

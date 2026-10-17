@@ -84,7 +84,7 @@ sup [T, A: Alloc] Arc[T, A] {
     # before the answer is read.
     # @ret: The number of `Arc` handles sharing the value.
 
-    ret self.ptr.strong_counter.load()
+    ret self.pointer.strong_counter.load()
   }
 
   !public
@@ -94,7 +94,7 @@ sup [T, A: Alloc] Arc[T, A] {
     # not one of them, so it is subtracted; asking through a live `Arc` means there is always one to subtract.
     # @ret: The number of `Weak` handles pointing at the control block.
 
-    ret self.ptr.weak_counter.load() - 1_uz
+    ret self.pointer.weak_counter.load() - 1_uz
   }
 }
 
@@ -106,15 +106,15 @@ sup [T, A: Alloc & Clone] Arc[T, A] {
     # alive; it only keeps the block itself alive while the weak handle exists.
     # @ret: A `Weak` handle pointing at the same control block as this `Arc`.
 
-    let old_count = self.ptr.weak_counter.fetch_add(1_uz)
-    ret Weak(ptr=self.ptr, alloc=self.alloc.clone())
+    let old_count = self.pointer.weak_counter.fetch_add(1_uz)
+    ret Weak(pointer=self.pointer, alloc=self.alloc.clone())
   }
 }
 
 sup [T] Arc[T] ext FwdRef[T] {
   !versioned(base="1.0.0", new="1.0.0")
   cor fwd_ref(&self) -> GenOnce[&T] {
-    gen &self.ptr.val
+    gen &self.pointer.val
   }
 }
 
@@ -125,8 +125,8 @@ sup [T, A: Alloc & Clone] Arc[T, A] ext Clone {
     # shared borrow and from any thread at once - the `Rc` version has to fabricate a mutable pointer to do it.
     # @ret: A new `Arc` handle sharing this one's control block.
 
-    let old_count = self.ptr.strong_counter.fetch_add(1_uz)
-    ret Arc(ptr=self.ptr, alloc=self.alloc.clone())
+    let old_count = self.pointer.strong_counter.fetch_add(1_uz)
+    ret Arc(pointer=self.pointer, alloc=self.alloc.clone())
   }
 }
 

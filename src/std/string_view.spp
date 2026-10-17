@@ -669,7 +669,7 @@ sup StrView {
     # guaranteed to be null-terminated.
     # @ret: A view of the bytes of this `StrView`.
 
-    let view = View(ptr=self.pointer, length=self.length)
+    let view = View(pointer=self.pointer, length=self.length)
     gen &view
   }
 
@@ -680,7 +680,7 @@ sup StrView {
     # lifetime of this `StrView`, and it is guaranteed to be null-terminated.
     # @ret: A mutable view of the bytes of this `StrView`.
 
-    let mut view = View(ptr=self.pointer, length=self.length)
+    let mut view = View(pointer=self.pointer, length=self.length)
     gen &mut view
   }
 }

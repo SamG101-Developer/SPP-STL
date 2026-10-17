@@ -44,10 +44,10 @@ sup [T, A: Alloc & Clone] Weak[T, A] {
     # abandoned if it ever reaches zero - which is final, because nothing brings a count back up from zero.
     # @ret: `Some` holding a new `Arc` if the value is still alive, otherwise `None`.
 
-    let mut seen = self.ptr.strong_counter.load()
+    let mut seen = self.pointer.strong_counter.load()
     loop seen != 0_uz {
-      let (found, swapped) = self.ptr.strong_counter.compex(seen, seen + 1_uz)
-      case swapped { ret Some(val=Arc(ptr=self.ptr, alloc=self.alloc.clone())) }
+      let (found, swapped) = self.pointer.strong_counter.compex(seen, seen + 1_uz)
+      case swapped { ret Some(val=Arc(pointer=self.pointer, alloc=self.alloc.clone())) }
       seen = found
     }
     ret None
@@ -61,8 +61,8 @@ sup [T, A: Alloc & Clone] Weak[T, A] ext Clone {
     # stays alive while any weak handle does, and the value is untouched.
     # @ret: A new `Weak` sharing this handle's control block.
 
-    let old_count = self.ptr.weak_counter.fetch_add(1_uz)
-    ret Weak(ptr=self.ptr, alloc=self.alloc.clone())
+    let old_count = self.pointer.weak_counter.fetch_add(1_uz)
+    ret Weak(pointer=self.pointer, alloc=self.alloc.clone())
   }
 }
 

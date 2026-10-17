@@ -69,7 +69,7 @@ sup [T, A: Alloc] RawBuf[T, A] {
   fun new_with_capacity_in(cap: USize, alloc: A) -> Self {
     # A capacity that occupies no bytes (a zero-sized `T`, or `cap == 0`) needs no allocation; the buffer holds a
     # dangling sentinel instead. This is why an empty `Vec` never calls the allocator.
-    case Self::is_storage_free(cap) { ret RawBuf(ptr=NonNull[T]::dangling(), capacity=cap, alloc) }
+    case Self::is_storage_free(cap) { ret RawBuf(pointer=NonNull[T]::dangling(), capacity=cap, alloc) }
 
     let ptr = alloc.allocate_array[T](cap).expect("Allocation failed")
     ret RawBuf(ptr, capacity=cap, alloc)
@@ -80,7 +80,7 @@ sup [T, A: Alloc] RawBuf[T, A] {
   fun new_with_capacity_zeroed_in(cap: USize, alloc: A) -> Self {
     # As `new_with_capacity_in`, but zeroed. A storage-free capacity still needs no allocation - a zero-byte block is
     # trivially already zeroed - so it uses a dangling sentinel.
-    case Self::is_storage_free(cap) { ret RawBuf(ptr=NonNull[T]::dangling(), capacity=cap, alloc) }
+    case Self::is_storage_free(cap) { ret RawBuf(pointer=NonNull[T]::dangling(), capacity=cap, alloc) }
 
     let ptr = alloc.allocate_array_zeroed[T](cap).expect("Allocation failed")
     ret RawBuf(ptr, capacity=cap, alloc)
