@@ -924,3 +924,6 @@ fun copyfile(fd_in: CInt, fd_out: CInt, len: CSizeT, flags: CInt, out_n: &mut CS
 
 !ffi(symbol="sppc_deny_wx")
 fun deny_wx() -> CInt { }
+
+!ffi(symbol="sppc_seal_segments")
+fun seal_segments() -> CInt { }
