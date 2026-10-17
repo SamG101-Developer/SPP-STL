@@ -61,7 +61,7 @@ sup StrView {
 
   !package
   !versioned(base="1.0.0", new="1.0.0")
-  fun ptr(&self) -> NonNull[T] {
+  fun ptr(&self) -> NonNull[U8] {
     # The `ptr` method returns a non-null pointer to the first element of the view. This pointer is guaranteed to be
     # valid for the lifetime of the view and can be used to access the elements of the view directly.
     # @ret: A non-null pointer to the first element of the view.
