@@ -23,10 +23,10 @@ cls Weak[T, A: Alloc=GlobalAlloc] {
   # module, and like `Arc` it needs no marker of its own - it is as sendable as its `T`.
   # @type T: The type of the value the control block holds.
   # @type A: The allocator type used to deallocate the control block. Defaults to `GlobalAlloc`.
-  # @let ptr: A non-null pointer to the shared control block.
+  # @let pointer: A non-null pointer to the shared control block.
   # @let alloc: The allocator used to deallocate the control block once no handles of any kind remain.
 
-  !package ptr: NonNull[ControlBlock[T]]
+  !package pointer: NonNull[ControlBlock[T]]
   !package alloc: A
 }
 
@@ -73,11 +73,11 @@ sup [T, A: Alloc] Weak[T, A] ext Drop {
     # whoever takes the weak count to zero, which is either the last `Weak` or the last `Arc` releasing the count the
     # strong handles held collectively - and by then the value has already been destroyed.
 
-    let Weak[T, A](ptr, alloc) = self
+    let Weak[T, A](pointer, alloc) = self
     defer drop(alloc)
 
-    case ptr.weak_counter.fetch_sub(1_uz) == 1_uz {
-      alloc.deallocate_array(ptr, 1_uz)
+    case pointer.weak_counter.fetch_sub(1_uz) == 1_uz {
+      alloc.deallocate_array(pointer, 1_uz)
     }
   }
 }
