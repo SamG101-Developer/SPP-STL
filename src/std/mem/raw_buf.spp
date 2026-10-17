@@ -275,9 +275,9 @@ sup [T, A: Alloc] RawBuf[T, A] ext Drop {
     # elements is the responsibility of the length-aware owner (`Vec`), which must do so before its buffer is dropped.
     # @ret: Nothing; this is invoked for its cleanup side effect when a `RawBuf` is destroyed.
 
-    let Self(ptr, capacity, alloc) = self
+    let Self(pointer, capacity, alloc) = self
     defer drop(alloc)
     case Self::is_storage_free(capacity) { ret }
-    alloc.deallocate_array(ptr, capacity)
+    alloc.deallocate_array(pointer, capacity)
   }
 }
