@@ -23,10 +23,10 @@ cls Single[T, A: Alloc=GlobalAlloc] {
   # provides a way to allocate a single value on the heap and manage its lifetime.
   # @type T: The type of the value that is allocated on the heap.
   # @type A: The allocator type used to allocate and deallocate the value. Defaults to `GlobalAlloc`.
-  # @let ptr: A non-null pointer to the allocated value on the heap.
+  # @let pointer: A non-null pointer to the allocated value on the heap.
   # @let alloc: The allocator used to allocate and deallocate the value on the heap.
 
-  !package ptr: NonNull[T]
+  !package pointer: NonNull[T]
   !package alloc: A
 }
 
@@ -89,9 +89,9 @@ sup [T, A: Alloc] Single[T, A] {
 
     # Allocate the non-null pointer an ambed the value into
     # it. Wrap in the `Single` type and return.
-    let mut ptr = alloc.allocate_array[T](1_uz).expect("Allocation failed")
-    ptr.write(val)
-    ret Single(ptr, alloc)
+    let mut pointer = alloc.allocate_array[T](1_uz).expect("Allocation failed")
+    pointer.write(val)
+    ret Single(pointer, alloc)
   }
 
   !public
@@ -108,7 +108,7 @@ sup [T, A: Alloc] Single[T, A] {
 
     # Allocate the non-null pointer and embed the value into
     # it. Wrap in the `Single` type and return.
-    let mut ptr = case alloc.allocate_array[T](1_uz) of {
+    let mut pointer = case alloc.allocate_array[T](1_uz) of {
       is Pass[NonNull[T]](val as p) { p }
       is Fail[AllocErr](err as e) {
         drop(val)
@@ -116,8 +116,8 @@ sup [T, A: Alloc] Single[T, A] {
         ret Fail(err=e)
       }
     }
-    ptr.write(val)
-    ret Pass(val=Single(ptr, alloc))
+    pointer.write(val)
+    ret Pass(val=Single(pointer, alloc))
   }
 
   !public
@@ -181,10 +181,10 @@ sup [T, A: Alloc] Single[T, A] ext Drop {
     # on the pointee rather than the pointer itself. The `Del` trait allows for custom cleanup logic to be defined for
     # types, and this ensures the `Single` behaves correctly when it goes out of scope.
 
-    let Self(mut ptr, alloc) = self
+    let Self(mut pointer, alloc) = self
     defer drop(alloc)
 
-    std::mem::ops::drop_in_place(&mut ptr)
-    alloc.deallocate_array(ptr, 1_uz)
+    std::mem::ops::drop_in_place(&mut pointer)
+    alloc.deallocate_array(pointer, 1_uz)
   }
 }
