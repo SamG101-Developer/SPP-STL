@@ -65,3 +65,12 @@ fun assert(condition: Bool, msg: &StrView = "") -> Void {
 
   std::abort::abort_if(condition.not, msg)
 }
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun expect[T, F: FunMov[(&T,), Bool]](what: T, test: F) -> Res[T, AssertErr] {
+  ret case test(&what) of {
+    == true { Pass(val=what) }
+    else { Fail(err=AssertErr) }
+  }
+}

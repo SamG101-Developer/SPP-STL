@@ -37,11 +37,11 @@ cls RawBuf[T, A: Alloc=GlobalAlloc] {
   # accessors are `Opt`-returning.
   # @type T: The type of the elements in the buffer.
   # @type A: The allocator type used to allocate and deallocate the buffer. Defaults to `GlobalAlloc`.
-  # @let ptr: A non-null pointer to the buffer memory.
+  # @let pointer: A non-null pointer to the buffer memory.
   # @let capacity: The capacity of the buffer, in number of elements.
   # @let alloc: The allocator used to allocate and deallocate the buffer.
 
-  !package ptr: NonNull[T]
+  !package pointer: NonNull[T]
   !package capacity: USize
   !package alloc: A
 }
@@ -94,6 +94,12 @@ sup [T, A: Alloc] RawBuf[T, A] {
 
   !package
   !versioned(base="1.0.0", new="1.0.0")
+  fun ptr(&self) -> NonNull[T] {
+    ret self.pointer
+  }
+
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
   fun is_storage_free(cap: USize) -> Bool {
     # A buffer of `cap` elements of `T` occupies no bytes - and so needs no real allocation - when `T` is zero-sized or
     # `cap` is zero. In that case the buffer's pointer is a `NonNull::dangling` sentinel rather than a heap allocation,
@@ -125,14 +131,14 @@ sup [T, A: Alloc] RawBuf[T, A] {
     # the allocator to grow a dangling pointer. Propagate errors, then
     # record the new capacity.
     case Self::is_storage_free(self.capacity) {
-      self.ptr = self.alloc.allocate_array[T](new_cap)?
+      self.pointer = self.alloc.allocate_array[T](new_cap)?
       self.capacity = new_cap
       ret Pass[Void]()
     }
 
     # Otherwise grow the existing allocation in place, and propagate
     # allocation errors.
-    self.alloc.grow_array[T](&mut self.ptr, self.capacity, new_cap)?
+    self.alloc.grow_array[T](&mut self.pointer, self.capacity, new_cap)?
     self.capacity = new_cap
     ret Pass[Void]()
   }
@@ -150,15 +156,15 @@ sup [T, A: Alloc] RawBuf[T, A] {
     # free the current block (if it is real) and drop back to a dangling
     # sentinel. This is infallible, so it returns directly.
     case Self::is_storage_free(new_cap) {
-      case Self::is_storage_free(self.capacity).not { self.alloc.deallocate_array[T](self.ptr, self.capacity) }
-      self.ptr = NonNull[T]::dangling()
+      case Self::is_storage_free(self.capacity).not { self.alloc.deallocate_array[T](self.pointer, self.capacity) }
+      self.pointer = NonNull[T]::dangling()
       self.capacity = new_cap
       ret Pass[Void]()
     }
 
     # Otherwise shrink the existing allocation in place, and propagate
     # allocation errors.
-    self.alloc.shrink_array[T](&mut self.ptr, self.capacity, new_cap)?
+    self.alloc.shrink_array[T](&mut self.pointer, self.capacity, new_cap)?
 
     # Update the capacity if successful, returning the pass
     # state.

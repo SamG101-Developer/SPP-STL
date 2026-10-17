@@ -71,7 +71,7 @@ sup [T, A: Alloc] Rc[T, A] {
     # how many `Rc` handles are currently sharing ownership of the value.
     # @ret: The number of `Rc` handles currently sharing ownership of the value.
 
-    ret self.ptr.strong_counter
+    ret self.pointer.strong_counter
   }
 
   !public
@@ -81,7 +81,7 @@ sup [T, A: Alloc] Rc[T, A] {
     # many `Weak` handles are currently sharing ownership of the control block.
     # @ret: The number of `Weak` handles currently sharing ownership of the control block.
 
-    ret self.ptr.weak_counter
+    ret self.pointer.weak_counter
   }
 }
 
@@ -94,7 +94,7 @@ sup [T, A: Alloc & Clone] Rc[T, A] {
     # exists.  The allocator is cloned so the weak handle can deallocate the block independently.
     # @ret: A `Weak` handle pointing at the same control block as this `Rc`.
 
-    let mut cb = self.ptr.clone()
+    let mut cb = self.pointer.clone()
     cb.weak_counter += 1_uz
     ret Weak(ptr=cb, alloc=self.alloc.clone())
   }
@@ -103,7 +103,7 @@ sup [T, A: Alloc & Clone] Rc[T, A] {
 sup [T] Rc[T] ext FwdRef[T] {
   !versioned(base="1.0.0", new="1.0.0")
   cor fwd_ref(&self) -> GenOnce[&T] {
-    gen &self.ptr.val
+    gen &self.pointer.val
   }
 }
 
@@ -116,7 +116,7 @@ sup [T, A: Alloc & Clone] Rc[T, A] ext Clone {
     # the returned `Rc`. The allocator is cloned so the new share can deallocate the block independently.
     # @ret: A new `Rc` handle pointing at the same control block as this one.
 
-    let mut cb = self.ptr.clone()
+    let mut cb = self.pointer.clone()
     cb.strong_counter += 1_uz
     ret Rc(ptr=cb, alloc=self.alloc.clone())
   }

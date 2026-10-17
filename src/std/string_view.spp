@@ -40,10 +40,10 @@ cls StrView {
   # The `StrView` type is a view into a UTF-8 encoded string. It is null-terminated and is valid UTF-8. The `StrView`
   # type is designed to be used as a view into a string, and it is not intended to be used as a standalone type. That
   # is, it will always be used as `&StrView` or `&mut StrView`.
-  # @let ptr: The pointer to the start of the string. It is guaranteed to be non-null and aligned.
+  # @let pointer: The pointer to the start of the string. It is guaranteed to be non-null and aligned.
   # @let length: The length of the string in bytes.
 
-  !package ptr: NonNull[U8]
+  !package pointer: NonNull[U8]
   !package length: USize
 }
 
@@ -57,6 +57,16 @@ sup StrView {
     # @ret: The length of this string in bytes.
 
     ret self.length
+  }
+
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
+  fun ptr(&self) -> NonNull[T] {
+    # The `ptr` method returns a non-null pointer to the first element of the view. This pointer is guaranteed to be
+    # valid for the lifetime of the view and can be used to access the elements of the view directly.
+    # @ret: A non-null pointer to the first element of the view.
+
+    ret self.pointer
   }
 
   !public
@@ -209,7 +219,7 @@ sup StrView {
     # Find the match using the "memmem" C function, mapping
     # the result into the Opt type.
     let mut idx = self.length
-    let err = sppc::memmem(self.ptr.raw(), self.length, needle.ptr.raw(), needle.length, &mut idx) # Todo: Error handling.
+    let err = sppc::memmem(self.pointer.raw(), self.length, needle.ptr().raw(), needle.length, &mut idx) # Todo: Error handling.
     case idx >= self.length { ret None }
     ret Some(val=idx)
   }
@@ -512,8 +522,8 @@ sup StrView {
   !versioned(base="1.0.0", new="1.0.0")
   fun to_c_str(&self) -> Str {
     # A nul-terminated copy of this view, for handing to a c api. A view is a `{ptr, length}` slice into bytes that
-    # carry no terminator of their own, so a c function given `self.ptr` directly reads past the end of it - which is
-    # what made every terminator-based search here return whatever followed the view in memory.
+    # carry no terminator of their own, so a c function given `self.pointer` directly reads past the end of it - which
+    # is what made every terminator-based search here return whatever followed the view in memory.
     # @ret: An owned copy whose buffer has a `0` byte after the last character. The returned string's own `len` does not
     # count that byte, so it still reports the number of characters.
 
@@ -659,7 +669,7 @@ sup StrView {
     # guaranteed to be null-terminated.
     # @ret: A view of the bytes of this `StrView`.
 
-    let view = View(ptr=self.ptr, length=self.length)
+    let view = View(ptr=self.pointer, length=self.length)
     gen &view
   }
 
@@ -670,7 +680,7 @@ sup StrView {
     # lifetime of this `StrView`, and it is guaranteed to be null-terminated.
     # @ret: A mutable view of the bytes of this `StrView`.
 
-    let mut view = View(ptr=self.ptr, length=self.length)
+    let mut view = View(ptr=self.pointer, length=self.length)
     gen &mut view
   }
 }
@@ -690,7 +700,7 @@ sup StrView ext Eq {
 
     case self.length != that.length { ret false }
     case self.length == 0_uz { ret true }
-    ret std::mem::ops::mem_cmp(&self.ptr, &that.ptr, self.length) == 0
+    ret std::mem::ops::mem_cmp(&self.pointer, &that.ptr(), self.length) == 0
   }
 
   !versioned(base="1.0.0", new="1.0.0")
@@ -701,7 +711,7 @@ sup StrView ext Eq {
 
     case self.length != that.length { ret true }
     case self.length == 0_uz { ret false }
-    ret std::mem::ops::mem_cmp(&self.ptr, &that.ptr, self.length) != 0
+    ret std::mem::ops::mem_cmp(&self.pointer, &that.ptr(), self.length) != 0
   }
 }
 

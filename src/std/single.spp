@@ -155,19 +155,19 @@ sup [T, A: Alloc] Single[T, A] {
     # @ret: The value owned by the `Single` instance.
 
     defer drop(self)
-    ret self.ptr.read()
+    ret self.pointer.read()
   }
 }
 
 sup [T, A: Alloc] Single[T, A] ext FwdMut[T] {
   cor fwd_mut(&mut self) -> GenOnce[&mut T] {
-    gen &mut self.ptr
+    gen &mut self.pointer
   }
 }
 
 sup [T, A: Alloc] Single[T, A] ext FwdRef[T] {
   cor fwd_ref(&self) -> GenOnce[&T] {
-    gen &self.ptr
+    gen &self.pointer
   }
 }
 

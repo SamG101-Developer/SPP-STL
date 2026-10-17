@@ -176,7 +176,7 @@ sup File {
     # The creation mode is only consulted when `O_CREAT` is in
     # the flags; the process umask is applied on top of it.
     let mut file = File()
-    let err = sppc::open(path.inner.ptr, mode.to_flags(), 0x1b6, &mut file.fd)
+    let err = sppc::open(path.inner.ptr(), mode.to_flags(), 0x1b6, &mut file.fd)
     ret case err == 0 { Pass(val=file) } else {
       drop(file)
       Fail(err=PathErr::from_errno(err))
@@ -324,7 +324,7 @@ sup File ext Read {
     # operation fails.
 
     let mut bytes_read = 0_sz
-    let err = sppc::read(buf.ptr, 1_uz, self.file_size(), self.fd, &mut bytes_read)
+    let err = sppc::read(buf.ptr(), 1_uz, self.file_size(), self.fd, &mut bytes_read)
     ret case err == 0 { Pass(val=USize::from(bytes_read)) } else { Fail(err=StreamErr::from_errno(err)) }
   }
 }
@@ -338,7 +338,7 @@ sup File ext Write {
     # the operation fails.
 
     let mut bytes_written = 0_sz
-    let err = sppc::write(buf.ptr, 1_uz, buf.len(), self.fd, &mut bytes_written)
+    let err = sppc::write(buf.ptr(), 1_uz, buf.len(), self.fd, &mut bytes_written)
     ret case err == 0 { Pass(val=USize::from(bytes_written)) } else { Fail(err=StreamErr::from_errno(err)) }
   }
 
@@ -386,7 +386,7 @@ fun get_cwd() -> Res[Path, PathErr] {
   # message if the operation fails.
 
   let mut cwd = Path()
-  let err = sppc::getcwd(cwd.inner.ptr, path::path_max)
+  let err = sppc::getcwd(cwd.inner.ptr(), path::path_max)
   ret case err == 0 { Pass(val=cwd) } else {
     drop(cwd)
     Fail(err=PathErr::from_errno(err))
@@ -401,7 +401,7 @@ fun set_cwd(path: &Path) -> Res[Void, PathErr] {
   # @ret: A `Res` type containing an empty value if the current directory is successfully changed, or an error message
   # if the operation fails.
 
-  let err = sppc::chdir(path.inner.ptr)
+  let err = sppc::chdir(path.inner.ptr())
   ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
 }
 

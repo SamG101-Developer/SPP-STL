@@ -47,8 +47,8 @@ sup [T, A: Alloc & Clone] Weak[T, A] {
     # so the revived share can deallocate the block independently.
     # @ret: `Some` containing a new `Rc` handle if the value is still alive, otherwise `None`.
 
-    case self.ptr.strong_counter == 0_uz { ret None }
-    let mut cb = self.ptr.clone()
+    case self.pointer.strong_counter == 0_uz { ret None }
+    let mut cb = self.pointer.clone()
     cb.strong_counter += 1_uz
     ret Some(val=Rc(ptr=cb, alloc=self.alloc.clone()))
   }
@@ -63,7 +63,7 @@ sup [T, A: Alloc & Clone] Weak[T, A] ext Clone {
     # the new handle; the allocator is cloned so each weak handle can deallocate independently.
     # @ret: A new `Weak` sharing this handle's control block.
 
-    let mut cb = self.ptr.clone()
+    let mut cb = self.pointer.clone()
     cb.weak_counter += 1_uz
     ret Weak(ptr=cb, alloc=self.alloc.clone())
   }
