@@ -26,8 +26,8 @@ jobs:
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
           # Validate PR title format
-          if [[ ! "$PR_TITLE" =~ ^(fmt|api|core|meta|fix|docs)/[a-z][a-z0-9-]*$ ]]; then
-              echo "Error: PR title must be in the format 'xxx/yyy' where 'xxx' is one of [fmt, api, core, meta, fix, docs] and 'yyy' fits the regex pattern [a-z][a-z0-9-]*."
+          if [[ ! "$PR_TITLE" =~ ^(fmt|api|core|meta|fix|docs|sppc)/[a-z][a-z0-9-]*$ ]]; then
+              echo "Error: PR title must be in the format 'xxx/yyy' where 'xxx' is one of [fmt, api, core, meta, fix, docs, sppc] and 'yyy' fits the regex pattern [a-z][a-z0-9-]*."
               exit 1
           fi
           
