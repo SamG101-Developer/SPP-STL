@@ -27,7 +27,9 @@ cls Rng {
   # without proper synchronization. The `Rng` type can be seeded with a specific value to ensure reproducibility of
   # random sequences, and it provides methods for generating random bytes, integers, and floating-point numbers within
   # specified ranges. The underlying implementation of the PRNG is based on the "Xoshiro256**" algorithm, which is known
-  # for its speed and quality of randomness.
+  # for its speed and quality of randomness. It is NOT cryptographically secure: its whole future output follows from a
+  # few outputs, and a copy (or a forked process) repeats the same sequence. Never use it for keys, tokens, nonces, or
+  # anything an attacker must not predict; use `OsRng`, which reads the operating system's CSPRNG on every call.
   # @let state: The internal state of the PRNG, represented as an array of four 64-bit unsigned integers. This state is
   # used to generate random numbers and cannot be modified directly by the user. It is initialized with a seed value and
   # updated with each random number generation.
@@ -62,8 +64,8 @@ fun rotl64(x: U64, k: U32) -> U64 {
 !versioned(base="1.0.0", new="1.0.0")
 fun splitmix64(x: &mut U64) -> U64 {
   # Every step here is meant to wrap: the mixing is what the constants are for, and a state that stayed inside "U64"
-  # would not be a bit mixer. So the operations are spelled as the wrapping ones rather than "+" and "*", which abort
-  # on the overflow this depends on.
+  # would not be a bit mixer. So the operations are spelled as the wrapping ones rather than "+" and "*", which abort on
+  # the overflow this depends on.
   x@ = x@.add_wrapping(0x9e3779b97f4a7c15_u64)
   let mut z = x@
   z = (z ^ z >> 30_u32).mul_wrapping(0xbf58476d1ce4e5b9_u64)
@@ -134,9 +136,9 @@ sup Rng {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun between(&mut self, min: U64, max: U64) -> U64 {
-    # The bounds are half-open, so "min" can come up and "max" cannot. The draw is taken over the width of the range
-    # and then offset - "min" used to be ignored outright, which put every result in "[0, max)" however the range was
-    # asked for.
+    # The bounds are half-open, so "min" can come up and "max" cannot. The draw is taken over the width of the range and
+    # then offset - "min" used to be ignored outright, which put every result in "[0, max)" however the range was asked
+    # for.
     case max <= min { ret min }
     let span = max - min
     let t = 0_u64.sub_wrapping(span) % span
@@ -175,7 +177,11 @@ sup OsRng {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun next_bytes(n: USize) -> Res[Vec[U8], RngErr] {
-    let mut buffer = Vec[U8]::new_with_capacity(n)
+    # Filled to its length first, as "getrandom" writes "n" bytes into it: a vector only reserved to "n" would come back
+    # holding none of them.
+    # @let n: The number of random bytes to generate.
+
+    let mut buffer = Vec[U8]::new_filled(n, 0_u8)
     let err = sppc::getrandom(n, buffer.ptr())
     ret case err != 0 {
       drop(buffer)

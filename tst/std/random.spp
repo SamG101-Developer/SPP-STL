@@ -98,3 +98,22 @@ fun test_asking_for_no_bytes_gives_none() -> Void {
   drop(bytes)
   drop(r)
 }
+
+!test(group="std/random")
+fun test_os_next_bytes_returns_the_number_asked_for() -> Void {
+  let bytes = std::random::OsRng::next_bytes(32_uz).expect("the OS generator is available")
+  std::debug::assert(bytes.len() == 32_uz, "thirty-two bytes were asked for")
+  drop(bytes)
+}
+
+!test(group="std/random")
+fun test_os_next_bytes_are_not_all_zero() -> Void {
+  # Thirty-two zero bytes from the OS generator is a 1 in 2^256 event; a buffer it never wrote is all zero every time.
+  let bytes = std::random::OsRng::next_bytes(32_uz).expect("the OS generator is available")
+  let mut seen = 0_u8
+  loop b in bytes.iter_ref() {
+    seen = seen | b@
+  }
+  std::debug::assert(seen != 0_u8, "the generator wrote the bytes")
+  drop(bytes)
+}
