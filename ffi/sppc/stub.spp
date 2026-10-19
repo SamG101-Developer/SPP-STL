@@ -544,6 +544,33 @@ fun pthread_rwlock_unlock(rwlock: &CULong) -> CInt { }
 !ffi(symbol="sppc_pthread_rwlock_destroy")
 fun pthread_rwlock_destroy(rwlock: &CULong) -> CInt { }
 
+!ffi(symbol="sppc_pthread_mutex_clocklock")
+fun pthread_mutex_clocklock(mutex: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
+
+!ffi(symbol="sppc_pthread_cond_clockwait")
+fun pthread_cond_clockwait(cond: &CULong, mutex: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
+
+!ffi(symbol="sppc_pthread_rwlock_clockrdlock")
+fun pthread_rwlock_clockrdlock(rwlock: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
+
+!ffi(symbol="sppc_pthread_rwlock_clockwrlock")
+fun pthread_rwlock_clockwrlock(rwlock: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
+
+!ffi(symbol="sppc_pthread_spin_init")
+fun pthread_spin_init(spinlock: &mut CULong) -> CInt { }
+
+!ffi(symbol="sppc_pthread_spin_lock")
+fun pthread_spin_lock(spinlock: &CULong) -> CInt { }
+
+!ffi(symbol="sppc_pthread_spin_trylock")
+fun pthread_spin_trylock(spinlock: &CULong) -> CInt { }
+
+!ffi(symbol="sppc_pthread_spin_unlock")
+fun pthread_spin_unlock(spinlock: &CULong) -> CInt { }
+
+!ffi(symbol="sppc_pthread_spin_destroy")
+fun pthread_spin_destroy(spinlock: &CULong) -> CInt { }
+
 !ffi(symbol="sppc_malloc")
 fun malloc(size: CSizeT) -> CVoidPtr { }
 
@@ -865,18 +892,6 @@ fun stdout_write(buffer: CCharPtr, size: CSizeT, count: CSizeT, out_n: &mut CSSi
 !ffi(symbol="sppc_stderr_write")
 fun stderr_write(buffer: CCharPtr, size: CSizeT, count: CSizeT, out_n: &mut CSSizeT) -> CInt { }
 
-!ffi(symbol="sppc_pthread_mutex_clocklock")
-fun pthread_mutex_clocklock(mutex: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
-
-!ffi(symbol="sppc_pthread_cond_clockwait")
-fun pthread_cond_clockwait(cond: &CULong, mutex: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
-
-!ffi(symbol="sppc_pthread_rwlock_clockrdlock")
-fun pthread_rwlock_clockrdlock(rwlock: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
-
-!ffi(symbol="sppc_pthread_rwlock_clockwrlock")
-fun pthread_rwlock_clockwrlock(rwlock: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
-
 !ffi(symbol="sppc_pthread_barrier_init")
 fun pthread_barrier_init(barrier: &mut CULong, count: CULong) -> CInt { }
 
@@ -885,21 +900,6 @@ fun pthread_barrier_wait(barrier: &CULong) -> CInt { }
 
 !ffi(symbol="sppc_pthread_barrier_destroy")
 fun pthread_barrier_destroy(barrier: &CULong) -> CInt { }
-
-!ffi(symbol="sppc_pthread_spin_init")
-fun pthread_spin_init(spinlock: &mut CULong) -> CInt { }
-
-!ffi(symbol="sppc_pthread_spin_lock")
-fun pthread_spin_lock(spinlock: &CULong) -> CInt { }
-
-!ffi(symbol="sppc_pthread_spin_trylock")
-fun pthread_spin_trylock(spinlock: &CULong) -> CInt { }
-
-!ffi(symbol="sppc_pthread_spin_unlock")
-fun pthread_spin_unlock(spinlock: &CULong) -> CInt { }
-
-!ffi(symbol="sppc_pthread_spin_destroy")
-fun pthread_spin_destroy(spinlock: &CULong) -> CInt { }
 
 !ffi(symbol="sppc_pipe")
 fun pipe(out_read_fd: &mut CInt, out_write_fd: &mut CInt) -> CInt { }
