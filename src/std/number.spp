@@ -1,4 +1,5 @@
 use std::annotations::public
+use std::num::float8::Float8
 use std::num::sized_floating_point::SizedFloatingPoint
 use std::num::sized_integer_signed::SizedIntegerSigned
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
@@ -19,7 +20,7 @@ use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 !public type S256 = SizedIntegerSigned[256_u32]
 !public type SSize = SizedIntegerSigned[64_u32]
 
-!public type F8 = SizedFloatingPoint[8_u32]
+!public type F8 = Float8
 !public type F16 = SizedFloatingPoint[16_u32]
 !public type F32 = SizedFloatingPoint[32_u32]
 !public type F64 = SizedFloatingPoint[64_u32]
