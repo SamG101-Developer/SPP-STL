@@ -1,0 +1,45 @@
+use std::annotations::package
+use std::annotations::versioned
+use std::llvm::always_inline
+use std::cast::From
+use std::copy::Copy
+use std::number::U32
+use std::num::sized_floating_point::SizedFloatingPoint
+
+!package
+!versioned(base="1.0.0", new="1.0.0")
+cls Float8 {
+  # The `Float8` class is an 8-bit floating point number in the FP8 E4M3 format: a sign bit, 4 exponent bits and 3
+  # mantissa bits. It has no infinity, its NaN is `0x7F` (and `0xFF`), and its largest finite value is 448. LLVM has no
+  # 8-bit float type, so it is kept as its bits: it is a storage type, with no arithmetic or comparisons of its own, and
+  # it is not a `FloatingPoint`. A value is converted to a wider float to work on (`From`, or `intrinsics::fpext_f8`),
+  # and back to store (`From`, or `intrinsics::fptrunc_f8`), which rounds to nearest and saturates past 448 to 448.
+}
+
+sup Float8 ext Copy {
+  # The `Float8` class implements the `Copy` trait, as every sized number does: it is copied by value.
+}
+
+sup [cmp w: U32] SizedFloatingPoint[w] ext From[Float8] {
+  # Reading a `Float8` as a wider float: exact, as every `Float8` value is one of every wider format.
+
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from(that: Float8) -> Self {
+    # @let that: The `Float8` value to read.
+    # @ret: The same value, as a float of width `w`.
+    ret intrinsics::fpext_f8[w](that)
+  }
+}
+
+sup [cmp w: U32] Float8 ext From[SizedFloatingPoint[w]] {
+  # Storing a float as a `Float8`: rounded to nearest (ties to even), and saturating past 448 to 448.
+
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from(that: SizedFloatingPoint[w]) -> Self {
+    # @let that: The float value to store.
+    # @ret: The nearest `Float8`, saturated to 448 when the value is past it (an infinity too).
+    ret intrinsics::fptrunc_f8[w](that)
+  }
+}
