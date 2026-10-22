@@ -87,7 +87,7 @@ cmp fun zero_type() -> Void { }
 cmp fun cfg(platform: &StrView = "", mode: &StrView = "") -> Void { }
 
 !public
-!annotation(target=Annotation::class | Annotation::new_type)
+!annotation(target=Annotation::class)
 !versioned(base="1.0.0", new="1.0.0")
 cmp fun thread_hazard() -> Void {
   # Marks a type that may never cross a thread boundary. Every type is thread-safe unless it is annotated with this, or
