@@ -468,7 +468,7 @@ sup [R: Read] BufRead[R] {
       let found = loop i < self.filled {
         case self.buf[i] == byte { exit true }
         i += 1_uz
-      }
+      } else { false }
 
       let end = case found { i + 1_uz } else { self.filled }
       out.append_from_view(self.buf[self.pos to end])
@@ -490,7 +490,7 @@ sup [R: Read] BufRead[R] {
       let found = loop i < self.filled {
         case self.buf[i] == byte { exit true }
         i += 1_uz
-      }
+      } else { false }
 
       let end = case found { i + 1_uz } else { self.filled }
       total += end - self.pos
