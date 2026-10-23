@@ -511,7 +511,7 @@ sup Path {
     # Run the sppc copyfile system call to do the actual file
     # logic, and handle the error with the final returned value
     # (number of bytes as a pass, or error code as a failure).
-    let mut out_size = 0_s64
+    let mut out_size = 0_sz
     let err = sppc::copyfile(file_in.fd, file_out.fd, USize::from(file_length), 0, &mut out_size)
     ret case err == 0 { Pass[USize](val=USize::from(out_size)) } else { Fail(err=PathErr::from_errno(err)) }
   }

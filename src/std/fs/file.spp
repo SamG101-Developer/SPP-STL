@@ -8,7 +8,8 @@ use std::io::Seek
 use std::io::StreamErr
 use std::io::Write
 use std::number::S32
-use std::number::SSize
+use std::number::S64
+use std::number::U64
 use std::number::U8
 use std::number::USize
 use std::result::Fail
@@ -234,7 +235,7 @@ sup File {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun set_len(&self, len: USize) -> Res[Void, StreamErr] {
+  fun set_len(&self, len: U64) -> Res[Void, StreamErr] {
     # The `set_len` method sets the length of the file to the specified value. If the new length is greater than the
     # current length, the file is extended and the new space is filled with zeros. If the new length is less than the
     # current length, the file is truncated.
@@ -242,7 +243,7 @@ sup File {
     # @ret: A `Res` type containing an empty value if the operation is successful, or an error message if the operation
     # fails.
 
-    let err = sppc::ftruncate(self.fd, SSize::from(len))
+    let err = sppc::ftruncate(self.fd, S64::from(len))
     ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
   }
 
@@ -273,7 +274,7 @@ sup File {
     # @ret: A `Res` type containing an empty value if the lock is successfully acquired, or an error message if the
     # operation fails.
 
-    let mut fl = sppc::CFlock(type_=sppc::f_wrlck, whence=sppc::seek_set, start=0_sz, len=0_sz)
+    let mut fl = sppc::CFlock(type_=sppc::f_wrlck, whence=sppc::seek_set, start=0_s64, len=0_s64)
     let err = sppc::fcntl_lock(self.fd, case non_blocking { sppc::f_setlk } else { sppc::f_setlkw }, &mut fl)
     drop(fl)
 
@@ -293,7 +294,7 @@ sup File {
     # @ret: A `Res` type containing an empty value if the shared lock is successfully acquired, or an error message if
     # the operation fails.
 
-    let mut fl = sppc::CFlock(type_=sppc::f_rdlck, whence=sppc::seek_set, start=0_sz, len=0_sz)
+    let mut fl = sppc::CFlock(type_=sppc::f_rdlck, whence=sppc::seek_set, start=0_s64, len=0_s64)
     let err = sppc::fcntl_lock(self.fd, case non_blocking { sppc::f_setlk } else { sppc::f_setlkw }, &mut fl)
     drop(fl)
 
@@ -309,7 +310,7 @@ sup File {
     # @ret: A `Res` type containing an empty value if the lock is successfully released, or an error message if the
     # operation fails.
 
-    let mut fl = sppc::CFlock(type_=sppc::f_unlck, whence=sppc::seek_set, start=0_sz, len=0_sz)
+    let mut fl = sppc::CFlock(type_=sppc::f_unlck, whence=sppc::seek_set, start=0_s64, len=0_s64)
     let err = sppc::fcntl_lock(self.fd, sppc::f_setlk, &mut fl)
     drop(fl)
 
@@ -357,24 +358,24 @@ sup File ext Write {
 }
 
 sup File ext Seek {
-  fun seek(&mut self, offset: SSize, whence: S32) -> Res[SSize, StreamErr] {
-    let mut pos = 0_sz
+  fun seek(&mut self, offset: S64, whence: S32) -> Res[S64, StreamErr] {
+    let mut pos = 0_s64
     let err = sppc::lseek(self.fd, offset, whence, &mut pos)
     ret case err == 0 { Pass(val=pos) } else { Fail(err=StreamErr::from_errno(err)) }
   }
 
-  fun stream_len(&mut self) -> Res[SSize, StreamErr] {
+  fun stream_len(&mut self) -> Res[S64, StreamErr] {
     let mut info = sppc::CStat()
     let err = sppc::fstat(self.fd, &mut info)
 
-    let len = SSize::from(info.size)
+    let len = info.size
     drop(info)
     ret case err == 0 { Pass(val=len) } else { Fail(err=StreamErr::from_errno(err)) }
   }
 
-  fun stream_pos(&mut self) -> Res[SSize, StreamErr] {
-    let mut pos = 0_sz
-    let err = sppc::lseek(self.fd, 0_sz, Self::seek_cur, &mut pos)
+  fun stream_pos(&mut self) -> Res[S64, StreamErr] {
+    let mut pos = 0_s64
+    let err = sppc::lseek(self.fd, 0_s64, Self::seek_cur, &mut pos)
     ret case err == 0 { Pass(val=pos) } else { Fail(err=StreamErr::from_errno(err)) }
   }
 }
