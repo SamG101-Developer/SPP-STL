@@ -5,13 +5,13 @@ use std::cffi::CBool
 use std::cffi::CCharPtr
 use std::cffi::CClosure
 use std::cffi::CInt
-use std::cffi::CLong
+use std::cffi::CInt64
 use std::cffi::CSSizeT
 use std::cffi::CShort
 use std::cffi::CSizeT
 use std::cffi::CUChar
 use std::cffi::CUInt
-use std::cffi::CULong
+use std::cffi::CUInt64
 use std::cffi::CUShort
 use std::cffi::CVoid
 use std::cffi::CVoidPtr
@@ -350,19 +350,19 @@ use std::cffi::CVoidPtr
 
 !public
 cls CTimespec {
-  !public sec: CULong
-  !public nsec: CULong
+  !public sec: CUInt64
+  !public nsec: CUInt64
 }
 
 !public
 cls CStat {
-  !public dev: CULong
-  !public ino: CULong
-  !public nlink: CULong
-  !public rdev: CULong
-  !public size: CLong
-  !public block_size: CLong
-  !public blocks: CLong
+  !public dev: CUInt64
+  !public ino: CUInt64
+  !public nlink: CUInt64
+  !public rdev: CUInt64
+  !public size: CInt64
+  !public block_size: CInt64
+  !public blocks: CInt64
   !public atim: CTimespec
   !public mtim: CTimespec
   !public ctim: CTimespec
@@ -387,24 +387,24 @@ cls CIovec {
 
 !public
 cls CFdSet {
-  !public bits: [CULong; 16_uz]
+  !public bits: [CUInt64; 16_uz]
 }
 
 !public
 cls CTimeval {
-  !public sec: CULong
-  !public usec: CULong
+  !public sec: CUInt64
+  !public usec: CUInt64
 }
 
 !public
 cls CSockaddrStorage {
-  !private opaque: [CULong; 16_uz]
+  !private opaque: [CUInt64; 16_uz]
 }
 
 !public
 cls CFlock {
-  !public start: CLong
-  !public len: CLong
+  !public start: CInt64
+  !public len: CInt64
   !public pid: CInt
   !public type_: CInt
   !public whence: CInt
@@ -413,17 +413,17 @@ cls CFlock {
 
 !public
 cls CStatvfs {
-  !public block_size: CULong
-  !public frag_size: CULong
-  !public blocks: CULong
-  !public blocks_free: CULong
-  !public blocks_available: CULong
-  !public files: CULong
-  !public files_free: CULong
-  !public files_available: CULong
-  !public fs_id: CULong
-  !public flag: CULong
-  !public namemax: CULong
+  !public block_size: CUInt64
+  !public frag_size: CUInt64
+  !public blocks: CUInt64
+  !public blocks_free: CUInt64
+  !public blocks_available: CUInt64
+  !public files: CUInt64
+  !public files_free: CUInt64
+  !public files_available: CUInt64
+  !public fs_id: CUInt64
+  !public flag: CUInt64
+  !public namemax: CUInt64
 }
 
 !public
@@ -470,106 +470,106 @@ fun init() -> CInt { }
 fun cleanup() -> CInt { }
 
 !ffi(symbol="sppc_pthread_create")
-fun pthread_create(start_routine: CClosure[(), CVoid], out: &mut CULong) -> CInt { }
+fun pthread_create(start_routine: CClosure[(), CVoid], out: &mut CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_join")
-fun pthread_join(handle: &CULong) -> CInt { }
+fun pthread_join(handle: &CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_detach")
-fun pthread_detach(handle: &CULong) -> CInt { }
+fun pthread_detach(handle: &CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_equal")
-fun pthread_equal(handle1: &CULong, handle2: &CULong, out: &mut CULong) -> CVoid { }
+fun pthread_equal(handle1: &CUInt64, handle2: &CUInt64, out: &mut CUInt64) -> CVoid { }
 
 !ffi(symbol="sppc_pthread_self")
-fun pthread_self(out: &mut CULong) -> CVoid { }
+fun pthread_self(out: &mut CUInt64) -> CVoid { }
 
 !ffi(symbol="sppc_pthread_mutex_init")
-fun pthread_mutex_init(out: &mut CULong) -> CInt { }
+fun pthread_mutex_init(out: &mut CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_mutex_init_recursive")
-fun pthread_mutex_init_recursive(out: &mut CULong) -> CInt { }
+fun pthread_mutex_init_recursive(out: &mut CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_mutex_lock")
-fun pthread_mutex_lock(mutex: &CULong) -> CInt { }
+fun pthread_mutex_lock(mutex: &CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_mutex_trylock")
-fun pthread_mutex_trylock(mutex: &CULong) -> CInt { }
+fun pthread_mutex_trylock(mutex: &CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_mutex_unlock")
-fun pthread_mutex_unlock(mutex: &CULong) -> CInt { }
+fun pthread_mutex_unlock(mutex: &CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_mutex_destroy")
-fun pthread_mutex_destroy(mutex: &CULong) -> CInt { }
+fun pthread_mutex_destroy(mutex: &CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_once_init")
-fun pthread_once_init(out: &mut CULong) -> CInt { }
+fun pthread_once_init(out: &mut CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_once")
-fun pthread_once(once: &CULong, func: CClosure[(), CVoid]) -> CInt { }
+fun pthread_once(once: &CUInt64, func: CClosure[(), CVoid]) -> CInt { }
 
 !ffi(symbol="sppc_pthread_cond_init")
-fun pthread_cond_init(out: &mut CULong) -> CInt { }
+fun pthread_cond_init(out: &mut CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_cond_wait")
-fun pthread_cond_wait(cond: &CULong, mutex: &CULong) -> CInt { }
+fun pthread_cond_wait(cond: &CUInt64, mutex: &CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_cond_signal")
-fun pthread_cond_signal(cond: &CULong) -> CInt { }
+fun pthread_cond_signal(cond: &CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_cond_broadcast")
-fun pthread_cond_broadcast(cond: &CULong) -> CInt { }
+fun pthread_cond_broadcast(cond: &CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_cond_destroy")
-fun pthread_cond_destroy(cond: &CULong) -> CInt { }
+fun pthread_cond_destroy(cond: &CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_rwlock_init")
-fun pthread_rwlock_init(rwlock: &mut CULong) -> CInt { }
+fun pthread_rwlock_init(rwlock: &mut CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_rwlock_rdlock")
-fun pthread_rwlock_rdlock(rwlock: &CULong) -> CInt { }
+fun pthread_rwlock_rdlock(rwlock: &CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_rwlock_tryrdlock")
-fun pthread_rwlock_tryrdlock(rwlock: &CULong) -> CInt { }
+fun pthread_rwlock_tryrdlock(rwlock: &CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_rwlock_wrlock")
-fun pthread_rwlock_wrlock(rwlock: &CULong) -> CInt { }
+fun pthread_rwlock_wrlock(rwlock: &CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_rwlock_trywrlock")
-fun pthread_rwlock_trywrlock(rwlock: &CULong) -> CInt { }
+fun pthread_rwlock_trywrlock(rwlock: &CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_rwlock_unlock")
-fun pthread_rwlock_unlock(rwlock: &CULong) -> CInt { }
+fun pthread_rwlock_unlock(rwlock: &CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_rwlock_destroy")
-fun pthread_rwlock_destroy(rwlock: &CULong) -> CInt { }
+fun pthread_rwlock_destroy(rwlock: &CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_mutex_clocklock")
-fun pthread_mutex_clocklock(mutex: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
+fun pthread_mutex_clocklock(mutex: &CUInt64, clock: CInt, duration: &CTimespec) -> CInt { }
 
 !ffi(symbol="sppc_pthread_cond_clockwait")
-fun pthread_cond_clockwait(cond: &CULong, mutex: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
+fun pthread_cond_clockwait(cond: &CUInt64, mutex: &CUInt64, clock: CInt, duration: &CTimespec) -> CInt { }
 
 !ffi(symbol="sppc_pthread_rwlock_clockrdlock")
-fun pthread_rwlock_clockrdlock(rwlock: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
+fun pthread_rwlock_clockrdlock(rwlock: &CUInt64, clock: CInt, duration: &CTimespec) -> CInt { }
 
 !ffi(symbol="sppc_pthread_rwlock_clockwrlock")
-fun pthread_rwlock_clockwrlock(rwlock: &CULong, clock: CInt, duration: &CTimespec) -> CInt { }
+fun pthread_rwlock_clockwrlock(rwlock: &CUInt64, clock: CInt, duration: &CTimespec) -> CInt { }
 
 !ffi(symbol="sppc_pthread_spin_init")
-fun pthread_spin_init(spinlock: &mut CULong) -> CInt { }
+fun pthread_spin_init(spinlock: &mut CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_spin_lock")
-fun pthread_spin_lock(spinlock: &CULong) -> CInt { }
+fun pthread_spin_lock(spinlock: &CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_spin_trylock")
-fun pthread_spin_trylock(spinlock: &CULong) -> CInt { }
+fun pthread_spin_trylock(spinlock: &CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_spin_unlock")
-fun pthread_spin_unlock(spinlock: &CULong) -> CInt { }
+fun pthread_spin_unlock(spinlock: &CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_spin_destroy")
-fun pthread_spin_destroy(spinlock: &CULong) -> CInt { }
+fun pthread_spin_destroy(spinlock: &CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_malloc")
 fun malloc(size: CSizeT) -> CVoidPtr { }
@@ -623,13 +623,13 @@ fun fstat(fd: CInt, out: &mut CStat) -> CInt { }
 fun lstat(path: CCharPtr, out: &mut CStat) -> CInt { }
 
 !ffi(symbol="sppc_poll")
-fun poll(fds: &mut CPollfd, count: CULong, timeout: CInt, out_n: &mut CInt) -> CInt { }
+fun poll(fds: &mut CPollfd, count: CUInt64, timeout: CInt, out_n: &mut CInt) -> CInt { }
 
 !ffi(symbol="sppc_lseek")
-fun lseek(fd: CInt, offset: CLong, whence: CInt, out_pos: &mut CLong) -> CInt { }
+fun lseek(fd: CInt, offset: CInt64, whence: CInt, out_pos: &mut CInt64) -> CInt { }
 
 !ffi(symbol="sppc_mmap")
-fun mmap(fd: CInt, length: CSizeT, prot: CInt, flags: CInt, offset: CLong) -> CVoidPtr { }
+fun mmap(fd: CInt, length: CSizeT, prot: CInt, flags: CInt, offset: CInt64) -> CVoidPtr { }
 
 !ffi(symbol="sppc_memprotect")
 fun memprotect(addr: CVoidPtr, size: CSizeT, prot: CInt) -> CInt { }
@@ -638,10 +638,10 @@ fun memprotect(addr: CVoidPtr, size: CSizeT, prot: CInt) -> CInt { }
 fun munmap(addr: CVoidPtr, length: &CSizeT) -> CInt { }
 
 !ffi(symbol="sppc_pread")
-fun pread(fd: CInt, buffer: CVoidPtr, size: CSizeT, count: CSizeT, offset: CLong, out_n: &mut CSSizeT) -> CInt { }
+fun pread(fd: CInt, buffer: CVoidPtr, size: CSizeT, count: CSizeT, offset: CInt64, out_n: &mut CSSizeT) -> CInt { }
 
 !ffi(symbol="sppc_pwrite")
-fun pwrite(fd: CInt, buffer: CVoidPtr, size: CSizeT, count: CSizeT, offset: CLong, out_n: &mut CSSizeT) -> CInt { }
+fun pwrite(fd: CInt, buffer: CVoidPtr, size: CSizeT, count: CSizeT, offset: CInt64, out_n: &mut CSSizeT) -> CInt { }
 
 !ffi(symbol="sppc_readv")
 fun readv(fd: CInt, iov: &CIovec, iov_count: CInt, out_n: &mut CSSizeT) -> CInt { }
@@ -725,10 +725,10 @@ fun fcntl_lock(fd: CInt, cmd: CInt, lock: &mut CFlock) -> CInt { }
 fun fsync(fd: CInt) -> CInt { }
 
 !ffi(symbol="sppc_truncate")
-fun truncate(path: CCharPtr, length: CLong) -> CInt { }
+fun truncate(path: CCharPtr, length: CInt64) -> CInt { }
 
 !ffi(symbol="sppc_ftruncate")
-fun ftruncate(fd: CInt, length: CLong) -> CInt { }
+fun ftruncate(fd: CInt, length: CInt64) -> CInt { }
 
 !ffi(symbol="sppc_getcwd")
 fun getcwd(buffer: CCharPtr, size: CSizeT) -> CInt { }
@@ -848,7 +848,7 @@ fun abort() -> ! { }
 # message naming the check, with the values it was given, then a backtrace
 # and "_exit". Nothing allocates, and no code of the program's runs again.
 !ffi(symbol="sppc_check_failed")
-fun check_failed(check: CUInt, a: CULong, b: CULong) -> ! { }
+fun check_failed(check: CUInt, a: CUInt64, b: CUInt64) -> ! { }
 
 !ffi(symbol="sppc_set_sockaddr_v4")
 fun set_sockaddr_v4(octets: &CUChar, port: CUShort, out_storage: &mut CSockaddrStorage) -> CVoid { }
@@ -893,19 +893,19 @@ fun stdout_write(buffer: CCharPtr, size: CSizeT, count: CSizeT, out_n: &mut CSSi
 fun stderr_write(buffer: CCharPtr, size: CSizeT, count: CSizeT, out_n: &mut CSSizeT) -> CInt { }
 
 !ffi(symbol="sppc_pthread_barrier_init")
-fun pthread_barrier_init(barrier: &mut CULong, count: CULong) -> CInt { }
+fun pthread_barrier_init(barrier: &mut CUInt64, count: CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_barrier_wait")
-fun pthread_barrier_wait(barrier: &CULong) -> CInt { }
+fun pthread_barrier_wait(barrier: &CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pthread_barrier_destroy")
-fun pthread_barrier_destroy(barrier: &CULong) -> CInt { }
+fun pthread_barrier_destroy(barrier: &CUInt64) -> CInt { }
 
 !ffi(symbol="sppc_pipe")
 fun pipe(out_read_fd: &mut CInt, out_write_fd: &mut CInt) -> CInt { }
 
 !ffi(symbol="sppc_sendfile")
-fun sendfile(from_fd: CInt, to_fd: CInt, offset: &mut CLong, count: CSizeT, out_n: &mut CSSizeT) -> CInt { }
+fun sendfile(from_fd: CInt, to_fd: CInt, offset: &mut CInt64, count: CSizeT, out_n: &mut CSSizeT) -> CInt { }
 
 !ffi(symbol="sppc_accept")
 fun accept(fd: CInt, out_storage: &mut CSockaddrStorage, out_fd: &mut CInt) -> CInt { }
