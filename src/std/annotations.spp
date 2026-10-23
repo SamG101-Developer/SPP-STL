@@ -82,9 +82,25 @@ cmp fun ffi(symbol: &StrView) -> Void { }
 cmp fun zero_type() -> Void { }
 
 !public
-!annotation(target=Annotation::function | Annotation::method | Annotation::ext_method)
-!versioned(base="1.0.0", new="1.0.0")
-cmp fun cfg(platform: &StrView = "", mode: &StrView = "") -> Void { }
+!annotation(target=Annotation::all)
+!versioned(base="1.0.0", new="1.1.0")
+cmp fun cfg(mode: &StrView = "", family: &StrView = "", os: &StrView = "", arch: &StrView = "", env: &StrView = "", pointer_width: &StrView = "", endian: &StrView = "") -> Void {
+  # The `cfg` annotation compiles the annotated item only for the builds it names: the item is dropped, before any
+  # scope is made, from a build its condition does not match, as if it were never written. Two items of the same name
+  # can then each be written for the builds the other is not, such as `USize` for 32 and 64-bit targets.
+  #
+  # Every key given must match. A value can name alternatives, separated by `|`, and a leading `!` matches every value
+  # but those named: `!cfg(pointer_width="32", os="!windows")` is every 32-bit target but Windows. An unknown key or
+  # value is a compile error, not a condition that never holds. Values are spelled as the target's folder names them.
+  # @let ?mode: The build mode: "dev" or "rel".
+  # @let ?family: The kind of operating system: "unix" (Linux, macOS, FreeBSD, ...), "windows" or "wasm".
+  # @let ?os: The operating system: "linux", "macos", "windows", "freebsd" or "wasi".
+  # @let ?arch: The architecture, as the target folder spells it: "x86_64", "i386", "aarch64", "arm", "riscv64",
+  # "s390x", "powerpc64", "powerpc64le", "mips", "mipsel", "mips64el", "sparcv9", "loongarch64", "m68k", "wasm32", ...
+  # @let ?env: The environment, or ABI: "gnu", "musl", "gnueabihf", "gnueabi", "gnuabi64", "gnux32", "msvc", ...
+  # @let ?pointer_width: The width of a pointer in bits: "16", "32" or "64".
+  # @let ?endian: The byte order: "little" or "big".
+}
 
 !public
 !annotation(target=Annotation::class)
