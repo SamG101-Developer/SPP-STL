@@ -1,3 +1,4 @@
+use std::annotations::cfg
 use std::annotations::intrinsic
 use std::annotations::package
 use std::annotations::public
@@ -9,13 +10,18 @@ use std::limits::Limits
 !public type CChar = std::number::S8
 !public type CShort = std::number::S16
 !public type CInt = std::number::S32
-!public type CLong = std::number::S64
+# C's `long` is a pointer wide on Unix, 32 or 64-bit, but always 32 bits on Windows.
+!public !cfg(os="!windows", pointer_width="64") type CLong = std::number::S64
+!public !cfg(os="!windows", pointer_width="32") type CLong = std::number::S32
+!public !cfg(os="windows") type CLong = std::number::S32
 !public type CSSizeT = std::number::SSize
 
 !public type CUChar = std::number::U8
 !public type CUShort = std::number::U16
 !public type CUInt = std::number::U32
-!public type CULong = std::number::U64
+!public !cfg(os="!windows", pointer_width="64") type CULong = std::number::U64
+!public !cfg(os="!windows", pointer_width="32") type CULong = std::number::U32
+!public !cfg(os="windows") type CULong = std::number::U32
 !public type CSizeT = std::number::USize
 
 !public type CFloat = std::number::F32

@@ -1,3 +1,4 @@
+use std::annotations::cfg
 use std::annotations::public
 use std::num::float8::Float8
 use std::num::sized_floating_point::SizedFloatingPoint
@@ -10,7 +11,8 @@ use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 !public type U64 = SizedIntegerUnsigned[64_u32]
 !public type U128 = SizedIntegerUnsigned[128_u32]
 !public type U256 = SizedIntegerUnsigned[256_u32]
-!public type USize = SizedIntegerUnsigned[64_u32]
+!public !cfg(pointer_width="64") type USize = SizedIntegerUnsigned[64_u32]
+!public !cfg(pointer_width="32") type USize = SizedIntegerUnsigned[32_u32]
 
 !public type S8 = SizedIntegerSigned[8_u32]
 !public type S16 = SizedIntegerSigned[16_u32]
@@ -18,7 +20,8 @@ use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 !public type S64 = SizedIntegerSigned[64_u32]
 !public type S128 = SizedIntegerSigned[128_u32]
 !public type S256 = SizedIntegerSigned[256_u32]
-!public type SSize = SizedIntegerSigned[64_u32]
+!public !cfg(pointer_width="64") type SSize = SizedIntegerSigned[64_u32]
+!public !cfg(pointer_width="32") type SSize = SizedIntegerSigned[32_u32]
 
 !public type F8 = Float8
 !public type F16 = SizedFloatingPoint[16_u32]

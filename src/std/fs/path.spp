@@ -187,7 +187,7 @@ sup Path {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  !cfg(platform="Unix")
+  !cfg(family="unix")
   fun sep(&self) -> Char {
     # The `sep` method returns the path separator character for the current platform. This is used to split and join
     # paths in a platform-agnostic way. On Windows, the separator is '\\', while on Unix-like systems, it's '/'.
@@ -199,7 +199,7 @@ sup Path {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  !cfg(platform="Unix")
+  !cfg(family="unix")
   fun is_absolute(&self) -> Bool {
     # The `is_absolute` method checks if the path is an absolute path. An absolute path starts with the root directory
     # (e.g., '/' on Unix or 'C:\\' on Windows). This method provides a simple way to determine if a path is absolute or
@@ -214,7 +214,7 @@ sup Path {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  !cfg(platform="Unix")
+  !cfg(family="unix")
   fun is_relative(&self) -> Bool {
     # The `is_relative` method checks if the path is a relative path. A relative path does not start with the root
     # directory and is interpreted relative to the current working directory. This method provides a simple way to
