@@ -382,7 +382,7 @@ cls CPollfd {
 !public
 cls CIovec {
   !public base: CVoidPtr
-  !public len: CULong
+  !public len: CSizeT
 }
 
 !public
