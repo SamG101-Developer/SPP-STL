@@ -22,6 +22,10 @@ use std::limits::Limits
 !public !cfg(os="!windows", pointer_width="64") type CULong = std::number::U64
 !public !cfg(os="!windows", pointer_width="32") type CULong = std::number::U32
 !public !cfg(os="windows") type CULong = std::number::U32
+
+# C's fixed-width 64-bit integers ("int64_t", "uint64_t"), whatever "long" is.
+!public type CInt64 = std::number::S64
+!public type CUInt64 = std::number::U64
 !public type CSizeT = std::number::USize
 
 !public type CFloat = std::number::F32

@@ -365,7 +365,7 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
     # Todo: self <= 0 or base <= 1 should return None. Todo: cant use ord on this base type, so do bit checking. Todo:
     # no clue if this is right, probably not.
     case self.ilog2_checked() of {
-      is Some[U32](val as i) { ret Some(val=log_10_lookup_table.index_ref(U64::from(i))@) }
+      is Some[U32](val as i) { ret Some(val=log_10_lookup_table.index_ref(USize::from(i))@) }
     }
     ret None
   }
