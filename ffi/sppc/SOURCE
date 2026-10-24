@@ -1,3 +1,3 @@
-commit: d0fd14fed162c96b77def182ecd7fe361cc8dd3b
-stamp: 26821fe18b621d65ec1dda341f0c7ffe9707805d
-targets: aarch64-linux-gnu aarch64-macos x86_64-linux-gnu x86_64-macos
+commit: 4cc01d2a2000a2a648d191c42183dc80149b2adf
+stamp: 566ffa31489297ea85791ab0bcb98f48d30b79b2
+targets: aarch64-linux-gnu aarch64-macos arm-linux-gnueabi arm-linux-gnueabihf i386-linux-gnu loongarch64-linux-gnu m68k-linux-gnu mips-linux-gnu mips64el-linux-gnuabi64 mipsel-linux-gnu powerpc64-linux-gnu powerpc64le-linux-gnu riscv64-linux-gnu s390x-linux-gnu sparcv9-linux-gnu x86_64-linux-gnu x86_64-macos
