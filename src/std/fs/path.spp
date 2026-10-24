@@ -85,7 +85,18 @@ sup PathErr {
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
+!cfg(os="!windows|macos|ios|darwin|tvos|watchos|xros|driverkit|freebsd|netbsd|openbsd|dragonfly|solaris")
 cmp path_max: USize = 4096_uz
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+!cfg(os="macos|ios|darwin|tvos|watchos|xros|driverkit|freebsd|netbsd|openbsd|dragonfly|solaris")
+cmp path_max: USize = 1024_uz
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+!cfg(os="windows")
+cmp path_max: USize = 260_uz
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
@@ -187,25 +198,33 @@ sup Path {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  !cfg(family="unix")
+  !cfg(family="!windows")
   fun sep(&self) -> Char {
     # The `sep` method returns the path separator character for the current platform. This is used to split and join
-    # paths in a platform-agnostic way. On Windows, the separator is '\\', while on Unix-like systems, it's '/'.
+    # paths in a platform-agnostic way. On Unix-like systems and WebAssembly, it's '/'.
     # @ret: The path separator as a `Char` object.
-    # @todo: Implement platform-specific logic for Windows paths.
 
     ret '/'
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  !cfg(family="unix")
+  !cfg(family="windows")
+  fun sep(&self) -> Char {
+    # The `sep` method returns the path separator character for the current platform. This is used to split and join
+    # paths in a platform-agnostic way. On Windows, it's '\\'.
+    # @ret: The path separator as a `Char` object.
+
+    ret '\\'
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  !cfg(family="!windows")
   fun is_absolute(&self) -> Bool {
-    # The `is_absolute` method checks if the path is an absolute path. An absolute path starts with the root directory
-    # (e.g., '/' on Unix or 'C:\\' on Windows). This method provides a simple way to determine if a path is absolute or
-    # relative.
+    # The `is_absolute` method checks if the path is an absolute path. An absolute path starts with the root directory,
+    # '/'. This method provides a simple way to determine if a path is absolute or relative.
     # @ret: `true` if the path is absolute, `false` otherwise.
-    # @todo: Implement platform-specific logic for Windows paths.
 
     let sep = Str::from(self.sep())
     defer drop(sep)
@@ -214,7 +233,29 @@ sup Path {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  !cfg(family="unix")
+  !cfg(family="windows")
+  fun is_absolute(&self) -> Bool {
+    # The `is_absolute` method checks if the path is an absolute path. On Windows, that is a drive root ('C:\\' or
+    # 'C:/'), or a path starting with a separator (a UNC path '\\\\server', or rooted on the current drive).
+    # @ret: `true` if the path is absolute, `false` otherwise.
+
+    let back = Str::from('\\')
+    defer drop(back)
+    let fwd = Str::from('/')
+    defer drop(fwd)
+    case self.inner.starts_with(&back) or self.inner.starts_with(&fwd) { ret true }
+
+    # A drive root: one letter, a colon, then a separator.
+    let colon = self.inner.find_char(':')
+    case colon.is_none() { ret false }
+    case colon.unwrap() != 1_uz { ret false }
+    let rest = Str::from(self.inner[2_uz to self.inner.len()])
+    defer drop(rest)
+    ret rest.starts_with(&back) or rest.starts_with(&fwd)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
   fun is_relative(&self) -> Bool {
     # The `is_relative` method checks if the path is a relative path. A relative path does not start with the root
     # directory and is interpreted relative to the current working directory. This method provides a simple way to
