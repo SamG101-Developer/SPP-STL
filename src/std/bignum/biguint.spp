@@ -162,7 +162,7 @@ sup BigUInt ext std::ops::bit_xor::BitXor {
 sup BigUInt ext std::ops::bit_not::BitNot {
   fun bit_not(mut self) -> Self {
     loop i in Range[USize]::between(0_uz, self.data.len()) {
-      self.data[i].bit_not_assign()
+      self.data[mut i].bit_not_assign()
     }
     ret self
   }
