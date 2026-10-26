@@ -904,9 +904,6 @@ fun pthread_barrier_destroy(barrier: &CUInt64) -> CInt { }
 !ffi(symbol="sppc_pipe")
 fun pipe(out_read_fd: &mut CInt, out_write_fd: &mut CInt) -> CInt { }
 
-!ffi(symbol="sppc_sendfile")
-fun sendfile(from_fd: CInt, to_fd: CInt, offset: &mut CInt64, count: CSizeT, out_n: &mut CSSizeT) -> CInt { }
-
 !ffi(symbol="sppc_accept")
 fun accept(fd: CInt, out_storage: &mut CSockaddrStorage, out_fd: &mut CInt) -> CInt { }
 
@@ -921,6 +918,9 @@ fun getrandom(size: CSizeT, out: CCharPtr) -> CInt { }
 
 !ffi(symbol="sppc_copyfile")
 fun copyfile(fd_in: CInt, fd_out: CInt, len: CSizeT, flags: CInt, out_n: &mut CSSizeT) -> CInt { }
+
+!ffi(symbol="sppc_sendfile")
+fun sendfile(from_fd: CInt, to_fd: CInt, offset: &mut CInt64, count: CSizeT, out_n: &mut CSSizeT) -> CInt { }
 
 !ffi(symbol="sppc_deny_wx")
 fun deny_wx() -> CInt { }
