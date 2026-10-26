@@ -1,3 +1,3 @@
-commit: d88c936e0c971c21b215031aa1a6dc81fd5b4def
-stamp: b81a28f705775f05d626438abaeb9af9c3665ecf
-targets: aarch64-linux-gnu aarch64-macos arm-linux-gnueabi arm-linux-gnueabihf i386-linux-gnu loongarch64-linux-gnu m68k-linux-gnu mips-linux-gnu mips64el-linux-gnuabi64 mipsel-linux-gnu powerpc-linux-gnu powerpc64-linux-gnu powerpc64le-linux-gnu riscv64-linux-gnu s390x-linux-gnu sparcv9-linux-gnu x86_64-linux-gnu x86_64-macos
+commit: 366fdf21684349638398754ac69b39c96ab69ab9
+stamp: 52ed80b1ceded484d19c38e0cf97bf484f033991
+targets: aarch64-linux-gnu aarch64-macos aarch64_be-linux-gnu arm-linux-gnueabi arm-linux-gnueabihf i386-linux-gnu loongarch64-linux-gnu m68k-linux-gnu mips-linux-gnu mips64el-linux-gnuabi64 mipsel-linux-gnu powerpc-linux-gnu powerpc64-linux-gnu powerpc64le-linux-gnu riscv64-linux-gnu s390x-linux-gnu sparcv9-linux-gnu x86_64-linux-gnu x86_64-linux-gnux32 x86_64-linux-musl x86_64-macos
