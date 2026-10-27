@@ -51,7 +51,7 @@ fun test_a_datagram_arrives_with_its_sender_s_address() -> Void {
   std::debug::assert(sent.is_pass(), "the send succeeds")
   std::debug::assert(sent.unwrap() == 3_uz, "and it took the whole datagram")
 
-  let mut buf = [0_u8; 8_u64]
+  let mut buf = [0_u8; 8_uz]
   let received = b.recv_from(&mut buf)
   std::debug::assert(received.is_pass(), "the receive succeeds")
   let (n, from) = received.unwrap()
@@ -82,7 +82,7 @@ fun test_datagrams_keep_their_boundaries() -> Void {
   let s2 = a.send_to(&second, &b_addr)
   drop(s2)
 
-  let mut buf = [0_u8; 16_u64]
+  let mut buf = [0_u8; 16_uz]
   let r1 = b.recv_from(&mut buf)
   let (n1, from1) = r1.unwrap()
   std::debug::assert(n1 == 2_uz, "the first receive produced the first datagram, and only it")
@@ -108,12 +108,12 @@ fun test_an_empty_datagram_is_still_a_datagram() -> Void {
   let mut b = bound()
   let b_addr = b.local_addr().unwrap()
 
-  let empty = [0_u8; 0_u64]
+  let empty = [0_u8; 0_uz]
   let sent = a.send_to(&empty, &b_addr)
   std::debug::assert(sent.is_pass(), "sending nothing succeeds")
   std::debug::assert(sent.unwrap() == 0_uz, "and reports no bytes")
 
-  let mut buf = [0_u8; 4_u64]
+  let mut buf = [0_u8; 4_uz]
   let received = b.recv_from(&mut buf)
   std::debug::assert(received.is_pass(), "and it is received")
   let (n, from) = received.unwrap()

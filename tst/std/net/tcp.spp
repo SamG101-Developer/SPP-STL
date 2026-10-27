@@ -95,7 +95,7 @@ fun test_bytes_written_at_one_end_are_read_at_the_other() -> Void {
   std::debug::assert(written.is_pass(), "the write succeeds")
   std::debug::assert(written.unwrap() == 5_uz, "and it took the whole payload")
 
-  let mut buf = [0_u8; 8_u64]
+  let mut buf = [0_u8; 8_uz]
   let read = server.read(&mut buf)
   std::debug::assert(read.is_pass(), "the read succeeds")
   std::debug::assert(read.unwrap() == 5_uz, "and it produced as many bytes as were sent")
@@ -198,7 +198,7 @@ fun test_shutting_down_the_write_side_ends_the_other_end_s_read() -> Void {
   std::debug::assert(down.is_pass(), "shutting down the write side succeeds")
   drop(down)
 
-  let mut buf = [0_u8; 4_u64]
+  let mut buf = [0_u8; 4_uz]
   let read = server.read(&mut buf)
   std::debug::assert(read.is_pass(), "the other end's read still succeeds")
   std::debug::assert(read.unwrap() == 0_uz, "and reports end of stream")
