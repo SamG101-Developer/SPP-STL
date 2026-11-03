@@ -1,0 +1,728 @@
+use std::annotations::abstract_method
+use std::annotations::package
+use std::annotations::private
+use std::annotations::public
+use std::annotations::versioned
+use std::boolean::Bool
+use std::char::Char
+use std::copy::Copy
+use std::io::StreamErr
+use std::io::StreamInvalidInputError
+use std::io::Write
+use std::number::U32
+use std::number::U8
+use std::number::USize
+use std::option::None
+use std::option::Opt
+use std::option::Some
+use std::result::Fail
+use std::result::Pass
+use std::result::Res
+use std::string::Str
+use std::string_view::StrView
+use std::view::View
+use std::void::Void
+use std::mem::ops::drop
+
+# Format strings are text with placeholders: `{}` takes the next argument, and `{:spec}` takes it with a spec. `{{` and
+# `}}` are a literal brace. The spec is `[[fill]align][+][#][0][width][.precision][kind]`:
+#
+#   fill       Any one character used to pad up to the width (default a space). Only given with an alignment.
+#   align      `<` left, `>` right, `^` centre. Text defaults to left, numbers to right.
+#   +          Show a `+` on non-negative numbers.
+#   #          Show the radix prefix: `0x` for `x`/`X`, `0b` for `b`, `0o` for `o`.
+#   0          Pad a number with zeros after its sign and prefix, instead of with the fill before it.
+#   width      The minimum width, in characters.
+#   precision  Digits after the point for a float (default 6), or the most characters shown for text.
+#   kind       `x`/`X` hexadecimal (lower/upper case), `b` binary, `o` octal. Integers only.
+#
+# Arguments are taken positionally, in order: there are no `{0}`/`{name}` placeholders yet. A format string with more
+# placeholders than arguments, more arguments than placeholders, an unmatched `}` or a malformed spec is an error:
+# `try_format` and `write_format` return `StreamInvalidInputError`, and `format` aborts.
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls Format {
+  # The `Format` type is the interface for rendering a value as text in a format string. A type implements `fmt`,
+  # writing itself into the `Formatter` it is given. `Formatter::pad` and `Formatter::pad_integral` apply the
+  # placeholder's width, alignment, sign and precision for it; a type that writes with `Formatter::write_str` instead
+  # ignores them. The std's own impls live with their types: the integers, floats, `Bool`, `Char` and `Str`.
+  #
+  # Arguments are passed by value, so formatting a non-`Copy` value such as a `Str` consumes it. Pass a clone to keep
+  # the original.
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls FormatSpec {
+  # The `FormatSpec` type is a parsed placeholder spec, `{:spec}`, as described at the top of this module. A `{}` with
+  # no spec gets `FormatSpec::new()`.
+  # @let fill: The character used to pad up to `width`.
+  # @let align: `b'<'`, `b'>'` or `b'^'`, or `0_u8` when none was given and the value's own default applies.
+  # @let sign_plus: Whether a non-negative number shows a `+`.
+  # @let alternate: Whether an integer shows its radix prefix.
+  # @let zero_pad: Whether a number pads with zeros after its sign, instead of with `fill`.
+  # @let width: The minimum number of characters written; `0` means no minimum.
+  # @let precision: Digits after the point for a float, or the most characters shown for text.
+  # @let kind: `b'x'`, `b'X'`, `b'b'` or `b'o'`, or `0_u8` for the value's default rendering.
+
+  !public fill: Char
+  !public align: U8
+  !public sign_plus: Bool
+  !public alternate: Bool
+  !public zero_pad: Bool
+  !public width: USize
+  !public precision: Opt[USize]
+  !public kind: U8
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls Formatter {
+  # The `Formatter` type walks a format string, writing its literal text and handing each placeholder's spec to the
+  # argument that fills it. It formats into its own buffer, so a whole format call is written out with one write: a line
+  # from `println` cannot be split by another thread's output.
+  # @let out: The text formatted so far.
+  # @let fmt: A copy of the format string. `StrView` only exists behind a borrow, so it cannot be held here.
+  # @let pos: The byte offset in `fmt` that has not been consumed yet.
+  # @let spec: The spec of the placeholder currently being filled.
+  #
+  # Todo: copying `fmt` costs an allocation per format call, as does `out` before anything is written. Avoiding them
+  # needs a way to hold the caller's borrow for the formatter's lifetime, or to pass it to each parsing method.
+
+  !package out: Str
+  !package fmt: Str
+  !package pos: USize
+  !package spec: FormatSpec
+}
+
+sup Format {
+  !public
+  !abstract_method
+  !versioned(base="1.0.0", new="1.0.0")
+  fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
+    # The `fmt` method writes this value into the formatter, honouring the formatter's current spec where it makes sense
+    # for the type.
+    # @let formatter: The formatter to write into. `formatter.spec()` is the spec of the placeholder being filled.
+    # @ret: An empty success value, or an error if the value could not be formatted.
+  }
+}
+
+sup FormatSpec ext Copy { }
+
+sup FormatSpec {
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun new() -> FormatSpec {
+    # The `new` function creates the spec of a bare `{}`: no width, no precision, no flags, and the default rendering.
+    # @ret: The default spec.
+
+    ret FormatSpec(
+      fill=' ', align=0_u8, sign_plus=false, alternate=false, zero_pad=false, width=0_uz, precision=None, kind=0_u8)
+  }
+}
+
+sup Formatter {
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
+  fun new(fmt: &StrView) -> Formatter {
+    # The `new` function creates a formatter at the start of a format string. All the fields are defaulted to being
+    # empty.
+    # @let fmt: The format string. The formatter keeps its own copy.
+    # @ret: A formatter with nothing written yet.
+
+    ret Formatter(out=Str::new(), fmt=Str::from(fmt), pos=0_uz, spec=FormatSpec::new())
+  }
+
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
+  fun into_str(self) -> Str {
+    # The `into_str` method takes the text formatted so far out of the formatter.
+    # @ret: The formatted text.
+
+    drop(self.fmt)
+    ret self.out
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun spec(&self) -> FormatSpec {
+    # The `spec` method gets the spec of the placeholder currently being filled. A spec is copyable, so the formatter
+    # doesn't get consumed.
+    # @ret: A copy of the current spec.
+
+    ret self.spec
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun write_str(&mut self, text: &StrView) -> Void {
+    # The `write_str` method writes text as it is, ignoring the spec. For example, the optional type might write "Some("
+    # into the formatter before the internal value is formatted in.
+    # @let text: The text to write.
+
+    # Append the string with no respect for existing formatting rules. This just
+    # directly adds the characters.
+    self.out.append_str(text)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun write_char(&mut self, char: Char) -> Void {
+    # The `write_char` method writes one character as it is, ignoring the spec. Exposed for symmetry with the string
+    # appending, but it is likely that the string version is used more often than not.
+    # @let char: The character to write.
+
+    # Append the char with no respect for existing formatting rules.
+    self.out.append(char)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun write_format[..Args: Format](&mut self, fmt: &StrView, ..args: Args) -> Res[Void, StreamErr] {
+    # The `write_format` method formats a nested format string into this formatter. It is how a type with fields writes
+    # them, for example `f.write_format("({}, {})", self.x, self.y)`. The nested string has its own specs; the current
+    # placeholder's spec does not apply to it.
+    # @type Args: The format-constrained variadic generic types.
+    # @let fmt: The nested format string.
+    # @let args: The arguments for the nested format string's placeholders.
+    # @ret: An empty success value, or an error if the nested format string   does not match its arguments.
+
+    # Create a new formatter for the "fmt" string, and format the args into
+    # it. This creates a filled string to add to the current one.
+    let mut inner = Formatter::new(fmt)
+    let result = format_args(&mut inner, ..args)
+    let text = inner.into_str()
+
+    # Append the newly formatting string into the current string, and drop
+    # the formatted string. Return the overal formatted result.
+    self.out.append_str(&text)
+    drop(text)
+    ret result
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun pad(&mut self, text: &StrView) -> Void {
+    # The `pad` method writes text under the current spec: cut to `precision` characters if one is given, then padded
+    # with `fill` up to `width`, left-aligned unless the spec says otherwise. This is how text-like values format.
+    # @let text: The text to write.
+
+    # Write a string into the formatter, respecting existing formatting rules.
+    # This is used by strings, bools and chars at the moment. The "end" has to
+    # respect the precision should it exist, otherwise the whole text chunk.
+    let spec = self.spec
+    let end = case spec.precision.is_some() {
+      byte_offset_of_char(text, spec.precision.unwrap()) }
+    else {
+      text.len()
+    }
+
+    # Pad with left-alignment, slicing to the adjusted end position. This
+    # handles the " " padding.
+    self.pad_aligned(text[0_uz to end], b'<')
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun pad_integral(&mut self, non_negative: Bool, digits: &StrView) -> Void {
+    # The `pad_integral` method writes a number's digits under the current spec: a sign (`-`, or `+` with the `+` flag),
+    # the radix prefix with the `#` flag, then the digits, either zero-padded after the sign and prefix with the `0`
+    # flag or padded with `fill` up to `width`, right-aligned unless the spec says otherwise.
+    # @let non_negative: Whether the number is zero or positive. The sign is not part of `digits`.
+    # @let digits: The number's digits, with no sign and no prefix.
+
+    let spec = self.spec
+
+    # If the "+" was present in the spec, then add the sign of the number. The
+    # negative sign is always added, and the positive is flag dependent.
+    let mut head = Str::new()
+    case non_negative.not { head.append('-') }
+    case non_negative and spec.sign_plus { head.append('+') }
+
+    # Next the radix is handled. This adds the "0x"/"0b"/"0o" for the different
+    # numeric forms: hex, binary, octal.
+    case spec.alternate {
+      case spec.kind of {
+        == b'x', b'X' { head.append_str("0x") }
+        == b'b' { head.append_str("0b") }
+        == b'o' { head.append_str("0o") }
+      }
+    }
+
+    # Zero padding goes between the prefix and the digits, so it ignores the fill
+    # and the alignment.
+    case spec.zero_pad {
+      let used = head.len() + char_count(digits)
+      self.out.append_str(&head)
+      case used < spec.width { self.write_fill('0', spec.width - used) }
+      self.out.append_str(digits)
+    }
+
+    # Otherwise, append the didgts and then the right-alignment padding. Any new
+    # characters will come after the " " padding.
+    else {
+      head.append_str(digits)
+      self.pad_aligned(&head, b'>')
+    }
+    drop(head)
+  }
+
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
+  fun pad_aligned(&mut self, text: &StrView, default_align: U8) -> Void {
+    # The `pad_aligned` method writes text padded with the spec's fill up to the spec's width.
+    # @let text: The text to write, already cut to any precision.
+    # @let default_align: The alignment used when the spec gives none.
+
+    # If the current length has already exceeded the spec's width, add the text
+    # and return, no padding required.
+    let spec = self.spec
+    let length = char_count(text)
+    case length >= spec.width {
+      self.out.append_str(text)
+      ret
+    }
+
+    # The left padding is either the full padding for right-alignment, otherwise
+    # half the size for central alignment (and nothing for left-alignment).
+    let total = spec.width - length
+    let align = case spec.align == 0_u8 { default_align } else { spec.align }
+    let left = case align of {
+      == b'>' { total }
+      == b'^' { total / 2_uz }
+      else { 0_uz }
+    }
+
+    # Fill the left padding, add the text, and then the remaining difference for
+    # the right-side padding.
+    self.write_fill(spec.fill, left)
+    self.out.append_str(text)
+    self.write_fill(spec.fill, total - left)
+  }
+
+  !private
+  !versioned(base="1.0.0", new="1.0.0")
+  fun write_fill(&mut self, fill: Char, count: USize) -> Void {
+    # The `write_fill` method writes a fill character a number of times.
+    # @let fill: The character to write.
+    # @let count: How many times to write it.
+
+    # Effectively "write_char" n times, keep looping the character appending.
+    # Todo: One allocation and append the lot, easy optimization.
+    let mut i = 0_uz
+    loop i < count {
+      self.out.append(fill)
+      i += 1_uz
+    }
+  }
+
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
+  fun arg[T: Format](&mut self, value: &T) -> Res[Void, StreamErr] {
+    # The `arg` method writes the literal text up to the next placeholder, then formats one argument into it.
+    # @type T: The type of the argument (and formattable type).
+    # @let value: The argument for the next placeholder.
+    # @ret: An empty success value, or an error if there is no placeholder left   for it, the placeholder is malformed,
+    # or the value fails to format.
+
+    # Get the next placeholder in the format string (as in the next left brace
+    # character), and handle any errors with parsing the spec. If there was no
+    # parsing ("found.not"), then there are no available "{}" sections left.
+    let found = self.next_placeholder()?
+    case found.not { ret Fail(err=invalid_format()) }
+    ret value.fmt(self)
+  }
+
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
+  fun finish(&mut self) -> Res[Void, StreamErr] {
+    # The `finish` method writes the literal text after the last argument, checking no placeholder is left unfilled.
+    # @ret: An empty success value, or an error if a placeholder is left or the   rest of the string is malformed.
+
+    # An inversion of "arg" - ensure that the spec parses correctly, but that
+    # there were no "{}" sections left; nothing more to fill.
+    let found = self.next_placeholder()?
+    case found { ret Fail(err=invalid_format()) }
+    ret Pass[Void]()
+  }
+
+  !private
+  !versioned(base="1.0.0", new="1.0.0")
+  fun next_placeholder(&mut self) -> Res[Bool, StreamErr] {
+    # The `next_placeholder` method writes literal text up to the next placeholder and parses that placeholder's spec
+    # into `spec`, or writes the rest of the string if there is no placeholder left. Braces are ASCII, so they never
+    # occur inside a multi-byte character, and scanning bytes is safe.
+    # @ret: Whether a placeholder was found, or an error for an unmatched `}` or a malformed spec.
+
+    # Get the length and set the start position to the current tracking position, and
+    # the "i" bump-variable to the currrent position too.
+    let length = self.fmt.len()
+    let mut start = self.pos
+    let mut i = self.pos
+
+    loop i < length {
+
+      # Get the current byte (at the ith position and check if it is either brace
+      # character. Keep iterating until one is found.
+      let byte = byte_at(&self.fmt, i)
+      case byte == b'{' or byte == b'}' {
+        # Append everything between the chunk start position, and the current i
+        # position. This is either a format string upto "}", or skippable contents
+        # upto "{".
+        self.out.append_str(self.fmt[start to i])
+
+        # A doubled brace is a literal; the second brace starts the next run of
+        # literal text. Bump the positions and continue looping.
+        case byte_at(&self.fmt, i + 1_uz) == byte {
+          start = i + 1_uz
+          i += 2_uz
+          skip
+        }
+
+        # If the byte is a closing brace then there is an issue, because the previous
+        # call to the "parse_spec" method should have picked it up. Bump the tracking
+        # position and parse the next part of the spec.
+        case byte == b'}' { ret Fail(err=invalid_format()) }
+        self.pos = i + 1_uz
+        ret self.parse_spec()
+      }
+
+      # Bump the current "i" part and continue.
+      i += 1_uz
+    }
+
+    # Given there was bo spec part to parse, and the chunk from the starting position
+    # to the end of the string, and return "false" ie nothing parsed.
+    self.out.append_str(self.fmt[start to length])
+    self.pos = length
+    ret Pass(val=false)
+  }
+
+  !private
+  !versioned(base="1.0.0", new="1.0.0")
+  fun parse_spec(&mut self) -> Res[Bool, StreamErr] {
+    # The `parse_spec` method parses the inside of a placeholder, from just after its `{` up to and including its `}`,
+    # into `spec`.
+    # @ret: `true` once the spec is parsed, or an error if it is malformed.
+
+    # Create a new spec, and start at the current tracking position. It is a spec per
+    # "{...}" section, so each needs its onw. We start one character after the "{".
+    let mut spec = FormatSpec::new()
+    let mut i = self.pos
+
+    # The entering character must be a ":". This signifies the start of formatting
+    # after "{".
+    case byte_at(&self.fmt, i) == b':' {
+      i += 1_uz # Shift pass the ":".
+
+      # A fill is only given with an alignment, so a character followed by an
+      # alignment is the fill. The fill may be any character, so step over all of its
+      # bytes.
+      case i < self.fmt.len() {
+        let n = utf8_len(byte_at(&self.fmt, i)) # Length of fill chars
+
+        # If the current byte (offset for fill bytes) is an alignment character ("<",
+        # ">" or "^"), then set the fill and alignment (fill is before alignment).
+        case is_align(byte_at(&self.fmt, i + n)) {
+          let fill_text = self.fmt[i to i + n]
+          spec.fill = fill_text.chars().nth(0_uz).unwrap()
+          spec.align = byte_at(&self.fmt, i + n)
+          i += n + 1_uz
+        }
+
+        # Otherwise, check the current byte for alignment, and apply it to the spec if
+        # so.
+        else {
+          case is_align(byte_at(&self.fmt, i)) {
+            spec.align = byte_at(&self.fmt, i)
+            i += 1_uz
+          }
+        }
+      }
+
+      # The flags, each at most once and in this order. The flag to force "+" to show
+      # on positive numbers, the "#" radix and "0" padding control.
+      case byte_at(&self.fmt, i) == b'+' {
+        spec.sign_plus = true
+        i += 1_uz
+      }
+      case byte_at(&self.fmt, i) == b'#' {
+        spec.alternate = true
+        i += 1_uz
+      }
+      case byte_at(&self.fmt, i) == b'0' {
+        spec.zero_pad = true
+        i += 1_uz
+      }
+
+      # The width, which is the minimum width in characters. This doesn't truncate if
+      # something is bigger.
+      loop byte_at(&self.fmt, i).is_ascii_digit() {
+        spec.width = spec.width * 10_uz + USize::from(byte_at(&self.fmt, i) - b'0')
+        i += 1_uz
+      }
+
+      # The precision after a point. This requires as ascii digit after the ".", then
+      # any amount of ascii digits for expressive precision.
+      case byte_at(&self.fmt, i) == b'.' {
+        i += 1_uz
+        case byte_at(&self.fmt, i).is_ascii_digit().not { ret Fail(err=invalid_format()) }
+        let mut precision = 0_uz
+        loop byte_at(&self.fmt, i).is_ascii_digit() {
+          precision = precision * 10_uz + USize::from(byte_at(&self.fmt, i) - b'0')
+          i += 1_uz
+        }
+        spec.precision = Some(val=precision)
+      }
+
+      # The kind of rendering. This uses hex, binary, octal or decimal (no kind), and
+      # if the radix is enabled, the prefix gets prepended for the formatting ie "0x".
+      let kind = byte_at(&self.fmt, i)
+      case kind == b'x' or kind == b'X' or kind == b'b' or kind == b'o' {
+        spec.kind = kind
+        i += 1_uz
+      }
+    }
+
+    # Ensure the "}" gets closed, and move past it. Another "}" is out of position, as
+    # it needs a matching "{", and the caller picks this up.
+    case byte_at(&self.fmt, i) != b'}' { ret Fail(err=invalid_format()) }
+    self.pos = i + 1_uz
+    self.spec = spec
+    ret Pass(val=true)
+  }
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun format[..Args: Format](fmt: &StrView, ..args: Args) -> Str {
+  # The `format` function formats its arguments into a format string, as described at the top of this module. A format
+  # string that does not match its arguments is a programming error, so it aborts; use `try_format` for a format string
+  # that is only known at run time.
+  # @let fmt: The format string.
+  # @let args: The arguments for the placeholders, in order.
+  # @ret: The formatted text.
+
+  ret try_format(fmt, ..args)
+    .expect("std::format::format: the format string does not match its arguments")
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun try_format[..Args: Format](fmt: &StrView, ..args: Args) -> Res[Str, StreamErr] {
+  # The `try_format` function formats its arguments into a format string, as described at the top of this module.
+  # @let fmt: The format string.
+  # @let args: The arguments for the placeholders, in order.
+  # @ret: The formatted text, or `StreamInvalidInputError` if the format string is malformed or does not have exactly
+  # one placeholder per argument.
+
+  let mut f = Formatter::new(fmt)
+  let result = format_args(&mut f, ..args)
+  let text = f.into_str()
+  case result is Fail[StreamErr](err) {
+    drop(text)
+    ret Fail(err)
+  }
+  ret Pass(val=text)
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun write_format[W: Write, ..Args: Format](w: &mut W, fmt: &StrView, ..args: Args) -> Res[Void, StreamErr] {
+  # The `write_format` function formats its arguments into a format string and writes the result to a stream. The whole
+  # text is formatted first and written with one `write_all`, so nothing is written if formatting fails.
+  # @let w: The stream to write to.
+  # @let fmt: The format string.
+  # @let args: The arguments for the placeholders, in order.
+  # @ret: An empty success value, or an error if the format string does not match its arguments or the write fails.
+
+  let text = try_format(fmt, ..args)?
+  let written = w.write_all(text.view_ref())
+  drop(text)
+  let n = written?
+  ret Pass[Void]()
+}
+
+!private
+!versioned(base="1.0.0", new="1.0.0")
+fun format_args(f: &mut Formatter) -> Res[Void, StreamErr] {
+  # The end of `format_args`' recursion: with every argument formatted, write the rest of the string.
+  # @let f: The formatter.
+  # @ret: An empty success value, or an error if a placeholder is left unfilled.
+
+  ret f.finish()
+}
+
+!private
+!versioned(base="1.0.0", new="1.0.0")
+fun format_args[H: Format, ..Ts: Format](f: &mut Formatter, head: H, ..tail: Ts) -> Res[Void, StreamErr] {
+  # The `format_args` function formats the first argument into the next placeholder, then the rest of them, by recursion
+  # over the pack. The overload with no arguments ends it.
+  # @let f: The formatter.
+  # @let head: The argument for the next placeholder.
+  # @let tail: The arguments for the placeholders after it.
+  # @ret: An empty success value, or the first error.
+
+  let result = f.arg(&head)
+  drop(head)
+  case result of {
+    is Fail[StreamErr](err) {
+      drop(..tail)
+      ret Fail(err)
+    }
+  }
+  ret format_args(f, ..tail)
+}
+
+!package
+!versioned(base="1.0.0", new="1.0.0")
+fun format_elements[T: Format](formatter: &mut Formatter, items: &View[T]) -> Res[Void, StreamErr] {
+  # The `format_elements` function writes a sequence as `[a, b, c]`, the shared rendering for `Vec` and `Arr`. The
+  # placeholder's spec applies to each element, so `{:>3}` of a vector of 1 and 2 is `[  1,   2]`.
+  # @let formatter: The formatter to write into.
+  # @let items: The elements, in order.
+  # @ret: An empty success value, or the first element's error.
+
+  # Indexed rather than walked with "iter_ref": a borrow it yields of a variant element (a vector of "Opt") is not a
+  # valid pointer, and using it segfaults ("view-iter-ref-variant-elements" in the project notes).
+  formatter.write_str("[")
+  let mut i = 0_uz
+  loop i < items.len() {
+    case i > 0_uz { formatter.write_str(", ") }
+    items[i].fmt(&mut formatter)?
+    i += 1_uz
+  }
+  formatter.write_str("]")
+  ret Pass[Void]()
+}
+
+!package
+!versioned(base="1.0.0", new="1.0.0")
+fun format_tuple_elements(formatter: &mut Formatter, index: USize) -> Res[USize, StreamErr] {
+  # The end of `format_tuple_elements`' recursion: every element is written.
+  # @let formatter: The formatter.
+  # @let index: How many elements were written.
+  # @ret: The number of elements written.
+
+  ret Pass(val=index)
+}
+
+!package
+!versioned(base="1.0.0", new="1.0.0")
+fun format_tuple_elements[H: Format, ..Ts: Format](
+  formatter: &mut Formatter, index: USize, head: &H, ..tail: &Ts) -> Res[USize, StreamErr] {
+  # The `format_tuple_elements` function writes a tuple's elements separated by `, `, by recursion over the borrowed
+  # pack, for the `Tup` `Format` impl. The overload with no elements ends it.
+  # @let formatter: The formatter.
+  # @let index: How many elements were written before `head`.
+  # @let head: The next element.
+  # @let tail: The elements after it.
+  # @ret: The number of elements written, or the first element's error.
+
+  case index > 0_uz { formatter.write_str(", ") }
+  head.fmt(&mut formatter)?
+  ret format_tuple_elements(formatter, index + 1_uz, &..tail)
+}
+
+!private
+fun invalid_format() -> StreamErr {
+  # The error for a format string that is malformed or does not match its arguments.
+  # @ret: `StreamInvalidInputError`.
+
+  ret StreamInvalidInputError
+}
+
+!private
+fun byte_at(text: &StrView, index: USize) -> U8 {
+  # The byte at an index, or `0_u8` past the end, so the parser can look ahead without a bounds check at each step. A
+  # `0_u8` matches none of the spec's characters, so running off the end reads as a malformed spec.
+  # @let text: The text to read.
+  # @let index: The byte offset.
+  # @ret: The byte, or `0_u8` if `index` is out of range.
+
+  case index >= text.len() { ret 0_u8 }
+  let bytes = text.view_ref()
+  ret bytes[index]@
+}
+
+!private
+fun utf8_len(lead: U8) -> USize {
+  # The length of a UTF-8 character from its leading byte.
+  # @let lead: The character's first byte.
+  # @ret: How many bytes the character takes.
+
+  ret case lead of {
+    < 0x80_u8 { 1_uz }
+    < 0xe0_u8 { 2_uz }
+    < 0xf0_u8 { 3_uz }
+    else { 4_uz }
+  }
+}
+
+!private
+fun is_align(byte: U8) -> Bool {
+  # Whether a byte is one of the alignment characters, `<`, `>` and `^`.
+  # @let byte: The byte to check.
+  # @ret: `true` for an alignment character.
+
+  ret byte == b'<' or byte == b'>' or byte == b'^'
+}
+
+!private
+fun char_count(text: &StrView) -> USize {
+  # The number of characters in a text, which is what a width counts, rather than its bytes.
+  # @let text: The text to measure.
+  # @ret: The number of characters.
+
+  let mut count = 0_uz
+  loop byte in text.bytes() {
+    case byte.is_utf8_char_boundary() { count += 1_uz }
+  }
+  ret count
+}
+
+!private
+fun byte_offset_of_char(text: &StrView, chars: USize) -> USize {
+  # The byte offset just after a number of characters, used to cut text to a precision.
+  # @let text: The text to cut.
+  # @let chars: How many characters to keep.
+  # @ret: The byte offset after the first `chars` characters, or the text's length if it has no more than that.
+
+  let mut seen = 0_uz
+  let mut offset = 0_uz
+  loop byte in text.bytes() {
+    case byte.is_utf8_char_boundary() {
+      case seen == chars { ret offset }
+      seen += 1_uz
+    }
+    offset += 1_uz
+  }
+  ret offset
+}
+
+!package
+fun radix_of(kind: U8) -> U32 {
+  # The radix a spec's kind renders an integer in.
+  # @let kind: The spec's kind.
+  # @ret: 16, 2, 8, or 10 by default.
+
+  ret case kind of {
+    == b'x', b'X' { 16_u32 }
+    == b'b' { 2_u32 }
+    == b'o' { 8_u32 }
+    else { 10_u32 }
+  }
+}
+
+!package
+fun digit_byte(digit: U8, upper: Bool) -> U8 {
+  # The ASCII byte for one digit in a radix of up to 16.
+  # @let digit: The digit's value, below the radix.
+  # @let upper: Whether digits above 9 are upper case.
+  # @ret: The digit's byte: `0`-`9`, then `a`-`f` or `A`-`F`.
+
+  case digit < 10_u8 { ret b'0' + digit }
+  case upper { ret b'A' + digit - 10_u8 }
+  ret b'a' + digit - 10_u8
+}
