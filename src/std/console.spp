@@ -3,6 +3,7 @@ use std::annotations::private
 use std::annotations::public
 use std::annotations::versioned
 use std::annotations::zero_type
+use std::format::Format
 use std::io::BufRead
 use std::io::Read
 use std::io::StreamErr
@@ -148,6 +149,21 @@ fun print(str: &StrView) -> Void {
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
+fun print[A: Format, ..Args: Format](fmt: &StrView, first: A, ..rest: Args) -> Void {
+  # The formatted `print` fills a format string's placeholders with its arguments (see `std::format` for the syntax) and
+  # writes the result to the standard output, with one write. It takes at least one argument, so `print("text")` is
+  # always the plain `print`, which prints braces as they are. A format string that does not match its arguments aborts.
+  # @let fmt: The format string.
+  # @let first: The argument for the first placeholder.
+  # @let rest: The arguments for the placeholders after it.
+
+  let text = format::format(fmt, first, ..rest)
+  print(&text)
+  drop(text)
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
 fun println(str: &StrView) -> Void {
   # The `println` function writes the provided string to the standard output stream followed by a newline. It creates a
   # new `StdoutStream` instance and uses its `write_str` method to write the string followed by a newline character to
@@ -170,6 +186,24 @@ fun println(str: &StrView) -> Void {
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
+fun println[A: Format, ..Args: Format](fmt: &StrView, first: A, ..rest: Args) -> Void {
+  # The formatted `println` fills a format string's placeholders with its arguments (see `std::format` for the syntax)
+  # and writes the result to the standard output, followed by a newline, with one write. It takes at least one argument,
+  # so `println("text")` is always the plain `println`, which prints braces as they are. A format string that does not
+  # match its arguments aborts. The newline is part of the same single write, so another thread's output cannot land
+  # between the text and its newline.
+  # @let fmt: The format string.
+  # @let first: The argument for the first placeholder.
+  # @let rest: The arguments for the placeholders after it.
+
+  let mut text = format::format(fmt, first, ..rest)
+  text.append_str("\n")
+  print(&text)
+  drop(text)
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
 fun eprint(str: &StrView) -> Void {
   # The `eprint` function writes the provided string to the standard error stream without a newline. It creates a new
   # `StderrStream` instance and uses its `write_str` method to write the string to the standard error. Generally, an
@@ -181,6 +215,22 @@ fun eprint(str: &StrView) -> Void {
   let mut stderr = StderrStream()
   defer drop(stderr)
   let n = stderr.write_all(str.view_ref()).expect("Failed to print")
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun eprint[A: Format, ..Args: Format](fmt: &StrView, first: A, ..rest: Args) -> Void {
+  # The formatted `eprint` fills a format string's placeholders with its arguments (see `std::format` for the syntax)
+  # and writes the result to the standard error, with one write. It takes at least one argument, so `eprint("text")` is
+  # always the plain `eprint`, which prints braces as they are. A format string that does not match its arguments
+  # aborts.
+  # @let fmt: The format string.
+  # @let first: The argument for the first placeholder.
+  # @let rest: The arguments for the placeholders after it.
+
+  let text = format::format(fmt, first, ..rest)
+  eprint(&text)
+  drop(text)
 }
 
 !public
@@ -203,6 +253,24 @@ fun eprintln(str: &StrView) -> Void {
   let line = Str::from(str) + "\n"
   let n = stderr.write_all(line.view_ref()).expect("Failed to print")
   drop(line)
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun eprintln[A: Format, ..Args: Format](fmt: &StrView, first: A, ..rest: Args) -> Void {
+  # The formatted `eprintln` fills a format string's placeholders with its arguments (see `std::format` for the syntax)
+  # and writes the result to the standard error, followed by a newline, with one write. It takes at least one argument,
+  # so `eprintln("text")` is always the plain `eprintln`, which prints braces as they are. A format string that does not
+  # match its arguments aborts. The newline is part of the same single write, so another thread's output cannot land
+  # between the text and its newline.
+  # @let fmt: The format string.
+  # @let first: The argument for the first placeholder.
+  # @let rest: The arguments for the placeholders after it.
+
+  let mut text = format::format(fmt, first, ..rest)
+  text.append_str("\n")
+  eprint(&text)
+  drop(text)
 }
 
 !public

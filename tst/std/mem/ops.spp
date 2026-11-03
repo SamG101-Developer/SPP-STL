@@ -93,3 +93,17 @@ fun test_a_layout_for_a_zero_sized_element() -> Void {
   let layout = std::allocator::Layout::new_for_array[std::option::None](4_uz)
   std::debug::assert(layout.size == 0_uz, "no bytes are needed for four of nothing")
 }
+
+!test(group="std/mem/ops")
+fun test_drop_of_several_owned_values() -> Void {
+  drop(Str::from("a"), Str::from("b"), 3)
+}
+
+!test(group="std/mem/ops")
+fun test_drop_of_several_borrows_keeps_the_values() -> Void {
+  let a = Str::from("a")
+  let b = 2
+  drop(&a, &b)
+  std::debug::assert(b == 2, "a borrow drop leaves the value alive")
+  drop(a)
+}

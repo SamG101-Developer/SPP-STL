@@ -1055,3 +1055,21 @@ fun test_a_borrowing_closure_passed_as_a_fun_mov_keeps_its_stack_environment() -
   let z = 5_s32
   regression_drop_mut((caps &z) -> S32 { ret z@ })
 }
+
+# A borrow "iter_ref" yields of a variant element is not a valid pointer: using it, by a method call or by a "case"
+# pattern, segfaults (at address 0x1, as if the element's contents arrived where its address should). Element types
+# that are not variants are fine, and so is indexing the same vector. "View::iter_ref" is the compiler intrinsic
+# "std.view.View.iter_ref". Red until spp fixes it; "std::format::format_elements" indexes instead meanwhile.
+!test(group="std/regression")
+fun test_iter_ref_over_variant_elements_yields_valid_borrows() -> Void {
+  let mut v = Vec[Opt[S32]]::new()
+  v.append(Some(val=1_s32))
+  v.append(None)
+
+  let mut somes = 0_uz
+  loop x in v.iter_ref() {
+    case x.is_some() { somes += 1_uz }
+  }
+  std::debug::assert(somes == 1_uz, "one element is Some")
+  drop(v)
+}

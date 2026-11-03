@@ -1,0 +1,334 @@
+# Coverage for "std::format": format strings, the spec, the built-in "Format" impls, the error cases, and writing to a
+# stream. Each expected text is compared by prefix and length, as "Str" has no equality with a "&StrView" literal.
+
+fun expect_text(actual: Str, expected: &StrView, msg: &StrView) -> Void {
+  std::debug::assert(actual.starts_with(expected) and actual.len() == expected.len(), msg)
+  drop(actual)
+}
+
+fun expect_invalid(result: Res[Str, std::io::StreamErr], msg: &StrView) -> Void {
+  std::debug::assert(result.is_fail(), msg)
+  drop(result)
+}
+
+# An in-memory stream, to see exactly what "write_format" writes.
+cls FmtSink {
+  !public bytes: Vec[U8]
+}
+
+sup FmtSink ext std::io::Write {
+  fun write(&mut self, buf: &std::view::View[U8]) -> Res[USize, std::io::StreamErr] {
+    self.bytes.append_from_view(buf)
+    ret Pass(val=buf.len())
+  }
+
+  fun flush(&mut self) -> Res[Void, std::io::StreamErr] {
+    ret Pass[Void]()
+  }
+}
+
+# A user type that formats its fields through a nested format string.
+cls FmtPoint {
+  !public x: S32
+  !public y: S32
+}
+
+sup FmtPoint ext std::format::Format {
+  fun fmt(&self, formatter: &mut std::format::Formatter) -> Res[Void, std::io::StreamErr] {
+    ret formatter.write_format("({}, {})", self.x, self.y)
+  }
+}
+
+!test(group="std/format")
+fun test_a_string_with_no_placeholders_is_copied() -> Void {
+  expect_text(std::format::format("hello"), "hello", "plain text")
+  expect_text(std::format::format(""), "", "empty text")
+}
+
+!test(group="std/format")
+fun test_doubled_braces_are_literal_braces() -> Void {
+  expect_text(std::format::format("{{}} {{x}}"), "{} {x}", "escaped braces")
+  expect_text(std::format::format("{{{}}}", 7_s32), "{7}", "a placeholder inside escaped braces")
+}
+
+!test(group="std/format")
+fun test_arguments_fill_placeholders_in_order() -> Void {
+  expect_text(std::format::format("{} and {} make {}", 1_s32, 2_s32, 3_s32), "1 and 2 make 3", "three arguments")
+  expect_text(std::format::format("{}{}", 4_s32, 5_s32), "45", "adjacent placeholders")
+}
+
+!test(group="std/format")
+fun test_unsigned_integers() -> Void {
+  expect_text(std::format::format("{}", 0_u8), "0", "zero")
+  expect_text(std::format::format("{}", 255_u8), "255", "the largest byte")
+  expect_text(
+    std::format::format("{}", std::limits::Limits[U64]::max), "18446744073709551615", "the largest 64-bit value")
+}
+
+!test(group="std/format")
+fun test_signed_integers() -> Void {
+  expect_text(std::format::format("{}", 0_s32), "0", "zero")
+  expect_text(std::format::format("{}", -42_s32), "-42", "a negative value")
+  expect_text(std::format::format("{}", -128_s8), "-128", "the most negative byte")
+  expect_text(
+    std::format::format("{}", std::limits::Limits[S64]::min), "-9223372036854775808", "the most negative 64-bit value")
+}
+
+!test(group="std/format")
+fun test_integer_radixes() -> Void {
+  expect_text(std::format::format("{:x} {:X}", 255_u32, 255_u32), "ff FF", "hexadecimal")
+  expect_text(std::format::format("{:b}", 5_u32), "101", "binary")
+  expect_text(std::format::format("{:o}", 8_u32), "10", "octal")
+  expect_text(std::format::format("{:x}", 0_u32), "0", "zero in hexadecimal")
+  expect_text(std::format::format("{:x}", -255_s32), "-ff", "a negative value is a sign and a magnitude")
+}
+
+!test(group="std/format")
+fun test_the_alternate_flag_adds_the_radix_prefix() -> Void {
+  expect_text(std::format::format("{:#x}", 255_u32), "0xff", "hexadecimal")
+  expect_text(std::format::format("{:#X}", 255_u32), "0xFF", "upper case hexadecimal keeps a lower case prefix")
+  expect_text(std::format::format("{:#b}", 5_u32), "0b101", "binary")
+  expect_text(std::format::format("{:#o}", 8_u32), "0o10", "octal")
+  expect_text(std::format::format("{:#}", 8_u32), "8", "no prefix for decimal")
+}
+
+!test(group="std/format")
+fun test_numbers_align_right_by_default() -> Void {
+  expect_text(std::format::format("[{:5}]", 42_u32), "[   42]", "default alignment")
+  expect_text(std::format::format("[{:<5}]", 42_u32), "[42   ]", "left")
+  expect_text(std::format::format("[{:^6}]", 42_u32), "[  42  ]", "centre")
+  expect_text(std::format::format("[{:*^7}]", 42_u32), "[**42***]", "an odd remainder goes on the right")
+  expect_text(std::format::format("[{:2}]", 12345_u32), "[12345]", "a width is a minimum")
+}
+
+!test(group="std/format")
+fun test_signs_and_zero_padding() -> Void {
+  expect_text(std::format::format("{:+}", 42_s32), "+42", "an explicit plus")
+  expect_text(std::format::format("{:+}", 0_s32), "+0", "zero is non-negative")
+  expect_text(std::format::format("{:05}", -42_s32), "-0042", "zeros go after the sign")
+  expect_text(std::format::format("{:+05}", 42_s32), "+0042", "and after a plus")
+  expect_text(std::format::format("{:#010x}", 255_u32), "0x000000ff", "and after the prefix")
+  expect_text(std::format::format("{:03}", 12345_u32), "12345", "no zeros past the width")
+}
+
+!test(group="std/format")
+fun test_text_aligns_left_by_default() -> Void {
+  expect_text(std::format::format("[{:6}]", Str::from("ab")), "[ab    ]", "default alignment")
+  expect_text(std::format::format("[{:>6}]", Str::from("ab")), "[    ab]", "right")
+  expect_text(std::format::format("[{:-^6}]", Str::from("ab")), "[--ab--]", "centre with a fill")
+}
+
+!test(group="std/format")
+fun test_a_precision_cuts_text() -> Void {
+  expect_text(std::format::format("{:.2}", Str::from("abcdef")), "ab", "cut to two characters")
+  expect_text(std::format::format("{:.9}", Str::from("abc")), "abc", "a longer precision keeps it all")
+  expect_text(std::format::format("[{:>4.2}]", Str::from("abcdef")), "[  ab]", "cut, then padded")
+}
+
+!test(group="std/format")
+fun test_widths_count_characters_not_bytes() -> Void {
+  expect_text(std::format::format("[{:3}]", Str::from("é")), "[é  ]", "a two-byte character is one wide")
+  expect_text(std::format::format("{:─^5}", Str::from("x")), "──x──", "a multi-byte fill")
+  expect_text(std::format::format("{:.1}", Str::from("éa")), "é", "a precision does not split a character")
+}
+
+!test(group="std/format")
+fun test_floats() -> Void {
+  expect_text(std::format::format("{}", 1.5_f64), "1.500000", "six digits by default")
+  expect_text(std::format::format("{:.2}", 3.14159_f64), "3.14", "rounded down")
+  expect_text(std::format::format("{:.3}", 3.14159_f64), "3.142", "rounded up")
+  expect_text(std::format::format("{:.0}", 2.5_f64), "3", "no point with no digits")
+  expect_text(std::format::format("{:.2}", 0.999_f64), "1.00", "a carry into the integer part")
+  expect_text(std::format::format("{:.1}", -0.25_f64), "-0.3", "a negative value")
+  expect_text(std::format::format("{:.2}", 1.25_f32), "1.25", "a 32-bit float")
+}
+
+!test(group="std/format")
+fun test_floats_take_the_number_flags() -> Void {
+  expect_text(std::format::format("[{:8.3}]", 3.14159_f64), "[   3.142]", "a width")
+  expect_text(std::format::format("{:+.1}", 2.0_f64), "+2.0", "a plus")
+  expect_text(std::format::format("{:07.2}", -1.5_f64), "-001.50", "zero padding")
+}
+
+!test(group="std/format")
+fun test_booleans_and_characters() -> Void {
+  expect_text(std::format::format("{} {}", true, false), "true false", "booleans")
+  expect_text(std::format::format("{}", 'z'), "z", "a character")
+  expect_text(std::format::format("[{:>3}]", 'z'), "[  z]", "a padded character")
+  expect_text(std::format::format("[{:6}]", true), "[true  ]", "a padded boolean")
+}
+
+!test(group="std/format")
+fun test_mixed_arguments() -> Void {
+  expect_text(
+    std::format::format("{}: {:>3} {:.1}", Str::from("x"), 7_u8, 0.5_f64), "x:   7 0.5", "a string, a byte and a float")
+}
+
+!test(group="std/format")
+fun test_a_user_type_formats_through_a_nested_format_string() -> Void {
+  expect_text(std::format::format("p = {}", FmtPoint(x=1, y=-2)), "p = (1, -2)", "the fields in the nested string")
+}
+
+!test(group="std/format")
+fun test_an_optional_formats_its_value() -> Void {
+  let some: Opt[S32] = Some(val=5_s32)
+  let none: Opt[S32] = None
+  expect_text(std::format::format("{} {}", some, none), "Some(5) None", "both alternatives")
+
+  let padded: Opt[S32] = Some(val=7_s32)
+  expect_text(std::format::format("{:>3}", padded), "Some(  7)", "the spec applies to the value inside")
+
+  let nested: Opt[Opt[S32]] = Some(val=Some(val=1_s32))
+  expect_text(std::format::format("{}", nested), "Some(Some(1))", "an optional inside an optional")
+
+  let text: Opt[Str] = Some(val=Str::from("hi"))
+  expect_text(std::format::format("{}", text), "Some(hi)", "a non-copyable value is consumed with it")
+}
+
+!test(group="std/format")
+fun test_a_result_formats_its_value_or_error() -> Void {
+  let pass: Res[U32, Str] = Pass(val=255_u32)
+  expect_text(std::format::format("{:#x}", pass), "Pass(0xff)", "a passed value, under the spec")
+
+  let fail: Res[U32, Str] = Fail(err=Str::from("bad"))
+  expect_text(std::format::format("{}", fail), "Fail(bad)", "a failed error")
+
+  let inner: Res[Opt[S32], S32] = Pass(val=None)
+  expect_text(std::format::format("{}", inner), "Pass(None)", "an optional inside a result")
+}
+
+!test(group="std/format")
+fun test_void_inside_an_optional_or_a_result_formats_as_a_unit() -> Void {
+  let some: Opt[Void] = Some[Void]()
+  let none: Opt[Void] = None
+  expect_text(std::format::format("{} {}", some, none), "Some(()) None", "an optional over void")
+
+  let done: Res[Void, Str] = Pass[Void]()
+  let broke: Res[Void, Str] = Fail(err=Str::from("bad"))
+  expect_text(std::format::format("{} {}", done, broke), "Pass(()) Fail(bad)", "a void value")
+
+  let value: Res[U32, Void] = Pass(val=255_u32)
+  let empty: Res[U32, Void] = Fail[Void]()
+  expect_text(std::format::format("{:x} {}", value, empty), "Pass(ff) Fail(())", "a void error")
+
+  let both_pass: Res[Void, Void] = Pass[Void]()
+  let both_fail: Res[Void, Void] = Fail[Void]()
+  expect_text(std::format::format("{} {}", both_pass, both_fail), "Pass(()) Fail(())", "void on both sides")
+}
+
+!test(group="std/format")
+fun test_a_vector_formats_its_elements() -> Void {
+  let mut v = Vec[S32]::new()
+  v.append(1)
+  v.append(-2)
+  v.append(3)
+  expect_text(std::format::format("{}", v), "[1, -2, 3]", "three elements")
+
+  let empty = Vec[S32]::new()
+  expect_text(std::format::format("{}", empty), "[]", "no elements")
+
+  let mut padded = Vec[U32]::new()
+  padded.append(1_u32)
+  padded.append(255_u32)
+  expect_text(std::format::format("{:>3x}", padded), "[  1,  ff]", "the spec applies to each element")
+
+  let mut words = Vec[Str]::new()
+  words.append(Str::from("a"))
+  words.append(Str::from("bc"))
+  expect_text(std::format::format("{}", words), "[a, bc]", "non-copyable elements")
+}
+
+!test(group="std/format")
+fun test_an_array_formats_its_elements() -> Void {
+  expect_text(std::format::format("{}", [7_u8; 3_uz]), "[7, 7, 7]", "a filled array")
+  expect_text(std::format::format("{:.1}", [0.25_f64; 2_uz]), "[0.3, 0.3]", "the spec applies to each element")
+}
+
+!test(group="std/format")
+fun test_containers_nest() -> Void {
+  let mut inner = Vec[Opt[S32]]::new()
+  inner.append(Some(val=1_s32))
+  inner.append(None)
+  let mut outer = Vec[Vec[Opt[S32]]]::new()
+  outer.append(inner)
+  outer.append(Vec[Opt[S32]]::new())
+  expect_text(std::format::format("{}", outer), "[[Some(1), None], []]", "vectors of vectors of optionals")
+}
+
+!test(group="std/format")
+fun test_a_tuple_formats_its_elements() -> Void {
+  expect_text(std::format::format("{}", (1_s32, true)), "(1, true)", "a pair")
+  expect_text(std::format::format("{}", (9_s32,)), "(9,)", "one element, like its literal")
+  expect_text(std::format::format("{}", (Str::from("a"), 2_u8, 'c')), "(a, 2, c)", "mixed, non-copyable elements")
+  expect_text(std::format::format("{:>2}", (1_u8, 2_u8)), "( 1,  2)", "the spec applies to each element")
+  expect_text(std::format::format("{}", ((1_s32, 2_s32), 3_s32)), "((1, 2), 3)", "a nested tuple")
+  expect_text(
+    std::format::format("{}", (1_u8, 2_u8, 3_u8, 4_u8, 5_u8, 6_u8, 7_u8, 8_u8)), "(1, 2, 3, 4, 5, 6, 7, 8)",
+    "the widest arity")
+}
+
+!test(group="std/format")
+fun test_a_pair_formats_its_key_and_value() -> Void {
+  let p = std::tuple::Pair[S32, Str](key=1, val=Str::from("one"))
+  expect_text(std::format::format("{}", p), "Pair(1, one)", "a key and a value")
+
+  let q = std::tuple::Pair[U8, U8](key=1_u8, val=255_u8)
+  expect_text(std::format::format("{:>3x}", q), "Pair(  1,  ff)", "the spec applies to both")
+}
+
+!test(group="std/format")
+fun test_a_single_formats_as_its_value() -> Void {
+  let s = std::single::Single[S32]::new(7)
+  expect_text(std::format::format("{}", s), "7", "the box is not shown")
+
+  let t = std::single::Single[S32]::new(7)
+  expect_text(std::format::format("[{:>4}]", t), "[   7]", "the whole spec applies to the value")
+
+  let v = std::single::Single[Opt[Str]]::new(Some(val=Str::from("x")))
+  expect_text(std::format::format("{}", v), "Some(x)", "a boxed optional")
+}
+
+!test(group="std/format")
+fun test_mismatched_arguments_are_an_error() -> Void {
+  expect_invalid(std::format::try_format("{} {}", 1_s32), "more placeholders than arguments")
+  expect_invalid(std::format::try_format("{}", 1_s32, 2_s32), "more arguments than placeholders")
+  expect_invalid(std::format::try_format("{}"), "a placeholder with no arguments")
+}
+
+!test(group="std/format")
+fun test_malformed_format_strings_are_an_error() -> Void {
+  expect_invalid(std::format::try_format("a } b"), "an unmatched closing brace")
+  expect_invalid(std::format::try_format("{", 1_s32), "an unterminated placeholder")
+  expect_invalid(std::format::try_format("{:q}", 1_s32), "an unknown kind")
+  expect_invalid(std::format::try_format("{:.}", 1_s32), "a point with no precision")
+  expect_invalid(std::format::try_format("{0}", 1_s32), "positional indexes are not supported")
+}
+
+!test(group="std/format")
+fun test_try_format_passes_the_text_through() -> Void {
+  let result = std::format::try_format("{}-{}", 1_s32, 2_s32)
+  std::debug::assert(result.is_pass(), "a matching format string")
+  expect_text(result.unwrap(), "1-2", "the formatted text")
+}
+
+!test(group="std/format")
+fun test_write_format_writes_the_formatted_text() -> Void {
+  let mut sink = FmtSink(bytes=Vec[U8]::new())
+  let result = std::format::write_format(&mut sink, "a={} b={:x}", 1_s32, 255_u32)
+  std::debug::assert(result.is_pass(), "the write succeeds")
+  drop(result)
+
+  let text = Str::from(&sink.bytes)
+  expect_text(text, "a=1 b=ff", "the stream got the formatted text")
+  drop(sink)
+}
+
+!test(group="std/format")
+fun test_write_format_writes_nothing_for_a_bad_format_string() -> Void {
+  let mut sink = FmtSink(bytes=Vec[U8]::new())
+  let result = std::format::write_format(&mut sink, "{} {}", 1_s32)
+  std::debug::assert(result.is_fail(), "the format string does not match")
+  drop(result)
+  std::debug::assert(sink.bytes.len() == 0_uz, "and nothing was written")
+  drop(sink)
+}

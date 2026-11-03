@@ -1,0 +1,39 @@
+# Coverage for "std::hints" - the optimiser hints leave the program's values unchanged.
+
+!test(group="std/hints")
+fun test_black_box_returns_a_copy_value_unchanged() -> Void {
+  let x = std::hints::black_box(41_u32)
+  std::debug::assert(x + 1_u32 == 42_u32, "the value passes through")
+}
+
+!test(group="std/hints")
+fun test_black_box_moves_a_linear_value_through() -> Void {
+  let s = std::hints::black_box(Str::from("hello"))
+  std::debug::assert(s.len() == 5_uz, "the moved value is intact")
+  drop(s)
+}
+
+!test(group="std/hints")
+fun test_black_box_of_a_borrow_leaves_the_value_intact() -> Void {
+  let s = Str::from("abc")
+  std::hints::black_box(&s)
+  std::debug::assert(s.len() == 3_uz, "the value behind the borrow is unchanged")
+  drop(s)
+}
+
+!test(group="std/hints")
+fun test_black_box_of_a_mutable_borrow_coerces() -> Void {
+  let mut x = 5_u32
+  std::hints::black_box(&mut x)
+  x += 1_u32
+  std::debug::assert(x == 6_u32, "the value is still usable after the hint")
+}
+
+!test(group="std/hints")
+fun test_black_box_in_a_loop_keeps_every_iteration() -> Void {
+  let mut total = 0_u64
+  loop i in std::range::Range[U64]::between(0_u64, 100_u64) {
+    total += std::hints::black_box(i)
+  }
+  std::debug::assert(total == 4950_u64, "every value was added")
+}

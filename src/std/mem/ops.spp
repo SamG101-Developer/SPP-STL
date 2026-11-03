@@ -179,6 +179,42 @@ fun drop[T](val: &T) -> Void {
   # @ret: An empty value.
 }
 
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun drop() -> Void {
+  # Drops nothing: the end of a variadic drop, so `drop(..xs)` of an empty pack is a call. A pack is not a value, so
+  # there is no `drop(xs)`; spreading it here drops each of its elements, in order.
+  # @ret: An empty value.
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun drop[H, ..Ts](head: H, ..tail: Ts) -> Void {
+  # Drops each value given, in order: `drop(a, b)`, or `drop(..xs)` to consume a pack, which is not a value and so
+  # cannot be given to `drop[T]` whole. A single value goes to `drop[T]` instead, as a call of fixed arity is preferred.
+  # @type H: The type of the first value.
+  # @type Ts: The types of the rest.
+  # @let head: The first value to drop.
+  # @let tail: The rest, dropped after it.
+  # @ret: An empty value.
+  drop(head)
+  drop(..tail)
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun drop[H, ..Ts](head: &H, ..tail: &Ts) -> Void {
+  # Discards each borrow given, the borrowed counterpart of the owned variadic `drop`, so `drop(..xs)` works the same
+  # over a borrowed pack. A pack is all owned or all borrowed, never mixed, so each overload covers its own case.
+  # @type H: The type behind the first borrow.
+  # @type Ts: The types behind the rest.
+  # @let head: The first borrow to discard.
+  # @let tail: The rest, discarded after it.
+  # @ret: An empty value.
+  drop(head)
+  drop(..tail)
+}
+
 !package
 !intrinsic(name="std.mem.ops.drop_in_place")
 !versioned(base="1.0.0", new="1.0.0")

@@ -5,6 +5,9 @@ use std::boolean::Bool
 use std::cast::From
 use std::cast::TryFrom
 use std::copy::Copy
+use std::format::Format
+use std::format::Formatter
+use std::io::StreamErr
 use std::number::S32
 use std::number::U16
 use std::number::U32
@@ -13,7 +16,12 @@ use std::number::USize
 use std::option::None
 use std::option::Opt
 use std::option::Some
+use std::result::Pass
+use std::result::Res
+use std::string::Str
 use std::view::View
+use std::void::Void
+use std::mem::ops::drop
 use std::ops::eq::Eq
 use std::ops::ord::Ord
 
@@ -177,5 +185,17 @@ sup Char ext From[U32] {
 
     let opt = Char::try_from(that)
     ret opt.expect("Invalid Unicode scalar value for Char conversion")
+  }
+}
+
+sup Char ext Format {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
+    # Format a character as itself, padded like text.
+
+    let text = Str::from(self@)
+    formatter.pad(&text)
+    drop(text)
+    ret Pass[Void]()
   }
 }

@@ -5,16 +5,24 @@ use std::llvm::always_inline
 use std::llvm::inline
 use std::boolean::Bool
 use std::cast::From
+use std::format::Format
+use std::format::Formatter
+use std::io::StreamErr
 use std::number::S32
 use std::number::U32
 use std::number::U64
+use std::number::U8
 use std::option::None
 use std::option::Opt
 use std::option::Some
+use std::result::Pass
+use std::result::Res
+use std::string::Str
 use std::void::Void
 use std::num::sized_floating_point::SizedFloatingPoint
 use std::num::sized_integer::SizedInteger
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
+use std::mem::ops::drop
 use std::ops::add::Add
 use std::ops::add::AddAssign
 use std::ops::div::Div
@@ -506,5 +514,41 @@ sup [cmp w: U32] SizedIntegerSigned[w] {
       bit >>= 2_u32
     }
     ret Some(val=out)
+  }
+}
+
+sup [cmp w: U32] SizedIntegerSigned[w] ext Format {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
+    # Format a signed integer in the spec's radix, as a sign and a magnitude: `{:x}` of -255 is `-ff`, not the two's
+    # complement bits. The digits are taken on the negative side, as in `Str::from`: the most negative value of a width
+    # has no positive counterpart, but every remainder of a negative value negates in range.
+
+    let spec = formatter.spec()
+    let base = SizedIntegerSigned[w]::from(format::radix_of(spec.kind))
+    let upper = spec.kind == b'X'
+    let mut value = self@
+    let non_negative = value.is_negative().not
+    let mut buf = [0_u8; 264_uz]
+    let mut pos = buf.len()
+
+    case value.is_zero() {
+      pos -= 1_uz
+      buf[mut pos]@ = b'0'
+    }
+
+    # Force the value negative so one loop covers both signs.
+    case non_negative { value = value.neg() }
+
+    loop value.is_zero().not {
+      pos -= 1_uz
+      buf[mut pos]@ = format::digit_byte(U8::from((value % base).neg()), upper)
+      value /= base
+    }
+
+    let digits = Str::from_utf8_unchecked(&buf[pos to buf.len()])
+    formatter.pad_integral(non_negative, &digits)
+    drop(digits)
+    ret Pass[Void]()
   }
 }

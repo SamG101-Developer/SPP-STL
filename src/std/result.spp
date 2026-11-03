@@ -2,7 +2,10 @@ use std::annotations::public
 use std::annotations::versioned
 use std::boolean::Bool
 use std::copy::Copy
+use std::format::Format
+use std::format::Formatter
 use std::function::FunMov
+use std::io::StreamErr
 use std::option::None
 use std::option::Opt
 use std::option::Some
@@ -728,5 +731,87 @@ sup [T: Drop, E: Drop] Res[T, E] ext Drop {
       is Pass[T](val) { drop(val) }
       is Fail[E](err) { drop(err) }
     }
+  }
+}
+
+sup [T: Format, E: Format] Res[T, E] ext Format {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
+    # Format a result as `Pass(value)` or `Fail(error)`. The placeholder's spec applies to the value or error inside,
+    # so `{:x}` of `Pass(val=255)` is `Pass(ff)`.
+
+    ret case self of {
+      is Pass[T](&val as value) {
+        formatter.write_str("Pass(")
+        let result = value.fmt(&mut formatter)
+        formatter.write_str(")")
+        result
+      }
+      is Fail[E](&err as error) {
+        formatter.write_str("Fail(")
+        let result = error.fmt(&mut formatter)
+        formatter.write_str(")")
+        result
+      }
+    }
+  }
+}
+
+sup [E: Format] Res[Void, E] ext Format {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
+    # Format a result with a `Void` value as `Pass(())` or `Fail(error)`, the spec applying to the error. `Void` has no
+    # `Format` impl, so this does not overlap the impl for `T: Format`.
+    #
+    # Todo: a stopgap, like the three below. `Void` cannot implement `Format` yet: a `&Void` parameter, `&self`
+    #  included, is erased from the definition but not from the call (`void-borrow-params-erased` in the project
+    #  notes). Once `sup Void ext Format` works, the generic impl covers these and they should be removed.
+
+    case self of {
+      is Fail[E](&err as error) {
+        formatter.write_str("Fail(")
+        let result = error.fmt(&mut formatter)
+        formatter.write_str(")")
+        ret result
+      }
+    }
+
+    formatter.write_str("Pass(())")
+    ret Pass[Void]()
+  }
+}
+
+sup [T: Format] Res[T, Void] ext Format {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
+    # Format a result with a `Void` error as `Pass(value)` or `Fail(())`, the spec applying to the value. A stopgap:
+    # see `Res[Void, E]` above.
+
+    case self of {
+      is Pass[T](&val as value) {
+        formatter.write_str("Pass(")
+        let result = value.fmt(&mut formatter)
+        formatter.write_str(")")
+        ret result
+      }
+    }
+
+    formatter.write_str("Fail(())")
+    ret Pass[Void]()
+  }
+}
+
+sup Res[Void, Void] ext Format {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
+    # Format a result with a `Void` value and error as `Pass(())` or `Fail(())`. A stopgap: see `Res[Void, E]` above.
+
+    case self.is_pass() {
+      formatter.write_str("Pass(())")
+      ret Pass[Void]()
+    }
+
+    formatter.write_str("Fail(())")
+    ret Pass[Void]()
   }
 }

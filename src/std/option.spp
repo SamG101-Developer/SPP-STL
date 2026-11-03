@@ -3,7 +3,10 @@ use std::annotations::versioned
 use std::annotations::zero_type
 use std::boolean::Bool
 use std::copy::Copy
+use std::format::Format
+use std::format::Formatter
 use std::function::FunMov
+use std::io::StreamErr
 use std::result::Fail
 use std::result::Pass
 use std::result::Res
@@ -808,5 +811,47 @@ sup [T: Drop] Opt[T] ext Drop {
       is Some[T](val) { drop(val) }
       else { }
     }
+  }
+}
+
+sup [T: Format] Opt[T] ext Format {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
+    # Format an optional as `Some(value)` or `None`. The placeholder's spec applies to the value inside, so `{:>3}` of
+    # `Some(val=7)` is `Some(  7)`; `None` is written as it is.
+
+    case self of {
+      is Some[T](&val as value) {
+        formatter.write_str("Some(")
+        let result = value.fmt(&mut formatter)
+        formatter.write_str(")")
+        ret result
+      }
+    }
+
+    formatter.write_str("None")
+    ret Pass[Void]()
+  }
+}
+
+sup Opt[Void] ext Format {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
+    # Format an optional over `Void` as `Some(())` or `None`. `Void` has no `Format` impl, so this does not overlap
+    # the impl for `T: Format`.
+    #
+    # Todo: a stopgap. `Void` cannot implement `Format` yet: a `&Void` parameter, `&self` included, is erased from the
+    #  definition but not from the call (`void-borrow-params-erased` in the project notes). Once `sup Void ext Format`
+    #  works, the generic impl covers this and it should be removed.
+
+    case self of {
+      is None() {
+        formatter.write_str("None")
+        ret Pass[Void]()
+      }
+    }
+
+    formatter.write_str("Some(())")
+    ret Pass[Void]()
   }
 }
