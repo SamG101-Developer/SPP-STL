@@ -12,10 +12,13 @@ use std::boolean::Bool
 use std::cast::From
 use std::clone::Clone
 use std::copy::Copy
+use std::format::Format
+use std::format::Formatter
 use std::function::FunMov
 use std::function::FunMut
 use std::generator::Gen
 use std::generator::GenOnce
+use std::io::StreamErr
 use std::iterator::FromIterator
 use std::iterator::Indexed
 use std::iterator::Iterator
@@ -734,5 +737,14 @@ sup [T, A: Alloc] Vec[T, A] ext Drop {
     let Vec[T, A](mut buffer, length) = self
     buffer.clear_range(0_uz, length)
     drop(buffer)
+  }
+}
+
+sup [T: Format, A: Alloc] Vec[T, A] ext Format {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
+    # Format a vector as `[a, b, c]`, the placeholder's spec applying to each element.
+
+    ret format::format_elements[T](formatter, self)
   }
 }

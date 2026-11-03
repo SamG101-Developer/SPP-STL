@@ -6,14 +6,23 @@ use std::llvm::always_inline
 use std::llvm::inline
 use std::boolean::Bool
 use std::cast::From
+use std::char::Char
 use std::copy::Copy
+use std::format::Format
+use std::format::Formatter
+use std::io::StreamErr
 use std::limits::Limits
 use std::number::S32
 use std::number::U32
+use std::number::U64
 use std::number::U8
 use std::option::None
 use std::option::Opt
 use std::option::Some
+use std::result::Pass
+use std::result::Res
+use std::string::Str
+use std::vector::Vec
 use std::view::View
 use std::void::Void
 use std::num::bases::FloatingPoint
@@ -21,6 +30,7 @@ use std::num::bases::One
 use std::num::bases::Zero
 use std::num::sized_integer_signed::SizedIntegerSigned
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
+use std::mem::ops::drop
 use std::ops::add::Add
 use std::ops::add::AddAssign
 use std::ops::div::Div
@@ -837,5 +847,86 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
     # @ret: The reconstructed floating point value.
 
     ret intrinsics::bit_cast[Self](SizedIntegerUnsigned[w]::from_ne_bytes(bytes))
+  }
+}
+
+sup [cmp w: U32] SizedFloatingPoint[w] ext Format {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
+    # Format a float with a fixed number of digits after the point: the spec's precision, or 6. The last digit is
+    # rounded half up from the first digit dropped, carrying into the integer part when needed (`{:.2}` of 0.999 is
+    # `1.00`). Digits are taken one at a time off the fraction rather than by scaling it by a power of ten, so a narrow
+    # float with a large precision does not overflow. The digits are the exact binary value's, so 0.1 to 20 places is
+    # `0.10000000000000000555`.
+    #
+    # Todo: the integer part goes through `U64`, so a magnitude of 2^64 or more does not render correctly. That needs
+    #  the digits of the float's own integer part, or a shortest round-tripping algorithm (Ryu, Grisu), which would
+    #  also give `{}` of 0.1 as `0.1` rather than `0.100000`.
+
+    let value = self@
+
+    # The values with no digits are named, right-aligned like
+    # any other number.
+    case value.is_signaling_nan() or value.is_quiet_nan() {
+      formatter.pad_aligned("nan", b'>')
+      ret Pass[Void]()
+    }
+    case value.is_positive_infinity() {
+      formatter.pad_aligned("inf", b'>')
+      ret Pass[Void]()
+    }
+    case value.is_negative_infinity() {
+      formatter.pad_aligned("-inf", b'>')
+      ret Pass[Void]()
+    }
+
+    let precision = formatter.spec().precision.unwrap_or(6_uz)
+    let magnitude = value.abs()
+    let whole_part = magnitude.trunc()
+    let mut whole = U64::from(whole_part)
+    let mut frac = magnitude - whole_part
+    let ten = SizedFloatingPoint[w]::from(10_u32)
+
+    # The fraction's digits, one at a time.
+    let mut fraction = Vec[U8]::new()
+    let mut i = 0_uz
+    loop i < precision {
+      frac *= ten
+      let digit = frac.trunc()
+      fraction.append(U8::from(digit))
+      frac -= digit
+      i += 1_uz
+    }
+
+    # Round half up on the first digit dropped, carrying 9s
+    # over into the integer part.
+    frac *= ten
+    case frac.trunc() >= SizedFloatingPoint[w]::from(5_u32) {
+      let mut carry = true
+      let mut j = precision
+      loop carry and j > 0_uz {
+        j -= 1_uz
+        case fraction[j]@ == 9_u8 { fraction[mut j]@ = 0_u8 }
+        else {
+          fraction[mut j]@ = fraction[j]@ + 1_u8
+          carry = false
+        }
+      }
+      case carry { whole += 1_u64 }
+    }
+
+    # The integer part, the point, then the fraction.
+    let mut digits = Str::from(whole)
+    case precision > 0_uz { digits.append('.') }
+    let mut k = 0_uz
+    loop k < fraction.len() {
+      digits.append(Char::from(48_u32 + U32::from(fraction[k]@)))
+      k += 1_uz
+    }
+
+    formatter.pad_integral(value.is_negative().not, &digits)
+    drop(digits)
+    drop(fraction)
+    ret Pass[Void]()
   }
 }

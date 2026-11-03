@@ -9,12 +9,16 @@ use std::boolean::Bool
 use std::cast::From
 use std::clone::Clone
 use std::copy::Copy
+use std::format::Format
+use std::format::Formatter
 use std::function::FunMov
 use std::generator::GenOnce
+use std::io::StreamErr
 use std::iterator::Indexed
 use std::iterator::Iterator
 use std::number::USize
 use std::range::Range
+use std::result::Res
 use std::single::Single
 use std::view::View
 use std::void::Void
@@ -129,3 +133,12 @@ sup [T, cmp n: USize] Arr[T, n] ext FwdRef[View[T]] {
 }
 
 type HeapArr[T, cmp n: USize, A: Alloc] = Single[Arr[T, n], A]
+
+sup [T: Format, cmp n: USize] Arr[T, n] ext Format {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
+    # Format an array as `[a, b, c]`, the placeholder's spec applying to each element.
+
+    ret format::format_elements[T](formatter, self)
+  }
+}

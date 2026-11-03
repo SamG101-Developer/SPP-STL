@@ -1,6 +1,12 @@
 use std::annotations::public
 use std::annotations::versioned
 use std::copy::Copy
+use std::format::Format
+use std::format::Formatter
+use std::io::StreamErr
+use std::result::Pass
+use std::result::Res
+use std::void::Void
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
@@ -27,4 +33,32 @@ sup [..Items: Copy] Tup[Items] ext Copy {
 cls Pair[K, V] {
   !public key: K
   !public val: V
+}
+
+sup [..Items: Format] Tup[Items] ext Format {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
+    # Format a tuple as `(a, b, c)`, or `(a,)` for one element like its literal, the placeholder's spec applying to each
+    # element. `&..self` passes each element as a borrow, so none is moved out of `&self`.
+
+    formatter.write_str("(")
+    let count = format::format_tuple_elements(&mut formatter, 0_uz, &..self)?
+    case count == 1_uz { formatter.write_str(",") }
+    formatter.write_str(")")
+    ret Pass[Void]()
+  }
+}
+
+sup [K: Format, V: Format] Pair[K, V] ext Format {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
+    # Format a pair as `Pair(key, val)`, the placeholder's spec applying to the key and the value.
+
+    formatter.write_str("Pair(")
+    self.key.fmt(&mut formatter)?
+    formatter.write_str(", ")
+    let val = self.val.fmt(&mut formatter)
+    formatter.write_str(")")
+    ret val
+  }
 }

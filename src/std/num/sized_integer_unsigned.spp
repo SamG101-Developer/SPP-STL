@@ -5,16 +5,24 @@ use std::llvm::always_inline
 use std::llvm::inline
 use std::boolean::Bool
 use std::cast::From
+use std::format::Format
+use std::format::Formatter
+use std::io::StreamErr
 use std::number::S32
 use std::number::U32
 use std::number::U64
+use std::number::U8
 use std::option::None
 use std::option::Opt
 use std::option::Some
+use std::result::Pass
+use std::result::Res
+use std::string::Str
 use std::void::Void
 use std::num::sized_floating_point::SizedFloatingPoint
 use std::num::sized_integer::SizedInteger
 use std::num::sized_integer_signed::SizedIntegerSigned
+use std::mem::ops::drop
 use std::ops::add::Add
 use std::ops::add::AddAssign
 use std::ops::div::Div
@@ -423,5 +431,36 @@ sup [cmp w: U32] SizedIntegerUnsigned[w] {
       bit >>= 2_u32
     }
     ret Some(val=result)
+  }
+}
+
+sup [cmp w: U32] SizedIntegerUnsigned[w] ext Format {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
+    # Format an unsigned integer in the spec's radix. The digits are written backwards from the end of a buffer large
+    # enough for the widest integer in binary.
+
+    let spec = formatter.spec()
+    let base = SizedIntegerUnsigned[w]::from(format::radix_of(spec.kind))
+    let upper = spec.kind == b'X'
+    let mut value = self@
+    let mut buf = [0_u8; 264_uz]
+    let mut pos = buf.len()
+
+    case value.is_zero() {
+      pos -= 1_uz
+      buf[mut pos]@ = b'0'
+    }
+
+    loop value.is_zero().not {
+      pos -= 1_uz
+      buf[mut pos]@ = format::digit_byte(U8::from(value % base), upper)
+      value /= base
+    }
+
+    let digits = Str::from_utf8_unchecked(&buf[pos to buf.len()])
+    formatter.pad_integral(true, &digits)
+    drop(digits)
+    ret Pass[Void]()
   }
 }
