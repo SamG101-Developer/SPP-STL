@@ -1,0 +1,31 @@
+use std::annotations::intrinsic
+use std::annotations::public
+use std::annotations::versioned
+use std::llvm::always_inline
+use std::void::Void
+
+!public !always_inline
+!intrinsic(name="std.hints.black_box")
+!versioned(base="1.0.0", new="1.0.0")
+fun black_box[T](value: T) -> T {
+  # Returns `value` unchanged, but hides it from the optimiser: the compiler must assume the value is read and may have
+  # been changed in ways it cannot see, and that any memory it can reach was read and written. Benchmarks use this to
+  # stop work being folded away because its result is constant or unused. It is a best-effort hint, not a guarantee
+  # about generated code, and must never be relied on for correctness or security (such as constant-time code).
+  # @type T: The type of the value to hide.
+  # @let value: The value to hide from the optimiser.
+  # @ret: The same value, which the optimiser can no longer assume anything about.
+}
+
+!public !always_inline
+!intrinsic(name="std.hints.black_box_ref")
+!versioned(base="1.0.0", new="1.0.0")
+fun black_box[T](value: &T) -> Void {
+  # Hides a borrowed value from the optimiser: the compiler must assume the value behind the borrow is read here, and
+  # may have been changed in ways it cannot see. Use it to keep a value it would otherwise fold away or delete as unused
+  # without moving it, such as a buffer a benchmark fills. A borrow cannot be returned, so nothing is handed back; a
+  # `&mut T` coerces to the `&T` taken here. The same caveats as the owned form apply: a best-effort hint only.
+  # @type T: The type behind the borrow.
+  # @let value: The borrowed value to hide from the optimiser.
+  # @ret: An empty value, as the function is only used for its effect on the optimiser.
+}
