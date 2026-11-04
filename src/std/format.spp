@@ -584,14 +584,12 @@ fun format_elements[T: Format](formatter: &mut Formatter, items: &View[T]) -> Re
   # @let items: The elements, in order.
   # @ret: An empty success value, or the first element's error.
 
-  # Indexed rather than walked with "iter_ref": a borrow it yields of a variant element (a vector of "Opt") is not a
-  # valid pointer, and using it segfaults ("view-iter-ref-variant-elements" in the project notes).
   formatter.write_str("[")
-  let mut i = 0_uz
-  loop i < items.len() {
-    case i > 0_uz { formatter.write_str(", ") }
-    items[i].fmt(&mut formatter)?
-    i += 1_uz
+  let mut after_first = false
+  loop item in items.iter_ref() {
+    case after_first { formatter.write_str(", ") }
+    item.fmt(&mut formatter)?
+    after_first = true
   }
   formatter.write_str("]")
   ret Pass[Void]()
