@@ -144,3 +144,27 @@ fun test_a_clone_has_the_same_shape() -> Void {
   drop(p)
   drop(c)
 }
+
+!test(group="std/fs/path")
+fun test_copy_to_copies_the_whole_file() -> Void {
+  # Larger than one copy chunk (4 KiB), so a copy that moves it a chunk at a time (where "copy_file_range" refuses the
+  # two files) has to carry on until all of it is across.
+  let src = std::fs::path::Path::new("/tmp/spp_stl_test_copy_src")
+  let dst = std::fs::path::Path::new("/tmp/spp_stl_test_copy_dst")
+  let file = std::fs::file::File::open(&src, std::fs::file::FileMode().write().create().truncate()).unwrap()
+  let sized = file.set_len(20000_u64)
+  std::debug::assert(sized.is_pass(), "the source is sized")
+  drop(sized)
+  let closed = file.close()
+  drop(closed)
+
+  let copied = src.copy_to(&dst)
+  std::debug::assert(copied.is_pass(), "the copy succeeds")
+  std::debug::assert(copied.unwrap() == 20000_uz, "every byte is copied")
+
+  let removed_src = src.remove_file()
+  drop(removed_src)
+  let removed_dst = dst.remove_file()
+  drop(removed_dst)
+  drop(src, dst)
+}
