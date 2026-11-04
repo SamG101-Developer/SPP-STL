@@ -524,7 +524,8 @@ sup Path {
     # The `copy_to` method attempts to copy the file at the current path to a new path. If the current path does not
     # exist, the new path already exists, or the operation fails for any reason, an error will be returned.
     # @let new_path: The new path to copy to.
-    # @ret: A `Res` type containing `Pass()` if the copy is successful, or an error message if the operation fails.
+    # @ret: A `Res` type containing the number of bytes copied if the copy is successful, or an error message if the
+    # operation fails.
 
     # Create the info-carrying stat struct, and defer its deletion
     # as it won't be returned; it's strictly to go to C to get its
@@ -543,18 +544,26 @@ sup Path {
 
     # Create the two file object for the "in" and "out" file. The
     # "in" file is where the contents are coming from, and the "out"
-    # file is where the contents are going to. Defer their closing.
+    # file is where the contents are going to, created, and refused
+    # if it already exists. Defer their closing.
     let file_in = File::open(&self, FileMode().read())?
     defer drop(file_in)
-    let file_out = File::open(new_path, FileMode().write())?
+    let file_out = File::open(new_path, FileMode().write().create_new())?
     defer drop(file_out)
 
-    # Run the sppc copyfile system call to do the actual file
-    # logic, and handle the error with the final returned value
-    # (number of bytes as a pass, or error code as a failure).
-    let mut out_size = 0_sz
-    let err = sppc::copyfile(file_in.fd, file_out.fd, USize::from(file_length), 0, &mut out_size)
-    ret case err == 0 { Pass[USize](val=USize::from(out_size)) } else { Fail(err=PathErr::from_errno(err)) }
+    # Copy until the whole file is across: "copyfile" may copy less than asked (a large file, or a signal arriving),
+    # and reports how much it did. Each call carries on from both files' positions. One that copies nothing means the
+    # source ended early (it shrank since the stat), so what was copied is the result. An error is returned as it is.
+    let target = USize::from(file_length)
+    let mut copied = 0_uz
+    loop copied < target {
+      let mut out_size = 0_sz
+      let err = sppc::copyfile(file_in.fd, file_out.fd, target - copied, 0, &mut out_size)
+      case err != 0 { ret Fail(err=PathErr::from_errno(err)) }
+      case out_size == 0_sz { exit }
+      copied += USize::from(out_size)
+    }
+    ret Pass[USize](val=copied)
   }
 
   !public
