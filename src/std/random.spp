@@ -88,7 +88,7 @@ sup Rng {
   fun from_os_seed() -> Res[Rng, RngErr] {
     let mut buffer = [0_u8; 8_uz]
     let err = sppc::getrandom(8_uz, buffer.ptr())
-    case err < 0 { ret Fail(err=RngErr) }
+    case err != 0 { ret Fail(err=RngErr) }
 
     let seed = U64::from_le_bytes(&buffer)
     ret Pass(val=Rng::from_seed(seed))
