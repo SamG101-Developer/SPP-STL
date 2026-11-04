@@ -195,10 +195,8 @@ sup [T, A: Alloc] Single[T, A] ext Drop {
 sup [T: Format, A: Alloc] Single[T, A] ext Format {
   !versioned(base="1.0.0", new="1.0.0")
   fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
-    # Format a `Single` as the value it owns: the box is not shown, and the whole spec applies to the value. Through
-    # `fwd_ref` rather than `get_ref`: `get_ref` over a variant (a `Single[Opt[S32]]`) is an internal compiler error
-    # ("single-get-ref-variant-ice" in the project notes).
+    # Format a `Single` as the value it owns: the box is not shown, and the whole spec applies to the value.
 
-    ret self.fwd_ref().fmt(formatter)
+    ret self.get_ref().fmt(formatter)
   }
 }
