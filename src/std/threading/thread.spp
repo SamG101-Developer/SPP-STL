@@ -5,6 +5,7 @@ use std::allocator::GlobalAlloc
 use std::mem::pointer::NonNull
 use std::ops::drop::Drop
 use std::ops::eq::Eq
+use std::threading::atomic::Atom
 use std::threading::safe::ThreadSafe
 
 !public !zero_type
@@ -62,10 +63,14 @@ cls JoinHandle[Out] {
   # @let handle: The `pthread_t` the thread was created with.
   # @let result: The uninitialized cell the thread body writes its return value into. Reading it before the thread has
   # been joined would be a data race, so `join` is the only thing that does.
+  # @let users: How many of the handle and the thread still use `result`, starting at 2. A detached thread outlives its
+  # handle, so neither side can assume it frees the cell: each decrements this when done, and whichever brings it to 0
+  # frees `result` and this counter, dropping a result nobody read.
   # @let detached: Whether the thread has already been detached, so `drop` does not detach it twice.
 
   !package handle: U64
   !package result: NonNull[Out]
+  !package users: NonNull[Atom[USize]]
   !private detached: Bool
 }
 
@@ -99,7 +104,7 @@ fun spawn[Out: ThreadSafe, F: FunMov[(), Out] & ThreadSafe](function: F) -> Res[
   # new thread, so that a failure to allocate is seen by
   # the caller rather than by a thread with nowhere to
   # report it.
-  let slot = case GlobalAlloc.allocate_array[Out](1_uz) of {
+  let slot = case GlobalAlloc.allocate[Out]() of {
     is Pass[NonNull[Out]](val as p) { p }
     is Fail[AllocErr](err as e) {
       drop(function)
@@ -107,20 +112,43 @@ fun spawn[Out: ThreadSafe, F: FunMov[(), Out] & ThreadSafe](function: F) -> Res[
       ret Fail(err=ThreadMemoryErr)
     }
   }
+  let mut users = case GlobalAlloc.allocate[Atom[USize]]() of {
+    is Pass[NonNull[Atom[USize]]](val as p) { p }
+    is Fail[AllocErr](err as e) {
+      drop(function)
+      drop(e)
+      GlobalAlloc.deallocate(slot)
+      ret Fail(err=ThreadMemoryErr)
+    }
+  }
+  users.write(Atom[USize]::new(2_uz))
 
   # The body moves the function onto the new thread and
-  # takes a copy of the cell with it.
+  # takes copies of the cell and its user count with it.
   let mut handle = 0_u64
-  let err = sppc::pthread_create(std::cffi::CClosure[(), Void]::from((caps function, slot) -> Void {
+  let err = sppc::pthread_create(std::cffi::CClosure[(), Void]::from((caps function, slot, users) -> Void {
     let mut into = slot
     into.write(function())
+
+    # Done with the cell. If the handle let go first (detached
+    # or dropped unjoined), nobody will read the result, so the
+    # thread drops it and frees both cells itself.
+    case users.fetch_sub(1_uz) == 1_uz {
+      drop(into.read())
+      GlobalAlloc.deallocate(into)
+      GlobalAlloc.deallocate(users)
+    } else {
+      # The handle is still held: it reads the result, or frees
+      # it when it lets go.
+    }
   }), &mut handle)
 
   case err != 0 {
-    GlobalAlloc.deallocate_array(slot, 1_uz)
+    GlobalAlloc.deallocate(slot)
+    GlobalAlloc.deallocate(users)
     ret Fail(err=ThreadErr::from_errno(err))
   }
-  ret Pass(val=JoinHandle[Out](handle, result=slot))
+  ret Pass(val=JoinHandle[Out](handle, result=slot, users))
 }
 
 !public
@@ -153,13 +181,13 @@ sup [R] JoinHandle[R] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun detach(mut self) -> Res[Void, ThreadErr] {
-    # Detach the thread using the sppc threading API. A detached thread is never joined, so its result is never read and
-    # the cell holding it is released here - along with whatever the thread has written into it by the time it finishes,
-    # which is why detaching is only safe for a thread whose result is not wanted.
+    # Detach the thread using the sppc threading API. A detached thread is never joined, so its result is never read: it
+    # is dropped, and its cell freed, by whichever of this handle and the thread is last to finish with it. If the
+    # thread is still running, that is the thread.
 
-    let Self(handle, result, ..) = self
-    GlobalAlloc.deallocate_array(result, 1_uz)
+    let Self(handle, result, users, ..) = self
     let err = sppc::pthread_detach(&handle)
+    Self::release_unjoined(result, users)
     case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
     ret Pass[Void]()
   }
@@ -169,16 +197,37 @@ sup [R] JoinHandle[R] {
   fun join(self) -> Res[R, ThreadErr] {
     # Wait for the thread to finish, and answer with what it returned. The read is only sound after the join has
     # returned: until then the thread may not have written the cell yet.
-    let Self(handle, result, ..) = self
+    let Self(handle, result, users, ..) = self
     let err = sppc::pthread_join(&handle)
     case err != 0 {
-      GlobalAlloc.deallocate_array(result, 1_uz)
+      # Not joined, so the thread may still be running: it is
+      # left to free the cell if it finishes last.
+      Self::release_unjoined(result, users)
       ret Fail(err=ThreadErr::from_errno(err))
     }
 
+    # Joined: the thread has finished and given up its use of
+    # the cell, so this side is the last user.
     let val = result.read()
-    GlobalAlloc.deallocate_array(result, 1_uz)
+    GlobalAlloc.deallocate(result)
+    GlobalAlloc.deallocate(users)
     ret Pass(val=val)
+  }
+
+  !private
+  !versioned(base="1.0.0", new="1.0.0")
+  fun release_unjoined(result: NonNull[R], users: NonNull[Atom[USize]]) -> Void {
+    # Give up the handle's use of the result cell without joining. If the thread has already finished, this is the last
+    # user: the result was written but will never be read, so it is dropped and both cells are freed. Otherwise the
+    # thread frees them when it finishes.
+    # @let result: The thread's result cell.
+    # @let users: The cell's user count.
+
+    case users.fetch_sub(1_uz) == 1_uz {
+      drop(result.read())
+      GlobalAlloc.deallocate(result)
+      GlobalAlloc.deallocate(users)
+    }
   }
 }
 
@@ -206,8 +255,8 @@ sup [R] JoinHandle[R] ext Drop {
   !versioned(base="1.0.0", new="1.0.0")
   fun drop(self) -> Void {
     # Ensure the thread is detached before deletion.
-    let JoinHandle[R](handle, result, detached) = self
-    GlobalAlloc.deallocate_array(result, 1_uz)
+    let JoinHandle[R](handle, result, users, detached) = self
     case detached.not { let err = sppc::pthread_detach(&handle) }
+    JoinHandle[R]::release_unjoined(result, users)
   }
 }

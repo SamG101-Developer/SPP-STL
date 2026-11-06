@@ -173,3 +173,55 @@ fun test_a_named_function_can_be_the_thread_body() -> Void {
   let h = std::threading::thread::spawn(zz_named_thread_body).expect("spawn failed")
   std::debug::assert(h.join().expect("join failed") == 42, "the named function ran on the thread")
 }
+
+!test(group="std/threading/thread")
+fun test_detaching_a_running_thread_leaves_it_its_result_cell() -> Void {
+  # Regression: `detach` freed the result cell at once, and the thread then wrote its result into freed memory. Under
+  # valgrind this was an invalid write in `_sppc_thread_entry`; the main thread waits long enough for the write to land.
+  let h = std::threading::thread::spawn(() -> Vec[S32] {
+    std::time::time::sleep(std::time::duration::Duration::from_millis(100_u64))
+    let mut v = Vec[S32]::new()
+    v.append(1)
+    ret v
+  }).expect("spawn failed")
+  h.detach().expect("detach failed")
+  std::time::time::sleep(std::time::duration::Duration::from_millis(300_u64))
+}
+
+!test(group="std/threading/thread")
+fun test_detaching_a_finished_thread_drops_its_result() -> Void {
+  # The other order: the thread has finished before the detach, so the handle is the last user and drops the result.
+  # Under valgrind with --leak-check=full, a missed drop shows as a leaked vector buffer.
+  let h = std::threading::thread::spawn(() -> Vec[S32] {
+    let mut v = Vec[S32]::new()
+    v.append(1)
+    ret v
+  }).expect("spawn failed")
+  std::time::time::sleep(std::time::duration::Duration::from_millis(100_u64))
+  h.detach().expect("detach failed")
+}
+
+!test(group="std/threading/thread")
+fun test_dropping_an_unjoined_handle_leaves_the_thread_its_result_cell() -> Void {
+  # As for `detach`, through the handle's `drop`.
+  let h = std::threading::thread::spawn(() -> Vec[S32] {
+    std::time::time::sleep(std::time::duration::Duration::from_millis(100_u64))
+    let mut v = Vec[S32]::new()
+    v.append(1)
+    ret v
+  }).expect("spawn failed")
+  drop(h)
+  std::time::time::sleep(std::time::duration::Duration::from_millis(300_u64))
+}
+
+!test(group="std/threading/thread")
+fun test_joining_returns_an_owned_result_without_freeing_it() -> Void {
+  let h = std::threading::thread::spawn(() -> Vec[S32] {
+    let mut v = Vec[S32]::new()
+    v.append(4)
+    ret v
+  }).expect("spawn failed")
+  let v = h.join().expect("join failed")
+  std::debug::assert(v[0_uz]@ == 4, "the joined vector is intact")
+  drop(v)
+}

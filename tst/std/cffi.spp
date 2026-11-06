@@ -1,0 +1,106 @@
+!test(group="std/cffi")
+fun test_view_ptr_ref_points_at_the_view() -> Void {
+  let s = "hello"
+  let (p, n) = std::cffi::view_ptr_ref(s.view_ref())
+  let std::cffi::CRefBytePtr(inner) = p
+  std::debug::assert(n == 5_uz, "the length is the view's length in bytes")
+  std::debug::assert(inner.read() == 104_u8, "the pointer is at the first byte")
+}
+
+!test(group="std/cffi")
+fun test_view_ptr_ref_of_a_subview_starts_at_the_subview() -> Void {
+  let s = "hello world"
+  let (p, n) = std::cffi::view_ptr_ref(s.slice_ref(6_uz, 11_uz).view_ref())
+  let std::cffi::CRefBytePtr(inner) = p
+  std::debug::assert(n == 5_uz, "the length is the subview's")
+  std::debug::assert(inner.read() == 119_u8, "the pointer is at the subview's first byte")
+}
+
+!test(group="std/cffi")
+fun test_view_ptr_mut_writes_land_in_the_vector() -> Void {
+  let mut v = Vec[U8]::new()
+  v.append(1_u8)
+  v.append(2_u8)
+  let (p, n) = std::cffi::view_ptr_mut(&mut v)
+  let std::cffi::CMutBytePtr(mut inner) = p
+  std::debug::assert(n == 2_uz, "the length is the vector's")
+  inner.write(9_u8)
+  std::debug::assert(v[0_uz]@ == 9_u8, "a write through the pointer is seen by the vector")
+  drop(v)
+}
+
+!test(group="std/cffi")
+fun test_an_unused_pointer_can_be_dropped() -> Void {
+  let (p, n) = std::cffi::view_ptr_ref("abc".view_ref())
+  drop(p)
+  std::debug::assert(n == 3_uz, "the length outlives the dropped pointer")
+}
+
+!test(group="std/cffi")
+fun test_view_ptr_ref_of_a_byte_vector() -> Void {
+  let mut v = Vec[U8]::new()
+  v.append(7_u8)
+  let (p, n) = std::cffi::view_ptr_ref(&v)
+  let std::cffi::CRefBytePtr(inner) = p
+  std::debug::assert(n == 1_uz, "the length is the vector's")
+  std::debug::assert(inner.read() == 7_u8, "the pointer is at the first byte")
+  drop(v)
+}
+
+!test(group="std/cffi")
+fun test_returned_ptr_mut_round_trips_malloc_to_free() -> Void {
+  let raw = sppc::malloc(16_uz)
+  let p = std::cffi::returned_ptr_mut(raw)
+  case p of {
+    is Some[std::cffi::CMutBytePtr](val) { sppc::free(val) }
+    is None() { std::debug::assert(false, "malloc returned a non-null pointer") }
+  }
+}
+
+!test(group="std/cffi")
+fun test_returned_ptr_ref_of_null_is_none() -> Void {
+  let p = std::cffi::returned_ptr_ref(std::mem::pointer::Ptr[U8](addr=0_uz))
+  std::debug::assert(p.is_none(), "a null returned pointer has no byte pointer")
+  drop(p)
+}
+
+!test(group="std/cffi")
+fun test_returned_ptr_mut_of_null_is_none() -> Void {
+  let p = std::cffi::returned_ptr_mut(std::mem::pointer::Ptr[U8](addr=0_uz))
+  std::debug::assert(p.is_none(), "a null returned pointer has no byte pointer")
+  drop(p)
+}
+
+!test(group="std/cffi")
+fun test_from_c_str_reads_up_to_the_terminator() -> Void {
+  let c = "hello".to_c_str()
+  let (p, n) = std::cffi::view_ptr_ref(c.view_ref())
+  let s = Str::from_c_str(&p)
+  std::debug::assert(s == "hello", "the bytes before the nul are copied")
+  std::debug::assert(n == 5_uz, "the view's length does not count the nul")
+  drop(p)
+  drop(s)
+  drop(c)
+}
+
+!test(group="std/cffi")
+fun test_returned_ptr_alloc_round_trips_malloc_to_free() -> Void {
+  let raw = sppc::malloc(4_uz)
+  let ptr = std::cffi::returned_ptr_alloc(raw)
+  case ptr of {
+    is Some[std::mem::pointer::NonNull[U8]](val) {
+      let mut p = val
+      p.write(42_u8)
+      std::debug::assert(p.read() == 42_u8, "the pointer can be written and read through")
+      sppc::free(p.as_c_mut())
+    }
+    is None() { std::debug::assert(false, "malloc returned a non-null pointer") }
+  }
+}
+
+!test(group="std/cffi")
+fun test_returned_ptr_alloc_of_null_is_none() -> Void {
+  let ptr = std::cffi::returned_ptr_alloc(std::mem::pointer::Ptr[U8](addr=0_uz))
+  std::debug::assert(ptr.is_none(), "a null returned pointer has no NonNull")
+  drop(ptr)
+}

@@ -63,7 +63,7 @@ sup [T, A: Alloc] Arc[T, A] {
     # @let alloc: The allocator used to allocate and deallocate the control block.
     # @ret: An `Arc` owning the sole handle to the newly allocated control block.
 
-    let mut pointer = alloc.allocate_array[ControlBlock[T]](1_uz).expect("Allocation failed")
+    let mut pointer = alloc.allocate[ControlBlock[T]]().expect("Allocation failed")
     pointer.write(ControlBlock(
       strong_counter=Atom[USize]::new(1_uz),
       weak_counter=Atom[USize]::new(1_uz),
@@ -130,16 +130,17 @@ sup [T, A: Alloc] Arc[T, A] ext Drop {
     # Drop one handle. The thread that takes the strong count to zero is the one that destroys the value, and it is the
     # only one: `fetch_sub` hands back the count from before, so exactly one caller sees the one. It then releases the
     # count the strong handles held collectively, and whichever of that and the last `Weak` finishes second frees the
-    # block. The value is destroyed before the block is, and a `Weak` never reads a destroyed value because `upgrade`
-    # refuses once the strong count is zero.
+    # block. Only the `val` field is moved out and dropped - reading the whole block would race the other threads'
+    # atomic operations on the counters. The value is destroyed before the block is, and a `Weak` never reads a
+    # destroyed value because `upgrade` refuses once the strong count is zero.
 
     let Self(mut pointer, alloc) = self
     defer drop(alloc)
 
     case pointer.strong_counter.fetch_sub(1_uz) == 1_uz {
-      std::mem::ops::drop_in_place(&mut pointer.val)
+      drop(NonNull[T]::from_mut(&mut pointer.val).read())
       case pointer.weak_counter.fetch_sub(1_uz) == 1_uz {
-        alloc.deallocate_array(pointer, 1_uz)
+        alloc.deallocate(pointer)
       }
     }
   }

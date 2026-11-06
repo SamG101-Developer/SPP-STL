@@ -61,3 +61,25 @@ fun test_each_box_owns_a_separate_value() -> Void {
   drop(a)
   drop(b)
 }
+!test(group="std/single")
+fun test_dropping_a_single_drops_its_value() -> Void {
+  # Regression: `drop` called `drop_in_place(&mut pointer)`, which inferred `T` as the pointer and destroyed that
+  # rather than the value, leaking the vector's buffer. Only a leak check sees this: run under valgrind with
+  # --leak-check=full.
+  let mut v = Vec[S32]::new()
+  v.append(1)
+  let s = std::single::Single[Vec[S32]]::new(v)
+  drop(s)
+}
+
+!test(group="std/single")
+fun test_reading_a_single_does_not_drop_the_value_it_returns() -> Void {
+  # Regression: `read` deferred a full `drop(self)`, which destroyed the value it had just moved out. Once `drop` really
+  # destroyed values, that freed the vector's buffer twice.
+  let mut v = Vec[S32]::new()
+  v.append(1)
+  let s = std::single::Single[Vec[S32]]::new(v)
+  let back = s.read()
+  std::debug::assert(back.len() == 1_uz, "the vector came back whole")
+  drop(back)
+}

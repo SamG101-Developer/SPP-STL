@@ -10,15 +10,19 @@ use std::ops::drop::Drop
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls Fut[T] {
-  # The `Fut[T]` future type wraps any type, when a function is called as `async`. Because the `async` goes at the
-  # function call site rather than the definition, we avoid the coloring problem, and remove the duplication of every
-  # function into async and non-async forms. The compiler lowers an async call into a `Fut[T]::async_` call, which hands
-  # the work to the green-thread runtime in `sppc`.
+  # The `Fut[T]` future type wraps any type, when a function is called as
+  # `async`. Because the `async` goes at the function call site rather than the
+  # definition, we avoid the coloring problem, and remove the duplication of
+  # every function into async and non-async forms. The compiler lowers an async
+  # call into a `Fut[T]::async_` call, which hands the work to the green-thread
+  # runtime in `sppc`.
   # @type T: The type of the value that the future will eventually resolve to.
-  # @let handle: Names the task inside the runtime. It carries a generation as well as an index, so a handle kept past
-  # the task it named fails to resolve rather than naming whichever task now occupies the slot.
-  # @let result: The uninitialized cell the task writes its return value into. The value casn never be access directly
-  # because of the access modifier, so `.await` must be used.
+  # @let handle: Names the task inside the runtime. It carries a generation as
+  #   well as an index, so a handle kept past the task it named fails to resolve
+  #   rather than naming whichever task now occupies the slot.
+  # @let result: The uninitialized cell the task writes its return value into.
+  #   The value casn never be access directly because of the access modifier, so
+  #   `.await` must be used.
 
   !private handle: S32
   !private result: NonNull[T]
@@ -28,15 +32,17 @@ sup [T] Fut[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun spawn[F: FunMov[(), T]](f: F) -> Self {
-    # Start `f` as a task, and answer with the future standing for it. The function is moved onto the task, and its
-    # result comes back through a cell allocated here.
-    # @type F: The type of the function to run. It is moved onto the task, so it must be a `FunMov`.
+    # Start `f` as a task, and answer with the future standing for it. The
+    # function is moved onto the task, and its result comes back through a cell
+    # allocated here.
+    # @type F: The type of the function to run. It is moved onto the task, so it
+    #   must be a `FunMov`.
     # @let f: The function to run.
     # @ret: The future standing for the running task.
 
     # Allocated here rather than on the task, so that a failure to allocate is
     # seen by the caller rather than by a task with nowhere to report it.
-    let slot = case GlobalAlloc.allocate_array[T](1_uz) of {
+    let slot = case GlobalAlloc.allocate[T]() of {
       is Pass[NonNull[T]](val as p) { p }
       is Fail[AllocErr](err as e) {
         drop(e)
@@ -54,7 +60,7 @@ sup [T] Fut[T] {
     }))
 
     case err != 0 {
-      GlobalAlloc.deallocate_array(slot, 1_uz)
+      GlobalAlloc.deallocate(slot)
       std::abort::abort("async: the runtime refused to start the task")
     }
     ret Self(handle, result=slot)
@@ -63,11 +69,14 @@ sup [T] Fut[T] {
   !private
   !versioned(base="1.0.0", new="1.0.0")
   fun await_(self) -> T {
-    # What the `await` keyword lowers to. Private, because waiting has to go through the keyword rather than through a
-    # call: consuming a future is the one moment its escaping borrows can be released, and only the keyword's lowering
-    # is allowed to say so - it checks the receiver is a future first, where a plain method call would just be a move of
-    # a value carrying escaping borrows and refused as one.
-    # @ret: The resolved value. Blocks until the task has finished, or returns at once if it already had.
+    # What the `await` keyword lowers to. Private, because waiting has to go
+    # through the keyword rather than through a call: consuming a future is the
+    # one moment its escaping borrows can be released, and only the keyword's
+    # lowering is allowed to say so - it checks the receiver is a future first,
+    # where a plain method call would just be a move of a value carrying
+    # escaping borrows and refused as one.
+    # @ret: The resolved value. Blocks until the task has finished, or returns
+    #   at once if it already had.
 
     let Self(handle, result) = self
     let err = sppc::await_(handle)
@@ -76,25 +85,27 @@ sup [T] Fut[T] {
     # cell and there is no value to hand back. Reading it anyway would be a
     # read of uninitialized memory.
     case err != 0 {
-      GlobalAlloc.deallocate_array(result, 1_uz)
+      GlobalAlloc.deallocate(result)
       std::abort::abort("await: the future does not name a running task")
     }
 
     # The read is only sound once the await has returned: until then the task
     # may not have written the cell yet.
     let val = result.read()
-    GlobalAlloc.deallocate_array(result, 1_uz)
+    GlobalAlloc.deallocate(result)
     ret val
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun await_all(futures: Vec[Fut[T]]) -> Vec[T] {
-    # Wait for several futures and collect what they produced. The futures are all running already by the time this is
-    # called - what this does is collect them - so the total wait is that of the slowest rather than the sum of them
-    # all.
+    # Wait for several futures and collect what they produced. The futures are
+    # all running already by the time this is called - what this does is collect
+    # them - so the total wait is that of the slowest rather than the sum of
+    # them all.
     # @let futures: The futures to collect.
-    # @ret: A vector of the resolved values, in the order the futures were given.
+    # @ret: A vector of the resolved values, in the order the futures were
+    #   given.
 
     # Todo: Fix
     let mut out = Vec[T]()
@@ -108,20 +119,22 @@ sup [T] Fut[T] {
 sup [T] Fut[T] ext Drop {
   !versioned(base="1.0.0", new="1.0.0")
   fun drop(self) -> Void {
-    # A dropped future still waits for its task. It can't just detach and release the cell, because otherwise the green
-    # thread runtime would eventually reach this task and use uninitialized memory.
+    # A dropped future still waits for its task. It can't just detach and
+    # release the cell, because otherwise the green thread runtime would
+    # eventually reach this task and use uninitialized memory.
 
     let Self(handle, result) = self
     let err = sppc::await_(handle)
     case err == 0 { drop(result.read()) }
-    GlobalAlloc.deallocate_array(result, 1_uz)
+    GlobalAlloc.deallocate(result)
   }
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun yield_now() -> Void {
-  # Hand the thread to whatever other task is ready to run. A task that neither yields nor blocks runs to completion,
-  # which is the point of a cooperative runtime; this is how a long computation lets the others in.
+  # Hand the thread to whatever other task is ready to run. A task that neither
+  # yields nor blocks runs to completion, which is the point of a cooperative
+  # runtime; this is how a long computation lets the others in.
   sppc::async_yield()
 }
