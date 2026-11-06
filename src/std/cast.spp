@@ -1,12 +1,5 @@
-use std::annotations::abstract_method
 use std::annotations::intrinsic
-use std::annotations::public
 use std::annotations::versioned
-use std::annotations::zero_type
-use std::generator::GenOnce
-use std::option::None
-use std::option::Opt
-use std::string_view::StrView
 
 !public
 !versioned(base="1.0.0", new="1.0.0")

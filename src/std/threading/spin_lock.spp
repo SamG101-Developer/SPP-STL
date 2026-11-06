@@ -1,12 +1,4 @@
-use std::annotations::private
-use std::annotations::public
 use std::annotations::versioned
-use std::boolean::Bool
-use std::number::U64
-use std::result::Fail
-use std::result::Pass
-use std::result::Res
-use std::void::Void
 use std::ops::drop::Drop
 use std::threading::mutex::WouldBlock
 use std::threading::thread::ThreadErr

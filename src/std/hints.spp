@@ -1,8 +1,6 @@
 use std::annotations::intrinsic
-use std::annotations::public
 use std::annotations::versioned
 use std::llvm::always_inline
-use std::void::Void
 
 !public !always_inline
 !intrinsic(name="std.hints.black_box")

@@ -1,9 +1,3 @@
-use std::annotations::abstract_method
-use std::annotations::public
-use std::annotations::virtual_method
-use std::boolean::Bool
-use std::number::S32
-
 !public
 cls Ord[Rhs=Self] {
   # The `Ord` class represents the ability to order two values relative to one another, providing the behavior of the

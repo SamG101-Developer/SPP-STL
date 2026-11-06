@@ -1,28 +1,7 @@
-use std::annotations::abstract_method
-use std::annotations::package
-use std::annotations::private
-use std::annotations::public
 use std::annotations::versioned
-use std::boolean::Bool
-use std::char::Char
-use std::copy::Copy
 use std::io::StreamErr
 use std::io::StreamInvalidInputError
 use std::io::Write
-use std::number::U32
-use std::number::U8
-use std::number::USize
-use std::option::None
-use std::option::Opt
-use std::option::Some
-use std::result::Fail
-use std::result::Pass
-use std::result::Res
-use std::string::Str
-use std::string_view::StrView
-use std::view::View
-use std::void::Void
-use std::mem::ops::drop
 
 # Format strings are text with placeholders: `{}` takes the next argument, and `{:spec}` takes it with a spec. `{{` and
 # `}}` are a literal brace. The spec is `[[fill]align][+][#][0][width][.precision][kind]`:
@@ -584,14 +563,12 @@ fun format_elements[T: Format](formatter: &mut Formatter, items: &View[T]) -> Re
   # @let items: The elements, in order.
   # @ret: An empty success value, or the first element's error.
 
-  # Indexed rather than walked with "iter_ref": a borrow it yields of a variant element (a vector of "Opt") is not a
-  # valid pointer, and using it segfaults ("view-iter-ref-variant-elements" in the project notes).
   formatter.write_str("[")
-  let mut i = 0_uz
-  loop i < items.len() {
-    case i > 0_uz { formatter.write_str(", ") }
-    items[i].fmt(&mut formatter)?
-    i += 1_uz
+  let mut after_first = false
+  loop item in items.iter_ref() {
+    case after_first { formatter.write_str(", ") }
+    item.fmt(&mut formatter)?
+    after_first = true
   }
   formatter.write_str("]")
   ret Pass[Void]()

@@ -1,15 +1,7 @@
-use std::annotations::package
-use std::annotations::public
 use std::annotations::versioned
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
 use std::clone::Clone
-use std::number::USize
-use std::option::None
-use std::option::Opt
-use std::option::Some
-use std::void::Void
-use std::mem::ops::drop
 use std::mem::pointer::NonNull
 use std::ops::drop::Drop
 use std::threading::arc::Arc

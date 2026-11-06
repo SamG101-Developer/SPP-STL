@@ -1,7 +1,3 @@
-use std::annotations::abstract_method
-use std::annotations::public
-use std::void::Void
-
 !public
 cls Rem[Rhs=Self, Ret=Self] {
   # The `Rem` class represents the ability to compute the remainder of dividing one value by another using the "%"

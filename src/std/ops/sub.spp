@@ -1,7 +1,3 @@
-use std::annotations::abstract_method
-use std::annotations::public
-use std::void::Void
-
 !public
 cls Sub[Rhs=Self, Ret=Self] {
   # The `Sub` class represents the ability to subtract one value from another using the "-" operator. It is a generic

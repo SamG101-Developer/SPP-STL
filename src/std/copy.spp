@@ -1,7 +1,5 @@
-use std::annotations::public
 use std::annotations::versioned
 use std::clone::Clone
-use std::void::Void
 use std::ops::drop::Drop
 
 !public

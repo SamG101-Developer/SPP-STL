@@ -1,7 +1,4 @@
-use std::annotations::cfg
 use std::annotations::intrinsic
-use std::annotations::package
-use std::annotations::public
 use std::limits::Limits
 
 !public type CBool = std::boolean::Bool

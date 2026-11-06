@@ -1,8 +1,3 @@
-use std::annotations::abstract_method
-use std::annotations::public
-use std::annotations::virtual_method
-use std::boolean::Bool
-
 !public
 cls Eq[Rhs=Self] {
   # The `Eq` class represents the ability to test two values for equality using the "==" operator and inequality using

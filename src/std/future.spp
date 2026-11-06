@@ -1,19 +1,9 @@
-use std::annotations::package
-use std::annotations::private
-use std::annotations::public
 use std::annotations::versioned
 use std::allocator::Alloc
 use std::allocator::AllocErr
 use std::allocator::GlobalAlloc
 use std::cffi::CClosure
 use std::cffi::CVoid
-use std::function::FunMov
-use std::number::S32
-use std::result::Fail
-use std::result::Pass
-use std::vector::Vec
-use std::void::Void
-use std::mem::ops::drop
 use std::mem::pointer::NonNull
 use std::ops::drop::Drop
 

@@ -1,7 +1,3 @@
-use std::annotations::abstract_method
-use std::annotations::public
-use std::void::Void
-
 !public
 cls Pow[Rhs=Self, Ret=Self] {
   # The `Pow` class represents the ability to raise one value to the power of another using the "**" operator. It is a

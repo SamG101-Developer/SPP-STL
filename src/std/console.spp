@@ -1,62 +1,51 @@
-use std::annotations::package
-use std::annotations::private
-use std::annotations::public
 use std::annotations::versioned
-use std::annotations::zero_type
 use std::format::Format
 use std::io::BufRead
 use std::io::Read
 use std::io::StreamErr
 use std::io::Write
-use std::number::U8
-use std::number::USize
-use std::option::None
-use std::option::Opt
-use std::option::Some
-use std::result::Fail
-use std::result::Pass
-use std::result::Res
-use std::string::Str
-use std::string_view::StrView
-use std::view::View
-use std::void::Void
-use std::mem::ops::drop
 use std::ops::drop::Drop
 
 !package
 !versioned(base="1.0.0", new="1.0.0")
 cls StdinStream {
-  # The `StdinStream` class represents the standard input stream. It provides methods for reading data from the standard
-  # input, which is used to input data in the terminal/console. The `StdinStream` class extends the `Read` trait, which
-  # defines the interface for reading data from a stream.
+  # The `StdinStream` class represents the standard input stream. It provides
+  # methods for reading data from the standard input, which is used to input
+  # data in the terminal/console. The `StdinStream` class extends the `Read`
+  # trait, which defines the interface for reading data from a stream.
 }
 
 !package
 !versioned(base="1.0.0", new="1.0.0")
 cls StdoutStream {
-  # The `StdoutStream` class represents the standard output stream. It provides methods for writing data to the standard
-  # output, which is used to display data in the terminal/console. The `StdoutStream` class extends the `Write` trait,
-  # which defines the interface for writing data to a stream.
+  # The `StdoutStream` class represents the standard output stream. It provides
+  # methods for writing data to the standard output, which is used to display
+  # data in the terminal/console. The `StdoutStream` class extends the `Write`
+  # trait, which defines the interface for writing data to a stream.
 }
 
 !package
 !versioned(base="1.0.0", new="1.0.0")
 cls StderrStream {
-  # The `StderrStream` class represents the standard error stream. It provides methods for writing data to the standard
-  # error, which is used to display error messages in the terminal/console. The `StderrStream` class extends the `Write`
-  # trait, which defines the interface for writing data to a stream.
+  # The `StderrStream` class represents the standard error stream. It provides
+  # methods for writing data to the standard error, which is used to display
+  # error messages in the terminal/console. The `StderrStream` class extends the
+  # `Write` trait, which defines the interface for writing data to a stream.
 }
 
 sup StdinStream ext Read {
   !versioned(base="1.0.0", new="1.0.0")
   fun read(&mut self, mut buf: &mut View[U8]) -> Res[USize, StreamErr] {
-    # The `read` method reads data from the standard input stream into the provided buffer. It uses a special `C`
-    # function defined in the `sppc` library, which is very close to the `C` `read` kernel function, but locks on a
-    # global stdin pthread mutex.
-    # @let buf: A mutable borrow to a view of bytes that will be filled with the data read from the standard input. The
-    # method will attempt to read up to `len` bytes into the buffer, where `len` is the length of the view. The buffer
-    # is modified in-place with the data read from the standard input.
-    # @ret: The number of bytes that were successfully read into the buffer, or an error if the read operation fails.
+    # The `read` method reads data from the standard input stream into the
+    # provided buffer. It uses a special `C` function defined in the `sppc`
+    # library, which is very close to the `C` `read` kernel function, but locks
+    # on a global stdin pthread mutex.
+    # @let buf: A mutable borrow to a view of bytes that will be filled with the
+    #   data read from the standard input. The method will attempt to read up to
+    #   `len` bytes into the buffer, where `len` is the length of the view. The
+    #   buffer is modified in-place with the data read from the standard input.
+    # @ret: The number of bytes that were successfully read into the buffer, or
+    #   an error if the read operation fails.
 
     # Read from the standard input fd, lockingthe global stdin mutex.
     let mut filled = 0_sz
@@ -69,14 +58,16 @@ sup StdinStream ext Read {
 sup StdoutStream ext Write {
   !versioned(base="1.0.0", new="1.0.0")
   fun write(&mut self, buf: &View[U8]) -> Res[USize, StreamErr] {
-    # The `write` method writes data from the provided buffer to the standard output stream. It uses a special `C`
-    # function defined in the `sppc` library, which is very close to the `C` `write` kernel function, but locks on a
-    # global stdout pthread mutex.
-    # @let buf: A borrow to a view of bytes that contains the data to be written to the standard output. The method will
-    # attempt to write up to `len` bytes from the buffer, where `len` is the length of the view. The buffer is not
-    # modified by this method.
-    # @ret: The number of bytes that were successfully written from the buffer to the standard output, or an error if
-    # the write operation fails.
+    # The `write` method writes data from the provided buffer to the standard
+    # output stream. It uses a special `C` function defined in the `sppc`
+    # library, which is very close to the `C` `write` kernel function, but locks
+    # on a global stdout pthread mutex.
+    # @let buf: A borrow to a view of bytes that contains the data to be written
+    #   to the standard output. The method will attempt to write up to `len`
+    #   bytes from the buffer, where `len` is the length of the view. The buffer
+    #   is not modified by this method.
+    # @ret: The number of bytes that were successfully written from the buffer
+    #   to the standard output, or an error if the write operation fails.
 
     # Write to the standard output fd, locking the global
     # stdout mutex.
@@ -88,9 +79,11 @@ sup StdoutStream ext Write {
 
   !versioned(base="1.0.0", new="1.0.0")
   fun flush(&mut self) -> Res[Void, StreamErr] {
-    # The `flush` method flushes the standard output stream, ensuring that all buffered data is written out. It uses the
-    # `C` `flush` method - no special behaviour is needed for the stdout stream, vs any other streams.
-    # @ret: An empty success value if the flush operation was successful, or an error if the flush operation fails.
+    # The `flush` method flushes the standard output stream, ensuring that all
+    # buffered data is written out. It uses the `C` `flush` method - no special
+    # behaviour is needed for the stdout stream, vs any other streams.
+    # @ret: An empty success value if the flush operation was successful, or an
+    #   error if the flush operation fails.
 
     # Flush the standard output stream.
     let err = sppc::fsync(1)
@@ -102,14 +95,16 @@ sup StdoutStream ext Write {
 sup StderrStream ext Write {
   !versioned(base="1.0.0", new="1.0.0")
   fun write(&mut self, buf: &View[U8]) -> Res[USize, StreamErr] {
-    # The `write` method writes data from the provided buffer to the standard error stream. It uses a special `C`
-    # function defined in the `sppc` library, which is very close to the `C` `write` kernel function, but locks on a
-    # global stderr pthread mutex.
-    # @let buf: A borrow to a view of bytes that contains the data to be written to the standard error. The method will
-    # attempt to write up to `len` bytes from the buffer, where `len` is the length of the view. The buffer is not
-    # modified by this method.
-    # @ret: The number of bytes that were successfully written from the buffer to the standard error, or an error if the
-    # write operation fails.
+    # The `write` method writes data from the provided buffer to the standard
+    # error stream. It uses a special `C` function defined in the `sppc`
+    # library, which is very close to the `C` `write` kernel function, but locks
+    # on a global stderr pthread mutex.
+    # @let buf: A borrow to a view of bytes that contains the data to be written
+    #   to the standard error. The method will attempt to write up to `len`
+    #   bytes from the buffer, where `len` is the length of the view. The buffer
+    #   is not modified by this method.
+    # @ret: The number of bytes that were successfully written from the buffer
+    #   to the standard error, or an error if the write operation fails.
 
     # Write to the standard error fd, locking the global
     # stderr mutex.
@@ -121,9 +116,11 @@ sup StderrStream ext Write {
 
   !versioned(base="1.0.0", new="1.0.0")
   fun flush(&mut self) -> Res[Void, StreamErr] {
-    # The `flush` method flushes the standard error stream, ensuring that all buffered data is written out. It uses the
-    # `C` `flush` method - no special behaviour is needed for the stderr stream, vs any other streams.
-    # @ret: An empty success value if the flush operation was successful, or an error if the flush operation fails.
+    # The `flush` method flushes the standard error stream, ensuring that all
+    # buffered data is written out. It uses the `C` `flush` method - no special
+    # behaviour is needed for the stderr stream, vs any other streams.
+    # @ret: An empty success value if the flush operation was successful, or an
+    #   error if the flush operation fails.
 
     # Flush the standard error stream.
     let err = sppc::fsync(2)
@@ -135,9 +132,11 @@ sup StderrStream ext Write {
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun print(str: &StrView) -> Void {
-  # The `print` function writes the provided string to the standard output stream without a newline. It creates a new
-  # `StdoutStream` instance and uses its `write_str` method to write the string to the standard output. Generally, a
-  # `print` won't fail unless the stdout stream is in a very bad state, so we use `Opt` here for simplicity.
+  # The `print` function writes the provided string to the standard output
+  # stream without a newline. It creates a new `StdoutStream` instance and uses
+  # its `write_str` method to write the string to the standard output.
+  # Generally, a `print` won't fail unless the stdout stream is in a very bad
+  # state, so we use `Opt` here for simplicity.
   # @let str: The string to be printed to the standard output.
 
   # Create a new `StdoutStream` instance and write the
@@ -150,9 +149,11 @@ fun print(str: &StrView) -> Void {
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun print[A: Format, ..Args: Format](fmt: &StrView, first: A, ..rest: Args) -> Void {
-  # The formatted `print` fills a format string's placeholders with its arguments (see `std::format` for the syntax) and
-  # writes the result to the standard output, with one write. It takes at least one argument, so `print("text")` is
-  # always the plain `print`, which prints braces as they are. A format string that does not match its arguments aborts.
+  # The formatted `print` fills a format string's placeholders with its
+  # arguments (see `std::format` for the syntax) and writes the result to the
+  # standard output, with one write. It takes at least one argument, so
+  # `print("text")` is always the plain `print`, which prints braces as they
+  # are. A format string that does not match its arguments aborts.
   # @let fmt: The format string.
   # @let first: The argument for the first placeholder.
   # @let rest: The arguments for the placeholders after it.
@@ -165,11 +166,14 @@ fun print[A: Format, ..Args: Format](fmt: &StrView, first: A, ..rest: Args) -> V
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun println(str: &StrView) -> Void {
-  # The `println` function writes the provided string to the standard output stream followed by a newline. It creates a
-  # new `StdoutStream` instance and uses its `write_str` method to write the string followed by a newline character to
-  # the standard output. Generally, a `println` won't fail unless the stdout stream is in a very bad state, so we use
-  # `Opt` here for simplicity.
-  # @let str: The string to be printed to the standard output, followed by a newline.
+  # The `println` function writes the provided string to the standard output
+  # stream followed by a newline. It creates a new `StdoutStream` instance and
+  # uses its `write_str` method to write the string followed by a newline
+  # character to the standard output. Generally, a `println` won't fail unless
+  # the stdout stream is in a very bad state, so we use `Opt` here for
+  # simplicity.
+  # @let str: The string to be printed to the standard output, followed by a
+  #   newline.
 
   # Create a new `StdoutStream` instance and write the
   # string followed by a newline to the standard output.
@@ -187,11 +191,13 @@ fun println(str: &StrView) -> Void {
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun println[A: Format, ..Args: Format](fmt: &StrView, first: A, ..rest: Args) -> Void {
-  # The formatted `println` fills a format string's placeholders with its arguments (see `std::format` for the syntax)
-  # and writes the result to the standard output, followed by a newline, with one write. It takes at least one argument,
-  # so `println("text")` is always the plain `println`, which prints braces as they are. A format string that does not
-  # match its arguments aborts. The newline is part of the same single write, so another thread's output cannot land
-  # between the text and its newline.
+  # The formatted `println` fills a format string's placeholders with its
+  # arguments (see `std::format` for the syntax) and writes the result to the
+  # standard output, followed by a newline, with one write. It takes at least
+  # one argument, so `println("text")` is always the plain `println`, which
+  # prints braces as they are. A format string that does not match its arguments
+  # aborts. The newline is part of the same single write, so another thread's
+  # output cannot land between the text and its newline.
   # @let fmt: The format string.
   # @let first: The argument for the first placeholder.
   # @let rest: The arguments for the placeholders after it.
@@ -205,9 +211,11 @@ fun println[A: Format, ..Args: Format](fmt: &StrView, first: A, ..rest: Args) ->
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun eprint(str: &StrView) -> Void {
-  # The `eprint` function writes the provided string to the standard error stream without a newline. It creates a new
-  # `StderrStream` instance and uses its `write_str` method to write the string to the standard error. Generally, an
-  # `eprint` won't fail unless the stderr stream is in a very bad state, so we use `Opt` here for simplicity.
+  # The `eprint` function writes the provided string to the standard error
+  # stream without a newline. It creates a new `StderrStream` instance and uses
+  # its `write_str` method to write the string to the standard error. Generally,
+  # an `eprint` won't fail unless the stderr stream is in a very bad state, so
+  # we use `Opt` here for simplicity.
   # @let str: The string to be printed to the standard error.
 
   # Create a new `StderrStream` instance and write the
@@ -220,10 +228,11 @@ fun eprint(str: &StrView) -> Void {
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun eprint[A: Format, ..Args: Format](fmt: &StrView, first: A, ..rest: Args) -> Void {
-  # The formatted `eprint` fills a format string's placeholders with its arguments (see `std::format` for the syntax)
-  # and writes the result to the standard error, with one write. It takes at least one argument, so `eprint("text")` is
-  # always the plain `eprint`, which prints braces as they are. A format string that does not match its arguments
-  # aborts.
+  # The formatted `eprint` fills a format string's placeholders with its
+  # arguments (see `std::format` for the syntax) and writes the result to the
+  # standard error, with one write. It takes at least one argument, so
+  # `eprint("text")` is always the plain `eprint`, which prints braces as they
+  # are. A format string that does not match its arguments aborts.
   # @let fmt: The format string.
   # @let first: The argument for the first placeholder.
   # @let rest: The arguments for the placeholders after it.
@@ -236,11 +245,14 @@ fun eprint[A: Format, ..Args: Format](fmt: &StrView, first: A, ..rest: Args) -> 
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun eprintln(str: &StrView) -> Void {
-  # The `eprintln` function writes the provided string to the standard error stream followed by a newline. It creates a
-  # new `StderrStream` instance and uses its `write_str` method to write the string followed by a newline character to
-  # the standard error. Generally, an `eprintln` won't fail unless the stderr stream is in a very bad state, so we use
-  # `Opt` here for simplicity.
-  # @let str: The string to be printed to the standard error, followed by a newline.
+  # The `eprintln` function writes the provided string to the standard error
+  # stream followed by a newline. It creates a new `StderrStream` instance and
+  # uses its `write_str` method to write the string followed by a newline
+  # character to the standard error. Generally, an `eprintln` won't fail unless
+  # the stderr stream is in a very bad state, so we use `Opt` here for
+  # simplicity.
+  # @let str: The string to be printed to the standard error, followed by a
+  #   newline.
 
   # Create a new `StderrStream` instance and write the
   # string followed by a newline to the standard error.
@@ -258,11 +270,13 @@ fun eprintln(str: &StrView) -> Void {
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun eprintln[A: Format, ..Args: Format](fmt: &StrView, first: A, ..rest: Args) -> Void {
-  # The formatted `eprintln` fills a format string's placeholders with its arguments (see `std::format` for the syntax)
-  # and writes the result to the standard error, followed by a newline, with one write. It takes at least one argument,
-  # so `eprintln("text")` is always the plain `eprintln`, which prints braces as they are. A format string that does not
-  # match its arguments aborts. The newline is part of the same single write, so another thread's output cannot land
-  # between the text and its newline.
+  # The formatted `eprintln` fills a format string's placeholders with its
+  # arguments (see `std::format` for the syntax) and writes the result to the
+  # standard error, followed by a newline, with one write. It takes at least one
+  # argument, so `eprintln("text")` is always the plain `eprintln`, which prints
+  # braces as they are. A format string that does not match its arguments
+  # aborts. The newline is part of the same single write, so another thread's
+  # output cannot land between the text and its newline.
   # @let fmt: The format string.
   # @let first: The argument for the first placeholder.
   # @let rest: The arguments for the placeholders after it.
@@ -276,14 +290,17 @@ fun eprintln[A: Format, ..Args: Format](fmt: &StrView, first: A, ..rest: Args) -
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun input(prompt: &StrView = "") -> Str {
-  # The `input` function reads a line of input from the standard input stream. It optionally takes a `prompt` string
-  # that is printed to the standard output before reading the input. The function creates a new `StdinStream` instance
-  # and uses its `read_line` method to read a line of input from the standard input. Generally, an `input` won't fail
-  # unless the stdin stream is in a very bad state, so we use `Opt` here for simplicity.
-  # @let ?prompt: An optional string that is printed to the standard output before reading the input. If provided, the
-  # prompt is displayed to the user to indicate that input is expected.
-  # @ret: An `Opt[Str]` that is `Some(Str)` containing the line of input read from the standard input, or `None` if the
-  # read operation failed.
+  # The `input` function reads a line of input from the standard input stream.
+  # It optionally takes a `prompt` string that is printed to the standard output
+  # before reading the input. The function creates a new `StdinStream` instance
+  # and uses its `read_line` method to read a line of input from the standard
+  # input. Generally, an `input` won't fail unless the stdin stream is in a very
+  # bad state, so we use `Opt` here for simplicity.
+  # @let ?prompt: An optional string that is printed to the standard output
+  #   before reading the input. If provided, the prompt is displayed to the user
+  #   to indicate that input is expected.
+  # @ret: An `Opt[Str]` that is `Some(Str)` containing the line of input read
+  #   from the standard input, or `None` if the read operation failed.
 
   # If a prompt is provided, print it to the standard output
   # before reading the input.

@@ -1,5 +1,3 @@
-use std::annotations::cfg
-use std::annotations::public
 use std::num::float8::Float8
 use std::num::sized_floating_point::SizedFloatingPoint
 use std::num::sized_integer_signed::SizedIntegerSigned

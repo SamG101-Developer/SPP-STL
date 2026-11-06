@@ -1,7 +1,3 @@
-use std::annotations::abstract_method
-use std::annotations::public
-use std::void::Void
-
 !public
 cls Mul[Rhs=Self, Ret=Self] {
   # The `Mul` class represents the ability to multiply two values together using the "*" operator. It is a generic class
