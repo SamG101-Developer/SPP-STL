@@ -87,7 +87,7 @@ fun get_env(key: &StrView) -> Opt[Str] {
   let mut buffer = Str::new_with_capacity(max_size)
   defer drop(buffer)
 
-  let err = sppc::getenv(key_z.ptr(), buffer.ptr(), max_size)
+  let err = sppc::getenv(key_z.ptr().as_c_ref(), buffer.ptr().as_c_mut(), max_size)
   case err != 0 { ret None }
   ret Some(val=Str::from_c_str(buffer.ptr()))
 }
@@ -107,7 +107,7 @@ fun set_env(var_key: &StrView, var_val: &StrView, overwrite: Bool = true) -> Boo
   # @ret: A boolean value indicating whether the environment variable was successfully set. Returns `true` if the
   # operation was successful, or `false` if it failed.
 
-  let err = sppc::setenv(var_key.ptr(), var_val.ptr(), overwrite)
+  let err = sppc::setenv(var_key.ptr().as_c_ref(), var_val.ptr().as_c_ref(), overwrite)
   ret err == 0
 }
 
@@ -120,7 +120,7 @@ fun unset_env(var_key: &StrView) -> Bool {
   # @let var_key:
   # @ret:
 
-  let result = sppc::unsetenv(var_key.ptr())
+  let result = sppc::unsetenv(var_key.ptr().as_c_ref())
   ret result == 0
 }
 

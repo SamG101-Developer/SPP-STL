@@ -18,9 +18,10 @@ sup Utf8Err ext Copy { }
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls StrView {
-  # The `StrView` type is a view into a UTF-8 encoded string. It is null-terminated and is valid UTF-8. The `StrView`
-  # type is designed to be used as a view into a string, and it is not intended to be used as a standalone type. That
-  # is, it will always be used as `&StrView` or `&mut StrView`.
+  # The `StrView` type is a view into a UTF-8 encoded string. It is valid UTF-8 but not nul-terminated: it is a pointer
+  # and a length into bytes that carry no terminator, so use `to_c_str` before handing it to a c api that reads to a
+  # `0` byte. The `StrView` type is designed to be used as a view into a string, and it is not intended to be used as a
+  # standalone type. That is, it will always be used as `&StrView` or `&mut StrView`.
   # @let pointer: The pointer to the start of the string. It is guaranteed to be non-null and aligned.
   # @let length: The length of the string in bytes.
 
@@ -54,8 +55,7 @@ sup StrView {
   !versioned(base="1.0.0", new="1.0.0")
   fun is_empty(&self) -> Bool {
     # The `is_empty` method checks if this `StrView` is empty, meaning it has a length of 0 bytes. An empty string is a
-    # valid UTF-8 string, and it is represented by a null-terminated string with no characters before the null
-    # terminator.
+    # valid UTF-8 string.
     # @ret: `true` if this `StrView` is empty, `false` otherwise.
 
     ret self.length == 0_uz
@@ -167,18 +167,20 @@ sup StrView {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   cor bytes_ref(&self) -> Iterator[&U8] {
-    # The `bytes_ref` method returns an iterator over immutable borrows of the bytes of this `StrView`. This method will
-    # not typically be used, but is provided as the mirror of `bytes_mut`, which will often be used.
+    # The `bytes_ref` method returns an iterator over immutable borrows of the bytes of this `StrView`. It is the
+    # read-only mirror of the package-only `bytes_mut`.
     # @ret: An iterator over immutable borrows to the bytes of this `StrView`.
 
     loop byte in self.view_ref().iter_ref() { gen byte }
   }
 
-  !public
+  !package
   !versioned(base="1.0.0", new="1.0.0")
   cor bytes_mut(&mut self) -> Iterator[&mut U8] {
     # The `bytes_mut` method returns an iterator over mutable borrows of the bytes of this `StrView`. This method will
-    # be used when mutating the bytes of the string, such as when converting to uppercase or lowercase in-place.
+    # be used when mutating the bytes of the string, such as when converting to uppercase or lowercase in-place. It is
+    # package-only, like `view_mut`: writing arbitrary bytes can leave the string as invalid UTF-8, so every caller must
+    # keep that invariant itself.
     # @ret: An iterator over mutable borrows to the bytes of this `StrView`.
 
     loop byte in self.view_mut().iter_mut() { gen byte }
@@ -189,7 +191,7 @@ sup StrView {
   fun find(&self, needle: &StrView) -> Opt[USize] {
     # The `find` method searches for the first occurrence of the `needle` in this `StrView` (the haystack) and returns
     # the byte index of the start of the `needle` if found, or `None` if not found.
-    # @let needle: The `StrView` to search for in this `StrView`. It must be valid UTF-8 and null-terminated.
+    # @let needle: The `StrView` to search for in this `StrView`.
     # @ret: The byte index of the start of the `needle` if found, or `None` if not found.
 
     # Simple guards for guaranteed results - an empty needle
@@ -200,7 +202,7 @@ sup StrView {
     # Find the match using the "memmem" C function, mapping
     # the result into the Opt type.
     let mut idx = self.length
-    let err = sppc::memmem(self.pointer.raw(), self.length, needle.ptr().raw(), needle.length, &mut idx) # Todo: Error handling.
+    let err = sppc::memmem(self.pointer.as_c_ref(), self.length, needle.ptr().as_c_ref(), needle.length, &mut idx) # Todo: Error handling.
     case idx >= self.length { ret None }
     ret Some(val=idx)
   }
@@ -211,8 +213,7 @@ sup StrView {
     # The `find_if` method searches for the first character in this `StrView` that satisfies the given predicate and
     # returns the byte index of that character if found, or `None` if not found.
     # @type F: The type of the predicate function. It must be a function type that takes a `Char` and returns a `Bool`.
-    # @let predicate: The predicate function to apply to each character in this `StrView`. It must be valid UTF-8 and
-    # null-terminated.
+    # @let predicate: The predicate function to apply to each character in this `StrView`.
     # @ret: The byte index of the first character that satisfies the predicate if found, or `None` if not found.
 
     let mut idx = 0_uz
@@ -568,8 +569,7 @@ sup StrView {
   !versioned(base="1.0.0", new="1.0.0")
   fun replace(&self, from: &StrView, upto: &StrView) -> Str {
     # Replace all occurrences of `from` with `into` in this `StrView` and return the result as a new `Str`. The `from`
-    # and `into` strings must be valid UTF-8 and null-terminated, which is automatically guaranteed by the `StrView`
-    # type.
+    # and `into` strings are valid UTF-8, which is guaranteed by the `StrView` type.
     # @let from: The `StrView` to replace in this `StrView`.
     # @let upto: The `StrView` to replace `from` with in this `StrView`.
     # @ret: A new `Str` with all occurrences of `from` replaced with `into`.
@@ -646,19 +646,21 @@ sup StrView {
   !versioned(base="1.0.0", new="1.0.0")
   cor view_ref(&self) -> GenOnce[&View[U8]] {
     # The `view_ref` method returns a view of the bytes of this `StrView`. This is a non-mutating method, and it does
-    # not modify the original string. The returned view is valid for the lifetime of this `StrView`, and it is
-    # guaranteed to be null-terminated.
+    # not modify the original string. The returned view is valid for the lifetime of this `StrView`, and covers exactly
+    # its bytes, with no nul terminator after them.
     # @ret: A view of the bytes of this `StrView`.
 
     let view = View(pointer=self.pointer, length=self.length)
     gen &view
   }
 
-  !public
+  !package
   !versioned(base="1.0.0", new="1.0.0")
   cor view_mut(&mut self) -> GenOnce[&mut View[U8]] {
     # The `view_mut` method returns a mutable view of the bytes of this `StrView`. The returned view is valid for the
-    # lifetime of this `StrView`, and it is guaranteed to be null-terminated.
+    # lifetime of this `StrView`, and covers exactly its bytes, with no nul terminator after them. It is package-only:
+    # writing arbitrary bytes through it can leave the string as invalid UTF-8, so every caller must keep that
+    # invariant itself.
     # @ret: A mutable view of the bytes of this `StrView`.
 
     let mut view = View(pointer=self.pointer, length=self.length)

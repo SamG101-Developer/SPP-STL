@@ -1,44 +1,130 @@
 use std::annotations::intrinsic
-use std::limits::Limits
+use std::annotations::versioned
+use std::mem::pointer::NonNull
+use std::mem::pointer::Ptr
+use std::tuple::TupLike
 
-!public type CBool = std::boolean::Bool
-!public type CVoid = std::void::Void
+!public type CBool = Bool
+!public type CVoid = Void
 
-!public type CChar = std::number::S8
-!public type CShort = std::number::S16
-!public type CInt = std::number::S32
+!public type CChar = S8
+!public type CShort = S16
+!public type CInt = S32
 # C's `long` is a pointer wide on Unix, 32 or 64-bit, but always 32 bits on Windows.
-!public !cfg(os="!windows", pointer_width="64") type CLong = std::number::S64
-!public !cfg(os="!windows", pointer_width="32") type CLong = std::number::S32
-!public !cfg(os="windows") type CLong = std::number::S32
-!public type CSSizeT = std::number::SSize
+!public !cfg(os="!windows", pointer_width="64") type CLong = S64
+!public !cfg(os="!windows", pointer_width="32") type CLong = S32
+!public !cfg(os="windows") type CLong = S32
+!public type CSSizeT = SSize
 
-!public type CUChar = std::number::U8
-!public type CUShort = std::number::U16
-!public type CUInt = std::number::U32
-!public !cfg(os="!windows", pointer_width="64") type CULong = std::number::U64
-!public !cfg(os="!windows", pointer_width="32") type CULong = std::number::U32
-!public !cfg(os="windows") type CULong = std::number::U32
+!public type CUChar = U8
+!public type CUShort = U16
+!public type CUInt = U32
+!public !cfg(os="!windows", pointer_width="64") type CULong = U64
+!public !cfg(os="!windows", pointer_width="32") type CULong = U32
+!public !cfg(os="windows") type CULong = U32
 
 # C's fixed-width 64-bit integers ("int64_t", "uint64_t"), whatever "long" is.
-!public type CInt64 = std::number::S64
-!public type CUInt64 = std::number::U64
-!public type CSizeT = std::number::USize
+!public type CInt64 = S64
+!public type CUInt64 = U64
+!public type CSizeT = USize
 
-!public type CFloat = std::number::F32
-!public type CDouble = std::number::F64
+!public type CFloat = F32
+!public type CDouble = F64
 
-!public type CVoidPtr = std::mem::pointer::Ptr[CUChar]
-!public type CCharPtr = std::mem::pointer::NonNull[CUChar]
+!public type CVoidPtr = Ptr[CUChar]
+# Package-only: a `NonNull` is `Copy` with public forwarding, so outside code holding one could read and write through
+# it. Generated stubs use `CRefBytePtr` / `CMutBytePtr` for byte parameters; this remains for `CClosure`'s fields.
+!package type CCharPtr = NonNull[CUChar]
 
 !public
-cls CClosure[Ts: std::tuple::TupLike, R] {
+cls CClosure[Ts: TupLike, R] {
   !package fn: CCharPtr
   !package env: CCharPtr
 }
 
-sup [Ts: std::tuple::TupLike, R] CClosure[Ts, R] {
+sup [Ts: TupLike, R] CClosure[Ts, R] {
   !intrinsic(name="std.cffi.CClosure.from")
   !public
-  fun from[F: std::function::FunMov[Ts, R]](that: F) -> Self { }
+  fun from[F: FunMov[Ts, R]](that: F) -> Self { }
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls CRefBytePtr {
+  # A read-only pointer to bytes, for an ffi parameter of type `const char*` or `const void*`. It has no `Copy`, `FwdRef`
+  # or `FwdMut`, so s++ code can neither read through it nor keep a duplicate of it: the only thing to do with one is to
+  # pass it to an `!ffi` function. One field, so it is passed as a plain pointer in the c abi.
+  # @let inner: The address of the first byte.
+
+  !package inner: NonNull[CUChar]
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls CMutBytePtr {
+  # A writable pointer to bytes, for an ffi parameter of type `char*` or `void*` that c fills in. Like `CRefBytePtr`, it
+  # cannot be dereferenced or duplicated from s++ code, only passed to an `!ffi` function.
+  # @let inner: The address of the first byte.
+
+  !package inner: NonNull[CUChar]
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun view_ptr_ref(view: &View[CUChar]) -> (CRefBytePtr, CSizeT) {
+  # The pointer and length of a byte view, to pass to a c function that reads `{data, len}`. For a string, pass
+  # `s.view_ref()`. The bytes are not nul-terminated: for a c function that takes a bare `const char*` and reads to a `0`
+  # byte, call this on `s.to_c_str()` instead.
+  # The pointer is only valid while the view's backing storage is alive and unmodified. Nothing checks that across the
+  # ffi boundary, so a c library must not keep the pointer after the call returns.
+  # @let view: The view to point into.
+  # @ret: A read-only pointer to the first byte, and the number of bytes.
+
+  ret (CRefBytePtr(inner=view.pointer), view.length)
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun view_ptr_mut(view: &mut View[CUChar]) -> (CMutBytePtr, CSizeT) {
+  # The pointer and length of a byte view, to pass to a c function that writes into `{buffer, size}`. Taking the view
+  # mutably is what keeps a read-only view from yielding a writable pointer.
+  # The pointer is only valid while the view's backing storage is alive, and c must not write past the returned length
+  # or keep the pointer after the call returns. Nothing checks either across the ffi boundary.
+  # @let view: The view to point into.
+  # @ret: A writable pointer to the first byte, and the number of bytes.
+
+  ret (CMutBytePtr(inner=view.pointer), view.length)
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun returned_ptr_ref(ptr: CVoidPtr) -> Opt[CRefBytePtr] {
+  # A pointer a c function returned, as a read-only byte pointer to pass back to another c function (a string from
+  # one call handed to the next). Returned pointers are `CVoidPtr` because c may return null; this is where that is
+  # checked.
+  # Nothing checks what the pointer points at or how long it lives: that is the c library's contract, so follow its
+  # documentation for when the pointer stops being valid.
+  # @let ptr: The pointer a c function returned.
+  # @ret: `Some` read-only byte pointer at the same address, or `None` if `ptr` is null.
+
+  ret NonNull[CUChar]::from_ptr(ptr)
+    .pass_opt()
+    .map((p: NonNull[CUChar]) CRefBytePtr(inner=p))
+}
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun returned_ptr_mut(ptr: CVoidPtr) -> Opt[CMutBytePtr] {
+  # A pointer a c function returned, as a writable byte pointer to pass back to another c function - typically
+  # memory it allocated, handed back to be freed (`malloc` then `free`, `strdup` then `free`). Returned pointers are
+  # `CVoidPtr` because c may return null; this is where that is checked.
+  # Nothing checks what the pointer points at or how long it lives: that is the c library's contract. Both `ptr` and the
+  # result are linear, so one returned pointer converts once and the result is passed once: freeing it twice through
+  # this is a compile error (E5).
+  # @let ptr: The pointer a c function returned.
+  # @ret: `Some` writable byte pointer at the same address, or `None` if `ptr` is null.
+
+  ret NonNull[CUChar]::from_ptr(ptr)
+    .pass_opt()
+    .map((p: NonNull[CUChar]) CMutBytePtr(inner=p))
 }

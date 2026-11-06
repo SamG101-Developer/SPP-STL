@@ -329,7 +329,7 @@ sup Path {
 
     let mut exists = 0
     let path_z = self.inner.to_c_str()
-    let err = sppc::access(path_z.ptr(), sppc::f_ok, &mut exists)
+    let err = sppc::access(path_z.ptr().as_c_ref(), sppc::f_ok, &mut exists)
     drop(path_z)
     ret err == 0 and exists == 0
   }
@@ -344,7 +344,7 @@ sup Path {
 
     let mut exists = 0
     let path_z = self.inner.to_c_str()
-    let err = sppc::access(path_z.ptr(), sppc::f_ok, &mut exists)
+    let err = sppc::access(path_z.ptr().as_c_ref(), sppc::f_ok, &mut exists)
     drop(path_z)
     ret case err != 0 { Fail(err=PathErr::from_errno(err)) } else { Pass(val=exists != 0) }
   }
@@ -360,7 +360,7 @@ sup Path {
     defer drop(info)
 
     let path_z = self.inner.to_c_str()
-    let err = sppc::stat(path_z.ptr(), &mut info)
+    let err = sppc::stat(path_z.ptr().as_c_ref(), &mut info)
     drop(path_z)
     ret case err != 0 { false } else { (S32::from(info.mode) & sppc::s_ifmt) == sppc::s_ifreg }
   }
@@ -376,7 +376,7 @@ sup Path {
     defer drop(info)
 
     let path_z = self.inner.to_c_str()
-    let err = sppc::stat(path_z.ptr(), &mut info)
+    let err = sppc::stat(path_z.ptr().as_c_ref(), &mut info)
     drop(path_z)
     ret case err != 0 { false } else { (S32::from(info.mode) & sppc::s_ifmt) == sppc::s_ifdir }
   }
@@ -392,7 +392,7 @@ sup Path {
     defer drop(info)
 
     let path_z = self.inner.to_c_str()
-    let err = sppc::lstat(path_z.ptr(), &mut info)
+    let err = sppc::lstat(path_z.ptr().as_c_ref(), &mut info)
     drop(path_z)
     ret case err != 0 { false } else { (S32::from(info.mode) & sppc::s_ifmt) == sppc::s_iflnk }
   }
@@ -409,7 +409,7 @@ sup Path {
     let mut buffer = Str::new_with_capacity(path_max)
     defer drop(buffer)
     let path_z = self.inner.to_c_str()
-    let err = sppc::realpath(path_z.ptr(), buffer.ptr())
+    let err = sppc::realpath(path_z.ptr().as_c_ref(), buffer.ptr().as_c_mut())
     drop(path_z)
     ret case err == 0 { Pass(val=Path(inner=Str::from_c_str(buffer.ptr()))) } else {
       Fail(err=PathErr::from_errno(err))
@@ -426,7 +426,7 @@ sup Path {
 
     # rwxrwxrwx, with the process umask applied on top of it.
     let path_z = self.inner.to_c_str()
-    let err = sppc::mkdir(path_z.ptr(), 0o777_u32)
+    let err = sppc::mkdir(path_z.ptr().as_c_ref(), 0o777_u32)
     drop(path_z)
     ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
   }
@@ -447,7 +447,7 @@ sup Path {
       current_path /= Path(inner=component)
       case current_path.exists() { skip }
       let current_path_z = current_path.inner.to_c_str()
-      let err = sppc::mkdir(current_path_z.ptr(), 0o777_u32)
+      let err = sppc::mkdir(current_path_z.ptr().as_c_ref(), 0o777_u32)
       drop(current_path_z)
       case err == 0 { skip } else { ret Fail(err=PathErr::from_errno(err)) }
     }
@@ -463,7 +463,7 @@ sup Path {
     # fails.
 
     let path_z = self.inner.to_c_str()
-    let err = sppc::unlink(path_z.ptr())
+    let err = sppc::unlink(path_z.ptr().as_c_ref())
     drop(path_z)
     ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
   }
@@ -480,7 +480,7 @@ sup Path {
     # @todo: Implement the `force` parameter to recursively remove non-empty directories.
 
     let path_z = self.inner.to_c_str()
-    let err = sppc::rmdir(path_z.ptr())
+    let err = sppc::rmdir(path_z.ptr().as_c_ref())
     drop(path_z)
     ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
   }
@@ -496,7 +496,7 @@ sup Path {
 
     let path_z = self.inner.to_c_str()
     let new_path_z = new_path.inner.to_c_str()
-    let err = sppc::rename(path_z.ptr(), new_path_z.ptr())
+    let err = sppc::rename(path_z.ptr().as_c_ref(), new_path_z.ptr().as_c_ref())
     drop(path_z)
     drop(new_path_z)
     ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
@@ -521,7 +521,7 @@ sup Path {
     # the error where this function fails, and return the failure.
     # The info get dropped via the defer statement in this case.
     let path_z = self.inner.to_c_str()
-    let err = sppc::stat(path_z.ptr(), &mut info)
+    let err = sppc::stat(path_z.ptr().as_c_ref(), &mut info)
     drop(path_z)
     case err != 0 { ret Fail(err=PathErr::from_errno(err)) }
     let file_length = info.size
@@ -561,7 +561,7 @@ sup Path {
 
     let path_z = self.inner.to_c_str()
     let new_path_z = new_path.inner.to_c_str()
-    let err = sppc::link(path_z.ptr(), new_path_z.ptr())
+    let err = sppc::link(path_z.ptr().as_c_ref(), new_path_z.ptr().as_c_ref())
     drop(path_z)
     drop(new_path_z)
     ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
@@ -579,7 +579,7 @@ sup Path {
 
     let path_z = self.inner.to_c_str()
     let new_path_z = new_path.inner.to_c_str()
-    let err = sppc::symlink(path_z.ptr(), new_path_z.ptr())
+    let err = sppc::symlink(path_z.ptr().as_c_ref(), new_path_z.ptr().as_c_ref())
     drop(path_z)
     drop(new_path_z)
     ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
