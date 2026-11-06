@@ -1,7 +1,3 @@
-use std::annotations::abstract_method
-use std::annotations::public
-use std::void::Void
-
 !public
 cls BitShl[Rhs=Self, Ret=Self] {
   # The `BitShl` class represents the ability to shift the bits of a value to the left using the "<<" operator. It is a

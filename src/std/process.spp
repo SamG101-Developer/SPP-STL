@@ -1,16 +1,4 @@
-use std::annotations::public
 use std::annotations::versioned
-use std::annotations::zero_type
-use std::boolean::Bool
-use std::number::S32
-use std::number::U32
-use std::number::USize
-use std::option::None
-use std::option::Opt
-use std::option::Some
-use std::string::Str
-use std::string_view::StrView
-use std::mem::ops::drop
 
 !public !zero_type
 !versioned(base="1.0.0", new="1.0.0")

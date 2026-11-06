@@ -1,8 +1,3 @@
-use std::annotations::abstract_method
-use std::annotations::protected
-use std::annotations::public
-use std::void::Void
-
 !public
 cls Drop {
   # The `Drop` class marks a type as having a way to discard a value of it without saying anything about what the value

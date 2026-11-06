@@ -1,20 +1,5 @@
-use std::annotations::abstract_method
-use std::annotations::public
 use std::annotations::versioned
-use std::boolean::Bool
-use std::cast::From
 use std::clone::Clone
-use std::function::FunMut
-use std::function::FunRef
-use std::generator::Gen
-use std::generator::GenOnce
-use std::number::USize
-use std::option::None
-use std::option::Opt
-use std::option::Some
-use std::vector::Vec
-use std::void::Void
-use std::mem::ops::drop
 use std::ops::drop::Drop
 
 !public

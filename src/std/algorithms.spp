@@ -1,9 +1,4 @@
-use std::annotations::abstract_method
-use std::annotations::public
 use std::annotations::versioned
-use std::boolean::Bool
-use std::function::FunRef
-use std::void::Void
 use std::ops::ord::Ord
 
 !public

@@ -1,7 +1,3 @@
-use std::annotations::abstract_method
-use std::annotations::public
-use std::void::Void
-
 !public
 cls BitAnd[Rhs=Self, Ret=Self] {
   # The `BitAnd` class represents the ability to compute the bitwise AND of two values using the "&" operator. It is a

@@ -1,7 +1,3 @@
-use std::annotations::abstract_method
-use std::annotations::public
-use std::void::Void
-
 !public
 cls BitNot[Ret=Self] {
   # The `BitNot` class represents the ability to compute the bitwise NOT (complement) of a value using the unary "~"

@@ -1,7 +1,3 @@
-use std::annotations::abstract_method
-use std::annotations::public
-use std::boolean::Bool
-
 !public
 cls Try[Output, Residual, Value] {
   # The `Try` class represents the ability for a value to participate in the "?" (try) operator, which provides early

@@ -1,7 +1,3 @@
-use std::annotations::abstract_method
-use std::annotations::public
-use std::generator::GenOnce
-
 !public
 cls FwdMut[T] {
   # The `FwdMut` class represents the ability to forward the mutable elements of a value into a generator, yielding a
