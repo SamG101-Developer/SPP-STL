@@ -1,6 +1,5 @@
 use std::annotations::thread_hazard
 use std::annotations::versioned
-use std::allocator::GlobalAlloc
 use std::mem::pointer::NonNull
 use std::ops::drop::Drop
 use std::threading::cond_var::CondVar
@@ -22,14 +21,14 @@ cls WouldBlock {
 !versioned(base="1.0.0", new="1.0.0")
 cls Mutex[T] {
   # Guards a `T` behind a pthread mutex, handing out an exclusive borrow of it for as long as the lock is held. The
-  # value lives in its own cell rather than inside the mutex, and locking hands back a `MutexGuard` carrying a copy of
-  # the pointer to it.
+  # value lives in its own `Single` rather than inside the mutex, and locking hands back a `MutexGuard` carrying a copy
+  # of the pointer into it.
   # @type T: The type of the guarded value. A `Mutex[T]` is only as sendable as its `T`.
   # @let handle: The sppc handle for the underlying `pthread_mutex_t`, which lives behind it rather than in it.
-  # @let val: The cell holding the guarded value.
+  # @let val: The heap cell holding the guarded value. The mutex owns it; guards only borrow its pointer.
 
   !package handle: U64
-  !package val: NonNull[T]
+  !package val: Single[T]
 }
 
 !public
@@ -77,9 +76,7 @@ sup [T] Mutex[T] {
     # Create a new mutex using the sppc threading API. Todo: Error Handling.
     let mut handle = 0_u64
     let err = sppc::pthread_mutex_init(&mut handle)
-    let mut cell = GlobalAlloc.allocate_array[T](1_uz).expect("Allocation failed")
-    cell.write(val)
-    ret Mutex(handle, val=cell)
+    ret Mutex(handle, val=Single[T]::new(val))
   }
 
   !public
@@ -91,7 +88,7 @@ sup [T] Mutex[T] {
 
     let err = sppc::pthread_mutex_lock(&self.handle)
     case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
-    ret Pass(val=MutexGuard(handle=self.handle, val=self.val))
+    ret Pass(val=MutexGuard(handle=self.handle, val=self.val.pointer))
   }
 
   !public
@@ -109,7 +106,7 @@ sup [T] Mutex[T] {
 
     case err == sppc::etimedout { ret Fail(err=TimedOut) }
     case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
-    ret Pass(val=MutexGuard(handle=self.handle, val=self.val))
+    ret Pass(val=MutexGuard(handle=self.handle, val=self.val.pointer))
   }
 
   !public
@@ -138,7 +135,7 @@ sup [T] Mutex[T] {
     # mutex's pointer: the lock is held for the whole of
     # this loop, so an exclusive borrow of the value is
     # exactly what is available here.
-    let mut cell = self.val
+    let mut cell = self.val.pointer
     loop pred(cell.fwd_mut()).not {
       let werr = sppc::pthread_cond_wait(&cond.handle, &self.handle)
       case werr != 0 {
@@ -148,7 +145,7 @@ sup [T] Mutex[T] {
         ret Fail(err=ThreadErr::from_errno(werr))
       }
     }
-    ret Pass(val=MutexGuard(handle=self.handle, val=self.val))
+    ret Pass(val=MutexGuard(handle=self.handle, val=self.val.pointer))
   }
 
   !public
@@ -176,7 +173,7 @@ sup [T] Mutex[T] {
     let err = sppc::pthread_mutex_lock(&self.handle)
     case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
 
-    let mut cell = self.val
+    let mut cell = self.val.pointer
     loop pred(cell.fwd_mut()).not {
       let remaining = deadline.duration_since_saturating(TimePoint::now())
       case remaining.is_zero() {
@@ -194,7 +191,7 @@ sup [T] Mutex[T] {
         ret Fail(err=ThreadErr::from_errno(werr))
       }
     }
-    ret Pass(val=MutexGuard(handle=self.handle, val=self.val))
+    ret Pass(val=MutexGuard(handle=self.handle, val=self.val.pointer))
   }
 
   !public
@@ -207,7 +204,7 @@ sup [T] Mutex[T] {
     let code = sppc::pthread_mutex_trylock(&self.handle)
     case code == sppc::ebusy { ret Fail(err=WouldBlock) }
     case code != 0 { ret Fail(err=ThreadErr::from_errno(code)) }
-    ret Pass(val=MutexGuard(handle=self.handle, val=self.val))
+    ret Pass(val=MutexGuard(handle=self.handle, val=self.val.pointer))
   }
 
   !public
@@ -219,21 +216,17 @@ sup [T] Mutex[T] {
 
     let Self(handle, val) = self
     let err = sppc::pthread_mutex_destroy(&handle)
-    let inner = val.read()
-    GlobalAlloc.deallocate_array(val, 1_uz)
-    ret inner
+    ret val.read()
   }
 }
 
-sup [T: Drop] Mutex[T] ext Drop {
+sup [T] Mutex[T] ext Drop {
   !versioned(base="1.0.0", new="1.0.0")
   fun drop(self) -> Void {
-    # Destroy the mutex using the sppc threading API, and discard the value it was guarding. The guarded value has to go
-    # somewhere, which is why this needs "T: Drop"; a caller that wants the value back should use "take". Todo: Error
-    # Handling.
+    # Destroy the mutex using the sppc threading API, and drop the value it was guarding along with its cell. A caller
+    # that wants the value back should use "take". Todo: Error Handling.
     let Mutex[T](handle, val) = self
     let err = sppc::pthread_mutex_destroy(&handle)
-    drop(val.read())
-    GlobalAlloc.deallocate_array(val, 1_uz)
+    drop(val)
   }
 }

@@ -1,6 +1,5 @@
 use std::annotations::thread_hazard
 use std::annotations::versioned
-use std::allocator::GlobalAlloc
 use std::mem::pointer::NonNull
 use std::ops::drop::Drop
 use std::threading::cond_var::TimedOut
@@ -80,10 +79,10 @@ cls RwLock[T] {
   # Holding nothing hazardous, an `RwLock[T]` is sendable exactly when its `T` is.
   # @type T: The type of the guarded value. An `RwLock[T]` is only as sendable as its `T`.
   # @let handle: The sppc handle for the underlying `pthread_rwlock_t`, which lives behind it rather than in it.
-  # @let val: The guarded value.
+  # @let val: The heap cell holding the guarded value. The rwlock owns it; guards only borrow its pointer.
 
   !package handle: U64
-  !package val: NonNull[T]
+  !package val: Single[T]
 }
 
 sup [T] RwLock[T] {
@@ -94,9 +93,7 @@ sup [T] RwLock[T] {
     # than swallowing it.
     let mut handle = 0_u64
     let err = sppc::pthread_rwlock_init(&mut handle)
-    let mut cell = GlobalAlloc.allocate_array[T](1_uz).expect("Allocation failed")
-    cell.write(val)
-    ret RwLock(handle, val=cell)
+    ret RwLock(handle, val=Single[T]::new(val))
   }
 
   !public
@@ -109,7 +106,7 @@ sup [T] RwLock[T] {
     case err != 0 {
       ret Fail(err=ThreadErr::from_errno(err))
     }
-    ret Pass(val=RwLockReadGuard(handle=self.handle, val=self.val))
+    ret Pass(val=RwLockReadGuard(handle=self.handle, val=self.val.pointer))
   }
 
   !public
@@ -121,7 +118,7 @@ sup [T] RwLock[T] {
     case err != 0 {
       ret Fail(err=ThreadErr::from_errno(err))
     }
-    ret Pass(val=RwLockWriteGuard(handle=self.handle, val=self.val))
+    ret Pass(val=RwLockWriteGuard(handle=self.handle, val=self.val.pointer))
   }
 
   !public
@@ -139,7 +136,7 @@ sup [T] RwLock[T] {
     case err != 0 {
       ret Fail(err=ThreadErr::from_errno(err))
     }
-    ret Pass(val=RwLockReadGuard(handle=self.handle, val=self.val))
+    ret Pass(val=RwLockReadGuard(handle=self.handle, val=self.val.pointer))
   }
 
   !public
@@ -157,7 +154,7 @@ sup [T] RwLock[T] {
     case err != 0 {
       ret Fail(err=ThreadErr::from_errno(err))
     }
-    ret Pass(val=RwLockWriteGuard(handle=self.handle, val=self.val))
+    ret Pass(val=RwLockWriteGuard(handle=self.handle, val=self.val.pointer))
   }
 
   !public
@@ -172,7 +169,7 @@ sup [T] RwLock[T] {
     case code != 0 {
       ret Fail(err=ThreadErr::from_errno(code))
     }
-    ret Pass(val=RwLockWriteGuard(handle=self.handle, val=self.val))
+    ret Pass(val=RwLockWriteGuard(handle=self.handle, val=self.val.pointer))
   }
 
   !public
@@ -185,19 +182,17 @@ sup [T] RwLock[T] {
     ret case code of {
       == sppc::ebusy { Fail(err=WouldBlock) }
       != 0 { Fail(err=ThreadErr::from_errno(code)) }
-      else { Pass(val=RwLockReadGuard(handle=self.handle, val=self.val)) }
+      else { Pass(val=RwLockReadGuard(handle=self.handle, val=self.val.pointer)) }
     }
   }
 }
 
-sup [T: Drop] RwLock[T] ext Drop {
+sup [T] RwLock[T] ext Drop {
   !versioned(base="1.0.0", new="1.0.0")
   fun drop(self) -> Void {
-    # Destroy the rwlock using the sppc threading API, and discard the value it was guarding. The guarded value has to
-    # go somewhere, which is why this needs "T: Drop"; a caller that wants the value back should use "take".
+    # Destroy the rwlock using the sppc threading API, and drop the value it was guarding along with its cell.
     let RwLock[T](handle, val) = self
     let err = sppc::pthread_rwlock_destroy(&handle)
-    drop(val.read())
-    GlobalAlloc.deallocate_array(val, 1_uz)
+    drop(val)
   }
 }
