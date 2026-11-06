@@ -211,7 +211,7 @@ sup SockAddr {
       # port from the storage.
       == sppc::af_inet {
         let mut socket_address = SockV4Addr()
-        sppc::get_sockaddr_v4(&storage, &mut socket_address.ip.octets.ptr(), &mut socket_address.port)
+        sppc::get_sockaddr_v4(&storage, socket_address.ip.octets.ptr().as_c_mut(), &mut socket_address.port)
         socket_address
       }
 
@@ -242,7 +242,7 @@ sup SockAddr {
       # the octets of the IpV4Addr and the port.
       is SockV4Addr(&ip, port) {
         let mut storage = sppc::CSockaddrStorage()
-        sppc::set_sockaddr_v4(&ip.octets.ptr(), port, &mut storage)
+        sppc::set_sockaddr_v4(ip.octets.ptr().as_c_ref(), port, &mut storage)
         storage
       }
 

@@ -109,6 +109,26 @@ sup [T] NonNull[T] {
 
   !package !always_inline
   !versioned(base="1.0.0", new="1.0.0")
+  fun as_c_ref(self) -> std::cffi::CRefBytePtr {
+    # View this pointer as a read-only byte pointer, to pass to an ffi parameter of type `const char*` or `const void*`.
+    # Package-only: the public way is `std::cffi::view_ptr_ref`, which takes the pointer from a view.
+    # @ret: A `CRefBytePtr` at the same address.
+
+    ret std::cffi::CRefBytePtr(inner=self.erase_type())
+  }
+
+  !package !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  fun as_c_mut(self) -> std::cffi::CMutBytePtr {
+    # View this pointer as a writable byte pointer, to pass to an ffi parameter of type `char*` or `void*`.
+    # Package-only: the public way is `std::cffi::view_ptr_mut`, which takes the pointer from a mutable view.
+    # @ret: A `CMutBytePtr` at the same address.
+
+    ret std::cffi::CMutBytePtr(inner=self.erase_type())
+  }
+
+  !package !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
   fun is_aligned(&self, align: USize) -> Bool {
     # The `is_aligned` method checks if the pointer is aligned to a given alignment. This is a compiler intrinsic, as it
     # can be implemented using a single instruction in LLVM. The `align` parameter is a power of two, and the method

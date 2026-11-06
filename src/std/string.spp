@@ -2,6 +2,7 @@ use std::annotations::intrinsic
 use std::annotations::versioned
 use std::allocator::Alloc
 use std::allocator::GlobalAlloc
+use std::cffi::CRefBytePtr
 use std::clone::Clone
 use std::format::Format
 use std::format::Formatter
@@ -86,9 +87,22 @@ sup Str {
     # @ret: An owned copy of the bytes before the terminator.
 
     let mut length = 0_uz
-    let err = sppc::strchr(ptr, 0_u8, &mut length) # Todo: Error handling.
+    let err = sppc::strchr(ptr.as_c_ref(), 0_u8, &mut length) # Todo: Error handling.
     let view = StrView(pointer=ptr, length=length)
     ret Str::from(&view)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from_c_str(ptr: &CRefBytePtr) -> Str {
+    # Copy a nul-terminated c string into an owned `Str`, from the byte pointer a project outside std holds: get one from
+    # a returned pointer with `std::cffi::returned_ptr_ref`. The pointer is borrowed, not consumed, so it can still be
+    # passed on afterwards.
+    # Nothing checks that the bytes are nul-terminated or still alive: that is the c library's contract.
+    # @let ptr: A pointer to the first byte of a nul-terminated sequence.
+    # @ret: An owned copy of the bytes before the terminator.
+
+    ret Str::from_c_str(ptr.inner)
   }
 
   !public
