@@ -37,3 +37,38 @@ fun test_black_box_in_a_loop_keeps_every_iteration() -> Void {
   }
   std::debug::assert(total == 4950_u64, "every value was added")
 }
+
+!test(group="std/hints")
+fun test_likely_returns_the_condition_unchanged() -> Void {
+  std::debug::assert(std::hints::likely(true), "true passes through")
+  std::debug::assert(std::hints::likely(false) == false, "false passes through")
+}
+
+!test(group="std/hints")
+fun test_unlikely_returns_the_condition_unchanged() -> Void {
+  std::debug::assert(std::hints::unlikely(true), "true passes through")
+  std::debug::assert(std::hints::unlikely(false) == false, "false passes through")
+}
+
+!test(group="std/hints")
+fun test_likely_and_unlikely_choose_the_branch_the_condition_does() -> Void {
+  let mut taken = 0_u32
+  loop i in std::range::Range[U32]::between(0_u32, 10_u32) {
+    case std::hints::likely(i < 8_u32) { taken += 1_u32 }
+    case std::hints::unlikely(i >= 8_u32) { taken += 10_u32 }
+  }
+  std::debug::assert(taken == 28_u32, "eight likely and two unlikely branches were taken")
+}
+
+cmp likely_of_true: Bool = std::hints::likely(true)
+cmp likely_of_false: Bool = std::hints::likely(false)
+cmp unlikely_of_true: Bool = std::hints::unlikely(true)
+cmp unlikely_of_false: Bool = std::hints::unlikely(false)
+
+!test(group="std/hints")
+fun test_likely_and_unlikely_pass_the_condition_through_at_compile_time() -> Void {
+  std::debug::assert(likely_of_true, "likely(true) is true")
+  std::debug::assert(likely_of_false == false, "likely(false) is false")
+  std::debug::assert(unlikely_of_true, "unlikely(true) is true")
+  std::debug::assert(unlikely_of_false == false, "unlikely(false) is false")
+}
