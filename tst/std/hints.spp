@@ -72,3 +72,56 @@ fun test_likely_and_unlikely_pass_the_condition_through_at_compile_time() -> Voi
   std::debug::assert(unlikely_of_true, "unlikely(true) is true")
   std::debug::assert(unlikely_of_false == false, "unlikely(false) is false")
 }
+
+!test(group="std/hints")
+fun test_cold_path_leaves_the_branch_taken_unchanged() -> Void {
+  let mut taken = 0_u32
+  loop i in std::range::Range[U32]::between(0_u32, 10_u32) {
+    case i >= 8_u32 {
+      std::hints::cold_path()
+      taken += 10_u32
+    }
+    else {
+      taken += 1_u32
+    }
+  }
+  std::debug::assert(taken == 28_u32, "eight hot and two cold branches were taken")
+}
+
+!test(group="std/hints")
+fun test_cold_path_in_a_case_of_arm() -> Void {
+  let mut total = 0_u32
+  loop i in std::range::Range[U32]::between(0_u32, 4_u32) {
+    let x: Opt[U32] = case i == 3_u32 { None } else { Some(val=i) }
+    case x of {
+      is Some[U32](val) { total += val }
+      else {
+        std::hints::cold_path()
+        total += 100_u32
+      }
+    }
+  }
+  std::debug::assert(total == 103_u32, "three values and one cold arm were taken")
+}
+
+fun cold_path_whole_function(x: U32) -> U32 {
+  std::hints::cold_path()
+  ret x + 1_u32
+}
+
+!test(group="std/hints")
+fun test_cold_path_with_no_branch_leading_to_it() -> Void {
+  std::debug::assert(cold_path_whole_function(41_u32) == 42_u32, "a cold function still runs")
+}
+
+cmp fun cold_path_then_true() -> Bool {
+  std::hints::cold_path()
+  ret true
+}
+
+cmp cold_path_folded: Bool = cold_path_then_true()
+
+!test(group="std/hints")
+fun test_cold_path_does_nothing_at_compile_time() -> Void {
+  std::debug::assert(cold_path_folded, "the function around it still folds")
+}

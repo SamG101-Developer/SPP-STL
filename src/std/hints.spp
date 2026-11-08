@@ -6,36 +6,46 @@ use std::llvm::always_inline
 !intrinsic(name="std.hints.black_box")
 !versioned(base="1.0.0", new="1.0.0")
 fun black_box[T](value: T) -> T {
-  # Returns `value` unchanged, but hides it from the optimiser: the compiler must assume the value is read and may have
-  # been changed in ways it cannot see, and that any memory it can reach was read and written. Benchmarks use this to
-  # stop work being folded away because its result is constant or unused. It is a best-effort hint, not a guarantee
-  # about generated code, and must never be relied on for correctness or security (such as constant-time code).
+  # Returns `value` unchanged, but hides it from the optimiser: the compiler
+  # must assume the value is read and may have been changed in ways it cannot
+  # see, and that any memory it can reach was read and written. Benchmarks use
+  # this to stop work being folded away because its result is constant or
+  # unused. It is a best-effort hint, not a guarantee about generated code, and
+  # must never be relied on for correctness or security (such as constant-time
+  # code).
   # @type T: The type of the value to hide.
   # @let value: The value to hide from the optimiser.
-  # @ret: The same value, which the optimiser can no longer assume anything about.
+  # @ret: The same value, which the optimiser can no longer assume anything
+  #   about.
 }
 
 !public !always_inline
 !intrinsic(name="std.hints.black_box_ref")
 !versioned(base="1.0.0", new="1.0.0")
 fun black_box[T](value: &T) -> Void {
-  # Hides a borrowed value from the optimiser: the compiler must assume the value behind the borrow is read here, and
-  # may have been changed in ways it cannot see. Use it to keep a value it would otherwise fold away or delete as unused
-  # without moving it, such as a buffer a benchmark fills. A borrow cannot be returned, so nothing is handed back; a
-  # `&mut T` coerces to the `&T` taken here. The same caveats as the owned form apply: a best-effort hint only.
+  # Hides a borrowed value from the optimiser: the compiler must assume the
+  # value behind the borrow is read here, and may have been changed in ways it
+  # cannot see. Use it to keep a value it would otherwise fold away or delete as
+  # unused without moving it, such as a buffer a benchmark fills. A borrow
+  # cannot be returned, so nothing is handed back; a `&mut T` coerces to the
+  # `&T` taken here. The same caveats as the owned form apply: a best-effort
+  # hint only.
   # @type T: The type behind the borrow.
   # @let value: The borrowed value to hide from the optimiser.
-  # @ret: An empty value, as the function is only used for its effect on the optimiser.
+  # @ret: An empty value, as the function is only used for its effect on the
+  #   optimiser.
 }
 
 !public !always_inline
 !intrinsic(name="std.hints.likely")
 !versioned(base="1.0.0", new="1.0.0")
 cmp fun likely(condition: Bool) -> Bool {
-  # Returns `condition` unchanged, and tells the optimiser it is expected to be `true`, so the code taken when it is
-  # true is laid out as the fast path. The hint only reaches the branch when the call is the condition being tested
-  # (`case std::hints::likely(x > 0) { ... }`): a result stored in a variable first, or negated with `not`, loses it.
-  # Use `unlikely` in place of `not likely(...)`. Wrong hints slow code down; they never change what it does.
+  # Returns `condition` unchanged, and tells the optimiser it is expected to be
+  # `true`, so the code taken when it is true is laid out as the fast path. The
+  # hint only reaches the branch when the call is the condition being tested
+  # (`case std::hints::likely(x > 0) { ... }`): a result stored in a variable
+  # first, or negated with `not`, loses it. Use `unlikely` in place of `not
+  # likely(...)`. Wrong hints slow code down; they never change what it does.
   # Called at compile time, it returns the condition, with nothing to hint.
   # @let condition: The condition expected to be `true`.
   # @ret: The same condition.
@@ -45,9 +55,25 @@ cmp fun likely(condition: Bool) -> Bool {
 !intrinsic(name="std.hints.unlikely")
 !versioned(base="1.0.0", new="1.0.0")
 cmp fun unlikely(condition: Bool) -> Bool {
-  # Returns `condition` unchanged, and tells the optimiser it is expected to be `false`, so the code taken when it is
-  # true is moved off the fast path - an error or a rare case. The same rule as `likely` applies: the call must be the
-  # condition being tested for the hint to reach the branch.
+  # Returns `condition` unchanged, and tells the optimiser it is expected to be
+  # `false`, so the code taken when it is true is moved off the fast path - an
+  # error or a rare case. The same rule as `likely` applies: the call must be
+  # the condition being tested for the hint to reach the branch.
   # @let condition: The condition expected to be `false`.
   # @ret: The same condition.
+}
+
+!public !always_inline
+!intrinsic(name="std.hints.cold_path")
+!versioned(base="1.0.0", new="1.0.0")
+cmp fun cold_path() -> Void {
+  # Tells the optimiser that the code reaching this call is rarely run, so the
+  # branches leading to it are moved off the fast path - an error or a rare
+  # case. Unlike `unlikely`, it goes inside the branch, not around its
+  # condition, so it also works for a `case ... of` arm, an `else`, or a branch
+  # with no single condition to wrap. Called where no branch leads to it, it
+  # marks the whole function as rarely called. Wrong hints slow code down; they
+  # never change what it does. Called at compile time, it does nothing.
+  # @ret: An empty value, as the function is only used for its effect on the
+  #   optimiser.
 }
