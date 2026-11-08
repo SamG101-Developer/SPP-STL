@@ -62,3 +62,18 @@ cmp fun unlikely(condition: Bool) -> Bool {
   # @let condition: The condition expected to be `false`.
   # @ret: The same condition.
 }
+
+!public !always_inline
+!intrinsic(name="std.hints.cold_path")
+!versioned(base="1.0.0", new="1.0.0")
+cmp fun cold_path() -> Void {
+  # Tells the optimiser that the code reaching this call is rarely run, so the
+  # branches leading to it are moved off the fast path - an error or a rare
+  # case. Unlike `unlikely`, it goes inside the branch, not around its
+  # condition, so it also works for a `case ... of` arm, an `else`, or a branch
+  # with no single condition to wrap. Called where no branch leads to it, it
+  # marks the whole function as rarely called. Wrong hints slow code down; they
+  # never change what it does. Called at compile time, it does nothing.
+  # @ret: An empty value, as the function is only used for its effect on the
+  #   optimiser.
+}
