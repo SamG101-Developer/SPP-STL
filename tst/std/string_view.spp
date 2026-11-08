@@ -81,6 +81,55 @@ fun test_find_char_locates_a_single_character() -> Void {
 }
 
 !test(group="std/string_view")
+fun test_rfind_if_gives_the_last_match() -> Void {
+  let s = "a b c"
+  std::debug::assert(s.rfind_if((c: Char) c.is_whitespace()).unwrap() == 3_uz, "the last of several matches")
+  std::debug::assert(s.rfind_if((c: Char) c == 'b').unwrap() == 2_uz, "a single match")
+  std::debug::assert(s.rfind_if((c: Char) c == 'z').is_none(), "no match")
+  std::debug::assert("".rfind_if((c: Char) true).is_none(), "an empty view has nothing to match")
+}
+
+!test(group="std/string_view")
+fun test_rfind_if_gives_a_byte_index_past_multi_byte_characters() -> Void {
+  # "é" and "€" are two and three bytes, so the "x" after them is at byte 6, not character 3.
+  let s = "aé€x"
+  std::debug::assert(s.rfind_if((c: Char) c == 'x').unwrap() == 6_uz, "the byte index of the match")
+  std::debug::assert(s.rfind_if((c: Char) c == '€').unwrap() == 3_uz, "a multi-byte match starts at its lead byte")
+}
+
+!test(group="std/string_view")
+fun test_to_reverse_reverses_the_characters() -> Void {
+  let r = "hello".to_reverse()
+  std::debug::assert(r.len() == 5_uz and r.starts_with("olleh"), "an ascii string")
+  drop(r)
+
+  let e = "".to_reverse()
+  std::debug::assert(e.is_empty(), "an empty string")
+  drop(e)
+
+  let one = "x".to_reverse()
+  std::debug::assert(one.len() == 1_uz and one.starts_with("x"), "a single character")
+  drop(one)
+}
+
+!test(group="std/string_view")
+fun test_to_reverse_keeps_multi_byte_characters_whole() -> Void {
+  let r = "aé€b".to_reverse()
+  std::debug::assert(r.len() == 7_uz and r.starts_with("b€éa"), "each character's bytes stay in order")
+  drop(r)
+}
+
+!test(group="std/string_view")
+fun test_make_reverse_reverses_in_place() -> Void {
+  let mut s = Str::from("ab€c")
+  s.make_reverse()
+  std::debug::assert(s.len() == 6_uz and s.starts_with("c€ba"), "reversed in place")
+  s.make_reverse()
+  std::debug::assert(s.starts_with("ab€c"), "reversing twice restores it")
+  drop(s)
+}
+
+!test(group="std/string_view")
 fun test_case_conversion_produces_a_new_string() -> Void {
   let upper = "Hello".to_uppercase()
   std::debug::assert(upper.ends_with("HELLO"), "uppercase")

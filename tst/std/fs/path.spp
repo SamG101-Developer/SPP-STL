@@ -60,10 +60,6 @@ fun test_a_name_with_no_extension_has_an_empty_one() -> Void {
   drop(p)
 }
 
-# Todo: This is red on purpose. "components" returns an empty vector for every path. "split" on its own yields the
-#  right parts (with a "StrView" separator and with a "Str" one), so the fault is further along the chain it builds -
-#  "split(..).map(..).collect[Vec[Str]]()" comes back with nothing. Everything else in this file avoids "components"
-#  for that reason.
 !test(group="std/fs/path")
 fun test_components_counts_the_segments() -> Void {
   let p = std::fs::path::Path::new("usr/local/bin")
@@ -148,9 +144,10 @@ fun test_a_clone_has_the_same_shape() -> Void {
 !test(group="std/fs/path")
 fun test_copy_to_copies_the_whole_file() -> Void {
   # Larger than one copy chunk (4 KiB), so a copy that moves it a chunk at a time (where "copy_file_range" refuses the
-  # two files) has to carry on until all of it is across.
-  let src = std::fs::path::Path::new("/tmp/spp_stl_test_copy_src")
-  let dst = std::fs::path::Path::new("/tmp/spp_stl_test_copy_dst")
+  # two files) has to carry on until all of it is across. The files are relative to the working directory, which every
+  # platform has; "/tmp" is not a directory on Windows.
+  let src = std::fs::path::Path::new("spp_stl_test_copy_src")
+  let dst = std::fs::path::Path::new("spp_stl_test_copy_dst")
   let file = std::fs::file::File::open(&src, std::fs::file::FileMode().write().create().truncate()).unwrap()
   let sized = file.set_len(20000_u64)
   std::debug::assert(sized.is_pass(), "the source is sized")
