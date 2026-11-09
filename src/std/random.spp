@@ -37,12 +37,6 @@ cls RngErr {
 
 !private
 !versioned(base="1.0.0", new="1.0.0")
-fun rotl64(x: U64, k: U32) -> U64 {
-  ret x << k | x >> (64_u32 - k)
-}
-
-!private
-!versioned(base="1.0.0", new="1.0.0")
 fun splitmix64(x: &mut U64) -> U64 {
   # Every step here is meant to wrap: the mixing is what the constants are for, and a state that stayed inside "U64"
   # would not be a bit mixer. So the operations are spelled as the wrapping ones rather than "+" and "*", which abort on
@@ -79,7 +73,10 @@ sup Rng {
   !versioned(base="1.0.0", new="1.0.0")
   fun next_u64(&mut self) -> U64 {
     # As "splitmix64": xoshiro's output function wraps by design, so it asks for the wrapping multiply by name.
-    let mut result = rotl64(self.state[0_uz]@.mul_wrapping(5_u64), 7_u32).mul_wrapping(9_u64)
+    let mut result = self.state[0_uz]@
+      .mul_wrapping(5_u64)
+      .rotate_left(7_u32)
+      .mul_wrapping(9_u64)
     let t = self.state[1_uz]@ << 17_u32
 
     self.state[mut 2_uz] ^= self.state[0_uz]@
@@ -87,7 +84,8 @@ sup Rng {
     self.state[mut 1_uz] ^= self.state[2_uz]@
     self.state[mut 0_uz] ^= self.state[3_uz]@
     self.state[mut 2_uz] ^= t
-    self.state[mut 3_uz]@ = rotl64(self.state[3_uz]@, 45_u32)
+    self.state[mut 3_uz]@ = self.state[3_uz]@
+      .rotate_left(45_u32)
 
     ret result
   }
