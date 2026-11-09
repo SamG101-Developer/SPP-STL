@@ -1,5 +1,7 @@
 use std::annotations::intrinsic
 use std::annotations::versioned
+use std::llvm::cold
+use std::llvm::no_inline
 use std::allocator::Alloc
 use std::allocator::AllocErr
 use std::allocator::AllocOverflowErr
@@ -178,27 +180,45 @@ sup [T, A: Alloc] RawBuf[T, A] {
 
   !package
   !versioned(base="1.0.0", new="1.0.0")
-  fun try_capacity_reserve(&mut self, len: USize, mut additional: USize)
-  -> Res[Void, AllocErr] {
-    #
-    # @let len:
-    # @let additional:
-    # @ret:
+  fun try_capacity_reserve(&mut self, len: USize, additional: USize)
+    -> Res[Void, AllocErr] {
+    # Make room for at least `additional` more elements after the first `len`,
+    # growing the buffer (amortised: at least doubling it) only if they do not
+    # already fit. The test is all that is inlined into a caller; the growth is
+    # out of line and cold (`try_capacity_grow_amortised`), so a loop that
+    # appends stays small enough to optimise as a whole.
+    # @let len: The number of elements in use; at most the capacity.
+    # @let additional: The number of elements to make room for.
+    # @ret: `Pass()` if the room is there, or an `AllocErr` if it could not be
+    #   made.
 
-    # Round up "additional" to the nearest power of two.
-    additional = additional.next_pow_of_two()
+    # "len" is at most the capacity, so the subtraction cannot wrap.
+    case additional <= self.capacity - len { ret Pass[Void]() }
+    ret self.try_capacity_grow_amortised(len, additional)
+  }
 
-    # Calculate the required capacity, checking for overflow.
-    # If the calculation overflows, return an `AllocErr`.
-    let new_cap = len.add_checked(additional).pass_or(AllocOverflowErr)?
-    case new_cap <= self.capacity { ret Pass[Void]() }
+  !cold
+  !package !no_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  fun try_capacity_grow_amortised(&mut self, len: USize, additional: USize)
+    -> Res[Void, AllocErr] {
+    # Grow the buffer to hold `len + additional` elements, or twice its capacity
+    # if that is more, so a run of appends reallocates a logarithmic number of
+    # times rather than once per append.
+    # @let len: The number of elements in use.
+    # @let additional: The number of elements to make room for.
+    # @ret: `Pass()` if the buffer grew, or an `AllocErr` if the size overflows
+    #   or the allocation fails.
+
+    let required = len.add_checked(additional).pass_or(AllocOverflowErr)?
+    let new_cap = required.max(self.capacity.mul_saturating(2_uz))
     ret self.try_capacity_grow_to(new_cap)
   }
 
   !package
   !versioned(base="1.0.0", new="1.0.0")
   fun try_capacity_reserve_exact(&mut self, len: USize, additional: USize)
-  -> Res[Void, AllocErr] {
+    -> Res[Void, AllocErr] {
     #
     # @let len:
     # @let additional:

@@ -129,6 +129,28 @@ fun test_capacity_is_at_least_the_length() -> Void {
 }
 
 !test(group="std/vector")
+fun test_reserving_past_the_capacity_at_least_doubles_it() -> Void {
+  # Growth is amortised: one more element than fits doubles the capacity, so appending one at a time (as `Str.append`
+  # does) reallocates a logarithmic number of times, not once per append.
+  let mut v = Vec[S32]::new_with_capacity(8_uz)
+  loop i in std::range::Range[S32]::between(0, 8) { v.append(i) }
+  v.capacity_reserve(1_uz)
+  std::debug::assert(v.cap() >= 16_uz, "one more than fits doubles the capacity")
+  v.capacity_reserve(100_uz)
+  std::debug::assert(v.cap() >= 108_uz, "more than double grows to what is needed")
+  drop(v)
+}
+
+!test(group="std/vector")
+fun test_reserving_what_fits_keeps_the_capacity() -> Void {
+  let mut v = Vec[S32]::new_with_capacity(8_uz)
+  v.append(1)
+  v.capacity_reserve(7_uz)
+  std::debug::assert(v.cap() == 8_uz, "seven more fit in eight with one used")
+  drop(v)
+}
+
+!test(group="std/vector")
 fun test_clear_empties_without_dropping_the_buffer() -> Void {
   let mut v = Vec[S32]::from(&[1, 2, 3])
   v.clear()

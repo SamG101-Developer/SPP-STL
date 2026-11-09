@@ -19,18 +19,41 @@ sup NullptrErr ext Copy { }
 !package
 !versioned(base="1.0.0", new="1.0.0")
 cls Ptr[T] {
-  # The `Ptr` type is a simple wrapper around a raw pointer. It is never used
-  # outside of the standard library, and is only used internally to low level
-  # collections within the STL. The fields that have a `Ptr` type are also only
-  # internal to the S++ STL. Every use of `Ptr` is immediately wrapped  with
-  # `NonNull`, but `NonNull` can't be used from malloc API, because it malloc
-  # can legitamely return a null pointer.
+  # The `Ptr` type is a raw pointer that may be null: what the sppc allocation
+  # functions return. It is never used outside of the standard library, and every
+  # use is immediately wrapped with `NonNull` once checked, as `NonNull` cannot
+  # hold the null a malloc may legitimately return. The compiler lowers it to a
+  # bare pointer, as it does `NonNull`, so it has no fields; nothing makes one
+  # from an integer.
   # @type T: The type of the value that the pointer points to.
-  # @let addr: The address of the pointer. This is a compiler-added field that
-  #   is used to store the raw pointer value, and ise only used for the
-  #   `NonNull` construction method.
+}
 
-  !package addr: USize
+sup [T] Ptr[T] {
+  !package !always_inline
+  !intrinsic(name="std.mem.pointer.Ptr.null")
+  !versioned(base="1.0.0", new="1.0.0")
+  fun null() -> Ptr[T] {
+    # The null pointer: the only pointer made from nothing, as a test of the
+    # null checks needs one.
+    # @ret: A null `Ptr`.
+  }
+
+  !package !always_inline
+  !intrinsic(name="std.mem.pointer.Ptr.is_null")
+  !versioned(base="1.0.0", new="1.0.0")
+  fun is_null(&self) -> Bool {
+    # Whether the pointer is null.
+    # @ret: `true` if the pointer is null, `false` otherwise.
+  }
+
+  !package !always_inline
+  !intrinsic(name="std.mem.pointer.Ptr.addr")
+  !versioned(base="1.0.0", new="1.0.0")
+  fun addr(&self) -> USize {
+    # The pointer's address, as an integer. Read only: there is no way back from
+    # an address to a pointer.
+    # @ret: The address the pointer holds.
+  }
 }
 
 !public
@@ -66,9 +89,9 @@ sup [T] NonNull[T] {
     #   with a `NullptrErr`. If the raw pointer is non-null, the function
     #   returns a `Pass` state with the newly created `NonNull` pointer.
 
-    # Check if the ptr is null (addr = 0). If it is, return the
-    # `Fail` state, otherwise call the inner function.
-    case ptr.addr == 0_uz {
+    # Check if the ptr is null. If it is, return the `Fail` state,
+    # otherwise call the inner function.
+    case ptr.is_null() {
       drop(ptr)
       ret Fail(err=NullptrErr)
     }
@@ -80,7 +103,8 @@ sup [T] NonNull[T] {
   !versioned(base="1.0.0", new="1.0.0")
   fun from_ptr_inner(ptr: Ptr[T]) -> NonNull[T] { }
 
-  !package !inline
+  !package !always_inline
+  !intrinsic(name="std.mem.pointer.NonNull.dangling")
   !versioned(base="1.0.0", new="1.0.0")
   fun dangling() -> NonNull[T] {
     # Create a dangling `NonNull` that is non-null and correctly aligned for `T`
@@ -90,8 +114,6 @@ sup [T] NonNull[T] {
     # (an empty buffer, or a buffer of a zero-sized type), letting them hold a
     # non-null pointer without ever touching the allocator.
     # @ret: A dangling, well-aligned, non-null pointer for `T`.
-
-    ret Self::from_ptr_inner(Ptr[T](addr=std::mem::ops::align_of[T]()))
   }
 
   !package !always_inline
@@ -172,7 +194,7 @@ sup [T] NonNull[T] {
     # @ret: A boolean value indicating whether the pointer is aligned to the
     #   specified alignment or not.
 
-    ret self.raw().addr & (align - 1_uz) == 0_uz
+    ret self.raw().addr() & (align - 1_uz) == 0_uz
   }
 
   !package !always_inline

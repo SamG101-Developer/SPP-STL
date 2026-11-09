@@ -1,5 +1,7 @@
 use std::annotations::intrinsic
 use std::annotations::versioned
+use std::llvm::cold
+use std::llvm::no_inline
 use std::allocator::Alloc
 use std::allocator::AllocErr
 use std::allocator::AllocOverflowErr
@@ -31,36 +33,46 @@ use std::ops::iter::RevIterRef
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls Vec[T, A: Alloc=GlobalAlloc] {
-  # The `Vec` type is a growable array that provides efficient storage and access to a sequence of elements. It is the
-  # length-aware version of `RawBuf`, which is the lowest level contiguous buffer type. The `Vec` type manages the
-  # length of the buffer and provides methods for adding, removing, and accessing elements. It also handles memory
-  # management through the use of an allocator, allowing for flexible memory allocation strategies. It forwards to the
-  # `View[T]` type, specifically `&View[T]` and `&mut View[T]`.
+  # The `Vec` type is a growable array that provides efficient storage and
+  # access to a sequence of elements. It is the length-aware version of
+  # `RawBuf`, which is the lowest level contiguous buffer type. The `Vec` type
+  # manages the length of the buffer and provides methods for adding, removing,
+  # and accessing elements. It also handles memory management through the use of
+  # an allocator, allowing for flexible memory allocation strategies. It
+  # forwards to the `View[T]` type, specifically `&View[T]` and `&mut View[T]`.
   # @type T: The type of elements stored in the vector.
-  # @type A: The allocator type used for memory management. Defaults to `GlobalAlloc` if not specified.
-  # @let buffer: The underlying raw buffer that holds the elements of the vector. It is of type `RawBuf[T, A]`, which is
-  # a low-level contiguous buffer that manages memory allocation and deallocation.
-  # @let length: The current number of elements in the vector. It is of type `USize` and is used to track how many
-  # elements are currently stored in the vector. The length is always less than or equal to the capacity of the buffer.
+  # @type A: The allocator type used for memory management. Defaults to
+  #   `GlobalAlloc` if not specified.
+  # @let buffer: The underlying raw buffer that holds the elements of the
+  #   vector. It is of type `RawBuf[T, A]`, which is a low-level contiguous
+  #   buffer that manages memory allocation and deallocation.
+  # @let length: The current number of elements in the vector. It is of type
+  #   `USize` and is used to track how many elements are currently stored in the
+  #   vector. The length is always less than or equal to the capacity of the
+  #   buffer.
 
   !package buffer: RawBuf[T, A]
   !package length: USize
 }
 
 sup [T] Vec[T] {
-  # These are a collection of methods that are only usable with `A=GlobalAlloc`, which is the most common case. They
-  # provide simple ways to create a vector, either empty, with a specified capacity, filled with a specific element, or
-  # generated from a function or generator. They all forward to the more general methods that take an allocator as a
-  # parameter, using `GlobalAlloc` as the default allocator. This design allows for flexibility while also providing
+  # These are a collection of methods that are only usable with `A=GlobalAlloc`,
+  # which is the most common case. They provide simple ways to create a vector,
+  # either empty, with a specified capacity, filled with a specific element, or
+  # generated from a function or generator. They all forward to the more general
+  # methods that take an allocator as a parameter, using `GlobalAlloc` as the
+  # default allocator. This design allows for flexibility while also providing
   # convenient defaults for common use cases.
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun new() -> Self {
-    # The `new` function creates a new, empty `Vec` with the default allocator (`GlobalAlloc`). It initializes the
-    # underlying buffer to a dangling pointer and sets the length to zero. This function is infallible and does not
-    # perform any memory allocation until elements are added to the vector. It is a convenient way to create an empty
-    # vector that can be populated later.
+    # The `new` function creates a new, empty `Vec` with the default allocator
+    # (`GlobalAlloc`). It initializes the underlying buffer to a dangling
+    # pointer and sets the length to zero. This function is infallible and does
+    # not perform any memory allocation until elements are added to the vector.
+    # It is a convenient way to create an empty vector that can be populated
+    # later.
     # @ret: A new, empty `Vec` instance with the default allocator.
 
     # Forward to the more general `new_in` function, specifying
@@ -82,6 +94,7 @@ sup [T] Vec[T] {
   !versioned(base="1.0.0", new="1.0.0")
   fun new_from_fun[F: FunMut[(USize,), T]](len: USize, mut f: F) -> Self {
     #
+    # @type F:
     # @let len:
     # @let f:
     # @ret:
@@ -96,12 +109,15 @@ sup [T] Vec[T] {
 }
 
 sup [T, A: Alloc] Vec[T, A] {
-  # These are the core methods of the `Vec` type that provide the main functionality for managing the vector's capacity,
-  # length, and elements. They include methods for creating a vector with a specific allocator, reserving and shrinking
-  # capacity, accessing the length and emptiness of the vector, modifying the length through truncation and resizing,
-  # and adding, inserting, and removing elements.
+  # These are the core methods of the `Vec` type that provide the main
+  # functionality for managing the vector's capacity, length, and elements. They
+  # include methods for creating a vector with a specific allocator, reserving
+  # and shrinking capacity, accessing the length and emptiness of the vector,
+  # modifying the length through truncation and resizing, and adding, inserting,
+  # and removing elements.
   # @type Element: An alias for the element type `T` stored in the vector.
-  # @type Allocator: An alias for the allocator type `A` used for memory management.
+  # @type Allocator: An alias for the allocator type `A` used for memory
+  #   management.
 
   type Element = T
   type Allocator = A
@@ -331,6 +347,7 @@ sup [T, A: Alloc] Vec[T, A] {
   !versioned(base="1.0.0", new="1.0.0")
   fun take_last_if[F: FunMov[(&mut T,), Bool]](&mut self, mut f: F) -> Opt[T] {
     #
+    # @type F:
     # @let f:
     # @ret:
 
@@ -364,8 +381,9 @@ sup [T, A: Alloc] Vec[T, A] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun clear(&mut self) -> Void {
-    # Removes every element from the vector, running each one's destructor, and resets the length to zero. The capacity
-    # is left unchanged. Delegates to `truncate(0)`, which drops the whole live range in place.
+    # Removes every element from the vector, running each one's destructor, and
+    # resets the length to zero. The capacity is left unchanged. Delegates to
+    # `truncate(0)`, which drops the whole live range in place.
     # @ret: Nothing; the vector is left empty.
 
     self.truncate(0_uz)
@@ -388,10 +406,11 @@ sup [T, A: Alloc] Vec[T, A] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun swap(&mut self, i: USize, j: USize) -> Void {
-    # Handing "mem::ops::swap" two mutable borrows into one vector is not safe, and this is the same case
-    # "Arr::swap" is written around: "self[mut i]" and "self[mut j]" are one place when "i == j". So the swap
-    # happens here with a single element borrow live at a time, and the aliasing case is named rather than left
-    # to come out right by accident.
+    # Handing "mem::ops::swap" two mutable borrows into one vector is not safe,
+    # and this is the same case "Arr::swap" is written around: "self[mut i]" and
+    # "self[mut j]" are one place when "i == j". So the swap happens here with a
+    # single element borrow live at a time, and the aliasing case is named
+    # rather than left to come out right by accident.
     # @let i: The index of the first element to swap.
     # @let j: The index of the second element to swap.
     # @ret: Nothing; the two elements are exchanged in place.
@@ -458,14 +477,16 @@ sup [T, A: Alloc] Vec[T, A] {
     drop(that)
   }
 
-  !private
+  !cold
+  !private !no_inline
   !versioned(base="1.0.0", new="1.0.0")
   fun grow_one(&mut self) -> Void {
-    #
+    # Make room for one more element (doubling the capacity, or one if there is
+    # none). Out of line and cold, so `append` is only its capacity test and a
+    # store, and inlines into the loop that calls it.
     # @ret:
 
-    let new_cap = case self.cap() == 0_uz { 1_uz } else { self.cap() * 2_uz }
-    self.buffer.try_capacity_grow_to(new_cap).expect("Failed to grow capacity for Vec")
+    self.buffer.try_capacity_grow_amortised(self.len(), 1_uz).expect("Failed to grow capacity for Vec")
   }
 }
 
@@ -473,8 +494,9 @@ sup [T: Clone, A: Alloc] Vec[T, A] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun new_filled_in(len: USize, element: T, alloc: A) -> Self {
-    # Create a vector of `len` copies of `element`, using the given allocator. It needs `T: Clone`, as every slot but
-    # one holds a copy; it used to only set the length, leaving the elements as whatever the allocation held.
+    # Create a vector of `len` copies of `element`, using the given allocator.
+    # It needs `T: Clone`, as every slot but one holds a copy; it used to only
+    # set the length, leaving the elements as whatever the allocation held.
     # @let len: The number of elements the vector holds.
     # @let element: The value every element is a copy of.
     # @let alloc: The allocator for the vector's buffer.
@@ -488,9 +510,11 @@ sup [T: Clone, A: Alloc] Vec[T, A] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun resize(&mut self, new_len: USize, element: T) -> Void {
-    # Grows or shrinks the vector to `new_len`. Shrinking truncates and drops the trailing elements. Growing reserves
-    # the additional capacity once and clones `element` directly into the newly reserved slots, moving the original into
-    # the last slot instead of cloning it, so no intermediate `Vec` is built.
+    # Grows or shrinks the vector to `new_len`. Shrinking truncates and drops
+    # the trailing elements. Growing reserves the additional capacity once and
+    # clones `element` directly into the newly reserved slots, moving the
+    # original into the last slot instead of cloning it, so no intermediate
+    # `Vec` is built.
     # @let new_len: The length the vector should have after this call.
     # @let element: The value used to fill any newly added slots.
     # @ret:
@@ -512,7 +536,8 @@ sup [T: Clone, A: Alloc] Vec[T, A] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun append_from_view(&mut self, that: &View[T]) -> Void {
-    # Append all the elements from a view, by copying the elements from the view.
+    # Append all the elements from a view, by copying the elements from the
+    # view.
     # @let that: The view to append from.
 
     # Allocate enough space and them memcpy the
@@ -528,7 +553,8 @@ sup [T: Clone, A: Alloc] Vec[T, A] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun from_in(that: &View[T], alloc: A) -> Self {
-    # Create the vector from a view, by copying the elements from the view, using the given allocator.
+    # Create the vector from a view, by copying the elements from the view,
+    # using the given allocator.
     # @let that: The view to create the vector from.
     # @let alloc: The allocator used for the new vector's storage.
     # @ret: A new vector containing the elements from the view.
@@ -555,7 +581,8 @@ sup [T: Clone] Vec[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun from(that: &View[T]) -> Self {
-    # Create the vector from a view, by copying the elements from the view, using the global allocator.
+    # Create the vector from a view, by copying the elements from the view,
+    # using the global allocator.
     # @let that: The view to create the vector from.
     # @ret: A new vector containing the elements from the view.
 
@@ -568,9 +595,11 @@ sup [T: Clone] Vec[T] {
 sup [T, A: Alloc] Vec[T, A] ext IterMov[T] {
   !versioned(base="1.0.0", new="1.0.0")
   cor iter_mov(mut self) -> Iterator[T] {
-    # Yields the elements from front to back, moving each one out of the buffer. Consuming from the front leaves the
-    # remaining live elements as the suffix `[i, length)`, which a `Vec` cannot describe - its live region is always a
-    # prefix - so the vector is destructured here and this coroutine answers for the remainder itself.
+    # Yields the elements from front to back, moving each one out of the buffer.
+    # Consuming from the front leaves the remaining live elements as the suffix
+    # `[i, length)`, which a `Vec` cannot describe - its live region is always a
+    # prefix - so the vector is destructured here and this coroutine answers for
+    # the remainder itself.
     # @ret: An iterator that moves the vector's elements out in order.
 
     let Vec[T, A](mut buffer, length) = self
@@ -589,10 +618,11 @@ sup [T, A: Alloc] Vec[T, A] ext IterMov[T] {
 sup [T, A: Alloc] Vec[T, A] ext RevIterMov[T] {
   !versioned(base="1.0.0", new="1.0.0")
   cor reverse_iter_mov(mut self) -> Iterator[T] {
-    # Yields the elements from back to front, moving each one out of the buffer. The length is decremented before each
-    # yield, so the still-live elements are always exactly the prefix `[0, length)`. That keeps `Vec::del` correct even
-    # if iteration is abandoned early: it drops precisely the elements that were never yielded, with no double drop and
-    # no leak.
+    # Yields the elements from back to front, moving each one out of the buffer.
+    # The length is decremented before each yield, so the still-live elements
+    # are always exactly the prefix `[0, length)`. That keeps `Vec::del` correct
+    # even if iteration is abandoned early: it drops precisely the elements that
+    # were never yielded, with no double drop and no leak.
     # @ret: An iterator that moves the vector's elements out in reverse order.
 
     defer drop(self)
@@ -672,19 +702,23 @@ sup [T: Eq, A: Alloc] Vec[T, A] ext Eq {
 }
 
 sup [T] Vec[T] ext FromIterator[T] {
-  # Like `from(&View[T])` above, this needs a `Self` with no allocator supplied by the caller, so it can only build a
-  # `GlobalAlloc` vector.
+  # Like `from(&View[T])` above, this needs a `Self` with no allocator supplied
+  # by the caller, so it can only build a `GlobalAlloc` vector.
 
   !versioned(base="1.0.0", new="1.0.0")
   fun from_iter[G: Gen[T]](iter: G) -> Self {
-    # Build a new `Vec` from a generator. The generator is expected to yield elements of type `T`, and the function will
-    # collect these elements into a new `Vec`. The function will continue to call the generator until it returns `None`,
-    # indicating that there are no more elements to yield. The resulting `Vec` will contain all the elements produced by
-    # the generator, in the order they were generated.
-    # @type G: The type of the generator that produces elements of type `T`. This must be a generator type that yields
-    # elements of type `T`.
-    # @let iter: The generator instance that will be used to produce elements for the new `Vec`.
-    # @ret: A new `Vec` instance containing all the elements produced by the generator.
+    # Build a new `Vec` from a generator. The generator is expected to yield
+    # elements of type `T`, and the function will collect these elements into a
+    # new `Vec`. The function will continue to call the generator until it
+    # returns `None`, indicating that there are no more elements to yield. The
+    # resulting `Vec` will contain all the elements produced by the generator,
+    # in the order they were generated.
+    # @type G: The type of the generator that produces elements of type `T`.
+    #   This must be a generator type that yields elements of type `T`.
+    # @let iter: The generator instance that will be used to produce elements
+    #   for the new `Vec`.
+    # @ret: A new `Vec` instance containing all the elements produced by the
+    #   generator.
 
     # Create the vector and yield all the elements
     # from the generator into it.
@@ -709,10 +743,13 @@ sup [T, A: Alloc] Vec[T, A] ext FwdRef[View[T]] {
 sup [T, A: Alloc] Vec[T, A] ext Drop {
   !versioned(base="1.0.0", new="1.0.0")
   fun drop(self) -> Void {
-    # Runs the destructors of the vector's live elements, then lets the underlying buffer drop, which frees the backing
-    # memory. The live elements are always the prefix `[0, length)`, which `clear_range` destroys in place. The buffer's
-    # own destructor only frees memory and never touches the elements, so there is no double drop.
-    # @ret: Nothing; this is invoked for its cleanup side effect when a `Vec` is destroyed.
+    # Runs the destructors of the vector's live elements, then lets the
+    # underlying buffer drop, which frees the backing memory. The live elements
+    # are always the prefix `[0, length)`, which `clear_range` destroys in
+    # place. The buffer's own destructor only frees memory and never touches the
+    # elements, so there is no double drop.
+    # @ret: Nothing; this is invoked for its cleanup side effect when a `Vec` is
+    #   destroyed.
 
     let Vec[T, A](mut buffer, length) = self
     buffer.clear_range(0_uz, length)
@@ -723,7 +760,8 @@ sup [T, A: Alloc] Vec[T, A] ext Drop {
 sup [T: Format, A: Alloc] Vec[T, A] ext Format {
   !versioned(base="1.0.0", new="1.0.0")
   fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
-    # Format a vector as `[a, b, c]`, the placeholder's spec applying to each element.
+    # Format a vector as `[a, b, c]`, the placeholder's spec applying to each
+    # element.
 
     ret format::format_elements[T](formatter, self)
   }
