@@ -1,3 +1,44 @@
+cmp shifted_at_compile_time: S32 = (-8) >> 1_u32
+
+!test(group="std/num/sized_integer_signed")
+fun test_right_shift_is_arithmetic() -> Void {
+  # The sign bit is copied in, so a negative value stays negative and ">> 1" halves it, rounding down.
+  std::debug::assert(((-8) >> 1_u32) == -4, "a negative halves")
+  std::debug::assert(((-7) >> 1_u32) == -4, "rounding toward negative infinity")
+  std::debug::assert(((-1) >> 31_u32) == -1, "all the way down is all ones")
+  std::debug::assert((8 >> 1_u32) == 4, "a positive is unchanged")
+  let mut x = -16
+  x >>= 2_u32
+  std::debug::assert(x == -4, ">>= as well")
+  std::debug::assert(shifted_at_compile_time == -4, "and at compile time")
+  std::debug::assert((-8).bit_shr_wrapping(33_u32) == -4, "wrapping takes the amount modulo the width")
+  std::debug::assert((-8).bit_shr_checked(32_u32).is_none(), "checked refuses the width")
+  std::debug::assert((-8).bit_shr_checked(1_u32).unwrap() == -4, "and is arithmetic below it")
+}
+
+!test(group="std/num/sized_integer_signed")
+fun test_midpoint_rounds_toward_zero() -> Void {
+  # As "/" rounds, so "a.midpoint(b)" is "(a + b) / 2" without the sum that could overflow.
+  let min = std::limits::Limits[S32]::min
+  let max = std::limits::Limits[S32]::max
+  std::debug::assert(3.midpoint(4) == 3, "3.5 rounds down to 3")
+  std::debug::assert((-3).midpoint(-4) == -3, "-3.5 rounds up to -3")
+  std::debug::assert((-1).midpoint(-2) == -1, "-1.5 rounds up to -1")
+  std::debug::assert((-3).midpoint(0) == -1, "-1.5 again, with one side zero")
+  std::debug::assert(min.midpoint(max) == 0, "-0.5 rounds to 0")
+  std::debug::assert(max.midpoint(max) == max, "the sum would overflow; the average does not")
+  std::debug::assert(min.midpoint(min) == min, "nor at the bottom")
+}
+
+!test(group="std/num/sized_integer_signed")
+fun test_cube_root_rounds_toward_zero() -> Void {
+  std::debug::assert(27.icbrt() == 3, "an exact cube")
+  std::debug::assert((-27).icbrt() == -3, "a negative's root is the negation of its magnitude's")
+  std::debug::assert((-26).icbrt() == -2, "rounded toward zero")
+  std::debug::assert(std::limits::Limits[S32]::min.icbrt() == -1290, "the minimum, whose magnitude does not fit S32")
+  std::debug::assert(std::limits::Limits[S8]::min.icbrt() == -5_s8, "the S8 minimum")
+}
+
 !test(group="std/num/sized_integer_signed")
 fun test_the_sign_predicates_partition_around_zero() -> Void {
   std::debug::assert(5.is_positive(), "a positive")
@@ -90,4 +131,49 @@ fun test_the_narrower_widths_behave_the_same() -> Void {
   std::debug::assert((-5_s8).abs() == 5_s8, "abs at S8")
   std::debug::assert((-5_s16).is_negative(), "the sign predicate at S16")
   std::debug::assert((-7_s64).mod(2_s64) == 1_s64, "mod at S64")
+}
+
+!test(group="std/num/sized_integer_signed")
+fun test_floor_division_rounds_toward_negative_infinity() -> Void {
+  # Floor and truncation differ only when the signs differ and the division is inexact: -3.5 truncates to -3 but
+  # floors to -4. Hacker's Delight 2nd ed., exercise 9.3.
+  std::debug::assert(7.div_floor(2) == 3, "same signs agree with truncation")
+  std::debug::assert((-7).div_floor(-2) == 3, "as do two negatives")
+  std::debug::assert((-6).div_floor(3) == -2, "an exact division is not adjusted")
+  std::debug::assert((-7).div_floor(2) == -4, "-3.5 floors to -4")
+  std::debug::assert(7.div_floor(-2) == -4, "and with the sign on the divisor")
+}
+
+!test(group="std/num/sized_integer_signed")
+fun test_ceiling_division_rounds_toward_positive_infinity() -> Void {
+  std::debug::assert(7.div_ceil(2) == 4, "3.5 ceils to 4")
+  std::debug::assert((-7).div_ceil(-2) == 4, "as it does for two negatives")
+  std::debug::assert((-6).div_ceil(3) == -2, "an exact division is not adjusted")
+  std::debug::assert((-7).div_ceil(2) == -3, "-3.5 ceils to -3")
+  std::debug::assert(7.div_ceil(-2) == -3, "and with the sign on the divisor")
+}
+
+!test(group="std/num/sized_integer_signed")
+fun test_a_power_that_fits_is_not_reported_as_overflowing() -> Void {
+  # Square-and-multiply must not square the base after its last use: 16 * 16 does not fit S8, but 16 to the 1 does.
+  # Hacker's Delight 2nd ed., figure 11-6.
+  std::debug::assert(16_s8.pow_checked(1_u32).unwrap() == 16_s8, "the checked form already stops in time")
+  let (val, overflowed) = 16_s8.pow_overflow(1_u32)
+  std::debug::assert(val == 16_s8, "the overflow form's value")
+  std::debug::assert(overflowed.not, "and its flag")
+  std::debug::assert(8_s8.pow(2_u32) == 64_s8, "64 fits S8, though the next square would not")
+}
+
+!test(group="std/num/sized_integer_signed")
+fun test_the_remainder_by_minus_one_is_zero() -> Void {
+  # Every integer divides by -1 exactly, so the remainder is 0 - the minimum included: its quotient overflows, but the
+  # remainder is 0 and fits, so it is not an overflow (as Java and Go; Rust panics).
+  let min = std::limits::Limits[S32]::min
+  std::debug::assert(5.rem_checked(-1).unwrap() == 0, "the checked form")
+  std::debug::assert(5.rem_wrapping(-1) == 0, "the wrapping form")
+  std::debug::assert((-5).rem_wrapping(-1) == 0, "and for a negative dividend")
+  let (val, overflowed) = min.rem_overflow(-1)
+  std::debug::assert(val == 0, "the minimum's remainder")
+  std::debug::assert(overflowed.not, "is not an overflow")
+  std::debug::assert(min.rem_checked(-1).unwrap() == 0, "so the checked form gives it too")
 }

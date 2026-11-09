@@ -136,6 +136,16 @@ cmp fun bit_shr_assign[T: Integer, U: Integer](this: &mut T, by: U) -> Void { }
 
 !public
 !always_inline
+!intrinsic(name="std.intrinsics.bit_ashr")
+cmp fun bit_ashr[T: Integer, U: Integer](this: T, by: U) -> T { }  # fills with the sign bit, not 0
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.bit_ashr_assign")
+cmp fun bit_ashr_assign[T: Integer, U: Integer](this: &mut T, by: U) -> Void { }
+
+!public
+!always_inline
 !intrinsic(name="std.intrinsics.bit_ior")
 cmp fun bit_ior[T: Integral](this: T, that: T) -> T { }
 
@@ -516,8 +526,33 @@ fun bitreverse[T: Integer](value: T) -> T { }
 
 !public
 !always_inline
+!intrinsic(name="std.intrinsics.bswap")
+fun bswap[T: Integer](value: T) -> T { }  # a one-byte value is its own byte swap
+
+!public
+!always_inline
 !intrinsic(name="std.intrinsics.ctlz")
 fun ctlz[T: Integer](value: T) -> U32 { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.cttz")
+fun cttz[T: Integer](value: T) -> U32 { }  # zero gives the width, as "ctlz"
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.ctpop")
+fun ctpop[T: Integer](value: T) -> U32 { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.fshl")
+fun fshl[T: Integer, U: Integer](hi: T, lo: T, by: U) -> T { }  # high half of (hi:lo) << (by mod width)
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.fshr")
+fun fshr[T: Integer, U: Integer](hi: T, lo: T, by: U) -> T { }  # low half of (hi:lo) >> (by mod width)
 
 !public
 !always_inline
