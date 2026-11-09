@@ -721,18 +721,6 @@ fun getrandom(size: CSizeT, out: CMutBytePtr) -> CInt { }
 !ffi(symbol="sppc_copyfile")
 fun copyfile(fd_in: CInt, fd_out: CInt, len: CSizeT, flags: CInt, out_n: &mut CSSizeT) -> CInt { }
 
-# Copy a memory region with indexing support.
-!ffi(symbol="sppc_memcpy")
-fun memcpy(dest: CMutBytePtr, src: CRefBytePtr, size: CSizeT, dest_index: CSizeT, src_index: CSizeT) -> CInt { }
-
-# Move a memory region (pointers can overlap).
-!ffi(symbol="sppc_memmove")
-fun memmove(dest: CMutBytePtr, src: CRefBytePtr, size: CSizeT) -> CInt { }
-
-# Set the bytes in a memory region.
-!ffi(symbol="sppc_memset")
-fun memset(dest: CMutBytePtr, value: CInt, size: CSizeT, dest_index: CSizeT) -> CInt { }
-
 # Compare two memory regions.
 !ffi(symbol="sppc_memcmp")
 fun memcmp(ptr1: CRefBytePtr, ptr2: CRefBytePtr, size: CSizeT, out: &mut CInt) -> CInt { }
