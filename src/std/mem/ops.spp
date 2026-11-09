@@ -54,7 +54,8 @@ fun align_of_val[T](value: &T) -> USize {
   # @ret: The alignment of the value in bytes.
 }
 
-!package !inline
+!package !always_inline
+!intrinsic(name="std.mem.ops.mem_set")
 !versioned(base="1.0.0", new="1.0.0")
 fun mem_set[T](dest: &mut NonNull[T], value: U8, n: USize, dest_index: USize = 0_uz) -> Void {
   # Writes a byte value into a block of memory. This is typically used for
@@ -70,9 +71,7 @@ fun mem_set[T](dest: &mut NonNull[T], value: U8, n: USize, dest_index: USize = 0
   # @let n: The number of bytes to write to the memory.
   # @let ?dest_index: An optional index to start writing at, in bytes. This is
   #   typically used for writing to an offset within a value, such as an array.
-
-  let mut dest_bytes = dest@.erase_type()
-  let err = sppc::memset(dest_bytes.as_c_mut(), S32::from(value), n, dest_index) # Todo: Error handling.
+  # LLVM's own `memset`, so the optimiser sees the write (a small one becomes a store).
 }
 
 !package !always_inline
@@ -99,6 +98,7 @@ fun mem_cmp[T](a: &NonNull[T], b: &NonNull[T], n: USize) -> S32 {
 }
 
 !package !always_inline
+!intrinsic(name="std.mem.ops.mem_copy")
 !versioned(base="1.0.0", new="1.0.0")
 fun mem_copy[T](dest: &mut NonNull[T], src: &NonNull[T], n: USize, dest_index: USize = 0_uz, src_index: USize = 0_uz) -> Void {
   # Copies a block of memory from one location to another. This is typically
@@ -112,10 +112,8 @@ fun mem_copy[T](dest: &mut NonNull[T], src: &NonNull[T], n: USize, dest_index: U
   # @let n: The number of bytes to copy.
   # @let ?dest_index: An optional index to start writing at, in bytes.
   # @let ?src_index: An optional index to start reading from, in bytes.
-
-  let mut dest_bytes = dest@.erase_type()
-  let src_bytes = src@.erase_type()
-  let err = sppc::memcpy(dest_bytes.as_c_mut(), src_bytes.as_c_ref(), n, dest_index, src_index) # Todo: Error handling.
+  # The two regions must not overlap. LLVM's own `memcpy`, so the optimiser sees the copy (a small one becomes a load and
+  # a store).
 }
 
 !public

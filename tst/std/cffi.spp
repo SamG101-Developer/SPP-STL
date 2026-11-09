@@ -59,14 +59,14 @@ fun test_returned_ptr_mut_round_trips_malloc_to_free() -> Void {
 
 !test(group="std/cffi")
 fun test_returned_ptr_ref_of_null_is_none() -> Void {
-  let p = std::cffi::returned_ptr_ref(std::mem::pointer::Ptr[U8](addr=0_uz))
+  let p = std::cffi::returned_ptr_ref(std::mem::pointer::Ptr[U8]::null())
   std::debug::assert(p.is_none(), "a null returned pointer has no byte pointer")
   drop(p)
 }
 
 !test(group="std/cffi")
 fun test_returned_ptr_mut_of_null_is_none() -> Void {
-  let p = std::cffi::returned_ptr_mut(std::mem::pointer::Ptr[U8](addr=0_uz))
+  let p = std::cffi::returned_ptr_mut(std::mem::pointer::Ptr[U8]::null())
   std::debug::assert(p.is_none(), "a null returned pointer has no byte pointer")
   drop(p)
 }
@@ -100,7 +100,7 @@ fun test_returned_ptr_alloc_round_trips_malloc_to_free() -> Void {
 
 !test(group="std/cffi")
 fun test_returned_ptr_alloc_of_null_is_none() -> Void {
-  let ptr = std::cffi::returned_ptr_alloc(std::mem::pointer::Ptr[U8](addr=0_uz))
+  let ptr = std::cffi::returned_ptr_alloc(std::mem::pointer::Ptr[U8]::null())
   std::debug::assert(ptr.is_none(), "a null returned pointer has no NonNull")
   drop(ptr)
 }
