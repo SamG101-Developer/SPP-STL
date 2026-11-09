@@ -224,6 +224,23 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Ord {
   }
 }
 
+sup [cmp w: U32] SizedFloatingPoint[w] {
+  !public !inline
+  fun total_cmp(&self, that: &Self) -> S32 {
+    # A total order over every value, unlike `ord`, which has no answer for a NaN and calls -0 and +0 equal:
+    # -NaN < -inf < ... < -0 < +0 < ... < +inf < +NaN. The bits read as a signed integer already order the positives
+    # and put every negative below them; flipping a negative's bits below the sign puts the larger magnitudes lower
+    # (Hacker's Delight 2nd ed., section 17-3).
+    # @let that: A borrow to the value compared with this one.
+    # @ret: -1, 0 or 1, as `ord`.
+    let this_bits = intrinsics::bit_cast[SizedIntegerSigned[w]](self@)
+    let that_bits = intrinsics::bit_cast[SizedIntegerSigned[w]](that@)
+    let this_key = this_bits ^ intrinsics::bit_shr(intrinsics::bit_ashr(this_bits, w - 1_u32), 1_u32)
+    let that_key = that_bits ^ intrinsics::bit_shr(intrinsics::bit_ashr(that_bits, w - 1_u32), 1_u32)
+    ret intrinsics::scmp(&this_key, &that_key)
+  }
+}
+
 sup [cmp w: U32] SizedFloatingPoint[w] ext Add {
   # Provide addition support to sized floating point numbers, allowing for the addition of two floating point values of
   # the same size. For differing sizes, the `From` trait can be used to convert one of the values to the same size as
