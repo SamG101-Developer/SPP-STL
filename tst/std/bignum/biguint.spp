@@ -78,6 +78,19 @@ fun test_division_truncates_and_remainder_is_the_leftover() -> Void {
   drop(one)
 }
 
+!test(group="std/bignum/biguint")
+fun test_bit_length_counts_to_the_highest_set_bit() -> Void {
+  let zero = std::bignum::biguint::BigUInt::zero()
+  let byte = std::bignum::biguint::BigUInt::from(255_u32)
+  let two_limbs = std::bignum::biguint::BigUInt::from(4294967296_u64)
+  std::debug::assert(zero.bit_length() == 0_uz, "zero has no bits")
+  std::debug::assert(byte.bit_length() == 8_uz, "255 fills one byte")
+  std::debug::assert(two_limbs.bit_length() == 33_uz, "2^32 starts the second limb")
+  drop(zero)
+  drop(byte)
+  drop(two_limbs)
+}
+
 # Todo: still quarantined behind the crash the multiplication fix has not been confirmed to clear for these paths.
 #  Re-enable one at a time.
 #

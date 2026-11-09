@@ -1,0 +1,27 @@
+!test(group="std/threading/mutex")
+fun test_take_gives_back_the_guarded_value() -> Void {
+  let mut v = Vec[S32]::new()
+  v.append(3)
+  let m = std::threading::mutex::Mutex[Vec[S32]]::new(v)
+  let back = m.take()
+  std::debug::assert(back.len() == 1_uz, "the vector came back out")
+  drop(back)
+}
+
+!test(group="std/threading/mutex")
+fun test_a_write_through_the_guard_is_seen_by_take() -> Void {
+  let m = std::threading::mutex::Mutex[S32]::new(1)
+  let mut g = m.lock().expect("lock failed")
+  g.get()@ = 9
+  drop(g)
+  std::debug::assert(m.take() == 9, "the guard wrote the value the mutex owns")
+}
+
+!test(group="std/threading/mutex")
+fun test_dropping_a_mutex_drops_its_value() -> Void {
+  # The vector's buffer is freed by the mutex's drop; valgrind reports a leak if it is not.
+  let mut v = Vec[S32]::new()
+  v.append(3)
+  let m = std::threading::mutex::Mutex[Vec[S32]]::new(v)
+  drop(m)
+}

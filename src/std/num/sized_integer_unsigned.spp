@@ -10,6 +10,8 @@ use std::num::sized_integer::SizedInteger
 use std::num::sized_integer_signed::SizedIntegerSigned
 use std::ops::add::Add
 use std::ops::add::AddAssign
+use std::ops::bit_shr::BitShr
+use std::ops::bit_shr::BitShrAssign
 use std::ops::div::Div
 use std::ops::div::DivAssign
 use std::ops::mul::Mul
@@ -96,11 +98,49 @@ sup [cmp w: U32] SizedIntegerUnsigned[w] ext RemAssign[Rhs=Self] {
   }
 }
 
+sup [cmp w: U32] SizedIntegerUnsigned[w] ext BitShr[Rhs=U32] {
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun bit_shr(self, that: U32) -> Self {
+    # Logical: zeros are shifted in at the top.
+    ret intrinsics::bit_shr(self, that)
+  }
+}
+
+sup [cmp w: U32] SizedIntegerUnsigned[w] ext BitShrAssign[Rhs=U32] {
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun bit_shr_assign(&mut self, that: U32) -> Void {
+    intrinsics::bit_shr_assign(self, that)
+  }
+}
+
+sup [cmp w: U32] SizedIntegerUnsigned[w] {
+  !public
+  !inline
+  fun bit_shr_checked(self, that: U32) -> Opt[Self] {
+    case that >= w { ret None }
+    ret Some(val=intrinsics::bit_shr(self, that))
+  }
+
+  !public
+  !inline
+  fun bit_shr_overflow(self, that: U32) -> (Self, Bool) {
+    ret (self.bit_shr_wrapping(that), that >= w)
+  }
+
+  !public
+  !inline
+  fun bit_shr_wrapping(self, that: U32) -> Self {
+    ret intrinsics::bit_shr(self, that & (w - 1_u32))
+  }
+}
+
 sup [cmp w: U32] SizedIntegerUnsigned[w] ext Pow[Rhs=U32, Ret=Self] {
   fun pow(self, that: U32) -> Self {
-    case that == 0_u32 {
-      ret Self::one()
-    }
+    # Square-and-multiply. The base is squared only while bits of the exponent
+    # remain: the square after its last use can overflow when the power does not
+    # (Hacker's Delight 2nd ed., figure 11-6).
     let mut out = Self::one()
     let mut base = self
     let mut exp = that
@@ -108,8 +148,10 @@ sup [cmp w: U32] SizedIntegerUnsigned[w] ext Pow[Rhs=U32, Ret=Self] {
       case exp % 2_u32 == 1_u32 {
         out = out * base
       }
-      base = base * base
       exp /= 2_u32
+      case exp > 0_u32 {
+        base = base * base
+      }
     }
     ret out
   }
@@ -335,41 +377,33 @@ sup [cmp w: U32] SizedIntegerUnsigned[w] {
   !public
   !inline
   fun pow_overflow(self, that: U32) -> (Self, Bool) {
-    case that == 0_u32 {
-      ret (Self::one(), false)
-    }
+    # The wrapped power, as pow_wrapping, and whether any step overflowed. As in
+    # pow, the base is squared only while bits of the exponent remain, so an
+    # unused square cannot set the flag.
     let mut out = Self::one()
     let mut base = self
     let mut exp = that
+    let mut any_overflowed = false
     loop exp > 0_u32 {
       case exp % 2_u32 == 1_u32 {
-        let (tmp, overflowed) = out.mul_overflow(base)
-        case overflowed { ret (out, true) }
-        out = tmp
+        let (product, overflowed) = out.mul_overflow(base)
+        out = product
+        any_overflowed = any_overflowed or overflowed
       }
-      let (tmp, overflowed) = base.mul_overflow(base)
-      case overflowed { ret (out, true) }
-      base = tmp
       exp /= 2_u32
+      case exp > 0_u32 {
+        let (square, overflowed) = base.mul_overflow(base)
+        base = square
+        any_overflowed = any_overflowed or overflowed
+      }
     }
-    ret (out, false)
+    ret (out, any_overflowed)
   }
 
   !public
   !inline
   fun pow_wrapping(self, that: U32) -> Self {
-    case that == 0_u32 { ret Self::one() }
-    let mut out = Self::one()
-    let mut base = self
-    let mut exp = that
-    loop exp > 0_u32 {
-      case exp % 2_u32 == 1_u32 {
-        out = out.mul_wrapping(base)
-      }
-      base = base.mul_wrapping(base)
-      exp /= 2_u32
-    }
-    ret out
+    ret self.pow_overflow(that).0
   }
 
   !public
@@ -384,22 +418,121 @@ sup [cmp w: U32] SizedIntegerUnsigned[w] {
   !public
   !inline
   fun next_pow_of_two(self) -> Self {
-    case self == Self::zero() { ret Self::one() }
+    # The bit length of self - 1 is the exponent (Hacker's Delight 2nd ed.,
+    # section 3-2, by leading zeros).
+    case self <= Self::one() { ret Self::one() }
+    let bits = w - (self - Self::one()).leading_zeros()
+    case bits == w { std::abort::abort("next_pow_of_two: the next power of two does not fit") }
+    ret Self::one() << bits
+  }
 
-    let mut n = self - Self::one()
-    let mut shift = 1_u32
-    loop shift < w {
-      n |= n >> shift
-      shift <<= 1_u32
-    }
-    ret n + Self::one()
+  !public
+  !inline
+  fun is_pow_of_two(self) -> Bool {
+    ret self.count_ones() == 1_u32
+  }
+
+  !public
+  !inline
+  fun prev_pow_of_two(self) -> Self {
+    # The largest power of two at most self, by its bit length (Hacker's Delight
+    # 2nd ed., section 3-2, "flp2"). Zero has none and is returned as it is, as
+    # the book's is.
+    case self.is_zero() { ret Self::zero() }
+    ret Self::one() << (w - 1_u32 - self.leading_zeros())
+  }
+
+  !public
+  !inline
+  fun align_down(self, align: Self) -> Self {
+    # The largest multiple of "align" at most self: the bits below the alignment
+    # cleared (section 3-1). "align" has to be a power of two.
+    case align.is_pow_of_two().not {
+      std::abort::abort("align_down: the alignment must be a power of two") }
+    ret self & (align - Self::one()).bit_not()
+  }
+
+  !public
+  !inline
+  fun align_up(self, align: Self) -> Self {
+    # The smallest multiple of "align" at least self (section 3-1); it aborts
+    # when that does not fit, as "+" does. The sum cannot overflow when the
+    # answer fits: the answer is at most "align - 1" above self, and is a
+    # multiple.
+    case align.is_pow_of_two().not {
+      std::abort::abort("align_up: the alignment must be a power of two") }
+    let mask = align - Self::one()
+    ret (self + mask) & mask.bit_not()
   }
 }
 
 sup [cmp w: U32] SizedIntegerUnsigned[w] {
   !public
   !inline
-  fun isqrt(self) -> Opt[Self] {
+  fun midpoint(self, that: Self) -> Self {
+    # The average rounded down, without forming the sum that could overflow: the
+    # bits the two share, plus half the bits they differ in (Hacker's Delight
+    # 2nd ed., section 2-5).
+    ret (self & that) + ((self ^ that) >> 1_u32)
+  }
+
+  !public
+  !inline
+  fun icbrt(self) -> Self {
+    # The integer cube root, a bit of the root per three bits of the argument
+    # (Hacker's Delight 2nd ed., figure 11-5). The book's "b << s" overflows
+    # past 32 bits (its caution after the figure), so "x >> s" is compared with
+    # "b" instead: the same test, as x >= b * 2^s exactly when x / 2^s, rounded
+    # down, is at least b. Then b << s is at most x, so it fits.
+    let mut x = self
+    let mut y = Self::zero()
+    let mut steps = (w - 1_u32) / 3_u32 + 1_u32
+    loop steps > 0_u32 {
+      steps -= 1_u32
+      let s = steps * 3_u32
+      y = y + y
+      let b = Self::from(3_u8) * y * (y + Self::one()) + Self::one()
+      case (x >> s) >= b {
+        x -= b << s
+        y += Self::one()
+      }
+    }
+    ret y
+  }
+}
+
+sup [cmp w: U32] SizedIntegerUnsigned[w] {
+  !public
+  !inline
+  fun isqrt(self) -> Self {
+    # Every unsigned value has an integer square root, so there is nothing to
+    # check (the signed side has isqrt_checked for negatives). The method is
+    # picked by width (measured 2026-11-09, rel, arguments of every bit length):
+    # bit by bit is ~13% faster at 32 bits, where Newton's divides cost more
+    # than its fewer steps save; Newton's method is 2x faster at 64 bits and 6x
+    # at 128, even with 128-bit division a library call.
+    ret case w <= 32_u32 { self.isqrt_by_bits() } else { self.isqrt_by_newton() }
+  }
+
+  fun isqrt_by_newton(self) -> Self {
+    # Newton's method from a first guess at least the root, the power of two
+    # half the bit length of self - 1 up; the guesses then fall to the root and
+    # stop falling there (Hacker's Delight 2nd ed., figure 11-1, seeded by
+    # leading zeros). The first step's division by a power of two is a shift. No
+    # sum overflows: each guess is at most 2^s.
+    case self <= Self::one() { ret self }
+    let s = (w - (self - Self::one()).leading_zeros() + 1_u32) / 2_u32
+    let mut guess = Self::one() << s
+    let mut next = (guess + (self >> s)) >> 1_u32
+    loop next < guess {
+      guess = next
+      next = (guess + self / guess) >> 1_u32
+    }
+    ret guess
+  }
+
+  fun isqrt_by_bits(self) -> Self {
+    # Bit by bit, as Hacker's Delight 2nd ed., figure 11-4.
     let mut n = self
     let mut result = Self::zero()
     let mut bit = Self::one() << (w - 2_u32)
@@ -415,15 +548,16 @@ sup [cmp w: U32] SizedIntegerUnsigned[w] {
       }
       bit >>= 2_u32
     }
-    ret Some(val=result)
+    ret result
   }
 }
 
 sup [cmp w: U32] SizedIntegerUnsigned[w] ext Format {
   !versioned(base="1.0.0", new="1.0.0")
   fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
-    # Format an unsigned integer in the spec's radix. The digits are written backwards from the end of a buffer large
-    # enough for the widest integer in binary.
+    # Format an unsigned integer in the spec's radix. The digits are written
+    # backwards from the end of a buffer large enough for the widest integer in
+    # binary.
 
     let spec = formatter.spec()
     let base = SizedIntegerUnsigned[w]::from(format::radix_of(spec.kind))

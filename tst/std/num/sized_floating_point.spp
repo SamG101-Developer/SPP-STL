@@ -1,4 +1,32 @@
 !test(group="std/num/sized_floating_point")
+fun test_total_cmp_orders_every_value() -> Void {
+  # -NaN < -inf < -1 < -0 < +0 < 1 < +inf < +NaN, which "ord" cannot say: it has no order for a NaN, and calls the two
+  # zeros equal. The NaNs, infinities and -0 are written as their bits, so nothing folds them.
+  let values = [
+    std::intrinsics::bit_cast[F64](0xfff8000000000000_u64),
+    std::intrinsics::bit_cast[F64](0xfff0000000000000_u64),
+    -1.0_f64,
+    std::intrinsics::bit_cast[F64](0x8000000000000000_u64),
+    0.0_f64,
+    1.0_f64,
+    std::intrinsics::bit_cast[F64](0x7ff0000000000000_u64),
+    std::intrinsics::bit_cast[F64](0x7ff8000000000000_u64)]
+  let mut all_in_order = true
+  let mut i = 0_uz
+  loop i < values.len() {
+    let mut j = 0_uz
+    loop j < values.len() {
+      let a = values[i]@
+      let b = values[j]@
+      all_in_order = all_in_order and a.total_cmp(&b) == i.ord(&j)
+      j += 1_uz
+    }
+    i += 1_uz
+  }
+  std::debug::assert(all_in_order, "every pair compares as its position in the list")
+}
+
+!test(group="std/num/sized_floating_point")
 fun test_arithmetic_on_exactly_representable_values() -> Void {
   std::debug::assert(1.5_f64 + 2.25_f64 == 3.75_f64, "addition")
   std::debug::assert(3.75_f64 - 1.5_f64 == 2.25_f64, "subtraction")

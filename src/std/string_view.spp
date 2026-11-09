@@ -216,11 +216,17 @@ sup StrView {
     # or a needle larger than the haystack.
     case needle.length == 0_uz { ret Some(val=0_uz) }
     case needle.length > self.length { ret None }
+    ret self.find_bytes(needle.ptr(), needle.length)
+  }
 
-    # Find the match using the "memmem" C function, mapping
-    # the result into the Opt type.
+  fun find_bytes(&self, needle: NonNull[U8], needle_len: USize) -> Opt[USize] {
+    # The first occurrence of the "needle_len" bytes at "needle", by the
+    # "memmem" C function, mapped into the Opt type. The callers have ruled out
+    # an empty needle and one longer than the haystack.
     let mut idx = self.length
-    let err = sppc::memmem(self.pointer.as_c_ref(), self.length, needle.ptr().as_c_ref(), needle.length, &mut idx) # Todo: Error handling.
+    let err = sppc::memmem(
+      self.pointer.as_c_ref(), self.length, needle.as_c_ref(),
+      needle_len, &mut idx) # Todo: Error handling.
     case idx >= self.length { ret None }
     ret Some(val=idx)
   }
@@ -249,13 +255,19 @@ sup StrView {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun find_char(&self, needle: Char) -> Opt[USize] {
-    #
-    # @let needle:
-    # @ret:
+    # The `find_char` method searches for the first occurrence of the character
+    # `needle` in this `StrView` and returns its byte index, or `None` if it
+    # does not occur.
+    # @let needle: The character to search for.
+    # @ret: The byte index of the first occurrence of `needle`, or `None`.
 
-    let str = Str::from(needle)
-    defer drop(str)
-    ret self.find(&str)
+    # The character's UTF-8 bytes are encoded into a buffer on the stack
+    # rather than a new `Str`, so nothing is allocated; no character takes
+    # more than 4 bytes.
+    let mut buf = [0_u8; 4_uz]
+    let len = USize::from(needle.encode_utf8(&mut buf))
+    case len > self.length { ret None }
+    ret self.find_bytes(buf.ptr(), len)
   }
 
   !public
@@ -269,13 +281,19 @@ sup StrView {
     # or a needle larger than the haystack.
     case needle.length == 0_uz { ret Some(val=self.length) }
     case needle.length > self.length { ret None }
+    ret self.rfind_bytes(needle.ptr(), needle.length)
+  }
 
+  fun rfind_bytes(&self, needle: NonNull[U8], needle_len: USize) -> Opt[USize] {
+    # The last occurrence of the "needle_len" bytes at "needle": a forward
+    # search again from one past each match until there is none. The callers
+    # have ruled out an empty needle and one longer than the haystack.
     let mut best = 0_uz
     let mut found = false
     let mut from = 0_uz
 
-    loop from + needle.length <= self.length {
-      let hit = self[from to self.length]@.find(&needle@)
+    loop from + needle_len <= self.length {
+      let hit = self[from to self.length]@.find_bytes(needle, needle_len)
       case hit.is_none() { exit }
       best = from + hit.unwrap()
       found = true
@@ -305,13 +323,17 @@ sup StrView {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun rfind_char(&self, needle: Char) -> Opt[USize] {
-    #
-    # @let needle:
-    # @ret:
+    # The `rfind_char` method searches for the last occurrence of the character
+    # `needle` in this `StrView` and returns its byte index, or `None` if it
+    # does not occur.
+    # @let needle: The character to search for.
+    # @ret: The byte index of the last occurrence of `needle`, or `None`.
 
-    let str = Str::from(needle)
-    defer drop(str)
-    ret self.rfind(&str)
+    # Encoded on the stack, as in `find_char`, so nothing is allocated.
+    let mut buf = [0_u8; 4_uz]
+    let len = USize::from(needle.encode_utf8(&mut buf))
+    case len > self.length { ret None }
+    ret self.rfind_bytes(buf.ptr(), len)
   }
 
   !public

@@ -1,0 +1,119 @@
+# Files and directories on the real filesystem, under /tmp. Each test removes
+# what it made once its checks have passed.
+
+!test(group="std/fs/file")
+fun test_a_file_can_be_locked_shared_and_unlocked() -> Void {
+  let path = std::fs::path::Path::new("/tmp/spp_stl_test_file_lock")
+  # Read and write: a shared (read) lock needs the file open for reading.
+  let mode = std::fs::file::FileMode().read().write().create().truncate()
+  let file = std::fs::file::File::open(&path, mode).unwrap()
+
+  let exclusive = file.lock()
+  std::debug::assert(exclusive.is_pass(), "an exclusive lock on a file nobody else holds")
+  drop(exclusive)
+  let shared = file.lock_shared()
+  std::debug::assert(shared.is_pass(), "the owner can convert it to a shared one")
+  drop(shared)
+  let released = file.unlock()
+  std::debug::assert(released.is_pass(), "and release it")
+  drop(released)
+
+  let closed = file.close()
+  std::debug::assert(closed.is_pass(), "the file closes")
+  drop(closed)
+  let removed = path.remove_file()
+  std::debug::assert(removed.is_pass(), "and is removed")
+  drop(removed)
+  drop(path)
+}
+
+!test(group="std/fs/file")
+fun test_a_created_directory_can_be_written_into() -> Void {
+  # A directory has to come out writable by its owner, or nothing can be
+  # created inside it - which is how "create_dir_all" builds each level.
+  let dir = std::fs::path::Path::new("/tmp/spp_stl_test_dir")
+  let inner = std::fs::path::Path::new("/tmp/spp_stl_test_dir/inner")
+  std::debug::assert(dir.exists().not, "nothing there to begin with")
+
+  let made = dir.create_dir()
+  std::debug::assert(made.is_pass(), "the directory is created")
+  drop(made)
+  std::debug::assert(dir.exists(), "it exists")
+  std::debug::assert(dir.is_dir(), "as a directory")
+  std::debug::assert(inner.exists().not, "and is empty")
+
+  let file = std::fs::file::File::open(&inner, std::fs::file::FileMode().write().create()).unwrap()
+  let closed = file.close()
+  std::debug::assert(closed.is_pass(), "a file is created inside it")
+  drop(closed)
+  std::debug::assert(inner.exists(), "and is there")
+
+  let r1 = inner.remove_file()
+  std::debug::assert(r1.is_pass(), "the file is removed")
+  drop(r1)
+  let r2 = dir.remove_dir()
+  std::debug::assert(r2.is_pass(), "then the directory")
+  drop(r2)
+  drop(inner)
+  drop(dir)
+}
+
+!test(group="std/fs/file")
+fun test_create_dir_all_makes_every_level() -> Void {
+  # Each level is a path joined from the components before it, and each is
+  # handed to the C side - which needs it terminated where the path ends.
+  let root = std::fs::path::Path::new("/tmp/spp_stl_test_dirs")
+  let middle = std::fs::path::Path::new("/tmp/spp_stl_test_dirs/a")
+  let leaf = std::fs::path::Path::new("/tmp/spp_stl_test_dirs/a/b")
+  std::debug::assert(root.exists().not, "nothing there to begin with")
+
+  let made = leaf.create_dir_all()
+  std::debug::assert(made.is_pass(), "every level is created")
+  drop(made)
+  std::debug::assert(root.is_dir() and middle.is_dir() and leaf.is_dir(), "each one a directory")
+
+  let r1 = leaf.remove_dir()
+  std::debug::assert(r1.is_pass(), "the last level is removed")
+  drop(r1)
+  let r2 = middle.remove_dir()
+  std::debug::assert(r2.is_pass(), "then the one above it")
+  drop(r2)
+  let r3 = root.remove_dir()
+  std::debug::assert(r3.is_pass(), "then the first")
+  drop(r3)
+  drop(leaf)
+  drop(middle)
+  drop(root)
+}
+
+!test(group="std/fs/file")
+fun test_canonicalize_resolves_to_the_real_path() -> Void {
+  let dir = std::fs::path::Path::new("/tmp/spp_stl_test_canon")
+  let made = dir.create_dir()
+  std::debug::assert(made.is_pass(), "a directory to resolve")
+  drop(made)
+
+  let winding = std::fs::path::Path::new("/tmp/./spp_stl_test_canon/../spp_stl_test_canon")
+  let resolved = winding.canonicalize().unwrap()
+  std::debug::assert(resolved.is_absolute(), "the result is absolute")
+  std::debug::assert(resolved.is_dir(), "and names the directory")
+  let name = resolved.file_name()
+  std::debug::assert(name.len() == 18_uz, "with no . or .. left in it")
+  drop(name)
+  drop(resolved)
+  drop(winding)
+
+  let removed = dir.remove_dir()
+  std::debug::assert(removed.is_pass(), "the directory is removed")
+  drop(removed)
+  drop(dir)
+}
+
+!test(group="std/fs/file")
+fun test_the_working_directory_is_an_absolute_directory() -> Void {
+  let cwd = std::fs::file::get_cwd().unwrap()
+  std::debug::assert(cwd.is_absolute(), "the working directory is absolute")
+  std::debug::assert(cwd.is_dir(), "and is a directory")
+  drop(cwd)
+}
+

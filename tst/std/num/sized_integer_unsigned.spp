@@ -1,4 +1,69 @@
 !test(group="std/num/sized_integer_unsigned")
+fun test_rounding_to_powers_and_multiples_of_two() -> Void {
+  std::debug::assert(0_u32.prev_pow_of_two() == 0_u32, "zero has no power of two below it")
+  std::debug::assert(1_u32.prev_pow_of_two() == 1_u32, "one is 2 to the 0")
+  std::debug::assert(5_u32.prev_pow_of_two() == 4_u32, "between powers, the lower")
+  std::debug::assert(8_u32.prev_pow_of_two() == 8_u32, "a power is its own")
+  std::debug::assert(255_u8.prev_pow_of_two() == 128_u8, "the top of the width")
+  std::debug::assert(13_u32.align_down(4_u32) == 12_u32, "align_down clears the low bits")
+  std::debug::assert(12_u32.align_down(4_u32) == 12_u32, "an aligned value is kept")
+  std::debug::assert(13_u32.align_up(4_u32) == 16_u32, "align_up rounds to the next multiple")
+  std::debug::assert(12_u32.align_up(4_u32) == 12_u32, "and keeps an aligned value")
+  std::debug::assert(0_u32.align_up(8_u32) == 0_u32, "zero is aligned to anything")
+  std::debug::assert(250_u8.align_up(4_u8) == 252_u8, "near the top of the width, without overflowing")
+}
+
+!test(group="std/num/sized_integer_unsigned")
+fun test_midpoint_rounds_down_without_overflowing() -> Void {
+  let max = std::limits::Limits[U8]::max
+  std::debug::assert(3_u8.midpoint(4_u8) == 3_u8, "3.5 rounds down")
+  std::debug::assert(4_u8.midpoint(4_u8) == 4_u8, "a value with itself")
+  std::debug::assert(max.midpoint(max) == max, "the sum would overflow; the average does not")
+  std::debug::assert(0_u8.midpoint(max) == 127_u8, "the whole range")
+}
+
+!test(group="std/num/sized_integer_unsigned")
+fun test_integer_cube_root() -> Void {
+  std::debug::assert(0_u32.icbrt() == 0_u32, "zero")
+  std::debug::assert(1_u32.icbrt() == 1_u32, "one")
+  std::debug::assert(7_u32.icbrt() == 1_u32, "below the next cube")
+  std::debug::assert(8_u32.icbrt() == 2_u32, "an exact cube")
+  std::debug::assert(26_u32.icbrt() == 2_u32, "rounded down between cubes")
+  std::debug::assert(27_u32.icbrt() == 3_u32, "the next cube")
+  std::debug::assert(std::limits::Limits[U8]::max.icbrt() == 6_u8, "the U8 maximum")
+  std::debug::assert(std::limits::Limits[U32]::max.icbrt() == 1625_u32, "the U32 maximum")
+  std::debug::assert(std::limits::Limits[U64]::max.icbrt() == 2642245_u64, "the U64 maximum, past the book's 32 bits")
+  std::debug::assert(std::limits::Limits[U128]::max.icbrt() == 6981463658331_u128, "the U128 maximum")
+  std::debug::assert(
+    std::limits::Limits[U256]::max.icbrt() == 48740834812604276470692694_u256, "and the U256 maximum")
+}
+
+!test(group="std/num/sized_integer_unsigned")
+fun test_wide_square_roots_by_newtons_method() -> Void {
+  # Past 32 bits isqrt is Newton's method, not bit by bit; these are its edges.
+  std::debug::assert(0_u64.isqrt() == 0_u64, "zero")
+  std::debug::assert(1_u64.isqrt() == 1_u64, "one")
+  std::debug::assert(2_u64.isqrt() == 1_u64, "the smallest argument it iterates for")
+  std::debug::assert(1000000000000000000_u64.isqrt() == 1000000000_u64, "an exact square")
+  std::debug::assert(999999999999999999_u64.isqrt() == 999999999_u64, "just below it")
+  std::debug::assert(std::limits::Limits[U64]::max.isqrt() == 4294967295_u64, "the U64 maximum")
+  std::debug::assert(std::limits::Limits[U128]::max.isqrt() == 18446744073709551615_u128, "the U128 maximum")
+  std::debug::assert(
+    std::limits::Limits[U256]::max.isqrt() == 340282366920938463463374607431768211455_u256, "the U256 maximum")
+  std::debug::assert(std::limits::Limits[S64]::max.isqrt_checked().unwrap() == 3037000499_s64, "and signed, through it")
+}
+
+!test(group="std/num/sized_integer_unsigned")
+fun test_right_shift_is_logical() -> Void {
+  # Zeros come in at the top, even with the top bit set.
+  std::debug::assert((0x80_u8 >> 1_u32) == 0x40_u8, "the top bit moves down")
+  let mut x = 0xff_u8
+  x >>= 4_u32
+  std::debug::assert(x == 0x0f_u8, ">>= as well")
+  std::debug::assert(0x80_u8.bit_shr_wrapping(9_u32) == 0x40_u8, "wrapping takes the amount modulo the width")
+}
+
+!test(group="std/num/sized_integer_unsigned")
 fun test_subtracting_below_zero_wraps_to_the_top() -> Void {
   std::debug::assert(0_u8.sub_wrapping(1_u8) == 255_u8, "zero minus one wraps to the maximum")
   std::debug::assert(0_u8.sub_checked(1_u8).is_none(), "the checked form refuses")
@@ -34,10 +99,10 @@ fun test_mod_and_remainder_agree_without_a_sign() -> Void {
 
 !test(group="std/num/sized_integer_unsigned")
 fun test_integer_square_root() -> Void {
-  std::debug::assert(9_u32.isqrt().unwrap() == 3_u32, "an exact square")
-  std::debug::assert(10_u32.isqrt().unwrap() == 3_u32, "rounded down between squares")
-  std::debug::assert(0_u32.isqrt().unwrap() == 0_u32, "zero")
-  std::debug::assert(1_u32.isqrt().unwrap() == 1_u32, "one")
+  std::debug::assert(9_u32.isqrt() == 3_u32, "an exact square")
+  std::debug::assert(10_u32.isqrt() == 3_u32, "rounded down between squares")
+  std::debug::assert(0_u32.isqrt() == 0_u32, "zero")
+  std::debug::assert(1_u32.isqrt() == 1_u32, "one")
 }
 
 !test(group="std/num/sized_integer_unsigned")
@@ -71,6 +136,43 @@ fun test_min_and_max_over_the_full_range() -> Void {
 !test(group="std/num/sized_integer_unsigned")
 fun test_the_wider_widths_behave_the_same() -> Void {
   std::debug::assert(0_u64.sub_wrapping(1_u64) == std::limits::Limits[U64]::max, "wrapping at U64")
-  std::debug::assert(100_u64.isqrt().unwrap() == 10_u64, "isqrt at U64")
+  std::debug::assert(100_u64.isqrt() == 10_u64, "isqrt at U64")
   std::debug::assert(7_u16.mod(3_u16) == 1_u16, "mod at U16")
+}
+
+!test(group="std/num/sized_integer_unsigned")
+fun test_a_power_that_fits_is_not_reported_as_overflowing() -> Void {
+  # Square-and-multiply must not square the base after its last use: 16 * 16 does not fit U8, but 16 to the 1 does.
+  # Hacker's Delight 2nd ed., figure 11-6.
+  std::debug::assert(16_u8.pow_checked(1_u32).unwrap() == 16_u8, "the checked form already stops in time")
+  let (val, overflowed) = 16_u8.pow_overflow(1_u32)
+  std::debug::assert(val == 16_u8, "the overflow form's value")
+  std::debug::assert(overflowed.not, "and its flag")
+  std::debug::assert(4_u8.pow(3_u32) == 64_u8, "64 fits U8, though the next square would not")
+}
+
+!test(group="std/num/sized_integer_unsigned")
+fun test_an_overflowing_power_reports_the_wrapped_value() -> Void {
+  # As every other "_overflow" method: the wrapped result with the flag, so it agrees with the wrapping form.
+  let (val, overflowed) = 3_u8.pow_overflow(6_u32)
+  std::debug::assert(val == 217_u8, "729 wraps to 217")
+  std::debug::assert(overflowed, "and is flagged")
+  std::debug::assert(3_u8.pow_wrapping(6_u32) == 217_u8, "the wrapping form agrees")
+}
+
+!test(group="std/num/sized_integer_unsigned")
+fun test_next_power_of_two_rounds_up() -> Void {
+  std::debug::assert(0_u32.next_pow_of_two() == 1_u32, "zero rounds up to one")
+  std::debug::assert(1_u32.next_pow_of_two() == 1_u32, "one is a power of two")
+  std::debug::assert(5_u32.next_pow_of_two() == 8_u32, "between powers")
+  std::debug::assert(8_u32.next_pow_of_two() == 8_u32, "a power is its own")
+  std::debug::assert(128_u8.next_pow_of_two() == 128_u8, "the top power of the width")
+}
+
+!test(group="std/num/sized_integer_unsigned")
+fun test_is_pow_of_two() -> Void {
+  std::debug::assert(0_u32.is_pow_of_two().not, "zero is not a power of two")
+  std::debug::assert(1_u32.is_pow_of_two(), "one is 2 to the 0")
+  std::debug::assert(64_u32.is_pow_of_two(), "64")
+  std::debug::assert(96_u32.is_pow_of_two().not, "96 has two bits set")
 }

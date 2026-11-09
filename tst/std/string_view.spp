@@ -81,6 +81,19 @@ fun test_find_char_locates_a_single_character() -> Void {
 }
 
 !test(group="std/string_view")
+fun test_find_char_matches_multi_byte_characters_by_their_bytes() -> Void {
+  # "é", "€" and "😀" are two, three and four bytes: a at 0, é at 1, € at 3, 😀 at 6, é again at 10.
+  let s = "aé€😀é"
+  std::debug::assert(s.find_char('é').unwrap() == 1_uz, "a two-byte character")
+  std::debug::assert(s.rfind_char('é').unwrap() == 10_uz, "and its last occurrence")
+  std::debug::assert(s.find_char('€').unwrap() == 3_uz, "a three-byte character")
+  std::debug::assert(s.find_char('😀').unwrap() == 6_uz, "a four-byte character")
+  std::debug::assert(s.rfind_char('😀').unwrap() == 6_uz, "found the same way from the end")
+  std::debug::assert("ab".find_char('😀').is_none(), "a character longer than the view")
+  std::debug::assert("".rfind_char('a').is_none(), "an empty view")
+}
+
+!test(group="std/string_view")
 fun test_rfind_if_gives_the_last_match() -> Void {
   let s = "a b c"
   std::debug::assert(s.rfind_if((c: Char) c.is_whitespace()).unwrap() == 3_uz, "the last of several matches")

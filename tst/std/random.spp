@@ -1,4 +1,15 @@
 !test(group="std/random")
+fun test_a_seed_gives_the_reference_xoshiro256ss_stream() -> Void {
+  # The first draws of xoshiro256** seeded through splitmix64 from 42, as the reference algorithm computes them. The
+  # other tests only compare two streams, so they would not notice a change to the algorithm itself.
+  let mut r = std::random::Rng::from_seed(42_u64)
+  std::debug::assert(r.next_u64() == 7631449856891427754_u64, "first draw")
+  std::debug::assert(r.next_u64() == 12559587170922671360_u64, "second draw")
+  std::debug::assert(r.next_u64() == 18389334169461023688_u64, "third draw")
+  drop(r)
+}
+
+!test(group="std/random")
 fun test_the_same_seed_gives_the_same_sequence() -> Void {
   let mut a = std::random::Rng::from_seed(42_u64)
   let mut b = std::random::Rng::from_seed(42_u64)

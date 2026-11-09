@@ -94,12 +94,82 @@ fun test_conversion_between_widths() -> Void {
   std::debug::assert(U32::from(false) == 0_u32, "from a false boolean")
 }
 
-# Todo: re-enable once "ilog2"/"ilog10" build. They lower to "llvm.ctlz", which takes two arguments - the value and
-#  an "is_zero_poison" flag - and codegen passes only the value, so the module fails llvm verification and the whole
-#  build with it. Commented out rather than left red for that reason: a build failure costs every test, not one.
-#
-# !test(group="std/num")
-# fun test_integer_logarithms() -> Void {
-#     std::debug::assert(8_u32.ilog2() == 3_u32, "ilog2")
-#     std::debug::assert(1000_u32.ilog10() == 3_u32, "ilog10")
-# }
+!test(group="std/num")
+fun test_bytes_are_read_in_either_order() -> Void {
+  let bytes = [0x12_u8, 0x34_u8, 0x56_u8, 0x78_u8]
+  std::debug::assert(U32::from_le_bytes(&bytes) == 0x78563412_u32, "little-endian: the first byte is the lowest")
+  std::debug::assert(U32::from_be_bytes(&bytes) == 0x12345678_u32, "big-endian: the first byte is the highest")
+  let one = [0xab_u8]
+  std::debug::assert(U8::from_be_bytes(&one) == 0xab_u8, "a single byte has no order")
+}
+
+!test(group="std/num")
+fun test_integer_logarithms() -> Void {
+  std::debug::assert(8_u32.ilog2() == 3_u32, "ilog2")
+  std::debug::assert(1000_u32.ilog10() == 3_u32, "ilog10")
+}
+
+!test(group="std/num")
+fun test_ilog10_steps_up_at_each_power_of_ten() -> Void {
+  # An estimate from the bit length alone is one off just past a power of ten (10 has 4 bits, like 9), so it has to be
+  # corrected against a table of the powers themselves. Hacker's Delight 2nd ed., section 11-4.
+  std::debug::assert(1_u32.ilog10() == 0_u32, "one")
+  std::debug::assert(9_u32.ilog10() == 0_u32, "the top of one digit")
+  std::debug::assert(10_u32.ilog10() == 1_u32, "two digits from ten")
+  std::debug::assert(99_u32.ilog10() == 1_u32, "the top of two digits")
+  std::debug::assert(100_u32.ilog10() == 2_u32, "three digits from a hundred")
+  std::debug::assert(std::limits::Limits[U32]::max.ilog10() == 9_u32, "the maximum has ten digits")
+  std::debug::assert(9223372036854775808_u64.ilog10() == 18_u32, "2^63 has nineteen digits (the table once said 20)")
+  std::debug::assert(10000000000000000000_u64.ilog10() == 19_u32, "the largest power of ten in U64")
+  std::debug::assert(std::limits::Limits[U64]::max.ilog10() == 19_u32, "and the maximum past it")
+  std::debug::assert(1000.ilog10() == 3_u32, "a signed type")
+}
+
+!test(group="std/num")
+fun test_ilog_in_a_base_that_is_not_a_power_of_two() -> Void {
+  # Dividing the base-2 logarithms is only exact when the base is a power of two.
+  std::debug::assert(8_u32.ilog(2_u32) == 3_u32, "base two")
+  std::debug::assert(16_u32.ilog(4_u32) == 2_u32, "another power-of-two base")
+  std::debug::assert(26_u32.ilog(3_u32) == 2_u32, "3 to the 2 is at most 26, 3 to the 3 is past it")
+  std::debug::assert(27_u32.ilog(3_u32) == 3_u32, "an exact power")
+  std::debug::assert(5_u32.ilog(10_u32) == 0_u32, "below the base")
+  std::debug::assert(std::limits::Limits[U8]::max.ilog(3_u8) == 5_u32, "the multiply-up stops at the width")
+  std::debug::assert(5_u32.ilog_checked(1_u32).is_none(), "base one has no logarithm")
+}
+
+!test(group="std/num")
+fun test_the_logarithm_of_zero_or_a_negative_is_rejected() -> Void {
+  std::debug::assert(1_u32.ilog2_checked().unwrap() == 0_u32, "one is the smallest argument")
+  std::debug::assert((-8).ilog2_checked().is_none(), "a negative has no logarithm")
+  std::debug::assert(0_u32.ilog2_checked().is_none(), "nor does zero")
+  std::debug::assert(0_u32.ilog10_checked().is_none(), "in any base")
+  std::debug::assert((-5).ilog10_checked().is_none(), "base ten included")
+}
+
+!test(group="std/num")
+fun test_bit_counts() -> Void {
+  # 0xb0 is 1011_0000.
+  std::debug::assert(0xb0_u8.count_ones() == 3_u32, "count_ones")
+  std::debug::assert(0xb0_u8.count_zeros() == 5_u32, "count_zeros")
+  std::debug::assert(0xb0_u8.leading_ones() == 1_u32, "leading_ones")
+  std::debug::assert(0xb0_u8.trailing_zeros() == 4_u32, "trailing_zeros")
+  std::debug::assert(0x0f_u8.trailing_ones() == 4_u32, "trailing_ones")
+  std::debug::assert(0_u32.trailing_zeros() == 32_u32, "zero has the width's worth of trailing zeros")
+  std::debug::assert((-1).count_ones() == 32_u32, "a signed type counts its two's complement bits")
+}
+
+!test(group="std/num")
+fun test_rotates_wrap_the_bits_around() -> Void {
+  std::debug::assert(0x81_u8.rotate_left(1_u32) == 0x03_u8, "the top bit comes round to the bottom")
+  std::debug::assert(0x81_u8.rotate_right(1_u32) == 0xc0_u8, "and the bottom bit to the top")
+  std::debug::assert(0x81_u8.rotate_left(8_u32) == 0x81_u8, "a whole width is no rotation")
+  std::debug::assert(0x81_u8.rotate_left(9_u32) == 0x03_u8, "the amount is taken modulo the width")
+  std::debug::assert(0x81_u8.rotate_left(0_u32) == 0x81_u8, "zero is no rotation")
+}
+
+!test(group="std/num")
+fun test_byte_swap_and_bit_reversal() -> Void {
+  std::debug::assert(0x12345678_u32.swap_bytes() == 0x78563412_u32, "swap_bytes reverses the bytes")
+  std::debug::assert(0xab_u8.swap_bytes() == 0xab_u8, "a single byte is its own swap")
+  std::debug::assert(0x01_u8.reverse_bits() == 0x80_u8, "reverse_bits reverses the bits")
+}

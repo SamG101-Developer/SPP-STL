@@ -91,14 +91,9 @@ sup BigUInt {
     let mut i = self.data.len()
     loop i > 0_uz {
       i -= 1_uz
-      let mut limb = self.data[i]@
+      let limb = self.data[i]@
       case limb != 0_u32 {
-        let mut bits = 32_uz * i
-        loop limb != 0_u32 {
-          limb >>= 1_u32
-          bits += 1_uz
-        }
-        ret bits
+        ret 32_uz * i + USize::from(32_u32 - limb.leading_zeros())
       }
     }
     ret 0_uz

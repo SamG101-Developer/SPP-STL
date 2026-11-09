@@ -10,6 +10,8 @@ use std::num::sized_integer::SizedInteger
 use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 use std::ops::add::Add
 use std::ops::add::AddAssign
+use std::ops::bit_shr::BitShr
+use std::ops::bit_shr::BitShrAssign
 use std::ops::div::Div
 use std::ops::div::DivAssign
 use std::ops::mul::Mul
@@ -96,11 +98,50 @@ sup [cmp w: U32] SizedIntegerSigned[w] ext RemAssign {
   }
 }
 
+sup [cmp w: U32] SizedIntegerSigned[w] ext BitShr[Rhs=U32] {
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun bit_shr(self, that: U32) -> Self {
+    # Arithmetic: the sign bit is copied in, so a negative value stays negative
+    # (-8 >> 1 is -4), as in C and Rust.
+    ret intrinsics::bit_ashr(self, that)
+  }
+}
+
+sup [cmp w: U32] SizedIntegerSigned[w] ext BitShrAssign[Rhs=U32] {
+  !always_inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun bit_shr_assign(&mut self, that: U32) -> Void {
+    intrinsics::bit_ashr_assign(self, that)
+  }
+}
+
+sup [cmp w: U32] SizedIntegerSigned[w] {
+  !public
+  !inline
+  fun bit_shr_checked(self, that: U32) -> Opt[Self] {
+    case that >= w { ret None }
+    ret Some(val=intrinsics::bit_ashr(self, that))
+  }
+
+  !public
+  !inline
+  fun bit_shr_overflow(self, that: U32) -> (Self, Bool) {
+    ret (self.bit_shr_wrapping(that), that >= w)
+  }
+
+  !public
+  !inline
+  fun bit_shr_wrapping(self, that: U32) -> Self {
+    ret intrinsics::bit_ashr(self, that & (w - 1_u32))
+  }
+}
+
 sup [cmp w: U32] SizedIntegerSigned[w] ext Pow[Rhs=U32, Ret=Self] {
   fun pow(self, that: U32) -> Self {
-    case that == 0_u32 {
-      ret Self::one()
-    }
+    # Square-and-multiply. The base is squared only while bits of the exponent
+    # remain: the square after its last use can overflow when the power does not
+    # (Hacker's Delight 2nd ed., figure 11-6).
     let mut out = Self::one()
     let mut base = self
     let mut exp = that
@@ -108,8 +149,10 @@ sup [cmp w: U32] SizedIntegerSigned[w] ext Pow[Rhs=U32, Ret=Self] {
       case exp % 2_u32 == 1_u32 {
         out = out * base
       }
-      base = base * base
       exp /= 2_u32
+      case exp > 0_u32 {
+        base = base * base
+      }
     }
     ret out
   }
@@ -276,19 +319,25 @@ sup [cmp w: U32] SizedIntegerSigned[w] {
   !public
   !inline
   fun div_floor(self, that: Self) -> Self {
+    # "/" truncates toward zero, so an inexact quotient is one too high when the
+    # signs differ. "c" is 1 exactly then: the sign bit of self ^ that, by a
+    # logical shift (Hacker's Delight 2nd ed., exercise 9.3, which leaves out
+    # the "r != 0" test that an exact division needs).
     let d = self / that
     let r = self % that
     let c = intrinsics::bit_shr(self ^ that, w - 1_u32)
-    ret case r != Self::zero() { d + c } else { d }
+    ret case r != Self::zero() { d - c } else { d }
   }
 
   !public
   !inline
   fun div_ceil(self, that: Self) -> Self {
+    # An inexact truncated quotient is one too low when the signs match, and
+    # already the ceiling when they differ.
     let d = self / that
     let r = self % that
-    let c = Self::one() + intrinsics::bit_shr(self ^ that, w - 1_u32)
-    ret case r != Self::zero() { d + c } else { d }
+    let c = intrinsics::bit_shr(self ^ that, w - 1_u32)
+    ret case r != Self::zero() { d + (Self::one() - c) } else { d }
   }
 
   !public
@@ -303,17 +352,21 @@ sup [cmp w: U32] SizedIntegerSigned[w] {
   !public
   !inline
   fun rem_checked(self, that: Self) -> Opt[Self] {
-    case that == Self::zero() or (self == intrinsics::min_val[Self]() & that == Self::neg_one()) {
-      ret None
-    }
+    # Every integer divides by -1 exactly, so its remainder is 0. That includes
+    # the minimum, whose quotient overflows but whose remainder fits; it is
+    # answered here because "srem" is undefined for it.
+    case that == Self::zero() { ret None }
+    case that == Self::neg_one() { ret Some(val=Self::zero()) }
     ret Some(val=intrinsics::srem(self, that))
   }
 
   !public
   !inline
   fun rem_overflow(self, that: Self) -> (Self, Bool) {
+    # A remainder never overflows: by -1 it is 0, the minimum included (see
+    # rem_checked).
     case that == Self::neg_one() {
-      ret (self, self == intrinsics::min_val[Self]())
+      ret (Self::zero(), false)
     }
     ret (intrinsics::srem(self, that), false)
   }
@@ -351,43 +404,33 @@ sup [cmp w: U32] SizedIntegerSigned[w] {
   !public
   !inline
   fun pow_overflow(self, that: U32) -> (Self, Bool) {
-    case that == 0_u32 {
-      ret (Self::one(), false)
-    }
+    # The wrapped power, as pow_wrapping, and whether any step overflowed. As in
+    # pow, the base is squared only while bits of the exponent remain, so an
+    # unused square cannot set the flag.
     let mut out = Self::one()
     let mut base = self
     let mut exp = that
+    let mut any_overflowed = false
     loop exp > 0_u32 {
       case exp % 2_u32 == 1_u32 {
-        let (tmp, overflowed) = out.mul_overflow(base)
-        case overflowed { ret (out, true) }
-        out = tmp
+        let (product, overflowed) = out.mul_overflow(base)
+        out = product
+        any_overflowed = any_overflowed or overflowed
       }
-      let (tmp, overflowed) = base.mul_overflow(base)
-      case overflowed { ret (out, true) }
-      base = tmp
       exp /= 2_u32
+      case exp > 0_u32 {
+        let (square, overflowed) = base.mul_overflow(base)
+        base = square
+        any_overflowed = any_overflowed or overflowed
+      }
     }
-    ret (out, false)
+    ret (out, any_overflowed)
   }
 
   !public
   !inline
   fun pow_wrapping(self, that: U32) -> Self {
-    case that == 0_u32 {
-      ret Self::one()
-    }
-    let mut out = Self::one()
-    let mut base = self
-    let mut exp = that
-    loop exp > 0_u32 {
-      case exp % 2_u32 == 1_u32 {
-        out = out.mul_wrapping(base)
-      }
-      base = base.mul_wrapping(base)
-      exp /= 2_u32
-    }
-    ret out
+    ret self.pow_overflow(that).0
   }
 
   !public
@@ -483,31 +526,47 @@ sup [cmp w: U32] SizedIntegerSigned[w] {
   !public
   !inline
   fun isqrt_checked(self) -> Opt[Self] {
+    # A non-negative value is its own magnitude, so the unsigned root (which
+    # picks its method by width) is the answer, and it fits back.
     case self < Self::zero() { ret None }
-    let mut op = self
-    let mut out = Self::zero()
-    let mut bit = Self::one() << (w - 2_u32)
-    loop bit > op {
-      bit >>= 2_u32
-    }
-    loop bit != Self::zero() {
-      case op >= out + bit {
-        op -= out + bit
-        out += bit << 1_u32
-      }
-      out >>= 1_u32
-      bit >>= 2_u32
-    }
-    ret Some(val=out)
+    ret Some(val=Self::from(SizedIntegerUnsigned[w]::from(self).isqrt()))
+  }
+}
+
+sup [cmp w: U32] SizedIntegerSigned[w] {
+  !public
+  !inline
+  fun midpoint(self, that: Self) -> Self {
+    # The average rounded toward zero, as "/" rounds, without forming the sum
+    # that could overflow. The shared bits plus half the differing ones (">>" is
+    # arithmetic) is the average rounded down; that is one low exactly when the
+    # sum is negative and odd, so the sign bit of it, and the low bit of the
+    # differing ones, add the one back (Hacker's Delight 2nd ed., section 2-5).
+    let floor = (self & that) + ((self ^ that) >> 1_u32)
+    ret floor + (intrinsics::bit_shr(floor, w - 1_u32) & (self ^ that))
+  }
+
+  !public
+  !inline
+  fun icbrt(self) -> Self {
+    # The integer cube root rounded toward zero: a negative's is the negation of
+    # its magnitude's. The magnitude is read unsigned, so the minimum's fits.
+    let negative = self < Self::zero()
+    let bits = SizedIntegerUnsigned[w]::from(self)
+    let magnitude = case negative { SizedIntegerUnsigned[w]::zero().sub_wrapping(bits) } else { bits }
+    let root = Self::from(magnitude.icbrt())
+    ret case negative { root.neg() } else { root }
   }
 }
 
 sup [cmp w: U32] SizedIntegerSigned[w] ext Format {
   !versioned(base="1.0.0", new="1.0.0")
   fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
-    # Format a signed integer in the spec's radix, as a sign and a magnitude: `{:x}` of -255 is `-ff`, not the two's
-    # complement bits. The digits are taken on the negative side, as in `Str::from`: the most negative value of a width
-    # has no positive counterpart, but every remainder of a negative value negates in range.
+    # Format a signed integer in the spec's radix, as a sign and a magnitude:
+    # `{:x}` of -255 is `-ff`, not the two's complement bits. The digits are
+    # taken on the negative side, as in `Str::from`: the most negative value of
+    # a width has no positive counterpart, but every remainder of a negative
+    # value negates in range.
 
     let spec = formatter.spec()
     let base = SizedIntegerSigned[w]::from(format::radix_of(spec.kind))
