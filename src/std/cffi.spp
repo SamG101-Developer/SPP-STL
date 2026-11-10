@@ -36,7 +36,7 @@ use std::mem::pointer::Ptr
 # it. Generated stubs use `CRefBytePtr` / `CMutBytePtr` for byte parameters; this remains for `CClosure`'s fields.
 !package type CCharPtr = NonNull[CUChar]
 
-!public
+!ffi
 cls CClosure[Ts: TupLike, R] {
   !package fn: CCharPtr
   !package env: CCharPtr
@@ -48,7 +48,7 @@ sup [Ts: TupLike, R] CClosure[Ts, R] {
   fun from[F: FunMov[Ts, R]](that: F) -> Self { }
 }
 
-!public
+!ffi
 !versioned(base="1.0.0", new="1.0.0")
 cls CRefBytePtr {
   # A read-only pointer to bytes, for an ffi parameter of type `const char*` or
@@ -61,7 +61,7 @@ cls CRefBytePtr {
   !package inner: NonNull[CUChar]
 }
 
-!public
+!ffi
 !versioned(base="1.0.0", new="1.0.0")
 cls CMutBytePtr {
   # A writable pointer to bytes, for an ffi parameter of type `char*` or `void*`
