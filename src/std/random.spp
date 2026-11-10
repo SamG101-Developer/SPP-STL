@@ -41,7 +41,7 @@ fun splitmix64(x: &mut U64) -> U64 {
   # Every step here is meant to wrap: the mixing is what the constants are for, and a state that stayed inside "U64"
   # would not be a bit mixer. So the operations are spelled as the wrapping ones rather than "+" and "*", which abort on
   # the overflow this depends on.
-  x@ = x@.add_wrapping(0x9e3779b97f4a7c15_u64)
+  x@ = x.add_wrapping(0x9e3779b97f4a7c15_u64)
   let mut z = x@
   z = (z ^ z >> 30_u32).mul_wrapping(0xbf58476d1ce4e5b9_u64)
   z = (z ^ z >> 27_u32).mul_wrapping(0x94d049bb133111eb_u64)

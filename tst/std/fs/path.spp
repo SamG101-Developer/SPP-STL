@@ -94,6 +94,18 @@ fun test_joining_appends_a_component() -> Void {
 }
 
 !test(group="std/fs/path")
+fun test_joining_onto_an_empty_path_gives_the_other_unchanged() -> Void {
+  # No separator is put in front, or a relative path built up from nothing
+  # would land under the root.
+  let leaf = std::fs::path::Path::new("bin")
+  let joined = std::fs::path::Path().join(&leaf)
+  std::debug::assert(joined.is_absolute().not, "the joined path is still relative")
+  std::debug::assert(joined.inner.len() == 3_uz, "and is just the other path")
+  drop(joined)
+  drop(leaf)
+}
+
+!test(group="std/fs/path")
 fun test_starts_with_and_ends_with_compare_by_component() -> Void {
   let p = std::fs::path::Path::new("/usr/local/bin")
   let prefix = std::fs::path::Path::new("/usr")

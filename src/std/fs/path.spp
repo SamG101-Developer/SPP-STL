@@ -254,9 +254,7 @@ sup Path {
     # simple way to determine if a path is absolute or relative.
     # @ret: `true` if the path is absolute, `false` otherwise.
 
-    let sep = Str::from(self.sep())
-    defer drop(sep)
-    ret self.inner.starts_with(&sep)
+    ret self.inner.starts_with(self.sep())
   }
 
   !public
@@ -268,19 +266,14 @@ sup Path {
     # separator (a UNC path '\\\\server', or rooted on the current drive).
     # @ret: `true` if the path is absolute, `false` otherwise.
 
-    let back = Str::from('\\')
-    defer drop(back)
-    let fwd = Str::from('/')
-    defer drop(fwd)
-    case self.inner.starts_with(&back) or self.inner.starts_with(&fwd) { ret true }
+    case self.inner.starts_with('\\') or self.inner.starts_with('/') { ret true }
 
     # A drive root: one letter, a colon, then a separator.
     let colon = self.inner.find_char(':')
     case colon.is_none() { ret false }
     case colon.unwrap() != 1_uz { ret false }
-    let rest = Str::from(self.inner[2_uz to self.inner.len()])
-    defer drop(rest)
-    ret rest.starts_with(&back) or rest.starts_with(&fwd)
+    let rest = self.inner[2_uz to self.inner.len()]
+    ret rest.starts_with('\\') or rest.starts_with('/')
   }
 
   !public
@@ -328,13 +321,17 @@ sup Path {
     # @let other: The path to join with the current path.
     # @ret: A new `Path` object representing the joined path.
 
-    # Get the separator and clone this path.
-    let sep = Str::from(self.sep())
-    defer drop(sep)
+    # Get the separator and take this path's string.
+    let sep = self.sep()
     let Self(mut inner as new_path) = self
 
-    # Only add the separator if neither part has it.
-    case new_path.ends_with(&sep).not and other.inner.starts_with(&sep).not { new_path.append_str(&sep) }
+    # Only add the separator if neither part has it, and never onto an empty
+    # path.
+    case new_path.is_empty().not
+      and new_path.ends_with(sep).not
+      and other.inner.starts_with(sep).not {
+      new_path.append(sep)
+    }
     new_path.append_str(&other.inner)
     ret Path(inner=new_path)
   }
@@ -502,8 +499,16 @@ sup Path {
     let components = self.components()
     let mut current_path = Path()
     defer drop(current_path)
+    let sep = self.sep()
 
     loop component in components.iter_mov() {
+      # An empty component is a separator with nothing before it: the root of an
+      # absolute path, or a doubled separator. Neither is a directory to make.
+      case component.is_empty() {
+        drop(component)
+        current_path.inner.append(sep)
+        skip
+      }
       current_path /= Path(inner=component)
       case current_path.exists() { skip }
       let current_path_z = current_path.inner.to_c_str()
