@@ -61,5 +61,5 @@ jobs:
             core
             sppc
           requireScope: false
-          subjectPattern: '^[a-z][a-z0-9 ./:-]*$'
+          subjectPattern: '^[a-z][a-z0-9 ./:-\+]*$'
           subjectPatternError: "The description must match the regex."
