@@ -178,6 +178,12 @@ sup SockV6Addr ext Copy {
   # As "SockV4Addr" above.
 }
 
+sup sppc::CSockaddrStorage ext Copy {
+  # The C "sockaddr_storage" an address is written into for the socket calls: plain bytes, owning nothing, and
+  # handed to C by borrow. The sppc stub generator gives no type "Copy", so it is declared here, beside the
+  # "storage" method that makes one.
+}
+
 sup SockAddr {
   !public
   !versioned(base="1.0.0", new="1.0.0")

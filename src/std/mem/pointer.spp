@@ -260,6 +260,12 @@ sup NonNull[U8] {
   }
 }
 
+sup [T] Ptr[T] ext Copy {
+  # A `Ptr` is a single machine address that may be null, so it is `Copy` for
+  # the same reason `NonNull` is: duplicating one duplicates the address, not
+  # the pointee or any ownership of it.
+}
+
 sup [T] NonNull[T] ext Copy {
   # A `NonNull` is a single machine address, so it is `Copy`: duplicating one
   # just duplicates the address. Copying a pointer does not copy or alias the
