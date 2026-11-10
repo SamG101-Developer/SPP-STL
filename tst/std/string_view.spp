@@ -94,6 +94,28 @@ fun test_find_char_matches_multi_byte_characters_by_their_bytes() -> Void {
 }
 
 !test(group="std/string_view")
+fun test_starts_with_and_ends_with_take_one_character() -> Void {
+  let s = Str::from("a/b")
+  std::debug::assert(s.starts_with('a'), "the first character")
+  std::debug::assert(s.starts_with('/').not, "not one further in")
+  std::debug::assert(s.ends_with('b'), "the last character")
+  std::debug::assert(s.ends_with('/').not, "not one further in")
+  drop(s)
+
+  let e = Str::from("")
+  std::debug::assert(e.starts_with('a').not and e.ends_with('a').not, "an empty string has no ends")
+  drop(e)
+}
+
+!test(group="std/string_view")
+fun test_starts_with_and_ends_with_take_a_multi_byte_character() -> Void {
+  let s = Str::from("€x€")
+  std::debug::assert(s.starts_with('€') and s.ends_with('€'), "a three-byte character at either end")
+  std::debug::assert(s.starts_with('x').not, "not the one after it")
+  drop(s)
+}
+
+!test(group="std/string_view")
 fun test_rfind_if_gives_the_last_match() -> Void {
   let s = "a b c"
   std::debug::assert(s.rfind_if((c: Char) c.is_whitespace()).unwrap() == 3_uz, "the last of several matches")
