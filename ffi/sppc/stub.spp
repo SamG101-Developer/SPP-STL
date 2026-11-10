@@ -351,14 +351,12 @@ use std::cffi::CVoidPtr
 !public cmp st_relatime: CInt = 4096
 !public cmp barrier_serial_thread: CInt = -1
 
-!public
 !ffi
 cls CTimespec {
   !public sec: CUInt64
   !public nsec: CUInt64
 }
 
-!public
 !ffi
 cls CStat {
   !public dev: CUInt64
@@ -377,7 +375,6 @@ cls CStat {
   !private reserved: CUInt
 }
 
-!public
 !ffi
 cls CPollfd {
   !public fd: CInt
@@ -385,33 +382,28 @@ cls CPollfd {
   !public revents: CShort
 }
 
-!public
 !ffi
 cls CIovec {
   !public base: CVoidPtr
   !public len: CSizeT
 }
 
-!public
 !ffi
 cls CFdSet {
   !public bits: [CUInt64; 16_uz]
 }
 
-!public
 !ffi
 cls CTimeval {
   !public sec: CUInt64
   !public usec: CUInt64
 }
 
-!public
 !ffi
 cls CSockaddrStorage {
   !private opaque: [CUInt64; 16_uz]
 }
 
-!public
 !ffi
 cls CFlock {
   !public start: CInt64
@@ -422,7 +414,6 @@ cls CFlock {
   !private reserved: CInt
 }
 
-!public
 !ffi
 cls CStatvfs {
   !public block_size: CUInt64
@@ -438,7 +429,6 @@ cls CStatvfs {
   !public namemax: CUInt64
 }
 
-!public
 !ffi
 cls CLinger {
   !public onoff: CInt
