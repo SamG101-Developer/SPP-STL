@@ -3,7 +3,9 @@
 
 !test(group="std/fs/file")
 fun test_a_file_can_be_locked_shared_and_unlocked() -> Void {
-  let path = std::fs::path::Path::new("/tmp/spp_stl_test_file_lock")
+  # The files and directories in this group are relative to the working
+  # directory, which every platform has; "/tmp" is not a directory on Windows.
+  let path = std::fs::path::Path::new("spp_stl_test_file_lock")
   # Read and write: a shared (read) lock needs the file open for reading.
   let mode = std::fs::file::FileMode().read().write().create().truncate()
   let file = std::fs::file::File::open(&path, mode).unwrap()
@@ -31,8 +33,8 @@ fun test_a_file_can_be_locked_shared_and_unlocked() -> Void {
 fun test_a_created_directory_can_be_written_into() -> Void {
   # A directory has to come out writable by its owner, or nothing can be
   # created inside it - which is how "create_dir_all" builds each level.
-  let dir = std::fs::path::Path::new("/tmp/spp_stl_test_dir")
-  let inner = std::fs::path::Path::new("/tmp/spp_stl_test_dir/inner")
+  let dir = std::fs::path::Path::new("spp_stl_test_dir")
+  let inner = std::fs::path::Path::new("spp_stl_test_dir/inner")
   std::debug::assert(dir.exists().not, "nothing there to begin with")
 
   let made = dir.create_dir()
@@ -62,9 +64,9 @@ fun test_a_created_directory_can_be_written_into() -> Void {
 fun test_create_dir_all_makes_every_level() -> Void {
   # Each level is a path joined from the components before it, and each is
   # handed to the C side - which needs it terminated where the path ends.
-  let root = std::fs::path::Path::new("/tmp/spp_stl_test_dirs")
-  let middle = std::fs::path::Path::new("/tmp/spp_stl_test_dirs/a")
-  let leaf = std::fs::path::Path::new("/tmp/spp_stl_test_dirs/a/b")
+  let root = std::fs::path::Path::new("spp_stl_test_dirs")
+  let middle = std::fs::path::Path::new("spp_stl_test_dirs/a")
+  let leaf = std::fs::path::Path::new("spp_stl_test_dirs/a/b")
   std::debug::assert(root.exists().not, "nothing there to begin with")
 
   let made = leaf.create_dir_all()
@@ -88,12 +90,12 @@ fun test_create_dir_all_makes_every_level() -> Void {
 
 !test(group="std/fs/file")
 fun test_canonicalize_resolves_to_the_real_path() -> Void {
-  let dir = std::fs::path::Path::new("/tmp/spp_stl_test_canon")
+  let dir = std::fs::path::Path::new("spp_stl_test_canon")
   let made = dir.create_dir()
   std::debug::assert(made.is_pass(), "a directory to resolve")
   drop(made)
 
-  let winding = std::fs::path::Path::new("/tmp/./spp_stl_test_canon/../spp_stl_test_canon")
+  let winding = std::fs::path::Path::new("./spp_stl_test_canon/../spp_stl_test_canon")
   let resolved = winding.canonicalize().unwrap()
   std::debug::assert(resolved.is_absolute(), "the result is absolute")
   std::debug::assert(resolved.is_dir(), "and names the directory")

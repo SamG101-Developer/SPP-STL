@@ -258,7 +258,7 @@ sup Alloc {
     # @ret: `Pass()` if the storage was resized, or an `AllocErr` on failure.
 
     let new_byte = self.realloc_bytes(
-      ptr@.erase_type(), Layout::array[T](old_n), Layout::array[T](new_n))?
+      ptr.erase_type(), Layout::array[T](old_n), Layout::array[T](new_n))?
     ptr@ = new_byte.cast[T]()
     ret Pass[Void]()
   }
