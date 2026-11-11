@@ -308,7 +308,7 @@ fun input(prompt: &StrView = "") -> Str {
 
   # Create a new `StdinStream` instance and read a line of
   # input from the standard input.
-  let mut stdin = BufRead[StdinStream]()
+  let mut stdin = BufRead[StdinStream]::new(StdinStream())
   defer drop(stdin)
   let mut out = Str::new()
 
