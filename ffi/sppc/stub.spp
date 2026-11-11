@@ -467,6 +467,13 @@ fun async_stack_size(bytes: CSizeT) -> CVoid { }
 !ffi(symbol="sppc_set_source_lines")
 fun set_source_lines(table: CRefBytePtr) -> CVoid { }
 
+# Where a debugger breaks to stop on a failure that ends the process by call
+# (a failed check, "sppc_abort"). Called once the report is written, just
+# before "_exit", with the failing code's frames still on the stack. A signal
+# needs none: a debugger stops on it before the handler runs.
+!ffi(symbol="sppc_debug_fatal")
+fun debug_fatal() -> CVoid { }
+
 !ffi(symbol="sppc_unsafe_stack_up")
 fun unsafe_stack_up() -> CInt { }
 
