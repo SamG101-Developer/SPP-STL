@@ -460,6 +460,13 @@ fun async_yield() -> CVoid { }
 !ffi(symbol="sppc_async_stack_size")
 fun async_stack_size(bytes: CSizeT) -> CVoid { }
 
+# Hand the runtime the program's source-line table (above), from which its
+# crash reports name each frame's file and line. The compiler's C entry
+# point calls it first, when the program has one. NULL, or a table of a
+# version this runtime does not read, leaves reports without lines.
+!ffi(symbol="sppc_set_source_lines")
+fun set_source_lines(table: CRefBytePtr) -> CVoid { }
+
 !ffi(symbol="sppc_unsafe_stack_up")
 fun unsafe_stack_up() -> CInt { }
 
