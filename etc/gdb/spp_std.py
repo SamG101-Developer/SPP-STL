@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+import datetime
 import re
 from collections.abc import Iterator
 from typing import Protocol
@@ -20,6 +21,14 @@ _STR_VIEW = re.compile(r"^std::string_view::StrView$")
 _VEC = re.compile(r"^std::vector::Vec\[")
 _VIEW = re.compile(r"^std::view::View\[")
 _CHAR = re.compile(r"^std::char::Char$")
+_BIGUINT = re.compile(r"^std::bignum::biguint::BigUInt$")
+_BIGINT = re.compile(r"^std::bignum::bigint::BigInt$")
+_DURATION = re.compile(r"^std::time::duration::Duration$")
+_TIME_POINT = re.compile(r"^std::time::time_point::TimePoint$")
+_PATH = re.compile(r"^std::fs::path::Path$")
+_MAX_LIMBS = 256
+_OWNER = re.compile(r"^std::(single::Single|rc::rc::Rc|rc::weak::Weak|threading::arc::Arc|threading::weak::Weak"
+                    r"|threading::mutex::Mutex|threading::rwlock::RwLock|mem::volatile::Vol|threading::atomic::Atom)\[")
 
 
 class Printer(Protocol):
@@ -133,6 +142,36 @@ class CharPrinter:
             return f"U+{self.code:04X}"
 
 
+class OwnerPrinter:
+    """
+    For an owner, a shared owner or a lock, format its name around the value it holds, and a shared owner's counts:
+    "Single(5)", "Rc(6, strong=2, weak=1)", "Mutex(10)". A "Weak" whose value is gone shows "dropped" in its place.
+    """
+
+    def __init__(self, label: str, held: gdb.Value | None, counts: str) -> None:
+        self.label = label
+        self.held = held
+        self.counts = counts
+
+    def to_string(self) -> str:
+        text = "dropped" if self.held is None else self.held.format_string()
+        return f"{self.label}({text}{self.counts})"
+
+
+class TextPrinter:
+    """
+    For a value whose text is worked out in full when it is matched (a big number, a duration, a time, a path), format
+    that text inside its type's short name: "BigInt(-12)", "Duration(1.5s)".
+    """
+
+    def __init__(self, label: str, text: str) -> None:
+        self.label = label
+        self.text = text
+
+    def to_string(self) -> str:
+        return f"{self.label}({self.text})"
+
+
 class BorrowPrinter:
     """
     For a borrow of a type with a printer of its own ("&StrView", "&std::vector::Vec[...]"), forward to that printer,
@@ -177,6 +216,89 @@ def _bytes(pointer: gdb.Value, length: int) -> bytes:
 
     if length == 0: return b""
     return bytes(gdb.selected_inferior().read_memory(int(pointer), length))
+
+
+def _counter(field: gdb.Value) -> int:
+    """
+    A control block's count: a plain number in an "Rc"'s block, an atomic ("Atom[USize]", read through its "val") in an
+    "Arc"'s.
+    """
+
+    if field.type.strip_typedefs().code == gdb.TYPE_CODE_STRUCT: field = field["val"]
+    return int(field)
+
+
+def _owned(value: gdb.Value, name: str) -> OwnerPrinter:
+    """
+    For a type that owns, shares or guards a value, build its printer from its short name, the value, and the counts to
+    show after it. "Vol" and "Atom" hold the value in place; "Single" points to it; "Mutex" and "RwLock" hold a
+    "Single" of it; "Rc", "Arc" and "Weak" point to a control block holding the strong and weak counts beside it. A
+    block with no strong count left no longer holds a value, so there is none.
+    """
+
+    # Values held in place, and the locks' cells.
+    label = _short(name)
+    if label in ("Vol", "Atom"): return OwnerPrinter(label, value["val"], "")
+    if label in ("Mutex", "RwLock"): value = value["val"]
+
+    # Follow the pointer; a counted one reaches a control block.
+    target = value["pointer"].dereference()
+    if label not in ("Rc", "Arc", "Weak"): return OwnerPrinter(label, target, "")
+    strong = _counter(target["strong_counter"])
+    weak = _counter(target["weak_counter"])
+    held = target["val"] if strong > 0 else None
+    return OwnerPrinter(label, held, f", strong={strong}, weak={weak}")
+
+
+def _limbs(vector: gdb.Value) -> list[int] | None:
+    """
+    The 32-bit limbs of a big number's "Vec[U32]", least significant first. None past _MAX_LIMBS, whose decimal text
+    would be too long to show (and past what Python converts to text at all).
+    """
+
+    pointer, length = vector["buffer"]["pointer"], int(vector["length"])
+    if length > _MAX_LIMBS: return None
+    return [int((pointer + i).dereference()) for i in range(length)]
+
+
+def _big_text(limbs: list[int] | None, negative: bool) -> str:
+    """
+    The decimal text of a big number from its limbs, with a "-" for a negative one; the number of limbs instead when
+    there are too many to show.
+    """
+
+    if limbs is None: return f"<over {_MAX_LIMBS} limbs>"
+    magnitude = sum(limb << (32 * i) for i, limb in enumerate(limbs))
+    return ("-" if negative and magnitude != 0 else "") + str(magnitude)
+
+
+def _duration_text(seconds: int, nanoseconds: int) -> str:
+    """
+    A duration as Rust shows one: in seconds with the fraction it has ("1.5s"), or under a second, in the largest unit
+    it fills ("250ms", "250µs", "5ns").
+    """
+
+    def scaled(whole: int, part: int, digits: int, unit: str) -> str:
+        fraction = f"{part:0{digits}d}".rstrip("0")
+        return f"{whole}.{fraction}{unit}" if fraction else f"{whole}{unit}"
+
+    if seconds > 0: return scaled(seconds, nanoseconds, 9, "s")
+    if nanoseconds >= 1_000_000: return scaled(nanoseconds // 1_000_000, nanoseconds % 1_000_000, 6, "ms")
+    if nanoseconds >= 1_000: return scaled(nanoseconds // 1_000, nanoseconds % 1_000, 3, "µs")
+    return f"{nanoseconds}ns" if nanoseconds else "0s"
+
+
+def _time_point_text(seconds: int, nanoseconds: int) -> str:
+    """
+    A point in time, a duration since the Unix epoch, as its date and time in UTC to the nanosecond
+    ("2026-11-12T10:09:58.050703768Z"). One too far from the epoch for a date shows as its duration.
+    """
+
+    try:
+        date = datetime.datetime.fromtimestamp(seconds, tz=datetime.timezone.utc)
+    except (OverflowError, OSError, ValueError):
+        return f"{_duration_text(seconds, nanoseconds)} since the epoch"
+    return f"{date:%Y-%m-%dT%H:%M:%S}.{nanoseconds:09d}Z"
 
 
 def _is_variant(stripped: gdb.Type) -> bool:
@@ -225,6 +347,21 @@ def _std_printer(value: gdb.Value) -> Printer | None:
     if _VEC.match(name):
         return SequencePrinter("Vec", value["buffer"]["pointer"], value["length"], value["buffer"]["capacity"])
     if _VIEW.match(name): return SequencePrinter("View", value["pointer"], value["length"])
+
+    # Owners, shared owners and locks show the value they hold.
+    if _OWNER.match(name): return _owned(value, name)
+
+    # Big numbers, durations, times and paths, as text.
+    if _BIGUINT.match(name): return TextPrinter("BigUInt", _big_text(_limbs(value["data"]), False))
+    if _BIGINT.match(name): return TextPrinter("BigInt", _big_text(_limbs(value["data"]["data"]), bool(value["sign"])))
+    if _DURATION.match(name):
+        return TextPrinter("Duration", _duration_text(int(value["seconds"]), int(value["nanoseconds"])))
+    if _TIME_POINT.match(name):
+        duration = value["duration"]
+        return TextPrinter("TimePoint", _time_point_text(int(duration["seconds"]), int(duration["nanoseconds"])))
+    if _PATH.match(name):
+        inner = value["inner"]["bytes"]
+        return TextPrinter("Path", StrPrinter(inner["buffer"]["pointer"], inner["length"]).to_string())
 
     # Characters, then any variant.
     if _CHAR.match(name): return CharPrinter(value)
