@@ -1,0 +1,30 @@
+!test(group="std/process")
+fun test_args_name_the_program_first() -> Void {
+  # The test runner passes nothing of its own here, but the program's name
+  # always comes first.
+  let args = std::process::args()
+  std::debug::assert(args.len() >= 1_uz, "no arguments at all")
+  std::debug::assert(args[0_uz].len() > 0_uz, "an empty program name")
+  drop(args)
+}
+
+!test(group="std/process")
+fun test_get_env_reads_a_long_value_whole() -> Void {
+  # Longer than the 1024 bytes "get_env" once read into, which came back as not
+  # set.
+  let value = Str::new_filled(3000_uz, 118_u8)
+  std::debug::assert(std::process::set_env("SPP_STD_TEST_LONG", &value), "set")
+  let got = std::process::get_env("SPP_STD_TEST_LONG").expect("a long value read as not set")
+  std::debug::assert(got.len() == 3000_uz, "a long value cut short")
+  drop(got)
+  std::debug::assert(std::process::unset_env("SPP_STD_TEST_LONG"), "unset")
+  drop(value)
+}
+
+!test(group="std/process")
+fun test_get_env_of_an_unset_variable() -> Void {
+  std::debug::assert(std::process::unset_env("SPP_STD_TEST_UNSET"), "unset")
+  let got = std::process::get_env("SPP_STD_TEST_UNSET")
+  std::debug::assert(got.is_none(), "an unset variable read as set")
+  drop(got)
+}

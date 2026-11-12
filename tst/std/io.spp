@@ -1,0 +1,59 @@
+# Coverage for "std::io::BufRead" over an in-memory source: lines come out whole, without their line endings. Each line
+# is compared by prefix and length, as "Str" has no equality with a "&StrView" literal.
+
+# A source that hands out its bytes as far as each read's buffer allows, then 0 for the end.
+cls IoLineSource {
+  !public bytes: Vec[U8]
+  !public pos: USize
+}
+
+sup IoLineSource ext std::io::Read {
+  fun read(&mut self, buf: &mut std::view::View[U8]) -> Res[USize, std::io::StreamErr] {
+    let mut n = 0_uz
+    loop n < buf.len() and self.pos < self.bytes.len() {
+      buf[mut n]@ = self.bytes[self.pos]@
+      n += 1_uz
+      self.pos += 1_uz
+    }
+    ret Pass(val=n)
+  }
+}
+
+# "ab\r\ncd\n": two lines, one ending the Windows way.
+fun io_two_lines() -> IoLineSource {
+  let mut bytes = Vec[U8]::new()
+  bytes.append(b'a')
+  bytes.append(b'b')
+  bytes.append(b'\r')
+  bytes.append(b'\n')
+  bytes.append(b'c')
+  bytes.append(b'd')
+  bytes.append(b'\n')
+  ret IoLineSource(bytes=bytes, pos=0_uz)
+}
+
+fun expect_line(reader: &mut std::io::BufRead[IoLineSource], expected: &StrView, msg: &StrView) -> Void {
+  let mut out = std::string::Str()
+  let n = reader.read_line(&mut out)
+  std::debug::assert(n.is_pass(), msg)
+  drop(n)
+  std::debug::assert(out.starts_with(expected) and out.len() == expected.len(), msg)
+  drop(out)
+}
+
+fun expect_end(reader: &mut std::io::BufRead[IoLineSource], msg: &StrView) -> Void {
+  let mut out = std::string::Str()
+  let n = reader.read_line(&mut out)
+  std::debug::assert(n.is_pass() and out.len() == 0_uz, msg)
+  drop(n)
+  drop(out)
+}
+
+!test(group="std/io")
+fun test_read_line_reads_each_line_from_new() -> Void {
+  let mut reader = std::io::BufRead[IoLineSource]::new(io_two_lines())
+  expect_line(&mut reader, "ab", "the first line, its CR LF stripped")
+  expect_line(&mut reader, "cd", "the second line, its LF stripped")
+  expect_end(&mut reader, "then the end")
+  drop(reader)
+}
