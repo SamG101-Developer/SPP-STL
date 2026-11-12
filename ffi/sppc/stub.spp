@@ -693,6 +693,17 @@ fun statvfs(path: CRefBytePtr, out: &mut CStatvfs) -> CInt { }
 !ffi(symbol="sppc_getenv")
 fun getenv(key: CRefBytePtr, out: CMutBytePtr, size: CSizeT) -> CInt { }
 
+# The length in bytes of a variable's value, without its terminator, so a
+# buffer for "sppc_getenv" can be sized to fit. ENOENT for one not set.
+!ffi(symbol="sppc_getenv_len")
+fun getenv_len(key: CRefBytePtr, out_len: &mut CSizeT) -> CInt { }
+
+# Keep the program's arguments, as "main" was given them, for
+# "sppc_arg_count" and "sppc_arg". The compiler's C entry point calls it
+# first; the strings are the process's own, there for its whole life.
+!ffi(symbol="sppc_set_args")
+fun set_args(argc: CInt, argv: &mut CVoidPtr) -> CVoid { }
+
 !ffi(symbol="sppc_setenv")
 fun setenv(key: CRefBytePtr, val: CRefBytePtr, overwrite: CBool) -> CInt { }
 
@@ -817,6 +828,20 @@ fun abort() -> ! { }
 # and "_exit". Nothing allocates, and no code of the program's runs again.
 !ffi(symbol="sppc_check_failed")
 fun check_failed(check: CUInt, a: CUInt64, b: CUInt64) -> ! { }
+
+# How many arguments the program was started with, its own name first.
+!ffi(symbol="sppc_arg_count")
+fun arg_count() -> CSizeT { }
+
+# The length of argument "i" in bytes, without its terminator, so a buffer
+# for "sppc_arg" can be sized to fit. EINVAL for an "i" past the last.
+!ffi(symbol="sppc_arg_len")
+fun arg_len(i: CSizeT, out_len: &mut CSizeT) -> CInt { }
+
+# Argument "i", with its terminator, into "out". EINVAL for an "i" past the
+# last; ERANGE when it does not fit (either way "out" is emptied).
+!ffi(symbol="sppc_arg")
+fun arg(i: CSizeT, out: CMutBytePtr, size: CSizeT) -> CInt { }
 
 !ffi(symbol="sppc_pthread_create")
 fun pthread_create(start_routine: CClosure[(), CVoid], out: &mut CUInt64) -> CInt { }
