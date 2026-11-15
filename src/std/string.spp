@@ -18,6 +18,7 @@ use std::ops::add::AddAssign
 use std::ops::drop::Drop
 use std::ops::fwd::FwdMut
 use std::ops::fwd::FwdRef
+use std::ops::mul::Mul
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
@@ -702,5 +703,33 @@ sup [A: Alloc] Str[A] ext Format {
 
     formatter.pad(self)
     ret Pass[Void]()
+  }
+}
+
+sup [A: Alloc & Clone] Str[A] ext Mul[S32] {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun mul(self, that: S32) -> Self {
+    # The `mul` method repeats the string `that` times, so `Str::from("ab") * 3`
+    # is `"ababab"`. A count of zero or less gives an empty string. Like `add`,
+    # it reuses `self`'s own buffer, so the allocator backing `self` (which may
+    # be a stateful one) keeps being used rather than a default-constructed one.
+    # @let that: How many times to repeat the string. Zero or a negative count
+    #   gives an empty string.
+    # @ret: The string repeated `that` times.
+
+    let mut result = self
+    case that <= 0 {
+      result.bytes.truncate(0_uz)
+      ret result
+    }
+
+    # The result already holds one copy; append the other "that - 1" from a
+    # clone, as the result cannot be read while it is appended to. Reserving
+    # first means the buffer grows at most once.
+    let piece = result.clone()
+    result.capacity_reserve(piece.len() * USize::from(that))
+    loop i in Range[S32]::between(1, that) { result.append_str(&piece) }
+    drop(piece)
+    ret result
   }
 }

@@ -92,3 +92,48 @@ fun test_range_over_an_unsigned_type() -> Void {
   std::debug::assert(count == 4_uz, "four steps")
   std::debug::assert(sum == 6_uz, "0+1+2+3")
 }
+fun zr_sum_and_count(r: std::range::Range[S32]) -> (S32, USize) {
+  let mut sum = 0
+  let mut count = 0_uz
+  loop i in r {
+    sum += i
+    count += 1_uz
+  }
+  ret (sum, count)
+}
+
+!test(group="std/range")
+fun test_between_a_negative_step_walks_down() -> Void {
+  let r = zr_sum_and_count(std::range::Range[S32]::between(10, 0, -3))
+  std::debug::assert(r.1 == 4_uz, "10, 7, 4, 1")
+  std::debug::assert(r.0 == 22, "10+7+4+1")
+
+  let r1 = zr_sum_and_count(std::range::Range[S32]::between(3, 0, -1))
+  std::debug::assert(r1.1 == 3_uz and r1.0 == 6, "3, 2, 1: the end is exclusive going down too")
+
+  let neg = zr_sum_and_count(std::range::Range[S32]::between(-1, -4, -1))
+  std::debug::assert(neg.1 == 3_uz and neg.0 == -6, "-1, -2, -3")
+}
+
+!test(group="std/range")
+fun test_between_a_positive_step_walks_up() -> Void {
+  let r = zr_sum_and_count(std::range::Range[S32]::between(0, 10, 3))
+  std::debug::assert(r.1 == 4_uz and r.0 == 18, "0, 3, 6, 9")
+  let one = zr_sum_and_count(std::range::Range[S32]::between(0, 5, 1))
+  std::debug::assert(one.1 == 5_uz and one.0 == 10, "a step of one matches between")
+}
+
+!test(group="std/range")
+fun test_between_walking_away_or_standing_still_yields_nothing() -> Void {
+  std::debug::assert(zr_sum_and_count(std::range::Range[S32]::between(0, 10, -1)).1 == 0_uz, "down, away from 10")
+  std::debug::assert(zr_sum_and_count(std::range::Range[S32]::between(10, 0, 1)).1 == 0_uz, "up, away from 0")
+  std::debug::assert(zr_sum_and_count(std::range::Range[S32]::between(0, 10, 0)).1 == 0_uz, "a zero step")
+  std::debug::assert(zr_sum_and_count(std::range::Range[S32]::between(5, 5, -1)).1 == 0_uz, "an empty interval")
+}
+
+!test(group="std/range")
+fun test_between_composes_with_step_by() -> Void {
+  # 9, 8, ..., 0 descending, then every third: 9, 6, 3, 0.
+  let r = zr_sum_and_count(std::range::Range[S32]::between(9, -1, -1).step_by(3_uz))
+  std::debug::assert(r.1 == 4_uz and r.0 == 18, "9+6+3+0")
+}
