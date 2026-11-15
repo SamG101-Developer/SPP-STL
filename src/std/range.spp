@@ -1,66 +1,96 @@
 use std::annotations::versioned
 use std::num::bases::One
+use std::num::bases::Zero
 use std::ops::add::AddAssign
 use std::ops::ord::Ord
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls Range[T: Ord] {
-  # The `Range` class is the generator produced when walking between two values of an orderable type `T`. It holds no
-  # fields of its own: like `Iterator`, a `Range` only ever comes out of a coroutine, and the value handed back is that
-  # coroutine's suspended state rather than a record of the bounds. Building one with an object initializer would
-  # produce a generator with nothing behind it to resume, which is why the constructors below are coroutines.
+  # The `Range` class is the generator produced when walking between two values
+  # of an orderable type `T`. It holds no fields of its own: like `Iterator`, a
+  # `Range` only ever comes out of a coroutine, and the value handed back is
+  # that coroutine's suspended state rather than a record of the bounds.
+  # Building one with an object initializer would produce a generator with
+  # nothing behind it to resume, which is why the constructors below are
+  # coroutines.
   # @type T: An orderable type that represents the elements in the range.
 }
 
 sup [T: Ord] Range[T] ext Gen[T] {
-  # In order to iterate a range, we need to implement the `Gen` interface for the `Range` class. This allows us to
-  # generate a sequence of values from the range, starting from the `start` value and ending before the `end` value,
+  # In order to iterate a range, we need to implement the `Gen` interface for
+  # the `Range` class. This allows us to generate a sequence of values from the
+  # range, starting from the `start` value and ending before the `end` value,
   # incrementing by the specified `step` size.
 }
 
-sup [T: Ord & One & AddAssign & Copy] Range[T] {
-  # The constructor of a range, a coroutine rather than a function: a `Range` is a generator, so what it returns is the
-  # suspended coroutine that yields the values, and resuming it is what walks the range.
+sup [T: Ord & One & Zero & AddAssign & Copy] Range[T] {
+  # The constructor of a range, a coroutine rather than a function: a `Range` is
+  # a generator, so what it returns is the suspended coroutine that yields the
+  # values, and resuming it is what walks the range.
   #
-  # This block carries the arithmetic bounds, because building a range from its endpoints is the only part that has to
-  # compute the next value. The adaptors below get their own block with only `Ord`, so a type that can be ordered but
-  # not incremented can still be stepped through once something else has produced the range.
+  # This block carries the arithmetic bounds, because building a range from its
+  # endpoints is the only part that has to compute the next value. The adaptors
+  # below get their own block with only `Ord`, so a type that can be ordered but
+  # not incremented can still be stepped through once something else has
+  # produced the range. `One` gives the default step, and `Zero` is what the
+  # step's sign is found against, which decides the direction of the range.
   #
-  # The bound is `AddAssign` rather than `Add`: `add(self, that: Rhs) -> Ret` names `Ret` only in its return type, so a
-  # call on a generic receiver has nothing to infer it from, whereas `add_assign(&mut self, that: Rhs) -> Void` takes
-  # its only parameter from the argument.
+  # The bound is `AddAssign` rather than `Add`: `add(self, that: Rhs) -> Ret`
+  # names `Ret` only in its return type, so a call on a generic receiver has
+  # nothing to infer it from, whereas `add_assign(&mut self, that: Rhs) -> Void`
+  # takes its only parameter from the argument.
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  cor between(start: T, end: T) -> Range[T] {
-    # Yields every value from `start` up to but not including `end`, advancing by one each time. This is the common case
-    # of walking an interval, and is what `loop x in Range[T]::between(a, b)` iterates over.
-    # @let start: The starting value of the range, which is inclusive. It represents the first value in the range.
-    # @let end: The ending value of the range, which is exclusive. It represents the value at which the range stops
-    # generating.
+  cor between(start: T, end: T, step: T = T::one()) -> Range[T] {
+    # Yields `start`, `start + step`, `start + 2 * step`, ... for as long as the
+    # value has not reached `end`, which is exclusive. The step defaults to one,
+    # so `loop x in Range[T]::between(a, b)` walks every value from `a` up to
+    # but not including `b`. A positive step walks upwards and stops at or above
+    # `end`; a negative step walks downwards and stops at or below it, so
+    # `Range[S32]::between(10, 0, -3)` yields `10, 7, 4, 1`. A range walking
+    # away from its end, such as `between(0, 10, -1)` or `between(5, 0)`, yields
+    # nothing, as does a step of zero, which would otherwise never finish.
+    # @let start: The first value of the range, which is inclusive.
+    # @let end: The value at which the range stops, which is exclusive whichever
+    #   way the range walks.
+    # @let step: The amount added to reach each next value, one by default. Its
+    #   sign sets the direction of the range.
     # @ret: A generator yielding each value of the interval in turn.
 
+    let zero = T::zero()
     let mut current = start
-    loop current < end {
-      gen current
-      current += T::one()
+    case step > zero {
+      loop current < end {
+        gen current
+        current += step
+      }
+    }
+    else case step < zero {
+      loop current > end {
+        gen current
+        current += step
+      }
     }
   }
 }
 
 sup [T: Ord] Range[T] {
-  # The adaptors of a range: coroutines that consume a range and yield a subset of it. They mirror the equivalents on
-  # `Iterator`, and like those they count in `USize` rather than doing arithmetic on `T`, so they need no bound beyond
+  # The adaptors of a range: coroutines that consume a range and yield a subset
+  # of it. They mirror the equivalents on `Iterator`, and like those they count
+  # in `USize` rather than doing arithmetic on `T`, so they need no bound beyond
   # the `Ord` the class itself declares.
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
   cor step_by(self, step: USize) -> Range[T] {
-    # Yields every `step`-th value of this range, discarding the ones in between, so that `Range[S32]::between(0,
-    # 100).step_by(5)` walks `0, 5, 10, ...`. The range is consumed: this resumes it and re-yields the values that land
-    # on a multiple of the step.
-    # @let step: How many of the range's values to advance by between yields. A step of 1 yields every value.
+    # Yields every `step`-th value of this range, discarding the ones in
+    # between, so that `Range[S32]::between(0, 100).step_by(5)` walks `0, 5, 10,
+    # ...`. The range is consumed: this resumes it and re-yields the values that
+    # land on a multiple of the step.
+    # @let step: How many of the range's values to advance by between yields. A
+    #   step of 1 yields every value.
     # @ret: A generator yielding every `step`-th value of this range.
 
     let mut index = 0_uz

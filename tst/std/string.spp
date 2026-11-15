@@ -207,3 +207,32 @@ fun test_an_appended_string_equals_the_whole() -> Void {
   drop(built)
   drop(whole)
 }
+
+!test(group="std/string")
+fun test_mul_repeats_the_string() -> Void {
+  let s = Str::from("ab") * 3
+  std::debug::assert(s.len() == 6_uz, "three copies of two bytes")
+  let expected = Str::from("ababab")
+  std::debug::assert(s == expected, "ab ab ab")
+  drop(s)
+  drop(expected)
+
+  let once = Str::from("xyz") * 1
+  let original = Str::from("xyz")
+  std::debug::assert(once == original, "a count of one is the string itself")
+  drop(once)
+  drop(original)
+}
+
+!test(group="std/string")
+fun test_mul_by_zero_or_less_is_empty() -> Void {
+  let zero = Str::from("ab") * 0
+  std::debug::assert(zero.len() == 0_uz, "zero copies")
+  drop(zero)
+  let neg = Str::from("ab") * -2
+  std::debug::assert(neg.len() == 0_uz, "a negative count is empty too")
+  drop(neg)
+  let empty = Str::from("") * 5
+  std::debug::assert(empty.len() == 0_uz, "repeating nothing is nothing")
+  drop(empty)
+}
