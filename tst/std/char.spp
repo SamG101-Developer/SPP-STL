@@ -45,3 +45,11 @@ fun test_try_from_rejects_a_value_that_is_not_a_scalar() -> Void {
   std::debug::assert(std::char::Char::try_from(0x110000_u32).is_none(), "past the unicode maximum")
   std::debug::assert(std::char::Char::try_from(0xd800_u32).is_none(), "a lone surrogate")
 }
+!test(group="std/char")
+fun test_min_and_max_from_ord() -> Void {
+  # Char has no min/max of its own; these are Ord's defaults.
+  let a = std::char::Char::from(97_u32)
+  let b = std::char::Char::from(98_u32)
+  std::debug::assert(b.min(a) == std::char::Char::from(97_u32), "the smaller")
+  std::debug::assert(a.max(b) == std::char::Char::from(98_u32), "the larger")
+}
