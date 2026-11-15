@@ -260,18 +260,15 @@ sup [T, A: Alloc] Vec[T, A] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun append_within_capacity(&mut self, element: T) -> Res[Void, AllocErr] {
-    #
-    # @let element:
-    # @ret:
+    # Append `element` only if the vector has room for it without growing.
+    # @let element: The element to append; dropped if there is no room.
+    # @ret: `Pass` once appended, or `AllocOverflowErr` if the vector was full.
 
     case self.len() < self.cap() {
       self.append_unchecked(element)
-      ret
+      ret Pass[Void]()
     }
-    else {
-      drop(element)
-    }
-
+    drop(element)
     ret Fail(err=AllocOverflowErr)
   }
 
@@ -297,11 +294,14 @@ sup [T, A: Alloc] Vec[T, A] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun insert_at(&mut self, index: USize, element: T) -> Void {
-    #
-    # @let index:
-    # @let element:
+    # Insert `element` at `index`, shifting the elements from `index` on one
+    # place back. `index` may be the length (appending), but not past it.
+    # @let index: Where the element goes; aborts if past the length.
+    # @let element: The element to insert.
     # @ret:
 
+    std::abort::abort_if(
+      index > self.len(), "Vec::insert_at: index past the end of the vector")
     case self.len() < self.cap() {
       self.insert_at_unchecked(index, element)
       ret
@@ -316,11 +316,15 @@ sup [T, A: Alloc] Vec[T, A] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun insert_many_at(&mut self, index: USize, that: Vec[T, A]) -> Void {
-    #
-    # @let index:
-    # @let that:
+    # Insert every element of `that` at `index`, in order, shifting the
+    # elements from `index` on back. `index` may be the length (appending), but
+    # not past it.
+    # @let index: Where the elements go; aborts if past the length.
+    # @let that: The elements to insert, moved in.
     # @ret:
 
+    std::abort::abort_if(
+      index > self.len(), "Vec::insert_many_at: index past the end of the vector")
     let required_cap = self.len() + that.len()
     case required_cap <= self.cap() {
       self.insert_vec_at_unchecked(index, that)

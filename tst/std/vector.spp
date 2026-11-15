@@ -416,3 +416,28 @@ fun test_new_filled_with_no_elements_is_empty() -> Void {
   std::debug::assert(v.len() == 0_uz, "empty")
   drop(v)
 }
+
+!test(group="std/vector")
+fun test_vector_append_within_capacity_fills_then_refuses() -> Void {
+  # It never compiled (a bare "ret" in a "Res" function) because nothing instantiated it.
+  let mut v = Vec[Str]::new_with_capacity(1_uz)
+  let first = v.append_within_capacity(Str::from("a"))
+  std::debug::assert(first.is_pass(), "there was room for the first")
+  drop(first)
+  let second = v.append_within_capacity(Str::from("b"))
+  std::debug::assert(second.is_fail(), "a full vector refuses without growing")
+  drop(second)
+  std::debug::assert(v.len() == 1_uz and v.cap() == 1_uz, "the vector is unchanged by the refusal")
+  drop(v)
+}
+
+!test(group="std/vector")
+fun test_vector_insert_at_the_length_appends() -> Void {
+  # The bounds check allows the length itself (an append) and only refuses past it.
+  let mut v = Vec[S32]::from(&[1, 2])
+  v.insert_at(2_uz, 3)
+  v.insert_many_at(3_uz, Vec[S32]::from(&[4]))
+  std::debug::assert(v.len() == 4_uz, "both inserts landed")
+  std::debug::assert(v[2_uz]@ == 3 and v[3_uz]@ == 4, "appended at the end, in order")
+  drop(v)
+}
