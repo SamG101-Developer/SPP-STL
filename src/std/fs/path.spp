@@ -65,6 +65,7 @@ type PathErr = PathNotFoundErr
   or PathOtherErr
 
 sup PathErr {
+  !package
   fun from_errno(errno: S32) -> Self {
     ret case errno of {
       == sppc::enoent { PathNotFoundErr }
