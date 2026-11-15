@@ -825,6 +825,26 @@ sup U8 {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
+  fun to_digit(&self, radix: U32) -> Opt[U32] {
+    # The value of this byte as a digit in a radix: `0-9` are 0 to 9, and `a-z`
+    # or `A-Z` are 10 to 35, as Rust's `char::to_digit`.
+    # @let radix: The base, from 2 to 36; one outside that aborts.
+    # @ret: The digit's value, or `None` if it is not a digit in `radix`.
+
+    case radix < 2_u32 or radix > 36_u32 {
+      std::abort::abort("to_digit: radix must be in 2 ..= 36")
+    }
+
+    let byte = self@
+    let lower = byte | 0x20_u8
+    let mut value = 36_u32
+    case b'0' <= byte <= b'9' { value = U32::from(byte - b'0') }
+    case b'a' <= lower <= b'z' { value = U32::from(lower - b'a') + 10_u32 }
+    ret case value < radix { Some(val=value) } else { None }
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
   fun is_ascii(&self) -> Bool {
     # The `is_ascii` method checks if this byte is an ASCII character, meaning
     # it is in the range 0 to 127 inclusive. This is a common check for many

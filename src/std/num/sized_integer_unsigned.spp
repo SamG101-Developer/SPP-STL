@@ -1,5 +1,6 @@
 use std::annotations::intrinsic
 use std::annotations::versioned
+use std::cast::TryFrom
 use std::llvm::always_inline
 use std::llvm::inline
 use std::format::Format
@@ -581,5 +582,45 @@ sup [cmp w: U32] SizedIntegerUnsigned[w] ext Format {
     formatter.pad_integral(true, &digits)
     drop(digits)
     ret Pass[Void]()
+  }
+}
+
+sup [cmp w: U32] SizedIntegerUnsigned[w] ext TryFrom[StrView] {
+  # Parsing an unsigned integer of any width from its decimal text. The view is
+  # taken by value, as a borrow cannot be a generic argument (E2): pass a
+  # literal as `"42"@`, or call `from_str(&text)` with a `Str`.
+
+  !versioned(base="1.0.0", new="1.0.0")
+  fun try_from(that: StrView) -> Opt[Self] {
+    ret Self::from_str_radix(&that, 10_u32)
+  }
+}
+
+sup [cmp w: U32] SizedIntegerUnsigned[w] {
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from_str(text: &StrView) -> Opt[Self] {
+    ret Self::from_str_radix(text, 10_u32)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from_str_radix(text: &StrView, radix: U32) -> Opt[Self] {
+    # Parse an optional `+` then one or more digits, `0-9` then `a-z` in either
+    # case. There is no `-`, prefix (`0x`), separator or whitespace.
+    # @let text: The text to parse.
+    # @let radix: The base of the digits, from 2 to 36; one outside that aborts.
+    # @ret: The value, or `None` if the text is malformed or does not fit.
+
+    let digits = case text.starts_with('+') { text[1_uz to text.len()]@ } else { text@ }
+    case digits.is_empty() { ret None }
+
+    let base = Self::from(radix)
+    let mut value = Self::zero()
+    loop byte in digits.bytes() {
+      let digit = Self::from(byte.to_digit(radix)?)
+      value = value.mul_checked(base)?.add_checked(digit)?
+    }
+    ret Some(val=value)
   }
 }
