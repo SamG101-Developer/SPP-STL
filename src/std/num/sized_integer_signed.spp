@@ -1,6 +1,5 @@
 use std::annotations::intrinsic
 use std::annotations::versioned
-use std::cast::TryFrom
 use std::llvm::always_inline
 use std::llvm::inline
 use std::format::Format
@@ -598,21 +597,18 @@ sup [cmp w: U32] SizedIntegerSigned[w] ext Format {
   }
 }
 
-sup [cmp w: U32] SizedIntegerSigned[w] ext TryFrom[StrView] {
-  # Parsing a signed integer of any width from its decimal text. The view is
-  # taken by value, as a borrow cannot be a generic argument (E2): pass a
-  # literal as `"42"@`, or call `from_str(&text)` with a `Str`.
-
-  !versioned(base="1.0.0", new="1.0.0")
-  fun try_from(that: StrView) -> Opt[Self] {
-    ret Self::from_str_radix(&that, 10_u32)
-  }
-}
-
 sup [cmp w: U32] SizedIntegerSigned[w] {
+  # Parsing a signed integer of any width from text. These are plain methods,
+  # not the `TryFrom` trait: the text is a `&StrView`, and a borrow cannot be
+  # a generic argument (E2), so `TryFrom[&StrView]` cannot be written.
+
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun from_str(text: &StrView) -> Opt[Self] {
+  fun try_from(text: &StrView) -> Opt[Self] {
+    # Parse decimal text, as `from_str_radix` with a radix of 10.
+    # @let text: The text to parse.
+    # @ret: The value, or `None` if the text is malformed or does not fit.
+
     ret Self::from_str_radix(text, 10_u32)
   }
 
