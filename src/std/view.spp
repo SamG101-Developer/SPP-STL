@@ -18,32 +18,38 @@ use std::ops::iter::RevIterRef
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls View[T] {
-  # The `View[T]` type is a borrow into a collection. It is contiguous in memory and provides efficient access to the
-  # underlying data. The `View` type is designed to be used with collections that support slicing, such as arrays and
-  # vectors. It allows you to create a view into a portion of a collection without copying the data.
+  # The `View[T]` type is a borrow into a collection. It is contiguous in memory
+  # and provides efficient access to the underlying data. The `View` type is
+  # designed to be used with collections that support slicing, such as arrays
+  # and vectors. It allows you to create a view into a portion of a collection
+  # without copying the data.
   # @type T: The type of elements in the view.
-  # @let pointer: A non-null pointer to the first element of the view. This pointer is guaranteed to be valid for the
-  # lifetime of the view.
-  # @let length: The number of elements in the view. This length is used to determine the bounds of the view and to
-  # provide efficient access to the elements.
+  # @let pointer: A non-null pointer to the first element of the view. This
+  #   pointer is guaranteed to be valid for the lifetime of the view.
+  # @let length: The number of elements in the view. This length is used to
+  #   determine the bounds of the view and to provide efficient access to the
+  #   elements.
 
   !package pointer: NonNull[T]
   !package length: USize
 }
 
 sup [T] View[T] {
-  # @type Element: The type of elements in the view. This is an alias for the generic type parameter `T` and is provided
-  # for convenience when working with the view.
+  # @type Element: The type of elements in the view. This is an alias for the
+  #   generic type parameter `T` and is provided for convenience when working
+  #   with the view.
 
   !public type Element = T
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun len(&self) -> USize {
-    # The `len` method returns the number of elements in the view. This is the length of the view and indicates how many
-    # elements are accessible through the view. The length is determined by the `length` field of the `View` struct,
-    # which is set when the view is created. The length is used to ensure that access to the elements of the view is
-    # within bounds and to provide efficient iteration over the elements.
+    # The `len` method returns the number of elements in the view. This is the
+    # length of the view and indicates how many elements are accessible through
+    # the view. The length is determined by the `length` field of the `View`
+    # struct, which is set when the view is created. The length is used to
+    # ensure that access to the elements of the view is within bounds and to
+    # provide efficient iteration over the elements.
     # @ret: The number of elements in the view.
 
     ret self.length
@@ -52,8 +58,9 @@ sup [T] View[T] {
   !package
   !versioned(base="1.0.0", new="1.0.0")
   fun ptr(&self) -> NonNull[T] {
-    # The `ptr` method returns a non-null pointer to the first element of the view. This pointer is guaranteed to be
-    # valid for the lifetime of the view and can be used to access the elements of the view directly.
+    # The `ptr` method returns a non-null pointer to the first element of the
+    # view. This pointer is guaranteed to be valid for the lifetime of the view
+    # and can be used to access the elements of the view directly.
     # @ret: A non-null pointer to the first element of the view.
 
     ret self.pointer
@@ -62,8 +69,8 @@ sup [T] View[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun is_empty(&self) -> Bool {
-    # The `is_empty` method checks if the view contains no elements. It returns `true` if the length of the view is
-    # zero.
+    # The `is_empty` method checks if the view contains no elements. It returns
+    # `true` if the length of the view is zero.
     # @ret: `true` if the view is empty, `false` otherwise.
 
     ret self.len() == 0_uz
@@ -72,11 +79,13 @@ sup [T] View[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   cor get_ref(&self, index: USize) -> Indexed[&T or None] {
-    # The `get_ref` method retrieves an immutable borrow to the element at the specified index in the view. It is a safe
-    # abstraction over the `[index]` operator, using `None` for out of bounds access.
+    # The `get_ref` method retrieves an immutable borrow to the element at the
+    # specified index in the view. It is a safe abstraction over the `[index]`
+    # operator, using `None` for out of bounds access.
     # @let index: The index of the element to retrieve.
-    # @ret: An `Indexed` once-generator that yields a borrow to the element at the specified index if it is within
-    # bounds, or `None` if the index is out of bounds.
+    # @ret: An `Indexed` once-generator that yields a borrow to the element at
+    #   the specified index if it is within bounds, or `None` if the index is
+    #   out of bounds.
 
     # Check the bounds and if valid, get the element using
     # the `[index]` immutable operator.
@@ -86,11 +95,13 @@ sup [T] View[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   cor get_mut(&mut self, index: USize) -> Indexed[&mut T or None] {
-    # The `get_mut` method retrieves a mutable borrow to the element at the specified index in the view. It is a safe
-    # abstraction over the `[mut index]` operator, using `None` for out of bounds access.
+    # The `get_mut` method retrieves a mutable borrow to the element at the
+    # specified index in the view. It is a safe abstraction over the `[mut
+    # index]` operator, using `None` for out of bounds access.
     # @let index: The index of the element to retrieve.
-    # @ret: An `Indexed` once-generator that yields a mutable borrow to the element at the specified index if it is
-    # within bounds, or `None` if the index is out of bounds.
+    # @ret: An `Indexed` once-generator that yields a mutable borrow to the
+    #   element at the specified index if it is within bounds, or `None` if the
+    #   index is out of bounds.
 
     # Check the bounds and if valid, get the element using
     # the `[mut index]` mutable operator.
@@ -100,10 +111,11 @@ sup [T] View[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   cor first_ref(&self) -> Indexed[&T or None] {
-    # The `first_ref` method retrieves an immutable borrow to the first element in the view. It is a safe abstraction
-    # over the `[0]` operator, using `None` for empty views.
-    # @ret: An `Indexed` once-generator that yields a borrow to the first element in the view if it is not empty, or
-    # `None` if the view is empty.
+    # The `first_ref` method retrieves an immutable borrow to the first element
+    # in the view. It is a safe abstraction over the `[0]` operator, using
+    # `None` for empty views.
+    # @ret: An `Indexed` once-generator that yields a borrow to the first
+    #   element in the view if it is not empty, or `None` if the view is empty.
 
     # Check if the view is empty and if not, get the first
     # element using the `[0]` immutable operator.
@@ -113,10 +125,12 @@ sup [T] View[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   cor first_mut(&mut self) -> Indexed[&mut T or None] {
-    # The `first_mut` method retrieves a mutable borrow to the first element in the view. It is a safe abstraction over
-    # the `[mut 0]` operator, using `None` for empty views.
-    # @ret: An `Indexed` once-generator that yields a mutable borrow to the first element in the view if it is not
-    # empty, or `None` if the view is empty.
+    # The `first_mut` method retrieves a mutable borrow to the first element in
+    # the view. It is a safe abstraction over the `[mut 0]` operator, using
+    # `None` for empty views.
+    # @ret: An `Indexed` once-generator that yields a mutable borrow to the
+    #   first element in the view if it is not empty, or `None` if the view is
+    #   empty.
 
     # Check if the view is empty and if not, get the first
     # element using the `[mut 0]` mutable operator.
@@ -126,10 +140,11 @@ sup [T] View[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   cor last_ref(&self) -> Indexed[&T or None] {
-    # The `last_ref` method retrieves an immutable borrow to the last element in the view. It is a safe abstraction over
-    # the `[length - 1]` operator, using `None` for empty views.
-    # @ret: An `Indexed` once-generator that yields a borrow to the last element in the view if it is not empty, or
-    # `None` if the view is empty.
+    # The `last_ref` method retrieves an immutable borrow to the last element in
+    # the view. It is a safe abstraction over the `[length - 1]` operator, using
+    # `None` for empty views.
+    # @ret: An `Indexed` once-generator that yields a borrow to the last element
+    #   in the view if it is not empty, or `None` if the view is empty.
 
     # Check if the view is empty and if not, get the last
     # element using the `[length - 1]` immutable operator.
@@ -138,10 +153,11 @@ sup [T] View[T] {
 
   !public
   cor last_mut(&mut self) -> Indexed[&mut T or None] {
-    # The `last_mut` method retrieves a mutable borrow to the last element in the view. It is a safe abstraction over
-    # the `[mut length - 1]` operator, using `None` for empty views.
-    # @ret: An `Indexed` once-generator that yields a mutable borrow to the last element in the view if it is not empty,
-    # or `None` if the view is empty.
+    # The `last_mut` method retrieves a mutable borrow to the last element in
+    # the view. It is a safe abstraction over the `[mut length - 1]` operator,
+    # using `None` for empty views.
+    # @ret: An `Indexed` once-generator that yields a mutable borrow to the last
+    #   element in the view if it is not empty, or `None` if the view is empty.
 
     # Check if the view is empty and if not, get the last
     # element using the `[mut length - 1]` mutable operator.
@@ -149,23 +165,26 @@ sup [T] View[T] {
   }
 }
 
-sup [T: Eq & Copy] View[T] {
-  # The following methods require that the type `T` implements the `Eq` trait, which allows for equality comparisons.
-  # These methods provide functionality for finding elements in the view or checking for their presence.
+sup [T: Eq] View[T] {
+  # The following methods require that the type `T` implements the `Eq` trait,
+  # which allows for equality comparisons. These methods provide functionality
+  # for finding elements in the view or checking for their presence.
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun find(&self, item: &T) -> Opt[USize] {
-    # The `find` method searches for the first occurrence of an element in the view that is equal to the specified item.
-    # It returns an `Opt[USize]` that contains the index of the found element if it exists, or `None` if the element is
-    # not found.
+    # The `find` method searches for the first occurrence of an element in the
+    # view that is equal to the specified item. It returns an `Opt[USize]` that
+    # contains the index of the found element if it exists, or `None` if the
+    # element is not found.
     # @let item: A borrow to the item to search for in the view.
-    # @ret: An `Opt[USize]` containing the index of the found element, or `None` if not found.
+    # @ret: An `Opt[USize]` containing the index of the found element, or `None`
+    #   if not found.
 
     # Iterate over the elements in the view and check for
     # equality with the specified item. If found, return the index.
     loop index in Range[USize]::between(0_uz, self.len()) {
-      case self[index]@ == item { ret Some(val=index) }
+      case self[index] == item { ret Some(val=index) }
     }
     ret None
   }
@@ -173,10 +192,12 @@ sup [T: Eq & Copy] View[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun contains(&self, item: &T) -> Bool {
-    # The `contains` method checks if the view contains an element that is equal to the specified item. It returns
-    # `true` if such an element is found, and `false` otherwise.
+    # The `contains` method checks if the view contains an element that is equal
+    # to the specified item. It returns `true` if such an element is found, and
+    # `false` otherwise.
     # @let item: A borrow to the item to search for in the view.
-    # @ret: `true` if the view contains an element equal to `item`, `false` otherwise.
+    # @ret: `true` if the view contains an element equal to `item`, `false`
+    #   otherwise.
 
     # Re-use the find method to check for the presence of the item.
     ret self.find(item).is_some()
@@ -184,41 +205,52 @@ sup [T: Eq & Copy] View[T] {
 }
 
 sup [T] View[T] ext Copy {
-  # A view is a borrow into a collection that happens to be spelled as a value: a pointer and a length, owning neither
-  # the elements it points at nor the storage holding them. Both of its attributes are already copyable, so copying one
-  # duplicates a handle rather than an owner, and there is nothing for a linear obligation to protect.
+  # A view is a borrow into a collection that happens to be spelled as a value:
+  # a pointer and a length, owning neither the elements it points at nor the
+  # storage holding them. Both of its attributes are already copyable, so
+  # copying one duplicates a handle rather than an owner, and there is nothing
+  # for a linear obligation to protect.
 }
 
 sup [T] View[T] ext IndexRef[T, USize] {
-  # Allow for the use of the `[index]` operator to access elements in the view, yielding into an immutable borrow. This
-  # is internally computed, because S++ does allow for pointer math. Because lots of types forward to the `View` type,
-  # such as `Vec[T]` and `Arr[T, n]`, this operator is used as a "catch all" for indexing into those types, and the
-  # intrinsic implementation will perform the necessary pointer arithmetic to access the correct element in the view.
+  # Allow for the use of the `[index]` operator to access elements in the view,
+  # yielding into an immutable borrow. This is internally computed, because S++
+  # does allow for pointer math. Because lots of types forward to the `View`
+  # type, such as `Vec[T]` and `Arr[T, n]`, this operator is used as a "catch
+  # all" for indexing into those types, and the intrinsic implementation will
+  # perform the necessary pointer arithmetic to access the correct element in
+  # the view.
 
   !intrinsic(name="std.view.View.index_ref")
   !versioned(base="1.0.0", new="1.0.0")
   cor index_ref(&self, index: USize) -> Indexed[&T] {
-    # Obtain an immutable borrow to the element at the specified index in the view. This will abort if the index is out
-    # of bounds; `get_ref()` will not abort and will return `None` instead.
+    # Obtain an immutable borrow to the element at the specified index in the
+    # view. This will abort if the index is out of bounds; `get_ref()` will not
+    # abort and will return `None` instead.
     # @let index: The index of the element to access.
-    # @ret: An `Indexed` once-generator that yields an imuutable borrow to the element at the specified index in the
-    # view.
+    # @ret: An `Indexed` once-generator that yields an imuutable borrow to the
+    #   element at the specified index in the view.
   }
 }
 
 sup [T] View[T] ext IndexMut[T, USize] {
-  # Allow for the use of the `[mut index]` operator to access elements in the view, yielding into a mutable borrow. This
-  # is internally computed, because S++ does allow for pointer math. Because lots of types forward to the `View` type,
-  # such as `Vec[T]` and `Arr[T, n]`, this operator is used as a "catch all" for indexing into those types, and the
-  # intrinsic implementation will perform the necessary pointer arithmetic to access the correct element in the view.
+  # Allow for the use of the `[mut index]` operator to access elements in the
+  # view, yielding into a mutable borrow. This is internally computed, because
+  # S++ does allow for pointer math. Because lots of types forward to the `View`
+  # type, such as `Vec[T]` and `Arr[T, n]`, this operator is used as a "catch
+  # all" for indexing into those types, and the intrinsic implementation will
+  # perform the necessary pointer arithmetic to access the correct element in
+  # the view.
 
   !intrinsic(name="std.view.View.index_mut")
   !versioned(base="1.0.0", new="1.0.0")
   cor index_mut(&mut self, index: USize) -> Indexed[&mut T] {
-    # Obtain a mutable borrow to the element at the specified index in the view. This will abort if the index is out of
-    # bounds; `get_mut()` will not abort and will return `None` instead.
+    # Obtain a mutable borrow to the element at the specified index in the view.
+    # This will abort if the index is out of bounds; `get_mut()` will not abort
+    # and will return `None` instead.
     # @let index: The index of the element to access.
-    # @ret: An `Indexed` once-generator that yields a mutable borrow to the element at the specified index in the view.
+    # @ret: An `Indexed` once-generator that yields a mutable borrow to the
+    #   element at the specified index in the view.
   }
 }
 
@@ -249,9 +281,11 @@ sup [T] View[T] ext RevIterMut[T] {
 sup [T] View[T] ext SliceMut[View[T], USize] {
   !versioned(base="1.0.0", new="1.0.0")
   fun slice_mut_max_len(&self) -> USize {
-    # The `slice_mut_max_len` method returns the maximum length of the mutable slice that can be created from the view.
-    # This is equal to the length of the view itself, as a mutable slice can span the entire view.
-    # @ret: The maximum length of the mutable slice that can be created from the view.
+    # The `slice_mut_max_len` method returns the maximum length of the mutable
+    # slice that can be created from the view. This is equal to the length of
+    # the view itself, as a mutable slice can span the entire view.
+    # @ret: The maximum length of the mutable slice that can be created from the
+    #   view.
 
     ret self.len()
   }
@@ -264,8 +298,9 @@ sup [T] View[T] ext SliceMut[View[T], USize] {
 sup [T] View[T] ext SliceRef[View[T], USize] {
   !versioned(base="1.0.0", new="1.0.0")
   fun slice_ref_max_len(&self) -> USize {
-    # The `slice_ref_max_len` method returns the maximum length of the immutable slice that can be created from the
-    # view. This is equal to the length of the view itself, as an immutable slice can span the entire view.
+    # The `slice_ref_max_len` method returns the maximum length of the immutable
+    # slice that can be created from the view. This is equal to the length of
+    # the view itself, as an immutable slice can span the entire view.
     # @ret: The maximum length of the slice that can be created from the view.
 
     ret self.len()
