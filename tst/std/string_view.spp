@@ -190,3 +190,23 @@ fun test_char_iteration_visits_every_character() -> Void {
   loop c in s.chars() { count += 1_uz }
   std::debug::assert(count == 3_uz, "one step per character")
 }
+
+!test(group="std/string_view")
+fun test_eq_fold_ignores_only_letter_case() -> Void {
+  std::debug::assert("Infinity".eq_fold("iNFINITY"), "mixed case matches")
+  std::debug::assert("nan".eq_fold("nan"), "identical text matches")
+  std::debug::assert("inf".eq_fold("infinity").not, "a prefix does not match")
+  std::debug::assert("a1".eq_fold("A2").not, "a differing digit does not match")
+  std::debug::assert("".eq_fold(""), "empty matches empty")
+}
+
+!test(group="std/string_view")
+fun test_to_digit_reads_a_byte_in_any_radix() -> Void {
+  std::debug::assert(b'7'.to_digit(10_u32).unwrap() == 7_u32, "a decimal digit")
+  std::debug::assert(b'f'.to_digit(16_u32).unwrap() == 15_u32, "a lowercase hex digit")
+  std::debug::assert(b'F'.to_digit(16_u32).unwrap() == 15_u32, "an uppercase hex digit")
+  std::debug::assert(b'Z'.to_digit(36_u32).unwrap() == 35_u32, "the top of base 36")
+  std::debug::assert(b'2'.to_digit(2_u32).is_none(), "a digit past the radix")
+  std::debug::assert(b'g'.to_digit(16_u32).is_none(), "a letter past the radix")
+  std::debug::assert(b'.'.to_digit(10_u32).is_none(), "not a digit at all")
+}
