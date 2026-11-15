@@ -175,11 +175,15 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Ord {
 
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun lt(&self, that: &Self) -> Bool {
-    # The `lt` method defines how to compare two floating point values of the same size to determine if the current
-    # value is less than the other value. It uses the `olt` intrinsic function to perform the comparison, which checks
-    # if the current value is less than the other value according to the rules of floating point arithmetic.
-    # @let that: A borrow to the floating point value that is being compared to the current value for ordering.
-    # @ret: `true` if the current value is less than the other value, and `false` otherwise.
+    # The `lt` method defines how to compare two floating point values of the
+    # same size to determine if the current value is less than the other value.
+    # It uses the `olt` intrinsic function to perform the comparison, which
+    # checks if the current value is less than the other value according to the
+    # rules of floating point arithmetic.
+    # @let that: A borrow to the floating point value that is being compared to
+    #   the current value for ordering.
+    # @ret: `true` if the current value is less than the other value, and
+    #   `false` otherwise.
 
     # Hook into less-than intrinsic.
     ret intrinsics::olt(self, that)
@@ -187,12 +191,15 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Ord {
 
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun le(&self, that: &Self) -> Bool {
-    # The `le` method defines how to compare two floating point values of the same size to determine if the current
-    # value is less than or equal to the other value. It uses the `ole` intrinsic function to perform the comparison,
-    # which checks if the current value is less than or equal to the other value according to the rules of floating
-    # point arithmetic.
-    # @let that: A borrow to the floating point value that is being compared to the current value for ordering.
-    # @ret: `true` if the current value is less than or equal to the other value, and `false` otherwise.
+    # The `le` method defines how to compare two floating point values of the
+    # same size to determine if the current value is less than or equal to the
+    # other value. It uses the `ole` intrinsic function to perform the
+    # comparison, which checks if the current value is less than or equal to the
+    # other value according to the rules of floating point arithmetic.
+    # @let that: A borrow to the floating point value that is being compared to
+    #   the current value for ordering.
+    # @ret: `true` if the current value is less than or equal to the other
+    #   value, and `false` otherwise.
 
     # Hook into less-than-or-equal-to intrinsic.
     ret intrinsics::ole(self, that)
@@ -200,11 +207,15 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Ord {
 
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun gt(&self, that: &Self) -> Bool {
-    # The `gt` method defines how to compare two floating point values of the same size to determine if the current
-    # value is greater than the other value. It uses the `ogt` intrinsic function to perform the comparison, which
-    # checks if the current value is greater than the other value according to the rules of floating point arithmetic.
-    # @let that: A borrow to the floating point value that is being compared to the current value for ordering.
-    # @ret: `true` if the current value is greater than the other value, and `false` otherwise.
+    # The `gt` method defines how to compare two floating point values of the
+    # same size to determine if the current value is greater than the other
+    # value. It uses the `ogt` intrinsic function to perform the comparison,
+    # which checks if the current value is greater than the other value
+    # according to the rules of floating point arithmetic.
+    # @let that: A borrow to the floating point value that is being compared to
+    #   the current value for ordering.
+    # @ret: `true` if the current value is greater than the other value, and
+    #   `false` otherwise.
 
     # Hook into greater-than intrinsic.
     ret intrinsics::ogt(self, that)
@@ -212,15 +223,50 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Ord {
 
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun ge(&self, that: &Self) -> Bool {
-    # The `ge` method defines how to compare two floating point values of the same size to determine if the current
-    # value is greater than or equal to the other value. It uses the `oge` intrinsic function to perform the comparison,
-    # which checks if the current value is greater than or equal to the other value according to the rules of floating
-    # point arithmetic.
-    # @let that: A borrow to the floating point value that is being compared to the current value for ordering.
-    # @ret: `true` if the current value is greater than or equal to the other value, and `false` otherwise.
+    # The `ge` method defines how to compare two floating point values of the
+    # same size to determine if the current value is greater than or equal to
+    # the other value. It uses the `oge` intrinsic function to perform the
+    # comparison, which checks if the current value is greater than or equal to
+    # the other value according to the rules of floating point arithmetic.
+    # @let that: A borrow to the floating point value that is being compared to
+    #   the current value for ordering.
+    # @ret: `true` if the current value is greater than or equal to the other
+    #   value, and `false` otherwise.
 
     # Hook into greater-than-or-equal-to intrinsic.
     ret intrinsics::oge(self, that)
+  }
+
+  !inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun min(self, that: Self) -> Self {
+    # The `min` method defines how to calculate the minimum of two floating
+    # point values of the same size: IEEE 754-2019's `minimum`, so a NaN operand
+    # gives a NaN (it is not skipped, as the 2008 `minNum` did) and -0 is below
+    # +0.
+    # @let that: The floating point value that is being compared with the
+    #   current value to determine the minimum. It is of the same size as the
+    #   current value.
+    # @ret: The result of the minimum calculation, which is a new floating point
+    #   value of the same size as the operands, representing the smaller of the
+    #   two values.
+    ret intrinsics::float_min(self, that)
+  }
+
+  !inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun max(self, that: Self) -> Self {
+    # The `max` method defines how to calculate the maximum of two floating
+    # point values of the same size: IEEE 754-2019's `maximum`, so a NaN operand
+    # gives a NaN (it is not skipped, as the 2008 `maxNum` did) and +0 is above
+    # -0.
+    # @let that: The floating point value that is being compared with the
+    #   current value to determine the maximum. It is of the same size as the
+    #   current value.
+    # @ret: The result of the maximum calculation, which is a new floating point
+    #   value of the same size as the operands, representing the larger of the
+    #   two values.
+    ret intrinsics::float_max(self, that)
   }
 }
 
