@@ -516,53 +516,37 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Pow {
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext Pow[Rhs=S32] {
-  # Provide exponentiation support to sized floating point numbers with an `S32` exponent, allowing for the calculation
-  # of one floating point value raised to the power of an `S32` integer exponent. For differing sizes, the `From` trait
-  # can be used to convert the floating point value to the same size as the other before performing the exponentiation.
+  # Provide exponentiation support to sized floating point numbers with an `S32`
+  # exponent, allowing for the calculation of one floating point value raised to
+  # the power of an `S32` integer exponent. For differing sizes, the `From`
+  # trait can be used to convert the floating point value to the same size as
+  # the other before performing the exponentiation.
 
   !versioned(base="1.0.0", new="1.0.0")
   fun pow(self, that: S32) -> Self {
-    # The `pow` method defines how to calculate one floating point value raised to the power of an `S32` integer
-    # exponent. It uses the `float_powi` intrinsic function to perform the exponentiation, which computes the result
-    # according to the rules of floating point arithmetic.
-    # @let that: The `S32` integer value that is being used as the exponent in the exponentiation operation. The base
-    # (the current value) is raised to the power of this integer exponent.
-    # @ret: The result of the exponentiation operation, which is a new floating point value of the same size as the base
-    # (the current value).
-
-    # Hook into integer exponentiation intrinsic.
-    ret intrinsics::float_powi(self, that)
-  }
-}
-
-sup [cmp w: U32] SizedFloatingPoint[w] {
-  # Collection of comparison methods for sized floating point numbers, allowing for the calculation of the minimum and
-  # maximum of two floating point values of the same size.
-
-  !public !inline
-  !versioned(base="1.0.0", new="1.0.0")
-  cmp fun min(self, that: Self) -> Self {
-    # The `min` method defines how to calculate the minimum of two floating point values of the same size. It uses the
-    # `float_min` intrinsic function to perform the calculation, which computes the minimum according to the rules of
-    # floating point arithmetic.
-    # @let that: The floating point value that is being compared with the current value to determine the minimum. It is
-    # of the same size as the current value.
-    # @ret: The result of the minimum calculation, which is a new floating point value of the same size as the operands,
-    # representing the smaller of the two values.
-    ret intrinsics::float_min(self, that)
-  }
-
-  !public !inline
-  !versioned(base="1.0.0", new="1.0.0")
-  cmp fun max(self, that: Self) -> Self {
-    # The `max` method defines how to calculate the maximum of two floating point values of the same size. It uses the
-    # `float_max` intrinsic function to perform the calculation, which computes the maximum according to the rules of
-    # floating point arithmetic.
-    # @let that: The floating point value that is being compared with the current value to determine the maximum. It is
-    # of the same size as the current value.
-    # @ret: The result of the maximum calculation, which is a new floating point value of the same size as the operands,
-    # representing the larger of the two values.
-    ret intrinsics::float_max(self, that)
+    # The `pow` method defines how to calculate one floating point value raised
+    # to the power of an `S32` integer exponent. It squares and multiplies, one
+    # bit of the exponent at a time, and takes the reciprocal for a negative
+    # one, as compiler-rt's `__powidf2` does. Written out here rather than as
+    # `llvm.powi`, whose order of multiplications LLVM leaves undefined, so the
+    # result is the same at every optimisation level and on every target. Each
+    # multiplication rounds, so a large exponent is a few ulps from the exact
+    # power.
+    # @let that: The `S32` integer value that is being used as the exponent in
+    #   the exponentiation operation. The base (the current value) is raised to
+    #   the power of this integer exponent.
+    # @ret: The result of the exponentiation operation, which is a new floating
+    #   point value of the same size as the base (the current value).
+    let mut base = self
+    let mut n = that
+    let mut result = Self::one()
+    loop true {
+      case n.bit_and(1_s32) != 0_s32 { result = result * base }
+      n = n / 2_s32
+      case n == 0_s32 { exit }
+      base = base * base
+    }
+    ret case that < 0_s32 { Self::one() / result } else { result }
   }
 }
 
