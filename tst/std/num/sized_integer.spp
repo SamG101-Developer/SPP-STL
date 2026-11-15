@@ -173,3 +173,55 @@ fun test_byte_swap_and_bit_reversal() -> Void {
   std::debug::assert(0xab_u8.swap_bytes() == 0xab_u8, "a single byte is its own swap")
   std::debug::assert(0x01_u8.reverse_bits() == 0x80_u8, "reverse_bits reverses the bits")
 }
+
+!test(group="std/num")
+fun test_try_from_parses_decimal_text() -> Void {
+  std::debug::assert(S32::try_from("0"@).unwrap() == 0_s32, "zero")
+  std::debug::assert(S32::try_from("12345"@).unwrap() == 12345_s32, "a positive value")
+  std::debug::assert(S32::try_from("+42"@).unwrap() == 42_s32, "a leading plus")
+  std::debug::assert(S32::try_from("-42"@).unwrap() == -42_s32, "a negative value")
+  std::debug::assert(U64::try_from("007"@).unwrap() == 7_u64, "leading zeros")
+  let text = Str::from("314")
+  std::debug::assert(U16::from_str(&text).unwrap() == 314_u16, "an owned Str")
+  drop(text)
+}
+
+!test(group="std/num")
+fun test_try_from_reaches_both_ends_of_every_width() -> Void {
+  std::debug::assert(U8::try_from("255"@).unwrap() == 255_u8, "u8 max")
+  std::debug::assert(U8::try_from("256"@).is_none(), "past u8 max")
+  std::debug::assert(S8::try_from("127"@).unwrap() == 127_s8, "s8 max")
+  std::debug::assert(S8::try_from("128"@).is_none(), "past s8 max")
+  std::debug::assert(S8::try_from("-128"@).unwrap() == -128_s8, "s8 min")
+  std::debug::assert(S8::try_from("-129"@).is_none(), "past s8 min")
+  std::debug::assert(U64::try_from("18446744073709551615"@).unwrap() == 18446744073709551615_u64, "u64 max")
+  std::debug::assert(U64::try_from("18446744073709551616"@).is_none(), "past u64 max")
+  std::debug::assert(S64::try_from("-9223372036854775808"@).unwrap() == std::intrinsics::min_val[S64](), "s64 min")
+  std::debug::assert(S64::try_from("9223372036854775808"@).is_none(), "past s64 max")
+}
+
+!test(group="std/num")
+fun test_try_from_rejects_malformed_text() -> Void {
+  std::debug::assert(S32::try_from(""@).is_none(), "empty")
+  std::debug::assert(S32::try_from("-"@).is_none(), "a sign alone")
+  std::debug::assert(S32::try_from("+"@).is_none(), "a plus alone")
+  std::debug::assert(S32::try_from(" 1"@).is_none(), "leading whitespace")
+  std::debug::assert(S32::try_from("1 "@).is_none(), "trailing whitespace")
+  std::debug::assert(S32::try_from("1_000"@).is_none(), "a separator")
+  std::debug::assert(S32::try_from("12a"@).is_none(), "a letter")
+  std::debug::assert(S32::try_from("--1"@).is_none(), "two signs")
+  std::debug::assert(U32::try_from("-1"@).is_none(), "a negative unsigned")
+  std::debug::assert(U32::try_from("-0"@).is_none(), "a negative zero unsigned")
+}
+
+!test(group="std/num")
+fun test_from_str_radix_reads_any_base() -> Void {
+  std::debug::assert(U32::from_str_radix("ff", 16_u32).unwrap() == 255_u32, "lowercase hex")
+  std::debug::assert(U32::from_str_radix("FF", 16_u32).unwrap() == 255_u32, "uppercase hex")
+  std::debug::assert(S32::from_str_radix("-101", 2_u32).unwrap() == -5_s32, "negative binary")
+  std::debug::assert(U32::from_str_radix("z", 36_u32).unwrap() == 35_u32, "the top of base 36")
+  std::debug::assert(U32::from_str_radix("777", 8_u32).unwrap() == 511_u32, "octal")
+  std::debug::assert(U32::from_str_radix("8", 8_u32).is_none(), "a digit past the radix")
+  std::debug::assert(U8::from_str_radix("100000000", 2_u32).is_none(), "past u8 max in binary")
+  std::debug::assert(S8::from_str_radix("-80", 16_u32).unwrap() == -128_s8, "s8 min in hex")
+}
