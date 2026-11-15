@@ -6,11 +6,17 @@ use std::threading::thread::ThreadErr
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls SpinLock {
-  # The `SpinLock` type is a low-level synchronization primitive that provides mutual exclusion for concurrent threads.
-  # It is implemented using a busy-waiting mechanism, where a thread repeatedly checks if the lock is available and
-  # acquires it when it becomes free. This type is useful in scenarios where the expected wait time for acquiring the
-  # lock is short, as it avoids the overhead of context switching associated with traditional mutexes.
-  # @let handle: A unique identifier for the spin lock, represented as a 64-bit unsigned integer.
+  # The `SpinLock` type is a low-level synchronization primitive that provides
+  # mutual exclusion for concurrent threads. It is implemented using a
+  # busy-waiting mechanism, where a thread repeatedly checks if the lock is
+  # available and acquires it when it becomes free. This type is useful in
+  # scenarios where the expected wait time for acquiring the lock is short, as
+  # it avoids the overhead of context switching associated with traditional
+  # mutexes. The lock is only held around a closure (`with_lock`), so it is
+  # always released by the thread that took it, and never released unheld: a
+  # public `unlock` allowed both, which POSIX leaves undefined.
+  # @let handle: A unique identifier for the spin lock, represented as a 64-bit
+  #   unsigned integer.
 
   !private handle: U64
 }
@@ -20,49 +26,72 @@ sup SpinLock {
   !versioned(base="1.0.0", new="1.0.0")
   fun new() -> Res[SpinLock, ThreadErr] {
     # Create a new spin lock using the sppc threading API.
+    # @ret: The spin lock, or the error the initialisation reported.
+
     let mut handle = 0_u64
     let err = sppc::pthread_spin_init(&mut handle)
-    case err != 0 { ret Fail(err=ThreadErr::from_errno(err))  }
+    case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
     ret Pass(val=SpinLock(handle))
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun lock(&self) -> Res[Void, ThreadErr] {
-    # Acquire the spin lock using the sppc threading API.
+  fun with_lock[R, F: FunMov[(), R]](&self, f: F) -> Res[R, ThreadErr] {
+    # Spin until the lock is held, run `f`, then release the lock.
+    # @type R: What `f` returns.
+    # @type F: The function run under the lock.
+    # @let f: Called once while the lock is held.
+    # @ret: What `f` returned, or the error the lock reported (`f` is then
+    #   dropped unrun).
+
     let err = sppc::pthread_spin_lock(&self.handle)
-    case err != 0 { ret Fail(err=ThreadErr::from_errno(err))  }
-    ret Pass[Void]()
+    case err != 0 {
+      drop(f)
+      ret Fail(err=ThreadErr::from_errno(err))
+    }
+    ret Pass(val=self.run_and_release[R, F](f))
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun try_lock(&self) -> Res[Void, WouldBlock or ThreadErr] {
-    # Try to acquire the spin lock using the sppc threading API.
-    # A held lock reports "WouldBlock"; any other failure reports
-    # the error.
+  fun try_with_lock[R, F: FunMov[(), R]](&self, f: F) -> Res[R, WouldBlock or ThreadErr] {
+    # As `with_lock`, but only if the lock is free now. A held lock reports
+    # `WouldBlock`.
+    # @type R: What `f` returns.
+    # @type F: The function run under the lock.
+    # @let f: Called once, if the lock was free.
+    # @ret: What `f` returned, `WouldBlock`, or the error the lock reported.
+
     let err = sppc::pthread_spin_trylock(&self.handle)
-    case err == sppc::ebusy { ret Fail(err=WouldBlock) }
-    case err != 0 { ret Fail(err=ThreadErr::from_errno(err))  }
-    ret Pass[Void]()
+    case err != 0 {
+      drop(f)
+      case err == sppc::ebusy { ret Fail(err=WouldBlock) }
+      ret Fail(err=ThreadErr::from_errno(err))
+    }
+    ret Pass(val=self.run_and_release[R, F](f))
   }
 
-  !public
+  !private
   !versioned(base="1.0.0", new="1.0.0")
-  fun unlock(&self) -> Res[Void, ThreadErr] {
-    # Release the spin lock using the sppc threading API.
+  fun run_and_release[R, F: FunMov[(), R]](&self, f: F) -> R {
+    # With the lock held by the caller: run `f`, then release; failing to
+    # release aborts.
+    # @ret: What `f` returned.
+
+    let out = f()
     let err = sppc::pthread_spin_unlock(&self.handle)
-    case err != 0 { ret Fail(err=ThreadErr::from_errno(err))  }
-    ret Pass[Void]()
+    std::abort::abort_if(err != 0, "Failed to unlock a spin lock")
+    ret out
   }
 }
 
 sup SpinLock ext Drop {
   !versioned(base="1.0.0", new="1.0.0")
   fun drop(self) -> Void {
-    # Destroy the spin lock using the sppc threading API.
+    # Destroy the spin lock using the sppc threading API; failing to aborts.
+
     let SpinLock(handle) = self
     let err = sppc::pthread_spin_destroy(&handle)
-    case err != 0 { std::abort::abort("Failed to destroy spin lock") }
+    std::abort::abort_if(err != 0, "Failed to destroy a spin lock")
   }
 }

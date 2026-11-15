@@ -2,26 +2,87 @@
 fun test_take_gives_back_the_guarded_value() -> Void {
   let mut v = Vec[S32]::new()
   v.append(3)
-  let m = std::threading::mutex::Mutex[Vec[S32]]::new(v)
+  let m = std::threading::mutex::Mutex[Vec[S32]]::new(v).expect("mutex")
   let back = m.take()
   std::debug::assert(back.len() == 1_uz, "the vector came back out")
   drop(back)
 }
 
 !test(group="std/threading/mutex")
-fun test_a_write_through_the_guard_is_seen_by_take() -> Void {
-  let m = std::threading::mutex::Mutex[S32]::new(1)
-  let mut g = m.lock().expect("lock failed")
-  g.get()@ = 9
-  drop(g)
-  std::debug::assert(m.take() == 9, "the guard wrote the value the mutex owns")
+fun test_a_write_under_the_lock_is_seen_by_take() -> Void {
+  let m = std::threading::mutex::Mutex[S32]::new(1).expect("mutex")
+  m.with_lock((v: &mut S32) { v@ = 9 }).expect("lock")
+  std::debug::assert(m.take() == 9, "the closure wrote the value the mutex owns")
+}
+
+!test(group="std/threading/mutex")
+fun test_with_lock_returns_the_closure_result() -> Void {
+  let m = std::threading::mutex::Mutex[S32]::new(4).expect("mutex")
+  let doubled = m.with_lock((v: &mut S32) { ret v@ * 2 }).expect("lock")
+  std::debug::assert(doubled == 8, "the closure's result comes back")
+  drop(m)
+}
+
+!test(group="std/threading/mutex")
+fun test_the_lock_is_held_only_while_the_closure_runs() -> Void {
+  # A coroutine's deferred unlock released the lock before the borrow was used;
+  # an owned guard could outlive the mutex. Inside the closure the mutex is
+  # busy; after it, free again.
+  let m = std::threading::mutex::Mutex[S32]::new(0).expect("mutex")
+  let busy_inside = m.with_lock((v: &mut S32 caps &m) {
+    let inner = m.try_with_lock((w: &mut S32) { ret 0 })
+    let busy = inner.is_fail()
+    drop(inner)
+    ret busy
+  }).expect("lock")
+  std::debug::assert(busy_inside, "the mutex is busy inside the closure")
+  let after = m.try_with_lock((v: &mut S32) { ret 1 })
+  std::debug::assert(after.is_pass(), "the lock is free once the closure returns")
+  drop(after)
+  drop(m)
+}
+
+!test(group="std/threading/mutex")
+fun test_with_lock_when_waits_for_the_signal() -> Void {
+  let m = std::threading::arc::Arc[std::threading::mutex::Mutex[S32]]::new(
+    std::threading::mutex::Mutex[S32]::new(0).expect("mutex"))
+  let c = std::threading::arc::Arc[std::threading::cond_var::CondVar]::new(
+    std::threading::cond_var::CondVar::new().expect("cond"))
+  let (m2, c2) = (m.clone(), c.clone())
+  let h = std::threading::thread::spawn((caps m2, c2) -> std::void::Void {
+    m2.with_lock((v: &mut S32) { v@ = 7 }).expect("lock")
+    c2.signal_all().expect("signal")
+    drop(m2)
+    drop(c2)
+  }).expect("spawn failed")
+  let seen = m.with_lock_when(&c, (v: &mut S32) { ret v@ == 7 }, (v: &mut S32) { ret v@ }).expect("lock")
+  h.join().expect("join failed")
+  std::debug::assert(seen == 7, "the closure ran once the predicate held")
+  drop(m)
+  drop(c)
+}
+
+!test(group="std/threading/mutex")
+fun test_with_lock_when_timeout_gives_up() -> Void {
+  let m = std::threading::mutex::Mutex[S32]::new(0).expect("mutex")
+  let c = std::threading::cond_var::CondVar::new().expect("cond")
+  let r = m.with_lock_when_timeout(
+    &c, std::time::duration::Duration::from_millis(20_u64), (v: &mut S32) { ret false }, (v: &mut S32) { ret 1 })
+  std::debug::assert(r.is_fail(), "the predicate never held, so the wait timed out")
+  drop(r)
+  let after = m.try_with_lock((v: &mut S32) { ret 1 })
+  std::debug::assert(after.is_pass(), "the timeout released the lock")
+  drop(after)
+  drop(m)
+  drop(c)
 }
 
 !test(group="std/threading/mutex")
 fun test_dropping_a_mutex_drops_its_value() -> Void {
-  # The vector's buffer is freed by the mutex's drop; valgrind reports a leak if it is not.
+  # The vector's buffer is freed by the mutex's drop; valgrind reports a leak if
+  # it is not.
   let mut v = Vec[S32]::new()
   v.append(3)
-  let m = std::threading::mutex::Mutex[Vec[S32]]::new(v)
+  let m = std::threading::mutex::Mutex[Vec[S32]]::new(v).expect("mutex")
   drop(m)
 }
