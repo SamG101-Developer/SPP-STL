@@ -38,14 +38,18 @@ cls Arr[T, cmp n: USize] {
   #   cannot be changed after the array is created.
 }
 
-sup [T, cmp n: USize] Arr[T, n] {
-  !public
+sup [T: Copy, cmp n: USize] Arr[T, n] {
+  !private
   !intrinsic(name="std.array.Arr.new")
   !versioned(base="1.0.0", new="1.0.0")
-  fun new() -> Self { }
-}
+  fun new() -> Self {
+    # An array whose elements are not initialised (LLVM `undef`, which an
+    # optimised build may read as a different value at each use), for
+    # `new_filled` to write every slot of before anything reads one. Private for
+    # that reason, and bound to `Copy` so that nothing in it is dropped. Public
+    # code uses `new_filled`, a literal, or `Arr[T, n]()` (zeroed).
+  }
 
-sup [T: Copy, cmp n: USize] Arr[T, n] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun fill(&mut self, val: T) -> Void {
