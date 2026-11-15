@@ -11,26 +11,29 @@ use std::threading::safe::ThreadSafe
 !public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
 cls ThreadMemoryErr {
-  # Indicates an error related to thread memory management, such as stack overflow or insufficient memory for thread
-  # creation. This error type can be used to represent various memory-related issues that may arise during thread
+  # Indicates an error related to thread memory management, such as stack
+  # overflow or insufficient memory for thread creation. This error type can be
+  # used to represent various memory-related issues that may arise during thread
   # operations. Mapped from the `ENOMEM` error code in `C`.
 }
 
 !public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
 cls ThreadPermissionErr {
-  # Indicates an error related to thread permissions, such as insufficient privileges to create or manage threads. This
-  # error type can be used to represent various permission-related issues that may arise during thread operations.
-  # Mapped from the `EPERM` error code in `C`.
+  # Indicates an error related to thread permissions, such as insufficient
+  # privileges to create or manage threads. This error type can be used to
+  # represent various permission-related issues that may arise during thread
+  # operations. Mapped from the `EPERM` error code in `C`.
 }
 
 !public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
 cls ThreadUnknownErr {
-  # Indicates an unknown error related to thread operations. This error type can be used to represent various unexpected
-  # issues that may arise during thread operations. Mapped from the `EAGAIN` error code in `C`, which typically
-  # indicates that a resource is temporarily unavailable or that the system is unable to create a new thread due to
-  # resource constraints.
+  # Indicates an unknown error related to thread operations. This error type can
+  # be used to represent various unexpected issues that may arise during thread
+  # operations. Mapped from the `EAGAIN` error code in `C`, which typically
+  # indicates that a resource is temporarily unavailable or that the system is
+  # unable to create a new thread due to resource constraints.
 }
 
 !public
@@ -56,31 +59,36 @@ sup ThreadErr {
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls JoinHandle[Out] {
-  # A handle on a running thread, and on the single heap cell that thread writes its result into. The cell is what makes
-  # `Out` a real type rather than a placeholder: `pthread_join`'s own result channel is one `void*`, which can carry a
-  # pointer and nothing wider, and the c side has no way to know the size or layout of an s++ type. Keeping the result
-  # on this side of the boundary means the thread body writes `Out` directly and c never sees it.
+  # A handle on a running thread, and on the single heap cell that thread writes
+  # its result into. The cell is what makes `Out` a real type rather than a
+  # placeholder: `pthread_join`'s own result channel is one `void*`, which can
+  # carry a pointer and nothing wider, and the c side has no way to know the
+  # size or layout of an s++ type. Keeping the result on this side of the
+  # boundary means the thread body writes `Out` directly and c never sees it.
   # @let handle: The `pthread_t` the thread was created with.
-  # @let result: The uninitialized cell the thread body writes its return value into. Reading it before the thread has
-  # been joined would be a data race, so `join` is the only thing that does.
-  # @let users: How many of the handle and the thread still use `result`, starting at 2. A detached thread outlives its
-  # handle, so neither side can assume it frees the cell: each decrements this when done, and whichever brings it to 0
-  # frees `result` and this counter, dropping a result nobody read.
-  # @let detached: Whether the thread has already been detached, so `drop` does not detach it twice.
+  # @let result: The uninitialized cell the thread body writes its return value
+  #   into. Reading it before the thread has been joined would be a data race,
+  #   so `join` is the only thing that does.
+  # @let users: How many of the handle and the thread still use `result`,
+  #   starting at 2. A detached thread outlives its handle, so neither side can
+  #   assume it frees the cell: each decrements this when done, and whichever
+  #   brings it to 0 frees `result` and this counter, dropping a result nobody
+  #   read.
 
   !package handle: U64
   !package result: NonNull[Out]
   !package users: NonNull[Atom[USize]]
-  !private detached: Bool
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls ThreadId {
-  # Identifies a running thread. It is the `pthread_t` the thread was created with, and nothing more - holding one
-  # neither keeps the thread alive nor gives any control over it, which is what a `JoinHandle` is for. Two of them are
-  # compared with `pthread_equal` rather than by their bits, because `pthread_t` is opaque and a platform is free to
-  # make it something other than an integer that compares directly.
+  # Identifies a running thread. It is the `pthread_t` the thread was created
+  # with, and nothing more - holding one neither keeps the thread alive nor
+  # gives any control over it, which is what a `JoinHandle` is for. Two of them
+  # are compared with `pthread_equal` rather than by their bits, because
+  # `pthread_t` is opaque and a platform is free to make it something other than
+  # an integer that compares directly.
   # @let handle: The `pthread_t` this identifies.
 
   !package handle: U64
@@ -89,16 +97,22 @@ cls ThreadId {
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun spawn[Out: ThreadSafe, F: FunMov[(), Out] & ThreadSafe](function: F) -> Res[JoinHandle[Out], ThreadErr] {
-  # Spawn a new thread running `function`, and return a handle that can be joined for its result. `Out` is read off the
-  # function's own return type rather than given at the call site. Both types crossing the boundary have to be
-  # `ThreadSafe`: the function is moved onto the new thread, and its result is moved back off it by `join`.
-  # @type Out: The type the spawned function returns, and so the type `join` answers with. It crosses back from the
-  # spawned thread, so it is held to the same marker the function is.
-  # @type F: The type of the function to run. It is moved onto the new thread, so it must be a `FunMov`, and it must be
-  # `ThreadSafe` - which for a closure means it captured nothing hazardous, and captured nothing by borrow at all,
-  # because nothing yet keeps a borrow alive for as long as the thread holding it.
+  # Spawn a new thread running `function`, and return a handle that can be
+  # joined for its result. `Out` is read off the function's own return type
+  # rather than given at the call site. Both types crossing the boundary have to
+  # be `ThreadSafe`: the function is moved onto the new thread, and its result
+  # is moved back off it by `join`.
+  # @type Out: The type the spawned function returns, and so the type `join`
+  #   answers with. It crosses back from the spawned thread, so it is held to
+  #   the same marker the function is.
+  # @type F: The type of the function to run. It is moved onto the new thread,
+  #   so it must be a `FunMov`, and it must be `ThreadSafe` - which for a
+  #   closure means it captured nothing hazardous, and captured nothing by
+  #   borrow at all, because nothing yet keeps a borrow alive for as long as the
+  #   thread holding it.
   # @let function: The function to run on the new thread.
-  # @ret: A `Res` holding the join handle, or the error `pthread_create` reported.
+  # @ret: A `Res` holding the join handle, or the error `pthread_create`
+  #   reported.
 
   # The result cell is allocated here rather than on the
   # new thread, so that a failure to allocate is seen by
@@ -171,8 +185,8 @@ sup [R] JoinHandle[R] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun id(&self) -> ThreadId {
-    # Get the id of a thread, usually for comparison with another thread's identifier. Wraps the handle in a special
-    # comparable identifier type.
+    # Get the id of a thread, usually for comparison with another thread's
+    # identifier. Wraps the handle in a special comparable identifier type.
     # @ret: The id of the spawned thread.
 
     ret ThreadId(handle=self.handle)
@@ -181,11 +195,12 @@ sup [R] JoinHandle[R] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun detach(mut self) -> Res[Void, ThreadErr] {
-    # Detach the thread using the sppc threading API. A detached thread is never joined, so its result is never read: it
-    # is dropped, and its cell freed, by whichever of this handle and the thread is last to finish with it. If the
+    # Detach the thread using the sppc threading API. A detached thread is never
+    # joined, so its result is never read: it is dropped, and its cell freed, by
+    # whichever of this handle and the thread is last to finish with it. If the
     # thread is still running, that is the thread.
 
-    let Self(handle, result, users, ..) = self
+    let Self(handle, result, users) = self
     let err = sppc::pthread_detach(&handle)
     Self::release_unjoined(result, users)
     case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
@@ -195,9 +210,10 @@ sup [R] JoinHandle[R] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun join(self) -> Res[R, ThreadErr] {
-    # Wait for the thread to finish, and answer with what it returned. The read is only sound after the join has
-    # returned: until then the thread may not have written the cell yet.
-    let Self(handle, result, users, ..) = self
+    # Wait for the thread to finish, and answer with what it returned. The read
+    # is only sound after the join has returned: until then the thread may not
+    # have written the cell yet.
+    let Self(handle, result, users) = self
     let err = sppc::pthread_join(&handle)
     case err != 0 {
       # Not joined, so the thread may still be running: it is
@@ -217,9 +233,10 @@ sup [R] JoinHandle[R] {
   !private
   !versioned(base="1.0.0", new="1.0.0")
   fun release_unjoined(result: NonNull[R], users: NonNull[Atom[USize]]) -> Void {
-    # Give up the handle's use of the result cell without joining. If the thread has already finished, this is the last
-    # user: the result was written but will never be read, so it is dropped and both cells are freed. Otherwise the
-    # thread frees them when it finishes.
+    # Give up the handle's use of the result cell without joining. If the thread
+    # has already finished, this is the last user: the result was written but
+    # will never be read, so it is dropped and both cells are freed. Otherwise
+    # the thread frees them when it finishes.
     # @let result: The thread's result cell.
     # @let users: The cell's user count.
 
@@ -234,8 +251,9 @@ sup [R] JoinHandle[R] {
 sup ThreadId ext Eq {
   !versioned(base="1.0.0", new="1.0.0")
   fun eq(&self, that: &Self) -> Bool {
-    # Whether two ids name the same thread. Asked of `pthread_equal` rather than compared directly, because `pthread_t`
-    # is opaque: a platform may make it a struct, or leave padding in it that differs between two ids of the same
+    # Whether two ids name the same thread. Asked of `pthread_equal` rather than
+    # compared directly, because `pthread_t` is opaque: a platform may make it a
+    # struct, or leave padding in it that differs between two ids of the same
     # thread.
     # @let that: The id to compare against.
     # @ret: Whether both ids name the same thread.
@@ -247,16 +265,19 @@ sup ThreadId ext Eq {
 }
 
 sup ThreadId ext Copy {
-  # An id is a name for a thread, not a claim on it: duplicating one costs nothing and lets go of nothing, so it is free
-  # to copy. Without this every comparison would consume the id it was asked about.
+  # An id is a name for a thread, not a claim on it: duplicating one costs
+  # nothing and lets go of nothing, so it is free to copy. Without this every
+  # comparison would consume the id it was asked about.
 }
 
 sup [R] JoinHandle[R] ext Drop {
   !versioned(base="1.0.0", new="1.0.0")
   fun drop(self) -> Void {
-    # Ensure the thread is detached before deletion.
-    let JoinHandle[R](handle, result, users, detached) = self
-    case detached.not { let err = sppc::pthread_detach(&handle) }
+    # A handle dropped without `join` or `detach` (both consume it) detaches the
+    # thread, so its resources are released when it ends.
+    let JoinHandle[R](handle, result, users) = self
+    let err = sppc::pthread_detach(&handle)
+    std::abort::abort_if(err != 0, "Failed to detach a dropped thread handle")
     JoinHandle[R]::release_unjoined(result, users)
   }
 }

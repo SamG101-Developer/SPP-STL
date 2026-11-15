@@ -163,6 +163,26 @@ sup [T] View[T] {
     # element using the `[mut length - 1]` mutable operator.
     gen case self.is_empty() { None } else { self[mut self.length - 1_uz] }
   }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun swap(&mut self, i: USize, j: USize) -> Void {
+    # Exchanges the elements at `i` and `j` by moving each out through a pointer
+    # and the other in, so no stand-in value is made or dropped. Swapping
+    # through `take` left a `T()` behind, and dropping that segfaulted for any
+    # `T` that dereferences a pointer in `Drop` (`Rc`, `Single`, `Arc`).
+    # @let i: The index of one element; bounds checked.
+    # @let j: The index of the other element; bounds checked.
+    # @ret:
+
+    let mut a = NonNull[T]::from_mut(self[mut i])
+    let mut b = NonNull[T]::from_mut(self[mut j])
+    case i == j { ret }
+    let a_val = a.read()
+    let b_val = b.read()
+    a.write(b_val)
+    b.write(a_val)
+  }
 }
 
 sup [T: Eq] View[T] {

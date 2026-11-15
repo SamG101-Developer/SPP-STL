@@ -161,3 +161,68 @@ fun test_equality_over_elements_that_own_storage() -> Void {
   drop(b)
   drop(c)
 }
+
+!test(group="std/array")
+fun test_swap_of_pointer_owning_elements() -> Void {
+  # Swapping went through `take`, which left an `Rc()` with a null control
+  # block in the slot and then dropped it.
+  let mut a = [std::rc::rc::Rc[Str]::new(Str::from("a")), std::rc::rc::Rc[Str]::new(Str::from("bc"))]
+  a.swap(0_uz, 1_uz)
+  std::debug::assert(a[0_uz].len() == 2_uz, "the second element moved to the front")
+  std::debug::assert(a[1_uz].strong_count() == 1_uz, "no count was gained or lost")
+  drop(a)
+}
+
+!test(group="std/array")
+fun test_new_filled_sets_every_slot() -> Void {
+  # `new` leaves the elements uninitialised, so it is private;
+  # `new_filled` writes every slot before anything reads one.
+  let a = Arr[S32, 3_uz]::new_filled(4)
+  std::debug::assert(a[0_uz]@ == 4, "first")
+  std::debug::assert(a[2_uz]@ == 4, "last")
+}
+
+!test(group="std/array")
+fun test_move_iteration_of_owning_elements() -> Void {
+  # Moving elements out read through the array's first element as if it
+  # were a pointer to the array, and reversed iteration started one past
+  # the end.
+  let a = [Str::from("a"), Str::from("bc"), Str::from("def")]
+  let mut total = 0_uz
+  let mut first = 0_uz
+  loop s in a.iter_mov() {
+    case total == 0_uz { first = s.len() }
+    total += s.len()
+    drop(s)
+  }
+  std::debug::assert(first == 1_uz, "forwards starts at the front")
+  std::debug::assert(total == 6_uz, "every element is visited")
+
+  let b = [Str::from("a"), Str::from("bc"), Str::from("def")]
+  total = 0_uz
+  first = 0_uz
+  loop s in b.reverse_iter_mov() {
+    case total == 0_uz { first = s.len() }
+    total += s.len()
+    drop(s)
+  }
+  std::debug::assert(first == 3_uz, "reversed starts at the back")
+  std::debug::assert(total == 6_uz, "every element is visited reversed")
+}
+
+!test(group="std/array")
+fun test_move_iteration_left_part_way() -> Void {
+  # Leaving the loop drops the elements not yet moved out.
+  let a = [Str::from("a"), Str::from("bc"), Str::from("def")]
+  loop s in a.iter_mov() {
+    std::debug::assert(s.len() == 1_uz, "the first element")
+    drop(s)
+    exit
+  }
+  let b = [Str::from("a"), Str::from("bc"), Str::from("def")]
+  loop s in b.reverse_iter_mov() {
+    std::debug::assert(s.len() == 3_uz, "the last element")
+    drop(s)
+    exit
+  }
+}

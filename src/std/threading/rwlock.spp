@@ -1,4 +1,3 @@
-use std::annotations::thread_hazard
 use std::annotations::versioned
 use std::mem::pointer::NonNull
 use std::ops::drop::Drop
@@ -9,77 +8,17 @@ use std::time::duration::Duration
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-cls RwLockReadGuard[T] {
-  # Proof that a read hold is taken, and the route to the value while it is. Dropping one releases the hold.
-  # @type T: The type of the guarded value.
-  # @let handle: A copy of the owning rwlock's sppc handle; unlocking through it releases the same rwlock.
-  # @let val: A copy of the owning rwlock's pointer to the guarded value.
-
-  !package handle: U64
-  !package val: NonNull[T]
-}
-
-!public
-!versioned(base="1.0.0", new="1.0.0")
-cls RwLockWriteGuard[T] {
-  # As `RwLockReadGuard`, for the exclusive hold: it reaches the value mutably.
-  # @type T: The type of the guarded value.
-  # @let handle: A copy of the owning rwlock's sppc handle; unlocking through it releases the same rwlock.
-  # @let val: A copy of the owning rwlock's pointer to the guarded value.
-
-  !package handle: U64
-  !package val: NonNull[T]
-}
-
-sup [T] RwLockReadGuard[T] ext Drop {
-  !versioned(base="1.0.0", new="1.0.0")
-  fun drop(self) -> Void {
-    # Release the read hold. One `pthread_rwlock_unlock` releases either kind of hold.
-    let Self(handle, val) = self
-    let err = sppc::pthread_rwlock_unlock(&handle)
-  }
-}
-
-sup [T] RwLockWriteGuard[T] ext Drop {
-  !versioned(base="1.0.0", new="1.0.0")
-  fun drop(self) -> Void {
-    # Release the write hold.
-    let Self(handle, val) = self
-    let err = sppc::pthread_rwlock_unlock(&handle)
-  }
-}
-
-sup [T] RwLockReadGuard[T] {
-  !public
-  !versioned(base="1.0.0", new="1.0.0")
-  cor get(&self) -> GenOnce[&T] {
-    # The guarded value, borrowed for as long as the hold lasts.
-    # @ret: The guarded value, borrowed immutably.
-
-    gen self.val.fwd_ref()
-  }
-}
-
-sup [T] RwLockWriteGuard[T] {
-  !public
-  !versioned(base="1.0.0", new="1.0.0")
-  cor get(&mut self) -> GenOnce[&mut T] {
-    # The guarded value, borrowed exclusively for as long as the hold lasts.
-    # @ret: The guarded value, borrowed mutably.
-
-    gen self.val.fwd_mut()
-  }
-}
-
-!public
-!versioned(base="1.0.0", new="1.0.0")
 cls RwLock[T] {
-  # Guards a `T` behind a pthread rwlock, handing out a shared borrow to readers and an exclusive one to a writer. It
-  # holds its value in its own cell for the same reason `Mutex` does, and hands out a guard rather than a borrow.
-  # Holding nothing hazardous, an `RwLock[T]` is sendable exactly when its `T` is.
-  # @type T: The type of the guarded value. An `RwLock[T]` is only as sendable as its `T`.
-  # @let handle: The sppc handle for the underlying `pthread_rwlock_t`, which lives behind it rather than in it.
-  # @let val: The heap cell holding the guarded value. The rwlock owns it; guards only borrow its pointer.
+  # Guards a `T` behind a pthread rwlock: any number of readers at once, or one
+  # writer. As with `Mutex`, the value is only reachable inside a closure passed
+  # to a `with_read` or `with_write` method, which holds the lock for exactly as
+  # long as the closure runs, so the borrow cannot outlive the hold or reach
+  # another thread.
+  # @type T: The type of the guarded value. An `RwLock[T]` is only as sendable
+  #   as its `T`.
+  # @let handle: The sppc handle for the underlying `pthread_rwlock_t`, which
+  #   lives behind it rather than in it.
+  # @let val: The heap cell holding the guarded value.
 
   !package handle: U64
   !package val: Single[T]
@@ -88,111 +27,203 @@ cls RwLock[T] {
 sup [T] RwLock[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun new(val: T) -> RwLock[T] {
-    # Create a new rwlock using the sppc threading API. Todo: Error handling - "new" should report a failed init rather
-    # than swallowing it.
+  fun new(val: T) -> Res[RwLock[T], ThreadErr] {
+    # Create an rwlock guarding `val`. If the pthread rwlock cannot be created,
+    # `val` is dropped and the error returned.
+    # @let val: The value to guard.
+    # @ret: The rwlock, or the error the initialisation reported.
+
     let mut handle = 0_u64
     let err = sppc::pthread_rwlock_init(&mut handle)
-    ret RwLock(handle, val=Single[T]::new(val))
+    case err != 0 {
+      drop(val)
+      ret Fail(err=ThreadErr::from_errno(err))
+    }
+    ret Pass(val=RwLock(handle, val=Single[T]::new(val)))
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun read(&self) -> Res[RwLockReadGuard[T], ThreadErr] {
-    # Lock the rwlock for reading using the sppc threading API. A failed lock yields the error instead of the guarded
-    # value; the alternatives are a bare variant rather than a "Res", because "Pass[T]" would store the borrow in its
-    # "val" attribute and second-class borrows do not allow that.
+  fun with_read[R, F: FunMov[(&T,), R]](&self, f: F) -> Res[R, ThreadErr] {
+    # Block until a read hold is taken, run `f` on the value, then release the
+    # hold.
+    # @type R: What `f` returns.
+    # @type F: The function run under the read hold.
+    # @let f: Called once with the value, borrowed immutably.
+    # @ret: What `f` returned, or the error the lock reported (`f` is then
+    #   dropped unrun).
+
     let err = sppc::pthread_rwlock_rdlock(&self.handle)
     case err != 0 {
+      drop(f)
       ret Fail(err=ThreadErr::from_errno(err))
     }
-    ret Pass(val=RwLockReadGuard(handle=self.handle, val=self.val.pointer))
+    ret Pass(val=self.read_and_release[R, F](f))
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun write(&self) -> Res[RwLockWriteGuard[T], ThreadErr] {
-    # Lock the rwlock for writing using the sppc threading API. A failed lock yields the error instead of the guarded
-    # value.
+  fun with_write[R, F: FunMov[(&mut T,), R]](&self, f: F) -> Res[R, ThreadErr] {
+    # Block until the write hold is taken, run `f` on the value, then release
+    # the hold.
+    # @type R: What `f` returns.
+    # @type F: The function run under the write hold.
+    # @let f: Called once with the value, borrowed exclusively.
+    # @ret: What `f` returned, or the error the lock reported (`f` is then
+    #   dropped unrun).
+
     let err = sppc::pthread_rwlock_wrlock(&self.handle)
     case err != 0 {
+      drop(f)
       ret Fail(err=ThreadErr::from_errno(err))
     }
-    ret Pass(val=RwLockWriteGuard(handle=self.handle, val=self.val.pointer))
+    ret Pass(val=self.write_and_release[R, F](f))
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun timed_read(&self, timeout: Duration, clock: U32 = 1_u32) -> Res[RwLockReadGuard[T], TimedOut or ThreadErr] {
-    # Timed lock the rwlock for reading using the sppc threading API. The deadline elapsing yields "TimedOut", and any
-    # other failure yields the error; neither hands out the guarded value.
+  fun timed_with_read[R, F: FunMov[(&T,), R]](
+    &self, timeout: Duration, f: F, clock: U32 = 1_u32) -> Res[R, TimedOut or ThreadErr] {
+    # As `with_read`, but giving up once `timeout` has passed without the hold.
+    # @type R: What `f` returns.
+    # @type F: The function run under the read hold.
+    # @let timeout: How long to wait for the hold.
+    # @let f: Called once with the value, if the hold is taken in time.
+    # @let ?clock: The clock the deadline is measured against.
+    # @ret: What `f` returned, `TimedOut`, or the error the lock reported.
+
     let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
     let err = sppc::pthread_rwlock_clockrdlock(&self.handle, S32::from(clock), &timespec)
     drop(timespec)
 
-    case err == sppc::etimedout {
-      ret Fail(err=TimedOut)
-    }
     case err != 0 {
+      drop(f)
+      case err == sppc::etimedout { ret Fail(err=TimedOut) }
       ret Fail(err=ThreadErr::from_errno(err))
     }
-    ret Pass(val=RwLockReadGuard(handle=self.handle, val=self.val.pointer))
+    ret Pass(val=self.read_and_release[R, F](f))
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun timed_write(&self, timeout: Duration, clock: U32 = 1_u32) -> Res[RwLockWriteGuard[T], TimedOut or ThreadErr] {
-    # Timed lock the rwlock for writing using the sppc threading API. The deadline elapsing yields "TimedOut", and any
-    # other failure yields the error.
+  fun timed_with_write[R, F: FunMov[(&mut T,), R]](
+    &self, timeout: Duration, f: F, clock: U32 = 1_u32) -> Res[R, TimedOut or ThreadErr] {
+    # As `with_write`, but giving up once `timeout` has passed without the hold.
+    # @type R: What `f` returns.
+    # @type F: The function run under the write hold.
+    # @let timeout: How long to wait for the hold.
+    # @let f: Called once with the value, if the hold is taken in time.
+    # @let ?clock: The clock the deadline is measured against.
+    # @ret: What `f` returned, `TimedOut`, or the error the lock reported.
+
     let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
     let err = sppc::pthread_rwlock_clockwrlock(&self.handle, S32::from(clock), &timespec)
     drop(timespec)
 
-    case err == sppc::etimedout {
-      ret Fail(err=TimedOut)
-    }
     case err != 0 {
+      drop(f)
+      case err == sppc::etimedout { ret Fail(err=TimedOut) }
       ret Fail(err=ThreadErr::from_errno(err))
     }
-    ret Pass(val=RwLockWriteGuard(handle=self.handle, val=self.val.pointer))
+    ret Pass(val=self.write_and_release[R, F](f))
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun try_write(&self) -> Res[RwLockWriteGuard[T], WouldBlock or ThreadErr] {
-    # Try to lock the rwlock for writing using the sppc threading API. A busy lock yields "WouldBlock"; any other
-    # failure yields the error rather than being swallowed.
-    let code = sppc::pthread_rwlock_trywrlock(&self.handle)
-    case code == sppc::ebusy {
-      ret Fail(err=WouldBlock)
-    }
+  fun try_with_read[R, F: FunMov[(&T,), R]](&self, f: F) -> Res[R, WouldBlock or ThreadErr] {
+    # As `with_read`, but only if a read hold is free now (no writer holds the
+    # lock).
+    # @type R: What `f` returns.
+    # @type F: The function run under the read hold.
+    # @let f: Called once with the value, if the hold was free.
+    # @ret: What `f` returned, `WouldBlock`, or the error the lock reported.
+
+    let code = sppc::pthread_rwlock_tryrdlock(&self.handle)
     case code != 0 {
+      drop(f)
+      case code == sppc::ebusy { ret Fail(err=WouldBlock) }
       ret Fail(err=ThreadErr::from_errno(code))
     }
-    ret Pass(val=RwLockWriteGuard(handle=self.handle, val=self.val.pointer))
+    ret Pass(val=self.read_and_release[R, F](f))
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun try_read(&self) -> Res[RwLockReadGuard[T], WouldBlock or ThreadErr] {
-    # Try to lock the rwlock for reading using the sppc threading API. A busy lock yields "WouldBlock"; any other
-    # failure yields the error rather than being swallowed.
-    let code = sppc::pthread_rwlock_tryrdlock(&self.handle)
+  fun try_with_write[R, F: FunMov[(&mut T,), R]](&self, f: F) -> Res[R, WouldBlock or ThreadErr] {
+    # As `with_write`, but only if the write hold is free now (no reader or
+    # writer holds the lock).
+    # @type R: What `f` returns.
+    # @type F: The function run under the write hold.
+    # @let f: Called once with the value, if the hold was free.
+    # @ret: What `f` returned, `WouldBlock`, or the error the lock reported.
 
-    ret case code of {
-      == sppc::ebusy { Fail(err=WouldBlock) }
-      != 0 { Fail(err=ThreadErr::from_errno(code)) }
-      else { Pass(val=RwLockReadGuard(handle=self.handle, val=self.val.pointer)) }
+    let code = sppc::pthread_rwlock_trywrlock(&self.handle)
+    case code != 0 {
+      drop(f)
+      case code == sppc::ebusy { ret Fail(err=WouldBlock) }
+      ret Fail(err=ThreadErr::from_errno(code))
     }
+    ret Pass(val=self.write_and_release[R, F](f))
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun take(self) -> T {
+    # Take the value out, consuming the rwlock. Owning `self` means nothing else
+    # can be using it, so no hold is needed.
+    # @ret: The value the rwlock was guarding.
+
+    let Self(handle, val) = self
+    let err = sppc::pthread_rwlock_destroy(&handle)
+    std::abort::abort_if(err != 0, "Failed to destroy an rwlock")
+    ret val.read()
+  }
+
+  !private
+  !versioned(base="1.0.0", new="1.0.0")
+  fun read_and_release[R, F: FunMov[(&T,), R]](&self, f: F) -> R {
+    # With a read hold taken by the caller: run `f` on the value, then release.
+    # @ret: What `f` returned.
+
+    let cell = self.val.pointer
+    let out = f(&cell)
+    self.release()
+    ret out
+  }
+
+  !private
+  !versioned(base="1.0.0", new="1.0.0")
+  fun write_and_release[R, F: FunMov[(&mut T,), R]](&self, f: F) -> R {
+    # With the write hold taken by the caller: run `f` on the value, then
+    # release.
+    # @ret: What `f` returned.
+
+    let mut cell = self.val.pointer
+    let out = f(&mut cell)
+    self.release()
+    ret out
+  }
+
+  !private
+  !versioned(base="1.0.0", new="1.0.0")
+  fun release(&self) -> Void {
+    # Release a hold this thread has. One `pthread_rwlock_unlock` releases
+    # either kind; failing to aborts.
+
+    let err = sppc::pthread_rwlock_unlock(&self.handle)
+    std::abort::abort_if(err != 0, "Failed to unlock an rwlock")
   }
 }
 
 sup [T] RwLock[T] ext Drop {
   !versioned(base="1.0.0", new="1.0.0")
   fun drop(self) -> Void {
-    # Destroy the rwlock using the sppc threading API, and drop the value it was guarding along with its cell.
+    # Destroy the rwlock and drop the value it guards. Use `take` to keep the
+    # value.
+
     let RwLock[T](handle, val) = self
     let err = sppc::pthread_rwlock_destroy(&handle)
+    std::abort::abort_if(err != 0, "Failed to destroy an rwlock")
     drop(val)
   }
 }

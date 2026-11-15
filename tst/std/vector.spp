@@ -129,6 +129,64 @@ fun test_vector_insert_many_at_of_heap_elements_keeps_them_alive() -> Void {
 }
 
 !test(group="std/vector")
+fun test_vector_swap_of_pointer_owning_elements() -> Void {
+  # Swapping went through `take`, which left an `Rc()` with a null control
+  # block in the slot and then dropped it.
+  let mut v = Vec[std::rc::rc::Rc[Str]]::new()
+  v.append(std::rc::rc::Rc[Str]::new(Str::from("a")))
+  v.append(std::rc::rc::Rc[Str]::new(Str::from("bc")))
+  v.swap(0_uz, 1_uz)
+  v.swap(1_uz, 1_uz)
+  std::debug::assert(v[0_uz].len() == 2_uz, "the second element moved to the front")
+  std::debug::assert(v[1_uz].len() == 1_uz, "the first element moved to the back")
+  std::debug::assert(v[0_uz].strong_count() == 1_uz, "no count was gained or lost")
+  drop(v)
+}
+
+!test(group="std/vector")
+fun test_vector_make_reverse_of_pointer_owning_elements() -> Void {
+  let mut v = Vec[Single[Str]]::new()
+  v.append(Single[Str]::new(Str::from("a")))
+  v.append(Single[Str]::new(Str::from("bc")))
+  v.append(Single[Str]::new(Str::from("def")))
+  v.make_reverse()
+  std::debug::assert(v[0_uz].len() == 3_uz, "last is first")
+  std::debug::assert(v[1_uz].len() == 2_uz, "middle stays")
+  std::debug::assert(v[2_uz].len() == 1_uz, "first is last")
+  drop(v)
+}
+
+!test(group="std/vector")
+fun test_vector_make_reverse_of_empty_and_single() -> Void {
+  # An empty vector computed `len() - 1` and underflowed.
+  let mut e = Vec[Str]::new()
+  e.make_reverse()
+  std::debug::assert(e.len() == 0_uz, "empty stays empty")
+  let mut s = Vec[S32]::from(&[7])
+  s.make_reverse()
+  std::debug::assert(s[0_uz]@ == 7, "one element stays")
+  drop(e)
+  drop(s)
+}
+
+!test(group="std/vector")
+fun test_vector_shrink_never_drops_below_length() -> Void {
+  # A target below the length shrank the buffer under live elements.
+  let mut v = Vec[Str]::new_with_capacity(8_uz)
+  v.append(Str::from("a"))
+  v.append(Str::from("bc"))
+  v.append(Str::from("def"))
+  v.capacity_shrink_to(1_uz)
+  std::debug::assert(v.cap() >= 3_uz, "capacity kept every element")
+  std::debug::assert(v[2_uz].len() == 3_uz, "the last element survived")
+  let r = v.try_capacity_shrink_to(0_uz)
+  std::debug::assert(r.is_pass(), "the clamped shrink succeeds")
+  std::debug::assert(v.len() == 3_uz, "the length is untouched")
+  drop(r)
+  drop(v)
+}
+
+!test(group="std/vector")
 fun test_vector_iteration_visits_every_element_in_order() -> Void {
   let v = Vec[S32]::from(&[1, 2, 3, 4])
   let mut sum = 0
@@ -356,5 +414,30 @@ fun test_new_filled_holds_the_value_in_every_slot() -> Void {
 fun test_new_filled_with_no_elements_is_empty() -> Void {
   let v = Vec[U8]::new_filled(0_uz, 10_u8)
   std::debug::assert(v.len() == 0_uz, "empty")
+  drop(v)
+}
+
+!test(group="std/vector")
+fun test_vector_append_within_capacity_fills_then_refuses() -> Void {
+  # It never compiled (a bare "ret" in a "Res" function) because nothing instantiated it.
+  let mut v = Vec[Str]::new_with_capacity(1_uz)
+  let first = v.append_within_capacity(Str::from("a"))
+  std::debug::assert(first.is_pass(), "there was room for the first")
+  drop(first)
+  let second = v.append_within_capacity(Str::from("b"))
+  std::debug::assert(second.is_fail(), "a full vector refuses without growing")
+  drop(second)
+  std::debug::assert(v.len() == 1_uz and v.cap() == 1_uz, "the vector is unchanged by the refusal")
+  drop(v)
+}
+
+!test(group="std/vector")
+fun test_vector_insert_at_the_length_appends() -> Void {
+  # The bounds check allows the length itself (an append) and only refuses past it.
+  let mut v = Vec[S32]::from(&[1, 2])
+  v.insert_at(2_uz, 3)
+  v.insert_many_at(3_uz, Vec[S32]::from(&[4]))
+  std::debug::assert(v.len() == 4_uz, "both inserts landed")
+  std::debug::assert(v[2_uz]@ == 3 and v[3_uz]@ == 4, "appended at the end, in order")
   drop(v)
 }

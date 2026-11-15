@@ -1,0 +1,35 @@
+!test(group="std/threading/once")
+fun test_call_once_runs_only_the_first_function() -> Void {
+  # The free `call_once` made a fresh once-state per call, so it ran every time.
+  let once = std::threading::once::Once::new()
+  let runs = std::threading::atomic::Atom[U32]::new(0_u32)
+  once.call_once((caps &runs) { let old = runs.fetch_add(1_u32) })
+  once.call_once((caps &runs) { let old = runs.fetch_add(10_u32) })
+  std::debug::assert(runs.load() == 1_u32, "only the first function ran")
+  drop(runs)
+  drop(once)
+}
+
+!test(group="std/threading/once")
+fun test_call_once_across_threads_runs_once() -> Void {
+  let once = std::threading::arc::Arc[std::threading::once::Once]::new(std::threading::once::Once::new())
+  let runs = std::threading::arc::Arc[std::threading::atomic::Atom[U32]]::new(
+    std::threading::atomic::Atom[U32]::new(0_u32))
+  let (o1, r1) = (once.clone(), runs.clone())
+  let (o2, r2) = (once.clone(), runs.clone())
+  let h1 = std::threading::thread::spawn((caps o1, r1) -> std::void::Void {
+    o1.call_once((caps &r1) { let old = r1.fetch_add(1_u32) })
+    drop(o1)
+    drop(r1)
+  }).expect("spawn failed")
+  let h2 = std::threading::thread::spawn((caps o2, r2) -> std::void::Void {
+    o2.call_once((caps &r2) { let old = r2.fetch_add(1_u32) })
+    drop(o2)
+    drop(r2)
+  }).expect("spawn failed")
+  h1.join().expect("join failed")
+  h2.join().expect("join failed")
+  std::debug::assert(runs.load() == 1_u32, "one of the two threads ran it")
+  drop(once)
+  drop(runs)
+}

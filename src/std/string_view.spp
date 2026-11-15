@@ -340,6 +340,26 @@ sup StrView {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
+  fun eq_fold(&self, that: &StrView) -> Bool {
+    # Whether two strings are equal once ASCII letters are case-folded (modelled
+    # on Go's `strings.EqualFold`, ASCII only). Bytes outside ASCII compare
+    # exactly.
+    # @let that: The string to compare against.
+    # @ret: `true` if the strings match ignoring ASCII case.
+
+    case self.length != that.length { ret false }
+    let this = self.view_ref()
+    let that = that.view_ref()
+    let mut i = 0_uz
+    loop i < self.length {
+      case this[i].to_ascii_lowercase() != that[i].to_ascii_lowercase() { ret false }
+      i += 1_uz
+    }
+    ret true
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
   fun starts_with(&self, needle: &StrView) -> Bool {
     #
     # @let needle:

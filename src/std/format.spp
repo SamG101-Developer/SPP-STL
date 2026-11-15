@@ -22,28 +22,34 @@ use std::io::Write
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls Format {
-  # The `Format` type is the interface for rendering a value as text in a format string. A type implements `fmt`,
-  # writing itself into the `Formatter` it is given. `Formatter::pad` and `Formatter::pad_integral` apply the
-  # placeholder's width, alignment, sign and precision for it; a type that writes with `Formatter::write_str` instead
-  # ignores them. The std's own impls live with their types: the integers, floats, `Bool`, `Char` and `Str`.
+  # The `Format` type is the interface for rendering a value as text in a format
+  # string. A type implements `fmt`, writing itself into the `Formatter` it is
+  # given. `Formatter::pad` and `Formatter::pad_integral` apply the
+  # placeholder's width, alignment, sign and precision for it; a type that
+  # writes with `Formatter::write_str` instead ignores them. The std's own impls
+  # live with their types: the integers, floats, `Bool`, `Char` and `Str`.
   #
-  # Arguments are passed by value, so formatting a non-`Copy` value such as a `Str` consumes it. Pass a clone to keep
-  # the original.
+  # Arguments are passed by value, so formatting a non-`Copy` value such as a
+  # `Str` consumes it. Pass a clone to keep the original.
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls FormatSpec {
-  # The `FormatSpec` type is a parsed placeholder spec, `{:spec}`, as described at the top of this module. A `{}` with
-  # no spec gets `FormatSpec::new()`.
+  # The `FormatSpec` type is a parsed placeholder spec, `{:spec}`, as described
+  # at the top of this module. A `{}` with no spec gets `FormatSpec::new()`.
   # @let fill: The character used to pad up to `width`.
-  # @let align: `b'<'`, `b'>'` or `b'^'`, or `0_u8` when none was given and the value's own default applies.
+  # @let align: `b'<'`, `b'>'` or `b'^'`, or `0_u8` when none was given and the
+  #   value's own default applies.
   # @let sign_plus: Whether a non-negative number shows a `+`.
   # @let alternate: Whether an integer shows its radix prefix.
-  # @let zero_pad: Whether a number pads with zeros after its sign, instead of with `fill`.
+  # @let zero_pad: Whether a number pads with zeros after its sign, instead of
+  #   with `fill`.
   # @let width: The minimum number of characters written; `0` means no minimum.
-  # @let precision: Digits after the point for a float, or the most characters shown for text.
-  # @let kind: `b'x'`, `b'X'`, `b'b'` or `b'o'`, or `0_u8` for the value's default rendering.
+  # @let precision: Digits after the point for a float, or the most characters
+  #   shown for text.
+  # @let kind: `b'x'`, `b'X'`, `b'b'` or `b'o'`, or `0_u8` for the value's
+  #   default rendering.
 
   !public fill: Char
   !public align: U8
@@ -58,16 +64,19 @@ cls FormatSpec {
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls Formatter {
-  # The `Formatter` type walks a format string, writing its literal text and handing each placeholder's spec to the
-  # argument that fills it. It formats into its own buffer, so a whole format call is written out with one write: a line
-  # from `println` cannot be split by another thread's output.
+  # The `Formatter` type walks a format string, writing its literal text and
+  # handing each placeholder's spec to the argument that fills it. It formats
+  # into its own buffer, so a whole format call is written out with one write: a
+  # line from `println` cannot be split by another thread's output.
   # @let out: The text formatted so far.
-  # @let fmt: A copy of the format string. `StrView` only exists behind a borrow, so it cannot be held here.
+  # @let fmt: A copy of the format string. `StrView` only exists behind a
+  #   borrow, so it cannot be held here.
   # @let pos: The byte offset in `fmt` that has not been consumed yet.
   # @let spec: The spec of the placeholder currently being filled.
   #
-  # Todo: copying `fmt` costs an allocation per format call, as does `out` before anything is written. Avoiding them
-  # needs a way to hold the caller's borrow for the formatter's lifetime, or to pass it to each parsing method.
+  # Todo: copying `fmt` costs an allocation per format call, as does `out`
+  # before anything is written. Avoiding them needs a way to hold the caller's
+  # borrow for the formatter's lifetime, or to pass it to each parsing method.
 
   !package out: Str
   !package fmt: Str
@@ -80,10 +89,12 @@ sup Format {
   !abstract_method
   !versioned(base="1.0.0", new="1.0.0")
   fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
-    # The `fmt` method writes this value into the formatter, honouring the formatter's current spec where it makes sense
-    # for the type.
-    # @let formatter: The formatter to write into. `formatter.spec()` is the spec of the placeholder being filled.
-    # @ret: An empty success value, or an error if the value could not be formatted.
+    # The `fmt` method writes this value into the formatter, honouring the
+    # formatter's current spec where it makes sense for the type.
+    # @let formatter: The formatter to write into. `formatter.spec()` is the
+    #   spec of the placeholder being filled.
+    # @ret: An empty success value, or an error if the value could not be
+    #   formatted.
   }
 }
 
@@ -93,7 +104,8 @@ sup FormatSpec {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun new() -> FormatSpec {
-    # The `new` function creates the spec of a bare `{}`: no width, no precision, no flags, and the default rendering.
+    # The `new` function creates the spec of a bare `{}`: no width, no
+    # precision, no flags, and the default rendering.
     # @ret: The default spec.
 
     ret FormatSpec(
@@ -105,8 +117,8 @@ sup Formatter {
   !package
   !versioned(base="1.0.0", new="1.0.0")
   fun new(fmt: &StrView) -> Formatter {
-    # The `new` function creates a formatter at the start of a format string. All the fields are defaulted to being
-    # empty.
+    # The `new` function creates a formatter at the start of a format string.
+    # All the fields are defaulted to being empty.
     # @let fmt: The format string. The formatter keeps its own copy.
     # @ret: A formatter with nothing written yet.
 
@@ -116,7 +128,8 @@ sup Formatter {
   !package
   !versioned(base="1.0.0", new="1.0.0")
   fun into_str(self) -> Str {
-    # The `into_str` method takes the text formatted so far out of the formatter.
+    # The `into_str` method takes the text formatted so far out of the
+    # formatter.
     # @ret: The formatted text.
 
     drop(self.fmt)
@@ -126,8 +139,8 @@ sup Formatter {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun spec(&self) -> FormatSpec {
-    # The `spec` method gets the spec of the placeholder currently being filled. A spec is copyable, so the formatter
-    # doesn't get consumed.
+    # The `spec` method gets the spec of the placeholder currently being filled.
+    # A spec is copyable, so the formatter doesn't get consumed.
     # @ret: A copy of the current spec.
 
     ret self.spec
@@ -136,8 +149,9 @@ sup Formatter {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun write_str(&mut self, text: &StrView) -> Void {
-    # The `write_str` method writes text as it is, ignoring the spec. For example, the optional type might write "Some("
-    # into the formatter before the internal value is formatted in.
+    # The `write_str` method writes text as it is, ignoring the spec. For
+    # example, the optional type might write "Some(" into the formatter before
+    # the internal value is formatted in.
     # @let text: The text to write.
 
     # Append the string with no respect for existing formatting rules. This just
@@ -148,8 +162,9 @@ sup Formatter {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun write_char(&mut self, char: Char) -> Void {
-    # The `write_char` method writes one character as it is, ignoring the spec. Exposed for symmetry with the string
-    # appending, but it is likely that the string version is used more often than not.
+    # The `write_char` method writes one character as it is, ignoring the spec.
+    # Exposed for symmetry with the string appending, but it is likely that the
+    # string version is used more often than not.
     # @let char: The character to write.
 
     # Append the char with no respect for existing formatting rules.
@@ -159,13 +174,15 @@ sup Formatter {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun write_format[..Args: Format](&mut self, fmt: &StrView, ..args: Args) -> Res[Void, StreamErr] {
-    # The `write_format` method formats a nested format string into this formatter. It is how a type with fields writes
-    # them, for example `f.write_format("({}, {})", self.x, self.y)`. The nested string has its own specs; the current
-    # placeholder's spec does not apply to it.
+    # The `write_format` method formats a nested format string into this
+    # formatter. It is how a type with fields writes them, for example
+    # `f.write_format("({}, {})", self.x, self.y)`. The nested string has its
+    # own specs; the current placeholder's spec does not apply to it.
     # @type Args: The format-constrained variadic generic types.
     # @let fmt: The nested format string.
     # @let args: The arguments for the nested format string's placeholders.
-    # @ret: An empty success value, or an error if the nested format string   does not match its arguments.
+    # @ret: An empty success value, or an error if the nested format string
+    #   does not match its arguments.
 
     # Create a new formatter for the "fmt" string, and format the args into
     # it. This creates a filled string to add to the current one.
@@ -183,8 +200,10 @@ sup Formatter {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun pad(&mut self, text: &StrView) -> Void {
-    # The `pad` method writes text under the current spec: cut to `precision` characters if one is given, then padded
-    # with `fill` up to `width`, left-aligned unless the spec says otherwise. This is how text-like values format.
+    # The `pad` method writes text under the current spec: cut to `precision`
+    # characters if one is given, then padded with `fill` up to `width`,
+    # left-aligned unless the spec says otherwise. This is how text-like values
+    # format.
     # @let text: The text to write.
 
     # Write a string into the formatter, respecting existing formatting rules.
@@ -205,10 +224,13 @@ sup Formatter {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun pad_integral(&mut self, non_negative: Bool, digits: &StrView) -> Void {
-    # The `pad_integral` method writes a number's digits under the current spec: a sign (`-`, or `+` with the `+` flag),
-    # the radix prefix with the `#` flag, then the digits, either zero-padded after the sign and prefix with the `0`
-    # flag or padded with `fill` up to `width`, right-aligned unless the spec says otherwise.
-    # @let non_negative: Whether the number is zero or positive. The sign is not part of `digits`.
+    # The `pad_integral` method writes a number's digits under the current spec:
+    # a sign (`-`, or `+` with the `+` flag), the radix prefix with the `#`
+    # flag, then the digits, either zero-padded after the sign and prefix with
+    # the `0` flag or padded with `fill` up to `width`, right-aligned unless the
+    # spec says otherwise.
+    # @let non_negative: Whether the number is zero or positive. The sign is not
+    #   part of `digits`.
     # @let digits: The number's digits, with no sign and no prefix.
 
     let spec = self.spec
@@ -250,7 +272,8 @@ sup Formatter {
   !package
   !versioned(base="1.0.0", new="1.0.0")
   fun pad_aligned(&mut self, text: &StrView, default_align: U8) -> Void {
-    # The `pad_aligned` method writes text padded with the spec's fill up to the spec's width.
+    # The `pad_aligned` method writes text padded with the spec's fill up to the
+    # spec's width.
     # @let text: The text to write, already cut to any precision.
     # @let default_align: The alignment used when the spec gives none.
 
@@ -299,11 +322,12 @@ sup Formatter {
   !package
   !versioned(base="1.0.0", new="1.0.0")
   fun arg[T: Format](&mut self, value: &T) -> Res[Void, StreamErr] {
-    # The `arg` method writes the literal text up to the next placeholder, then formats one argument into it.
+    # The `arg` method writes the literal text up to the next placeholder, then
+    # formats one argument into it.
     # @type T: The type of the argument (and formattable type).
     # @let value: The argument for the next placeholder.
-    # @ret: An empty success value, or an error if there is no placeholder left   for it, the placeholder is malformed,
-    # or the value fails to format.
+    # @ret: An empty success value, or an error if there is no placeholder left
+    #    for it, the placeholder is malformed, or the value fails to format.
 
     # Get the next placeholder in the format string (as in the next left brace
     # character), and handle any errors with parsing the spec. If there was no
@@ -316,8 +340,10 @@ sup Formatter {
   !package
   !versioned(base="1.0.0", new="1.0.0")
   fun finish(&mut self) -> Res[Void, StreamErr] {
-    # The `finish` method writes the literal text after the last argument, checking no placeholder is left unfilled.
-    # @ret: An empty success value, or an error if a placeholder is left or the   rest of the string is malformed.
+    # The `finish` method writes the literal text after the last argument,
+    # checking no placeholder is left unfilled.
+    # @ret: An empty success value, or an error if a placeholder is left or the
+    #    rest of the string is malformed.
 
     # An inversion of "arg" - ensure that the spec parses correctly, but that
     # there were no "{}" sections left; nothing more to fill.
@@ -329,10 +355,13 @@ sup Formatter {
   !private
   !versioned(base="1.0.0", new="1.0.0")
   fun next_placeholder(&mut self) -> Res[Bool, StreamErr] {
-    # The `next_placeholder` method writes literal text up to the next placeholder and parses that placeholder's spec
-    # into `spec`, or writes the rest of the string if there is no placeholder left. Braces are ASCII, so they never
-    # occur inside a multi-byte character, and scanning bytes is safe.
-    # @ret: Whether a placeholder was found, or an error for an unmatched `}` or a malformed spec.
+    # The `next_placeholder` method writes literal text up to the next
+    # placeholder and parses that placeholder's spec into `spec`, or writes the
+    # rest of the string if there is no placeholder left. Braces are ASCII, so
+    # they never occur inside a multi-byte character, and scanning bytes is
+    # safe.
+    # @ret: Whether a placeholder was found, or an error for an unmatched `}` or
+    #   a malformed spec.
 
     # Get the length and set the start position to the current tracking position, and
     # the "i" bump-variable to the currrent position too.
@@ -381,8 +410,8 @@ sup Formatter {
   !private
   !versioned(base="1.0.0", new="1.0.0")
   fun parse_spec(&mut self) -> Res[Bool, StreamErr] {
-    # The `parse_spec` method parses the inside of a placeholder, from just after its `{` up to and including its `}`,
-    # into `spec`.
+    # The `parse_spec` method parses the inside of a placeholder, from just
+    # after its `{` up to and including its `}`, into `spec`.
     # @ret: `true` once the spec is parsed, or an error if it is malformed.
 
     # Create a new spec, and start at the current tracking position. It is a spec per
@@ -476,9 +505,10 @@ sup Formatter {
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun format[..Args: Format](fmt: &StrView, ..args: Args) -> Str {
-  # The `format` function formats its arguments into a format string, as described at the top of this module. A format
-  # string that does not match its arguments is a programming error, so it aborts; use `try_format` for a format string
-  # that is only known at run time.
+  # The `format` function formats its arguments into a format string, as
+  # described at the top of this module. A format string that does not match its
+  # arguments is a programming error, so it aborts; use `try_format` for a
+  # format string that is only known at run time.
   # @let fmt: The format string.
   # @let args: The arguments for the placeholders, in order.
   # @ret: The formatted text.
@@ -490,11 +520,12 @@ fun format[..Args: Format](fmt: &StrView, ..args: Args) -> Str {
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun try_format[..Args: Format](fmt: &StrView, ..args: Args) -> Res[Str, StreamErr] {
-  # The `try_format` function formats its arguments into a format string, as described at the top of this module.
+  # The `try_format` function formats its arguments into a format string, as
+  # described at the top of this module.
   # @let fmt: The format string.
   # @let args: The arguments for the placeholders, in order.
-  # @ret: The formatted text, or `StreamInvalidInputError` if the format string is malformed or does not have exactly
-  # one placeholder per argument.
+  # @ret: The formatted text, or `StreamInvalidInputError` if the format string
+  #   is malformed or does not have exactly one placeholder per argument.
 
   let mut f = Formatter::new(fmt)
   let result = format_args(&mut f, ..args)
@@ -509,12 +540,14 @@ fun try_format[..Args: Format](fmt: &StrView, ..args: Args) -> Res[Str, StreamEr
 !public
 !versioned(base="1.0.0", new="1.0.0")
 fun write_format[W: Write, ..Args: Format](w: &mut W, fmt: &StrView, ..args: Args) -> Res[Void, StreamErr] {
-  # The `write_format` function formats its arguments into a format string and writes the result to a stream. The whole
-  # text is formatted first and written with one `write_all`, so nothing is written if formatting fails.
+  # The `write_format` function formats its arguments into a format string and
+  # writes the result to a stream. The whole text is formatted first and written
+  # with one `write_all`, so nothing is written if formatting fails.
   # @let w: The stream to write to.
   # @let fmt: The format string.
   # @let args: The arguments for the placeholders, in order.
-  # @ret: An empty success value, or an error if the format string does not match its arguments or the write fails.
+  # @ret: An empty success value, or an error if the format string does not
+  #   match its arguments or the write fails.
 
   let text = try_format(fmt, ..args)?
   let written = w.write_all(text.view_ref())
@@ -526,7 +559,8 @@ fun write_format[W: Write, ..Args: Format](w: &mut W, fmt: &StrView, ..args: Arg
 !private
 !versioned(base="1.0.0", new="1.0.0")
 fun format_args(f: &mut Formatter) -> Res[Void, StreamErr] {
-  # The end of `format_args`' recursion: with every argument formatted, write the rest of the string.
+  # The end of `format_args`' recursion: with every argument formatted, write
+  # the rest of the string.
   # @let f: The formatter.
   # @ret: An empty success value, or an error if a placeholder is left unfilled.
 
@@ -536,8 +570,9 @@ fun format_args(f: &mut Formatter) -> Res[Void, StreamErr] {
 !private
 !versioned(base="1.0.0", new="1.0.0")
 fun format_args[H: Format, ..Ts: Format](f: &mut Formatter, head: H, ..tail: Ts) -> Res[Void, StreamErr] {
-  # The `format_args` function formats the first argument into the next placeholder, then the rest of them, by recursion
-  # over the pack. The overload with no arguments ends it.
+  # The `format_args` function formats the first argument into the next
+  # placeholder, then the rest of them, by recursion over the pack. The overload
+  # with no arguments ends it.
   # @let f: The formatter.
   # @let head: The argument for the next placeholder.
   # @let tail: The arguments for the placeholders after it.
@@ -557,8 +592,9 @@ fun format_args[H: Format, ..Ts: Format](f: &mut Formatter, head: H, ..tail: Ts)
 !package
 !versioned(base="1.0.0", new="1.0.0")
 fun format_elements[T: Format](formatter: &mut Formatter, items: &View[T]) -> Res[Void, StreamErr] {
-  # The `format_elements` function writes a sequence as `[a, b, c]`, the shared rendering for `Vec` and `Arr`. The
-  # placeholder's spec applies to each element, so `{:>3}` of a vector of 1 and 2 is `[  1,   2]`.
+  # The `format_elements` function writes a sequence as `[a, b, c]`, the shared
+  # rendering for `Vec` and `Arr`. The placeholder's spec applies to each
+  # element, so `{:>3}` of a vector of 1 and 2 is `[  1,   2]`.
   # @let formatter: The formatter to write into.
   # @let items: The elements, in order.
   # @ret: An empty success value, or the first element's error.
@@ -589,8 +625,9 @@ fun format_tuple_elements(formatter: &mut Formatter, index: USize) -> Res[USize,
 !versioned(base="1.0.0", new="1.0.0")
 fun format_tuple_elements[H: Format, ..Ts: Format](
   formatter: &mut Formatter, index: USize, head: &H, ..tail: &Ts) -> Res[USize, StreamErr] {
-  # The `format_tuple_elements` function writes a tuple's elements separated by `, `, by recursion over the borrowed
-  # pack, for the `Tup` `Format` impl. The overload with no elements ends it.
+  # The `format_tuple_elements` function writes a tuple's elements separated by
+  # `, `, by recursion over the borrowed pack, for the `Tup` `Format` impl. The
+  # overload with no elements ends it.
   # @let formatter: The formatter.
   # @let index: How many elements were written before `head`.
   # @let head: The next element.
@@ -604,7 +641,8 @@ fun format_tuple_elements[H: Format, ..Ts: Format](
 
 !private
 fun invalid_format() -> StreamErr {
-  # The error for a format string that is malformed or does not match its arguments.
+  # The error for a format string that is malformed or does not match its
+  # arguments.
   # @ret: `StreamInvalidInputError`.
 
   ret StreamInvalidInputError
@@ -612,8 +650,9 @@ fun invalid_format() -> StreamErr {
 
 !private
 fun byte_at(text: &StrView, index: USize) -> U8 {
-  # The byte at an index, or `0_u8` past the end, so the parser can look ahead without a bounds check at each step. A
-  # `0_u8` matches none of the spec's characters, so running off the end reads as a malformed spec.
+  # The byte at an index, or `0_u8` past the end, so the parser can look ahead
+  # without a bounds check at each step. A `0_u8` matches none of the spec's
+  # characters, so running off the end reads as a malformed spec.
   # @let text: The text to read.
   # @let index: The byte offset.
   # @ret: The byte, or `0_u8` if `index` is out of range.
@@ -648,7 +687,8 @@ fun is_align(byte: U8) -> Bool {
 
 !private
 fun char_count(text: &StrView) -> USize {
-  # The number of characters in a text, which is what a width counts, rather than its bytes.
+  # The number of characters in a text, which is what a width counts, rather
+  # than its bytes.
   # @let text: The text to measure.
   # @ret: The number of characters.
 
@@ -661,10 +701,12 @@ fun char_count(text: &StrView) -> USize {
 
 !private
 fun byte_offset_of_char(text: &StrView, chars: USize) -> USize {
-  # The byte offset just after a number of characters, used to cut text to a precision.
+  # The byte offset just after a number of characters, used to cut text to a
+  # precision.
   # @let text: The text to cut.
   # @let chars: How many characters to keep.
-  # @ret: The byte offset after the first `chars` characters, or the text's length if it has no more than that.
+  # @ret: The byte offset after the first `chars` characters, or the text's
+  #   length if it has no more than that.
 
   let mut seen = 0_uz
   let mut offset = 0_uz

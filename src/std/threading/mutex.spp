@@ -1,4 +1,3 @@
-use std::annotations::thread_hazard
 use std::annotations::versioned
 use std::mem::pointer::NonNull
 use std::ops::drop::Drop
@@ -11,222 +10,248 @@ use std::time::time_point::TimePoint
 !public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
 cls WouldBlock {
-  # The `WouldBlock` type is a zero sized type that is used to indicate that a non-blocking operation would block if it
-  # were to be performed. It is used as a return type for the `try_lock` method of the `Mutex` class, which attempts to
-  # acquire a lock on the mutex without blocking. If the mutex is already locked, the `try_lock` method returns a
-  # `WouldBlock` value to indicate that the operation would block if it were to be performed.
+  # The `WouldBlock` type is a zero sized type that is used to indicate that a
+  # non-blocking operation would block if it were to be performed. It is the
+  # failure of the `try_` locking methods of `Mutex`, `RwLock` and `SpinLock`,
+  # which attempt to take a lock without blocking.
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls Mutex[T] {
-  # Guards a `T` behind a pthread mutex, handing out an exclusive borrow of it for as long as the lock is held. The
-  # value lives in its own `Single` rather than inside the mutex, and locking hands back a `MutexGuard` carrying a copy
-  # of the pointer into it.
-  # @type T: The type of the guarded value. A `Mutex[T]` is only as sendable as its `T`.
-  # @let handle: The sppc handle for the underlying `pthread_mutex_t`, which lives behind it rather than in it.
-  # @let val: The heap cell holding the guarded value. The mutex owns it; guards only borrow its pointer.
+  # Guards a `T` behind a pthread mutex. The value is only reachable inside a
+  # closure passed to one of the `with_lock` methods, which holds the lock for
+  # exactly as long as the closure runs: the closure's `&mut T` cannot outlive
+  # the call (a borrow cannot be the closure's result type) or reach another
+  # thread. Owned guards could do both, and a deferred unlock in a coroutine
+  # frame released the lock before the borrow was used.
+  # @type T: The type of the guarded value. A `Mutex[T]` is only as sendable as
+  #   its `T`.
+  # @let handle: The sppc handle for the underlying `pthread_mutex_t`, which
+  #   lives behind it rather than in it.
+  # @let val: The heap cell holding the guarded value.
 
   !package handle: U64
   !package val: Single[T]
 }
 
-!public
-!versioned(base="1.0.0", new="1.0.0")
-cls MutexGuard[T] {
-  # Proof that the lock is held, and the only route to the value while it is. Dropping one releases the mutex, so the
-  # lock is held for exactly as long as the guard is - which is what the old design tried to express with a deferred
-  # release inside a coroutine frame, and could not, because the frame's cleanup ran before the caller ever saw the
-  # borrow.
-  # @type T: The type of the guarded value.
-  # @let handle: A copy of the owning mutex's sppc handle; unlocking through it releases the same mutex.
-  # @let val: A copy of the owning mutex's pointer to the guarded value.
-
-  !package handle: U64
-  !package val: NonNull[T]
-}
-
-sup [T] MutexGuard[T] ext Drop {
-  !versioned(base="1.0.0", new="1.0.0")
-  fun drop(self) -> Void {
-    # Release the mutex. This is the whole of the guard's purpose, and the reason it must be consumed rather than
-    # discarded: dropping it is what unlocks.
-
-    let Self(handle, val) = self
-    let err = sppc::pthread_mutex_unlock(&handle)
-  }
-}
-
-sup [T] MutexGuard[T] {
-  !public
-  !versioned(base="1.0.0", new="1.0.0")
-  cor get(&mut self) -> GenOnce[&mut T] {
-    # The guarded value, borrowed exclusively for as long as the guard is held: `guard.get()@ = 4` writes it, and
-    # `guard.get().push(4)` calls through it.
-    # @ret: The guarded value, borrowed mutably.
-
-    gen self.val.fwd_mut()
-  }
-}
-
 sup [T] Mutex[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun new(val: T) -> Mutex[T] {
-    # Create a new mutex using the sppc threading API. Todo: Error Handling.
+  fun new(val: T) -> Res[Mutex[T], ThreadErr] {
+    # Create a mutex guarding `val`. If the pthread mutex cannot be created,
+    # `val` is dropped and the error returned.
+    # @let val: The value to guard.
+    # @ret: The mutex, or the error the initialisation reported.
+
     let mut handle = 0_u64
     let err = sppc::pthread_mutex_init(&mut handle)
-    ret Mutex(handle, val=Single[T]::new(val))
+    case err != 0 {
+      drop(val)
+      ret Fail(err=ThreadErr::from_errno(err))
+    }
+    ret Pass(val=Mutex(handle, val=Single[T]::new(val)))
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun lock(&self) -> Res[MutexGuard[T], ThreadErr] {
-    # Block until the mutex is held, and hand back the guard that both proves it and reaches the value. A "Res" is
-    # possible here where it was not before, because a guard is an ordinary owned value rather than a borrow.
-    # @ret: The guard, or the error the lock reported.
+  fun with_lock[R, F: FunMov[(&mut T,), R]](&self, f: F) -> Res[R, ThreadErr] {
+    # Block until the mutex is held, run `f` on the guarded value, then release
+    # the mutex.
+    # @type R: What `f` returns.
+    # @type F: The function run under the lock.
+    # @let f: Called once with the guarded value, borrowed exclusively.
+    # @ret: What `f` returned, or the error the lock reported (`f` is then
+    #   dropped unrun).
 
     let err = sppc::pthread_mutex_lock(&self.handle)
-    case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
-    ret Pass(val=MutexGuard(handle=self.handle, val=self.val.pointer))
+    case err != 0 {
+      drop(f)
+      ret Fail(err=ThreadErr::from_errno(err))
+    }
+    ret Pass(val=self.run_and_release[R, F](f))
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun timed_lock(&self, timeout: Duration, clock: U32 = 1_u32) -> Res[MutexGuard[T], TimedOut or ThreadErr] {
-    # As "lock", but giving up once the deadline passes. The deadline elapsing reports "TimedOut" rather than an error,
-    # because it is an ordinary outcome of asking for a lock with a limit on the wait.
-    # @let timeout: How long to wait before giving up.
+  fun timed_with_lock[R, F: FunMov[(&mut T,), R]](
+    &self, timeout: Duration, f: F, clock: U32 = 1_u32) -> Res[R, TimedOut or ThreadErr] {
+    # As `with_lock`, but giving up once `timeout` has passed without the lock.
+    # The deadline elapsing reports `TimedOut` rather than an error, as it is an
+    # ordinary outcome of a limited wait.
+    # @type R: What `f` returns.
+    # @type F: The function run under the lock.
+    # @let timeout: How long to wait for the lock.
+    # @let f: Called once with the guarded value, if the lock is taken in time.
     # @let ?clock: The clock the deadline is measured against.
-    # @ret: The guard, "TimedOut" if the deadline passed, or the error the lock reported.
+    # @ret: What `f` returned, `TimedOut`, or the error the lock reported.
 
     let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
     let err = sppc::pthread_mutex_clocklock(&self.handle, S32::from(clock), &timespec)
     drop(timespec)
 
-    case err == sppc::etimedout { ret Fail(err=TimedOut) }
-    case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
-    ret Pass(val=MutexGuard(handle=self.handle, val=self.val.pointer))
+    case err != 0 {
+      drop(f)
+      case err == sppc::etimedout { ret Fail(err=TimedOut) }
+      ret Fail(err=ThreadErr::from_errno(err))
+    }
+    ret Pass(val=self.run_and_release[R, F](f))
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun lock_when[F: FunMut[(&mut T,), Bool]](&self, cond: &CondVar, mut pred: F) -> Res[MutexGuard[T], ThreadErr] {
-    # Acquire the mutex, then block on `cond` until `pred` reports that the guarded value satisfies the caller's
-    # condition, and finally yield the guard. This is the safe replacement for the classic "lock, then wait on a
-    # condition variable" dance: because the wait lives inside this guard coroutine, the mutex is released and
-    # re-acquired atomically across each `pthread_cond_wait` (guarding against spurious wake-ups via the predicate
-    # loop), and there is only ever one `&mut T` in existence -- no separate condition-variable API can conjure an
-    # aliasing reference to the protected value while a waiter holds the lock. The signalling half is on `CondVar`
-    # itself (`signal_one` / `signal_all`), called by whichever thread mutates the guarded value.
-    # @type F: The predicate function type, taking a mutable reference to the guarded value and reporting whether the
-    # awaited condition now holds.
-    # @let cond: The condition variable that threads mutating the guarded value signal after each change.
-    # @let pred: The predicate; the wait continues for as long as it returns `false`, and the guard is yielded once it
-    # returns `true`.
-    # @ret: The guard, once the predicate is satisfied, or the error the lock reported.
+  fun try_with_lock[R, F: FunMov[(&mut T,), R]](&self, f: F) -> Res[R, WouldBlock or ThreadErr] {
+    # As `with_lock`, but only if the mutex is free. A held mutex reports
+    # `WouldBlock`.
+    # @type R: What `f` returns.
+    # @type F: The function run under the lock.
+    # @let f: Called once with the guarded value, if the lock was free.
+    # @ret: What `f` returned, `WouldBlock`, or the error the lock reported.
+
+    let code = sppc::pthread_mutex_trylock(&self.handle)
+    case code != 0 {
+      drop(f)
+      case code == sppc::ebusy { ret Fail(err=WouldBlock) }
+      ret Fail(err=ThreadErr::from_errno(code))
+    }
+    ret Pass(val=self.run_and_release[R, F](f))
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun with_lock_when[R, P: FunMut[(&mut T,), Bool], F: FunMov[(&mut T,), R]](
+    &self, cond: &CondVar, mut pred: P, f: F) -> Res[R, ThreadErr] {
+    # Take the mutex, wait on `cond` until `pred` holds for the guarded value,
+    # then run `f` on it and release. Each `pthread_cond_wait` releases and
+    # retakes the mutex atomically, and the predicate loop absorbs spurious
+    # wake-ups. Threads changing the value signal `cond` (`signal_one` /
+    # `signal_all`) afterwards.
+    # @type R: What `f` returns.
+    # @type P: The predicate type.
+    # @type F: The function run once the predicate holds.
+    # @let cond: The condition variable signalled after each change to the
+    #   value.
+    # @let pred: Asked under the lock; the wait continues while it returns
+    #   `false`.
+    # @let f: Called once with the guarded value, once `pred` holds.
+    # @ret: What `f` returned, or the error the lock or wait reported.
 
     defer drop(pred)
-
     let err = sppc::pthread_mutex_lock(&self.handle)
-    case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
+    case err != 0 {
+      drop(f)
+      ret Fail(err=ThreadErr::from_errno(err))
+    }
 
-    # The predicate is asked through a local copy of the
-    # mutex's pointer: the lock is held for the whole of
-    # this loop, so an exclusive borrow of the value is
-    # exactly what is available here.
     let mut cell = self.val.pointer
-    loop pred(cell.fwd_mut()).not {
+    loop pred(&mut cell).not {
       let werr = sppc::pthread_cond_wait(&cond.handle, &self.handle)
       case werr != 0 {
-        # No guard exists yet on this path, so the lock
-        # is released by hand before the error goes back.
-        let uerr = sppc::pthread_mutex_unlock(&self.handle)
+        self.release()
+        drop(f)
         ret Fail(err=ThreadErr::from_errno(werr))
       }
     }
-    ret Pass(val=MutexGuard(handle=self.handle, val=self.val.pointer))
+    ret Pass(val=self.run_and_release[R, F](f))
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun lock_when_timeout[F: FunMut[(&mut T,), Bool]](
-    &self, cond: &CondVar, timeout: Duration, mut pred: F, clock: U32 = 1_u32)
-  -> Res[MutexGuard[T], TimedOut or ThreadErr] {
-    # The timed counterpart of `lock_when`: acquire the mutex and wait on `cond` for the predicate to hold, but give up
-    # once `timeout` has elapsed. On success the guard is yielded exactly as in `lock_when`. On timeout the mutex is
-    # released first and `TimedOut` is yielded instead, so no guarded reference escapes past the deadline; a caller that
-    # still needs the value must re-lock. The deadline is computed once up front and the remaining time is recomputed
-    # each iteration, so repeated spurious wake-ups cannot extend the total wait.
-    # @type F: The predicate function type, taking a mutable reference to the guarded value and reporting whether the
-    # awaited condition now holds.
-    # @let cond: The condition variable that threads mutating the guarded value signal after each change.
-    # @let timeout: The maximum duration to wait for the predicate to hold before giving up.
-    # @let pred: The predicate; the wait continues for as long as it returns `false` and the deadline has not passed.
-    # @let ?clock: The clock id used to measure the timeout, matching the `clock`-parameter convention of `timed_lock`.
-    # Defaults to `1`.
-    # @ret: The guard if the predicate is satisfied in time, or `TimedOut` if the deadline elapses first.
+  fun with_lock_when_timeout[R, P: FunMut[(&mut T,), Bool], F: FunMov[(&mut T,), R]](
+    &self, cond: &CondVar, timeout: Duration, mut pred: P, f: F, clock: U32 = 1_u32)
+    -> Res[R, TimedOut or ThreadErr] {
+    # As `with_lock_when`, but giving up once `timeout` has passed. The deadline
+    # is fixed up front and the remaining time recomputed each wait, so spurious
+    # wake-ups cannot extend it. On timeout the mutex is released and `f` is
+    # dropped unrun.
+    # @type R: What `f` returns.
+    # @type P: The predicate type.
+    # @type F: The function run once the predicate holds.
+    # @let cond: The condition variable signalled after each change to the
+    #   value.
+    # @let timeout: The longest the whole wait may take.
+    # @let pred: Asked under the lock; the wait continues while it returns
+    #   `false` and time remains.
+    # @let f: Called once with the guarded value, if `pred` holds in time.
+    # @let ?clock: The clock the timeout is measured against.
+    # @ret: What `f` returned, `TimedOut`, or the error the lock or wait
+    #   reported.
 
     defer drop(pred)
-
     let deadline = TimePoint::now() + timeout
     let err = sppc::pthread_mutex_lock(&self.handle)
-    case err != 0 { ret Fail(err=ThreadErr::from_errno(err)) }
+    case err != 0 {
+      drop(f)
+      ret Fail(err=ThreadErr::from_errno(err))
+    }
 
     let mut cell = self.val.pointer
-    loop pred(cell.fwd_mut()).not {
+    loop pred(&mut cell).not {
       let remaining = deadline.duration_since_saturating(TimePoint::now())
       case remaining.is_zero() {
-        # Nothing has been handed out, so the lock is released
-        # here rather than by a guard the caller never receives.
-        let uerr = sppc::pthread_mutex_unlock(&self.handle)
+        self.release()
+        drop(f)
         ret Fail(err=TimedOut)
       }
       let timespec = sppc::CTimespec(sec=remaining.seconds, nsec=remaining.nanoseconds)
-      let werr = sppc::pthread_cond_clockwait(&cond.handle, &self.handle, S32::from(clock), &timespec)
+      let werr = sppc::pthread_cond_clockwait(
+        &cond.handle, &self.handle, S32::from(clock), &timespec)
       drop(timespec)
 
       case werr != 0 and werr != sppc::etimedout {
-        let uerr = sppc::pthread_mutex_unlock(&self.handle)
+        self.release()
+        drop(f)
         ret Fail(err=ThreadErr::from_errno(werr))
       }
     }
-    ret Pass(val=MutexGuard(handle=self.handle, val=self.val.pointer))
-  }
-
-  !public
-  !versioned(base="1.0.0", new="1.0.0")
-  fun try_lock(&self) -> Res[MutexGuard[T], WouldBlock or ThreadErr] {
-    # Take the lock only if it is free. A busy mutex reports "WouldBlock"; any other failure reports the error rather
-    # than being swallowed.
-    # @ret: The guard, "WouldBlock" if the mutex was already held, or the error the lock reported.
-
-    let code = sppc::pthread_mutex_trylock(&self.handle)
-    case code == sppc::ebusy { ret Fail(err=WouldBlock) }
-    case code != 0 { ret Fail(err=ThreadErr::from_errno(code)) }
-    ret Pass(val=MutexGuard(handle=self.handle, val=self.val.pointer))
+    ret Pass(val=self.run_and_release[R, F](f))
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun take(self) -> T {
-    # Take the value out of the mutex, consuming the mutex. Because "self" is being moved, it requires exclusive access
-    # to the mutex, so we can safely consume the mutex and take the value out without locking it.
+    # Take the value out, consuming the mutex. Owning `self` means nothing else
+    # can be using it, so no lock is needed.
     # @ret: The value the mutex was guarding.
 
     let Self(handle, val) = self
     let err = sppc::pthread_mutex_destroy(&handle)
+    std::abort::abort_if(err != 0, "Failed to destroy a mutex")
     ret val.read()
+  }
+
+  !private
+  !versioned(base="1.0.0", new="1.0.0")
+  fun run_and_release[R, F: FunMov[(&mut T,), R]](&self, f: F) -> R {
+    # With the mutex held by the caller: run `f` on the value, then release.
+    # @ret: What `f` returned.
+
+    let mut cell = self.val.pointer
+    let out = f(&mut cell)
+    self.release()
+    ret out
+  }
+
+  !private
+  !versioned(base="1.0.0", new="1.0.0")
+  fun release(&self) -> Void {
+    # Unlock a mutex this thread holds. Failing to means the lock state is not
+    # what the code believes, so it aborts.
+
+    let err = sppc::pthread_mutex_unlock(&self.handle)
+    std::abort::abort_if(err != 0, "Failed to unlock a mutex")
   }
 }
 
 sup [T] Mutex[T] ext Drop {
   !versioned(base="1.0.0", new="1.0.0")
   fun drop(self) -> Void {
-    # Destroy the mutex using the sppc threading API, and drop the value it was guarding along with its cell. A caller
-    # that wants the value back should use "take". Todo: Error Handling.
+    # Destroy the mutex and drop the value it guards. Use `take` to keep the
+    # value.
+
     let Mutex[T](handle, val) = self
     let err = sppc::pthread_mutex_destroy(&handle)
+    std::abort::abort_if(err != 0, "Failed to destroy a mutex")
     drop(val)
   }
 }

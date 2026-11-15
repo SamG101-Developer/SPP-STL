@@ -80,3 +80,13 @@ fun test_saturating_arithmetic_clamps_instead_of_failing() -> Void {
   std::debug::assert(big.sub_saturating(small).as_secs() == 4_u64, "an ordinary difference is unaffected")
   std::debug::assert(small.add_saturating(big).as_secs() == 6_u64, "an ordinary sum is unaffected")
 }
+
+!test(group="std/time/duration")
+fun test_saturating_subtraction_of_a_later_time_in_the_same_second_is_zero() -> Void {
+  # The seconds saturated to 0 but the borrowed second stayed in the nanoseconds, giving ~1s instead of 0; a
+  # deadline loop ("remaining = deadline - now") then never finished.
+  let earlier = std::time::duration::Duration::from_millis(5020_u64)
+  let later = std::time::duration::Duration::from_millis(5030_u64)
+  std::debug::assert(earlier.sub_saturating(later).is_zero(), "a later time leaves nothing remaining")
+  std::debug::assert(later.sub_saturating(earlier).as_millis() == 10_u64, "the forward difference is unaffected")
+}

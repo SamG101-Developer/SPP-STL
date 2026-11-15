@@ -143,19 +143,6 @@ fun replace[T](dest: &mut T, src: T) -> T {
 }
 
 !public
-!versioned(base="1.0.0", new="1.0.0")
-fun take[T](src: &mut T) -> T {
-  # The same as replace, but automatically uses the default value for a type
-  # instead of a different pre-existing value. Safety is inherited from the
-  # "replace" function.
-  # @type T: The type of the value to take.
-  # @let src: A mutable reference to the value to take.
-  # @ret: The old value that was taken.
-
-  ret replace(src, T())
-}
-
-!public
 !intrinsic(name="std.mem.ops.drop")
 !versioned(base="1.0.0", new="1.0.0")
 fun drop[T](val: T) -> Void {

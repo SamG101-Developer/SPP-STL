@@ -204,11 +204,12 @@ sup [T, A: Alloc] Vec[T, A] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun try_capacity_shrink_to(&mut self, min_capacity: USize) -> Res[Void, AllocErr] {
-    #
-    # @let min_capacity:
-    # @ret:
+    # Shrinks the capacity towards `min_capacity`, but never below the length:
+    # the buffer must keep holding every live element.
+    # @let min_capacity: The capacity to shrink to, raised to the length if lower.
+    # @ret: The allocator's error if the shrink fails.
 
-    ret self.buffer.try_capacity_shrink_to(min_capacity)
+    ret self.buffer.try_capacity_shrink_to(self.len().max(min_capacity))
   }
 
   !public
@@ -259,18 +260,15 @@ sup [T, A: Alloc] Vec[T, A] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun append_within_capacity(&mut self, element: T) -> Res[Void, AllocErr] {
-    #
-    # @let element:
-    # @ret:
+    # Append `element` only if the vector has room for it without growing.
+    # @let element: The element to append; dropped if there is no room.
+    # @ret: `Pass` once appended, or `AllocOverflowErr` if the vector was full.
 
     case self.len() < self.cap() {
       self.append_unchecked(element)
-      ret
+      ret Pass[Void]()
     }
-    else {
-      drop(element)
-    }
-
+    drop(element)
     ret Fail(err=AllocOverflowErr)
   }
 
@@ -296,11 +294,14 @@ sup [T, A: Alloc] Vec[T, A] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun insert_at(&mut self, index: USize, element: T) -> Void {
-    #
-    # @let index:
-    # @let element:
+    # Insert `element` at `index`, shifting the elements from `index` on one
+    # place back. `index` may be the length (appending), but not past it.
+    # @let index: Where the element goes; aborts if past the length.
+    # @let element: The element to insert.
     # @ret:
 
+    std::abort::abort_if(
+      index > self.len(), "Vec::insert_at: index past the end of the vector")
     case self.len() < self.cap() {
       self.insert_at_unchecked(index, element)
       ret
@@ -315,11 +316,15 @@ sup [T, A: Alloc] Vec[T, A] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun insert_many_at(&mut self, index: USize, that: Vec[T, A]) -> Void {
-    #
-    # @let index:
-    # @let that:
+    # Insert every element of `that` at `index`, in order, shifting the
+    # elements from `index` on back. `index` may be the length (appending), but
+    # not past it.
+    # @let index: Where the elements go; aborts if past the length.
+    # @let that: The elements to insert, moved in.
     # @ret:
 
+    std::abort::abort_if(
+      index > self.len(), "Vec::insert_many_at: index past the end of the vector")
     let required_cap = self.len() + that.len()
     case required_cap <= self.cap() {
       self.insert_vec_at_unchecked(index, that)
@@ -392,33 +397,18 @@ sup [T, A: Alloc] Vec[T, A] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun make_reverse(&mut self) -> Void {
-    #
+    # Reverses the elements in place, swapping from both ends inwards. Fewer than
+    # two elements is already reversed, and returns before `len() - 1` could
+    # underflow on an empty vector.
     # @ret:
 
+    case self.len() < 2_uz { ret }
     let (mut l, mut r) = (0_uz, self.len() - 1_uz)
     loop l < r {
       self.swap(l, r)
       l += 1_uz
       r -= 1_uz
     }
-  }
-
-  !public
-  !versioned(base="1.0.0", new="1.0.0")
-  fun swap(&mut self, i: USize, j: USize) -> Void {
-    # Handing "mem::ops::swap" two mutable borrows into one vector is not safe,
-    # and this is the same case "Arr::swap" is written around: "self[mut i]" and
-    # "self[mut j]" are one place when "i == j". So the swap happens here with a
-    # single element borrow live at a time, and the aliasing case is named
-    # rather than left to come out right by accident.
-    # @let i: The index of the first element to swap.
-    # @let j: The index of the second element to swap.
-    # @ret: Nothing; the two elements are exchanged in place.
-
-    case i == j { ret }
-    let a = std::mem::ops::take(self[mut i])
-    let b = std::mem::ops::replace(self[mut j], a)
-    std::mem::ops::drop(std::mem::ops::replace(self[mut i], b))
   }
 
   !private

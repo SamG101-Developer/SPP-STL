@@ -2,13 +2,42 @@ use std::annotations::versioned
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-fun call_once[F: FunMov[(), Void]](func: F) -> Void {
-  # Calls a function once, and only once. This is typically used for initializing global state, and is thread-safe.
-  # @type F: The type of the function being called. This must be a function type that takes no arguments and returns
-  # `Void`.
-  # @let func: The function being called. This is a value of type `F`.
+cls Once {
+  # A one-shot gate. The first `call_once` on a `Once` runs its function; every
+  # later call, from any thread, returns without running its own, and not before
+  # the first has finished. The state lives in the value, so the callers share
+  # one `Once` (across threads through an `Arc`): a free `call_once` made a
+  # fresh state per call and ran every time.
+  # @let handle: The `pthread_once_t`, held in place rather than behind a
+  #   pointer.
 
-  let mut handle = 0_u64
-  let init_err = sppc::pthread_once_init(&mut handle) # Todo: Error handling.
-  let once_err = sppc::pthread_once(&handle, std::cffi::CClosure[(), Void]::from(func)) # Todo: Error handling.
+  !package handle: U64
+}
+
+sup Once {
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun new() -> Once {
+    # Create a `Once` that has not run yet. Uses abort instead of "Res" like
+    # Mutex/RwLock, because "pthread_once_init" is infallible anyway.
+    # @ret: The fresh gate.
+
+    let mut handle = 0_u64
+    let err = sppc::pthread_once_init(&mut handle)
+    std::abort::abort_if(err != 0, "Failed to initialise a once")
+    ret Once(handle)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun call_once[F: FunMov[(), Void]](&self, func: F) -> Void {
+    # Run `func` if this is the first call on this `Once`, and otherwise drop it
+    # unrun. Returns only once the first call's function has finished, so
+    # whatever it initialised is visible to every caller.
+    # @type F: The function type, taking nothing and returning `Void`.
+    # @let func: The function to run on the first call.
+
+    let err = sppc::pthread_once(&self.handle, std::cffi::CClosure[(), Void]::from(func))
+    std::abort::abort_if(err != 0, "Failed to run a once")
+  }
 }
