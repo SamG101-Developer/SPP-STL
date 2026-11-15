@@ -121,3 +121,22 @@ fun test_a_view_over_a_fixed_size_array() -> Void {
   std::debug::assert(a.contains(&1), "an element that is there")
   std::debug::assert(a.find(&2).unwrap() == 2_uz, "and its index")
 }
+!test(group="std/view")
+fun test_find_and_contains_over_elements_that_are_not_copy() -> Void {
+  let mut inner = Vec[S32]::new()
+  inner.append(1)
+  inner.append(2)
+  let mut probe = Vec[S32]::new()
+  probe.append(1)
+  probe.append(2)
+  let mut miss = Vec[S32]::new()
+  miss.append(3)
+  let mut outer = Vec[Vec[S32]]::new()
+  outer.append(inner)
+  std::debug::assert(outer.contains(&probe), "an equal vector is found by value, not address")
+  std::debug::assert(outer.contains(&miss).not, "an unequal one is not")
+  std::debug::assert(outer.find(&probe).unwrap() == 0_uz, "and has an index")
+  drop(outer)
+  drop(probe)
+  drop(miss)
+}

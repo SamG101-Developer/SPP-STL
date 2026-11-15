@@ -676,9 +676,9 @@ sup [T, A: Alloc] Vec[T, A] ext AddAssign {
 sup [T: Eq, A: Alloc] Vec[T, A] ext Eq {
   !versioned(base="1.0.0", new="1.0.0")
   fun eq(&self, that: &Self) -> Bool {
-    #
-    # @let that:
-    # @ret:
+    # Short-circuit element equality test, breaking on the first mismatch.
+    # @let that: Other vector to compare against.
+    # @ret: If the vectors are equal, per element.
 
     case self.len() != that.len() { ret false }
     loop i in Range[USize]::between(0_uz, self.len()) {
@@ -689,9 +689,9 @@ sup [T: Eq, A: Alloc] Vec[T, A] ext Eq {
 
   !versioned(base="1.0.0", new="1.0.0")
   fun ne(&self, that: &Self) -> Bool {
-    #
-    # @let that:
-    # @ret:
+    # Short-circuit element unequality test, breaking on the first mismatch.
+    # @let that: Other vector to compare against.
+    # @ret: If the vectors are unequal, per element.
 
     case self.len() != that.len() { ret true }
     loop i in Range[USize]::between(0_uz, self.len()) {

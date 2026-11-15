@@ -25,14 +25,17 @@ use std::ops::iter::RevIterRef
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls Arr[T, cmp n: USize] {
-  # A fixed size, inline array of element type T. The length is a compiletime constant, so storage lives on the stack
-  # with no heap allocations, and therefore no allocation generic type parameter. The layout is statically known. All
-  # methods for the array type are intrinsic as the Arr[T, n] type lowers to the llvm array type, where all methods are
-  # defined in llvm directly.
-  # @type T: The type of elements stored in the array. This is a generic type parameter that can be any type, there are
-  # no constraints.
-  # @cmp n: The length of the array. This is a compile-time constant that determines how many elements the array can
-  # hold. The length is fixed and cannot be changed after the array is created.
+  # A fixed size, inline array of element type T. The length is a compiletime
+  # constant, so storage lives on the stack with no heap allocations, and
+  # therefore no allocation generic type parameter. The layout is statically
+  # known. All methods for the array type are intrinsic as the Arr[T, n] type
+  # lowers to the llvm array type, where all methods are defined in llvm
+  # directly.
+  # @type T: The type of elements stored in the array. This is a generic type
+  #   parameter that can be any type, there are no constraints.
+  # @cmp n: The length of the array. This is a compile-time constant that
+  #   determines how many elements the array can hold. The length is fixed and
+  #   cannot be changed after the array is created.
 }
 
 sup [T, cmp n: USize] Arr[T, n] {
@@ -44,9 +47,11 @@ sup [T, cmp n: USize] Arr[T, n] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun swap(&mut self, i: USize, j: USize) -> Void {
-    # Handing "mem::ops::swap" two mutable borrows into one array is refused: an index borrow names the whole array,
-    # since only the run-time indices could tell "self[mut i]" from "self[mut j]", and "i == j" makes them one. So the
-    # swap happens here with a single element borrow live at a time, and the aliasing case is named.
+    # Handing "mem::ops::swap" two mutable borrows into one array is refused: an
+    # index borrow names the whole array, since only the run-time indices could
+    # tell "self[mut i]" from "self[mut j]", and "i == j" makes them one. So the
+    # swap happens here with a single element borrow live at a time, and the
+    # aliasing case is named.
     # @let i: The index of the first element to swap.
     # @let j: The index of the second element to swap.
 
@@ -87,23 +92,34 @@ sup [T, cmp n: USize] Arr[T, n] ext RevIterMov[T] {
   cor reverse_iter_mov(self) -> Iterator[T] { }
 }
 
-sup [T, cmp n: USize] Arr[T, n] ext Eq {
+sup [T: Eq, cmp n: USize] Arr[T, n] ext Eq {
   !versioned(base="1.0.0", new="1.0.0")
   fun eq(&self, that: &Self) -> Bool {
-    # Use the `sppc::memcpy` function to compare the memory of the two arrays. This is a fast and efficient way to check
-    # for equality, as it compares the raw bytes of the arrays directly.
-    # @let that: The other array to compare against. This is a reference to another instance of the same array type.
+    # Compare the arrays element by element with each element's own `Eq`. A raw
+    # memory comparison would only be right for plain data: an element that owns
+    # storage elsewhere (a `Vec`, a `Str`) holds a pointer, so two equal
+    # elements would compare unequal whenever their storage lives at different
+    # addresses.
+    # @let that: The other array to compare against. This is a reference to
+    #   another instance of the same array type.
     # @ret: A boolean value indicating whether the two arrays are equal.
 
-    ret std::mem::ops::mem_cmp(&self.pointer, &that.ptr(), n * std::mem::ops::size_of[T]()) == 0
+    loop i in Range[USize]::between(0_uz, n) {
+      case self[i] != that[i] { ret false }
+    }
+    ret true
   }
 
   !versioned(base="1.0.0", new="1.0.0")
   fun ne(&self, that: &Self) -> Bool {
-    # @let that: The other array to compare against. This is a reference to another instance of the same array type.
+    # @let that: The other array to compare against. This is a reference to
+    #   another instance of the same array type.
     # @ret: A boolean value indicating whether the two arrays are not equal.
 
-    ret std::mem::ops::mem_cmp(&self.pointer, &that.ptr(), n * std::mem::ops::size_of[T]()) != 0
+    loop i in Range[USize]::between(0_uz, n) {
+      case self[i] != that[i] { ret true }
+    }
+    ret false
   }
 }
 
@@ -124,7 +140,8 @@ type HeapArr[T, cmp n: USize, A: Alloc] = Single[Arr[T, n], A]
 sup [T: Format, cmp n: USize] Arr[T, n] ext Format {
   !versioned(base="1.0.0", new="1.0.0")
   fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
-    # Format an array as `[a, b, c]`, the placeholder's spec applying to each element.
+    # Format an array as `[a, b, c]`, the placeholder's spec applying to each
+    # element.
 
     ret format::format_elements[T](formatter, self)
   }

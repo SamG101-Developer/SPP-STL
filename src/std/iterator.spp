@@ -1,6 +1,7 @@
 use std::annotations::versioned
 use std::clone::Clone
 use std::ops::drop::Drop
+use std::ops::ord::Ord
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
@@ -78,6 +79,39 @@ sup [T] Iterator[T] {
     gen with self
     gen with other
   }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  cor zip[U, G: Gen[U]](self, mut other: G) -> Iterator[(T, U)] {
+    # The `zip` method is a coroutine that walks this iterator and `other` in lockstep, yielding a tuple of one item
+    # from each, so that zipping `[1, 2, 3]` with `[4, 5, 6]` yields `(1, 4), (2, 5), (3, 6)`. It stops as soon as
+    # either side runs out, and the unpaired items of the longer side are discarded. Because a tuple cannot hold a
+    # borrow, both sides must yield owned items: zip `iter_mov()`, not `iter_ref()`.
+    # @type U: The type of the items produced by `other`, and the second element of each yielded tuple.
+    # @type G: A generator type that produces items of type `U`.
+    # @let other: The generator to pair this iterator's items with. It is resumed once per item of this iterator.
+    # @ret: A new iterator of type `Iterator[(T, U)]` yielding the paired items, as long as the shorter side.
+
+    # Resume "other" once per item of "self"; the first time it has
+    # nothing left, the item from "self" has no partner and is dropped.
+    loop item in self {
+      let next = other.res()
+      case next of {
+        is U(..) {
+          # Bound first: "gen (item, next)" written inline is not seen as
+          # moving "item", and fails E94 at the end of the loop body.
+          let pair = (item, next)
+          gen pair
+        }
+        is std::generator::GenDone() {
+          drop(item)
+          exit
+        }
+      }
+    }
+    drop(other)
+  }
+
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
@@ -267,6 +301,33 @@ sup [T] Iterator[T] {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
+  fun fold_first[F: FunRef[(T, T), T]](self, reducer: F) -> Opt[T] {
+    # The `fold_first` method folds the iterator like `fold`, but takes its initial value from the iterator itself: the
+    # first item is the starting accumulator, and the reducer is applied to it and each item after. This is the
+    # equivalent of C++'s `std::ranges::fold_left_first`. Because the accumulator is an item, the reducer both takes
+    # and returns a `T`, and an empty iterator has no initial value, so the result is optional.
+    # @type F: A function type that represents the reducer function used for folding the items. It must implement the
+    # `FunRef[(T, T), T]` interface, taking the accumulated value and the next item, and returning the new accumulated
+    # value.
+    # @let reducer: The reducer function that combines the accumulated value with each item after the first.
+    # @ret: `Some(val=acc)` holding the final accumulated value, or `None` if the iterator yielded nothing. A single
+    # item is returned as-is, without calling the reducer.
+
+    # The accumulator starts empty; the first item fills it, and
+    # every item after is reduced into it.
+    let mut acc: Opt[T] = None
+    loop item in self {
+      let prev = acc
+      acc = case prev of {
+        is Some[T](val) { Some(val=reducer(val, item)) }
+        else { Some(val=item) }
+      }
+    }
+    ret acc
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
   fun all[F: FunMut[(T,), Bool]](self, mut f: F) -> Bool {
     # The `all` method is a function that takes an iterator and a predicate function, and returns `true` if the
     # predicate returns `true` for all items produced by the iterator, and `false` otherwise. The method uses a loop to
@@ -422,6 +483,48 @@ sup [T] Iterator[T] {
 sup [T: Clone] Iterator[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
+  cor zip_longest[U: Clone, G: Gen[U]](self, mut other: G, self_default: T, other_default: U) -> Iterator[(T, U)] {
+    # The `zip_longest` method is `zip` that runs until both sides are exhausted rather than either: once one side
+    # runs out, its place in each tuple is filled with a clone of its default. Zipping `[1, 2, 3]` with `[4]`, with
+    # defaults `0` and `9`, yields `(1, 4), (2, 9), (3, 9)`; swapping the sides yields `(4, 1), (9, 2), (9, 3)`. As
+    # with `zip`, both sides must yield owned items.
+    # @type U: The type of the items produced by `other`, and the second element of each yielded tuple.
+    # @type G: A generator type that produces items of type `U`.
+    # @let other: The generator to pair this iterator's items with.
+    # @let self_default: Cloned into the first element of each tuple after this iterator runs out.
+    # @let other_default: Cloned into the second element of each tuple after `other` runs out.
+    # @ret: A new iterator of type `Iterator[(T, U)]` yielding the paired items, as long as the longer side.
+
+    # While "self" has items, pair each with the next from "other",
+    # or with the default once "other" has run out. The tuples are
+    # bound before "gen": see "zip" for why.
+    loop item in self {
+      let next = other.res()
+      case next of {
+        is U(..) {
+          let pair = (item, next)
+          gen pair
+        }
+        is std::generator::GenDone() {
+          let pair = (item, other_default.clone())
+          gen pair
+        }
+      }
+    }
+
+    # "self" has run out; whatever is left of "other" is paired with
+    # the default. An "other" that ran out first yields nothing here,
+    # as a finished generator answers "GenDone" every time.
+    loop next in other {
+      let pair = (self_default.clone(), next)
+      gen pair
+    }
+    drop(self_default)
+    drop(other_default)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
   cor cycle(self) -> Iterator[T] {
     # The `cycle` method is a coroutine that takes an iterator and produces a new iterator that yields the items from
     # the original iterator in an infinite loop. The method uses the `gen with` syntax to exhaust the generator, and
@@ -435,5 +538,27 @@ sup [T: Clone] Iterator[T] {
     let mut buffer = self.collect[Vec[T]]()
     defer drop(buffer)
     loop true { gen with buffer.clone().iter_mov() }
+  }
+}
+
+sup [T: Ord] Iterator[T] {
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun min(self) -> Opt[T] {
+    # The smallest item of the iterator, or `None` if it yields nothing. Of equal items, the first is kept. Items are
+    # compared with `Ord::min`, so a type's own `min` is used where it overrides the default.
+    # @ret: `Some(val=item)` holding the smallest item, or `None` for an empty iterator.
+
+    ret self.fold_first((a: T, b: T) { ret a.min(b) })
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun max(self) -> Opt[T] {
+    # The largest item of the iterator, or `None` if it yields nothing. Of equal items, the first is kept. Items are
+    # compared with `Ord::max`, so a type's own `max` is used where it overrides the default.
+    # @ret: `Some(val=item)` holding the largest item, or `None` for an empty iterator.
+
+    ret self.fold_first((a: T, b: T) { ret a.max(b) })
   }
 }
