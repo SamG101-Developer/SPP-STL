@@ -133,3 +133,31 @@ fun test_iteration_over_a_single_element() -> Void {
   std::debug::assert(count == 1_uz, "one step")
   std::debug::assert(sum == 5, "and it saw the element")
 }
+
+!test(group="std/array")
+fun test_equality_compares_each_element() -> Void {
+  let a = [1, 2, 3]
+  let b = [1, 2, 3]
+  let c = [1, 2, 4]
+  std::debug::assert(a == b, "equal elements make equal arrays")
+  std::debug::assert(a != c, "one differing element makes them unequal")
+  std::debug::assert((a == c).not, "and eq agrees with ne")
+}
+
+!test(group="std/array")
+fun test_equality_over_elements_that_own_storage() -> Void {
+  let mut x = Vec[S32]::new()
+  x.append(5)
+  let mut y = Vec[S32]::new()
+  y.append(5)
+  let mut z = Vec[S32]::new()
+  z.append(6)
+  let a = [x]
+  let b = [y]
+  let c = [z]
+  std::debug::assert(a == b, "equal vectors in different storage compare equal")
+  std::debug::assert(a != c, "unequal vectors compare unequal")
+  drop(a)
+  drop(b)
+  drop(c)
+}
