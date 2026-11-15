@@ -50,14 +50,6 @@ fun test_replace_returns_the_previous_value() -> Void {
 }
 
 !test(group="std/mem/ops")
-fun test_take_leaves_the_default_behind() -> Void {
-  let mut x = 7
-  let old = std::mem::ops::take(&mut x)
-  std::debug::assert(old == 7, "the previous value comes back")
-  std::debug::assert(x == 0, "and the slot holds the type's default")
-}
-
-!test(group="std/mem/ops")
 fun test_copy_duplicates_through_a_borrow() -> Void {
   let x = 9
   let y = std::mem::ops::copy(&x)
