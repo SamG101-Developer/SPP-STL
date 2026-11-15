@@ -70,6 +70,65 @@ fun test_vector_clone_is_independent() -> Void {
 }
 
 !test(group="std/vector")
+fun test_vector_clone_of_heap_elements_is_deep() -> Void {
+  # Element-owned heap memory (the inner buffers) must be cloned, not shared:
+  # a bytewise clone made the two vectors free each inner buffer twice.
+  let mut v = Vec[Vec[S32]]::new()
+  v.append(Vec[S32]::from(&[1, 2]))
+  v.append(Vec[S32]::from(&[3]))
+  let c1 = v.clone()
+  let mut c2 = v.clone()
+  c2[mut 0_uz].append(9)
+  std::debug::assert(v[0_uz].len() == 2_uz, "original inner is untouched")
+  std::debug::assert(c1[0_uz].len() == 2_uz, "other clone's inner is untouched")
+  std::debug::assert(c2[0_uz].len() == 3_uz, "the changed clone's inner grew")
+  std::debug::assert(c1[1_uz][0_uz]@ == 3, "clone kept the contents")
+  drop(c1)
+  drop(c2)
+  drop(v)
+}
+
+!test(group="std/vector")
+fun test_vector_from_view_of_heap_elements_clones_them() -> Void {
+  let arr = [Vec[S32]::from(&[5, 6]), Vec[S32]::from(&[7])]
+  let mut v = Vec[Vec[S32]]::from(&arr)
+  v[mut 0_uz].append(8)
+  std::debug::assert(arr[0_uz].len() == 2_uz, "the view's element is untouched")
+  std::debug::assert(v[0_uz].len() == 3_uz, "the vector's element is its own")
+  drop(v)
+  drop(arr)
+}
+
+!test(group="std/vector")
+fun test_vector_append_many_of_heap_elements_keeps_them_alive() -> Void {
+  # The moved-from vector's buffer is freed without destroying the elements
+  # that moved out of it; dropping it whole freed their inner buffers.
+  let mut a = Vec[Vec[S32]]::new()
+  a.append(Vec[S32]::from(&[1]))
+  let mut b = Vec[Vec[S32]]::new()
+  b.append(Vec[S32]::from(&[2, 3]))
+  a.append_many(b)
+  std::debug::assert(a.len() == 2_uz, "length")
+  std::debug::assert(a[1_uz].len() == 2_uz, "moved element kept its length")
+  std::debug::assert(a[1_uz][1_uz]@ == 3, "moved element kept its contents")
+  drop(a)
+}
+
+!test(group="std/vector")
+fun test_vector_insert_many_at_of_heap_elements_keeps_them_alive() -> Void {
+  let mut a = Vec[Vec[S32]]::new()
+  a.append(Vec[S32]::from(&[1]))
+  a.append(Vec[S32]::from(&[4]))
+  let mut b = Vec[Vec[S32]]::new()
+  b.append(Vec[S32]::from(&[2, 3]))
+  a.insert_many_at(1_uz, b)
+  std::debug::assert(a.len() == 3_uz, "length")
+  std::debug::assert(a[1_uz][1_uz]@ == 3, "inserted element kept its contents")
+  std::debug::assert(a[2_uz][0_uz]@ == 4, "shifted tail")
+  drop(a)
+}
+
+!test(group="std/vector")
 fun test_vector_iteration_visits_every_element_in_order() -> Void {
   let v = Vec[S32]::from(&[1, 2, 3, 4])
   let mut sum = 0

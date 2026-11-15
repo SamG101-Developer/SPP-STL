@@ -444,7 +444,7 @@ sup [T, A: Alloc] Vec[T, A] {
       &mut self.buffer.ptr(), &that.buffer.ptr(),
       that.len() * elem_size, self.len() * elem_size)
     self.length += that.len()
-    drop(that)
+    that.free_moved_from()
   }
 
   !private
@@ -474,7 +474,20 @@ sup [T, A: Alloc] Vec[T, A] {
       &mut self.buffer.ptr(), &that.buffer.ptr(),
       that.len() * elem_size, index * elem_size)
     self.length += that.len()
-    drop(that)
+    that.free_moved_from()
+  }
+
+  !private
+  !versioned(base="1.0.0", new="1.0.0")
+  fun free_moved_from(self) -> Void {
+    # Frees the buffer of a vector whose elements were moved out bytewise, as
+    # `append_many_unchecked` and `insert_vec_at_unchecked` do, without running
+    # their destructors: `drop(self)` would destroy the elements that now live
+    # in the other vector.
+    # @ret:
+
+    let Vec[T, A](buffer, length) = self
+    drop(buffer)
   }
 
   !cold
@@ -536,18 +549,15 @@ sup [T: Clone, A: Alloc] Vec[T, A] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun append_from_view(&mut self, that: &View[T]) -> Void {
-    # Append all the elements from a view, by copying the elements from the
-    # view.
+    # Append all the elements from a view, by cloning each element. A bytewise
+    # copy would leave both the view and the vector owning any heap memory an
+    # element holds, and free it twice.
     # @let that: The view to append from.
 
-    # Allocate enough space and them memcpy the
-    # elements from the view into the vector.
     self.capacity_reserve(that.len())
-    let elem_size = std::mem::ops::size_of[T]()
-    std::mem::ops::mem_copy(
-      &mut self.buffer.ptr(), &that.ptr(),
-      that.len() * elem_size, self.len() * elem_size)
-    self.length += that.len()
+    loop element in that.iter_ref() {
+      self.append_unchecked(element.clone())
+    }
   }
 
   !public
@@ -558,7 +568,6 @@ sup [T: Clone, A: Alloc] Vec[T, A] {
     # @let that: The view to create the vector from.
     # @let alloc: The allocator used for the new vector's storage.
     # @ret: A new vector containing the elements from the view.
-    # @todo: This doesn't respect clone steps.
 
     let mut vec = Self::new_with_capacity_in(that.len(), alloc)
     vec.append_from_view(that)
@@ -636,15 +645,15 @@ sup [T, A: Alloc] Vec[T, A] ext RevIterMov[T] {
 sup [T: Clone, A: Alloc & Clone] Vec[T, A] ext Clone {
   !versioned(base="1.0.0", new="1.0.0")
   fun clone(&self) -> Self {
-    #
-    # @ret:
+    # Clones each element into a new vector with the same allocator. A bytewise
+    # copy would share any heap memory the elements own (the inner buffers of a
+    # `Vec[Vec[T]]`), which both vectors then free.
+    # @ret: The independent copy.
 
-    let alloc = self.buffer.alloc.clone()
-    let mut vec = Self::new_with_capacity_in(self.len(), alloc)
-    std::mem::ops::mem_copy(
-      &mut vec.buffer.ptr(), &self.buffer.ptr(),
-      self.len() * std::mem::ops::size_of[T]())
-    vec.length = self.len()
+    let mut vec = Self::new_with_capacity_in(self.len(), self.buffer.alloc.clone())
+    loop element in self.iter_ref() {
+      vec.append_unchecked(element.clone())
+    }
     ret vec
   }
 }
