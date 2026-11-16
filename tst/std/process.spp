@@ -12,7 +12,7 @@ fun test_args_name_the_program_first() -> Void {
 fun test_get_env_reads_a_long_value_whole() -> Void {
   # Longer than the 1024 bytes "get_env" once read into, which came back as not
   # set.
-  let value = Str::new_filled(3000_uz, 118_u8)
+  let value = Str::new_filled(3000_uz, 'v')
   std::debug::assert(std::process::set_env("SPP_STD_TEST_LONG", &value), "set")
   let got = std::process::get_env("SPP_STD_TEST_LONG").expect("a long value read as not set")
   std::debug::assert(got.len() == 3000_uz, "a long value cut short")
