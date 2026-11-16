@@ -381,17 +381,24 @@ sup [A: Alloc] Str[A] {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun take_last(&mut self) -> Opt[U8] {
-    # The `take_last` method removes and returns the last byte from the string,
-    # if it exists. This is equivalent to a pop operation from a lot of other
-    # languages. If the string is empty, it returns `None`.
-    # @ret: An `Opt[U8]` that contains the last byte of the string if it exists,
-    #   or `None` if the string is empty. This allows for safe handling of the
-    #   case where there are no bytes to take, without risking a runtime error.
+  fun take_last(&mut self) -> Opt[Char] {
+    # The `take_last` method removes and returns the last character from the
+    # string, if it exists. This is equivalent to a pop operation from a lot of
+    # other languages. The whole character is removed, however many bytes it
+    # encodes to, so the string stays valid UTF-8.
+    # @ret: An `Opt[Char]` that contains the last character of the string if it
+    #   exists, or `None` if the string is empty.
 
-    # Use the `pop` method of the internal vector to remove and
-    # return the last byte, if it exists.
-    ret self.bytes.take_last()
+    case self.bytes.is_empty() { ret None }
+
+    # Walk back over the continuation bytes to the last character's leading
+    # byte, decode the character from there, then cut the bytes off.
+    let len = self.bytes.len()
+    let mut start = len - 1_uz
+    loop self.bytes[start].is_utf8_char_boundary().not { start -= 1_uz }
+    let last = self[start to len].chars().nth(0_uz)
+    self.bytes.truncate(start)
+    ret last
   }
 
   !public

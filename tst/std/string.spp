@@ -258,3 +258,21 @@ fun test_new_filled_repeats_a_character() -> Void {
   std::debug::assert(empty.is_empty(), "no characters")
   drop(empty)
 }
+
+!test(group="std/string")
+fun test_take_last_removes_a_whole_character() -> Void {
+  # A multi-byte last character comes off whole, so no lone leading byte is
+  # left behind (taking one byte off "aé" would leave "a" + `0xc3`).
+  let mut s = Str::from("aé€😀")
+  std::debug::assert(s.take_last().unwrap() == '😀', "four-byte character")
+  std::debug::assert(s.len() == 6_uz, "four bytes gone")
+  std::debug::assert(s.take_last().unwrap() == '€', "three-byte character")
+  std::debug::assert(s.take_last().unwrap() == 'é', "two-byte character")
+  std::debug::assert(s.len() == 1_uz, "only the 'a' is left")
+  let checked = Str::from_utf8(s.view_ref())
+  std::debug::assert(checked.is_pass(), "still valid UTF-8")
+  drop(checked)
+  std::debug::assert(s.take_last().unwrap() == 'a', "one-byte character")
+  std::debug::assert(s.take_last().is_none(), "nothing left")
+  drop(s)
+}
