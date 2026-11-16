@@ -118,7 +118,7 @@ fun returned_ptr_ref(ptr: CVoidPtr) -> Opt[CRefBytePtr] {
 
   ret NonNull[CUChar]::from_ptr(ptr)
     .pass_opt()
-    .map((p: NonNull[CUChar]) CRefBytePtr(inner=p))
+    .map(|p: NonNull[CUChar]| CRefBytePtr(inner=p))
 }
 
 !public
@@ -138,7 +138,7 @@ fun returned_ptr_mut(ptr: CVoidPtr) -> Opt[CMutBytePtr] {
 
   ret NonNull[CUChar]::from_ptr(ptr)
     .pass_opt()
-    .map((p: NonNull[CUChar]) CMutBytePtr(inner=p))
+    .map(|p: NonNull[CUChar]| CMutBytePtr(inner=p))
 }
 
 !public

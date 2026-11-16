@@ -70,43 +70,43 @@ fun test_equality_compares_both_the_side_and_the_value() -> Void {
 !test(group="std/result")
 fun test_map_transforms_only_the_passed_value() -> Void {
   let p: Res[S32, Bool] = Pass(val=3)
-  std::debug::assert(p.map((x: S32) x * 2).unwrap() == 6, "the value is transformed")
+  std::debug::assert(p.map(|x: S32| x * 2).unwrap() == 6, "the value is transformed")
 
   let f: Res[S32, Bool] = Fail(err=true)
-  std::debug::assert(f.map((x: S32) x * 2).is_fail(), "a failure passes through untouched")
+  std::debug::assert(f.map(|x: S32| x * 2).is_fail(), "a failure passes through untouched")
 }
 
 !test(group="std/result")
 fun test_map_err_transforms_only_the_failure() -> Void {
   let f: Res[S32, Bool] = Fail(err=true)
-  std::debug::assert(f.map_err((e: Bool) e.not).unwrap_err().not, "the failure is transformed")
+  std::debug::assert(f.map_err(|e: Bool| e.not).unwrap_err().not, "the failure is transformed")
 
   let p: Res[S32, Bool] = Pass(val=3)
-  std::debug::assert(p.map_err((e: Bool) e.not).unwrap() == 3, "a pass passes through untouched")
+  std::debug::assert(p.map_err(|e: Bool| e.not).unwrap() == 3, "a pass passes through untouched")
 }
 
 !test(group="std/result")
 fun test_map_or_falls_back_for_a_failure() -> Void {
   let p: Res[S32, Bool] = Pass(val=3)
-  std::debug::assert(p.map_or(99, (x: S32) x * 2) == 6, "a pass uses the mapper")
+  std::debug::assert(p.map_or(99, |x: S32| x * 2) == 6, "a pass uses the mapper")
 
   let f: Res[S32, Bool] = Fail(err=true)
-  std::debug::assert(f.map_or(99, (x: S32) x * 2) == 99, "a fail uses the default")
+  std::debug::assert(f.map_or(99, |x: S32| x * 2) == 99, "a fail uses the default")
 }
 
 !test(group="std/result")
 fun test_and_then_chains_a_fallible_step() -> Void {
   let p: Res[S32, Bool] = Pass(val=4)
   std::debug::assert(
-    p.and_then((x: S32) -> Res[S32, Bool] { ret Pass(val=x + 1) }).unwrap() == 5, "the step runs on a pass")
+    p.and_then(|x: S32| -> Res[S32, Bool] { ret Pass(val=x + 1) }).unwrap() == 5, "the step runs on a pass")
 
   let q: Res[S32, Bool] = Pass(val=4)
   std::debug::assert(
-    q.and_then((x: S32) -> Res[S32, Bool] { ret Fail(err=true) }).is_fail(), "a step may itself fail")
+    q.and_then(|x: S32| -> Res[S32, Bool] { ret Fail(err=true) }).is_fail(), "a step may itself fail")
 
   let f: Res[S32, Bool] = Fail(err=true)
   std::debug::assert(
-    f.and_then((x: S32) -> Res[S32, Bool] { ret Pass(val=x + 1) }).is_fail(), "a failure short-circuits")
+    f.and_then(|x: S32| -> Res[S32, Bool] { ret Pass(val=x + 1) }).is_fail(), "a failure short-circuits")
 }
 
 !test(group="std/result")
@@ -123,34 +123,34 @@ fun test_ior_keeps_the_first_when_it_passed() -> Void {
 !test(group="std/result")
 fun test_is_pass_and_tests_the_passed_value() -> Void {
   let p: Res[S32, Bool] = Pass(val=4)
-  std::debug::assert(p.is_pass_and((x: S32) x > 3), "a pass whose value matches")
+  std::debug::assert(p.is_pass_and(|x: S32| x > 3), "a pass whose value matches")
 
   let q: Res[S32, Bool] = Pass(val=1)
-  std::debug::assert(q.is_pass_and((x: S32) x > 3).not, "a pass whose value does not")
+  std::debug::assert(q.is_pass_and(|x: S32| x > 3).not, "a pass whose value does not")
 
   let f: Res[S32, Bool] = Fail(err=true)
-  std::debug::assert(f.is_pass_and((x: S32) true).not, "a fail is never pass-and")
+  std::debug::assert(f.is_pass_and(|x: S32| true).not, "a fail is never pass-and")
 }
 
 !test(group="std/result")
 fun test_is_fail_and_tests_the_failure() -> Void {
   let f: Res[S32, Bool] = Fail(err=true)
-  std::debug::assert(f.is_fail_and((e: Bool) e), "a fail whose error matches")
+  std::debug::assert(f.is_fail_and(|e: Bool| e), "a fail whose error matches")
 
   let g: Res[S32, Bool] = Fail(err=false)
-  std::debug::assert(g.is_fail_and((e: Bool) e).not, "a fail whose error does not")
+  std::debug::assert(g.is_fail_and(|e: Bool| e).not, "a fail whose error does not")
 
   let p: Res[S32, Bool] = Pass(val=1)
-  std::debug::assert(p.is_fail_and((e: Bool) true).not, "a pass is never fail-and")
+  std::debug::assert(p.is_fail_and(|e: Bool| true).not, "a pass is never fail-and")
 }
 
 !test(group="std/result")
 fun test_unwrap_or_else_computes_the_fallback_from_the_error() -> Void {
   let p: Res[S32, Bool] = Pass(val=7)
-  std::debug::assert(p.unwrap_or_else((e: Bool) 99) == 7, "a pass ignores the fallback")
+  std::debug::assert(p.unwrap_or_else(|e: Bool| 99) == 7, "a pass ignores the fallback")
 
   let f: Res[S32, Bool] = Fail(err=true)
-  std::debug::assert(f.unwrap_or_else((e: Bool) 99) == 99, "a fail computes it")
+  std::debug::assert(f.unwrap_or_else(|e: Bool| 99) == 99, "a fail computes it")
 }
 
 !test(group="std/result")
@@ -164,7 +164,7 @@ fun test_expect_and_expect_err_pick_the_matching_side() -> Void {
 
 fun store_through_a_captured_borrow(out: &mut std::string::Str) -> USize {
   let r: Res[std::string::Str, Bool] = Pass(val=std::string::Str::from("hello"))
-  ret r.map((s: std::string::Str caps &mut out) {
+  ret r.map(|s: std::string::Str caps &mut out| {
     let len = s.len()
     std::mem::ops::drop(std::mem::ops::replace(out, s))
     len

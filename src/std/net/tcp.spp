@@ -286,7 +286,7 @@ sup TcpStream {
     # Milliseconds, or zero for "None" - zero being what
     # an all-zero "timeval" says, which is "no timeout".
     let millis = timeout
-      .and_then((t: Duration) Some(val=t.as_millis()))
+      .and_then(|t: Duration| Some(val=t.as_millis()))
       .unwrap_or(0_u64)
 
     let tv = sppc::CTimeval(
@@ -343,7 +343,7 @@ sup TcpStream {
     # "None" means no timeout, which is what an all-zero "timeval"
     # says.
     let millis = timeout
-      .and_then((t: Duration) Some(val=t.as_millis()))
+      .and_then(|t: Duration| Some(val=t.as_millis()))
       .unwrap_or(0_u64)
 
     let tv = sppc::CTimeval(

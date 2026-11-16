@@ -24,7 +24,7 @@ sup [T: Ord] Range[T] ext Gen[T] {
   # incrementing by the specified `step` size.
 }
 
-sup [T: Ord & One & Zero & AddAssign & Copy] Range[T] {
+sup [T: Ord and One and Zero and AddAssign and Copy] Range[T] {
   # The constructor of a range, a coroutine rather than a function: a `Range` is
   # a generator, so what it returns is the suspended coroutine that yields the
   # values, and resuming it is what walks the range.

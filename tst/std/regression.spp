@@ -667,12 +667,12 @@ fun test_two_case_blocks_over_a_shadowed_subject_name() -> Void {
 fun zz_chain_through_a_closure() -> U64 {
   let some: std::option::Opt[std::time::duration::Duration] =
     std::option::Some(val=std::time::duration::Duration::from_millis(250_u64))
-  ret some.and_then((t: std::time::duration::Duration) std::option::Some(val=t.as_millis())).unwrap_or(0_u64)
+  ret some.and_then(|t: std::time::duration::Duration| std::option::Some(val=t.as_millis())).unwrap_or(0_u64)
 }
 
 fun zz_chain_through_a_closure_on_none() -> U64 {
   let none: std::option::Opt[std::time::duration::Duration] = std::option::None
-  ret none.and_then((t: std::time::duration::Duration) std::option::Some(val=t.as_millis())).unwrap_or(7_u64)
+  ret none.and_then(|t: std::time::duration::Duration| std::option::Some(val=t.as_millis())).unwrap_or(7_u64)
 }
 
 !test(group="std/regression")
@@ -945,13 +945,13 @@ fun call_ref(c: &FunRef[(), U32]) -> U32 {
 !test(group="std/regression")
 fun test_closure_called_through_a_borrowed_function_type() -> Void {
   let mut n = 1_u32
-  let mut bump = (caps &mut n) { n@ = n@ + 1_u32 }
+  let mut bump = |caps &mut n| { n@ = n@ + 1_u32 }
   call_twice_mut(&mut bump)
   std::mem::ops::drop(bump)
   std::debug::assert(n == 3_u32, "a &mut FunMut call writes back to the capture")
 
   let base = 10_u32
-  let read = (caps &base, &n) { ret base + n@ }
+  let read = |caps &base, &n| { ret base + n@ }
   std::debug::assert(call_ref(&read) == 13_u32, "a &FunRef call reads the capture")
   std::debug::assert(call_ref(&read) == 13_u32, "a &FunRef call leaves the closure callable")
 }
@@ -962,7 +962,7 @@ fun test_closure_called_through_a_borrowed_function_type() -> Void {
 fun test_closure_reads_an_immutably_borrowed_capture() -> Void {
   let a = 3_u32
   let b = 4_u32
-  let read = (caps &a, &b) { ret a@ + b@ }
+  let read = |caps &a, &b| { ret a@ + b@ }
   std::debug::assert(read() == 7_u32, "both borrowed captures read back their values")
 }
 
@@ -1026,11 +1026,11 @@ fun test_a_consumed_closure_releases_its_environment() -> Void {
   let n = 5_u32
   let s = Str::from("held by the environment")
   let len = s.len()
-  std::debug::assert(regression_call_once((caps n) -> U32 { ret n + 1_u32 }) == 6_u32, "a value capture")
+  std::debug::assert(regression_call_once(|caps n| -> U32 { ret n + 1_u32 }) == 6_u32, "a value capture")
   let mut total = 0_u32
   let mut i = 0_u32
   loop i < 50_u32 {
-    total = total + regression_call_once((caps i) -> U32 { ret i })
+    total = total + regression_call_once(|caps i| -> U32 { ret i })
     i = i + 1_u32
   }
   std::debug::assert(total == 1225_u32, "fifty environments, each released by its call")
@@ -1051,9 +1051,9 @@ fun regression_drop_mut(f: std::function::FunMut[(), S32]) -> Void {
 !test(group="std/regression")
 fun test_a_borrowing_closure_passed_as_a_fun_mov_keeps_its_stack_environment() -> Void {
   let x = 41_s32
-  std::debug::assert(regression_run_mov((caps &x) -> S32 { ret x@ + 1 }) == 42, "called through the FunMov")
+  std::debug::assert(regression_run_mov(|caps &x| -> S32 { ret x@ + 1 }) == 42, "called through the FunMov")
   let z = 5_s32
-  regression_drop_mut((caps &z) -> S32 { ret z@ })
+  regression_drop_mut(|caps &z| -> S32 { ret z@ })
 }
 
 # A borrow "iter_ref" yields of a variant element is not a valid pointer: using it, by a method call or by a "case"

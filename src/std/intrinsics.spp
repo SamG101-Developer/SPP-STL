@@ -207,6 +207,11 @@ cmp fun one[T: Num](this: &T, that: &T) -> Bool { }  # ordered not equal (floats
 
 !public
 !always_inline
+!intrinsic(name="std.intrinsics.une")
+cmp fun une[T: Num](this: &T, that: &T) -> Bool { }  # unordered not equal (floats): IEEE "!=", true with a NaN
+
+!public
+!always_inline
 !intrinsic(name="std.intrinsics.slt")
 cmp fun slt[T: Num](this: &T, that: &T) -> Bool { }
 
@@ -519,6 +524,11 @@ cmp fun float_trunc[T: FloatingPoint](value: T) -> T { }
 !always_inline
 !intrinsic(name="std.intrinsics.float_round")
 cmp fun float_round[T: FloatingPoint](value: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_round_even")
+cmp fun float_round_even[T: FloatingPoint](value: T) -> T { }
 
 !public
 !always_inline

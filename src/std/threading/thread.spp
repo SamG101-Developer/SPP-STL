@@ -96,7 +96,7 @@ cls ThreadId {
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-fun spawn[Out: ThreadSafe, F: FunMov[(), Out] & ThreadSafe](function: F) -> Res[JoinHandle[Out], ThreadErr] {
+fun spawn[Out: ThreadSafe, F: FunMov[(), Out] and ThreadSafe](function: F) -> Res[JoinHandle[Out], ThreadErr] {
   # Spawn a new thread running `function`, and return a handle that can be
   # joined for its result. `Out` is read off the function's own return type
   # rather than given at the call site. Both types crossing the boundary have to
@@ -140,7 +140,7 @@ fun spawn[Out: ThreadSafe, F: FunMov[(), Out] & ThreadSafe](function: F) -> Res[
   # The body moves the function onto the new thread and
   # takes copies of the cell and its user count with it.
   let mut handle = 0_u64
-  let err = sppc::pthread_create(std::cffi::CClosure[(), Void]::from((caps function, slot, users) -> Void {
+  let err = sppc::pthread_create(std::cffi::CClosure[(), Void]::from(|caps function, slot, users| -> Void {
     let mut into = slot
     into.write(function())
 

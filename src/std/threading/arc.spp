@@ -92,7 +92,7 @@ sup [T, A: Alloc] Arc[T, A] {
   }
 }
 
-sup [T, A: Alloc & Clone] Arc[T, A] {
+sup [T, A: Alloc and Clone] Arc[T, A] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun downgrade(&self) -> Weak[T, A] {
@@ -112,7 +112,7 @@ sup [T] Arc[T] ext FwdRef[T] {
   }
 }
 
-sup [T, A: Alloc & Clone] Arc[T, A] ext Clone {
+sup [T, A: Alloc and Clone] Arc[T, A] ext Clone {
   !versioned(base="1.0.0", new="1.0.0")
   fun clone(&self) -> Self {
     # Another handle to the same control block. The count is bumped atomically, which is what lets this happen through a

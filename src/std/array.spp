@@ -7,14 +7,13 @@ use std::clone::Clone
 use std::format::Format
 use std::format::Formatter
 use std::io::StreamErr
-use std::iterator::Indexed
 use std::iterator::Iterator
 use std::range::Range
+use std::num::bases::Zero
+use std::ops::add::Add
 use std::ops::eq::Eq
 use std::ops::fwd::FwdMut
 use std::ops::fwd::FwdRef
-use std::ops::idx::IndexMut
-use std::ops::idx::IndexRef
 use std::ops::iter::IterMov
 use std::ops::iter::IterMut
 use std::ops::iter::IterRef
@@ -36,6 +35,18 @@ cls Arr[T, cmp n: USize] {
   # @cmp n: The length of the array. This is a compile-time constant that
   #   determines how many elements the array can hold. The length is fixed and
   #   cannot be changed after the array is created.
+}
+
+sup [T: Zero, cmp n: USize] Arr[T, n] ext Zero {
+  fun zero() -> Self {
+    let arr = Self()
+    loop i in Range[USize]::between(0_uz, n) { arr[mut i]@ = T::zero() }
+    ret arr
+  }
+
+  fun is_zero(&self) -> Bool {
+    ret self.iter_ref().all(|elem: &T| elem.is_zero())
+  }
 }
 
 sup [T: Copy, cmp n: USize] Arr[T, n] {
@@ -133,3 +144,11 @@ sup [T: Format, cmp n: USize] Arr[T, n] ext Format {
     ret format::format_elements[T](formatter, self)
   }
 }
+
+# sup [T, cmp n: USize, cmp m: USize] Arr[T, n] ext Add[Arr[T, m], Arr[T, n + m]] {
+#   fun add(self, that: Arr[T, m]) -> Arr[T, n + m] {
+#     let out = Arr[T, n + m]::new()
+#     loop (i, elem) in self.iter_mov().enumerate() { out[mut i]@ = elem }
+#     loop (i, elem) in that.iter_mov().enumerate() { out[mut n + i]@ = elem }
+#   }
+# }

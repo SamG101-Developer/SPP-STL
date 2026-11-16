@@ -1,8 +1,8 @@
 !test(group="std/threading/rwlock")
 fun test_a_write_is_seen_by_a_later_read() -> Void {
   let l = std::threading::rwlock::RwLock[S32]::new(1).expect("rwlock")
-  l.with_write((v: &mut S32) { v@ = 5 }).expect("write")
-  let seen = l.with_read((v: &S32) { ret v@ }).expect("read")
+  l.with_write(|v: &mut S32| { v@ = 5 }).expect("write")
+  let seen = l.with_read(|v: &S32| { ret v@ }).expect("read")
   std::debug::assert(seen == 5, "the read sees the write")
   drop(l)
 }
@@ -10,9 +10,9 @@ fun test_a_write_is_seen_by_a_later_read() -> Void {
 !test(group="std/threading/rwlock")
 fun test_readers_share_and_exclude_a_writer() -> Void {
   let l = std::threading::rwlock::RwLock[S32]::new(1).expect("rwlock")
-  let (reader_shared, writer_shut_out) = l.with_read((v: &S32 caps &l) {
-    let r = l.try_with_read((w: &S32) { ret w@ })
-    let w = l.try_with_write((w: &mut S32) { ret 0 })
+  let (reader_shared, writer_shut_out) = l.with_read(|v: &S32 caps &l| {
+    let r = l.try_with_read(|w: &S32| { ret w@ })
+    let w = l.try_with_write(|w: &mut S32| { ret 0 })
     let seen = (r.is_pass(), w.is_fail())
     drop(r)
     drop(w)
@@ -20,7 +20,7 @@ fun test_readers_share_and_exclude_a_writer() -> Void {
   }).expect("read")
   std::debug::assert(reader_shared, "a second reader shares the hold")
   std::debug::assert(writer_shut_out, "a writer is shut out while a reader holds it")
-  let after = l.try_with_write((v: &mut S32) { ret 0 })
+  let after = l.try_with_write(|v: &mut S32| { ret 0 })
   std::debug::assert(after.is_pass(), "the write hold is free once the readers are done")
   drop(after)
   drop(l)

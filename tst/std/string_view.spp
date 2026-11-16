@@ -118,18 +118,18 @@ fun test_starts_with_and_ends_with_take_a_multi_byte_character() -> Void {
 !test(group="std/string_view")
 fun test_rfind_if_gives_the_last_match() -> Void {
   let s = "a b c"
-  std::debug::assert(s.rfind_if((c: Char) c.is_whitespace()).unwrap() == 3_uz, "the last of several matches")
-  std::debug::assert(s.rfind_if((c: Char) c == 'b').unwrap() == 2_uz, "a single match")
-  std::debug::assert(s.rfind_if((c: Char) c == 'z').is_none(), "no match")
-  std::debug::assert("".rfind_if((c: Char) true).is_none(), "an empty view has nothing to match")
+  std::debug::assert(s.rfind_if(|c: Char| c.is_whitespace()).unwrap() == 3_uz, "the last of several matches")
+  std::debug::assert(s.rfind_if(|c: Char| c == 'b').unwrap() == 2_uz, "a single match")
+  std::debug::assert(s.rfind_if(|c: Char| c == 'z').is_none(), "no match")
+  std::debug::assert("".rfind_if(|c: Char| true).is_none(), "an empty view has nothing to match")
 }
 
 !test(group="std/string_view")
 fun test_rfind_if_gives_a_byte_index_past_multi_byte_characters() -> Void {
   # "é" and "€" are two and three bytes, so the "x" after them is at byte 6, not character 3.
   let s = "aé€x"
-  std::debug::assert(s.rfind_if((c: Char) c == 'x').unwrap() == 6_uz, "the byte index of the match")
-  std::debug::assert(s.rfind_if((c: Char) c == '€').unwrap() == 3_uz, "a multi-byte match starts at its lead byte")
+  std::debug::assert(s.rfind_if(|c: Char| c == 'x').unwrap() == 6_uz, "the byte index of the match")
+  std::debug::assert(s.rfind_if(|c: Char| c == '€').unwrap() == 3_uz, "a multi-byte match starts at its lead byte")
 }
 
 !test(group="std/string_view")
