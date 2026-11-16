@@ -365,38 +365,6 @@ sup File ext Seek {
   }
 }
 
-!public
-!versioned(base="1.0.0", new="1.0.0")
-fun get_cwd() -> Res[Path, PathErr] {
-  # The `get_cwd` function retrieves the current working directory as a `File` object. It returns a `Res` type that
-  # indicates success or failure. On success, it returns a `File` object representing the current directory.
-  # @ret: A `Res` type containing a `File` object if the current directory is successfully retrieved, or an error
-  # message if the operation fails.
-
-  # getcwd writes a terminated string into the room it is given; the path is
-  # what comes before the terminator.
-  let mut buffer = std::string::Str::new_with_capacity(path::path_max)
-  defer drop(buffer)
-  let err = sppc::getcwd(buffer.ptr().as_c_mut(), path::path_max)
-  ret case err == 0 { Pass(val=Path(inner=std::string::Str::from_c_str(buffer.ptr()))) } else {
-    Fail(err=PathErr::from_errno(err))
-  }
-}
-
-!public
-!versioned(base="1.0.0", new="1.0.0")
-fun set_cwd(path: &Path) -> Res[Void, PathErr] {
-  # The `set_cwd` function changes the current working directory to the specified path.
-  # @let path: A reference to a `Path` object representing the new current working directory.
-  # @ret: A `Res` type containing an empty value if the current directory is successfully changed, or an error message
-  # if the operation fails.
-
-  let path_z = path.inner.to_c_str()
-  let err = sppc::chdir(path_z.ptr().as_c_ref())
-  drop(path_z)
-  ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
-}
-
 sup File ext Drop {
   # A `File` owns a descriptor, so discarding one closes it. This is the discard path, for a caller that will not look
   # at the outcome; anything that wants to know whether the close succeeded should call `close` directly, which is the

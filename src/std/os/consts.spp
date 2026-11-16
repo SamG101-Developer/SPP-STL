@@ -1,0 +1,25 @@
+use std::annotations::versioned
+
+# The platform's separators. The names of the system and architecture are
+# not here yet: a text constant needs the compiler to hand over its `!cfg`
+# values, which it does not.
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+!cfg(family="!windows")
+cmp path_sep: Char = '/'
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+!cfg(family="windows")
+cmp path_sep: Char = '\\'
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+!cfg(family="!windows")
+cmp path_list_sep: Char = ':'
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+!cfg(family="windows")
+cmp path_list_sep: Char = ';'

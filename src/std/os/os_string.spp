@@ -1,0 +1,218 @@
+use std::annotations::versioned
+use std::clone::Clone
+use std::format::Format
+use std::format::Formatter
+use std::io::StreamErr
+use std::mem::pointer::NonNull
+use std::ops::eq::Eq
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+cls OsStr {
+  # The `OsStr` type is a name or value as the operating system has it: an
+  # environment variable, a program argument, a path. These need not be valid
+  # UTF-8, so they cannot be a `Str` without changing them. On Unix they are any
+  # bytes but `0`, held as they are. On Windows they are UTF-16 that need not
+  # pair its surrogates, held as WTF-8: UTF-8 that also carries a lone surrogate
+  # as the three bytes its code point would take, so every name round-trips.
+  # Either way UTF-8 is a valid `OsStr`, so a `Str` becomes one freely
+  # (`OsStr::from`), and an `OsStr` becomes a `Str` with a check (`to_str`) or
+  # lossily (`to_str_lossy`). The bytes are private, as the Windows encoding is
+  # an invariant: not every byte sequence is WTF-8.
+  # @let bytes: The bytes, as above, with no terminator.
+
+  !package bytes: Vec[U8]
+}
+
+sup OsStr {
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun new() -> OsStr {
+    # An empty `OsStr`.
+    # @ret: A new empty `OsStr`.
+
+    ret OsStr(bytes=Vec[U8]::new())
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from(text: &StrView) -> OsStr {
+    # An `OsStr` of the same text. UTF-8 is valid on every platform (it is
+    # WTF-8 with no lone surrogates), so the bytes are copied as they are.
+    # @let text: The text to copy.
+    # @ret: A new `OsStr` holding `text`.
+
+    ret OsStr(bytes=Vec[U8]::from(text.view_ref()))
+  }
+
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
+  fun new_with_capacity(cap: USize) -> OsStr {
+    # An empty `OsStr` with room for `cap` bytes, for sppc to write a
+    # terminated name into (then read back with `from_c_str`).
+    # @let cap: The room, in bytes, terminator included.
+    # @ret: A new empty `OsStr` with at least that capacity.
+
+    ret OsStr(bytes=Vec[U8]::new_with_capacity(cap))
+  }
+
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from_c_str(ptr: NonNull[U8]) -> OsStr {
+    # Copy a terminated name that sppc wrote, which is in the platform's
+    # encoding (above), so nothing is checked or changed.
+    # @let ptr: A pointer to the first byte of a nul-terminated sequence.
+    # @ret: An owned copy of the bytes before the terminator.
+
+    let mut length = 0_uz
+    let err = sppc::strchr(ptr.as_c_ref(), 0_u8, &mut length)
+    let view = View(pointer=ptr, length=length)
+    ret OsStr(bytes=Vec[U8]::from(&view))
+  }
+
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
+  fun to_c_str(&self) -> OsStr {
+    # A nul-terminated copy, for sppc. The copy's own `len` does not count the
+    # terminator, which sits just past its last byte.
+    # @ret: An owned copy whose buffer has a `0` byte after the last byte.
+
+    let mut out = self.clone()
+    out.bytes.append(0_u8)
+    out.bytes.length -= 1_uz
+    ret out
+  }
+
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
+  fun ptr(&self) -> NonNull[U8] {
+    # A pointer to the first byte, for sppc.
+    # @ret: A non-null pointer to the bytes.
+
+    ret self.bytes.buffer.ptr()
+  }
+
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
+  fun byte(&self, index: USize) -> U8 {
+    # The byte at `index`, which must be in range.
+    # @let index: The byte's index.
+    # @ret: The byte.
+
+    ret self.bytes[index]@
+  }
+
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
+  fun slice(&self, from: USize, upto: USize) -> OsStr {
+    # A copy of the bytes from `from` up to `upto`. Only for cuts next to an
+    # ASCII byte (a separator, a dot): those never fall inside a character, in
+    # UTF-8 or WTF-8, so the copy is as valid as the original.
+    # @let from: The first byte's index.
+    # @let upto: The index past the last byte.
+    # @ret: The copy.
+
+    ret OsStr(bytes=Vec[U8]::from(self.bytes[from to upto]))
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun len(&self) -> USize {
+    # The length in bytes, in the platform's encoding (above).
+    # @ret: The number of bytes.
+
+    ret self.bytes.len()
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun is_empty(&self) -> Bool {
+    # Whether there are no bytes.
+    # @ret: `true` for an empty `OsStr`.
+
+    ret self.bytes.is_empty()
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun to_str(&self) -> Opt[Str] {
+    # The text, if it is valid UTF-8: on Windows, if it has no lone surrogate.
+    # @ret: A `Str` copy, or `None` when it would not be valid UTF-8.
+
+    ret Str::from_utf8(&self.bytes).pass_opt()
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun to_str_lossy(&self) -> Str {
+    # The text, with each part that is not valid UTF-8 replaced by U+FFFD (as
+    # `Str::from_utf8_lossy`): a lone surrogate on Windows, a stray byte on
+    # Unix. For showing a name; it may not name the same thing again.
+    # @ret: A `Str` copy, replaced where needed.
+
+    ret Str::from_utf8_lossy(&self.bytes)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun append(&mut self, char: Char) -> Void {
+    # Append one character, as UTF-8 (valid on every platform, as `from`).
+    # @let char: The character to append.
+
+    let mut buf = [0_u8; 4_uz]
+    let bytes_written = USize::from(char.encode_utf8(&mut buf))
+    self.bytes.append_from_view(buf[0_uz to bytes_written])
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun append_os_str(&mut self, that: &OsStr) -> Void {
+    # Append another `OsStr`'s bytes.
+    # @let that: The `OsStr` to append.
+
+    self.bytes.append_from_view(&that.bytes)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun append_str(&mut self, that: &StrView) -> Void {
+    # Append some text, which is valid on every platform (as `from`).
+    # @let that: The text to append.
+
+    self.bytes.append_from_view(that.view_ref())
+  }
+}
+
+sup OsStr ext Clone {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun clone(&self) -> Self {
+    # A copy with its own bytes.
+    # @ret: The copy.
+
+    ret OsStr(bytes=self.bytes.clone())
+  }
+}
+
+sup OsStr ext Eq {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun eq(&self, that: &Self) -> Bool {
+    # Whether the bytes are the same.
+    # @let that: The `OsStr` to compare with.
+    # @ret: `true` when equal.
+
+    ret self.bytes == that.bytes
+  }
+}
+
+sup OsStr ext Format {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
+    # Format as its text, lossily (as `to_str_lossy`), cut to the precision and
+    # padded.
+
+    let text = self.to_str_lossy()
+    formatter.pad(&text)
+    drop(text)
+    ret Pass[Void]()
+  }
+}

@@ -1,7 +1,7 @@
 !test(group="std/fs/path")
 fun test_a_path_keeps_what_it_was_built_from() -> Void {
   let p = std::fs::path::Path::new("/usr/local/bin")
-  let name = p.file_name()
+  let name = p.file_name().unwrap()
   std::debug::assert(name.len() == 3_uz, "the last component is there")
   drop(name)
   drop(p)
@@ -23,7 +23,7 @@ fun test_absolute_and_relative_are_opposites() -> Void {
 !test(group="std/fs/path")
 fun test_file_name_is_the_last_component() -> Void {
   let p = std::fs::path::Path::new("/usr/local/notes.txt")
-  let name = p.file_name()
+  let name = p.file_name().unwrap()
   std::debug::assert(name.len() == 9_uz, "notes.txt is nine bytes")
   drop(name)
   drop(p)
@@ -32,7 +32,7 @@ fun test_file_name_is_the_last_component() -> Void {
 !test(group="std/fs/path")
 fun test_file_stem_drops_the_extension() -> Void {
   let p = std::fs::path::Path::new("/usr/local/notes.txt")
-  let stem = p.file_stem()
+  let stem = p.file_stem().unwrap()
   std::debug::assert(stem.len() == 5_uz, "notes is five bytes")
   drop(stem)
   drop(p)
@@ -41,20 +41,20 @@ fun test_file_stem_drops_the_extension() -> Void {
 !test(group="std/fs/path")
 fun test_extension_is_what_follows_the_last_dot() -> Void {
   let p = std::fs::path::Path::new("/usr/local/notes.txt")
-  let suffix_str = p.extension()
+  let suffix_str = p.extension().unwrap()
   std::debug::assert(suffix_str.len() == 3_uz, "txt is three bytes")
   drop(suffix_str)
   drop(p)
 }
 
 !test(group="std/fs/path")
-fun test_a_name_with_no_extension_has_an_empty_one() -> Void {
+fun test_a_name_with_no_extension_has_none() -> Void {
   let p = std::fs::path::Path::new("/usr/local/README")
   let suffix_str = p.extension()
-  std::debug::assert(suffix_str.is_empty(), "no dot means no extension")
+  std::debug::assert(suffix_str.is_none(), "no dot means no extension")
   drop(suffix_str)
 
-  let stem = p.file_stem()
+  let stem = p.file_stem().unwrap()
   std::debug::assert(stem.len() == 6_uz, "and the whole name is the stem")
   drop(stem)
   drop(p)
@@ -73,7 +73,7 @@ fun test_components_counts_the_segments() -> Void {
 fun test_parent_drops_the_last_component() -> Void {
   let p = std::fs::path::Path::new("/usr/local/bin")
   let up = p.parent()
-  let name = up.file_name()
+  let name = up.file_name().unwrap()
   std::debug::assert(name.len() == 5_uz, "the parent's last component is now local")
   drop(name)
   drop(up)
@@ -85,7 +85,7 @@ fun test_joining_appends_a_component() -> Void {
   let base = std::fs::path::Path::new("/usr/local")
   let leaf = std::fs::path::Path::new("bin")
   let joined = base.join(&leaf)
-  let name = joined.file_name()
+  let name = joined.file_name().unwrap()
   std::debug::assert(name.len() == 3_uz, "the joined segment is now the last component")
   std::debug::assert(joined.ends_with(&leaf), "and the path ends with it")
   drop(name)
@@ -129,9 +129,9 @@ fun test_a_path_that_is_not_a_prefix() -> Void {
 !test(group="std/fs/path")
 fun test_with_extension_replaces_the_suffix() -> Void {
   let p = std::fs::path::Path::new("/usr/local/notes.txt")
-  let suffix_str = Str::from("md")
+  let suffix_str = std::os::os_string::OsStr::from("md")
   let renamed = p.with_extension(&suffix_str)
-  let new_ext = renamed.extension()
+  let new_ext = renamed.extension().unwrap()
   std::debug::assert(new_ext.len() == 2_uz, "the extension is the new one")
   drop(new_ext)
   drop(renamed)
@@ -143,8 +143,8 @@ fun test_with_extension_replaces_the_suffix() -> Void {
 fun test_a_clone_has_the_same_shape() -> Void {
   let p = std::fs::path::Path::new("/usr/local/bin")
   let c = p.clone()
-  let a_name = p.file_name()
-  let b_name = c.file_name()
+  let a_name = p.file_name().unwrap()
+  let b_name = c.file_name().unwrap()
   std::debug::assert(a_name.len() == b_name.len(), "the clone has the same last component")
   std::debug::assert(c.is_absolute(), "and is absolute like its source")
   drop(a_name)
@@ -176,4 +176,76 @@ fun test_copy_to_copies_the_whole_file() -> Void {
   let removed_dst = dst.remove_file()
   drop(removed_dst)
   drop(src, dst)
+}
+
+!test(group="std/fs/path")
+fun test_a_leading_dot_starts_a_name_not_an_extension() -> Void {
+  let p = std::fs::path::Path::new("/home/me/.bashrc")
+  let suffix = p.extension()
+  std::debug::assert(suffix.is_none(), "a dot that starts the name is part of it")
+  drop(suffix)
+  let stem = p.file_stem().unwrap()
+  std::debug::assert(stem.len() == 7_uz, "so the whole name is the stem")
+  drop(stem)
+  drop(p)
+}
+
+!test(group="std/fs/path")
+fun test_no_file_name_after_a_trailing_separator() -> Void {
+  let dir = std::fs::path::Path::new("/usr/local/")
+  let name = dir.file_name()
+  std::debug::assert(name.is_none(), "nothing after the last separator")
+  drop(name)
+  let stem = dir.file_stem()
+  std::debug::assert(stem.is_none(), "and so no stem")
+  drop(stem)
+  drop(dir)
+
+  let empty = std::fs::path::Path()
+  let none = empty.file_name()
+  std::debug::assert(none.is_none(), "an empty path has no file name")
+  drop(none)
+  drop(empty)
+}
+
+!test(group="std/fs/path")
+fun test_a_path_reads_back_as_text() -> Void {
+  let p = std::fs::path::Path::new("/tmp/héllo")
+  let text = p.to_str().expect("a text path is text")
+  std::debug::assert(text == "/tmp/héllo", "the same text")
+  drop(text)
+  let os = p.to_os_str()
+  let again = std::fs::path::Path::new(&os)
+  std::debug::assert(again.starts_with(&p) and p.starts_with(&again), "and the same path from its OsStr")
+  drop(again)
+  drop(os)
+  drop(p)
+}
+
+!test(group="std/fs/path")
+!cfg(family="!windows")
+fun test_a_file_whose_name_is_not_utf8() -> Void {
+  # Unix names are any bytes: a file named "x", 0xff is made, found, and its
+  # name read back exactly, where it used to become a `Str` that was not UTF-8.
+  let name = std::os::os_string::OsStr(bytes=Vec[U8]::from(&[0x78_u8, 0xff_u8]))
+  let path = std::fs::path::Path::new(&name)
+  let file = std::fs::file::File::open(&path, std::fs::file::FileMode().write().create().truncate()).unwrap()
+  let closed = file.close()
+  drop(closed)
+  std::debug::assert(path.is_file(), "the file is there")
+
+  let real = path.canonicalize().unwrap()
+  let real_name = real.file_name().unwrap()
+  std::debug::assert(real_name == name, "and its name comes back byte for byte")
+  let text = real.to_str()
+  std::debug::assert(text.is_none(), "which is not text")
+  drop(text)
+  drop(real_name)
+  drop(real)
+
+  let removed = path.remove_file()
+  std::debug::assert(removed.is_pass(), "the file is removed")
+  drop(removed)
+  drop(path)
+  drop(name)
 }

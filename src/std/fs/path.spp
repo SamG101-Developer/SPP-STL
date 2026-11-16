@@ -6,6 +6,10 @@ use std::fs::file::FileMode
 use std::ops::div::Div
 use std::ops::div::DivAssign
 use std::ops::drop::Drop
+use std::os::consts::path_sep
+use std::os::os_string::OsStr
+use std::format::Format
+use std::format::Formatter
 
 !public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
@@ -99,21 +103,60 @@ cls Path {
   # It provides methods for manipulating and querying paths, such as joining
   # paths, extracting file names, and iterating over path components. This type
   # uses C ffi functions that accept the `const char*` input, where-as the
-  # `File` type uses the `fd`, keeping these two types isolated.
-  # @let inner: The inner path stored as a string.
+  # `File` type uses the `fd`, keeping these two types isolated. A path is an
+  # `OsStr`, as the system's names need not be UTF-8; its pieces are split at
+  # the separators and dots, which are ASCII and so never inside a character.
+  # @let inner: The inner path, as the system has it.
 
-  !package inner: Str
+  !package inner: OsStr
 }
 
 sup Path {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun new(inner: &StrView) -> Path {
-    #
-    # @let inner:
-    # @ret:
+    # A path of some text, such as a literal.
+    # @let inner: The path's text.
+    # @ret: The path.
 
-    ret Self(inner=Str::from(inner))
+    ret Self(inner=OsStr::from(inner))
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun new(inner: &OsStr) -> Path {
+    # A path of a name the system gave, such as an argument.
+    # @let inner: The path, as the system has it.
+    # @ret: The path.
+
+    ret Self(inner=inner.clone())
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun to_os_str(&self) -> OsStr {
+    # The path, as the system has it.
+    # @ret: A copy of the path's `OsStr`.
+
+    ret self.inner.clone()
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun to_str(&self) -> Opt[Str] {
+    # The path as text, if it is valid UTF-8 (as `OsStr::to_str`).
+    # @ret: A `Str` copy, or `None` when it would not be valid UTF-8.
+
+    ret self.inner.to_str()
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun to_str_lossy(&self) -> Str {
+    # The path as text, for showing it (as `OsStr::to_str_lossy`).
+    # @ret: A `Str` copy, with U+FFFD for any part that is not UTF-8.
+
+    ret self.inner.to_str_lossy()
   }
 
   !public
@@ -124,166 +167,196 @@ sup Path {
     # path.
     # @ret: The parent directory as a `Path` object.
 
-    let idx = self.inner.rfind_if((c: Char) Path::is_sep(c))
-    case idx.is_none() { ret Path(inner=Str::from("")) }
-    ret Path(inner=Str::from(self.inner[0_uz to idx.unwrap()]))
+    ret case self.last_sep() of {
+      is Some[USize](val as idx) { Path(inner=self.inner.slice(0_uz, idx)) }
+      else { Path(inner=OsStr::new()) }
+    }
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun file_name(&self) -> Str {
+  fun file_name(&self) -> Opt[OsStr] {
     # The `file_name` method returns the file name component of the path (right
-    # of the right-most separator). If the path has no file name, it returns the
-    # entire path as a string.
-    # @ret: The file name as a `Str` object.
+    # of the right-most separator, or the whole path if it has none).
+    # @ret: The file name, or `None` when it would be empty (an empty path, or
+    #   one ending in a separator).
 
-    let idx = self.inner.rfind_if((c: Char) Path::is_sep(c))
-    case idx.is_none() { ret self.inner.clone() }
-    ret Str::from(self.inner[idx.unwrap() + 1_uz to self.inner.len()])
+    let start = case self.last_sep() of {
+      is Some[USize](val as idx) { idx + 1_uz }
+      else { 0_uz }
+    }
+    case start == self.inner.len() { ret None }
+    ret Some(val=self.inner.slice(start, self.inner.len()))
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun file_stem(&self) -> Str {
-    # The `file_stem` method returns the file stem component of the path (the
-    # file name without the extension). If the file name has no extension, it
-    # returns the entire file name.
-    # @ret: The file stem as a `Str` object.
+  fun file_stem(&self) -> Opt[OsStr] {
+    # The `file_stem` method returns the file name without its extension (as
+    # `extension`): the whole file name when it has none.
+    # @ret: The file stem, or `None` when there is no file name.
 
-    let file_name = self.file_name()
-    let idx = file_name.rfind_char('.')
-    case idx.is_none() { ret file_name }
-
-    let stem = Str::from(file_name[0_uz to idx.unwrap()])
-    drop(file_name)
-    ret stem
+    let name = self.file_name()?
+    ret case Path::extension_dot(&name) of {
+      is Some[USize](val as dot) {
+        let stem = name.slice(0_uz, dot)
+        drop(name)
+        Some(val=stem)
+      }
+      else { Some(val=name) }
+    }
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun extension(&self) -> Str {
-    # The `extension` method returns the file extension component of the path
-    # (the substring after the last dot in the file name). If the file name has
-    # no extension, it returns an empty string.
-    # @ret: The file extension as a `Str` object.
+  fun extension(&self) -> Opt[OsStr] {
+    # The `extension` method returns the file name's extension: what follows
+    # its last dot. A dot that starts the name (".bashrc") is part of the name,
+    # not an extension.
+    # @ret: The extension, or `None` when there is no file name or it has no
+    #   extension.
 
-    let file_name = self.file_name()
-    defer drop(file_name)
-
-    let idx = file_name.rfind_char('.')
-    case idx.is_none() { ret Str::from("") }
-    ret Str::from(file_name[idx.unwrap() + 1_uz to file_name.len()])
+    let name = self.file_name()?
+    defer drop(name)
+    ret case Path::extension_dot(&name) of {
+      is Some[USize](val as dot) { Some(val=name.slice(dot + 1_uz, name.len())) }
+      else { None }
+    }
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun components(&self) -> Vec[Str] {
+  fun components(&self) -> Vec[OsStr] {
     # The `components` method returns a vector of the individual components of
     # the path, split at every separator (either one on Windows). A leading
     # separator gives an empty first component, as "split" does.
-    # @ret: A vector of path components as `Str` objects.
+    # @ret: A vector of path components as `OsStr` objects.
 
-    let mut parts = Vec[Str]::new()
+    let mut parts = Vec[OsStr]::new()
     let mut start = 0_uz
-    loop true {
-      let rest = self.inner[start to self.inner.len()]
-      let idx = rest.find_if((c: Char) Path::is_sep(c))
-      case idx.is_none() { exit }
-      let pos = idx.unwrap()
-      parts.append(Str::from(self.inner[start to start + pos]))
-      start += pos + 1_uz
+    let mut idx = 0_uz
+    loop idx < self.inner.len() {
+      case Path::is_sep(self.inner.byte(idx)) {
+        parts.append(self.inner.slice(start, idx))
+        start = idx + 1_uz
+      }
+      idx += 1_uz
     }
-    parts.append(Str::from(self.inner[start to self.inner.len()]))
+    parts.append(self.inner.slice(start, self.inner.len()))
     ret parts
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  !cfg(family="!windows")
   fun sep(&self) -> Char {
     # The `sep` method returns the path separator character for the current
-    # platform. This is used to split and join paths in a platform-agnostic way.
-    # On Unix-like systems and WebAssembly, it's '/'.
+    # platform (`std::os::consts::path_sep`): '\\' on Windows, '/' elsewhere.
     # @ret: The path separator as a `Char` object.
 
-    ret '/'
-  }
-
-  !public
-  !versioned(base="1.0.0", new="1.0.0")
-  !cfg(family="windows")
-  fun sep(&self) -> Char {
-    # The `sep` method returns the path separator character for the current
-    # platform. This is used to split and join paths in a platform-agnostic way.
-    # On Windows, it's '\\'.
-    # @ret: The path separator as a `Char` object.
-
-    ret '\\'
+    ret path_sep
   }
 
   !package
   !versioned(base="1.0.0", new="1.0.0")
   !cfg(family="!windows")
-  fun is_sep(c: Char) -> Bool {
-    # The `is_sep` method checks if a character separates path components. On
-    # Unix-like systems and WebAssembly, only '/' does.
-    # @let c: The character to check.
-    # @ret: `true` if the character is a separator, `false` otherwise.
+  fun is_sep(byte: U8) -> Bool {
+    # The `is_sep` method checks if a byte is a path separator: '/'.
+    # @let byte: The byte to check.
+    # @ret: `true` if the byte is a path separator, `false` otherwise.
 
-    ret c == '/'
+    ret byte == 0x2f_u8
   }
 
   !package
   !versioned(base="1.0.0", new="1.0.0")
   !cfg(family="windows")
-  fun is_sep(c: Char) -> Bool {
-    # The `is_sep` method checks if a character separates path components. On
-    # Windows, both '\\' and '/' do, as the Windows API accepts either; `sep` is
-    # still '\\', for the paths this type builds.
-    # @let c: The character to check.
-    # @ret: `true` if the character is a separator, `false` otherwise.
+  fun is_sep(byte: U8) -> Bool {
+    # The `is_sep` method checks if a byte is a path separator: '\\', or '/',
+    # which Windows takes as well.
+    # @let byte: The byte to check.
+    # @ret: `true` if the byte is a path separator, `false` otherwise.
 
-    ret c == '\\' or c == '/'
+    ret byte == 0x5c_u8 or byte == 0x2f_u8
+  }
+
+  !private
+  !versioned(base="1.0.0", new="1.0.0")
+  fun last_sep(&self) -> Opt[USize] {
+    # The index of the right-most separator, if there is one.
+    # @ret: The separator's byte index, or `None`.
+
+    let mut idx = self.inner.len()
+    loop idx > 0_uz {
+      idx -= 1_uz
+      case Path::is_sep(self.inner.byte(idx)) { ret Some(val=idx) }
+    }
+    ret None
+  }
+
+  !private
+  !versioned(base="1.0.0", new="1.0.0")
+  fun extension_dot(name: &OsStr) -> Opt[USize] {
+    # The index of the dot that starts a file name's extension: its last dot,
+    # unless that is its first byte.
+    # @let name: The file name.
+    # @ret: The dot's byte index, or `None` when the name has no extension.
+
+    let mut idx = name.len()
+    loop idx > 1_uz {
+      idx -= 1_uz
+      case name.byte(idx) == 0x2e_u8 { ret Some(val=idx) }
+    }
+    ret None
+  }
+
+  !private
+  !versioned(base="1.0.0", new="1.0.0")
+  fun matches_at(&self, that: &OsStr, offset: USize) -> Bool {
+    # Whether `that`'s bytes appear in this path's at `offset`.
+    # @let that: The bytes to look for.
+    # @let offset: Where in this path to look.
+    # @ret: `true` if every byte matches and none runs past the end.
+
+    case offset + that.len() > self.inner.len() { ret false }
+    let mut idx = 0_uz
+    loop idx < that.len() {
+      case self.inner.byte(offset + idx) != that.byte(idx) { ret false }
+      idx += 1_uz
+    }
+    ret true
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
   !cfg(family="!windows")
   fun is_absolute(&self) -> Bool {
-    # The `is_absolute` method checks if the path is an absolute path. An
-    # absolute path starts with the root directory, '/'. This method provides a
-    # simple way to determine if a path is absolute or relative.
+    # The `is_absolute` method checks if the path is absolute: it starts with
+    # the separator.
     # @ret: `true` if the path is absolute, `false` otherwise.
 
-    ret self.inner.starts_with(self.sep())
+    ret self.inner.is_empty().not and Path::is_sep(self.inner.byte(0_uz))
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
   !cfg(family="windows")
   fun is_absolute(&self) -> Bool {
-    # The `is_absolute` method checks if the path is an absolute path. On
-    # Windows, that is a drive root ('C:\\' or 'C:/'), or a path starting with a
-    # separator (a UNC path '\\\\server', or rooted on the current drive).
+    # The `is_absolute` method checks if the path is absolute: it starts with
+    # a separator (the current drive's root), or with a drive letter, a colon
+    # and a separator ("C:\\").
     # @ret: `true` if the path is absolute, `false` otherwise.
 
-    case self.inner.starts_with('\\') or self.inner.starts_with('/') { ret true }
-
-    # A drive root: one letter, a colon, then a separator.
-    let colon = self.inner.find_char(':')
-    case colon.is_none() { ret false }
-    case colon.unwrap() != 1_uz { ret false }
-    let rest = self.inner[2_uz to self.inner.len()]
-    ret rest.starts_with('\\') or rest.starts_with('/')
+    case self.inner.is_empty() { ret false }
+    case Path::is_sep(self.inner.byte(0_uz)) { ret true }
+    ret self.inner.len() >= 3_uz
+      and self.inner.byte(1_uz) == 0x3a_u8
+      and Path::is_sep(self.inner.byte(2_uz))
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun is_relative(&self) -> Bool {
-    # The `is_relative` method checks if the path is a relative path. A relative
-    # path does not start with the root directory and is interpreted relative to
-    # the current working directory. This method provides a simple way to
-    # determine if a path is relative or absolute.
+    # The `is_relative` method checks if the path is relative (not absolute).
     # @ret: `true` if the path is relative, `false` otherwise.
 
     ret self.is_absolute().not
@@ -292,59 +365,52 @@ sup Path {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun starts_with(&self, prefix: &Path) -> Bool {
-    # The `starts_with` method checks if the path starts with the given prefix
-    # path. This is useful for determining if a path is a subpath of another
-    # path or for validating that a path is within a certain directory.
-    # @let prefix: The prefix path to check against.
+    # The `starts_with` method checks if the path's bytes start with the
+    # prefix's.
+    # @let prefix: The prefix to check for.
     # @ret: `true` if the path starts with the prefix, `false` otherwise.
 
-    ret self.inner.starts_with(&prefix.inner)
+    ret self.matches_at(&prefix.inner, 0_uz)
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun ends_with(&self, suffix: &Path) -> Bool {
-    # The `ends_with` method checks if the path ends with the given suffix path.
-    # This is useful for determining if a path has a certain file name or
-    # extension.
-    # @let suffix: The suffix path to check against.
+    # The `ends_with` method checks if the path's bytes end with the suffix's.
+    # @let suffix: The suffix to check for.
     # @ret: `true` if the path ends with the suffix, `false` otherwise.
 
-    ret self.inner.ends_with(&suffix.inner)
+    case suffix.inner.len() > self.inner.len() { ret false }
+    ret self.matches_at(&suffix.inner, self.inner.len() - suffix.inner.len())
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun join(self, other: &Path) -> Path {
-    # The `join` method concatenates the current path with another path,
-    # inserting the appropriate separator if necessary. This is used to build
-    # paths in a platform-agnostic way.
-    # @let other: The path to join with the current path.
-    # @ret: A new `Path` object representing the joined path.
+    # The `join` method joins this path with another, with one separator
+    # between them unless either side already has one there.
+    # @let other: The path to join onto this one.
+    # @ret: The joined path.
 
-    # Get the separator and take this path's string.
     let sep = self.sep()
     let Self(mut inner as new_path) = self
 
-    # Only add the separator if neither part has it, and never onto an empty
-    # path.
     case new_path.is_empty().not
-      and new_path.ends_with(sep).not
-      and other.inner.starts_with(sep).not {
+      and Path::is_sep(new_path.byte(new_path.len() - 1_uz)).not
+      and (other.inner.is_empty() or Path::is_sep(other.inner.byte(0_uz)).not) {
       new_path.append(sep)
     }
-    new_path.append_str(&other.inner)
+    new_path.append_os_str(&other.inner)
     ret Path(inner=new_path)
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun with_file_name(&self, file_name: &Str) -> Path {
-    # The `with_file_name` method replaces the file name component of the path
-    # with a new file name. This is useful for changing the file name while
-    # keeping the same directory structure.
-    # @let file_name: The new file name to use.
-    # @ret: A new `Path` object with the updated file name.
+  fun with_file_name(&self, file_name: &OsStr) -> Path {
+    # The `with_file_name` method returns this path with its file name
+    # replaced: the parent joined with `file_name`.
+    # @let file_name: The new file name.
+    # @ret: The new path.
 
     let parent = self.parent()
     let other = Path(inner=file_name.clone())
@@ -355,17 +421,18 @@ sup Path {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun with_extension(&self, extension: &Str) -> Path {
-    # The `with_extension` method replaces the file extension component of the
-    # path with a new extension. This is useful for changing the file type while
-    # keeping the same file name and directory structure.
-    # @let extension: The new file extension to use (without the dot).
-    # @ret: A new `Path` object with the updated file extension.
+  fun with_extension(&self, extension: &OsStr) -> Path {
+    # The `with_extension` method returns this path with its extension
+    # replaced, or removed for an empty `extension`.
+    # @let extension: The new extension, without its dot.
+    # @ret: The new path.
 
-    let file_stem = self.file_stem()
-    let new_file_name = case extension.is_empty() { file_stem } else { file_stem + "." + extension }
+    let mut new_file_name = self.file_stem().unwrap_or(OsStr::new())
     defer drop(new_file_name)
-
+    case extension.is_empty().not {
+      new_file_name.append('.')
+      new_file_name.append_os_str(extension)
+    }
     ret self.with_file_name(&new_file_name)
   }
 
@@ -462,12 +529,12 @@ sup Path {
 
     # realpath writes a terminated string into the room it is given; the path
     # is what comes before the terminator.
-    let mut buffer = Str::new_with_capacity(path_max)
+    let mut buffer = OsStr::new_with_capacity(path_max)
     defer drop(buffer)
     let path_z = self.inner.to_c_str()
     let err = sppc::realpath(path_z.ptr().as_c_ref(), buffer.ptr().as_c_mut())
     drop(path_z)
-    ret case err == 0 { Pass(val=Path(inner=Str::from_c_str(buffer.ptr()))) } else {
+    ret case err == 0 { Pass(val=Path(inner=OsStr::from_c_str(buffer.ptr()))) } else {
       Fail(err=PathErr::from_errno(err))
     }
   }
@@ -701,5 +768,14 @@ sup Path ext DivAssign {
     defer drop(that)
     let joined = self.clone().join(&that)
     std::mem::ops::drop(std::mem::ops::replace(self, joined))
+  }
+}
+
+sup Path ext Format {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
+    # Format as its text, lossily (as `to_str_lossy`).
+
+    ret self.inner.fmt(formatter)
   }
 }
