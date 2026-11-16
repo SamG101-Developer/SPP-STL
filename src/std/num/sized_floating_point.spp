@@ -28,31 +28,39 @@ use std::ops::sub::SubAssign
 !package
 !versioned(base="1.0.0", new="1.0.0")
 cls SizedFloatingPoint[cmp w: U32] {
-  # The `SizedFloatingPoint` class represents a floating point type with a specific bit width. The `w` parameter is a
-  # compile-time constant that specifies the number of bits used to represent the floating point value. This allows for
-  # the creation of floating point types with different levels of precision, such as single precision (32 bits) and
-  # double precision (64 bits). The `SizedFloatingPoint` class is a generic class that can be extended to create
-  # specific sized floating point types, and it provides various methods for performing mathematical operations and
-  # comparisons on floating point values of the specified size.
-  # @cmp w: The number of bits used to represent the floating point value. This is a compile-time constant that
-  # determines the precision of the floating point type. The provided values for `w` are: - `8`: Quarter precision
-  # floating point (binary8) - `16`: Half precision floating point (binary16) - `32`: Single precision floating point
-  # (binary32) - `64`: Double precision floating point (binary64) - `128`: Quadruple precision floating point
-  # (binary128)
+  # The `SizedFloatingPoint` class represents a floating point type with a
+  # specific bit width. The `w` parameter is a compile-time constant that
+  # specifies the number of bits used to represent the floating point value.
+  # This allows for the creation of floating point types with different levels
+  # of precision, such as single precision (32 bits) and double precision (64
+  # bits). The `SizedFloatingPoint` class is a generic class that can be
+  # extended to create specific sized floating point types, and it provides
+  # various methods for performing mathematical operations and comparisons on
+  # floating point values of the specified size.
+  # @cmp w: The number of bits used to represent the floating point value. This
+  #   is a compile-time constant that determines the precision of the floating
+  #   point type. The provided values for `w` are: - `8`: Quarter precision
+  #   floating point (binary8) - `16`: Half precision floating point (binary16)
+  #   - `32`: Single precision floating point (binary32) - `64`: Double
+  #   precision floating point (binary64) - `128`: Quadruple precision floating
+  #   point (binary128)
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext Copy {
-  # The `SizedFloatingPoint` class implements the `Copy` trait, which means that instances of sized floating point types
-  # can be copied by value. This allows for the creation of new instances of sized floating point types without having
-  # to explicitly clone or move the original instance.
+  # The `SizedFloatingPoint` class implements the `Copy` trait, which means that
+  # instances of sized floating point types can be copied by value. This allows
+  # for the creation of new instances of sized floating point types without
+  # having to explicitly clone or move the original instance.
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext FloatingPoint {
-  # The `SizedFloatingPoint` class extends the `FloatingPoint` class, which means that all sized floating point types
-  # are also considered floating point types. This allows for the use of sized floating point types in contexts where a
-  # floating point type is expected, such as in mathematical operations or generic functions that operate on floating
-  # point types, where the size is not important, typically code in the `instrinsics` module. This also saves on
-  # monomorphization costs.
+  # The `SizedFloatingPoint` class extends the `FloatingPoint` class, which
+  # means that all sized floating point types are also considered floating point
+  # types. This allows for the use of sized floating point types in contexts
+  # where a floating point type is expected, such as in mathematical operations
+  # or generic functions that operate on floating point types, where the size is
+  # not important, typically code in the `instrinsics` module. This also saves
+  # on monomorphization costs.
 }
 
 sup [cmp this_w: U32, cmp that_w: U32]
@@ -63,21 +71,28 @@ From[SizedFloatingPoint[that_w]] {
   !always_inline
   !versioned(base="1.0.0", new="1.0.0")
   fun from(that: SizedFloatingPoint[that_w]) -> Self {
-    # The `from` method defines how to convert a floating point value of one size to another size. The conversion is
-    # performed based on the relationship between the bit widths of the source and target types. The following three
-    # cases are handled:
-    # 1. If the target type has fewer bits than the source type (this_w < that_w), the conversion is done by
-    # truncating the source value to fit into the smaller target type. This is typically done by discarding the least
-    # significant bits of the source value, which may result in a loss of precision.
-    # 2. If the target type has more bits than the source type (this_w > that_w), the conversion is done by
-    # extending the source value to fit into the larger target type. This is typically done by adding additional bits to
-    # the source value, which may involve zero-extending or sign-extending the value depending on whether it is unsigned
-    # or signed.
-    # 3. If the target type has the same number of bits as the source type (this_w == that_w), the conversion is
-    # simply a copy of the value, as no change in precision is needed.
-    # @let that: The floating point value of the source type that is being converted to the target type.
-    # @ret: The converted floating point value of the target type, which may have a different precision than the source
-    # value depending on the relationship between their bit widths.
+    # The `from` method defines how to convert a floating point value of one
+    # size to another size. The conversion is performed based on the
+    # relationship between the bit widths of the source and target types. The
+    # following three cases are handled:
+    # 1. If the target type has fewer bits than the source type (this_w <
+    #   that_w), the conversion is done by truncating the source value to fit
+    #   into the smaller target type. This is typically done by discarding the
+    #   least significant bits of the source value, which may result in a loss
+    #   of precision.
+    # 2. If the target type has more bits than the source type (this_w >
+    #   that_w), the conversion is done by extending the source value to fit
+    #   into the larger target type. This is typically done by adding additional
+    #   bits to the source value, which may involve zero-extending or
+    #   sign-extending the value depending on whether it is unsigned or signed.
+    # 3. If the target type has the same number of bits as the source type
+    #   (this_w == that_w), the conversion is simply a copy of the value, as no
+    #   change in precision is needed.
+    # @let that: The floating point value of the source type that is being
+    #   converted to the target type.
+    # @ret: The converted floating point value of the target type, which may
+    #   have a different precision than the source value depending on the
+    #   relationship between their bit widths.
 
     # If the source has more bits, truncate it.
     # If the source has fewer bits, extend it.
@@ -90,14 +105,17 @@ From[SizedFloatingPoint[that_w]] {
 }
 
 sup [cmp w: U32, cmp that_w: U32] SizedFloatingPoint[w] ext From[SizedIntegerUnsigned[that_w]] {
-  # Converting from an unsigned integer of any width to a floating point value of this width. This is a value conversion
-  # (the integer's numeric value, rounded to the nearest representable float), not a bit reinterpretation.
+  # Converting from an unsigned integer of any width to a floating point value
+  # of this width. This is a value conversion (the integer's numeric value,
+  # rounded to the nearest representable float), not a bit reinterpretation.
 
   !always_inline
   !versioned(base="1.0.0", new="1.0.0")
   fun from(that: SizedIntegerUnsigned[that_w]) -> Self {
-    # Convert the unsigned integer source value to this floating point type using the `uitofp` intrinsic.
-    # @let that: The unsigned integer value of the source type that is being converted.
+    # Convert the unsigned integer source value to this floating point type
+    # using the `uitofp` intrinsic.
+    # @let that: The unsigned integer value of the source type that is being
+    #   converted.
     # @ret: The converted floating point value of this type.
 
     ret intrinsics::uitofp[w](that)
@@ -105,14 +123,17 @@ sup [cmp w: U32, cmp that_w: U32] SizedFloatingPoint[w] ext From[SizedIntegerUns
 }
 
 sup [cmp w: U32, cmp that_w: U32] SizedFloatingPoint[w] ext From[SizedIntegerSigned[that_w]] {
-  # Converting from a signed integer of any width to a floating point value of this width. This is a value conversion
-  # (the integer's numeric value, rounded to the nearest representable float), not a bit reinterpretation.
+  # Converting from a signed integer of any width to a floating point value of
+  # this width. This is a value conversion (the integer's numeric value, rounded
+  # to the nearest representable float), not a bit reinterpretation.
 
   !always_inline
   !versioned(base="1.0.0", new="1.0.0")
   fun from(that: SizedIntegerSigned[that_w]) -> Self {
-    # Convert the signed integer source value to this floating point type using the `sitofp` intrinsic.
-    # @let that: The signed integer value of the source type that is being converted.
+    # Convert the signed integer source value to this floating point type using
+    # the `sitofp` intrinsic.
+    # @let that: The signed integer value of the source type that is being
+    #   converted.
     # @ret: The converted floating point value of this type.
 
     ret intrinsics::sitofp[w](that)
@@ -120,17 +141,22 @@ sup [cmp w: U32, cmp that_w: U32] SizedFloatingPoint[w] ext From[SizedIntegerSig
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext Eq {
-  # Provide equality support to sized floating point numbers, allowing for comparison of two floating point values of
-  # the same size for equality and inequality. For differing sizes, the `From` trait can be used to convert one of the
-  # values to the same size as the other before performing the comparison.
+  # Provide equality support to sized floating point numbers, allowing for
+  # comparison of two floating point values of the same size for equality and
+  # inequality. For differing sizes, the `From` trait can be used to convert one
+  # of the values to the same size as the other before performing the
+  # comparison.
 
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun eq(&self, that: &Self) -> Bool {
-    # The `eq` method defines how to compare two floating point values of the same size for equality. It uses the `oeq`
-    # intrinsic function to perform the comparison, which checks if the two values are equal according to the rules of
-    # floating point arithmetic.
-    # @let that: A borrow to the floating point value that is being compared to the current value for equality.
-    # @ret: `true` if the two floating point values are equal, and `false` otherwise.
+    # The `eq` method defines how to compare two floating point values of the
+    # same size for equality. It uses the `oeq` intrinsic function to perform
+    # the comparison, which checks if the two values are equal according to the
+    # rules of floating point arithmetic.
+    # @let that: A borrow to the floating point value that is being compared to
+    #   the current value for equality.
+    # @ret: `true` if the two floating point values are equal, and `false`
+    #   otherwise.
 
     # Hook into equality intrinsic.
     ret intrinsics::oeq(self, that)
@@ -138,39 +164,48 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Eq {
 
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun ne(&self, that: &Self) -> Bool {
-    # The `ne` method defines how to compare two floating point values of the same size for inequality. It uses the
-    # `one` intrinsic function to perform the comparison, which checks if the two values are not equal according to the
-    # rules of floating point arithmetic.
-    # @let that: A borrow to the floating point value that is being compared to the current value for inequality.
-    # @ret: `true` if the two floating point values are not equal, and `false` otherwise.
+    # The `ne` method defines how to compare two floating point values of the
+    # same size for inequality. It uses the `une` intrinsic function (unordered
+    # not-equal), IEEE 754's "!=": always the negation of `eq`, so a NaN is
+    # unequal to everything, itself included, and `x != x` is how a NaN is
+    # found.
+    # @let that: A borrow to the floating point value that is being compared to
+    #   the current value for inequality.
+    # @ret: `true` if the two floating point values are not equal (either is a
+    #   NaN), and `false` otherwise.
 
     # Hook into inequality intrinsic.
-    ret intrinsics::one(self, that)
+    ret intrinsics::une(self, that)
   }
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext Ord {
-  # Provide ordering support to sized floating point numbers, allowing for comparison of two floating point values of
-  # the same size to determine their relative ordering. For differing sizes, the `From` trait can be used to convert one
-  # of the values to the same size as the other before performing the comparison.
+  # Provide ordering support to sized floating point numbers, allowing for
+  # comparison of two floating point values of the same size to determine their
+  # relative ordering. For differing sizes, the `From` trait can be used to
+  # convert one of the values to the same size as the other before performing
+  # the comparison.
 
   !versioned(base="1.0.0", new="1.0.0")
   fun ord(&self, that: &Self) -> S32 {
-    # The `ord` method defines how to compare two floating point values of the same size and determine their ordering.
-    # It uses the `fcmp` intrinsic function to perform the comparison, which checks the relative ordering of the two
-    # values according to the rules of floating point arithmetic. There is no intrinsic for `fcmp`, so it is implemented
-    # in S++.
-    # @let that: A borrow to the floating point value that is being compared to the current value for ordering.
-    # @ret: An `S32` value indicating the ordering of the two floating point values:
-    # - A negative value indicates that the current value is less than the other value.
-    # - Zero indicates that the two values are equal.
-    # - A positive value indicates that the current value is greater than the other value.
+    # The `ord` method defines how to compare two floating point values of the
+    # same size and determine their ordering. `Ord` asks for a total order,
+    # which the IEEE comparisons are not (a NaN is neither less, greater nor
+    # equal), so it is IEEE 754's totalOrder (`total_cmp`): -NaN < -inf < ... <
+    # -0 < +0 < ... < +inf < +NaN. It agrees with `<` and `==` everywhere except
+    # at NaNs and the two zeros; the operators keep their IEEE meaning, as this
+    # type overrides them.
+    # @let that: A borrow to the floating point value that is being compared to
+    #   the current value for ordering.
+    # @ret: An `S32` value indicating the ordering of the two floating point
+    #   values:
+    # - A negative value indicates that the current value is less than the other
+    #   value.
+    # - Zero indicates that the two values are the same value (bit for bit).
+    # - A positive value indicates that the current value is greater than the
+    #   other value.
 
-    # Simple 3 way comparison.
-    ret case self of {
-      < that { -1 }
-      > that { 1 }
-      else { 0 } }
+    ret self.total_cmp(that)
   }
 
   !versioned(base="1.0.0", new="1.0.0")
@@ -273,10 +308,12 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Ord {
 sup [cmp w: U32] SizedFloatingPoint[w] {
   !public !inline
   fun total_cmp(&self, that: &Self) -> S32 {
-    # A total order over every value, unlike `ord`, which has no answer for a NaN and calls -0 and +0 equal:
-    # -NaN < -inf < ... < -0 < +0 < ... < +inf < +NaN. The bits read as a signed integer already order the positives
-    # and put every negative below them; flipping a negative's bits below the sign puts the larger magnitudes lower
-    # (Hacker's Delight 2nd ed., section 17-3).
+    # A total order over every value (IEEE 754's totalOrder), which `ord` uses,
+    # unlike `<` and `==`, which have no answer for a NaN and call -0 and +0
+    # equal: -NaN < -inf < ... < -0 < +0 < ... < +inf < +NaN. The bits read as a
+    # signed integer already order the positives and put every negative below
+    # them; flipping a negative's bits below the sign puts the larger magnitudes
+    # lower (Hacker's Delight 2nd ed., section 17-3).
     # @let that: A borrow to the value compared with this one.
     # @ret: -1, 0 or 1, as `ord`.
     let this_bits = intrinsics::bit_cast[SizedIntegerSigned[w]](self@)
@@ -288,18 +325,21 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext Add {
-  # Provide addition support to sized floating point numbers, allowing for the addition of two floating point values of
-  # the same size. For differing sizes, the `From` trait can be used to convert one of the values to the same size as
-  # the other before performing the addition.
+  # Provide addition support to sized floating point numbers, allowing for the
+  # addition of two floating point values of the same size. For differing sizes,
+  # the `From` trait can be used to convert one of the values to the same size
+  # as the other before performing the addition.
 
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun add(self, that: Self) -> Self {
-    # The `add` method defines how to add two floating point values of the same size together. It uses the `float_add`
-    # intrinsic function to perform the addition, which computes the sum of the two values according to the rules of
-    # floating point arithmetic.
-    # @let that: The floating point value that is being added to the current value. It is of the same size as the
-    # current value.
-    # @ret: The result of the addition operation, which is a new floating point value of the same size as the operands.
+    # The `add` method defines how to add two floating point values of the same
+    # size together. It uses the `float_add` intrinsic function to perform the
+    # addition, which computes the sum of the two values according to the rules
+    # of floating point arithmetic.
+    # @let that: The floating point value that is being added to the current
+    #   value. It is of the same size as the current value.
+    # @ret: The result of the addition operation, which is a new floating point
+    #   value of the same size as the operands.
 
     # Hook into addition intrinsic.
     ret intrinsics::float_add(self, that)
@@ -307,21 +347,23 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Add {
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext AddAssign {
-  # Provide addition assignment support to sized floating point numbers, allowing for the addition of a floating point
-  # value to another floating point value of the same size in place. For differing sizes, the `From` trait can be used
-  # to convert the right-hand side value to the same size as the left-hand side value before performing the addition
-  # assignment.
+  # Provide addition assignment support to sized floating point numbers,
+  # allowing for the addition of a floating point value to another floating
+  # point value of the same size in place. For differing sizes, the `From` trait
+  # can be used to convert the right-hand side value to the same size as the
+  # left-hand side value before performing the addition assignment.
 
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun add_assign(&mut self, that: Self) -> Void {
-    # The `add_assign` method defines how to add a floating point value to another floating point value of the same size
-    # in place. It uses the `float_add_assign` intrinsic function to perform the addition assignment, which computes the
-    # sum of the two values and updates the left-hand side value with the result according to the rules of floating
-    # point arithmetic.
-    # @let that: The floating point value that is being added to the current value. It is of the same size as the
-    # current value.
-    # @ret: The method does not return a value, as the result of the addition assignment is stored directly in the
-    # left-hand side value.
+    # The `add_assign` method defines how to add a floating point value to
+    # another floating point value of the same size in place. It uses the
+    # `float_add_assign` intrinsic function to perform the addition assignment,
+    # which computes the sum of the two values and updates the left-hand side
+    # value with the result according to the rules of floating point arithmetic.
+    # @let that: The floating point value that is being added to the current
+    #   value. It is of the same size as the current value.
+    # @ret: The method does not return a value, as the result of the addition
+    #   assignment is stored directly in the left-hand side value.
 
     # Hook into addition assignment intrinsic.
     intrinsics::float_add_assign(self, that)
@@ -329,19 +371,22 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext AddAssign {
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext Sub {
-  # Provide subtraction support to sized floating point numbers, allowing for the subtraction of two floating point
-  # values of the same size. For differing sizes, the `From` trait can be used to convert one of the values to the same
+  # Provide subtraction support to sized floating point numbers, allowing for
+  # the subtraction of two floating point values of the same size. For differing
+  # sizes, the `From` trait can be used to convert one of the values to the same
   # size as the other before performing the subtraction.
 
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun sub(self, that: Self) -> Self {
-    # The `sub` method defines how to subtract one floating point value from another floating point value of the same
-    # size. It uses the `float_sub` intrinsic function to perform the subtraction, which computes the difference of the
-    # two values according to the rules of floating point arithmetic.
-    # @let that: The floating point value that is being subtracted from the current value. It is of the same size as the
-    # current value.
-    # @ret: The result of the subtraction operation, which is a new floating point value of the same size as the
-    # operands.
+    # The `sub` method defines how to subtract one floating point value from
+    # another floating point value of the same size. It uses the `float_sub`
+    # intrinsic function to perform the subtraction, which computes the
+    # difference of the two values according to the rules of floating point
+    # arithmetic.
+    # @let that: The floating point value that is being subtracted from the
+    #   current value. It is of the same size as the current value.
+    # @ret: The result of the subtraction operation, which is a new floating
+    #   point value of the same size as the operands.
 
     # Hook into subtraction intrinsic.
     ret intrinsics::float_sub(self, that)
@@ -349,21 +394,24 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Sub {
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext SubAssign {
-  # Provide subtraction assignment support to sized floating point numbers, allowing for the subtraction of a floating
-  # point value from another floating point value of the same size in place. For differing sizes, the `From` trait can
-  # be used to convert the right-hand side value to the same size as the left-hand side value before performing the
-  # subtraction assignment.
+  # Provide subtraction assignment support to sized floating point numbers,
+  # allowing for the subtraction of a floating point value from another floating
+  # point value of the same size in place. For differing sizes, the `From` trait
+  # can be used to convert the right-hand side value to the same size as the
+  # left-hand side value before performing the subtraction assignment.
 
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun sub_assign(&mut self, that: Self) -> Void {
-    # The `sub_assign` method defines how to subtract a floating point value from another floating point value of the
-    # same size in place. It uses the `float_sub_assign` intrinsic function to perform the subtraction assignment, which
-    # computes the difference of the two values and updates the left-hand side value with the result according to the
-    # rules of floating point arithmetic.
-    # @let that: The floating point value that is being subtracted from the current value. It is of the same size as the
-    # current value.
-    # @ret: The method does not return a value, as the result of the subtraction assignment is stored directly in the
-    # left-hand side value.
+    # The `sub_assign` method defines how to subtract a floating point value
+    # from another floating point value of the same size in place. It uses the
+    # `float_sub_assign` intrinsic function to perform the subtraction
+    # assignment, which computes the difference of the two values and updates
+    # the left-hand side value with the result according to the rules of
+    # floating point arithmetic.
+    # @let that: The floating point value that is being subtracted from the
+    #   current value. It is of the same size as the current value.
+    # @ret: The method does not return a value, as the result of the subtraction
+    #   assignment is stored directly in the left-hand side value.
 
     # Hook into subtraction assignment intrinsic.
     intrinsics::float_sub_assign(self, that)
@@ -371,19 +419,21 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext SubAssign {
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext Mul {
-  # Provide multiplication support to sized floating point numbers, allowing for the multiplication of two floating
-  # point values of the same size. For differing sizes, the `From` trait can be used to convert one of the values to the
-  # same size as the other before performing the multiplication.
+  # Provide multiplication support to sized floating point numbers, allowing for
+  # the multiplication of two floating point values of the same size. For
+  # differing sizes, the `From` trait can be used to convert one of the values
+  # to the same size as the other before performing the multiplication.
 
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun mul(self, that: Self) -> Self {
-    # The `mul` method defines how to multiply two floating point values of the same size together. It uses the
-    # `float_mul` intrinsic function to perform the multiplication, which computes the product of the two values
-    # according to the rules of floating point arithmetic.
-    # @let that: The floating point value that is being multiplied with the current value. It is of the same size as the
-    # current value.
-    # @ret: The result of the multiplication operation, which is a new floating point value of the same size as the
-    # operands.
+    # The `mul` method defines how to multiply two floating point values of the
+    # same size together. It uses the `float_mul` intrinsic function to perform
+    # the multiplication, which computes the product of the two values according
+    # to the rules of floating point arithmetic.
+    # @let that: The floating point value that is being multiplied with the
+    #   current value. It is of the same size as the current value.
+    # @ret: The result of the multiplication operation, which is a new floating
+    #   point value of the same size as the operands.
 
     # Hook into multiplication intrinsic.
     ret intrinsics::float_mul(self, that)
@@ -391,21 +441,26 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Mul {
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext MulAssign {
-  # Provide multiplication assignment support to sized floating point numbers, allowing for the multiplication of a
-  # floating point value with another floating point value of the same size in place. For differing sizes, the `From`
-  # trait can be used to convert the right-hand side value to the same size as the left-hand side value before
-  # performing the multiplication assignment.
+  # Provide multiplication assignment support to sized floating point numbers,
+  # allowing for the multiplication of a floating point value with another
+  # floating point value of the same size in place. For differing sizes, the
+  # `From` trait can be used to convert the right-hand side value to the same
+  # size as the left-hand side value before performing the multiplication
+  # assignment.
 
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun mul_assign(&mut self, that: Self) -> Void {
-    # The `mul_assign` method defines how to multiply a floating point value with another floating point value of the
-    # same size in place. It uses the `float_mul_assign` intrinsic function to perform the multiplication assignment,
-    # which computes the product of the two values and updates the left-hand side value with the result according to the
-    # rules of floating point arithmetic.
-    # @let that: The floating point value that is being multiplied with the current value. It is of the same size as the
-    # current value.
-    # @ret: The method does not return a value, as the result of the multiplication assignment is stored directly in the
-    # left-hand side value.
+    # The `mul_assign` method defines how to multiply a floating point value
+    # with another floating point value of the same size in place. It uses the
+    # `float_mul_assign` intrinsic function to perform the multiplication
+    # assignment, which computes the product of the two values and updates the
+    # left-hand side value with the result according to the rules of floating
+    # point arithmetic.
+    # @let that: The floating point value that is being multiplied with the
+    #   current value. It is of the same size as the current value.
+    # @ret: The method does not return a value, as the result of the
+    #   multiplication assignment is stored directly in the left-hand side
+    #   value.
 
     # Hook into multiplication assignment intrinsic.
     intrinsics::float_mul_assign(self, that)
@@ -413,18 +468,22 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext MulAssign {
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext Div {
-  # Provide division support to sized floating point numbers, allowing for the division of two floating point values of
-  # the same size. For differing sizes, the `From` trait can be used to convert one of the values to the same size as
-  # the other before performing the division.
+  # Provide division support to sized floating point numbers, allowing for the
+  # division of two floating point values of the same size. For differing sizes,
+  # the `From` trait can be used to convert one of the values to the same size
+  # as the other before performing the division.
 
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun div(self, that: Self) -> Self {
-    # The `div` method defines how to divide one floating point value by another floating point value of the same size.
-    # It uses the `float_div` intrinsic function to perform the division, which computes the quotient of the two values
-    # according to the rules of floating point arithmetic.
-    # @let that: The floating point value that is being used as the divisor in the division operation. It is of the same
-    # size as the current value (the dividend).
-    # @ret: The result of the division operation, which is a new floating point value of the same size as the operands.
+    # The `div` method defines how to divide one floating point value by another
+    # floating point value of the same size. It uses the `float_div` intrinsic
+    # function to perform the division, which computes the quotient of the two
+    # values according to the rules of floating point arithmetic.
+    # @let that: The floating point value that is being used as the divisor in
+    #   the division operation. It is of the same size as the current value (the
+    #   dividend).
+    # @ret: The result of the division operation, which is a new floating point
+    #   value of the same size as the operands.
 
     # Hook into division intrinsic.
     ret intrinsics::float_div(self, that)
@@ -432,21 +491,25 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Div {
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext DivAssign {
-  # Provide division assignment support to sized floating point numbers, allowing for the division of a floating point
-  # value by another floating point value of the same size in place. For differing sizes, the `From` trait can be used
-  # to convert the right-hand side value to the same size as the left-hand side value before performing the division
-  # assignment.
+  # Provide division assignment support to sized floating point numbers,
+  # allowing for the division of a floating point value by another floating
+  # point value of the same size in place. For differing sizes, the `From` trait
+  # can be used to convert the right-hand side value to the same size as the
+  # left-hand side value before performing the division assignment.
 
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun div_assign(&mut self, that: Self) -> Void {
-    # The `div_assign` method defines how to divide a floating point value by another floating point value of the same
-    # size in place. It uses the `float_div_assign` intrinsic function to perform the division assignment, which
-    # computes the quotient of the two values and updates the left-hand side value with the result according to the
-    # rules of floating point arithmetic.
-    # @let that: The floating point value that is being used as the divisor in the division assignment operation. It is
-    # of the same size as the current value (the dividend).
-    # @ret: The method does not return a value, as the result of the division assignment is stored directly in the
-    # left-hand side value.
+    # The `div_assign` method defines how to divide a floating point value by
+    # another floating point value of the same size in place. It uses the
+    # `float_div_assign` intrinsic function to perform the division assignment,
+    # which computes the quotient of the two values and updates the left-hand
+    # side value with the result according to the rules of floating point
+    # arithmetic.
+    # @let that: The floating point value that is being used as the divisor in
+    #   the division assignment operation. It is of the same size as the current
+    #   value (the dividend).
+    # @ret: The method does not return a value, as the result of the division
+    #   assignment is stored directly in the left-hand side value.
 
     # Hook into division assignment intrinsic.
     intrinsics::float_div_assign(self, that)
@@ -454,19 +517,24 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext DivAssign {
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext Rem {
-  # Provide remainder support to sized floating point numbers, allowing for the calculation of the remainder of the
-  # division of two floating point values of the same size. For differing sizes, the `From` trait can be used to convert
-  # one of the values to the same size as the other before performing the remainder calculation.
+  # Provide remainder support to sized floating point numbers, allowing for the
+  # calculation of the remainder of the division of two floating point values of
+  # the same size. For differing sizes, the `From` trait can be used to convert
+  # one of the values to the same size as the other before performing the
+  # remainder calculation.
 
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun rem(self, that: Self) -> Self {
-    # The `rem` method defines how to calculate the remainder of the division of one floating point value by another
-    # floating point value of the same size. It uses the `float_rem` intrinsic function to perform the remainder
-    # calculation, which computes the remainder according to the rules of floating point arithmetic.
-    # @let that: The floating point value that is being used as the divisor in the remainder calculation. It is of the
-    # same size as the current value (the dividend).
-    # @ret: The result of the remainder calculation, which is a new floating point value of the same size as the
-    # operands.
+    # The `rem` method defines how to calculate the remainder of the division of
+    # one floating point value by another floating point value of the same size.
+    # It uses the `float_rem` intrinsic function to perform the remainder
+    # calculation, which computes the remainder according to the rules of
+    # floating point arithmetic.
+    # @let that: The floating point value that is being used as the divisor in
+    #   the remainder calculation. It is of the same size as the current value
+    #   (the dividend).
+    # @ret: The result of the remainder calculation, which is a new floating
+    #   point value of the same size as the operands.
 
     # Hook into remainder intrinsic.
     ret intrinsics::float_rem(self, that)
@@ -474,21 +542,26 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Rem {
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext RemAssign {
-  # Provide remainder assignment support to sized floating point numbers, allowing for the calculation of the remainder
-  # of the division of a floating point value by another floating point value of the same size in place. For differing
-  # sizes, the `From` trait can be used to convert the right-hand side value to the same size as the left-hand side
-  # value before performing the remainder assignment.
+  # Provide remainder assignment support to sized floating point numbers,
+  # allowing for the calculation of the remainder of the division of a floating
+  # point value by another floating point value of the same size in place. For
+  # differing sizes, the `From` trait can be used to convert the right-hand side
+  # value to the same size as the left-hand side value before performing the
+  # remainder assignment.
 
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun rem_assign(&mut self, that: Self) -> Void {
-    # The `rem_assign` method defines how to calculate the remainder of the division of a floating point value by
-    # another floating point value of the same size in place. It uses the `float_rem_assign` intrinsic function to
-    # perform the remainder assignment, which computes the remainder of the two values and updates the left-hand side
-    # value with the result according to the rules of floating point arithmetic.
-    # @let that: The floating point value that is being used as the divisor in the remainder assignment operation. It is
-    # of the same size as the current value (the dividend).
-    # @ret: The method does not return a value, as the result of the remainder assignment is stored directly in the
-    # left-hand side value.
+    # The `rem_assign` method defines how to calculate the remainder of the
+    # division of a floating point value by another floating point value of the
+    # same size in place. It uses the `float_rem_assign` intrinsic function to
+    # perform the remainder assignment, which computes the remainder of the two
+    # values and updates the left-hand side value with the result according to
+    # the rules of floating point arithmetic.
+    # @let that: The floating point value that is being used as the divisor in
+    #   the remainder assignment operation. It is of the same size as the
+    #   current value (the dividend).
+    # @ret: The method does not return a value, as the result of the remainder
+    #   assignment is stored directly in the left-hand side value.
 
     # Hook into remainder assignment intrinsic.
     intrinsics::float_rem_assign(self, that)
@@ -496,19 +569,23 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext RemAssign {
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext Pow {
-  # Provide exponentiation support to sized floating point numbers, allowing for the calculation of one floating point
-  # value raised to the power of another floating point value of the same size. For differing sizes, the `From` trait
-  # can be used to convert one of the values to the same size as the other before performing the exponentiation.
+  # Provide exponentiation support to sized floating point numbers, allowing for
+  # the calculation of one floating point value raised to the power of another
+  # floating point value of the same size. For differing sizes, the `From` trait
+  # can be used to convert one of the values to the same size as the other
+  # before performing the exponentiation.
 
   !versioned(base="1.0.0", new="1.0.0")
   fun pow(self, that: Self) -> Self {
-    # The `pow` method defines how to calculate one floating point value raised to the power of another floating point
-    # value of the same size. It uses the `float_powf` intrinsic function to perform the exponentiation, which computes
-    # the result according to the rules of floating point arithmetic.
-    # @let that: The floating point value that is being used as the exponent in the exponentiation operation. It is of
-    # the same size as the current value (the base).
-    # @ret: The result of the exponentiation operation, which is a new floating point value of the same size as the
-    # operands.
+    # The `pow` method defines how to calculate one floating point value raised
+    # to the power of another floating point value of the same size. It uses the
+    # `float_powf` intrinsic function to perform the exponentiation, which
+    # computes the result according to the rules of floating point arithmetic.
+    # @let that: The floating point value that is being used as the exponent in
+    #   the exponentiation operation. It is of the same size as the current
+    #   value (the base).
+    # @ret: The result of the exponentiation operation, which is a new floating
+    #   point value of the same size as the operands.
 
     # Hook into exponentiation intrinsic.
     ret intrinsics::float_powf(self, that)
@@ -572,6 +649,9 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
   !public !inline
   !versioned(base="1.0.0", new="1.0.0")
   fun log(self, base: Self) -> Self {
+    # Two logarithms and a division, so up to three roundings: within a few
+    # ulps, not correctly rounded (nor are the other transcendental functions,
+    # which come from the platform's libm, as IEEE 754 permits).
     ret intrinsics::float_log2(self) / intrinsics::float_log2(base)
   }
 
@@ -628,7 +708,18 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
   !public !inline
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun round(self) -> Self {
+    # The nearest integral value, a half rounded away from zero (2.5 to 3, -2.5
+    # to -3), as C's and Rust's `round`.
     ret intrinsics::float_round(self)
+  }
+
+  !public !inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun round_even(self) -> Self {
+    # The nearest integral value, a half rounded to the even neighbour (2.5 to
+    # 2, 3.5 to 4): IEEE 754's roundToIntegralTiesToEven, which does not drift
+    # up or down over many roundings.
+    ret intrinsics::float_round_even(self)
   }
 
   !public !inline
@@ -709,7 +800,8 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
   !public !inline
   !versioned(base="1.0.0", new="1.0.0")
   fun acosh(self) -> Opt[Self] {
-    # ln(x + sqrt(x^2 - 1)), domain x >= 1 Todo: Unchecked version? Or no check => NaN?
+    # ln(x + sqrt(x^2 - 1)), domain x >= 1 Todo: Unchecked version? Or no check
+    # => NaN?
     case self < Self::one() { ret None }
     ret Some(val=(self + (self * self - Self::one()).sqrt()).ln())
   }
@@ -717,7 +809,8 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
   !public !inline
   !versioned(base="1.0.0", new="1.0.0")
   fun atanh(self) -> Opt[Self] {
-    # 0.5 * ln((1 + x) / (1 - x)),  domain |x| < 1 Todo: Unchecked version? Or no check => NaN?
+    # 0.5 * ln((1 + x) / (1 - x)),  domain |x| < 1 Todo: Unchecked version? Or
+    # no check => NaN?
     case self <= Self::neg_one() or self >= Self::one() { ret None }
     let one = Self::one()
     ret Some(val=((one + self) / (one - self)).ln() * Self::from(0.5_f64))
@@ -835,18 +928,21 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext One {
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] {
-  # Byte-array conversions for floating point values of any width. The byte representation is that of the value's
-  # IEEE-754 bit pattern. Each function reconstructs the same-width unsigned integer bit pattern from the bytes (reusing
-  # the integer implementations) and then reinterprets it as a floating point value with `bit_cast`. Exactly `w / 8`
-  # bytes are read from the view.
+  # Byte-array conversions for floating point values of any width. The byte
+  # representation is that of the value's IEEE-754 bit pattern. Each function
+  # reconstructs the same-width unsigned integer bit pattern from the bytes
+  # (reusing the integer implementations) and then reinterprets it as a floating
+  # point value with `bit_cast`. Exactly `w / 8` bytes are read from the view.
 
   !public
   !inline
   !versioned(base="1.0.0", new="1.0.0")
   fun from_le_bytes(bytes: &View[U8]) -> Self {
-    # Reconstruct a floating point value from the little-endian byte representation of its IEEE-754 bit pattern, where
-    # `bytes[0]` is the least-significant byte.
-    # @let bytes: A view over the little-endian byte representation of the value (at least `w / 8` bytes).
+    # Reconstruct a floating point value from the little-endian byte
+    # representation of its IEEE-754 bit pattern, where `bytes[0]` is the
+    # least-significant byte.
+    # @let bytes: A view over the little-endian byte representation of the value
+    #   (at least `w / 8` bytes).
     # @ret: The reconstructed floating point value.
 
     ret intrinsics::bit_cast[Self](SizedIntegerUnsigned[w]::from_le_bytes(bytes))
@@ -856,9 +952,11 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
   !inline
   !versioned(base="1.0.0", new="1.0.0")
   fun from_be_bytes(bytes: &View[U8]) -> Self {
-    # Reconstruct a floating point value from the big-endian byte representation of its IEEE-754 bit pattern, where
-    # `bytes[0]` is the most-significant byte.
-    # @let bytes: A view over the big-endian byte representation of the value (at least `w / 8` bytes).
+    # Reconstruct a floating point value from the big-endian byte representation
+    # of its IEEE-754 bit pattern, where `bytes[0]` is the most-significant
+    # byte.
+    # @let bytes: A view over the big-endian byte representation of the value
+    #   (at least `w / 8` bytes).
     # @ret: The reconstructed floating point value.
 
     ret intrinsics::bit_cast[Self](SizedIntegerUnsigned[w]::from_be_bytes(bytes))
@@ -868,9 +966,11 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
   !inline
   !versioned(base="1.0.0", new="1.0.0")
   fun from_ne_bytes(bytes: &View[U8]) -> Self {
-    # Reconstruct a floating point value from the native-endian byte representation of its IEEE-754 bit pattern,
-    # matching the in-memory layout of the target.
-    # @let bytes: A view over the native-endian byte representation of the value (at least `w / 8` bytes).
+    # Reconstruct a floating point value from the native-endian byte
+    # representation of its IEEE-754 bit pattern, matching the in-memory layout
+    # of the target.
+    # @let bytes: A view over the native-endian byte representation of the value
+    #   (at least `w / 8` bytes).
     # @ret: The reconstructed floating point value.
 
     ret intrinsics::bit_cast[Self](SizedIntegerUnsigned[w]::from_ne_bytes(bytes))
@@ -880,15 +980,18 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
 sup [cmp w: U32] SizedFloatingPoint[w] ext Format {
   !versioned(base="1.0.0", new="1.0.0")
   fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
-    # Format a float with a fixed number of digits after the point: the spec's precision, or 6. The last digit is
-    # rounded half up from the first digit dropped, carrying into the integer part when needed (`{:.2}` of 0.999 is
-    # `1.00`). Digits are taken one at a time off the fraction rather than by scaling it by a power of ten, so a narrow
-    # float with a large precision does not overflow. The digits are the exact binary value's, so 0.1 to 20 places is
-    # `0.10000000000000000555`.
+    # Format a float with a fixed number of digits after the point: the spec's
+    # precision, or 6. The last digit is rounded half up from the first digit
+    # dropped, carrying into the integer part when needed (`{:.2}` of 0.999 is
+    # `1.00`). Digits are taken one at a time off the fraction rather than by
+    # scaling it by a power of ten, so a narrow float with a large precision
+    # does not overflow. The digits are the exact binary value's, so 0.1 to 20
+    # places is `0.10000000000000000555`.
     #
-    # Todo: the integer part goes through `U64`, so a magnitude of 2^64 or more does not render correctly. That needs
-    #  the digits of the float's own integer part, or a shortest round-tripping algorithm (Ryu, Grisu), which would
-    #  also give `{}` of 0.1 as `0.1` rather than `0.100000`.
+    # Todo: the integer part goes through `U64`, so a magnitude of 2^64 or more
+    # does not render correctly. That needs the digits of the float's own
+    # integer part, or a shortest round-tripping algorithm (Ryu, Grisu), which
+    # would also give `{}` of 0.1 as `0.1` rather than `0.100000`.
 
     let value = self@
 
@@ -955,5 +1058,110 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Format {
     drop(digits)
     drop(fraction)
     ret Pass[Void]()
+  }
+}
+
+sup [cmp w: U32] SizedFloatingPoint[w] {
+  # Parsing a floating point value of any width from text. This is a plain
+  # method, not the `TryFrom` trait: the text is a `&StrView`, and a borrow
+  # cannot be a generic argument (E2), so `TryFrom[&StrView]` cannot be written.
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun try_from(text: &StrView) -> Opt[Self] {
+    # Parse decimal text: an optional `+` or `-`, then digits with at most one
+    # `.` (`1.`, `.5` and `1.5` are all accepted), then an optional exponent,
+    # `e` or `E` and an `S32` with an optional sign. `inf`, `infinity` and
+    # `nan`, in any case and after an optional sign, name the values with no
+    # digits. Nothing else is accepted, including surrounding whitespace.
+    #
+    # The first 19 significant digits are read into a `U64`, so the text is
+    # `mantissa * 10^exp10`; that is scaled by a power of ten, in `F64` for a
+    # type narrower than it (so an `F16` does not overflow on the mantissa) and
+    # in this type otherwise. When the mantissa and the power of ten are both
+    # exact (up to 2^53 and 10^22 for an `F64`), one rounding gives the
+    # correctly rounded result (Clinger's fast path). Todo: outside the fast
+    # path the result can be a few ulps out: digits past the 19th are dropped, a
+    # large power of ten is not exact, and a narrower type rounds twice. Correct
+    # rounding everywhere needs Eisel-Lemire with a big-integer fallback.
+    # @let text: The text to parse.
+    # @ret: The value, or `None` if the text is malformed. A value too large is
+    #   an infinity and one too small is a zero, of the text's sign.
+
+    let negative = text.starts_with('-')
+    let body = case negative or text.starts_with('+') { text[1_uz to text.len()]@ } else { text@ }
+
+    # The named values. An infinity takes the sign; a NaN's sign is not kept.
+    case body.eq_fold("inf") or body.eq_fold("infinity") {
+      let infinity = Self::one() / Self::zero()
+      ret Some(val=case negative { infinity.neg() } else { infinity })
+    }
+    case body.eq_fold("nan") { ret Some(val=Self::zero() / Self::zero()) }
+
+    # Split off the exponent, which is an `S32` with its own sign.
+    let mut digits = body
+    let mut exponent = 0_s32
+    let exponent_at = body.find_if(|c: Char| c == 'e' or c == 'E')
+    case exponent_at is Some[USize](val) {
+      exponent = S32::try_from(body[val + 1_uz to body.len()])?
+      digits = body[0_uz to val]@
+    }
+    case digits.is_empty() or digits == "." { ret None }
+
+    # The digits, with the point's position and any dropped integer digits
+    # folded into a shift of the exponent. Leading zeros are not significant.
+    let mut mantissa = 0_u64
+    let mut significant = 0_u32
+    let mut shift = 0_s32
+    let mut seen_point = false
+    loop byte in digits.bytes() {
+      case byte == b'.' {
+        case seen_point { ret None }
+        seen_point = true
+      }
+      else {
+        let digit = U64::from(byte.to_digit(10_u32)?)
+        case significant == 19_u32 {
+          case seen_point.not { shift += 1_s32 }
+        }
+        else {
+          mantissa = mantissa * 10_u64 + digit
+          case mantissa != 0_u64 { significant += 1_u32 }
+          case seen_point { shift -= 1_s32 }
+        }
+      }
+    }
+
+    let exp10 = exponent.add_saturating(shift)
+    let magnitude = case w < 64_u32 {
+      Self::from(SizedFloatingPoint[64_u32]::scale_decimal(mantissa, exp10))
+    }
+    else {
+      Self::scale_decimal(mantissa, exp10)
+    }
+    ret Some(val=case negative { magnitude.neg() } else { magnitude })
+  }
+}
+
+sup [cmp w: U32] SizedFloatingPoint[w] {
+  fun scale_decimal(mantissa: U64, exp10: S32) -> Self {
+    # The value `mantissa * 10^exp10` in this type. A positive power that
+    # overflows is right to: the mantissa is at least 1, so the value is past
+    # the maximum too. A negative one is applied as a division, and when its
+    # reciprocal power overflows (a subnormal result), `10^22` is divided out
+    # first so the rest fits.
+    # @let mantissa: The significant digits.
+    # @let exp10: The power of ten to scale them by.
+    # @ret: The scaled value, rounded at each step.
+
+    let value = Self::from(mantissa)
+    case mantissa == 0_u64 or exp10 == 0_s32 { ret value }
+    let ten = Self::from(10_u32)
+    let exp = exp10.max(-100000_s32)
+    case exp > 0_s32 { ret value * ten.pow(exp) }
+
+    let power = ten.pow(0_s32 - exp)
+    case power.is_positive_infinity().not { ret value / power }
+    ret (value / ten.pow(22_s32)) / ten.pow(0_s32 - exp - 22_s32)
   }
 }
