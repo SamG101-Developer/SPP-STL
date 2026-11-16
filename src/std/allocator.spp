@@ -122,11 +122,12 @@ cls Alloc {
   # `free_bytes` are required; `alloc_bytes_zeroed` and `realloc_bytes` have
   # working defaults and exist to be overridden for speed (`calloc`'s pre-zeroed
   # pages, `realloc` growing in place).
-  # - Everyone else calls the public typed methods, in types and element counts:
-  # `allocate`, `allocate_zeroed`, `deallocate` and `reallocate`. They are the
-  # only place the pointer retypings live - `cast` after every allocation,
-  # `erase_type` before every free - so a container never retypes a pointer and
-  # an allocator never sees a typed one.
+  # - std's containers call the typed methods, in types and element counts:
+  # `allocate`, `allocate_zeroed`, `deallocate` and `reallocate`, which are
+  # `!package` because they hand out raw storage. They are the only place the
+  # pointer retypings live - `cast` after every allocation, `erase_type` before
+  # every free - so a container never retypes a pointer and an allocator never
+  # sees a typed one.
 }
 
 sup Alloc {
@@ -194,13 +195,15 @@ sup Alloc {
 }
 
 sup Alloc {
-  # The typed side, for containers and other callers. Not overridable: each
+  # The typed side, for std's containers. Not overridable, and `!package`:
+  # each typed pointer it hands out is raw storage, freeable twice through a
+  # `Copy` of it, so outside std memory comes only through the containers. Each
   # method sizes the request with `Layout::array` and retypes the pointer around
   # one byte method. The reallocating method writes the result back into the
   # caller's slot; `NonNull` is `Copy`, so erasing the pointer to pass it leaves
   # the slot intact, and on failure it still holds the original, valid pointer.
 
-  !public !inline
+  !package !inline
   !versioned(base="1.0.0", new="1.0.0")
   fun allocate[T](&self, n: USize = 1_uz) -> Res[NonNull[T], AllocErr] {
     # Allocate uninitialized storage for `n` values of type `T`: one value by
@@ -215,7 +218,7 @@ sup Alloc {
     ret Pass(val=ptr.cast[T]())
   }
 
-  !public !inline
+  !package !inline
   !versioned(base="1.0.0", new="1.0.0")
   fun allocate_zeroed[T](&self, n: USize = 1_uz) -> Res[NonNull[T], AllocErr] {
     # The same as `allocate`, with every byte zero. That is only a valid `T` if
@@ -230,7 +233,7 @@ sup Alloc {
     ret Pass(val=ptr.cast[T]())
   }
 
-  !public !inline
+  !package !inline
   !versioned(base="1.0.0", new="1.0.0")
   fun deallocate[T](&self, ptr: NonNull[T], n: USize = 1_uz) -> Void {
     # Free storage that `allocate[T](n)` or `reallocate` returned. The values in
@@ -243,7 +246,7 @@ sup Alloc {
     self.free_bytes(ptr.erase_type(), Layout::array[T](n))
   }
 
-  !public !inline
+  !package !inline
   !versioned(base="1.0.0", new="1.0.0")
   fun reallocate[T](&self, ptr: &mut NonNull[T], old_n: USize, new_n: USize)
   -> Res[Void, AllocErr] {
