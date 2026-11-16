@@ -236,3 +236,25 @@ fun test_mul_by_zero_or_less_is_empty() -> Void {
   std::debug::assert(empty.len() == 0_uz, "repeating nothing is nothing")
   drop(empty)
 }
+
+!test(group="std/string")
+fun test_new_filled_repeats_a_character() -> Void {
+  # A `Char`, not a byte, so a multi-byte character is repeated whole and the
+  # result is valid UTF-8 (a byte fill could leave a lone `0xc3`).
+  let s = Str::new_filled(3_uz, 'é')
+  std::debug::assert(s.len() == 6_uz, "three two-byte characters")
+  let mut count = 0_uz
+  loop c in s.chars() {
+    std::debug::assert(c == 'é', "each character is the one repeated")
+    count += 1_uz
+  }
+  std::debug::assert(count == 3_uz, "three characters")
+  let checked = Str::from_utf8(s.view_ref())
+  std::debug::assert(checked.is_pass(), "valid UTF-8")
+  drop(checked)
+  drop(s)
+
+  let empty = Str::new_filled(0_uz, 'x')
+  std::debug::assert(empty.is_empty(), "no characters")
+  drop(empty)
+}

@@ -132,17 +132,14 @@ sup Str {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun new_filled(len: USize, element: U8) -> Str {
-    # The `new_filled` method creates a new instance of the `Str` type with a
-    # specified length, where all bytes are initialized to a given value. This
-    # is useful for creating strings that need to be filled with a specific
-    # character or byte value, and it uses the global allocator by default.
-    # @let len: The length of the string in bytes. This determines how many
-    #   bytes will be allocated and initialized in the string's internal buffer.
-    # @let element: The byte value that will be used to fill the string. Each
-    #   byte in the resulting string will be set to this value.
-    # @ret: A new `Str` instance of the specified length, with all bytes
-    #   initialized to the given element.
+  fun new_filled(len: USize, element: Char) -> Str {
+    # The `new_filled` method creates a new `Str` of `len` copies of a
+    # character, using the global allocator. It takes a `Char` rather than a
+    # byte, so the result is always valid UTF-8: a byte such as `0xc3` on its
+    # own is not a character.
+    # @let len: The number of characters (not bytes) in the new string.
+    # @let element: The character repeated to fill the string.
+    # @ret: A new `Str` of `len` copies of `element`.
 
     # Forward to the more general `new_filled_in` method,
     # using the global allocator as the default.
@@ -198,27 +195,24 @@ sup [A: Alloc] Str[A] {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun new_filled_in(len: USize, element: U8, alloc: A = A()) -> Str[A] {
-    # The `new_filled_in` method creates a new instance of the `Str` type with a
-    # specified length, where all bytes are initialized to a given value, using
-    # a specified allocator. This is useful for creating strings that need to be
-    # filled with a specific character or byte value, and it allows for custom
-    # memory management through the use of different allocators.
-    # @let len: The length of the string in bytes. This determines how many
-    #   bytes will be allocated and initialized in the string's internal buffer.
-    # @let element: The byte value that will be used to fill the string. Each
-    #   byte in the resulting string will be set to this value.
+  fun new_filled_in(len: USize, element: Char, alloc: A = A()) -> Str[A] {
+    # The `new_filled_in` method creates a new `Str` of `len` copies of a
+    # character, using the given allocator. It takes a `Char` rather than a
+    # byte, so the result is always valid UTF-8.
+    # @let len: The number of characters (not bytes) in the new string.
+    # @let element: The character repeated to fill the string.
     # @let ?alloc: An optional allocator instance that will be used for managing
     #   the memory of the string. If not provided, a default instance of the
-    #   allocator type `A` will be used. This allows for both stateless and
-    #   stateful allocators to be utilized when creating a new filled string.
-    # @ret: A new `Str` instance of the specified length, with all bytes
-    #   initialized to the given element, using the specified allocator for
-    #   memory management.
+    #   allocator type `A` will be used.
+    # @ret: A new `Str` of `len` copies of `element`, using the given allocator.
 
-    # Forward to the constructor of `Str`, creating a new `Vec`
-    # filled with the specified length, element, and allocator.
-    ret Str(bytes=Vec[U8, A]::new_filled_in(len, element, alloc))
+    # Reserve the whole encoding up front, then append the character's bytes
+    # `len` times.
+    let mut out = Str[A]::new_with_capacity_in(len * USize::from(element.len_utf8()), alloc)
+    loop i in Range[USize]::between(0_uz, len) {
+      out.append(element)
+    }
+    ret out
   }
 
   !public
@@ -227,8 +221,9 @@ sup [A: Alloc] Str[A] {
     # The `from` method creates a new instance of the `Str` type from a given
     # `StrView`. It takes a byte view of `view` (`view_ref`, which just
     # repackages the `StrView`'s existing pointer and length - no copy yet) and
-    # forwards to the `View[U8]`-based `from` below, which does the actual
-    # allocation and memcpy, using the given allocator.
+    # forwards to `from_utf8_unchecked`, which does the actual allocation and
+    # memcpy, using the given allocator: the bytes of a `StrView` are already
+    # valid UTF-8.
     # @let view: A reference to a `StrView` that contains the string data to be
     #   copied. The bytes from this view will be used to initialize the internal
     #   vector of the new `Str` instance.
@@ -238,44 +233,28 @@ sup [A: Alloc] Str[A] {
     # @ret: A new `Str` instance that contains a copy of the bytes from the
     #   provided `StrView`.
 
-    ret Self::from(view.view_ref(), alloc)
+    ret Self::from_utf8_unchecked(view.view_ref(), alloc)
   }
 
-  !public
+  !package
   !versioned(base="1.0.0", new="1.0.0")
-  fun from(that: &View[U8], alloc: A = A()) -> Self {
-    # The `from` method creates a new instance of the `Str` type from a view of
-    # bytes. This involves copying the bytes from the provided view into a new
-    # internal vector, using the given allocator.
-    # @let that: A reference to a view of bytes that contains the data to be
-    #   copied into the new string. The bytes from this view will be used to
-    #   initialize the internal vector of the new `Str` instance.
-    # @let ?alloc: An optional allocator instance that will be used for managing
-    #   the memory of the string. If not provided, a default instance of the
-    #   allocator type `A` will be used.
-    # @ret: A new `Str` instance that contains a copy of the bytes from the
-    #   provided view.
-
-    # Forward to the constructor of `Str`, creating a new `Vec`
-    # filled with the bytes from the provided view.
-    ret Str(bytes=Vec[U8, A]::from_in(that, alloc))
-  }
-
-  !public
-  !versioned(base="1.0.0", new="1.0.0")
-  fun from_utf8_unchecked(bytes: &View[U8]) -> Self {
+  fun from_utf8_unchecked(bytes: &View[U8], alloc: A = A()) -> Self {
     # The `from_utf8_unchecked` method creates a new `Str` by copying `bytes`
     # verbatim, without checking that they are valid UTF-8. The caller must have
     # already established that `bytes` is valid UTF-8 - for example, because it
     # was copied out of an existing `StrView`, which carries that guarantee as
     # an invariant. Passing bytes that are not valid UTF-8 will produce a `Str`
     # that violates its own invariant, and any subsequent use of it as a
-    # `StrView` (`chars`, `find`, etc.) is undefined behaviour.
+    # `StrView` (`chars`, `find`, etc.) is undefined behaviour. So it is
+    # `!package`: outside std, bytes become a `Str` only through `from_utf8`,
+    # which checks them.
     # @let bytes: The raw bytes to copy into the new `Str`, asserted by the
     #   caller to already be valid UTF-8.
+    # @let ?alloc: An optional allocator instance for the new string's memory.
+    #   If not provided, a default instance of the allocator type `A` is used.
     # @ret: A new `Str` containing a copy of `bytes`.
 
-    ret Self::from(bytes)
+    ret Str(bytes=Vec[U8, A]::from_in(bytes, alloc))
   }
 
   !public
