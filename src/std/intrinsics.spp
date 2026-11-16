@@ -2,6 +2,7 @@ use std::annotations::intrinsic
 use std::annotations::versioned
 use std::llvm::always_inline
 use std::boolean::Integral
+use std::num::bases::BitCastable
 use std::num::bases::FloatingPoint
 use std::num::bases::Integer
 use std::num::bases::Num
@@ -697,7 +698,7 @@ fun fptrunc_f8[cmp that_w: U32](value: SizedFloatingPoint[that_w]) -> F8 { }
 !public
 !always_inline
 !intrinsic(name="std.intrinsics.bit_cast")
-fun bit_cast[T, U](value: U) -> T { }
+fun bit_cast[T: BitCastable, U: BitCastable](value: U) -> T { }
 
 !public
 !always_inline
