@@ -614,16 +614,186 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Pow[Rhs=S32] {
     #   the power of this integer exponent.
     # @ret: The result of the exponentiation operation, which is a new floating
     #   point value of the same size as the base (the current value).
+
+    # Computed with no check, and only the result checked: for a large
+    # negative exponent the power overflows on the way to a result that is
+    # finite (its reciprocal, a subnormal or zero). The check is a checked
+    # multiply by one, which stops on a NaN or infinite result and changes
+    # nothing else (a NaN's payload and a zero's sign are kept).
+    ret self.pow_ieee(that) * Self::one()
+  }
+}
+
+sup [cmp w: U32] SizedFloatingPoint[w] {
+  # The forms of the checked operations for values made non-finite on purpose.
+  # With "[binary.codegen] float_checks" on, `+`, `-`, `*`, `/`, `%` and `sqrt`
+  # stop the program on a NaN or infinite result, whatever the operands, as an
+  # integer `+` stops on an overflow. `*_ieee` is IEEE 754's result with no
+  # check (as `*_wrapping` is for an integer), `*_raised` that result and
+  # whether the checked form would have stopped (as `*_overflow`), and
+  # `*_checked` the result, or `None` where it would have stopped.
+
+  !public !inline
+  cmp fun add_ieee(self, that: Self) -> Self {
+    ret intrinsics::float_add_ieee(self, that)
+  }
+
+  !public !inline
+  cmp fun sub_ieee(self, that: Self) -> Self {
+    ret intrinsics::float_sub_ieee(self, that)
+  }
+
+  !public !inline
+  cmp fun mul_ieee(self, that: Self) -> Self {
+    ret intrinsics::float_mul_ieee(self, that)
+  }
+
+  !public !inline
+  cmp fun div_ieee(self, that: Self) -> Self {
+    ret intrinsics::float_div_ieee(self, that)
+  }
+
+  !public !inline
+  cmp fun rem_ieee(self, that: Self) -> Self {
+    ret intrinsics::float_rem_ieee(self, that)
+  }
+
+  !public !inline
+  fun sqrt_ieee(self) -> Self {
+    ret intrinsics::float_sqrt_ieee(self)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun pow_ieee(self, that: S32) -> Self {
+    # `pow` with no check, as `add_ieee` is `+`'s: IEEE's infinity on an
+    # overflow, and a NaN or infinity going in passing through.
+    # @let that: The exponent.
+    # @ret: The power.
     let mut base = self
     let mut n = that
     let mut result = Self::one()
     loop true {
-      case n.bit_and(1_s32) != 0_s32 { result = result * base }
+      case n.bit_and(1_s32) != 0_s32 { result = result.mul_ieee(base) }
       n = n / 2_s32
       case n == 0_s32 { exit }
-      base = base * base
+      base = base.mul_ieee(base)
     }
-    ret case that < 0_s32 { Self::one() / result } else { result }
+    ret case that < 0_s32 { Self::one().div_ieee(result) } else { result }
+  }
+
+  !public !inline
+  fun add_raised(self, that: Self) -> (Self, Bool) {
+    ret intrinsics::float_add_raised(self, that)
+  }
+
+  !public !inline
+  fun sub_raised(self, that: Self) -> (Self, Bool) {
+    ret intrinsics::float_sub_raised(self, that)
+  }
+
+  !public !inline
+  fun mul_raised(self, that: Self) -> (Self, Bool) {
+    ret intrinsics::float_mul_raised(self, that)
+  }
+
+  !public !inline
+  fun div_raised(self, that: Self) -> (Self, Bool) {
+    ret intrinsics::float_div_raised(self, that)
+  }
+
+  !public !inline
+  fun rem_raised(self, that: Self) -> (Self, Bool) {
+    ret intrinsics::float_rem_raised(self, that)
+  }
+
+  !public !inline
+  fun sqrt_raised(self) -> (Self, Bool) {
+    ret intrinsics::float_sqrt_raised(self)
+  }
+
+  !public !inline
+  fun add_checked(self, that: Self) -> Opt[Self] {
+    let (val, raised) = intrinsics::float_add_raised(self, that)
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun sub_checked(self, that: Self) -> Opt[Self] {
+    let (val, raised) = intrinsics::float_sub_raised(self, that)
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun mul_checked(self, that: Self) -> Opt[Self] {
+    let (val, raised) = intrinsics::float_mul_raised(self, that)
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun div_checked(self, that: Self) -> Opt[Self] {
+    let (val, raised) = intrinsics::float_div_raised(self, that)
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun rem_checked(self, that: Self) -> Opt[Self] {
+    let (val, raised) = intrinsics::float_rem_raised(self, that)
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun sqrt_checked(self) -> Opt[Self] {
+    let (val, raised) = intrinsics::float_sqrt_raised(self)
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  cmp fun nan() -> Self {
+    # A quiet NaN, made as IEEE's `0 / 0`.
+    ret intrinsics::float_div_ieee(Self::zero(), Self::zero())
+  }
+
+  !public !inline
+  cmp fun inf() -> Self {
+    # Positive infinity, made as IEEE's `1 / 0`.
+    ret intrinsics::float_div_ieee(Self::one(), Self::zero())
+  }
+
+  !public !inline
+  cmp fun neg_inf() -> Self {
+    # Negative infinity, made as IEEE's `-1 / 0`.
+    ret intrinsics::float_div_ieee(Self::neg_one(), Self::zero())
+  }
+
+  !public !inline
+  fun is_nan(self) -> Bool {
+    # Whether this is a NaN, quiet or signalling.
+    ret self.is_quiet_nan() or self.is_signaling_nan()
+  }
+
+  !public !inline
+  fun is_infinite(self) -> Bool {
+    # Whether this is either infinity.
+    ret self.is_positive_infinity() or self.is_negative_infinity()
+  }
+
+  !public !inline
+  fun is_finite(self) -> Bool {
+    # Whether this is neither a NaN nor an infinity: what a checked operation
+    # gives, and what it takes without stopping.
+    ret (self.is_nan() or self.is_infinite()).not
+  }
+
+  !public !inline
+  fun from_ieee[cmp that_w: U32](that: SizedFloatingPoint[that_w]) -> Self {
+    # `from` with no check when narrowing: a value past this type's range is
+    # IEEE's infinity rather than stopping the program.
+    ret case w of {
+      < that_w { intrinsics::fptrunc_ieee[w](that) }
+      > that_w { intrinsics::fpext[w](that) }
+      else { intrinsics::bit_cast[Self](that) }
+    }
   }
 }
 
@@ -1093,10 +1263,9 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
 
     # The named values. An infinity takes the sign; a NaN's sign is not kept.
     case body.eq_fold("inf") or body.eq_fold("infinity") {
-      let infinity = Self::one() / Self::zero()
-      ret Some(val=case negative { infinity.neg() } else { infinity })
+      ret Some(val=case negative { Self::neg_inf() } else { Self::inf() })
     }
-    case body.eq_fold("nan") { ret Some(val=Self::zero() / Self::zero()) }
+    case body.eq_fold("nan") { ret Some(val=Self::nan()) }
 
     # Split off the exponent, which is an `S32` with its own sign.
     let mut digits = body
@@ -1133,8 +1302,9 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
     }
 
     let exp10 = exponent.add_saturating(shift)
+    # Narrowed with no check: a value too large for this type is its infinity.
     let magnitude = case w < 64_u32 {
-      Self::from(SizedFloatingPoint[64_u32]::scale_decimal(mantissa, exp10))
+      Self::from_ieee(SizedFloatingPoint[64_u32]::scale_decimal(mantissa, exp10))
     }
     else {
       Self::scale_decimal(mantissa, exp10)
@@ -1154,14 +1324,15 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
     # @let exp10: The power of ten to scale them by.
     # @ret: The scaled value, rounded at each step.
 
+    # In the IEEE forms throughout: the overflow is the result, an infinity.
     let value = Self::from(mantissa)
     case mantissa == 0_u64 or exp10 == 0_s32 { ret value }
     let ten = Self::from(10_u32)
     let exp = exp10.max(-100000_s32)
-    case exp > 0_s32 { ret value * ten.pow(exp) }
+    case exp > 0_s32 { ret value.mul_ieee(ten.pow_ieee(exp)) }
 
-    let power = ten.pow(0_s32 - exp)
-    case power.is_positive_infinity().not { ret value / power }
-    ret (value / ten.pow(22_s32)) / ten.pow(0_s32 - exp - 22_s32)
+    let power = ten.pow_ieee(0_s32 - exp)
+    case power.is_positive_infinity().not { ret value.div_ieee(power) }
+    ret value.div_ieee(ten.pow_ieee(22_s32)).div_ieee(ten.pow_ieee(0_s32 - exp - 22_s32))
   }
 }

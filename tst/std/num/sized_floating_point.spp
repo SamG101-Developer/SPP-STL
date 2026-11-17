@@ -230,3 +230,71 @@ fun test_try_from_rejects_malformed_text() -> Void {
   std::debug::assert(F64::try_from("n").is_none(), "part of nan")
   std::debug::assert(F64::try_from("infinit").is_none(), "part of infinity")
 }
+
+!test(group="std/num/sized_floating_point")
+fun test_the_ieee_forms_pass_a_non_finite_value_through() -> Void {
+  # IEEE 754's results with no check, for values made non-finite on purpose.
+  std::debug::assert(F64::inf().add_ieee(1.0_f64).is_positive_infinity(), "inf + 1 is inf")
+  std::debug::assert(F64::nan().mul_ieee(0.0_f64).is_nan(), "NaN * 0 is a NaN")
+  std::debug::assert(1.0_f64.div_ieee(0.0_f64).is_positive_infinity(), "1 / 0 is inf")
+  std::debug::assert(0.0_f64.div_ieee(0.0_f64).is_nan(), "0 / 0 is a NaN")
+  std::debug::assert(F64::inf().sub_ieee(F64::inf()).is_nan(), "inf - inf is a NaN")
+  std::debug::assert(5.0_f64.rem_ieee(0.0_f64).is_nan(), "x % 0 is a NaN")
+  std::debug::assert(-1.0_f64.sqrt_ieee().is_nan(), "sqrt(-1) is a NaN")
+  std::debug::assert(1.5_f64.add_ieee(2.25_f64) == 3.75_f64, "a finite result is the checked one's")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_raised_says_whether_the_checked_form_would_stop() -> Void {
+  let (quotient, by_zero) = 1.0_f64.div_raised(0.0_f64)
+  std::debug::assert(by_zero and quotient.is_positive_infinity(), "1 / 0 raises, with IEEE's infinity")
+  let (sum, fine) = 1.0_f64.add_raised(2.0_f64)
+  std::debug::assert(fine.not and sum == 3.0_f64, "1 + 2 raises nothing")
+  let (product, nan_in) = F64::nan().mul_raised(2.0_f64)
+  std::debug::assert(nan_in and product.is_nan(), "a NaN going in raises")
+  let (root, negative) = -4.0_f64.sqrt_raised()
+  std::debug::assert(negative and root.is_nan(), "sqrt(-4) raises")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_checked_gives_none_where_the_checked_form_would_stop() -> Void {
+  std::debug::assert(1.0_f64.div_checked(0.0_f64).is_none(), "1 / 0 is None")
+  std::debug::assert(1.0_f64.div_checked(4.0_f64).unwrap() == 0.25_f64, "1 / 4 is 0.25")
+  std::debug::assert(F64::inf().sub_checked(1.0_f64).is_none(), "an infinity going in is None")
+  std::debug::assert(-1.0_f64.sqrt_checked().is_none(), "sqrt(-1) is None")
+  std::debug::assert(9.0_f64.sqrt_checked().unwrap() == 3.0_f64, "sqrt(9) is 3")
+  std::debug::assert(3.0_f64.rem_checked(2.0_f64).unwrap() == 1.0_f64, "3 % 2 is 1")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_the_non_finite_constants_and_their_classifiers() -> Void {
+  std::debug::assert(F64::nan().is_nan() and F64::nan().is_finite().not, "nan() is a NaN")
+  std::debug::assert(F64::inf().is_positive_infinity() and F64::inf().is_infinite(), "inf() is +inf")
+  std::debug::assert(F32::neg_inf().is_negative_infinity(), "neg_inf() is -inf")
+  std::debug::assert(1.0_f64.is_finite() and 0.0_f64.is_finite(), "numbers are finite")
+  std::debug::assert(F64::inf().is_nan().not and 1.0_f64.is_infinite().not, "the classifiers do not overlap")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_pow_finishes_a_power_whose_reciprocal_underflows() -> Void {
+  # 2^-2000 is past the smallest subnormal, so 0; the power 2^2000 it is the
+  # reciprocal of overflows on the way, which "pow" must not stop on.
+  std::debug::assert(2.0_f64.pow(-2000) == 0.0_f64, "2^-2000 underflows to zero")
+  std::debug::assert(2.0_f64.pow_ieee(2000).is_positive_infinity(), "2^2000 is inf, unchecked")
+  std::debug::assert(0.5_f64.pow(3) == 0.125_f64, "a finite power is unchanged")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_from_ieee_narrows_past_the_range_to_an_infinity() -> Void {
+  let big = 1000000000000000000000000000000000000000000.0_f64
+  std::debug::assert(F32::from_ieee(big).is_positive_infinity(), "past F32's range is inf")
+  std::debug::assert(F32::from_ieee(1.5_f64) == 1.5_f32, "a value in range is narrowed as by from")
+  std::debug::assert(F64::from_ieee(1.5_f32) == 1.5_f64, "widening is from's")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_try_from_gives_an_infinity_for_a_value_too_large_for_a_narrow_type() -> Void {
+  std::debug::assert(F16::try_from("1e10").unwrap().is_positive_infinity(), "1e10 is past F16's range")
+  std::debug::assert(F64::try_from("-1e400").unwrap().is_negative_infinity(), "-1e400 is -inf")
+  std::debug::assert(F64::try_from("NaN").unwrap().is_nan(), "nan parses to a NaN")
+}

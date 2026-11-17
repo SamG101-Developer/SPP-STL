@@ -385,6 +385,70 @@ cmp fun float_neg[T: FloatingPoint](value: T) -> T { }
 !intrinsic(name="std.intrinsics.float_sqrt")
 fun float_sqrt[T: FloatingPoint](value: T) -> T { }
 
+# The float operations above are checked (with "[binary.codegen] float_checks"): a NaN or infinite result stops the
+# program. "*_ieee" is IEEE 754's result with no check, for a value made non-finite on purpose, as "*_wrapping" is for
+# integers; "*_raised" is that result and whether the checked form would have stopped, as "*_overflow" is.
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_add_ieee")
+cmp fun float_add_ieee[T: FloatingPoint](this: T, that: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_add_raised")
+fun float_add_raised[T: FloatingPoint](this: T, that: T) -> (T, Bool) { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_sub_ieee")
+cmp fun float_sub_ieee[T: FloatingPoint](this: T, that: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_sub_raised")
+fun float_sub_raised[T: FloatingPoint](this: T, that: T) -> (T, Bool) { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_mul_ieee")
+cmp fun float_mul_ieee[T: FloatingPoint](this: T, that: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_mul_raised")
+fun float_mul_raised[T: FloatingPoint](this: T, that: T) -> (T, Bool) { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_div_ieee")
+cmp fun float_div_ieee[T: FloatingPoint](this: T, that: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_div_raised")
+fun float_div_raised[T: FloatingPoint](this: T, that: T) -> (T, Bool) { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_rem_ieee")
+cmp fun float_rem_ieee[T: FloatingPoint](this: T, that: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_rem_raised")
+fun float_rem_raised[T: FloatingPoint](this: T, that: T) -> (T, Bool) { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_sqrt_ieee")
+fun float_sqrt_ieee[T: FloatingPoint](value: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_sqrt_raised")
+fun float_sqrt_raised[T: FloatingPoint](value: T) -> (T, Bool) { }
+
 !public
 !always_inline
 !intrinsic(name="std.intrinsics.float_powi")
@@ -694,6 +758,12 @@ fun fpext[cmp this_w: U32, cmp that_w: U32](value: SizedFloatingPoint[that_w]) -
 !always_inline
 !intrinsic(name="std.intrinsics.fptrunc")
 fun fptrunc[cmp this_w: U32, cmp that_w: U32](value: SizedFloatingPoint[that_w]) -> SizedFloatingPoint[this_w] { }
+
+# "fptrunc" with no check: a value past the narrower type's range is IEEE's infinity, as "float_*_ieee" give.
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.fptrunc_ieee")
+fun fptrunc_ieee[cmp this_w: U32, cmp that_w: U32](value: SizedFloatingPoint[that_w]) -> SizedFloatingPoint[this_w] { }
 
 !public
 !always_inline
