@@ -200,10 +200,6 @@ cmp fun oeq[T: Num](this: &T, that: &T) -> Bool { }  # ordered equal (floats)
 !intrinsic(name="std.intrinsics.ne")
 cmp fun ne[T: Integral](this: &T, that: &T) -> Bool { }
 
-!public
-!always_inline
-!intrinsic(name="std.intrinsics.one")
-cmp fun one[T: Num](this: &T, that: &T) -> Bool { }  # ordered not equal (floats)
 
 !public
 !always_inline
@@ -449,10 +445,94 @@ fun float_sqrt_ieee[T: FloatingPoint](value: T) -> T { }
 !intrinsic(name="std.intrinsics.float_sqrt_raised")
 fun float_sqrt_raised[T: FloatingPoint](value: T) -> (T, Bool) { }
 
+# The maths functions are checked as the arithmetic is: a NaN result is invalid, an infinity at a pole ("log(0)",
+# "pow(0, -1)") a division by zero, any other infinity an overflow. "*_ieee" is the function with no check.
+
 !public
 !always_inline
-!intrinsic(name="std.intrinsics.float_powi")
-fun float_powi[T: FloatingPoint](base: T, exponent: S32) -> T { }
+!intrinsic(name="std.intrinsics.float_sin_ieee")
+fun float_sin_ieee[T: FloatingPoint](value: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_cos_ieee")
+fun float_cos_ieee[T: FloatingPoint](value: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_tan_ieee")
+fun float_tan_ieee[T: FloatingPoint](value: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_asin_ieee")
+fun float_asin_ieee[T: FloatingPoint](value: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_acos_ieee")
+fun float_acos_ieee[T: FloatingPoint](value: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_atan_ieee")
+fun float_atan_ieee[T: FloatingPoint](value: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_sinh_ieee")
+fun float_sinh_ieee[T: FloatingPoint](value: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_cosh_ieee")
+fun float_cosh_ieee[T: FloatingPoint](value: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_tanh_ieee")
+fun float_tanh_ieee[T: FloatingPoint](value: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_exp_ieee")
+fun float_exp_ieee[T: FloatingPoint](value: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_exp2_ieee")
+fun float_exp2_ieee[T: FloatingPoint](value: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_exp10_ieee")
+fun float_exp10_ieee[T: FloatingPoint](value: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_log_ieee")
+fun float_log_ieee[T: FloatingPoint](value: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_log2_ieee")
+fun float_log2_ieee[T: FloatingPoint](value: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_log10_ieee")
+fun float_log10_ieee[T: FloatingPoint](value: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_atan2_ieee")
+fun float_atan2_ieee[T: FloatingPoint](this: T, that: T) -> T { }
+
+!public
+!always_inline
+!intrinsic(name="std.intrinsics.float_powf_ieee")
+fun float_powf_ieee[T: FloatingPoint](base: T, exponent: T) -> T { }
+
 
 !public
 !always_inline

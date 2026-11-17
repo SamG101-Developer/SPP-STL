@@ -298,3 +298,64 @@ fun test_try_from_gives_an_infinity_for_a_value_too_large_for_a_narrow_type() ->
   std::debug::assert(F64::try_from("-1e400").unwrap().is_negative_infinity(), "-1e400 is -inf")
   std::debug::assert(F64::try_from("NaN").unwrap().is_nan(), "nan parses to a NaN")
 }
+
+!test(group="std/num/sized_floating_point")
+fun test_the_maths_ieee_forms_give_ieee_s_values_at_poles_and_outside_domains() -> Void {
+  std::debug::assert(0.0_f64.ln_ieee().is_negative_infinity(), "ln(0) is -inf")
+  std::debug::assert(-1.0_f64.ln_ieee().is_nan(), "ln(-1) is a NaN")
+  std::debug::assert(0.0_f64.log2_ieee().is_negative_infinity(), "log2(0) is -inf")
+  std::debug::assert(1000.0_f64.exp_ieee().is_positive_infinity(), "exp(1000) overflows to inf")
+  std::debug::assert(2.0_f64.asin_ieee().is_nan(), "asin(2) is a NaN")
+  std::debug::assert(0.0_f64.pow_ieee(-1.0_f64).is_positive_infinity(), "0^-1 is inf")
+  std::debug::assert(1.0_f64.ln_ieee() == 0.0_f64 and 1.0_f64.ln() == 0.0_f64, "ln(1) is 0, checked or not")
+  std::debug::assert(8.0_f64.log(2.0_f64) == 3.0_f64 and 8.0_f64.log_ieee(2.0_f64) == 3.0_f64, "log base 2 of 8 is 3")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_the_inverse_hyperbolic_functions() -> Void {
+  std::debug::assert(0.0_f64.asinh() == 0.0_f64, "asinh(0) is 0")
+  std::debug::assert((1.0_f64.asinh() - 0.881373587019543_f64).abs() < 0.000000000001_f64, "asinh(1)")
+  std::debug::assert((-1.0_f64.asinh() + 0.881373587019543_f64).abs() < 0.000000000001_f64, "asinh is odd")
+  std::debug::assert(1.0_f64.acosh() == 0.0_f64, "acosh(1) is 0")
+  std::debug::assert((2.0_f64.acosh() - 1.3169578969248166_f64).abs() < 0.000000000001_f64, "acosh(2)")
+  std::debug::assert((0.5_f64.atanh() - 0.5493061443340549_f64).abs() < 0.000000000001_f64, "atanh(0.5)")
+  # Large arguments, where x^2 overflows long before the result does: asinh(1e200) is ln(2e200), about 461.2.
+  let big = 10.0_f64.pow(200)
+  std::debug::assert((big.asinh() - 461.2101657793691_f64).abs() < 0.000000001_f64, "asinh(1e200) does not overflow")
+  std::debug::assert((big.acosh() - 461.2101657793691_f64).abs() < 0.000000001_f64, "acosh(1e200) does not overflow")
+  std::debug::assert((F16::from(1000.0_f64).asinh() - F16::from(7.6009_f64)).abs() < F16::from(0.01_f64), "F16 asinh")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_the_inverse_hyperbolic_ieee_forms_outside_their_domains() -> Void {
+  std::debug::assert(0.5_f64.acosh_ieee().is_nan(), "acosh below 1 is a NaN")
+  std::debug::assert(1.0_f64.atanh_ieee().is_positive_infinity(), "atanh(1) is inf")
+  std::debug::assert(-1.0_f64.atanh_ieee().is_negative_infinity(), "atanh(-1) is -inf")
+  std::debug::assert(2.0_f64.atanh_ieee().is_nan(), "atanh past 1 is a NaN")
+  std::debug::assert(F64::inf().asinh_ieee().is_positive_infinity(), "asinh(inf) is inf")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_the_maths_functions_checked_and_raised_forms() -> Void {
+  std::debug::assert(0.0_f64.ln_checked().is_none(), "ln(0) is None")
+  std::debug::assert(1.0_f64.ln_checked().unwrap() == 0.0_f64, "ln(1) is Some(0)")
+  let (big, overflowed) = 1000.0_f64.exp_raised()
+  std::debug::assert(overflowed and big.is_positive_infinity(), "exp(1000) raises, with IEEE's infinity")
+  let (one, fine) = 0.0_f64.exp_raised()
+  std::debug::assert(fine.not and one == 1.0_f64, "exp(0) raises nothing")
+  std::debug::assert(2.0_f64.asin_checked().is_none(), "asin(2) is None")
+  std::debug::assert(0.0_f64.pow_checked(-1.0_f64).is_none(), "0^-1 is None")
+  std::debug::assert(2.0_f64.pow_checked(10).unwrap() == 1024.0_f64, "2^10 is Some(1024)")
+  std::debug::assert(2.0_f64.pow_raised(-2000).1.not, "2^-2000 underflows to 0, raising nothing")
+  std::debug::assert(1.0_f64.atanh_checked().is_none(), "atanh(1) is None")
+  std::debug::assert(8.0_f64.log_checked(2.0_f64).unwrap() == 3.0_f64, "log base 2 of 8 is Some(3)")
+  std::debug::assert(1.0_f64.atan2_checked(1.0_f64).is_some(), "atan2 in range is Some")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_copysign_moves_only_the_sign() -> Void {
+  std::debug::assert(1.5_f64.copysign(-2.0_f64) == -1.5_f64, "takes a negative sign")
+  std::debug::assert(-1.5_f64.copysign(3.0_f64) == 1.5_f64, "takes a positive sign")
+  std::debug::assert(1.0_f64.copysign(-0.0_f64).is_negative(), "a negative zero's sign counts")
+  std::debug::assert(F64::nan().copysign(-1.0_f64).is_nan(), "a NaN stays a NaN")
+}
