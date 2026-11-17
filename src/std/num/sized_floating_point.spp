@@ -439,6 +439,7 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
   !public !inline
   !versioned(base="1.0.0", new="1.0.0")
   fun ln(self) -> Self {
+    # The natural logarithm (base e, `Consts[F64]::e`): the platform's `log`.
     ret intrinsics::float_log(self)
   }
 
@@ -456,7 +457,36 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
 
   !public !inline
   fun ln_ieee(self) -> Self {
+    # `ln` with no check.
     ret intrinsics::float_log_ieee(self)
+  }
+
+  !public !inline
+  !versioned(base="1.0.0", new="1.0.0")
+  fun log(self, base: Self) -> Self {
+    # The logarithm in `base`, as `log2(x) / log2(base)`, so up to three
+    # roundings: within a few ulps, not correctly rounded (nor are the other
+    # transcendental functions, which come from the platform's libm, as IEEE 754
+    # permits).
+    ret intrinsics::float_log2(self) / intrinsics::float_log2(base)
+  }
+
+  !public !inline
+  fun log_checked(self, base: Self) -> Opt[Self] {
+    let (val, raised) = self.log_raised(base)
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun log_raised(self, base: Self) -> (Self, Bool) {
+    let val = self.log_ieee(base)
+    ret (val, val.is_finite().not)
+  }
+
+  !public !inline
+  fun log_ieee(self, base: Self) -> Self {
+    # `log(base)` with no check.
+    ret intrinsics::float_log2_ieee(self).div_ieee(intrinsics::float_log2_ieee(base))
   }
 
   !public !inline
@@ -503,33 +533,6 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
   !public !inline
   fun log10_ieee(self) -> Self {
     ret intrinsics::float_log10_ieee(self)
-  }
-
-  !public !inline
-  !versioned(base="1.0.0", new="1.0.0")
-  fun log(self, base: Self) -> Self {
-    # Two logarithms and a division, so up to three roundings: within a few
-    # ulps, not correctly rounded (nor are the other transcendental functions,
-    # which come from the platform's libm, as IEEE 754 permits).
-    ret intrinsics::float_log2(self) / intrinsics::float_log2(base)
-  }
-
-  !public !inline
-  fun log_checked(self, base: Self) -> Opt[Self] {
-    let (val, raised) = self.log_raised(base)
-    ret case raised { None } else { Some(val) }
-  }
-
-  !public !inline
-  fun log_raised(self, base: Self) -> (Self, Bool) {
-    let val = self.log_ieee(base)
-    ret (val, val.is_finite().not)
-  }
-
-  !public !inline
-  fun log_ieee(self, base: Self) -> Self {
-    # `log` with no check.
-    ret intrinsics::float_log2_ieee(self).div_ieee(intrinsics::float_log2_ieee(base))
   }
 
   !public !inline

@@ -359,3 +359,16 @@ fun test_copysign_moves_only_the_sign() -> Void {
   std::debug::assert(1.0_f64.copysign(-0.0_f64).is_negative(), "a negative zero's sign counts")
   std::debug::assert(F64::nan().copysign(-1.0_f64).is_nan(), "a NaN stays a NaN")
 }
+
+!test(group="std/num/sized_floating_point")
+fun test_ln_is_the_natural_logarithm() -> Void {
+  # Each constant is rounded, and libm's "log" may be a few ulps out, so these are near, not exact.
+  let e = std::consts::Consts[F64]::e
+  let tol = 0.000000000000001_f64
+  std::debug::assert((e.ln() - 1.0_f64).abs() < tol, "ln(e) is 1")
+  std::debug::assert((e.ln() - e.log(e)).abs() < tol, "ln(x) is log(x, e)")
+  std::debug::assert((1000.0_f64.log(10.0_f64) - 3.0_f64).abs() < tol, "log base 10 of 1000 is 3")
+  std::debug::assert((2.0_f64.ln() - std::consts::Consts[F64]::ln_2).abs() < tol, "ln(2) is ln 2")
+  std::debug::assert((e.ln_ieee() - 1.0_f64).abs() < tol and (e.ln_checked().unwrap() - 1.0_f64).abs() < tol, "so are the variants")
+  std::debug::assert((std::consts::Consts[F32]::e.ln() - 1.0_f32).abs() < 0.0000002_f32, "F32 too")
+}
