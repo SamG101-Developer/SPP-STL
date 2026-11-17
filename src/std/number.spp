@@ -25,9 +25,9 @@ use std::num::sized_integer_unsigned::SizedIntegerUnsigned
 !public type F16 = SizedFloatingPoint[16_u32]
 !public type F32 = SizedFloatingPoint[32_u32]
 !public type F64 = SizedFloatingPoint[64_u32]
-!public type F128 = SizedFloatingPoint[128_u32]
 
-# Todo: Can't add the FP256 until LLVM adds intrinsic support for them.
-# type F256 = SizedFloatingPoint[256_u32]
-
-# Todo: Maybe add "PSize" for pointer size?
+# F128 only where its maths functions are right: binary128 "long double"
+# (AArch64, RISC-V 64, s390x) or glibc's "*f128" (x86-64). Everywhere else, the
+# platform's "sinl" takes another type and returns garbage.
+!public !cfg(os="linux", pointer_width="64")
+type F128 = SizedFloatingPoint[128_u32]
