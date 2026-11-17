@@ -54,3 +54,23 @@ fun test_a_lone_surrogate_is_not_text() -> Void {
   drop(lossy)
   drop(os)
 }
+
+!test(group="std/os/os_string")
+fun test_to_c_str_refuses_a_nul_inside() -> Void {
+  # C would stop at the nul and act on the shorter name "a".
+  let os = std::os::os_string::OsStr(bytes=Vec[U8]::from(&[0x61_u8, 0x00_u8, 0x62_u8]))
+  std::debug::assert(os.has_nul(), "the nul is found")
+  let z = os.to_c_str()
+  std::debug::assert(z.is_none(), "and there is no c string of it")
+  drop(z)
+  drop(os)
+}
+
+!test(group="std/os/os_string")
+fun test_to_c_str_terminates_a_name_without_a_nul() -> Void {
+  let os = std::os::os_string::OsStr::from("ab")
+  let z = os.to_c_str().expect("a name without a nul has a c string")
+  std::debug::assert(z.len() == 2_uz, "the terminator is not counted")
+  drop(z)
+  drop(os)
+}

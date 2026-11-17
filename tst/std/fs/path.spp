@@ -249,3 +249,21 @@ fun test_a_file_whose_name_is_not_utf8() -> Void {
   drop(path)
   drop(name)
 }
+
+!test(group="std/fs/path")
+fun test_a_path_with_a_nul_inside_is_refused() -> Void {
+  # The system would stop at the nul and act on "spp_std_test_nul" instead.
+  let path = std::fs::path::Path(inner=std::os::os_string::OsStr(bytes=Vec[U8]::from(
+    &[0x73_u8, 0x70_u8, 0x70_u8, 0x5f_u8, 0x6e_u8, 0x00_u8, 0x78_u8])))
+  std::debug::assert(path.exists().not, "it does not exist")
+  std::debug::assert(path.is_dir().not, "nor is a directory")
+  let made = path.create_dir()
+  let err = made.unwrap_err()
+  let refused = case err of {
+    is std::fs::path::PathNulErr() { true }
+    else { false }
+  }
+  drop(err)
+  std::debug::assert(refused, "creating it is refused with PathNulErr")
+  drop(path)
+}

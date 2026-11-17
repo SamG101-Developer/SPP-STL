@@ -75,7 +75,7 @@ fun test_returned_ptr_mut_of_null_is_none() -> Void {
 fun test_from_c_str_reads_up_to_the_terminator() -> Void {
   let c = "hello".to_c_str()
   let (p, n) = std::cffi::view_ptr_ref(c.view_ref())
-  let s = Str::from_c_str(&p)
+  let s = Str::from_c_str(&p).unwrap()
   std::debug::assert(s == "hello", "the bytes before the nul are copied")
   std::debug::assert(n == 5_uz, "the view's length does not count the nul")
   drop(p)
@@ -103,4 +103,20 @@ fun test_returned_ptr_alloc_of_null_is_none() -> Void {
   let ptr = std::cffi::returned_ptr_alloc(std::mem::pointer::Ptr[U8]::null())
   std::debug::assert(ptr.is_none(), "a null returned pointer has no NonNull")
   drop(ptr)
+}
+
+!test(group="std/cffi")
+fun test_from_c_str_of_bytes_that_are_not_utf8_fails() -> Void {
+  # A c library promises nothing about the encoding: a stray 0xff used to become
+  # a `Str` that was not valid UTF-8.
+  let bytes = Vec[U8]::from(&[0x61_u8, 0xff_u8, 0x62_u8, 0x00_u8])
+  let (p, n) = std::cffi::view_ptr_ref(&bytes)
+  let s = Str::from_c_str(&p)
+  std::debug::assert(s.is_fail(), "bytes that are not UTF-8 are refused")
+  drop(s)
+  let lossy = Str::from_c_str_lossy(&p)
+  std::debug::assert(lossy == "a�b", "or replaced, taken lossily")
+  drop(lossy)
+  drop(p)
+  drop(bytes)
 }

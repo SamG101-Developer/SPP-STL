@@ -83,34 +83,49 @@ sup Str {
     ret Str::new_in(GlobalAlloc)
   }
 
-  !public
+  !package
   !versioned(base="1.0.0", new="1.0.0")
-  fun from_c_str(ptr: NonNull[U8]) -> Str {
-    # Copy a nul-terminated c string into an owned `Str`. What a c api hands
-    # back is a pointer and nothing else, so the length is wherever the
-    # terminator is - which is what this finds. The counterpart of
-    # `StrView::to_c_str`, which is how a `Str` goes the other way.
+  fun c_str_view(ptr: NonNull[U8]) -> View[U8] {
+    # The bytes of a nul-terminated c string, not counting the terminator. What
+    # a c api hands back is a pointer and nothing else, so the length is
+    # wherever the terminator is - which is what this finds.
     # @let ptr: A pointer to the first byte of a nul-terminated sequence.
-    # @ret: An owned copy of the bytes before the terminator.
+    # @ret: A view of the bytes before the terminator.
 
     let mut length = 0_uz
     let err = sppc::strchr(ptr.as_c_ref(), 0_u8, &mut length) # Todo: Error handling.
-    let view = StrView(pointer=ptr, length=length)
-    ret Str::from(&view)
+    ret View(pointer=ptr, length=length)
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun from_c_str(ptr: &CRefBytePtr) -> Str {
+  fun from_c_str(ptr: &CRefBytePtr) -> Res[Str, Utf8Err] {
     # Copy a nul-terminated c string into an owned `Str`, from the byte pointer
     # a project outside std holds: get one from a returned pointer with
     # `std::cffi::returned_ptr_ref`. The pointer is borrowed, not consumed, so
-    # it can still be passed on afterwards. Nothing checks that the bytes are
-    # nul-terminated or still alive: that is the c library's contract.
+    # it can still be passed on afterwards. A c library promises nothing about
+    # the encoding, so the bytes are checked, as `from_utf8` does; use
+    # `from_c_str_lossy` to take them as they come. Nothing checks that the
+    # bytes are nul-terminated or still alive: that is the c library's
+    # contract. The counterpart of `StrView::to_c_str`.
     # @let ptr: A pointer to the first byte of a nul-terminated sequence.
-    # @ret: An owned copy of the bytes before the terminator.
+    # @ret: An owned copy of the bytes before the terminator, or the `Utf8Err`
+    #   of the first invalid sequence when they are not valid UTF-8.
 
-    ret Str::from_c_str(ptr.inner)
+    let view = Str::c_str_view(ptr.inner)
+    ret Str::from_utf8(&view)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from_c_str_lossy(ptr: &CRefBytePtr) -> Str {
+    # Copy a nul-terminated c string into an owned `Str`, as `from_c_str`, with
+    # each invalid UTF-8 sequence replaced by U+FFFD (see `from_utf8_lossy`).
+    # @let ptr: A pointer to the first byte of a nul-terminated sequence.
+    # @ret: An owned copy of the bytes before the terminator, made valid.
+
+    let view = Str::c_str_view(ptr.inner)
+    ret Str::from_utf8_lossy(&view)
   }
 
   !public

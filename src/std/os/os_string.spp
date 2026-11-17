@@ -5,6 +5,7 @@ use std::format::Formatter
 use std::io::StreamErr
 use std::mem::pointer::NonNull
 use std::ops::eq::Eq
+use std::range::Range
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
@@ -72,15 +73,31 @@ sup OsStr {
 
   !package
   !versioned(base="1.0.0", new="1.0.0")
-  fun to_c_str(&self) -> OsStr {
+  fun to_c_str(&self) -> Opt[OsStr] {
     # A nul-terminated copy, for sppc. The copy's own `len` does not count the
-    # terminator, which sits just past its last byte.
-    # @ret: An owned copy whose buffer has a `0` byte after the last byte.
+    # terminator, which sits just past its last byte. There is none for a name
+    # with a `0` byte inside: C would stop at that byte, so the call would act
+    # on a shorter name, a different file or variable.
+    # @ret: An owned copy whose buffer has a `0` byte after the last byte, or
+    #   `None` when a `0` byte is already inside.
 
+    case self.has_nul() { ret None }
     let mut out = self.clone()
     out.bytes.append(0_u8)
     out.bytes.length -= 1_uz
-    ret out
+    ret Some(val=out)
+  }
+
+  !package
+  !versioned(base="1.0.0", new="1.0.0")
+  fun has_nul(&self) -> Bool {
+    # Whether any byte is `0`, which no C call can take inside a name.
+    # @ret: `true` if a `0` byte is inside.
+
+    loop i in Range[USize]::between(0_uz, self.bytes.len()) {
+      case self.byte(i) == 0_u8 { ret true }
+    }
+    ret false
   }
 
   !package
