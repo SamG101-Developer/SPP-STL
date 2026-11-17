@@ -1,0 +1,24 @@
+!test(group="std/consts")
+fun test_the_constants_agree_with_each_other() -> Void {
+  # Each is its literal rounded once; these identities hold to the last place or nearly.
+  let c = std::consts::Consts[F64]::pi
+  std::debug::assert(std::consts::Consts[F64]::tau == c * 2.0_f64, "tau is 2 pi")
+  std::debug::assert(std::consts::Consts[F64]::frac_pi_2 == c / 2.0_f64, "pi / 2")
+  std::debug::assert(std::consts::Consts[F64]::frac_pi_4 == c / 4.0_f64, "pi / 4")
+  std::debug::assert((std::consts::Consts[F64]::sqrt_2 * std::consts::Consts[F64]::sqrt_2 - 2.0_f64).abs() < 0.000000000000001_f64, "sqrt(2)^2 is 2")
+  std::debug::assert((std::consts::Consts[F64]::ln_2 * std::consts::Consts[F64]::log2_e - 1.0_f64).abs() < 0.000000000000001_f64, "ln 2 * log2 e is 1")
+  std::debug::assert((std::consts::Consts[F64]::ln_10 * std::consts::Consts[F64]::log10_e - 1.0_f64).abs() < 0.000000000000001_f64, "ln 10 * log10 e is 1")
+  std::debug::assert((1.0_f64.exp() - std::consts::Consts[F64]::e).abs() < 0.000000000000001_f64, "exp(1) is e")
+}
+
+!test(group="std/consts")
+fun test_every_width_has_its_constants() -> Void {
+  std::debug::assert(std::consts::Consts[F16]::pi == F16::from_ieee(std::consts::Consts[F64]::pi), "F16 pi is F64's rounded")
+  std::debug::assert(std::consts::Consts[F32]::pi == F32::from_ieee(std::consts::Consts[F64]::pi), "F32 pi is F64's rounded")
+}
+
+!test(group="std/consts")
+!cfg(os="linux", pointer_width="64")
+fun test_f128_has_its_constants() -> Void {
+  std::debug::assert(F64::from(std::consts::Consts[F128]::pi) == std::consts::Consts[F64]::pi, "F128 pi rounds to F64's")
+}
