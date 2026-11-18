@@ -79,7 +79,7 @@ fun test_slice_yields_the_middle() -> Void {
 
 !test(group="std/iterator")
 fun test_fold_first_starts_from_the_first_element() -> Void {
-  let sum = Vec[S32]::from(&[1, 2, 3, 4]).iter_mov().fold_first((a: S32, b: S32) { ret a + b })
+  let sum = Vec[S32]::from(&[1, 2, 3, 4]).iter_mov().fold_first(|a: S32, b: S32| { ret a + b })
   let got = case sum of {
     is Some[S32](val) { val }
     else { -1 }
@@ -87,7 +87,7 @@ fun test_fold_first_starts_from_the_first_element() -> Void {
   std::debug::assert(got == 10, "1+2+3+4 with no external initial value")
 
   # Subtraction is not commutative, so this checks the first element is the left-hand accumulator.
-  let diff = Vec[S32]::from(&[10, 3, 2]).iter_mov().fold_first((a: S32, b: S32) { ret a - b })
+  let diff = Vec[S32]::from(&[10, 3, 2]).iter_mov().fold_first(|a: S32, b: S32| { ret a - b })
   let got_diff = case diff of {
     is Some[S32](val) { val }
     else { -1 }
@@ -97,7 +97,7 @@ fun test_fold_first_starts_from_the_first_element() -> Void {
 
 !test(group="std/iterator")
 fun test_fold_first_of_one_element_is_that_element() -> Void {
-  let one = Vec[S32]::from(&[7]).iter_mov().fold_first((a: S32, b: S32) { ret a * b })
+  let one = Vec[S32]::from(&[7]).iter_mov().fold_first(|a: S32, b: S32| { ret a * b })
   let got = case one of {
     is Some[S32](val) { val }
     else { -1 }
@@ -107,7 +107,7 @@ fun test_fold_first_of_one_element_is_that_element() -> Void {
 
 !test(group="std/iterator")
 fun test_fold_first_of_nothing_is_none() -> Void {
-  let none = Vec[S32]::new().iter_mov().fold_first((a: S32, b: S32) { ret a + b })
+  let none = Vec[S32]::new().iter_mov().fold_first(|a: S32, b: S32| { ret a + b })
   let got = case none of {
     is Some[S32](val) { val }
     else { -1 }

@@ -177,3 +177,23 @@ fun test_the_remainder_by_minus_one_is_zero() -> Void {
   std::debug::assert(overflowed.not, "is not an overflow")
   std::debug::assert(min.rem_checked(-1).unwrap() == 0, "so the checked form gives it too")
 }
+!test(group="std/num/sized_integer_signed")
+fun test_neg_and_abs_saturate_at_the_minimum() -> Void {
+  std::debug::assert(-128_s8.neg_saturating() == 127_s8, "-MIN saturates to MAX")
+  std::debug::assert(5_s8.neg_saturating() == -5_s8, "an ordinary negation")
+  std::debug::assert(-128_s8.abs_saturating() == 127_s8, "|MIN| saturates to MAX")
+  std::debug::assert(-5_s8.abs_saturating() == 5_s8, "an ordinary abs")
+  let (wrapped, overflowed) = -128_s8.abs_overflow()
+  std::debug::assert(overflowed and wrapped == -128_s8, "|MIN| overflows, wrapping to MIN")
+  let (value, fine) = -7_s8.abs_overflow()
+  std::debug::assert(fine.not and value == 7_s8, "|-7| does not overflow")
+}
+
+!test(group="std/num/sized_integer_signed")
+fun test_bit_shl_saturating_clamps_signed_values() -> Void {
+  std::debug::assert(64_s8.bit_shl_saturating(1_u32) == 127_s8, "64 << 1 saturates to MAX")
+  std::debug::assert(-64_s8.bit_shl_saturating(2_u32) == -128_s8, "-64 << 2 saturates to MIN")
+  std::debug::assert(3_s8.bit_shl_saturating(2_u32) == 12_s8, "a shift in range")
+  std::debug::assert(1_s8.bit_shl_saturating(100_u32) == 127_s8, "past the width saturates")
+  std::debug::assert(0_s8.bit_shl_saturating(100_u32) == 0_s8, "0 stays 0")
+}

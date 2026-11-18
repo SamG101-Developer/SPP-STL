@@ -176,3 +176,10 @@ fun test_is_pow_of_two() -> Void {
   std::debug::assert(64_u32.is_pow_of_two(), "64")
   std::debug::assert(96_u32.is_pow_of_two().not, "96 has two bits set")
 }
+!test(group="std/num/sized_integer_unsigned")
+fun test_bit_shl_saturating_clamps_unsigned_values() -> Void {
+  std::debug::assert(1_u8.bit_shl_saturating(9_u32) == 255_u8, "1 << 9 saturates to MAX")
+  std::debug::assert(200_u8.bit_shl_saturating(1_u32) == 255_u8, "200 << 1 saturates to MAX")
+  std::debug::assert(3_u8.bit_shl_saturating(2_u32) == 12_u8, "a shift in range")
+  std::debug::assert(0_u8.bit_shl_saturating(100_u32) == 0_u8, "0 stays 0")
+}

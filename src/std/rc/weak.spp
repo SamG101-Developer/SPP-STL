@@ -32,7 +32,7 @@ sup [T, A: Alloc] Weak[T, A] {
   !public type Element = T
 }
 
-sup [T, A: Alloc & Clone] Weak[T, A] {
+sup [T, A: Alloc and Clone] Weak[T, A] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun upgrade(&self) -> Opt[Rc[T, A]] {
@@ -55,7 +55,7 @@ sup [T, A: Alloc & Clone] Weak[T, A] {
   }
 }
 
-sup [T, A: Alloc & Clone] Weak[T, A] ext Clone {
+sup [T, A: Alloc and Clone] Weak[T, A] ext Clone {
   !versioned(base="1.0.0", new="1.0.0")
   fun clone(&self) -> Self {
     # Create another weak handle to the same control block. Like

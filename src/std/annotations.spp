@@ -8,8 +8,9 @@ sup Annotation {
   !public cmp class: S32 = 8
   !public cmp new_type: S32 = 16
   !public cmp constant: S32 = 32
+  !public cmp sup_block: S32 = 64
 
-  !public cmp all: S32 = Self::function | Self::method | Self::ext_method | Self::class | Self::new_type | Self::constant
+  !public cmp all: S32 = Self::function | Self::method | Self::ext_method | Self::class | Self::new_type | Self::constant | Self::sup_block
   !public cmp mod: S32 = Self::function | Self::method | Self::class | Self::new_type | Self::constant
 }
 

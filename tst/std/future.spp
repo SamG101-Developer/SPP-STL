@@ -1,13 +1,13 @@
 !test(group="std/future")
 fun test_an_awaited_task_answers_with_what_it_produced() -> Void {
-  let f = std::future::Fut[S32]::spawn(() -> S32 { ret 21 * 2 })
+  let f = std::future::Fut[S32]::spawn(|| -> S32 { ret 21 * 2 })
   std::debug::assert(f.await == 42, "the value the task produced")
 }
 
 !test(group="std/future")
 fun test_a_task_sees_what_it_captured() -> Void {
   let n = 7
-  let f = std::future::Fut[S32]::spawn((caps n) -> S32 { ret n * 3 })
+  let f = std::future::Fut[S32]::spawn(|caps n| -> S32 { ret n * 3 })
   std::debug::assert(f.await == 21, "the captured value crossed onto the task")
 }
 
@@ -15,7 +15,7 @@ fun test_a_task_sees_what_it_captured() -> Void {
 fun test_a_result_wider_than_a_pointer_survives() -> Void {
   # The c side's own result channel is one pointer. Anything wider has to come back through the cell the caller
   # allocated, which is what this proves.
-  let f = std::future::Fut[(S64, S64, S64)]::spawn(() -> (S64, S64, S64) {
+  let f = std::future::Fut[(S64, S64, S64)]::spawn(|| -> (S64, S64, S64) {
     ret (1_s64, 2_s64, 3_s64)
   })
   let (a, b, c) = f.await
@@ -24,7 +24,7 @@ fun test_a_result_wider_than_a_pointer_survives() -> Void {
 
 !test(group="std/future")
 fun test_a_non_copy_result_survives() -> Void {
-  let f = std::future::Fut[Str]::spawn(() -> Str { ret Str::from("hello") })
+  let f = std::future::Fut[Str]::spawn(|| -> Str { ret Str::from("hello") })
   let s = f.await
   std::debug::assert(s.len() == 5_uz, "the string came back whole")
   drop(s)
@@ -33,9 +33,9 @@ fun test_a_non_copy_result_survives() -> Void {
 !test(group="std/future")
 fun test_await_all_collects_in_order() -> Void {
   let mut futs = Vec[std::future::Fut[S32]]()
-  futs.append(std::future::Fut[S32]::spawn(() -> S32 { ret 10 }))
-  futs.append(std::future::Fut[S32]::spawn(() -> S32 { ret 20 }))
-  futs.append(std::future::Fut[S32]::spawn(() -> S32 { ret 30 }))
+  futs.append(std::future::Fut[S32]::spawn(|| -> S32 { ret 10 }))
+  futs.append(std::future::Fut[S32]::spawn(|| -> S32 { ret 20 }))
+  futs.append(std::future::Fut[S32]::spawn(|| -> S32 { ret 30 }))
 
   let vals = std::future::Fut[S32]::await_all(futs)
   std::debug::assert(vals.len() == 3_uz, "one value per future")
@@ -47,7 +47,7 @@ fun test_await_all_collects_in_order() -> Void {
 fun test_a_future_that_is_never_awaited_can_be_dropped() -> Void {
   # Dropping gives up the right to the value: the task is detached, so the runtime hands its slot back when it finishes
   # rather than keeping it for a result nobody will collect.
-  let f = std::future::Fut[S32]::spawn(() -> S32 { ret 9 })
+  let f = std::future::Fut[S32]::spawn(|| -> S32 { ret 9 })
   drop(f)
 }
 
@@ -58,7 +58,7 @@ fun test_many_tasks_reuse_their_slots() -> Void {
   let mut total = 0
   let mut i = 0
   loop i < 300 {
-    let f = std::future::Fut[S32]::spawn((caps i) -> S32 { ret i })
+    let f = std::future::Fut[S32]::spawn(|caps i| -> S32 { ret i })
     total = total + f.await
     i = i + 1
   }
@@ -68,7 +68,7 @@ fun test_many_tasks_reuse_their_slots() -> Void {
 !test(group="std/future")
 fun test_a_task_can_yield() -> Void {
   # A task that hands the thread on still finishes.
-  let a = std::future::Fut[S32]::spawn(() -> S32 {
+  let a = std::future::Fut[S32]::spawn(|| -> S32 {
     std::future::yield_now()
     ret 10
   })

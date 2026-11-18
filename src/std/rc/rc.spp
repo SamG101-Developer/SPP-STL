@@ -89,7 +89,7 @@ sup [T, A: Alloc] Rc[T, A] {
   }
 }
 
-sup [T, A: Alloc & Clone] Rc[T, A] {
+sup [T, A: Alloc and Clone] Rc[T, A] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun downgrade(&self) -> Weak[T, A] {
@@ -113,7 +113,7 @@ sup [T] Rc[T] ext FwdRef[T] {
   }
 }
 
-sup [T, A: Alloc & Clone] Rc[T, A] ext Clone {
+sup [T, A: Alloc and Clone] Rc[T, A] ext Clone {
   !versioned(base="1.0.0", new="1.0.0")
   fun clone(&self) -> Self {
     # Create a new `Rc` handle to the same control block. This increments the

@@ -341,6 +341,16 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
 
   !public
   !inline
+  fun bit_shl_saturating(self, that: U32) -> Self {
+    # The shifted value, or the bound on its side where bits shifted out would
+    # change it (0 stays 0); a distance of the width or more shifts every bit
+    # out, so it is taken as the width.
+    let by = Self::from(that.min(w))
+    ret case signed { intrinsics::sshl_saturating(self, by) } else { intrinsics::ushl_saturating(self, by) }
+  }
+
+  !public
+  !inline
   fun bit_shl_wrapping(self, that: U32) -> Self {
     ret intrinsics::bit_shl(self, that & (w - 1_u32))
   }

@@ -83,34 +83,49 @@ sup Str {
     ret Str::new_in(GlobalAlloc)
   }
 
-  !public
+  !package
   !versioned(base="1.0.0", new="1.0.0")
-  fun from_c_str(ptr: NonNull[U8]) -> Str {
-    # Copy a nul-terminated c string into an owned `Str`. What a c api hands
-    # back is a pointer and nothing else, so the length is wherever the
-    # terminator is - which is what this finds. The counterpart of
-    # `StrView::to_c_str`, which is how a `Str` goes the other way.
+  fun c_str_view(ptr: NonNull[U8]) -> View[U8] {
+    # The bytes of a nul-terminated c string, not counting the terminator. What
+    # a c api hands back is a pointer and nothing else, so the length is
+    # wherever the terminator is - which is what this finds.
     # @let ptr: A pointer to the first byte of a nul-terminated sequence.
-    # @ret: An owned copy of the bytes before the terminator.
+    # @ret: A view of the bytes before the terminator.
 
     let mut length = 0_uz
     let err = sppc::strchr(ptr.as_c_ref(), 0_u8, &mut length) # Todo: Error handling.
-    let view = StrView(pointer=ptr, length=length)
-    ret Str::from(&view)
+    ret View(pointer=ptr, length=length)
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun from_c_str(ptr: &CRefBytePtr) -> Str {
+  fun from_c_str(ptr: &CRefBytePtr) -> Res[Str, Utf8Err] {
     # Copy a nul-terminated c string into an owned `Str`, from the byte pointer
     # a project outside std holds: get one from a returned pointer with
     # `std::cffi::returned_ptr_ref`. The pointer is borrowed, not consumed, so
-    # it can still be passed on afterwards. Nothing checks that the bytes are
-    # nul-terminated or still alive: that is the c library's contract.
+    # it can still be passed on afterwards. A c library promises nothing about
+    # the encoding, so the bytes are checked, as `from_utf8` does; use
+    # `from_c_str_lossy` to take them as they come. Nothing checks that the
+    # bytes are nul-terminated or still alive: that is the c library's
+    # contract. The counterpart of `StrView::to_c_str`.
     # @let ptr: A pointer to the first byte of a nul-terminated sequence.
-    # @ret: An owned copy of the bytes before the terminator.
+    # @ret: An owned copy of the bytes before the terminator, or the `Utf8Err`
+    #   of the first invalid sequence when they are not valid UTF-8.
 
-    ret Str::from_c_str(ptr.inner)
+    let view = Str::c_str_view(ptr.inner)
+    ret Str::from_utf8(&view)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from_c_str_lossy(ptr: &CRefBytePtr) -> Str {
+    # Copy a nul-terminated c string into an owned `Str`, as `from_c_str`, with
+    # each invalid UTF-8 sequence replaced by U+FFFD (see `from_utf8_lossy`).
+    # @let ptr: A pointer to the first byte of a nul-terminated sequence.
+    # @ret: An owned copy of the bytes before the terminator, made valid.
+
+    let view = Str::c_str_view(ptr.inner)
+    ret Str::from_utf8_lossy(&view)
   }
 
   !public
@@ -132,17 +147,14 @@ sup Str {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun new_filled(len: USize, element: U8) -> Str {
-    # The `new_filled` method creates a new instance of the `Str` type with a
-    # specified length, where all bytes are initialized to a given value. This
-    # is useful for creating strings that need to be filled with a specific
-    # character or byte value, and it uses the global allocator by default.
-    # @let len: The length of the string in bytes. This determines how many
-    #   bytes will be allocated and initialized in the string's internal buffer.
-    # @let element: The byte value that will be used to fill the string. Each
-    #   byte in the resulting string will be set to this value.
-    # @ret: A new `Str` instance of the specified length, with all bytes
-    #   initialized to the given element.
+  fun new_filled(len: USize, element: Char) -> Str {
+    # The `new_filled` method creates a new `Str` of `len` copies of a
+    # character, using the global allocator. It takes a `Char` rather than a
+    # byte, so the result is always valid UTF-8: a byte such as `0xc3` on its
+    # own is not a character.
+    # @let len: The number of characters (not bytes) in the new string.
+    # @let element: The character repeated to fill the string.
+    # @ret: A new `Str` of `len` copies of `element`.
 
     # Forward to the more general `new_filled_in` method,
     # using the global allocator as the default.
@@ -198,27 +210,24 @@ sup [A: Alloc] Str[A] {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun new_filled_in(len: USize, element: U8, alloc: A = A()) -> Str[A] {
-    # The `new_filled_in` method creates a new instance of the `Str` type with a
-    # specified length, where all bytes are initialized to a given value, using
-    # a specified allocator. This is useful for creating strings that need to be
-    # filled with a specific character or byte value, and it allows for custom
-    # memory management through the use of different allocators.
-    # @let len: The length of the string in bytes. This determines how many
-    #   bytes will be allocated and initialized in the string's internal buffer.
-    # @let element: The byte value that will be used to fill the string. Each
-    #   byte in the resulting string will be set to this value.
+  fun new_filled_in(len: USize, element: Char, alloc: A = A()) -> Str[A] {
+    # The `new_filled_in` method creates a new `Str` of `len` copies of a
+    # character, using the given allocator. It takes a `Char` rather than a
+    # byte, so the result is always valid UTF-8.
+    # @let len: The number of characters (not bytes) in the new string.
+    # @let element: The character repeated to fill the string.
     # @let ?alloc: An optional allocator instance that will be used for managing
     #   the memory of the string. If not provided, a default instance of the
-    #   allocator type `A` will be used. This allows for both stateless and
-    #   stateful allocators to be utilized when creating a new filled string.
-    # @ret: A new `Str` instance of the specified length, with all bytes
-    #   initialized to the given element, using the specified allocator for
-    #   memory management.
+    #   allocator type `A` will be used.
+    # @ret: A new `Str` of `len` copies of `element`, using the given allocator.
 
-    # Forward to the constructor of `Str`, creating a new `Vec`
-    # filled with the specified length, element, and allocator.
-    ret Str(bytes=Vec[U8, A]::new_filled_in(len, element, alloc))
+    # Reserve the whole encoding up front, then append the character's bytes
+    # `len` times.
+    let mut out = Str[A]::new_with_capacity_in(len * USize::from(element.len_utf8()), alloc)
+    loop i in Range[USize]::between(0_uz, len) {
+      out.append(element)
+    }
+    ret out
   }
 
   !public
@@ -227,8 +236,9 @@ sup [A: Alloc] Str[A] {
     # The `from` method creates a new instance of the `Str` type from a given
     # `StrView`. It takes a byte view of `view` (`view_ref`, which just
     # repackages the `StrView`'s existing pointer and length - no copy yet) and
-    # forwards to the `View[U8]`-based `from` below, which does the actual
-    # allocation and memcpy, using the given allocator.
+    # forwards to `from_utf8_unchecked`, which does the actual allocation and
+    # memcpy, using the given allocator: the bytes of a `StrView` are already
+    # valid UTF-8.
     # @let view: A reference to a `StrView` that contains the string data to be
     #   copied. The bytes from this view will be used to initialize the internal
     #   vector of the new `Str` instance.
@@ -238,127 +248,77 @@ sup [A: Alloc] Str[A] {
     # @ret: A new `Str` instance that contains a copy of the bytes from the
     #   provided `StrView`.
 
-    ret Self::from(view.view_ref(), alloc)
+    ret Self::from_utf8_unchecked(view.view_ref(), alloc)
   }
 
-  !public
+  !package
   !versioned(base="1.0.0", new="1.0.0")
-  fun from(that: &View[U8], alloc: A = A()) -> Self {
-    # The `from` method creates a new instance of the `Str` type from a view of
-    # bytes. This involves copying the bytes from the provided view into a new
-    # internal vector, using the given allocator.
-    # @let that: A reference to a view of bytes that contains the data to be
-    #   copied into the new string. The bytes from this view will be used to
-    #   initialize the internal vector of the new `Str` instance.
-    # @let ?alloc: An optional allocator instance that will be used for managing
-    #   the memory of the string. If not provided, a default instance of the
-    #   allocator type `A` will be used.
-    # @ret: A new `Str` instance that contains a copy of the bytes from the
-    #   provided view.
-
-    # Forward to the constructor of `Str`, creating a new `Vec`
-    # filled with the bytes from the provided view.
-    ret Str(bytes=Vec[U8, A]::from_in(that, alloc))
-  }
-
-  !public
-  !versioned(base="1.0.0", new="1.0.0")
-  fun from_utf8_unchecked(bytes: &View[U8]) -> Self {
+  fun from_utf8_unchecked(bytes: &View[U8], alloc: A = A()) -> Self {
     # The `from_utf8_unchecked` method creates a new `Str` by copying `bytes`
     # verbatim, without checking that they are valid UTF-8. The caller must have
     # already established that `bytes` is valid UTF-8 - for example, because it
     # was copied out of an existing `StrView`, which carries that guarantee as
     # an invariant. Passing bytes that are not valid UTF-8 will produce a `Str`
     # that violates its own invariant, and any subsequent use of it as a
-    # `StrView` (`chars`, `find`, etc.) is undefined behaviour.
+    # `StrView` (`chars`, `find`, etc.) is undefined behaviour. So it is
+    # `!package`: outside std, bytes become a `Str` only through `from_utf8`,
+    # which checks them.
     # @let bytes: The raw bytes to copy into the new `Str`, asserted by the
     #   caller to already be valid UTF-8.
+    # @let ?alloc: An optional allocator instance for the new string's memory.
+    #   If not provided, a default instance of the allocator type `A` is used.
     # @ret: A new `Str` containing a copy of `bytes`.
 
-    ret Self::from(bytes)
+    ret Str(bytes=Vec[U8, A]::from_in(bytes, alloc))
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun from_utf8(bytes: &View[U8]) -> Res[Self, Utf8Err] {
     # The `from_utf8` method validates that `bytes` is well-formed UTF-8 and, if
-    # so, copies it into a new `Str`. Validation walks the bytes one sequence at
-    # a time: the leading byte's range picks the sequence length (1-4 bytes),
-    # and every continuation byte must fall in `0x80..=0xbf`. The second byte of
-    # 3- and 4-byte sequences is additionally range-checked against the specific
-    # leading byte, to reject overlong encodings (`0xe0 0x80 ..`), UTF-16
-    # surrogates smuggled through as UTF-8 (`0xed 0xa0..0xbf ..`), and code
-    # points past the Unicode maximum of `0x10ffff` (`0xf4 0x90.. ..`).
+    # so, copies it into a new `Str` (`first_utf8_err` is the check).
     # @let bytes: The raw bytes to validate and, if valid, copy into a new
     #   `Str`.
     # @ret: A new `Str` containing a copy of `bytes` if it is valid UTF-8, or a
     #   `Utf8Err` describing the byte index and length of the first invalid
     #   sequence found.
 
-    let mut idx = 0_uz
-    loop idx < bytes.len() {
-      let first = bytes[idx]@
+    ret case first_utf8_err(bytes) of {
+      is Some[Utf8Err](val as err) { Fail(err=err) }
+      else { Pass(val=Self::from_utf8_unchecked(bytes)) }
+    }
+  }
 
-      # Fast path: a leading byte below `0x80` is a single-byte
-      # ASCII character, valid on its own.
-      case first < 0x80_u8 {
-        idx += 1_uz
-        skip
-      }
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun from_utf8_lossy(bytes: &View[U8], alloc: A = A()) -> Self {
+    # The `from_utf8_lossy` method copies `bytes` into a new `Str`, with each
+    # invalid sequence replaced by U+FFFD, as Rust's `String::from_utf8_lossy`
+    # does: a sequence cut short at the end is one replacement, and any other
+    # invalid sequence is one replacement per `Utf8Err::error_len` bytes.
+    # Valid UTF-8 comes through unchanged.
+    # @let bytes: The raw bytes to copy.
+    # @let ?alloc: An optional allocator instance for the new string's memory.
+    # @ret: A new `Str` of the valid parts of `bytes`, with a U+FFFD for each
+    #   invalid sequence.
 
-      # Reject bytes that can never start a sequence: bare continuation
-      # bytes (`0x80..=0xbf`), and the two bytes reserved for overlong
-      # 2-byte encodings (`0xc0`, `0xc1`), and everything above the
-      # highest valid 4-byte leader (`0xf4`).
-      case first < 0xc2_u8 or first > 0xf4_u8 {
-        ret Fail(err=Utf8Err(valid_up_to=idx, error_len=Some(val=1_uz)))
-      }
-
-      # The leading byte's range determines how many bytes make up this
-      # sequence.
-      let seq_len = case first of {
-        < 0xe0_u8 { 2_uz }
-        < 0xf0_u8 { 3_uz }
-        else { 4_uz }
-      }
-
-      # If the sequence would run past the end of `bytes`, it is a
-      # truncated sequence rather than an invalid one - `error_len=None`
-      # signals that more bytes would have made it valid.
-      case idx + seq_len > bytes.len() {
-        ret Fail(err=Utf8Err(valid_up_to=idx, error_len=None))
-      }
-
-      # Most continuation bytes are only constrained to `0x80..=0xbf`,
-      # but the second byte following the extremal leading bytes (`0xe0`,
-      # `0xed`, `0xf0`, `0xf4`) has a narrower valid range, to rule out
-      # overlong encodings, surrogates, and out-of-range code points.
-      let (second_min, second_max) = case first of {
-        == 0xe0_u8 { (0xa0_u8, 0xbf_u8) }
-        == 0xed_u8 { (0x80_u8, 0x9f_u8) }
-        == 0xf0_u8 { (0x90_u8, 0xbf_u8) }
-        == 0xf4_u8 { (0x80_u8, 0x8f_u8) }
-        else { (0x80_u8, 0xbf_u8) }
-      }
-
-      let second = bytes[idx + 1_uz]@
-      case second < second_min or second > second_max {
-        ret Fail(err=Utf8Err(valid_up_to=idx, error_len=Some(val=1_uz)))
-      }
-
-      # Any remaining continuation bytes (the 3rd and 4th, when present)
-      # are only constrained to the plain continuation-byte range.
-      loop k in Range[USize]::between(2_uz, seq_len) {
-        let cont = bytes[idx + k]@
-        case cont < 0x80_u8 or cont > 0xbf_u8 {
-          ret Fail(err=Utf8Err(valid_up_to=idx, error_len=Some(val=k)))
+    let mut out = Self::new_with_capacity_in(bytes.len(), alloc)
+    let mut at = 0_uz
+    loop at < bytes.len() {
+      let rest = bytes[at to bytes.len()]
+      case first_utf8_err(rest) of {
+        is Some[Utf8Err](val as err) {
+          out.bytes.append_from_view(rest[0_uz to err.valid_up_to])
+          out.append(Char::from(0xfffd_u32))
+          at += err.valid_up_to + err.error_len.unwrap_or(rest.len() - err.valid_up_to)
+        }
+        else {
+          out.bytes.append_from_view(rest)
+          at = bytes.len()
         }
       }
-
-      idx += seq_len
     }
-
-    ret Pass(val=Self::from_utf8_unchecked(bytes))
+    ret out
   }
 
   !public
@@ -402,17 +362,24 @@ sup [A: Alloc] Str[A] {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun take_last(&mut self) -> Opt[U8] {
-    # The `take_last` method removes and returns the last byte from the string,
-    # if it exists. This is equivalent to a pop operation from a lot of other
-    # languages. If the string is empty, it returns `None`.
-    # @ret: An `Opt[U8]` that contains the last byte of the string if it exists,
-    #   or `None` if the string is empty. This allows for safe handling of the
-    #   case where there are no bytes to take, without risking a runtime error.
+  fun take_last(&mut self) -> Opt[Char] {
+    # The `take_last` method removes and returns the last character from the
+    # string, if it exists. This is equivalent to a pop operation from a lot of
+    # other languages. The whole character is removed, however many bytes it
+    # encodes to, so the string stays valid UTF-8.
+    # @ret: An `Opt[Char]` that contains the last character of the string if it
+    #   exists, or `None` if the string is empty.
 
-    # Use the `pop` method of the internal vector to remove and
-    # return the last byte, if it exists.
-    ret self.bytes.take_last()
+    case self.bytes.is_empty() { ret None }
+
+    # Walk back over the continuation bytes to the last character's leading
+    # byte, decode the character from there, then cut the bytes off.
+    let len = self.bytes.len()
+    let mut start = len - 1_uz
+    loop self.bytes[start].is_utf8_char_boundary().not { start -= 1_uz }
+    let last = self[start to len].chars().nth(0_uz)
+    self.bytes.truncate(start)
+    ret last
   }
 
   !public
@@ -542,7 +509,7 @@ sup [A: Alloc] Str[A] ext FwdRef[StrView] {
   }
 }
 
-sup [A: Alloc & Clone] Str[A] ext Clone {
+sup [A: Alloc and Clone] Str[A] ext Clone {
   !versioned(base="1.0.0", new="1.0.0")
   fun clone(&self) -> Self {
     # The `clone` method creates a new instance of the `Str` type that is a copy
@@ -550,7 +517,7 @@ sup [A: Alloc & Clone] Str[A] ext Clone {
     # copying the bytes from the current string into it. `self` is only borrowed
     # here, so `self.bytes` (a `Vec[U8, A]`) must actually be cloned rather than
     # moved out - that's also why this impl needs `A: Clone` on top of `Vec`'s
-    # own `A: Alloc & Clone` bound for its `Clone` impl, so the allocator itself
+    # own `A: Alloc and Clone` bound for its `Clone` impl, so the allocator itself
     # can be duplicated for the new buffer. The allocator used for the new
     # string will be the same (cloned) allocator as the original string,
     # ensuring that memory management is consistent between the two instances.
@@ -706,7 +673,7 @@ sup [A: Alloc] Str[A] ext Format {
   }
 }
 
-sup [A: Alloc & Clone] Str[A] ext Mul[S32] {
+sup [A: Alloc and Clone] Str[A] ext Mul[S32] {
   !versioned(base="1.0.0", new="1.0.0")
   fun mul(self, that: S32) -> Self {
     # The `mul` method repeats the string `that` times, so `Str::from("ab") * 3`
@@ -732,4 +699,85 @@ sup [A: Alloc & Clone] Str[A] ext Mul[S32] {
     drop(piece)
     ret result
   }
+}
+
+!package
+!versioned(base="1.0.0", new="1.0.0")
+fun first_utf8_err(bytes: &View[U8]) -> Opt[Utf8Err] {
+  # The first sequence in `bytes` that is not well-formed UTF-8, if any.
+  # Validation walks the bytes one sequence at a time: the leading byte's range
+  # picks the sequence length (1-4 bytes), and every continuation byte must
+  # fall in `0x80..=0xbf`. The second byte of 3- and 4-byte sequences is
+  # additionally range-checked against the specific leading byte, to reject
+  # overlong encodings (`0xe0 0x80 ..`), UTF-16 surrogates smuggled through as
+  # UTF-8 (`0xed 0xa0..0xbf ..`), and code points past the Unicode maximum of
+  # `0x10ffff` (`0xf4 0x90.. ..`).
+  # @let bytes: The raw bytes to validate.
+  # @ret: `None` if `bytes` is valid UTF-8, or a `Utf8Err` describing the
+  #   byte index and length of the first invalid sequence found.
+
+  let mut idx = 0_uz
+  loop idx < bytes.len() {
+    let first = bytes[idx]@
+
+    # Fast path: a leading byte below `0x80` is a single-byte
+    # ASCII character, valid on its own.
+    case first < 0x80_u8 {
+      idx += 1_uz
+      skip
+    }
+
+    # Reject bytes that can never start a sequence: bare continuation
+    # bytes (`0x80..=0xbf`), and the two bytes reserved for overlong
+    # 2-byte encodings (`0xc0`, `0xc1`), and everything above the
+    # highest valid 4-byte leader (`0xf4`).
+    case first < 0xc2_u8 or first > 0xf4_u8 {
+      ret Some(val=Utf8Err(valid_up_to=idx, error_len=Some(val=1_uz)))
+    }
+
+    # The leading byte's range determines how many bytes make up this
+    # sequence.
+    let seq_len = case first of {
+      < 0xe0_u8 { 2_uz }
+      < 0xf0_u8 { 3_uz }
+      else { 4_uz }
+    }
+
+    # If the sequence would run past the end of `bytes`, it is a
+    # truncated sequence rather than an invalid one - `error_len=None`
+    # signals that more bytes would have made it valid.
+    case idx + seq_len > bytes.len() {
+      ret Some(val=Utf8Err(valid_up_to=idx, error_len=None))
+    }
+
+    # Most continuation bytes are only constrained to `0x80..=0xbf`,
+    # but the second byte following the extremal leading bytes (`0xe0`,
+    # `0xed`, `0xf0`, `0xf4`) has a narrower valid range, to rule out
+    # overlong encodings, surrogates, and out-of-range code points.
+    let (second_min, second_max) = case first of {
+      == 0xe0_u8 { (0xa0_u8, 0xbf_u8) }
+      == 0xed_u8 { (0x80_u8, 0x9f_u8) }
+      == 0xf0_u8 { (0x90_u8, 0xbf_u8) }
+      == 0xf4_u8 { (0x80_u8, 0x8f_u8) }
+      else { (0x80_u8, 0xbf_u8) }
+    }
+
+    let second = bytes[idx + 1_uz]@
+    case second < second_min or second > second_max {
+      ret Some(val=Utf8Err(valid_up_to=idx, error_len=Some(val=1_uz)))
+    }
+
+    # Any remaining continuation bytes (the 3rd and 4th, when present)
+    # are only constrained to the plain continuation-byte range.
+    loop k in Range[USize]::between(2_uz, seq_len) {
+      let cont = bytes[idx + k]@
+      case cont < 0x80_u8 or cont > 0xbf_u8 {
+        ret Some(val=Utf8Err(valid_up_to=idx, error_len=Some(val=k)))
+      }
+    }
+
+    idx += seq_len
+  }
+
+  ret None
 }

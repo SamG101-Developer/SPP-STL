@@ -171,7 +171,7 @@ fun test_iter_mut_then_read() -> Void {
 fun test_closure_holding_mut_then_value_read() -> Void {
   let mut x = 1
   {
-    let mut c = (caps &mut x) { x@ = x@ + 41 }
+    let mut c = |caps &mut x| { x@ = x@ + 41 }
     c()
     std::mem::ops::drop(c)
   }

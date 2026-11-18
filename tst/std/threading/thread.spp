@@ -1,7 +1,7 @@
 !test(group="std/threading/thread")
 fun test_raw_pthread_create_writes_the_handle_back() -> Void {
   let mut handle = 0_u64
-  let err = sppc::pthread_create(std::cffi::CClosure[(), Void]::from(() -> Void { }), &mut handle)
+  let err = sppc::pthread_create(std::cffi::CClosure[(), Void]::from(|| -> Void { }), &mut handle)
   std::debug::assert(err == 0, "create returned zero")
   std::debug::assert(handle != 0_u64, "create wrote the handle back")
   let jerr = sppc::pthread_join(&handle)
@@ -10,13 +10,13 @@ fun test_raw_pthread_create_writes_the_handle_back() -> Void {
 
 !test(group="std/threading/thread")
 fun test_spawn_and_join() -> Void {
-  let h = std::threading::thread::spawn(() -> Void { }).expect("spawn failed")
+  let h = std::threading::thread::spawn(|| -> Void { }).expect("spawn failed")
   h.join().expect("join failed")
 }
 
 !test(group="std/threading/thread")
 fun test_join_returns_the_value_the_thread_produced() -> Void {
-  let h = std::threading::thread::spawn(() -> std::number::S32 { ret 42 }).expect("spawn failed")
+  let h = std::threading::thread::spawn(|| -> std::number::S32 { ret 42 }).expect("spawn failed")
   let val = h.join().expect("join failed")
   std::debug::assert(val == 42, "join answered with what the thread returned")
 }
@@ -24,13 +24,13 @@ fun test_join_returns_the_value_the_thread_produced() -> Void {
 !test(group="std/threading/thread")
 fun test_the_thread_body_sees_what_it_captured() -> Void {
   let n = 7
-  let h = std::threading::thread::spawn((caps n) -> std::number::S32 { ret n * 3 }).expect("spawn failed")
+  let h = std::threading::thread::spawn(|caps n| -> std::number::S32 { ret n * 3 }).expect("spawn failed")
   std::debug::assert(h.join().expect("join failed") == 21, "the captured value crossed onto the thread")
 }
 
 !test(group="std/threading/thread")
 fun test_join_returns_a_value_wider_than_a_pointer() -> Void {
-  let h = std::threading::thread::spawn(() -> (std::number::S64, std::number::S64, std::number::S64) {
+  let h = std::threading::thread::spawn(|| -> (std::number::S64, std::number::S64, std::number::S64) {
     ret (1_s64, 2_s64, 3_s64)
   }).expect("spawn failed")
 
@@ -48,14 +48,14 @@ fun test_the_current_thread_id_equals_itself() -> Void {
 
 !test(group="std/threading/thread")
 fun test_a_spawned_thread_has_a_different_id() -> Void {
-  let h = std::threading::thread::spawn(() -> Void { }).expect("spawn failed")
+  let h = std::threading::thread::spawn(|| -> Void { }).expect("spawn failed")
   std::debug::assert(h.id() != std::threading::thread::current(), "a spawned thread is not the calling one")
   h.join().expect("join failed")
 }
 
 !test(group="std/threading/thread")
 fun test_the_handle_id_matches_what_the_thread_reports() -> Void {
-  let h = std::threading::thread::spawn(() -> std::threading::thread::ThreadId {
+  let h = std::threading::thread::spawn(|| -> std::threading::thread::ThreadId {
     ret std::threading::thread::current()
   }).expect("spawn failed")
 
@@ -66,7 +66,7 @@ fun test_the_handle_id_matches_what_the_thread_reports() -> Void {
 
 !test(group="std/threading/thread")
 fun test_an_id_survives_the_handle_it_came_from() -> Void {
-  let h = std::threading::thread::spawn(() -> Void { }).expect("spawn failed")
+  let h = std::threading::thread::spawn(|| -> Void { }).expect("spawn failed")
   let id = h.id()
   h.join().expect("join failed")
   std::debug::assert(id != std::threading::thread::current(), "the id still compares after the thread is joined")
@@ -75,7 +75,7 @@ fun test_an_id_survives_the_handle_it_came_from() -> Void {
 fun zz_spawn_from_a_dying_frame() -> std::threading::thread::JoinHandle[std::number::S32] {
   let a = 12345
   let b = 678
-  ret std::threading::thread::spawn((caps a, b) -> std::number::S32 { ret a + b }).expect("spawn failed")
+  ret std::threading::thread::spawn(|caps a, b| -> std::number::S32 { ret a + b }).expect("spawn failed")
 }
 
 fun zz_clobber_the_stack(n: std::number::S32) -> std::number::S32 {
@@ -96,7 +96,7 @@ fun test_a_mutex_can_cross_onto_a_spawned_thread() -> Void {
   # A `Mutex` carries no marker of its own - it holds its value behind a pointer, so it is sendable exactly when its `T`
   # is - and this is the case that has to keep working: a guarded value making the crossing.
   let m = std::threading::mutex::Mutex[std::number::S32]::new(41).expect("mutex")
-  let h = std::threading::thread::spawn((caps m) -> std::number::S32 { ret m.take() + 1 })
+  let h = std::threading::thread::spawn(|caps m| -> std::number::S32 { ret m.take() + 1 })
     .expect("spawn failed")
   std::debug::assert(h.join().expect("join failed") == 42, "the guarded value crossed onto the thread")
 }
@@ -106,8 +106,8 @@ fun test_an_rwlock_can_cross_onto_a_spawned_thread() -> Void {
   # As for `Mutex`: an `RwLock` carries its value in its own cell, so the value can be read on the far thread rather
   # than merely released there.
   let l = std::threading::rwlock::RwLock[std::number::S32]::new(7).expect("rwlock")
-  let h = std::threading::thread::spawn((caps l) -> std::number::S32 {
-    let seen = l.with_read((v: &std::number::S32) { ret v@ }).expect("read failed")
+  let h = std::threading::thread::spawn(|caps l| -> std::number::S32 {
+    let seen = l.with_read(|v: &std::number::S32| { ret v@ }).expect("read failed")
     std::mem::ops::drop(l)
     ret seen * 3
   }).expect("spawn failed")
@@ -124,12 +124,12 @@ fun test_two_threads_share_one_mutex() -> Void {
   let a = m.clone()
   let b = m.clone()
 
-  let ha = std::threading::thread::spawn((caps a) -> std::void::Void {
-    a.with_lock((v: &mut std::number::S32) { v@ = v@ + 1 }).expect("lock failed")
+  let ha = std::threading::thread::spawn(|caps a| -> std::void::Void {
+    a.with_lock(|v: &mut std::number::S32| { v@ = v@ + 1 }).expect("lock failed")
     std::mem::ops::drop(a)
   }).expect("spawn failed")
-  let hb = std::threading::thread::spawn((caps b) -> std::void::Void {
-    b.with_lock((v: &mut std::number::S32) { v@ = v@ + 1 }).expect("lock failed")
+  let hb = std::threading::thread::spawn(|caps b| -> std::void::Void {
+    b.with_lock(|v: &mut std::number::S32| { v@ = v@ + 1 }).expect("lock failed")
     std::mem::ops::drop(b)
   }).expect("spawn failed")
 
@@ -137,7 +137,7 @@ fun test_two_threads_share_one_mutex() -> Void {
   hb.join().expect("join failed")
   std::debug::assert(m.strong_count() == 1_uz, "both threads released their handle to the shared mutex")
 
-  let total = m.with_lock((v: &mut std::number::S32) { ret v@ }).expect("lock failed")
+  let total = m.with_lock(|v: &mut std::number::S32| { ret v@ }).expect("lock failed")
   std::debug::assert(total == 2, "both increments landed on the one guarded value")
   std::mem::ops::drop(m)
 }
@@ -148,7 +148,7 @@ fun test_a_thread_carries_an_owned_value() -> Void {
   # - is moved onto the new thread and released there.
   let mut v = std::vector::Vec[std::number::S32]::new()
   v.append(5)
-  let h = std::threading::thread::spawn((caps v) -> std::number::S32 {
+  let h = std::threading::thread::spawn(|caps v| -> std::number::S32 {
     std::mem::ops::drop(v)
     ret 3
   }).expect("spawn failed")
@@ -169,7 +169,7 @@ fun test_a_named_function_can_be_the_thread_body() -> Void {
 fun test_detaching_a_running_thread_leaves_it_its_result_cell() -> Void {
   # Regression: `detach` freed the result cell at once, and the thread then wrote its result into freed memory. Under
   # valgrind this was an invalid write in `_sppc_thread_entry`; the main thread waits long enough for the write to land.
-  let h = std::threading::thread::spawn(() -> Vec[S32] {
+  let h = std::threading::thread::spawn(|| -> Vec[S32] {
     std::time::time::sleep(std::time::duration::Duration::from_millis(100_u64))
     let mut v = Vec[S32]::new()
     v.append(1)
@@ -183,7 +183,7 @@ fun test_detaching_a_running_thread_leaves_it_its_result_cell() -> Void {
 fun test_detaching_a_finished_thread_drops_its_result() -> Void {
   # The other order: the thread has finished before the detach, so the handle is the last user and drops the result.
   # Under valgrind with --leak-check=full, a missed drop shows as a leaked vector buffer.
-  let h = std::threading::thread::spawn(() -> Vec[S32] {
+  let h = std::threading::thread::spawn(|| -> Vec[S32] {
     let mut v = Vec[S32]::new()
     v.append(1)
     ret v
@@ -195,7 +195,7 @@ fun test_detaching_a_finished_thread_drops_its_result() -> Void {
 !test(group="std/threading/thread")
 fun test_dropping_an_unjoined_handle_leaves_the_thread_its_result_cell() -> Void {
   # As for `detach`, through the handle's `drop`.
-  let h = std::threading::thread::spawn(() -> Vec[S32] {
+  let h = std::threading::thread::spawn(|| -> Vec[S32] {
     std::time::time::sleep(std::time::duration::Duration::from_millis(100_u64))
     let mut v = Vec[S32]::new()
     v.append(1)
@@ -207,7 +207,7 @@ fun test_dropping_an_unjoined_handle_leaves_the_thread_its_result_cell() -> Void
 
 !test(group="std/threading/thread")
 fun test_joining_returns_an_owned_result_without_freeing_it() -> Void {
-  let h = std::threading::thread::spawn(() -> Vec[S32] {
+  let h = std::threading::thread::spawn(|| -> Vec[S32] {
     let mut v = Vec[S32]::new()
     v.append(4)
     ret v

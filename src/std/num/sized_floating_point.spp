@@ -28,31 +28,39 @@ use std::ops::sub::SubAssign
 !package
 !versioned(base="1.0.0", new="1.0.0")
 cls SizedFloatingPoint[cmp w: U32] {
-  # The `SizedFloatingPoint` class represents a floating point type with a specific bit width. The `w` parameter is a
-  # compile-time constant that specifies the number of bits used to represent the floating point value. This allows for
-  # the creation of floating point types with different levels of precision, such as single precision (32 bits) and
-  # double precision (64 bits). The `SizedFloatingPoint` class is a generic class that can be extended to create
-  # specific sized floating point types, and it provides various methods for performing mathematical operations and
-  # comparisons on floating point values of the specified size.
-  # @cmp w: The number of bits used to represent the floating point value. This is a compile-time constant that
-  # determines the precision of the floating point type. The provided values for `w` are: - `8`: Quarter precision
-  # floating point (binary8) - `16`: Half precision floating point (binary16) - `32`: Single precision floating point
-  # (binary32) - `64`: Double precision floating point (binary64) - `128`: Quadruple precision floating point
-  # (binary128)
+  # The `SizedFloatingPoint` class represents a floating point type with a
+  # specific bit width. The `w` parameter is a compile-time constant that
+  # specifies the number of bits used to represent the floating point value.
+  # This allows for the creation of floating point types with different levels
+  # of precision, such as single precision (32 bits) and double precision (64
+  # bits). The `SizedFloatingPoint` class is a generic class that can be
+  # extended to create specific sized floating point types, and it provides
+  # various methods for performing mathematical operations and comparisons on
+  # floating point values of the specified size.
+  # @cmp w: The number of bits used to represent the floating point value. This
+  #   is a compile-time constant that determines the precision of the floating
+  #   point type. The provided values for `w` are: - `8`: Quarter precision
+  #   floating point (binary8) - `16`: Half precision floating point (binary16)
+  #   - `32`: Single precision floating point (binary32) - `64`: Double
+  #   precision floating point (binary64) - `128`: Quadruple precision floating
+  #   point (binary128)
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext Copy {
-  # The `SizedFloatingPoint` class implements the `Copy` trait, which means that instances of sized floating point types
-  # can be copied by value. This allows for the creation of new instances of sized floating point types without having
-  # to explicitly clone or move the original instance.
+  # The `SizedFloatingPoint` class implements the `Copy` trait, which means that
+  # instances of sized floating point types can be copied by value. This allows
+  # for the creation of new instances of sized floating point types without
+  # having to explicitly clone or move the original instance.
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext FloatingPoint {
-  # The `SizedFloatingPoint` class extends the `FloatingPoint` class, which means that all sized floating point types
-  # are also considered floating point types. This allows for the use of sized floating point types in contexts where a
-  # floating point type is expected, such as in mathematical operations or generic functions that operate on floating
-  # point types, where the size is not important, typically code in the `instrinsics` module. This also saves on
-  # monomorphization costs.
+  # The `SizedFloatingPoint` class extends the `FloatingPoint` class, which
+  # means that all sized floating point types are also considered floating point
+  # types. This allows for the use of sized floating point types in contexts
+  # where a floating point type is expected, such as in mathematical operations
+  # or generic functions that operate on floating point types, where the size is
+  # not important, typically code in the `instrinsics` module. This also saves
+  # on monomorphization costs.
 }
 
 sup [cmp this_w: U32, cmp that_w: U32]
@@ -63,21 +71,28 @@ From[SizedFloatingPoint[that_w]] {
   !always_inline
   !versioned(base="1.0.0", new="1.0.0")
   fun from(that: SizedFloatingPoint[that_w]) -> Self {
-    # The `from` method defines how to convert a floating point value of one size to another size. The conversion is
-    # performed based on the relationship between the bit widths of the source and target types. The following three
-    # cases are handled:
-    # 1. If the target type has fewer bits than the source type (this_w < that_w), the conversion is done by
-    # truncating the source value to fit into the smaller target type. This is typically done by discarding the least
-    # significant bits of the source value, which may result in a loss of precision.
-    # 2. If the target type has more bits than the source type (this_w > that_w), the conversion is done by
-    # extending the source value to fit into the larger target type. This is typically done by adding additional bits to
-    # the source value, which may involve zero-extending or sign-extending the value depending on whether it is unsigned
-    # or signed.
-    # 3. If the target type has the same number of bits as the source type (this_w == that_w), the conversion is
-    # simply a copy of the value, as no change in precision is needed.
-    # @let that: The floating point value of the source type that is being converted to the target type.
-    # @ret: The converted floating point value of the target type, which may have a different precision than the source
-    # value depending on the relationship between their bit widths.
+    # The `from` method defines how to convert a floating point value of one
+    # size to another size. The conversion is performed based on the
+    # relationship between the bit widths of the source and target types. The
+    # following three cases are handled:
+    # 1. If the target type has fewer bits than the source type (this_w <
+    #   that_w), the conversion is done by truncating the source value to fit
+    #   into the smaller target type. This is typically done by discarding the
+    #   least significant bits of the source value, which may result in a loss
+    #   of precision.
+    # 2. If the target type has more bits than the source type (this_w >
+    #   that_w), the conversion is done by extending the source value to fit
+    #   into the larger target type. This is typically done by adding additional
+    #   bits to the source value, which may involve zero-extending or
+    #   sign-extending the value depending on whether it is unsigned or signed.
+    # 3. If the target type has the same number of bits as the source type
+    #   (this_w == that_w), the conversion is simply a copy of the value, as no
+    #   change in precision is needed.
+    # @let that: The floating point value of the source type that is being
+    #   converted to the target type.
+    # @ret: The converted floating point value of the target type, which may
+    #   have a different precision than the source value depending on the
+    #   relationship between their bit widths.
 
     # If the source has more bits, truncate it.
     # If the source has fewer bits, extend it.
@@ -89,15 +104,31 @@ From[SizedFloatingPoint[that_w]] {
   }
 }
 
+sup [cmp w: U32] SizedFloatingPoint[w] {
+  !public !inline
+  fun from_ieee[cmp that_w: U32](that: SizedFloatingPoint[that_w]) -> Self {
+    # `from` with no check when narrowing: a value past this type's range is
+    # IEEE's infinity rather than stopping the program.
+    ret case w of {
+      < that_w { intrinsics::fptrunc_ieee[w](that) }
+      > that_w { intrinsics::fpext[w](that) }
+      else { intrinsics::bit_cast[Self](that) }
+    }
+  }
+}
+
 sup [cmp w: U32, cmp that_w: U32] SizedFloatingPoint[w] ext From[SizedIntegerUnsigned[that_w]] {
-  # Converting from an unsigned integer of any width to a floating point value of this width. This is a value conversion
-  # (the integer's numeric value, rounded to the nearest representable float), not a bit reinterpretation.
+  # Converting from an unsigned integer of any width to a floating point value
+  # of this width. This is a value conversion (the integer's numeric value,
+  # rounded to the nearest representable float), not a bit reinterpretation.
 
   !always_inline
   !versioned(base="1.0.0", new="1.0.0")
   fun from(that: SizedIntegerUnsigned[that_w]) -> Self {
-    # Convert the unsigned integer source value to this floating point type using the `uitofp` intrinsic.
-    # @let that: The unsigned integer value of the source type that is being converted.
+    # Convert the unsigned integer source value to this floating point type
+    # using the `uitofp` intrinsic.
+    # @let that: The unsigned integer value of the source type that is being
+    #   converted.
     # @ret: The converted floating point value of this type.
 
     ret intrinsics::uitofp[w](that)
@@ -105,14 +136,17 @@ sup [cmp w: U32, cmp that_w: U32] SizedFloatingPoint[w] ext From[SizedIntegerUns
 }
 
 sup [cmp w: U32, cmp that_w: U32] SizedFloatingPoint[w] ext From[SizedIntegerSigned[that_w]] {
-  # Converting from a signed integer of any width to a floating point value of this width. This is a value conversion
-  # (the integer's numeric value, rounded to the nearest representable float), not a bit reinterpretation.
+  # Converting from a signed integer of any width to a floating point value of
+  # this width. This is a value conversion (the integer's numeric value, rounded
+  # to the nearest representable float), not a bit reinterpretation.
 
   !always_inline
   !versioned(base="1.0.0", new="1.0.0")
   fun from(that: SizedIntegerSigned[that_w]) -> Self {
-    # Convert the signed integer source value to this floating point type using the `sitofp` intrinsic.
-    # @let that: The signed integer value of the source type that is being converted.
+    # Convert the signed integer source value to this floating point type using
+    # the `sitofp` intrinsic.
+    # @let that: The signed integer value of the source type that is being
+    #   converted.
     # @ret: The converted floating point value of this type.
 
     ret intrinsics::sitofp[w](that)
@@ -120,152 +154,52 @@ sup [cmp w: U32, cmp that_w: U32] SizedFloatingPoint[w] ext From[SizedIntegerSig
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext Eq {
-  # Provide equality support to sized floating point numbers, allowing for comparison of two floating point values of
-  # the same size for equality and inequality. For differing sizes, the `From` trait can be used to convert one of the
-  # values to the same size as the other before performing the comparison.
-
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun eq(&self, that: &Self) -> Bool {
-    # The `eq` method defines how to compare two floating point values of the same size for equality. It uses the `oeq`
-    # intrinsic function to perform the comparison, which checks if the two values are equal according to the rules of
-    # floating point arithmetic.
-    # @let that: A borrow to the floating point value that is being compared to the current value for equality.
-    # @ret: `true` if the two floating point values are equal, and `false` otherwise.
-
-    # Hook into equality intrinsic.
     ret intrinsics::oeq(self, that)
   }
 
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun ne(&self, that: &Self) -> Bool {
-    # The `ne` method defines how to compare two floating point values of the same size for inequality. It uses the
-    # `one` intrinsic function to perform the comparison, which checks if the two values are not equal according to the
-    # rules of floating point arithmetic.
-    # @let that: A borrow to the floating point value that is being compared to the current value for inequality.
-    # @ret: `true` if the two floating point values are not equal, and `false` otherwise.
-
-    # Hook into inequality intrinsic.
-    ret intrinsics::one(self, that)
+    ret intrinsics::une(self, that)
   }
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext Ord {
-  # Provide ordering support to sized floating point numbers, allowing for comparison of two floating point values of
-  # the same size to determine their relative ordering. For differing sizes, the `From` trait can be used to convert one
-  # of the values to the same size as the other before performing the comparison.
-
   !versioned(base="1.0.0", new="1.0.0")
   fun ord(&self, that: &Self) -> S32 {
-    # The `ord` method defines how to compare two floating point values of the same size and determine their ordering.
-    # It uses the `fcmp` intrinsic function to perform the comparison, which checks the relative ordering of the two
-    # values according to the rules of floating point arithmetic. There is no intrinsic for `fcmp`, so it is implemented
-    # in S++.
-    # @let that: A borrow to the floating point value that is being compared to the current value for ordering.
-    # @ret: An `S32` value indicating the ordering of the two floating point values:
-    # - A negative value indicates that the current value is less than the other value.
-    # - Zero indicates that the two values are equal.
-    # - A positive value indicates that the current value is greater than the other value.
-
-    # Simple 3 way comparison.
-    ret case self of {
-      < that { -1 }
-      > that { 1 }
-      else { 0 } }
+    ret self.total_cmp(that)
   }
 
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun lt(&self, that: &Self) -> Bool {
-    # The `lt` method defines how to compare two floating point values of the
-    # same size to determine if the current value is less than the other value.
-    # It uses the `olt` intrinsic function to perform the comparison, which
-    # checks if the current value is less than the other value according to the
-    # rules of floating point arithmetic.
-    # @let that: A borrow to the floating point value that is being compared to
-    #   the current value for ordering.
-    # @ret: `true` if the current value is less than the other value, and
-    #   `false` otherwise.
-
-    # Hook into less-than intrinsic.
     ret intrinsics::olt(self, that)
   }
 
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun le(&self, that: &Self) -> Bool {
-    # The `le` method defines how to compare two floating point values of the
-    # same size to determine if the current value is less than or equal to the
-    # other value. It uses the `ole` intrinsic function to perform the
-    # comparison, which checks if the current value is less than or equal to the
-    # other value according to the rules of floating point arithmetic.
-    # @let that: A borrow to the floating point value that is being compared to
-    #   the current value for ordering.
-    # @ret: `true` if the current value is less than or equal to the other
-    #   value, and `false` otherwise.
-
-    # Hook into less-than-or-equal-to intrinsic.
     ret intrinsics::ole(self, that)
   }
 
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun gt(&self, that: &Self) -> Bool {
-    # The `gt` method defines how to compare two floating point values of the
-    # same size to determine if the current value is greater than the other
-    # value. It uses the `ogt` intrinsic function to perform the comparison,
-    # which checks if the current value is greater than the other value
-    # according to the rules of floating point arithmetic.
-    # @let that: A borrow to the floating point value that is being compared to
-    #   the current value for ordering.
-    # @ret: `true` if the current value is greater than the other value, and
-    #   `false` otherwise.
-
-    # Hook into greater-than intrinsic.
     ret intrinsics::ogt(self, that)
   }
 
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun ge(&self, that: &Self) -> Bool {
-    # The `ge` method defines how to compare two floating point values of the
-    # same size to determine if the current value is greater than or equal to
-    # the other value. It uses the `oge` intrinsic function to perform the
-    # comparison, which checks if the current value is greater than or equal to
-    # the other value according to the rules of floating point arithmetic.
-    # @let that: A borrow to the floating point value that is being compared to
-    #   the current value for ordering.
-    # @ret: `true` if the current value is greater than or equal to the other
-    #   value, and `false` otherwise.
-
-    # Hook into greater-than-or-equal-to intrinsic.
     ret intrinsics::oge(self, that)
   }
 
   !inline
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun min(self, that: Self) -> Self {
-    # The `min` method defines how to calculate the minimum of two floating
-    # point values of the same size: IEEE 754-2019's `minimum`, so a NaN operand
-    # gives a NaN (it is not skipped, as the 2008 `minNum` did) and -0 is below
-    # +0.
-    # @let that: The floating point value that is being compared with the
-    #   current value to determine the minimum. It is of the same size as the
-    #   current value.
-    # @ret: The result of the minimum calculation, which is a new floating point
-    #   value of the same size as the operands, representing the smaller of the
-    #   two values.
     ret intrinsics::float_min(self, that)
   }
 
   !inline
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun max(self, that: Self) -> Self {
-    # The `max` method defines how to calculate the maximum of two floating
-    # point values of the same size: IEEE 754-2019's `maximum`, so a NaN operand
-    # gives a NaN (it is not skipped, as the 2008 `maxNum` did) and +0 is above
-    # -0.
-    # @let that: The floating point value that is being compared with the
-    #   current value to determine the maximum. It is of the same size as the
-    #   current value.
-    # @ret: The result of the maximum calculation, which is a new floating point
-    #   value of the same size as the operands, representing the larger of the
-    #   two values.
     ret intrinsics::float_max(self, that)
   }
 }
@@ -273,12 +207,6 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Ord {
 sup [cmp w: U32] SizedFloatingPoint[w] {
   !public !inline
   fun total_cmp(&self, that: &Self) -> S32 {
-    # A total order over every value, unlike `ord`, which has no answer for a NaN and calls -0 and +0 equal:
-    # -NaN < -inf < ... < -0 < +0 < ... < +inf < +NaN. The bits read as a signed integer already order the positives
-    # and put every negative below them; flipping a negative's bits below the sign puts the larger magnitudes lower
-    # (Hacker's Delight 2nd ed., section 17-3).
-    # @let that: A borrow to the value compared with this one.
-    # @ret: -1, 0 or 1, as `ord`.
     let this_bits = intrinsics::bit_cast[SizedIntegerSigned[w]](self@)
     let that_bits = intrinsics::bit_cast[SizedIntegerSigned[w]](that@)
     let this_key = this_bits ^ intrinsics::bit_shr(intrinsics::bit_ashr(this_bits, w - 1_u32), 1_u32)
@@ -288,265 +216,222 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext Add {
-  # Provide addition support to sized floating point numbers, allowing for the addition of two floating point values of
-  # the same size. For differing sizes, the `From` trait can be used to convert one of the values to the same size as
-  # the other before performing the addition.
-
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun add(self, that: Self) -> Self {
-    # The `add` method defines how to add two floating point values of the same size together. It uses the `float_add`
-    # intrinsic function to perform the addition, which computes the sum of the two values according to the rules of
-    # floating point arithmetic.
-    # @let that: The floating point value that is being added to the current value. It is of the same size as the
-    # current value.
-    # @ret: The result of the addition operation, which is a new floating point value of the same size as the operands.
-
-    # Hook into addition intrinsic.
     ret intrinsics::float_add(self, that)
   }
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext AddAssign {
-  # Provide addition assignment support to sized floating point numbers, allowing for the addition of a floating point
-  # value to another floating point value of the same size in place. For differing sizes, the `From` trait can be used
-  # to convert the right-hand side value to the same size as the left-hand side value before performing the addition
-  # assignment.
-
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun add_assign(&mut self, that: Self) -> Void {
-    # The `add_assign` method defines how to add a floating point value to another floating point value of the same size
-    # in place. It uses the `float_add_assign` intrinsic function to perform the addition assignment, which computes the
-    # sum of the two values and updates the left-hand side value with the result according to the rules of floating
-    # point arithmetic.
-    # @let that: The floating point value that is being added to the current value. It is of the same size as the
-    # current value.
-    # @ret: The method does not return a value, as the result of the addition assignment is stored directly in the
-    # left-hand side value.
-
-    # Hook into addition assignment intrinsic.
     intrinsics::float_add_assign(self, that)
   }
 }
 
-sup [cmp w: U32] SizedFloatingPoint[w] ext Sub {
-  # Provide subtraction support to sized floating point numbers, allowing for the subtraction of two floating point
-  # values of the same size. For differing sizes, the `From` trait can be used to convert one of the values to the same
-  # size as the other before performing the subtraction.
+sup [cmp w: U32] SizedFloatingPoint[w] {
+  !public !inline
+  fun add_checked(self, that: Self) -> Opt[Self] {
+    let (val, raised) = intrinsics::float_add_raised(self, that)
+    ret case raised { None } else { Some(val) }
+  }
 
+  !public !inline
+  fun add_raised(self, that: Self) -> (Self, Bool) {
+    ret intrinsics::float_add_raised(self, that)
+  }
+
+  !public !inline
+  cmp fun add_ieee(self, that: Self) -> Self {
+    ret intrinsics::float_add_ieee(self, that)
+  }
+}
+
+sup [cmp w: U32] SizedFloatingPoint[w] ext Sub {
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun sub(self, that: Self) -> Self {
-    # The `sub` method defines how to subtract one floating point value from another floating point value of the same
-    # size. It uses the `float_sub` intrinsic function to perform the subtraction, which computes the difference of the
-    # two values according to the rules of floating point arithmetic.
-    # @let that: The floating point value that is being subtracted from the current value. It is of the same size as the
-    # current value.
-    # @ret: The result of the subtraction operation, which is a new floating point value of the same size as the
-    # operands.
-
-    # Hook into subtraction intrinsic.
     ret intrinsics::float_sub(self, that)
   }
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext SubAssign {
-  # Provide subtraction assignment support to sized floating point numbers, allowing for the subtraction of a floating
-  # point value from another floating point value of the same size in place. For differing sizes, the `From` trait can
-  # be used to convert the right-hand side value to the same size as the left-hand side value before performing the
-  # subtraction assignment.
-
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun sub_assign(&mut self, that: Self) -> Void {
-    # The `sub_assign` method defines how to subtract a floating point value from another floating point value of the
-    # same size in place. It uses the `float_sub_assign` intrinsic function to perform the subtraction assignment, which
-    # computes the difference of the two values and updates the left-hand side value with the result according to the
-    # rules of floating point arithmetic.
-    # @let that: The floating point value that is being subtracted from the current value. It is of the same size as the
-    # current value.
-    # @ret: The method does not return a value, as the result of the subtraction assignment is stored directly in the
-    # left-hand side value.
-
-    # Hook into subtraction assignment intrinsic.
     intrinsics::float_sub_assign(self, that)
   }
 }
 
-sup [cmp w: U32] SizedFloatingPoint[w] ext Mul {
-  # Provide multiplication support to sized floating point numbers, allowing for the multiplication of two floating
-  # point values of the same size. For differing sizes, the `From` trait can be used to convert one of the values to the
-  # same size as the other before performing the multiplication.
+sup [cmp w: U32] SizedFloatingPoint[w] {
+  !public !inline
+  fun sub_checked(self, that: Self) -> Opt[Self] {
+    let (val, raised) = intrinsics::float_sub_raised(self, that)
+    ret case raised { None } else { Some(val) }
+  }
 
+  !public !inline
+  fun sub_raised(self, that: Self) -> (Self, Bool) {
+    ret intrinsics::float_sub_raised(self, that)
+  }
+
+  !public !inline
+  cmp fun sub_ieee(self, that: Self) -> Self {
+    ret intrinsics::float_sub_ieee(self, that)
+  }
+}
+
+sup [cmp w: U32] SizedFloatingPoint[w] ext Mul {
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun mul(self, that: Self) -> Self {
-    # The `mul` method defines how to multiply two floating point values of the same size together. It uses the
-    # `float_mul` intrinsic function to perform the multiplication, which computes the product of the two values
-    # according to the rules of floating point arithmetic.
-    # @let that: The floating point value that is being multiplied with the current value. It is of the same size as the
-    # current value.
-    # @ret: The result of the multiplication operation, which is a new floating point value of the same size as the
-    # operands.
-
-    # Hook into multiplication intrinsic.
     ret intrinsics::float_mul(self, that)
   }
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext MulAssign {
-  # Provide multiplication assignment support to sized floating point numbers, allowing for the multiplication of a
-  # floating point value with another floating point value of the same size in place. For differing sizes, the `From`
-  # trait can be used to convert the right-hand side value to the same size as the left-hand side value before
-  # performing the multiplication assignment.
-
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun mul_assign(&mut self, that: Self) -> Void {
-    # The `mul_assign` method defines how to multiply a floating point value with another floating point value of the
-    # same size in place. It uses the `float_mul_assign` intrinsic function to perform the multiplication assignment,
-    # which computes the product of the two values and updates the left-hand side value with the result according to the
-    # rules of floating point arithmetic.
-    # @let that: The floating point value that is being multiplied with the current value. It is of the same size as the
-    # current value.
-    # @ret: The method does not return a value, as the result of the multiplication assignment is stored directly in the
-    # left-hand side value.
-
-    # Hook into multiplication assignment intrinsic.
     intrinsics::float_mul_assign(self, that)
   }
 }
 
-sup [cmp w: U32] SizedFloatingPoint[w] ext Div {
-  # Provide division support to sized floating point numbers, allowing for the division of two floating point values of
-  # the same size. For differing sizes, the `From` trait can be used to convert one of the values to the same size as
-  # the other before performing the division.
+sup [cmp w: U32] SizedFloatingPoint[w] {
+  !public !inline
+  fun mul_checked(self, that: Self) -> Opt[Self] {
+    let (val, raised) = intrinsics::float_mul_raised(self, that)
+    ret case raised { None } else { Some(val) }
+  }
 
+  !public !inline
+  fun mul_raised(self, that: Self) -> (Self, Bool) {
+    ret intrinsics::float_mul_raised(self, that)
+  }
+
+  !public !inline
+  cmp fun mul_ieee(self, that: Self) -> Self {
+    ret intrinsics::float_mul_ieee(self, that)
+  }
+}
+
+sup [cmp w: U32] SizedFloatingPoint[w] ext Div {
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun div(self, that: Self) -> Self {
-    # The `div` method defines how to divide one floating point value by another floating point value of the same size.
-    # It uses the `float_div` intrinsic function to perform the division, which computes the quotient of the two values
-    # according to the rules of floating point arithmetic.
-    # @let that: The floating point value that is being used as the divisor in the division operation. It is of the same
-    # size as the current value (the dividend).
-    # @ret: The result of the division operation, which is a new floating point value of the same size as the operands.
-
-    # Hook into division intrinsic.
     ret intrinsics::float_div(self, that)
   }
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext DivAssign {
-  # Provide division assignment support to sized floating point numbers, allowing for the division of a floating point
-  # value by another floating point value of the same size in place. For differing sizes, the `From` trait can be used
-  # to convert the right-hand side value to the same size as the left-hand side value before performing the division
-  # assignment.
-
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun div_assign(&mut self, that: Self) -> Void {
-    # The `div_assign` method defines how to divide a floating point value by another floating point value of the same
-    # size in place. It uses the `float_div_assign` intrinsic function to perform the division assignment, which
-    # computes the quotient of the two values and updates the left-hand side value with the result according to the
-    # rules of floating point arithmetic.
-    # @let that: The floating point value that is being used as the divisor in the division assignment operation. It is
-    # of the same size as the current value (the dividend).
-    # @ret: The method does not return a value, as the result of the division assignment is stored directly in the
-    # left-hand side value.
-
-    # Hook into division assignment intrinsic.
     intrinsics::float_div_assign(self, that)
   }
 }
 
-sup [cmp w: U32] SizedFloatingPoint[w] ext Rem {
-  # Provide remainder support to sized floating point numbers, allowing for the calculation of the remainder of the
-  # division of two floating point values of the same size. For differing sizes, the `From` trait can be used to convert
-  # one of the values to the same size as the other before performing the remainder calculation.
+sup [cmp w: U32] SizedFloatingPoint[w] {
+  !public !inline
+  fun div_checked(self, that: Self) -> Opt[Self] {
+    let (val, raised) = intrinsics::float_div_raised(self, that)
+    ret case raised { None } else { Some(val) }
+  }
 
+  !public !inline
+  fun div_raised(self, that: Self) -> (Self, Bool) {
+    ret intrinsics::float_div_raised(self, that)
+  }
+
+  !public !inline
+  cmp fun div_ieee(self, that: Self) -> Self {
+    ret intrinsics::float_div_ieee(self, that)
+  }
+}
+
+sup [cmp w: U32] SizedFloatingPoint[w] ext Rem {
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun rem(self, that: Self) -> Self {
-    # The `rem` method defines how to calculate the remainder of the division of one floating point value by another
-    # floating point value of the same size. It uses the `float_rem` intrinsic function to perform the remainder
-    # calculation, which computes the remainder according to the rules of floating point arithmetic.
-    # @let that: The floating point value that is being used as the divisor in the remainder calculation. It is of the
-    # same size as the current value (the dividend).
-    # @ret: The result of the remainder calculation, which is a new floating point value of the same size as the
-    # operands.
-
-    # Hook into remainder intrinsic.
     ret intrinsics::float_rem(self, that)
   }
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext RemAssign {
-  # Provide remainder assignment support to sized floating point numbers, allowing for the calculation of the remainder
-  # of the division of a floating point value by another floating point value of the same size in place. For differing
-  # sizes, the `From` trait can be used to convert the right-hand side value to the same size as the left-hand side
-  # value before performing the remainder assignment.
-
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun rem_assign(&mut self, that: Self) -> Void {
-    # The `rem_assign` method defines how to calculate the remainder of the division of a floating point value by
-    # another floating point value of the same size in place. It uses the `float_rem_assign` intrinsic function to
-    # perform the remainder assignment, which computes the remainder of the two values and updates the left-hand side
-    # value with the result according to the rules of floating point arithmetic.
-    # @let that: The floating point value that is being used as the divisor in the remainder assignment operation. It is
-    # of the same size as the current value (the dividend).
-    # @ret: The method does not return a value, as the result of the remainder assignment is stored directly in the
-    # left-hand side value.
-
-    # Hook into remainder assignment intrinsic.
     intrinsics::float_rem_assign(self, that)
   }
 }
 
-sup [cmp w: U32] SizedFloatingPoint[w] ext Pow {
-  # Provide exponentiation support to sized floating point numbers, allowing for the calculation of one floating point
-  # value raised to the power of another floating point value of the same size. For differing sizes, the `From` trait
-  # can be used to convert one of the values to the same size as the other before performing the exponentiation.
+sup [cmp w: U32] SizedFloatingPoint[w] {
+  !public !inline
+  fun rem_checked(self, that: Self) -> Opt[Self] {
+    let (val, raised) = intrinsics::float_rem_raised(self, that)
+    ret case raised { None } else { Some(val) }
+  }
 
+  !public !inline
+  fun rem_raised(self, that: Self) -> (Self, Bool) {
+    ret intrinsics::float_rem_raised(self, that)
+  }
+
+  !public !inline
+  cmp fun rem_ieee(self, that: Self) -> Self {
+    ret intrinsics::float_rem_ieee(self, that)
+  }
+}
+
+sup [cmp w: U32] SizedFloatingPoint[w] ext Pow {
   !versioned(base="1.0.0", new="1.0.0")
   fun pow(self, that: Self) -> Self {
-    # The `pow` method defines how to calculate one floating point value raised to the power of another floating point
-    # value of the same size. It uses the `float_powf` intrinsic function to perform the exponentiation, which computes
-    # the result according to the rules of floating point arithmetic.
-    # @let that: The floating point value that is being used as the exponent in the exponentiation operation. It is of
-    # the same size as the current value (the base).
-    # @ret: The result of the exponentiation operation, which is a new floating point value of the same size as the
-    # operands.
-
-    # Hook into exponentiation intrinsic.
     ret intrinsics::float_powf(self, that)
   }
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext Pow[Rhs=S32] {
-  # Provide exponentiation support to sized floating point numbers with an `S32`
-  # exponent, allowing for the calculation of one floating point value raised to
-  # the power of an `S32` integer exponent. For differing sizes, the `From`
-  # trait can be used to convert the floating point value to the same size as
-  # the other before performing the exponentiation.
-
   !versioned(base="1.0.0", new="1.0.0")
   fun pow(self, that: S32) -> Self {
-    # The `pow` method defines how to calculate one floating point value raised
-    # to the power of an `S32` integer exponent. It squares and multiplies, one
-    # bit of the exponent at a time, and takes the reciprocal for a negative
-    # one, as compiler-rt's `__powidf2` does. Written out here rather than as
-    # `llvm.powi`, whose order of multiplications LLVM leaves undefined, so the
-    # result is the same at every optimisation level and on every target. Each
-    # multiplication rounds, so a large exponent is a few ulps from the exact
-    # power.
-    # @let that: The `S32` integer value that is being used as the exponent in
-    #   the exponentiation operation. The base (the current value) is raised to
-    #   the power of this integer exponent.
-    # @ret: The result of the exponentiation operation, which is a new floating
-    #   point value of the same size as the base (the current value).
+    ret self.pow_ieee(that) * Self::one()
+  }
+}
+
+sup [cmp w: U32] SizedFloatingPoint[w] {
+  !public !inline
+  fun pow_checked(self, that: Self) -> Opt[Self] {
+    let (val, raised) = self.pow_raised(that)
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun pow_raised(self, that: Self) -> (Self, Bool) {
+    let val = self.pow_ieee(that)
+    ret (val, val.is_finite().not)
+  }
+
+  !public !inline
+  fun pow_ieee(self, that: Self) -> Self {
+    ret intrinsics::float_powf_ieee(self, that)
+  }
+
+  !public !inline
+  fun pow_checked(self, that: S32) -> Opt[Self] {
+    let (val, raised) = self.pow_raised(that)
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun pow_raised(self, that: S32) -> (Self, Bool) {
+    let val = self.pow_ieee(that)
+    ret (val, val.is_finite().not)
+  }
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun pow_ieee(self, that: S32) -> Self {
     let mut base = self
     let mut n = that
     let mut result = Self::one()
     loop true {
-      case n.bit_and(1_s32) != 0_s32 { result = result * base }
+      case n.bit_and(1_s32) != 0_s32 { result = result.mul_ieee(base) }
       n = n / 2_s32
       case n == 0_s32 { exit }
-      base = base * base
+      base = base.mul_ieee(base)
     }
-    ret case that < 0_s32 { Self::one() / result } else { result }
+    ret case that < 0_s32 { Self::one().div_ieee(result) } else { result }
   }
 }
 
@@ -554,7 +439,54 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
   !public !inline
   !versioned(base="1.0.0", new="1.0.0")
   fun ln(self) -> Self {
+    # The natural logarithm (base e, `Consts[F64]::e`): the platform's `log`.
     ret intrinsics::float_log(self)
+  }
+
+  !public !inline
+  fun ln_checked(self) -> Opt[Self] {
+    let (val, raised) = self.ln_raised()
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun ln_raised(self) -> (Self, Bool) {
+    let val = self.ln_ieee()
+    ret (val, val.is_finite().not)
+  }
+
+  !public !inline
+  fun ln_ieee(self) -> Self {
+    # `ln` with no check.
+    ret intrinsics::float_log_ieee(self)
+  }
+
+  !public !inline
+  !versioned(base="1.0.0", new="1.0.0")
+  fun log(self, base: Self) -> Self {
+    # The logarithm in `base`, as `log2(x) / log2(base)`, so up to three
+    # roundings: within a few ulps, not correctly rounded (nor are the other
+    # transcendental functions, which come from the platform's libm, as IEEE 754
+    # permits).
+    ret intrinsics::float_log2(self) / intrinsics::float_log2(base)
+  }
+
+  !public !inline
+  fun log_checked(self, base: Self) -> Opt[Self] {
+    let (val, raised) = self.log_raised(base)
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun log_raised(self, base: Self) -> (Self, Bool) {
+    let val = self.log_ieee(base)
+    ret (val, val.is_finite().not)
+  }
+
+  !public !inline
+  fun log_ieee(self, base: Self) -> Self {
+    # `log(base)` with no check.
+    ret intrinsics::float_log2_ieee(self).div_ieee(intrinsics::float_log2_ieee(base))
   }
 
   !public !inline
@@ -564,15 +496,43 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
   }
 
   !public !inline
+  fun log2_checked(self) -> Opt[Self] {
+    let (val, raised) = self.log2_raised()
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun log2_raised(self) -> (Self, Bool) {
+    let val = self.log2_ieee()
+    ret (val, val.is_finite().not)
+  }
+
+  !public !inline
+  fun log2_ieee(self) -> Self {
+    ret intrinsics::float_log2_ieee(self)
+  }
+
+  !public !inline
   !versioned(base="1.0.0", new="1.0.0")
   fun log10(self) -> Self {
     ret intrinsics::float_log10(self)
   }
 
   !public !inline
-  !versioned(base="1.0.0", new="1.0.0")
-  fun log(self, base: Self) -> Self {
-    ret intrinsics::float_log2(self) / intrinsics::float_log2(base)
+  fun log10_checked(self) -> Opt[Self] {
+    let (val, raised) = self.log10_raised()
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun log10_raised(self) -> (Self, Bool) {
+    let val = self.log10_ieee()
+    ret (val, val.is_finite().not)
+  }
+
+  !public !inline
+  fun log10_ieee(self) -> Self {
+    ret intrinsics::float_log10_ieee(self)
   }
 
   !public !inline
@@ -582,9 +542,43 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
   }
 
   !public !inline
+  fun exp_checked(self) -> Opt[Self] {
+    let (val, raised) = self.exp_raised()
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun exp_raised(self) -> (Self, Bool) {
+    let val = self.exp_ieee()
+    ret (val, val.is_finite().not)
+  }
+
+  !public !inline
+  fun exp_ieee(self) -> Self {
+    ret intrinsics::float_exp_ieee(self)
+  }
+
+  !public !inline
   !versioned(base="1.0.0", new="1.0.0")
   fun exp2(self) -> Self {
     ret intrinsics::float_exp2(self)
+  }
+
+  !public !inline
+  fun exp2_checked(self) -> Opt[Self] {
+    let (val, raised) = self.exp2_raised()
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun exp2_raised(self) -> (Self, Bool) {
+    let val = self.exp2_ieee()
+    ret (val, val.is_finite().not)
+  }
+
+  !public !inline
+  fun exp2_ieee(self) -> Self {
+    ret intrinsics::float_exp2_ieee(self)
   }
 
   !public !inline
@@ -594,9 +588,42 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
   }
 
   !public !inline
+  fun exp10_checked(self) -> Opt[Self] {
+    let (val, raised) = self.exp10_raised()
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun exp10_raised(self) -> (Self, Bool) {
+    let val = self.exp10_ieee()
+    ret (val, val.is_finite().not)
+  }
+
+  !public !inline
+  fun exp10_ieee(self) -> Self {
+    ret intrinsics::float_exp10_ieee(self)
+  }
+
+  !public !inline
   !versioned(base="1.0.0", new="1.0.0")
   fun sqrt(self) -> Self {
     ret intrinsics::float_sqrt(self)
+  }
+
+  !public !inline
+  fun sqrt_checked(self) -> Opt[Self] {
+    let (val, raised) = intrinsics::float_sqrt_raised(self)
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun sqrt_raised(self) -> (Self, Bool) {
+    ret intrinsics::float_sqrt_raised(self)
+  }
+
+  !public !inline
+  fun sqrt_ieee(self) -> Self {
+    ret intrinsics::float_sqrt_ieee(self)
   }
 }
 
@@ -614,6 +641,13 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
   }
 
   !public !inline
+  fun copysign(self, sign: Self) -> Self {
+    # This value's magnitude with `sign`'s sign, a NaN's or a zero's included.
+    # Never stops: it only moves the sign bit.
+    ret intrinsics::float_copysign(self, sign)
+  }
+
+  !public !inline
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun ceil(self) -> Self {
     ret intrinsics::float_ceil(self)
@@ -628,7 +662,18 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
   !public !inline
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun round(self) -> Self {
+    # The nearest integral value, a half rounded away from zero (2.5 to 3, -2.5
+    # to -3), as C's and Rust's `round`.
     ret intrinsics::float_round(self)
+  }
+
+  !public !inline
+  !versioned(base="1.0.0", new="1.0.0")
+  cmp fun round_even(self) -> Self {
+    # The nearest integral value, a half rounded to the even neighbour (2.5 to
+    # 2, 3.5 to 4): IEEE 754's roundToIntegralTiesToEven, which does not drift
+    # up or down over many roundings.
+    ret intrinsics::float_round_even(self)
   }
 
   !public !inline
@@ -646,9 +691,43 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
   }
 
   !public !inline
+  fun sin_checked(self) -> Opt[Self] {
+    let (val, raised) = self.sin_raised()
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun sin_raised(self) -> (Self, Bool) {
+    let val = self.sin_ieee()
+    ret (val, val.is_finite().not)
+  }
+
+  !public !inline
+  fun sin_ieee(self) -> Self {
+    ret intrinsics::float_sin_ieee(self)
+  }
+
+  !public !inline
   !versioned(base="1.0.0", new="1.0.0")
   fun cos(self) -> Self {
     ret intrinsics::float_cos(self)
+  }
+
+  !public !inline
+  fun cos_checked(self) -> Opt[Self] {
+    let (val, raised) = self.cos_raised()
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun cos_raised(self) -> (Self, Bool) {
+    let val = self.cos_ieee()
+    ret (val, val.is_finite().not)
+  }
+
+  !public !inline
+  fun cos_ieee(self) -> Self {
+    ret intrinsics::float_cos_ieee(self)
   }
 
   !public !inline
@@ -658,9 +737,43 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
   }
 
   !public !inline
+  fun tan_checked(self) -> Opt[Self] {
+    let (val, raised) = self.tan_raised()
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun tan_raised(self) -> (Self, Bool) {
+    let val = self.tan_ieee()
+    ret (val, val.is_finite().not)
+  }
+
+  !public !inline
+  fun tan_ieee(self) -> Self {
+    ret intrinsics::float_tan_ieee(self)
+  }
+
+  !public !inline
   !versioned(base="1.0.0", new="1.0.0")
   fun asin(self) -> Self {
     ret intrinsics::float_asin(self)
+  }
+
+  !public !inline
+  fun asin_checked(self) -> Opt[Self] {
+    let (val, raised) = self.asin_raised()
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun asin_raised(self) -> (Self, Bool) {
+    let val = self.asin_ieee()
+    ret (val, val.is_finite().not)
+  }
+
+  !public !inline
+  fun asin_ieee(self) -> Self {
+    ret intrinsics::float_asin_ieee(self)
   }
 
   !public !inline
@@ -670,9 +783,43 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
   }
 
   !public !inline
+  fun acos_checked(self) -> Opt[Self] {
+    let (val, raised) = self.acos_raised()
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun acos_raised(self) -> (Self, Bool) {
+    let val = self.acos_ieee()
+    ret (val, val.is_finite().not)
+  }
+
+  !public !inline
+  fun acos_ieee(self) -> Self {
+    ret intrinsics::float_acos_ieee(self)
+  }
+
+  !public !inline
   !versioned(base="1.0.0", new="1.0.0")
   fun atan(self) -> Self {
     ret intrinsics::float_atan(self)
+  }
+
+  !public !inline
+  fun atan_checked(self) -> Opt[Self] {
+    let (val, raised) = self.atan_raised()
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun atan_raised(self) -> (Self, Bool) {
+    let val = self.atan_ieee()
+    ret (val, val.is_finite().not)
+  }
+
+  !public !inline
+  fun atan_ieee(self) -> Self {
+    ret intrinsics::float_atan_ieee(self)
   }
 
   !public !inline
@@ -682,9 +829,43 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
   }
 
   !public !inline
+  fun atan2_checked(self, other: Self) -> Opt[Self] {
+    let (val, raised) = self.atan2_raised(other)
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun atan2_raised(self, other: Self) -> (Self, Bool) {
+    let val = self.atan2_ieee(other)
+    ret (val, val.is_finite().not)
+  }
+
+  !public !inline
+  fun atan2_ieee(self, other: Self) -> Self {
+    ret intrinsics::float_atan2_ieee(self, other)
+  }
+
+  !public !inline
   !versioned(base="1.0.0", new="1.0.0")
   fun sinh(self) -> Self {
     ret intrinsics::float_sinh(self)
+  }
+
+  !public !inline
+  fun sinh_checked(self) -> Opt[Self] {
+    let (val, raised) = self.sinh_raised()
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun sinh_raised(self) -> (Self, Bool) {
+    let val = self.sinh_ieee()
+    ret (val, val.is_finite().not)
+  }
+
+  !public !inline
+  fun sinh_ieee(self) -> Self {
+    ret intrinsics::float_sinh_ieee(self)
   }
 
   !public !inline
@@ -694,33 +875,140 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
   }
 
   !public !inline
+  fun cosh_checked(self) -> Opt[Self] {
+    let (val, raised) = self.cosh_raised()
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun cosh_raised(self) -> (Self, Bool) {
+    let val = self.cosh_ieee()
+    ret (val, val.is_finite().not)
+  }
+
+  !public !inline
+  fun cosh_ieee(self) -> Self {
+    ret intrinsics::float_cosh_ieee(self)
+  }
+
+  !public !inline
   !versioned(base="1.0.0", new="1.0.0")
   fun tanh(self) -> Self {
     ret intrinsics::float_tanh(self)
   }
 
   !public !inline
-  !versioned(base="1.0.0", new="1.0.0")
-  fun asinh(self) -> Opt[Self] {
-    # ln(x + sqrt(x^2 + 1)) Todo: Unchecked version? Or no check => NaN?
-    ret Some(val=(self + (self * self + Self::one()).sqrt()).ln())
+  fun tanh_checked(self) -> Opt[Self] {
+    let (val, raised) = self.tanh_raised()
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun tanh_raised(self) -> (Self, Bool) {
+    let val = self.tanh_ieee()
+    ret (val, val.is_finite().not)
+  }
+
+  !public !inline
+  fun tanh_ieee(self) -> Self {
+    ret intrinsics::float_tanh_ieee(self)
   }
 
   !public !inline
   !versioned(base="1.0.0", new="1.0.0")
-  fun acosh(self) -> Opt[Self] {
-    # ln(x + sqrt(x^2 - 1)), domain x >= 1 Todo: Unchecked version? Or no check => NaN?
-    case self < Self::one() { ret None }
-    ret Some(val=(self + (self * self - Self::one()).sqrt()).ln())
+  fun asinh(self) -> Self {
+    # ln(|x| + sqrt(x^2 + 1)), with x's sign. From |x| = 1 up, as ln(|x|) + ln(1
+    # + sqrt(1 + (1/x)^2)), where x^2 would overflow long before the result
+    # does. Checked: a NaN going in stops it.
+    let ax = self.abs()
+    let r = case ax < Self::one() { (ax + (ax * ax + Self::one()).sqrt()).ln() } else {
+      let inv = Self::one() / ax
+      ax.ln() + (Self::one() + (Self::one() + inv * inv).sqrt()).ln()
+    }
+    ret case self.is_negative() { r.neg() } else { r }
+  }
+
+  !public !inline
+  fun asinh_checked(self) -> Opt[Self] {
+    let (val, raised) = self.asinh_raised()
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun asinh_raised(self) -> (Self, Bool) {
+    let val = self.asinh_ieee()
+    ret (val, val.is_finite().not)
+  }
+
+  !public !inline
+  fun asinh_ieee(self) -> Self {
+    # `asinh` with no check: a NaN or infinity passes through.
+    let ax = self.abs()
+    let r = case ax < Self::one() { ax.add_ieee(ax.mul_ieee(ax).add_ieee(Self::one()).sqrt_ieee()).ln_ieee() } else {
+      let inv = Self::one().div_ieee(ax)
+      ax.ln_ieee().add_ieee(Self::one().add_ieee(Self::one().add_ieee(inv.mul_ieee(inv)).sqrt_ieee()).ln_ieee())
+    }
+    ret case self.is_negative() { r.neg() } else { r }
   }
 
   !public !inline
   !versioned(base="1.0.0", new="1.0.0")
-  fun atanh(self) -> Opt[Self] {
-    # 0.5 * ln((1 + x) / (1 - x)),  domain |x| < 1 Todo: Unchecked version? Or no check => NaN?
-    case self <= Self::neg_one() or self >= Self::one() { ret None }
+  fun acosh(self) -> Self {
+    # ln(x + sqrt(x^2 - 1)), as ln(x) + ln(1 + sqrt(1 - (1/x)^2)) so that x^2
+    # cannot overflow. Below 1 there is no result: checked, it stops (invalid,
+    # the square root of a negative).
+    case self < Self::one() { ret (self * self - Self::one()).sqrt() }
+    let inv = Self::one() / self
+    ret self.ln() + (Self::one() + (Self::one() - inv * inv).sqrt()).ln()
+  }
+
+  !public !inline
+  fun acosh_checked(self) -> Opt[Self] {
+    let (val, raised) = self.acosh_raised()
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun acosh_raised(self) -> (Self, Bool) {
+    let val = self.acosh_ieee()
+    ret (val, val.is_finite().not)
+  }
+
+  !public !inline
+  fun acosh_ieee(self) -> Self {
+    # `acosh` with no check: below 1, a NaN.
+    case self < Self::one() { ret self.mul_ieee(self).sub_ieee(Self::one()).sqrt_ieee() }
+    let inv = Self::one().div_ieee(self)
+    ret self.ln_ieee().add_ieee(Self::one().add_ieee(Self::one().sub_ieee(inv.mul_ieee(inv)).sqrt_ieee()).ln_ieee())
+  }
+
+  !public !inline
+  !versioned(base="1.0.0", new="1.0.0")
+  fun atanh(self) -> Self {
+    # 0.5 * ln((1 + x) / (1 - x)). Checked: at 1 it stops on a division by zero,
+    # at -1 on the logarithm's pole, and past either as invalid (the logarithm
+    # of a negative).
     let one = Self::one()
-    ret Some(val=((one + self) / (one - self)).ln() * Self::from(0.5_f64))
+    ret ((one + self) / (one - self)).ln() * Self::from(0.5_f64)
+  }
+
+  !public !inline
+  fun atanh_checked(self) -> Opt[Self] {
+    let (val, raised) = self.atanh_raised()
+    ret case raised { None } else { Some(val) }
+  }
+
+  !public !inline
+  fun atanh_raised(self) -> (Self, Bool) {
+    let val = self.atanh_ieee()
+    ret (val, val.is_finite().not)
+  }
+
+  !public !inline
+  fun atanh_ieee(self) -> Self {
+    # `atanh` with no check: an infinity at -1 and 1, a NaN past them.
+    let one = Self::one()
+    ret one.add_ieee(self).div_ieee(one.sub_ieee(self)).ln_ieee().mul_ieee(Self::from(0.5_f64))
   }
 }
 
@@ -799,6 +1087,25 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
       or self.is_negative_subnormal()
       or self.is_negative_zero()
   }
+
+  !public !inline
+  fun is_nan(self) -> Bool {
+    # Whether this is a NaN, quiet or signalling.
+    ret self.is_quiet_nan() or self.is_signaling_nan()
+  }
+
+  !public !inline
+  fun is_infinite(self) -> Bool {
+    # Whether this is either infinity.
+    ret self.is_positive_infinity() or self.is_negative_infinity()
+  }
+
+  !public !inline
+  fun is_finite(self) -> Bool {
+    # Whether this is neither a NaN nor an infinity: what a checked operation
+    # gives, and what it takes without stopping.
+    ret (self.is_nan() or self.is_infinite()).not
+  }
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] {
@@ -806,6 +1113,24 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
   !intrinsic(name="std.num.sized_floating_point.SizedFloatingPoint.neg_one")
   !versioned(base="1.0.0", new="1.0.0")
   cmp fun neg_one() -> Self { }
+
+  !public !inline
+  cmp fun nan() -> Self {
+    # A quiet NaN, made as IEEE's `0 / 0`.
+    ret intrinsics::float_div_ieee(Self::zero(), Self::zero())
+  }
+
+  !public !inline
+  cmp fun inf() -> Self {
+    # Positive infinity, made as IEEE's `1 / 0`.
+    ret intrinsics::float_div_ieee(Self::one(), Self::zero())
+  }
+
+  !public !inline
+  cmp fun neg_inf() -> Self {
+    # Negative infinity, made as IEEE's `-1 / 0`.
+    ret intrinsics::float_div_ieee(Self::neg_one(), Self::zero())
+  }
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] ext Zero {
@@ -835,18 +1160,21 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext One {
 }
 
 sup [cmp w: U32] SizedFloatingPoint[w] {
-  # Byte-array conversions for floating point values of any width. The byte representation is that of the value's
-  # IEEE-754 bit pattern. Each function reconstructs the same-width unsigned integer bit pattern from the bytes (reusing
-  # the integer implementations) and then reinterprets it as a floating point value with `bit_cast`. Exactly `w / 8`
-  # bytes are read from the view.
+  # Byte-array conversions for floating point values of any width. The byte
+  # representation is that of the value's IEEE-754 bit pattern. Each function
+  # reconstructs the same-width unsigned integer bit pattern from the bytes
+  # (reusing the integer implementations) and then reinterprets it as a floating
+  # point value with `bit_cast`. Exactly `w / 8` bytes are read from the view.
 
   !public
   !inline
   !versioned(base="1.0.0", new="1.0.0")
   fun from_le_bytes(bytes: &View[U8]) -> Self {
-    # Reconstruct a floating point value from the little-endian byte representation of its IEEE-754 bit pattern, where
-    # `bytes[0]` is the least-significant byte.
-    # @let bytes: A view over the little-endian byte representation of the value (at least `w / 8` bytes).
+    # Reconstruct a floating point value from the little-endian byte
+    # representation of its IEEE-754 bit pattern, where `bytes[0]` is the
+    # least-significant byte.
+    # @let bytes: A view over the little-endian byte representation of the value
+    #   (at least `w / 8` bytes).
     # @ret: The reconstructed floating point value.
 
     ret intrinsics::bit_cast[Self](SizedIntegerUnsigned[w]::from_le_bytes(bytes))
@@ -856,9 +1184,11 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
   !inline
   !versioned(base="1.0.0", new="1.0.0")
   fun from_be_bytes(bytes: &View[U8]) -> Self {
-    # Reconstruct a floating point value from the big-endian byte representation of its IEEE-754 bit pattern, where
-    # `bytes[0]` is the most-significant byte.
-    # @let bytes: A view over the big-endian byte representation of the value (at least `w / 8` bytes).
+    # Reconstruct a floating point value from the big-endian byte representation
+    # of its IEEE-754 bit pattern, where `bytes[0]` is the most-significant
+    # byte.
+    # @let bytes: A view over the big-endian byte representation of the value
+    #   (at least `w / 8` bytes).
     # @ret: The reconstructed floating point value.
 
     ret intrinsics::bit_cast[Self](SizedIntegerUnsigned[w]::from_be_bytes(bytes))
@@ -868,9 +1198,11 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
   !inline
   !versioned(base="1.0.0", new="1.0.0")
   fun from_ne_bytes(bytes: &View[U8]) -> Self {
-    # Reconstruct a floating point value from the native-endian byte representation of its IEEE-754 bit pattern,
-    # matching the in-memory layout of the target.
-    # @let bytes: A view over the native-endian byte representation of the value (at least `w / 8` bytes).
+    # Reconstruct a floating point value from the native-endian byte
+    # representation of its IEEE-754 bit pattern, matching the in-memory layout
+    # of the target.
+    # @let bytes: A view over the native-endian byte representation of the value
+    #   (at least `w / 8` bytes).
     # @ret: The reconstructed floating point value.
 
     ret intrinsics::bit_cast[Self](SizedIntegerUnsigned[w]::from_ne_bytes(bytes))
@@ -880,15 +1212,18 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
 sup [cmp w: U32] SizedFloatingPoint[w] ext Format {
   !versioned(base="1.0.0", new="1.0.0")
   fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
-    # Format a float with a fixed number of digits after the point: the spec's precision, or 6. The last digit is
-    # rounded half up from the first digit dropped, carrying into the integer part when needed (`{:.2}` of 0.999 is
-    # `1.00`). Digits are taken one at a time off the fraction rather than by scaling it by a power of ten, so a narrow
-    # float with a large precision does not overflow. The digits are the exact binary value's, so 0.1 to 20 places is
-    # `0.10000000000000000555`.
+    # Format a float with a fixed number of digits after the point: the spec's
+    # precision, or 6. The last digit is rounded half up from the first digit
+    # dropped, carrying into the integer part when needed (`{:.2}` of 0.999 is
+    # `1.00`). Digits are taken one at a time off the fraction rather than by
+    # scaling it by a power of ten, so a narrow float with a large precision
+    # does not overflow. The digits are the exact binary value's, so 0.1 to 20
+    # places is `0.10000000000000000555`.
     #
-    # Todo: the integer part goes through `U64`, so a magnitude of 2^64 or more does not render correctly. That needs
-    #  the digits of the float's own integer part, or a shortest round-tripping algorithm (Ryu, Grisu), which would
-    #  also give `{}` of 0.1 as `0.1` rather than `0.100000`.
+    # Todo: the integer part goes through `U64`, so a magnitude of 2^64 or more
+    # does not render correctly. That needs the digits of the float's own
+    # integer part, or a shortest round-tripping algorithm (Ryu, Grisu), which
+    # would also give `{}` of 0.1 as `0.1` rather than `0.100000`.
 
     let value = self@
 
@@ -955,5 +1290,111 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Format {
     drop(digits)
     drop(fraction)
     ret Pass[Void]()
+  }
+}
+
+sup [cmp w: U32] SizedFloatingPoint[w] {
+  # Parsing a floating point value of any width from text. This is a plain
+  # method, not the `TryFrom` trait: the text is a `&StrView`, and a borrow
+  # cannot be a generic argument (E2), so `TryFrom[&StrView]` cannot be written.
+
+  !public
+  !versioned(base="1.0.0", new="1.0.0")
+  fun try_from(text: &StrView) -> Opt[Self] {
+    # Parse decimal text: an optional `+` or `-`, then digits with at most one
+    # `.` (`1.`, `.5` and `1.5` are all accepted), then an optional exponent,
+    # `e` or `E` and an `S32` with an optional sign. `inf`, `infinity` and
+    # `nan`, in any case and after an optional sign, name the values with no
+    # digits. Nothing else is accepted, including surrounding whitespace.
+    #
+    # The first 19 significant digits are read into a `U64`, so the text is
+    # `mantissa * 10^exp10`; that is scaled by a power of ten, in `F64` for a
+    # type narrower than it (so an `F16` does not overflow on the mantissa) and
+    # in this type otherwise. When the mantissa and the power of ten are both
+    # exact (up to 2^53 and 10^22 for an `F64`), one rounding gives the
+    # correctly rounded result (Clinger's fast path). Todo: outside the fast
+    # path the result can be a few ulps out: digits past the 19th are dropped, a
+    # large power of ten is not exact, and a narrower type rounds twice. Correct
+    # rounding everywhere needs Eisel-Lemire with a big-integer fallback.
+    # @let text: The text to parse.
+    # @ret: The value, or `None` if the text is malformed. A value too large is
+    #   an infinity and one too small is a zero, of the text's sign.
+
+    let negative = text.starts_with('-')
+    let body = case negative or text.starts_with('+') { text[1_uz to text.len()]@ } else { text@ }
+
+    # The named values. An infinity takes the sign; a NaN's sign is not kept.
+    case body.eq_fold("inf") or body.eq_fold("infinity") {
+      ret Some(val=case negative { Self::neg_inf() } else { Self::inf() })
+    }
+    case body.eq_fold("nan") { ret Some(val=Self::nan()) }
+
+    # Split off the exponent, which is an `S32` with its own sign.
+    let mut digits = body
+    let mut exponent = 0_s32
+    let exponent_at = body.find_if(|c: Char| c == 'e' or c == 'E')
+    case exponent_at is Some[USize](val) {
+      exponent = S32::try_from(body[val + 1_uz to body.len()])?
+      digits = body[0_uz to val]@
+    }
+    case digits.is_empty() or digits == "." { ret None }
+
+    # The digits, with the point's position and any dropped integer digits
+    # folded into a shift of the exponent. Leading zeros are not significant.
+    let mut mantissa = 0_u64
+    let mut significant = 0_u32
+    let mut shift = 0_s32
+    let mut seen_point = false
+    loop byte in digits.bytes() {
+      case byte == b'.' {
+        case seen_point { ret None }
+        seen_point = true
+      }
+      else {
+        let digit = U64::from(byte.to_digit(10_u32)?)
+        case significant == 19_u32 {
+          case seen_point.not { shift += 1_s32 }
+        }
+        else {
+          mantissa = mantissa * 10_u64 + digit
+          case mantissa != 0_u64 { significant += 1_u32 }
+          case seen_point { shift -= 1_s32 }
+        }
+      }
+    }
+
+    let exp10 = exponent.add_saturating(shift)
+    # Narrowed with no check: a value too large for this type is its infinity.
+    let magnitude = case w < 64_u32 {
+      Self::from_ieee(SizedFloatingPoint[64_u32]::scale_decimal(mantissa, exp10))
+    }
+    else {
+      Self::scale_decimal(mantissa, exp10)
+    }
+    ret Some(val=case negative { magnitude.neg() } else { magnitude })
+  }
+}
+
+sup [cmp w: U32] SizedFloatingPoint[w] {
+  fun scale_decimal(mantissa: U64, exp10: S32) -> Self {
+    # The value `mantissa * 10^exp10` in this type. A positive power that
+    # overflows is right to: the mantissa is at least 1, so the value is past
+    # the maximum too. A negative one is applied as a division, and when its
+    # reciprocal power overflows (a subnormal result), `10^22` is divided out
+    # first so the rest fits.
+    # @let mantissa: The significant digits.
+    # @let exp10: The power of ten to scale them by.
+    # @ret: The scaled value, rounded at each step.
+
+    # In the IEEE forms throughout: the overflow is the result, an infinity.
+    let value = Self::from(mantissa)
+    case mantissa == 0_u64 or exp10 == 0_s32 { ret value }
+    let ten = Self::from(10_u32)
+    let exp = exp10.max(-100000_s32)
+    case exp > 0_s32 { ret value.mul_ieee(ten.pow_ieee(exp)) }
+
+    let power = ten.pow_ieee(0_s32 - exp)
+    case power.is_positive_infinity().not { ret value.div_ieee(power) }
+    ret value.div_ieee(ten.pow_ieee(22_s32)).div_ieee(ten.pow_ieee(0_s32 - exp - 22_s32))
   }
 }

@@ -114,7 +114,7 @@ fun test_matching_through_a_borrowed_receiver() -> Void {
 fun test_calling_a_closure_with_a_bound_value() -> Void {
   # The shape `Opt::and_then` uses: the bound value is handed straight to a closure parameter.
   let a: std::option::Opt[std::number::S32] = std::option::Some(val=1)
-  let inc = (x: std::number::S32) x + 1_s32
+  let inc = |x: std::number::S32| x + 1_s32
   let got = case a of {
     is std::option::Some[std::number::S32](val) { inc(val) }
     else { 0_s32 }

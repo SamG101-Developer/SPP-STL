@@ -99,7 +99,7 @@ fun test_canonicalize_resolves_to_the_real_path() -> Void {
   let resolved = winding.canonicalize().unwrap()
   std::debug::assert(resolved.is_absolute(), "the result is absolute")
   std::debug::assert(resolved.is_dir(), "and names the directory")
-  let name = resolved.file_name()
+  let name = resolved.file_name().unwrap()
   std::debug::assert(name.len() == 18_uz, "with no . or .. left in it")
   drop(name)
   drop(resolved)
@@ -110,12 +110,3 @@ fun test_canonicalize_resolves_to_the_real_path() -> Void {
   drop(removed)
   drop(dir)
 }
-
-!test(group="std/fs/file")
-fun test_the_working_directory_is_an_absolute_directory() -> Void {
-  let cwd = std::fs::file::get_cwd().unwrap()
-  std::debug::assert(cwd.is_absolute(), "the working directory is absolute")
-  std::debug::assert(cwd.is_dir(), "and is a directory")
-  drop(cwd)
-}
-

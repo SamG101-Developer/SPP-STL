@@ -474,6 +474,18 @@ sup [cmp w: U32] SizedIntegerSigned[w] {
 
   !public
   !inline
+  fun abs_overflow(self) -> (Self, Bool) {
+    ret case self.is_negative() { self.neg_overflow() } else { (self, false) }
+  }
+
+  !public
+  !inline
+  fun abs_saturating(self) -> Self {
+    ret case self.is_negative() { self.neg_saturating() } else { self }
+  }
+
+  !public
+  !inline
   fun abs_wrapping(self) -> Self {
     ret case self.is_negative() { self.neg_wrapping() } else { self }
   }
@@ -500,6 +512,14 @@ sup [cmp w: U32] SizedIntegerSigned[w] {
       ret (intrinsics::min_val[Self](), true)
     }
     ret (intrinsics::sneg(self), false)
+  }
+
+  !public
+  !inline
+  fun neg_saturating(self) -> Self {
+    # The negation, or the maximum for the minimum (whose negation is one past
+    # it).
+    ret case self == intrinsics::min_val[Self]() { intrinsics::max_val[Self]() } else { intrinsics::sneg(self) }
   }
 
   !public

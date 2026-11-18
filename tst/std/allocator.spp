@@ -115,7 +115,7 @@ cls BytesOnlyAlloc { }
 sup BytesOnlyAlloc ext std::allocator::Alloc {
   fun alloc_bytes(&self, layout: std::allocator::Layout) -> Res[std::mem::pointer::NonNull[U8], std::allocator::AllocErr] {
     let raw = sppc::malloc(layout.size)
-    let ptr = std::mem::pointer::NonNull[U8]::from_ptr(raw).map_err((e: std::mem::pointer::NullptrErr) std::allocator::AllocOomErr)?
+    let ptr = std::mem::pointer::NonNull[U8]::from_ptr(raw).map_err(|e: std::mem::pointer::NullptrErr| std::allocator::AllocOomErr)?
     ret Pass(val=ptr)
   }
 

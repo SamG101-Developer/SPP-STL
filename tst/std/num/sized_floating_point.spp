@@ -1,7 +1,8 @@
 !test(group="std/num/sized_floating_point")
-fun test_total_cmp_orders_every_value() -> Void {
-  # -NaN < -inf < -1 < -0 < +0 < 1 < +inf < +NaN, which "ord" cannot say: it has no order for a NaN, and calls the two
-  # zeros equal. The NaNs, infinities and -0 are written as their bits, so nothing folds them.
+fun test_total_cmp_and_ord_order_every_value() -> Void {
+  # -NaN < -inf < -1 < -0 < +0 < 1 < +inf < +NaN, which "<" and "==" cannot say: they have no order for a NaN, and call
+  # the two zeros equal. "ord" is this order too, as "Ord" asks for a total one. The NaNs, infinities and -0 are written
+  # as their bits, so nothing folds them.
   let values = [
     std::intrinsics::bit_cast[F64](0xfff8000000000000_u64),
     std::intrinsics::bit_cast[F64](0xfff0000000000000_u64),
@@ -18,7 +19,7 @@ fun test_total_cmp_orders_every_value() -> Void {
     loop j < values.len() {
       let a = values[i]@
       let b = values[j]@
-      all_in_order = all_in_order and a.total_cmp(&b) == i.ord(&j)
+      all_in_order = all_in_order and a.total_cmp(&b) == i.ord(&j) and a.ord(&b) == i.ord(&j)
       j += 1_uz
     }
     i += 1_uz
@@ -50,6 +51,26 @@ fun test_equality_and_inequality() -> Void {
 }
 
 !test(group="std/num/sized_floating_point")
+fun test_a_nan_is_unequal_to_everything_itself_included() -> Void {
+  # IEEE 754's "!=" is the negation of "==": true when either side is a NaN, so "x != x" finds one.
+  let nan = std::intrinsics::bit_cast[F64](0x7ff8000000000000_u64)
+  let one = 1.0_f64
+  std::debug::assert(nan != nan, "a NaN is unequal to itself")
+  std::debug::assert(nan != one and one != nan, "a NaN is unequal to a number, either side")
+  std::debug::assert((nan == nan).not, "a NaN is not equal to itself")
+  std::debug::assert((one != one).not, "a number is not unequal to itself")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_ord_tells_the_zeros_apart_where_equality_does_not() -> Void {
+  let neg_zero = std::intrinsics::bit_cast[F64](0x8000000000000000_u64)
+  let pos_zero = 0.0_f64
+  std::debug::assert(neg_zero == pos_zero, "the zeros are equal")
+  std::debug::assert(neg_zero.ord(&pos_zero) == -1, "-0 orders below +0")
+  std::debug::assert(pos_zero.ord(&neg_zero) == 1, "+0 orders above -0")
+}
+
+!test(group="std/num/sized_floating_point")
 fun test_abs_and_neg_flip_the_sign() -> Void {
   std::debug::assert(-2.5_f64.abs() == 2.5_f64, "abs of a negative")
   std::debug::assert(2.5_f64.abs() == 2.5_f64, "abs of a positive is itself")
@@ -68,11 +89,34 @@ fun test_rounding_towards_each_direction() -> Void {
 }
 
 !test(group="std/num/sized_floating_point")
+fun test_round_takes_a_half_away_from_zero_and_round_even_to_even() -> Void {
+  std::debug::assert(2.5_f64.round() == 3.0_f64, "round takes a half up, away from zero")
+  std::debug::assert(-2.5_f64.round() == -3.0_f64, "round takes a negative half down, away from zero")
+  std::debug::assert(2.5_f64.round_even() == 2.0_f64, "round_even takes 2.5 to the even 2")
+  std::debug::assert(3.5_f64.round_even() == 4.0_f64, "round_even takes 3.5 to the even 4")
+  std::debug::assert(-2.5_f64.round_even() == -2.0_f64, "round_even takes -2.5 to the even -2")
+  std::debug::assert(2.6_f64.round_even() == 3.0_f64, "round_even takes anything but a half to the nearest")
+  std::debug::assert(-0.5_f64.round_even().is_negative_zero(), "round_even keeps the sign of a zero")
+}
+
+!test(group="std/num/sized_floating_point")
 fun test_min_and_max_pick_the_right_side() -> Void {
   std::debug::assert(1.5_f64.min(2.5_f64) == 1.5_f64, "min of two positives")
   std::debug::assert(1.5_f64.max(2.5_f64) == 2.5_f64, "max of two positives")
   std::debug::assert(-1.5_f64.min(1.5_f64) == -1.5_f64, "min spanning zero")
   std::debug::assert(-1.5_f64.max(1.5_f64) == 1.5_f64, "max spanning zero")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_min_and_max_propagate_a_nan_and_order_the_zeros() -> Void {
+  # IEEE 754-2019's minimum and maximum: a NaN is not skipped, and -0 is below +0. Written as bits, so nothing folds.
+  let nan = std::intrinsics::bit_cast[F64](0x7ff8000000000000_u64)
+  let neg_zero = std::intrinsics::bit_cast[F64](0x8000000000000000_u64)
+  let pos_zero = 0.0_f64
+  std::debug::assert(nan.min(1.0_f64).is_quiet_nan(), "min with a NaN is a NaN")
+  std::debug::assert(1.0_f64.max(nan).is_quiet_nan(), "max with a NaN is a NaN, either side")
+  std::debug::assert(neg_zero.max(pos_zero).is_positive_zero(), "max of the zeros is +0")
+  std::debug::assert(pos_zero.min(neg_zero).is_negative_zero(), "min of the zeros is -0")
 }
 
 !test(group="std/num/sized_floating_point")
@@ -84,11 +128,13 @@ fun test_sqrt_of_exact_squares() -> Void {
 
 !test(group="std/num/sized_floating_point")
 fun test_powers_of_two_are_exact() -> Void {
-  # Both "pow" overloads: the integer exponent goes to "llvm.powi", the float one to "llvm.pow". Keep both - the
-  # integer form is overloaded on two types in llvm, and getting that wrong took the whole compiler down when the
-  # module was printed rather than where the call was built.
+  # Both "pow" overloads: the integer exponent is squared and multiplied in S++, the float one goes to "llvm.pow".
   std::debug::assert(2.0_f64.pow(3) == 8.0_f64, "two cubed, integer exponent")
   std::debug::assert(2.0_f64.pow(0) == 1.0_f64, "anything to the zero")
+  std::debug::assert(2.0_f64.pow(10) == 1024.0_f64, "two to the tenth, integer exponent")
+  std::debug::assert(2.0_f64.pow(-2) == 0.25_f64, "a negative exponent is a reciprocal")
+  std::debug::assert(-3.0_f64.pow(3) == -27.0_f64, "an odd power keeps the sign")
+  std::debug::assert(0.5_f64.pow(-1) == 2.0_f64, "minus one inverts")
   std::debug::assert(2.0_f64.pow(3.0_f64) == 8.0_f64, "two cubed, float exponent")
   std::debug::assert(9.0_f64.pow(0.5_f64) == 3.0_f64, "a fractional exponent is a root")
   std::debug::assert(2.0_f64.exp2() == 4.0_f64, "exp2 is two to the power")
@@ -129,4 +175,200 @@ fun test_a_narrower_width_holds_the_same_small_values() -> Void {
   std::debug::assert(1.5_f32 + 2.25_f32 == 3.75_f32, "addition at F32")
   std::debug::assert(4.0_f32.sqrt() == 2.0_f32, "sqrt at F32")
   std::debug::assert(-1.5_f32.abs() == 1.5_f32, "abs at F32")
+}
+!test(group="std/num/sized_floating_point")
+fun test_try_from_parses_decimal_text() -> Void {
+  std::debug::assert(F64::try_from("0").unwrap() == 0.0_f64, "zero")
+  std::debug::assert(F64::try_from("1.5").unwrap() == 1.5_f64, "a fraction")
+  std::debug::assert(F64::try_from("-2.25").unwrap() == -2.25_f64, "a negative")
+  std::debug::assert(F64::try_from("+3").unwrap() == 3.0_f64, "a leading plus")
+  std::debug::assert(F64::try_from("1.").unwrap() == 1.0_f64, "nothing after the point")
+  std::debug::assert(F64::try_from(".5").unwrap() == 0.5_f64, "nothing before the point")
+  std::debug::assert(F64::try_from("0.1").unwrap() == 0.1_f64, "an inexact fraction rounds as the literal does")
+  std::debug::assert(F64::try_from("123.456").unwrap() == 123.456_f64, "digits both sides")
+  std::debug::assert(F64::try_from("0.000123").unwrap() == 0.000123_f64, "leading zeros after the point")
+  std::debug::assert(F32::try_from("3.14159").unwrap() == 3.14159_f32, "an f32")
+  std::debug::assert(F16::try_from("0.5").unwrap() == 0.5_f16, "an f16")
+  let text = Str::from("2.5")
+  std::debug::assert(F64::try_from(&text).unwrap() == 2.5_f64, "an owned Str")
+  drop(text)
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_try_from_reads_an_exponent() -> Void {
+  std::debug::assert(F64::try_from("1e3").unwrap() == 1000.0_f64, "a positive exponent")
+  std::debug::assert(F64::try_from("1E3").unwrap() == 1000.0_f64, "an uppercase e")
+  std::debug::assert(F64::try_from("2.5e+2").unwrap() == 250.0_f64, "a signed positive exponent")
+  std::debug::assert(F64::try_from("25e-1").unwrap() == 2.5_f64, "a negative exponent")
+  std::debug::assert(F64::try_from("1e400").unwrap().is_positive_infinity(), "past the maximum is an infinity")
+  std::debug::assert(F64::try_from("-1e400").unwrap().is_negative_infinity(), "and negative past it")
+  std::debug::assert(F64::try_from("1e-400").unwrap().is_positive_zero(), "below the minimum is a zero")
+  std::debug::assert(F64::try_from("1e-320").unwrap().is_positive_subnormal(), "a subnormal")
+  std::debug::assert(F16::try_from("0.0001234567").unwrap() > 0.0_f16, "an f16 with more digits than its range")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_try_from_names_the_values_with_no_digits() -> Void {
+  std::debug::assert(F64::try_from("inf").unwrap().is_positive_infinity(), "inf")
+  std::debug::assert(F64::try_from("-Infinity").unwrap().is_negative_infinity(), "-Infinity")
+  std::debug::assert(F64::try_from("NaN").unwrap().is_quiet_nan(), "NaN")
+  std::debug::assert(F64::try_from("-0").unwrap().is_negative_zero(), "-0 keeps its sign")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_try_from_rejects_malformed_text() -> Void {
+  std::debug::assert(F64::try_from("").is_none(), "empty")
+  std::debug::assert(F64::try_from("-").is_none(), "a sign alone")
+  std::debug::assert(F64::try_from(".").is_none(), "a point alone")
+  std::debug::assert(F64::try_from("1.2.3").is_none(), "two points")
+  std::debug::assert(F64::try_from("1e").is_none(), "an empty exponent")
+  std::debug::assert(F64::try_from("1e+").is_none(), "a signed empty exponent")
+  std::debug::assert(F64::try_from("e5").is_none(), "an exponent with no digits before it")
+  std::debug::assert(F64::try_from(" 1").is_none(), "leading whitespace")
+  std::debug::assert(F64::try_from("1x").is_none(), "a trailing letter")
+  std::debug::assert(F64::try_from("in").is_none(), "part of inf")
+  std::debug::assert(F64::try_from("n").is_none(), "part of nan")
+  std::debug::assert(F64::try_from("infinit").is_none(), "part of infinity")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_the_ieee_forms_pass_a_non_finite_value_through() -> Void {
+  # IEEE 754's results with no check, for values made non-finite on purpose.
+  std::debug::assert(F64::inf().add_ieee(1.0_f64).is_positive_infinity(), "inf + 1 is inf")
+  std::debug::assert(F64::nan().mul_ieee(0.0_f64).is_nan(), "NaN * 0 is a NaN")
+  std::debug::assert(1.0_f64.div_ieee(0.0_f64).is_positive_infinity(), "1 / 0 is inf")
+  std::debug::assert(0.0_f64.div_ieee(0.0_f64).is_nan(), "0 / 0 is a NaN")
+  std::debug::assert(F64::inf().sub_ieee(F64::inf()).is_nan(), "inf - inf is a NaN")
+  std::debug::assert(5.0_f64.rem_ieee(0.0_f64).is_nan(), "x % 0 is a NaN")
+  std::debug::assert(-1.0_f64.sqrt_ieee().is_nan(), "sqrt(-1) is a NaN")
+  std::debug::assert(1.5_f64.add_ieee(2.25_f64) == 3.75_f64, "a finite result is the checked one's")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_raised_says_whether_the_checked_form_would_stop() -> Void {
+  let (quotient, by_zero) = 1.0_f64.div_raised(0.0_f64)
+  std::debug::assert(by_zero and quotient.is_positive_infinity(), "1 / 0 raises, with IEEE's infinity")
+  let (sum, fine) = 1.0_f64.add_raised(2.0_f64)
+  std::debug::assert(fine.not and sum == 3.0_f64, "1 + 2 raises nothing")
+  let (product, nan_in) = F64::nan().mul_raised(2.0_f64)
+  std::debug::assert(nan_in and product.is_nan(), "a NaN going in raises")
+  let (root, negative) = -4.0_f64.sqrt_raised()
+  std::debug::assert(negative and root.is_nan(), "sqrt(-4) raises")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_checked_gives_none_where_the_checked_form_would_stop() -> Void {
+  std::debug::assert(1.0_f64.div_checked(0.0_f64).is_none(), "1 / 0 is None")
+  std::debug::assert(1.0_f64.div_checked(4.0_f64).unwrap() == 0.25_f64, "1 / 4 is 0.25")
+  std::debug::assert(F64::inf().sub_checked(1.0_f64).is_none(), "an infinity going in is None")
+  std::debug::assert(-1.0_f64.sqrt_checked().is_none(), "sqrt(-1) is None")
+  std::debug::assert(9.0_f64.sqrt_checked().unwrap() == 3.0_f64, "sqrt(9) is 3")
+  std::debug::assert(3.0_f64.rem_checked(2.0_f64).unwrap() == 1.0_f64, "3 % 2 is 1")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_the_non_finite_constants_and_their_classifiers() -> Void {
+  std::debug::assert(F64::nan().is_nan() and F64::nan().is_finite().not, "nan() is a NaN")
+  std::debug::assert(F64::inf().is_positive_infinity() and F64::inf().is_infinite(), "inf() is +inf")
+  std::debug::assert(F32::neg_inf().is_negative_infinity(), "neg_inf() is -inf")
+  std::debug::assert(1.0_f64.is_finite() and 0.0_f64.is_finite(), "numbers are finite")
+  std::debug::assert(F64::inf().is_nan().not and 1.0_f64.is_infinite().not, "the classifiers do not overlap")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_pow_finishes_a_power_whose_reciprocal_underflows() -> Void {
+  # 2^-2000 is past the smallest subnormal, so 0; the power 2^2000 it is the
+  # reciprocal of overflows on the way, which "pow" must not stop on.
+  std::debug::assert(2.0_f64.pow(-2000) == 0.0_f64, "2^-2000 underflows to zero")
+  std::debug::assert(2.0_f64.pow_ieee(2000).is_positive_infinity(), "2^2000 is inf, unchecked")
+  std::debug::assert(0.5_f64.pow(3) == 0.125_f64, "a finite power is unchanged")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_from_ieee_narrows_past_the_range_to_an_infinity() -> Void {
+  let big = 1000000000000000000000000000000000000000000.0_f64
+  std::debug::assert(F32::from_ieee(big).is_positive_infinity(), "past F32's range is inf")
+  std::debug::assert(F32::from_ieee(1.5_f64) == 1.5_f32, "a value in range is narrowed as by from")
+  std::debug::assert(F64::from_ieee(1.5_f32) == 1.5_f64, "widening is from's")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_try_from_gives_an_infinity_for_a_value_too_large_for_a_narrow_type() -> Void {
+  std::debug::assert(F16::try_from("1e10").unwrap().is_positive_infinity(), "1e10 is past F16's range")
+  std::debug::assert(F64::try_from("-1e400").unwrap().is_negative_infinity(), "-1e400 is -inf")
+  std::debug::assert(F64::try_from("NaN").unwrap().is_nan(), "nan parses to a NaN")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_the_maths_ieee_forms_give_ieee_s_values_at_poles_and_outside_domains() -> Void {
+  std::debug::assert(0.0_f64.ln_ieee().is_negative_infinity(), "ln(0) is -inf")
+  std::debug::assert(-1.0_f64.ln_ieee().is_nan(), "ln(-1) is a NaN")
+  std::debug::assert(0.0_f64.log2_ieee().is_negative_infinity(), "log2(0) is -inf")
+  std::debug::assert(1000.0_f64.exp_ieee().is_positive_infinity(), "exp(1000) overflows to inf")
+  std::debug::assert(2.0_f64.asin_ieee().is_nan(), "asin(2) is a NaN")
+  std::debug::assert(0.0_f64.pow_ieee(-1.0_f64).is_positive_infinity(), "0^-1 is inf")
+  std::debug::assert(1.0_f64.ln_ieee() == 0.0_f64 and 1.0_f64.ln() == 0.0_f64, "ln(1) is 0, checked or not")
+  std::debug::assert(8.0_f64.log(2.0_f64) == 3.0_f64 and 8.0_f64.log_ieee(2.0_f64) == 3.0_f64, "log base 2 of 8 is 3")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_the_inverse_hyperbolic_functions() -> Void {
+  std::debug::assert(0.0_f64.asinh() == 0.0_f64, "asinh(0) is 0")
+  std::debug::assert((1.0_f64.asinh() - 0.881373587019543_f64).abs() < 0.000000000001_f64, "asinh(1)")
+  std::debug::assert((-1.0_f64.asinh() + 0.881373587019543_f64).abs() < 0.000000000001_f64, "asinh is odd")
+  std::debug::assert(1.0_f64.acosh() == 0.0_f64, "acosh(1) is 0")
+  std::debug::assert((2.0_f64.acosh() - 1.3169578969248166_f64).abs() < 0.000000000001_f64, "acosh(2)")
+  std::debug::assert((0.5_f64.atanh() - 0.5493061443340549_f64).abs() < 0.000000000001_f64, "atanh(0.5)")
+  # Large arguments, where x^2 overflows long before the result does: asinh(1e200) is ln(2e200), about 461.2.
+  let big = 10.0_f64.pow(200)
+  std::debug::assert((big.asinh() - 461.2101657793691_f64).abs() < 0.000000001_f64, "asinh(1e200) does not overflow")
+  std::debug::assert((big.acosh() - 461.2101657793691_f64).abs() < 0.000000001_f64, "acosh(1e200) does not overflow")
+  std::debug::assert((F16::from(1000.0_f64).asinh() - F16::from(7.6009_f64)).abs() < F16::from(0.01_f64), "F16 asinh")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_the_inverse_hyperbolic_ieee_forms_outside_their_domains() -> Void {
+  std::debug::assert(0.5_f64.acosh_ieee().is_nan(), "acosh below 1 is a NaN")
+  std::debug::assert(1.0_f64.atanh_ieee().is_positive_infinity(), "atanh(1) is inf")
+  std::debug::assert(-1.0_f64.atanh_ieee().is_negative_infinity(), "atanh(-1) is -inf")
+  std::debug::assert(2.0_f64.atanh_ieee().is_nan(), "atanh past 1 is a NaN")
+  std::debug::assert(F64::inf().asinh_ieee().is_positive_infinity(), "asinh(inf) is inf")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_the_maths_functions_checked_and_raised_forms() -> Void {
+  std::debug::assert(0.0_f64.ln_checked().is_none(), "ln(0) is None")
+  std::debug::assert(1.0_f64.ln_checked().unwrap() == 0.0_f64, "ln(1) is Some(0)")
+  let (big, overflowed) = 1000.0_f64.exp_raised()
+  std::debug::assert(overflowed and big.is_positive_infinity(), "exp(1000) raises, with IEEE's infinity")
+  let (one, fine) = 0.0_f64.exp_raised()
+  std::debug::assert(fine.not and one == 1.0_f64, "exp(0) raises nothing")
+  std::debug::assert(2.0_f64.asin_checked().is_none(), "asin(2) is None")
+  std::debug::assert(0.0_f64.pow_checked(-1.0_f64).is_none(), "0^-1 is None")
+  std::debug::assert(2.0_f64.pow_checked(10).unwrap() == 1024.0_f64, "2^10 is Some(1024)")
+  std::debug::assert(2.0_f64.pow_raised(-2000).1.not, "2^-2000 underflows to 0, raising nothing")
+  std::debug::assert(1.0_f64.atanh_checked().is_none(), "atanh(1) is None")
+  std::debug::assert(8.0_f64.log_checked(2.0_f64).unwrap() == 3.0_f64, "log base 2 of 8 is Some(3)")
+  std::debug::assert(1.0_f64.atan2_checked(1.0_f64).is_some(), "atan2 in range is Some")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_copysign_moves_only_the_sign() -> Void {
+  std::debug::assert(1.5_f64.copysign(-2.0_f64) == -1.5_f64, "takes a negative sign")
+  std::debug::assert(-1.5_f64.copysign(3.0_f64) == 1.5_f64, "takes a positive sign")
+  std::debug::assert(1.0_f64.copysign(-0.0_f64).is_negative(), "a negative zero's sign counts")
+  std::debug::assert(F64::nan().copysign(-1.0_f64).is_nan(), "a NaN stays a NaN")
+}
+
+!test(group="std/num/sized_floating_point")
+fun test_ln_is_the_natural_logarithm() -> Void {
+  # Each constant is rounded, and libm's "log" may be a few ulps out, so these are near, not exact.
+  let e = std::consts::Consts[F64]::e
+  let tol = 0.000000000000001_f64
+  std::debug::assert((e.ln() - 1.0_f64).abs() < tol, "ln(e) is 1")
+  std::debug::assert((e.ln() - e.log(e)).abs() < tol, "ln(x) is log(x, e)")
+  std::debug::assert((1000.0_f64.log(10.0_f64) - 3.0_f64).abs() < tol, "log base 10 of 1000 is 3")
+  std::debug::assert((2.0_f64.ln() - std::consts::Consts[F64]::ln_2).abs() < tol, "ln(2) is ln 2")
+  std::debug::assert((e.ln_ieee() - 1.0_f64).abs() < tol and (e.ln_checked().unwrap() - 1.0_f64).abs() < tol, "so are the variants")
+  std::debug::assert((std::consts::Consts[F32]::e.ln() - 1.0_f32).abs() < 0.0000002_f32, "F32 too")
 }

@@ -51,7 +51,7 @@ sup Limits[U64] {
 
 sup Limits[U128] {
   !public type SInt = S128
-  !public type FP = F128
+  !public !cfg(os="linux", pointer_width="64") type FP = F128
 
   !public cmp max: U128 = 340282366920938463463374607431768211455_u128
   !public cmp min: U128 = 0_u128
@@ -98,7 +98,7 @@ sup Limits[S64] {
 
 sup Limits[S128] {
   !public type UInt = U128
-  !public type FP = F128
+  !public !cfg(os="linux", pointer_width="64") type FP = F128
 
   !public cmp max: S128 = 170141183460469231731687303715884105727_s128
   !public cmp min: S128 = -170141183460469231731687303715884105728_s128
@@ -125,9 +125,6 @@ sup Limits[F8] {
   !public cmp max_exp: S32 = 9_s32
   !public cmp min_10_exp: S32 = -1_s32
   !public cmp max_10_exp: S32 = 2_s32
-  # Todo: No literal is a NaN (or an infinity), and "bit_cast" is not comp-time.
-  !public cmp nan: F8 = 0.0_f8
-  # An E4M3 "F8" has no infinity: a value past its largest saturates to it.
 }
 
 sup Limits[F16] {
@@ -144,10 +141,6 @@ sup Limits[F16] {
   !public cmp max_exp: S32 = 16_s32
   !public cmp min_10_exp: S32 = -4_s32
   !public cmp max_10_exp: S32 = 4_s32
-  # Todo: No literal is a NaN (or an infinity), and "bit_cast" is not comp-time.
-  !public cmp nan: F16 = 0.0_f16
-  !public cmp infinity: F16 = 0.0_f16
-  !public cmp neg_infinity: F16 = 0.0_f16
 }
 
 sup Limits[F32] {
@@ -164,10 +157,6 @@ sup Limits[F32] {
   !public cmp max_exp: S32 = 128_s32
   !public cmp min_10_exp: S32 = -37_s32
   !public cmp max_10_exp: S32 = 38_s32
-  # Todo: No literal is a NaN (or an infinity), and "bit_cast" is not comp-time.
-  !public cmp nan: F32 = 0.0_f32
-  !public cmp infinity: F32 = 0.0_f32
-  !public cmp neg_infinity: F32 = 0.0_f32
 }
 
 sup Limits[F64] {
@@ -184,12 +173,9 @@ sup Limits[F64] {
   !public cmp max_exp: S32 = 1024_s32
   !public cmp min_10_exp: S32 = -307_s32
   !public cmp max_10_exp: S32 = 308_s32
-  # Todo: No literal is a NaN (or an infinity), and "bit_cast" is not comp-time.
-  !public cmp nan: F64 = 0.0_f64
-  !public cmp infinity: F64 = 0.0_f64
-  !public cmp neg_infinity: F64 = 0.0_f64
 }
 
+!cfg(os="linux", pointer_width="64")
 sup Limits[F128] {
   !public type UInt = U128
   !public type SInt = S128
@@ -204,8 +190,4 @@ sup Limits[F128] {
   !public cmp max_exp: S32 = 16384_s32
   !public cmp min_10_exp: S32 = -4931_s32
   !public cmp max_10_exp: S32 = 4932_s32
-  # Todo: No literal is a NaN (or an infinity), and "bit_cast" is not comp-time.
-  !public cmp nan: F128 = 0.0_f128
-  !public cmp infinity: F128 = 0.0_f128
-  !public cmp neg_infinity: F128 = 0.0_f128
 }

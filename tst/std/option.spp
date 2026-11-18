@@ -136,84 +136,84 @@ fun test_expect_returns_the_value_when_present() -> Void {
 !test(group="std/option")
 fun test_map_transforms_only_a_present_value() -> Void {
   let a: Opt[S32] = Some(val=3)
-  std::debug::assert(a.map((x: S32) x * 2).unwrap() == 6, "the value is transformed")
+  std::debug::assert(a.map(|x: S32| x * 2).unwrap() == 6, "the value is transformed")
 
   let n: Opt[S32] = None
-  std::debug::assert(n.map((x: S32) x * 2).is_none(), "none maps to none")
+  std::debug::assert(n.map(|x: S32| x * 2).is_none(), "none maps to none")
 }
 
 !test(group="std/option")
 fun test_map_or_falls_back_for_none() -> Void {
   let a: Opt[S32] = Some(val=3)
-  std::debug::assert(a.map_or(99, (x: S32) x * 2) == 6, "some uses the mapper")
+  std::debug::assert(a.map_or(99, |x: S32| x * 2) == 6, "some uses the mapper")
 
   let n: Opt[S32] = None
-  std::debug::assert(n.map_or(99, (x: S32) x * 2) == 99, "none uses the default")
+  std::debug::assert(n.map_or(99, |x: S32| x * 2) == 99, "none uses the default")
 }
 
 !test(group="std/option")
 fun test_ior_else_computes_the_alternative_lazily() -> Void {
   let a: Opt[S32] = Some(val=1)
-  std::debug::assert(a.ior_else(() -> Opt[S32] { ret Some(val=2) }).unwrap() == 1, "some keeps its own value")
+  std::debug::assert(a.ior_else(|| -> Opt[S32] { ret Some(val=2) }).unwrap() == 1, "some keeps its own value")
 
   let n: Opt[S32] = None
-  std::debug::assert(n.ior_else(() -> Opt[S32] { ret Some(val=2) }).unwrap() == 2, "none calls for the alternative")
+  std::debug::assert(n.ior_else(|| -> Opt[S32] { ret Some(val=2) }).unwrap() == 2, "none calls for the alternative")
 }
 
 !test(group="std/option")
 fun test_take_if_removes_the_value_only_when_it_matches() -> Void {
   let mut a: Opt[S32] = Some(val=4)
-  std::debug::assert(a.take_if((x: &S32) x@ % 2 == 0).is_some(), "a matching value is taken")
+  std::debug::assert(a.take_if(|x: &S32| x@ % 2 == 0).is_some(), "a matching value is taken")
   std::debug::assert(a.is_none(), "and the slot is emptied")
 
   let mut b: Opt[S32] = Some(val=5)
-  std::debug::assert(b.take_if((x: &S32) x@ % 2 == 0).is_none(), "a non-matching value is not taken")
+  std::debug::assert(b.take_if(|x: &S32| x@ % 2 == 0).is_none(), "a non-matching value is not taken")
   std::debug::assert(b.is_some(), "and the slot keeps it")
 }
 
 !test(group="std/option")
 fun test_and_then_chains_an_optional_step() -> Void {
   let a: Opt[S32] = Some(val=4)
-  std::debug::assert(a.and_then((x: S32) -> Opt[S32] { ret Some(val=x + 1) }).unwrap() == 5, "the step runs on a value")
+  std::debug::assert(a.and_then(|x: S32| -> Opt[S32] { ret Some(val=x + 1) }).unwrap() == 5, "the step runs on a value")
 
   let b: Opt[S32] = Some(val=4)
-  std::debug::assert(b.and_then((x: S32) -> Opt[S32] { ret None }).is_none(), "a step may itself yield none")
+  std::debug::assert(b.and_then(|x: S32| -> Opt[S32] { ret None }).is_none(), "a step may itself yield none")
 
   let n: Opt[S32] = None
-  std::debug::assert(n.and_then((x: S32) -> Opt[S32] { ret Some(val=x + 1) }).is_none(), "none short-circuits")
+  std::debug::assert(n.and_then(|x: S32| -> Opt[S32] { ret Some(val=x + 1) }).is_none(), "none short-circuits")
 }
 
 !test(group="std/option")
 fun test_filter_keeps_only_a_matching_value() -> Void {
   let a: Opt[S32] = Some(val=4)
-  std::debug::assert(a.filter((x: &S32) x@ % 2 == 0).is_some(), "a value that matches is kept")
+  std::debug::assert(a.filter(|x: &S32| x@ % 2 == 0).is_some(), "a value that matches is kept")
 
   let b: Opt[S32] = Some(val=5)
-  std::debug::assert(b.filter((x: &S32) x@ % 2 == 0).is_none(), "one that does not is dropped")
+  std::debug::assert(b.filter(|x: &S32| x@ % 2 == 0).is_none(), "one that does not is dropped")
 
   let n: Opt[S32] = None
-  std::debug::assert(n.filter((x: &S32) true).is_none(), "none stays none")
+  std::debug::assert(n.filter(|x: &S32| true).is_none(), "none stays none")
 }
 
 !test(group="std/option")
 fun test_is_some_and_tests_the_contained_value() -> Void {
   let a: Opt[S32] = Some(val=4)
-  std::debug::assert(a.is_some_and((x: S32) x > 3), "some, and the predicate holds")
+  std::debug::assert(a.is_some_and(|x: S32| x > 3), "some, and the predicate holds")
 
   let b: Opt[S32] = Some(val=1)
-  std::debug::assert(b.is_some_and((x: S32) x > 3).not, "some, but the predicate fails")
+  std::debug::assert(b.is_some_and(|x: S32| x > 3).not, "some, but the predicate fails")
 
   let n: Opt[S32] = None
-  std::debug::assert(n.is_some_and((x: S32) true).not, "none is never some-and")
+  std::debug::assert(n.is_some_and(|x: S32| true).not, "none is never some-and")
 }
 
 !test(group="std/option")
 fun test_unwrap_or_else_computes_the_fallback_lazily() -> Void {
   let a: Opt[S32] = Some(val=7)
-  std::debug::assert(a.unwrap_or_else(() 99) == 7, "some ignores the fallback")
+  std::debug::assert(a.unwrap_or_else(|| 99) == 7, "some ignores the fallback")
 
   let n: Opt[S32] = None
-  std::debug::assert(n.unwrap_or_else(() 99) == 99, "none calls it")
+  std::debug::assert(n.unwrap_or_else(|| 99) == 99, "none calls it")
 }
 
 !test(group="std/option")

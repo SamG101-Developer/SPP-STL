@@ -333,7 +333,7 @@ sup [T: Integral] Atom[T] {
   }
 }
 
-sup [T: Integral & Zero] Atom[T] {
+sup [T: Integral and Zero] Atom[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun new_zeroed() -> Atom[T] {
@@ -531,7 +531,7 @@ sup [T: FloatingPoint] Atom[T] {
     # The `fetch_min` method atomically compares the current value of the atomic variable with the provided `val`,
     # stores the smaller of the two values back in the atomic variable, and returns the old value. This is specialized
     # for floating point types, so it uses the `fmin` atomic intrinsic, which has no signed/unsigned split unlike the
-    # integer `smin`/`umin`.
+    # integer `smin`/`umin`. It is IEEE 754-2019's `minimum`, as `F64::min` is: a NaN wins, and the zeros are ordered.
     # @let val: The value to be compared with the current value of the atomic variable, and the smaller of the two will
     # be stored back in the atomic variable.
     # @cmp order: The memory ordering for the fetch-min operation. The default is `mo_seq_cst`, which provides
@@ -546,7 +546,7 @@ sup [T: FloatingPoint] Atom[T] {
     # The `fetch_max` method atomically compares the current value of the atomic variable with the provided `val`,
     # stores the larger of the two values back in the atomic variable, and returns the old value. This is specialized
     # for floating point types, so it uses the `fmax` atomic intrinsic, which has no signed/unsigned split unlike the
-    # integer `smax`/`umax`.
+    # integer `smax`/`umax`. It is IEEE 754-2019's `maximum`, as `F64::max` is: a NaN wins, and the zeros are ordered.
     # @let val: The value to be compared with the current value of the atomic variable, and the larger of the two will
     # be stored back in the atomic variable.
     # @cmp order: The memory ordering for the fetch-max operation. The default is `mo_seq_cst`, which provides

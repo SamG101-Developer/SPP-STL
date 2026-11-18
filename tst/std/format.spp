@@ -318,7 +318,7 @@ fun test_write_format_writes_the_formatted_text() -> Void {
   std::debug::assert(result.is_pass(), "the write succeeds")
   drop(result)
 
-  let text = Str::from(&sink.bytes)
+  let text = Str::from_utf8(&sink.bytes).expect("the sink holds UTF-8")
   expect_text(text, "a=1 b=ff", "the stream got the formatted text")
   drop(sink)
 }

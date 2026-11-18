@@ -236,3 +236,69 @@ fun test_mul_by_zero_or_less_is_empty() -> Void {
   std::debug::assert(empty.len() == 0_uz, "repeating nothing is nothing")
   drop(empty)
 }
+
+!test(group="std/string")
+fun test_new_filled_repeats_a_character() -> Void {
+  # A `Char`, not a byte, so a multi-byte character is repeated whole and the
+  # result is valid UTF-8 (a byte fill could leave a lone `0xc3`).
+  let s = Str::new_filled(3_uz, 'é')
+  std::debug::assert(s.len() == 6_uz, "three two-byte characters")
+  let mut count = 0_uz
+  loop c in s.chars() {
+    std::debug::assert(c == 'é', "each character is the one repeated")
+    count += 1_uz
+  }
+  std::debug::assert(count == 3_uz, "three characters")
+  let checked = Str::from_utf8(s.view_ref())
+  std::debug::assert(checked.is_pass(), "valid UTF-8")
+  drop(checked)
+  drop(s)
+
+  let empty = Str::new_filled(0_uz, 'x')
+  std::debug::assert(empty.is_empty(), "no characters")
+  drop(empty)
+}
+
+!test(group="std/string")
+fun test_take_last_removes_a_whole_character() -> Void {
+  # A multi-byte last character comes off whole, so no lone leading byte is
+  # left behind (taking one byte off "aé" would leave "a" + `0xc3`).
+  let mut s = Str::from("aé€😀")
+  std::debug::assert(s.take_last().unwrap() == '😀', "four-byte character")
+  std::debug::assert(s.len() == 6_uz, "four bytes gone")
+  std::debug::assert(s.take_last().unwrap() == '€', "three-byte character")
+  std::debug::assert(s.take_last().unwrap() == 'é', "two-byte character")
+  std::debug::assert(s.len() == 1_uz, "only the 'a' is left")
+  let checked = Str::from_utf8(s.view_ref())
+  std::debug::assert(checked.is_pass(), "still valid UTF-8")
+  drop(checked)
+  std::debug::assert(s.take_last().unwrap() == 'a', "one-byte character")
+  std::debug::assert(s.take_last().is_none(), "nothing left")
+  drop(s)
+}
+
+!test(group="std/string")
+fun test_from_utf8_lossy_replaces_each_invalid_sequence() -> Void {
+  # Valid text comes through as it is.
+  let valid = Str::from_utf8_lossy(&[0x61_u8, 0xc3_u8, 0xa9_u8])
+  std::debug::assert(valid == "aé", "nothing to replace")
+  drop(valid)
+
+  # A stray byte, and a lone surrogate's three bytes (each its own
+  # replacement, as Rust): one U+FFFD (three bytes) per invalid sequence.
+  let stray = Str::from_utf8_lossy(&[0x61_u8, 0xff_u8, 0x62_u8])
+  std::debug::assert(stray == "a�b", "the stray byte replaced")
+  drop(stray)
+  let surrogate = Str::from_utf8_lossy(&[0xed_u8, 0xa0_u8, 0x80_u8])
+  std::debug::assert(surrogate == "���", "three replacements")
+  drop(surrogate)
+
+  # A sequence cut short at the end is one replacement, and the result is
+  # valid UTF-8.
+  let cut = Str::from_utf8_lossy(&[0x61_u8, 0xe2_u8, 0x82_u8])
+  std::debug::assert(cut == "a�", "one replacement for the cut sequence")
+  let checked = Str::from_utf8(cut.view_ref())
+  std::debug::assert(checked.is_pass(), "valid UTF-8")
+  drop(checked)
+  drop(cut)
+}
