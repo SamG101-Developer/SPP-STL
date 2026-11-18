@@ -223,10 +223,12 @@ fun test_a_path_reads_back_as_text() -> Void {
 }
 
 !test(group="std/fs/path")
-!cfg(family="!windows")
+!cfg(family="!windows", os="!macos")
 fun test_a_file_whose_name_is_not_utf8() -> Void {
   # Unix names are any bytes: a file named "x", 0xff is made, found, and its
   # name read back exactly, where it used to become a `Str` that was not UTF-8.
+  # Not on macOS, whose file systems (APFS, HFS+) refuse a name that is not
+  # UTF-8 ("open" fails with EILSEQ), so the file cannot be made there.
   let name = std::os::os_string::OsStr(bytes=Vec[U8]::from(&[0x78_u8, 0xff_u8]))
   let path = std::fs::path::Path::new(&name)
   let file = std::fs::file::File::open(&path, std::fs::file::FileMode().write().create().truncate()).unwrap()
