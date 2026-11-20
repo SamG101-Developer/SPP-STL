@@ -7,16 +7,103 @@ use std::ops::drop::Drop
 
 !public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
-cls SockOtherErr { }
+cls SockAddrInUseErr {
+  # The local address is already bound by another socket (`EADDRINUSE`).
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls SockAddrNotAvailErr {
+  # The local address is not one of this machine's (`EADDRNOTAVAIL`).
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls SockConnRefusedErr {
+  # Nothing was listening at the remote address (`ECONNREFUSED`).
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls SockConnResetErr {
+  # The remote end reset or aborted the connection (`ECONNRESET`,
+  # `ECONNABORTED`).
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls SockNotConnectedErr {
+  # The call needs a connected socket, and this one is not (`ENOTCONN`).
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls SockTimedOutErr {
+  # The remote end did not answer in time (`ETIMEDOUT`).
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls SockUnreachableErr {
+  # No route to the remote network or host (`ENETUNREACH`,
+  # `EHOSTUNREACH`).
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls SockPermissionErr {
+  # The system refused the call, such as a bind to a privileged port, or
+  # a broadcast without the broadcast option set (`EACCES`, `EPERM`).
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls SockWouldBlockErr {
+  # A non-blocking socket has nothing ready, or a timeout set on the socket
+  # ran out (`EAGAIN`).
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls SockOtherErr {
+  # Any other error the system reported.
+}
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-type SockErr = SockOtherErr
+type SockErr = SockAddrInUseErr
+  or SockAddrNotAvailErr
+  or SockConnRefusedErr
+  or SockConnResetErr
+  or SockNotConnectedErr
+  or SockTimedOutErr
+  or SockUnreachableErr
+  or SockPermissionErr
+  or SockWouldBlockErr
+  or SockOtherErr
 
 sup SockErr {
   !package
   fun from_errno(errno: S32) -> Self {
+    # Maps an sppc error code to the `SockErr` variant for it. sppc translates
+    # each platform's codes (Windows's socket ones included) to its own.
+    # @let errno: The code an sppc call returned (never 0).
+    # @ret: The variant for the code, or `SockOtherErr` for one with no variant
+    #   of its own.
+
     ret case errno of {
+      == sppc::eaddrinuse { SockAddrInUseErr }
+      == sppc::eaddrnotavail { SockAddrNotAvailErr }
+      == sppc::econnrefused { SockConnRefusedErr }
+      == sppc::econnreset { SockConnResetErr }
+      == sppc::econnaborted { SockConnResetErr }
+      == sppc::enotconn { SockNotConnectedErr }
+      == sppc::etimedout { SockTimedOutErr }
+      == sppc::enetunreach { SockUnreachableErr }
+      == sppc::ehostunreach { SockUnreachableErr }
+      == sppc::eacces { SockPermissionErr }
+      == sppc::eperm { SockPermissionErr }
+      == sppc::eagain { SockWouldBlockErr }
       else { SockOtherErr }
     }
   }
@@ -68,13 +155,13 @@ sup Socket {
     # 0 for false) to be used in the `fcntl` function.
     let mut flags = Flags::new()
     let err = sppc::fcntl_get(self.fd, sppc::f_getfl, &mut flags.bits)
-    case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
     flags.set(Flags::from_bits(sppc::o_nonblock), yes)
 
     # Call the `setsockopt` function to set the broadcast
     # option for the socket.
     let err = sppc::fcntl_set(self.fd, sppc::f_setfl, flags.bits)
-    case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass[Void]()
   }
 
@@ -93,7 +180,7 @@ sup Socket {
 
     # Read the flags from the socket and check if the
     # non-blocking flag is set. Error on failure.
-    case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass(val=flags.has(Flags::from_bits(sppc::o_nonblock)))
   }
 
@@ -127,7 +214,7 @@ sup Socket {
     # state of the ttl option for the socket.
     let mut ttl = 0
     let err = sppc::getsockopt(self.fd, sppc::ipproto_ip, sppc::ip_ttl, &mut ttl)
-    case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass(val=U32::from(ttl))
   }
 
@@ -141,7 +228,7 @@ sup Socket {
 
     let mut storage = sppc::CSockaddrStorage()
     let err = sppc::getsockname(self.fd, &mut storage)
-    case err < 0 {
+    case err != 0 {
       drop(storage)
       ret Fail(err=SockErr::from_errno(err))
     }

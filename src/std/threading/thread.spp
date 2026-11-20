@@ -28,30 +28,51 @@ cls ThreadPermissionErr {
 
 !public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
-cls ThreadUnknownErr {
-  # Indicates an unknown error related to thread operations. This error type can
-  # be used to represent various unexpected issues that may arise during thread
-  # operations. Mapped from the `EAGAIN` error code in `C`, which typically
-  # indicates that a resource is temporarily unavailable or that the system is
-  # unable to create a new thread due to resource constraints.
+cls ThreadResourceErr {
+  # Indicates that the system has run out of something other than memory that
+  # the call needs: no more threads may be created, or a lock has been taken as
+  # many times as it can count. Mapped from the `EAGAIN` error code in `C`.
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls ThreadDeadlockErr {
+  # Indicates that the call would never return: the calling thread is waiting on
+  # itself, such as by joining itself or taking a lock it already holds. Mapped
+  # from the `EDEADLK` error code in `C`.
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls ThreadOtherErr {
+  # Indicates any other error a thread operation reported, one with no error
+  # type of its own.
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-type ThreadErr = ThreadMemoryErr or ThreadPermissionErr or ThreadUnknownErr
+type ThreadErr = ThreadMemoryErr
+  or ThreadPermissionErr
+  or ThreadResourceErr
+  or ThreadDeadlockErr
+  or ThreadOtherErr
 
 sup ThreadErr {
-  !public
-  !versioned(base="1.0.0", new="1.0.0")
+  !package
   fun from_errno(errno: S32) -> Self {
-    #
-    # @let errno:
-    # @ret:
+    # Maps an sppc error code to the `ThreadErr` variant for it. `EBUSY` and
+    # `ETIMEDOUT` are answered by the lock calls themselves, as `WouldBlock`
+    # and a timeout, so never reach here.
+    # @let errno: The code an sppc call returned (never 0).
+    # @ret: The variant for the code, or `ThreadOtherErr` for one with no
+    #   variant of its own.
 
     ret case errno of {
       == sppc::enomem { ThreadMemoryErr }
       == sppc::eperm { ThreadPermissionErr }
-      else { ThreadUnknownErr }
+      == sppc::eagain { ThreadResourceErr }
+      == sppc::edeadlk { ThreadDeadlockErr }
+      else { ThreadOtherErr }
     }
   }
 }

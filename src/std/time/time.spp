@@ -12,25 +12,33 @@ cls TimeInvalidDurationErr { }
 
 !public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
+cls TimeInterruptedErr { }
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
 cls TimeOtherErr { }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
 type TimeErr = TimeInvalidClockErr
   or TimeInvalidDurationErr
+  or TimeInterruptedErr
   or TimeOtherErr
 
 sup TimeErr {
-  !public
-  !versioned(base="1.0.0", new="1.0.0")
+  !package
   fun from_errno(errno: S32) -> Self {
-    #
-    # @let errno:
-    # @ret:
+    # Maps an sppc error code to the `TimeErr` variant for it. `EINVAL` is
+    # read as a bad duration, though a sleep also gets it for a clock the
+    # system does not know, and `clock_gettime` gets it only for that.
+    # @let errno: The code an sppc call returned (never 0).
+    # @ret: The variant for the code, or `TimeOtherErr` for one with no variant
+    #   of its own.
 
     ret case errno of {
       == sppc::eopnotsupp { TimeInvalidClockErr }
       == sppc::einval { TimeInvalidDurationErr }
+      == sppc::eintr { TimeInterruptedErr }
       else { TimeOtherErr }
     }
   }

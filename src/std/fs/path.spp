@@ -52,6 +52,53 @@ cls PathNameTooLongErr {
 
 !public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
+cls PathExistsErr {
+  # The `PathExistsErr` type represents an error that occurs when a path
+  # that is to be created, such as a directory or a link, already exists
+  # (`EEXIST`).
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls PathNotADirErr {
+  # The `PathNotADirErr` type represents an error that occurs when a
+  # directory was needed but the path names something else: either the path
+  # itself, or a component before its last one (`ENOTDIR`).
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls PathIsADirErr {
+  # The `PathIsADirErr` type represents an error that occurs when a path
+  # names a directory where something else was needed, such as unlinking it
+  # as a file (`EISDIR`).
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls PathNotEmptyErr {
+  # The `PathNotEmptyErr` type represents an error that occurs when a
+  # directory that has to be empty, as one being removed does, still holds
+  # entries (`ENOTEMPTY`).
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls PathReadOnlyErr {
+  # The `PathReadOnlyErr` type represents an error that occurs when a path
+  # would be changed on a filesystem that is mounted read-only (`EROFS`).
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls PathCrossDeviceErr {
+  # The `PathCrossDeviceErr` type represents an error that occurs when a
+  # rename or a hard link spans two filesystems, which neither can do
+  # (`EXDEV`). Copying and then removing the original moves it instead.
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
 cls PathOtherErr {
   # The `PathOtherErr` type represents a generic error that can occur when
   # working with paths in the filesystem. This error is used to capture any
@@ -74,17 +121,36 @@ type PathErr = PathNotFoundErr
   or PathPermissionErr
   or PathLoopErr
   or PathNameTooLongErr
+  or PathExistsErr
+  or PathNotADirErr
+  or PathIsADirErr
+  or PathNotEmptyErr
+  or PathReadOnlyErr
+  or PathCrossDeviceErr
   or PathNulErr
   or PathOtherErr
 
 sup PathErr {
   !package
   fun from_errno(errno: S32) -> Self {
+    # Maps an sppc error code to the `PathErr` variant for it. `PathNulErr` has
+    # no code: it is raised before any call is made.
+    # @let errno: The code an sppc call returned (never 0).
+    # @ret: The variant for the code, or `PathOtherErr` for one with no variant
+    #   of its own.
+
     ret case errno of {
       == sppc::enoent { PathNotFoundErr }
       == sppc::eacces { PathPermissionErr }
+      == sppc::eperm { PathPermissionErr }
       == sppc::eloop { PathLoopErr }
       == sppc::enametoolong { PathNameTooLongErr }
+      == sppc::eexist { PathExistsErr }
+      == sppc::enotdir { PathNotADirErr }
+      == sppc::eisdir { PathIsADirErr }
+      == sppc::enotempty { PathNotEmptyErr }
+      == sppc::erofs { PathReadOnlyErr }
+      == sppc::exdev { PathCrossDeviceErr }
       else { PathOtherErr }
     }
   }

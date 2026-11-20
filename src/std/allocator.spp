@@ -52,10 +52,12 @@ type AllocErr = AllocOomErr
   or AllocOtherErr
 
 sup AllocErr {
+  !package
   fun from_errno(errno: S32) -> Self {
-    #
-    # @let errno:
-    # @ret:
+    # Maps an sppc error code to the `AllocErr` variant for it.
+    # @let errno: The code an sppc call returned (never 0).
+    # @ret: The variant for the code, or `AllocOtherErr` for one with no
+    #   variant of its own.
 
     ret case errno of {
       == sppc::enomem { AllocOomErr }

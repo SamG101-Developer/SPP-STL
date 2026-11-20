@@ -33,7 +33,7 @@ sup TcpListener {
     # Create the file descriptor from the address.
     let mut fd = 0
     let err = sppc::socket(addr.ip().family(), sppc::sock_stream, sppc::ipproto_tcp, &mut fd)
-    case fd < 0 { ret Fail(err=SockErr::from_errno(err)) }
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
 
     # Create the `TcpListener` object with the file descriptor.
     let listener = TcpListener(fd)
@@ -87,7 +87,7 @@ sup TcpListener {
     let mut new_fd = 0
     let mut storage = sppc::CSockaddrStorage()
     let err = sppc::accept(self.fd, &mut storage, &mut new_fd)
-    case new_fd < 0 {
+    case err != 0 {
       drop(storage)
       ret Fail(err=SockErr::from_errno(err))
     }
@@ -117,7 +117,7 @@ sup TcpStream {
     # Create the file descriptor from the address.
     let mut fd = 0
     let err = sppc::socket(addr.ip().family(), sppc::sock_stream, sppc::ipproto_tcp, &mut fd)
-    case fd < 0 { ret Fail(err=SockErr::from_errno(err)) }
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
 
     # Create the `TcpStream` object with the file descriptor.
     let stream = TcpStream(fd)
@@ -176,7 +176,7 @@ sup TcpStream {
     # state of the keepalive option for the socket.
     let mut yes = 0
     let err = sppc::getsockopt(self.fd, sppc::sol_socket, sppc::so_keepalive, &mut yes)
-    case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass(val=yes != 0)
   }
 
@@ -269,7 +269,7 @@ sup TcpStream {
     # state of the nodelay option for the socket.
     let mut yes = 0
     let err = sppc::getsockopt(self.fd, sppc::ipproto_tcp, sppc::tcp_nodelay, &mut yes)
-    case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass(val=yes != 0)
   }
 
@@ -394,7 +394,7 @@ sup TcpStream {
 
     let mut storage = sppc::CSockaddrStorage()
     let err = sppc::getpeername(self.fd, &mut storage)
-    case err < 0 {
+    case err != 0 {
       drop(storage)
       ret Fail(err=SockErr::from_errno(err))
     }

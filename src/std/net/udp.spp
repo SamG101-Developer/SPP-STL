@@ -35,7 +35,7 @@ sup UdpSocket {
     # Create the file descriptor from the address.
     let mut fd = 0
     let err = sppc::socket(addr.ip().family(), sppc::sock_dgram, sppc::ipproto_udp, &mut fd)
-    case fd < 0 or err < 0 { ret Fail(err=SockErr::from_errno(fd)) }
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
 
     # Create the `UdpSocket` object with the file descriptor.
     let listener = UdpSocket(fd)
@@ -117,7 +117,7 @@ sup UdpSocket {
     # state of the broadcast option for the socket.
     let mut yes = 0
     let err = sppc::getsockopt(self.fd, sppc::sol_socket, sppc::so_broadcast, &mut yes)
-    case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass(val=yes != 0)
   }
 

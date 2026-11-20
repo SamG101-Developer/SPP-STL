@@ -285,3 +285,33 @@ fun test_linger_reads_back_as_it_was_set() -> Void {
   let l = listener.close()
   drop(l)
 }
+
+!test(group="std/net/tcp")
+fun test_binding_an_address_in_use_is_an_addr_in_use_error() -> Void {
+  let listener = listening()
+  let addr = listener.local_addr().unwrap()
+
+  let second = std::net::tcp::TcpListener::bind(addr)
+  let mut in_use = false
+  case second is Fail(&err) and err is std::net::socket::SockAddrInUseErr() { in_use = true }
+  std::debug::assert(in_use, "a second bind to a listening address says it is in use")
+  drop(second)
+
+  let l = listener.close()
+  drop(l)
+}
+
+!test(group="std/net/tcp")
+fun test_connecting_where_nothing_listens_is_a_refused_error() -> Void {
+  # A port the kernel handed out and that is closed again has nothing on it.
+  let listener = std::net::tcp::TcpListener::bind(loopback(0_u16)).unwrap()
+  let addr = listener.local_addr().unwrap()
+  let l = listener.close()
+  drop(l)
+
+  let connected = std::net::tcp::TcpStream::connect(addr)
+  let mut refused = false
+  case connected is Fail(&err) and err is std::net::socket::SockConnRefusedErr() { refused = true }
+  std::debug::assert(refused, "the connection is refused")
+  drop(connected)
+}

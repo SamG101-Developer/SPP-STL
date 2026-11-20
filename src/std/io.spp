@@ -31,6 +31,15 @@ cls StreamAlreadyExistsError { }
 cls StreamWriteZeroError { }
 
 !public !zero_type
+cls StreamBrokenPipeError { }
+
+!public !zero_type
+cls StreamConnectionResetError { }
+
+!public !zero_type
+cls StreamStorageFullError { }
+
+!public !zero_type
 cls StreamOtherError { }
 
 !public
@@ -44,25 +53,32 @@ type StreamErr = StreamEofError
   or StreamNotFoundError
   or StreamAlreadyExistsError
   or StreamWriteZeroError
+  or StreamBrokenPipeError
+  or StreamConnectionResetError
+  or StreamStorageFullError
   or StreamOtherError
 
 sup StreamErr {
-  !public
-  !versioned(base="1.0.0", new="1.0.0")
+  !package
   fun from_errno(errno: S32) -> Self {
-    # The from_errno function is a helper function that maps platform-specific
-    # error codes (e.g., errno values on Unix-like systems) to the appropriate
-    # StreamErr variants. This allows the stream implementations to convert
-    # system errors into the unified StreamErr type used by the Read, Write, and
-    # Seek interfaces.
-    # @let errno: The C error code that we want to convert into a StreamErr.
-    #   This is typically obtained from a system call that set errno on failure.
-    # @ret: The corresponding StreamErr variant that represents the given errno
-    #   value. If the errno value does not match any known error codes, a
-    #   StreamOtherError with a generic message is returned.
+    # Maps an sppc error code to the `StreamErr` variant for it. sppc's codes
+    # are the same on every platform, so one table serves every target.
+    # @let errno: The code an sppc call returned (never 0).
+    # @ret: The variant for the code, or `StreamOtherError` for one with no
+    #   variant of its own.
 
     ret case errno of {
-      # Todo: map errno values to the appropriate StreamErr variants.
+      == sppc::eintr { StreamInterruptedError }
+      == sppc::eagain { StreamWouldBlockError }
+      == sppc::einval { StreamInvalidInputError }
+      == sppc::eacces { StreamPermissionDeniedError }
+      == sppc::eperm { StreamPermissionDeniedError }
+      == sppc::enoent { StreamNotFoundError }
+      == sppc::eexist { StreamAlreadyExistsError }
+      == sppc::epipe { StreamBrokenPipeError }
+      == sppc::econnreset { StreamConnectionResetError }
+      == sppc::enospc { StreamStorageFullError }
+      == sppc::edquot { StreamStorageFullError }
       else { StreamOtherError }
     }
   }

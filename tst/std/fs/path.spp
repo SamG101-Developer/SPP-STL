@@ -269,3 +269,50 @@ fun test_a_path_with_a_nul_inside_is_refused() -> Void {
   std::debug::assert(refused, "creating it is refused with PathNulErr")
   drop(path)
 }
+
+!test(group="std/fs/path")
+fun test_making_a_directory_that_exists_is_an_exists_error() -> Void {
+  let dir = std::fs::path::Path::new("spp_stl_test_dir_exists")
+  let made = dir.create_dir()
+  std::debug::assert(made.is_pass(), "the directory is made")
+  drop(made)
+
+  let again = dir.create_dir()
+  let mut exists = false
+  case again is Fail(&err) and err is std::fs::path::PathExistsErr() { exists = true }
+  std::debug::assert(exists, "making it again says it exists")
+  drop(again)
+
+  let removed = dir.remove_dir()
+  drop(removed, dir)
+}
+
+!test(group="std/fs/path")
+fun test_removing_a_directory_with_entries_is_a_not_empty_error() -> Void {
+  let dir = std::fs::path::Path::new("spp_stl_test_dir_not_empty")
+  let inner = std::fs::path::Path::new("spp_stl_test_dir_not_empty/inner")
+  let made = inner.create_dir_all()
+  std::debug::assert(made.is_pass(), "the directories are made")
+  drop(made)
+
+  let removed = dir.remove_dir()
+  let mut not_empty = false
+  case removed is Fail(&err) and err is std::fs::path::PathNotEmptyErr() { not_empty = true }
+  std::debug::assert(not_empty, "a directory that holds one is not empty")
+  drop(removed)
+
+  let removed_inner = inner.remove_dir()
+  drop(removed_inner)
+  let removed_dir = dir.remove_dir()
+  drop(removed_dir, inner, dir)
+}
+
+!test(group="std/fs/path")
+fun test_removing_a_missing_directory_is_a_not_found_error() -> Void {
+  let dir = std::fs::path::Path::new("spp_stl_test_dir_never_made")
+  let removed = dir.remove_dir()
+  let mut not_found = false
+  case removed is Fail(&err) and err is std::fs::path::PathNotFoundErr() { not_found = true }
+  std::debug::assert(not_found, "there is nothing there to remove")
+  drop(removed, dir)
+}
