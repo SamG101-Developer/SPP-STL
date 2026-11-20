@@ -2,7 +2,7 @@
 fun test_call_once_runs_only_the_first_function() -> Void {
   # The free `call_once` made a fresh once-state per call, so it ran every time.
   let once = std::threading::once::Once::new()
-  let runs = std::threading::atomic::Atom[U32]::new(0_u32)
+  let runs = std::threading::atomic::Atom::new(0_u32)
   once.call_once(|caps &runs| { let old = runs.fetch_add(1_u32) })
   once.call_once(|caps &runs| { let old = runs.fetch_add(10_u32) })
   std::debug::assert(runs.load() == 1_u32, "only the first function ran")
@@ -12,9 +12,9 @@ fun test_call_once_runs_only_the_first_function() -> Void {
 
 !test(group="std/threading/once")
 fun test_call_once_across_threads_runs_once() -> Void {
-  let once = std::threading::arc::Arc[std::threading::once::Once]::new(std::threading::once::Once::new())
-  let runs = std::threading::arc::Arc[std::threading::atomic::Atom[U32]]::new(
-    std::threading::atomic::Atom[U32]::new(0_u32))
+  let once = std::threading::arc::Arc::new(std::threading::once::Once::new())
+  let runs = std::threading::arc::Arc::new(
+    std::threading::atomic::Atom::new(0_u32))
   let (o1, r1) = (once.clone(), runs.clone())
   let (o2, r2) = (once.clone(), runs.clone())
   let h1 = std::threading::thread::spawn(|caps o1, r1| -> std::void::Void {

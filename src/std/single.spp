@@ -126,8 +126,8 @@ sup [T, A: Alloc] Single[T, A] {
     # Allocate the non-null pointer and embed the value into
     # it. Wrap in the `Single` type and return.
     let mut pointer = case alloc.allocate[T]() of {
-      is Pass[NonNull[T]](val as p) { p }
-      is Fail[AllocErr](err as e) {
+      is Pass(val as p) { p }
+      is Fail(err as e) {
         drop(val)
         drop(alloc)
         ret Fail(err=e)

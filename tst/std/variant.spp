@@ -64,7 +64,7 @@ fun test_a_variant_can_hold_a_non_copyable_alternative() -> Void {
 
   let v: Vec[S32] or Bool = vec
   let len = case v of {
-    is Vec[S32](..) { v.len() }
+    is Vec(..) { v.len() }
     else { 0_uz }
   }
   std::debug::assert(len == 1_uz, "the vector came through the variant whole")
@@ -98,7 +98,7 @@ fun test_a_narrowed_variant_keeps_the_alternative_it_held() -> Void {
 # value read back through the narrowed binding is the one that was stored.
 !test(group="std/variant")
 fun test_a_narrowed_variant_reads_its_value_from_a_wider_subject() -> Void {
-  let v: std::option::Opt[S32] or U64 = std::option::Some[S32](val=7)
+  let v: std::option::Opt[S32] or U64 = std::option::Some(val=7)
   let got = case v of {
     is NarrowOpt(..) { v.unwrap_or(0) }
     else { 0 }
@@ -124,7 +124,7 @@ sup NarrowHolder {
 # narrowing pattern that does not hold must not match there either.
 !test(group="std/variant")
 fun test_a_narrowed_pattern_on_an_attribute_subject_matches_only_its_members() -> Void {
-  let held = NarrowHolder(v=std::option::Some[S32](val=1))
+  let held = NarrowHolder(v=std::option::Some(val=1))
   let not_held = NarrowHolder(v=false)
   std::debug::assert(held.which() == 1, "the Opt alternative matched")
   std::debug::assert(not_held.which() == 0, "the Bool alternative did not match")

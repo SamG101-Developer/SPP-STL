@@ -46,7 +46,7 @@ sup TimePoint {
     # @ret: A `Duration` representing the time elapsed between this `TimePoint` and the earlier `TimePoint`.
     # @todo: Tidy this
 
-    case self.duration.sub_checked(earlier.duration) is Some[Duration](val) { ret val }
+    case self.duration.sub_checked(earlier.duration) is Some(val) { ret val }
     std::abort::abort("TimePoint::duration_since: the instant given is later than this one")
   }
 

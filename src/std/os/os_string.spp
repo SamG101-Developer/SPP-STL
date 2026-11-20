@@ -43,7 +43,7 @@ sup OsStr {
     # @let text: The text to copy.
     # @ret: A new `OsStr` holding `text`.
 
-    ret OsStr(bytes=Vec[U8]::from(text.view_ref()))
+    ret OsStr(bytes=Vec::from(text.view_ref()))
   }
 
   !package
@@ -68,7 +68,7 @@ sup OsStr {
     let mut length = 0_uz
     let err = sppc::strchr(ptr.as_c_ref(), 0_u8, &mut length)
     let view = View(pointer=ptr, length=length)
-    ret OsStr(bytes=Vec[U8]::from(&view))
+    ret OsStr(bytes=Vec::from(&view))
   }
 
   !package
@@ -94,7 +94,7 @@ sup OsStr {
     # Whether any byte is `0`, which no C call can take inside a name.
     # @ret: `true` if a `0` byte is inside.
 
-    loop i in Range[USize]::between(0_uz, self.bytes.len()) {
+    loop i in Range::between(0_uz, self.bytes.len()) {
       case self.byte(i) == 0_u8 { ret true }
     }
     ret false
@@ -129,7 +129,7 @@ sup OsStr {
     # @let upto: The index past the last byte.
     # @ret: The copy.
 
-    ret OsStr(bytes=Vec[U8]::from(self.bytes[from to upto]))
+    ret OsStr(bytes=Vec::from(self.bytes[from to upto]))
   }
 
   !public

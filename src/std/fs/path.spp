@@ -177,7 +177,7 @@ sup Path {
     # @ret: The parent directory as a `Path` object.
 
     ret case self.last_sep() of {
-      is Some[USize](val as idx) { Path(inner=self.inner.slice(0_uz, idx)) }
+      is Some(val as idx) { Path(inner=self.inner.slice(0_uz, idx)) }
       else { Path(inner=OsStr::new()) }
     }
   }
@@ -191,7 +191,7 @@ sup Path {
     #   one ending in a separator).
 
     let start = case self.last_sep() of {
-      is Some[USize](val as idx) { idx + 1_uz }
+      is Some(val as idx) { idx + 1_uz }
       else { 0_uz }
     }
     case start == self.inner.len() { ret None }
@@ -207,7 +207,7 @@ sup Path {
 
     let name = self.file_name()?
     ret case Path::extension_dot(&name) of {
-      is Some[USize](val as dot) {
+      is Some(val as dot) {
         let stem = name.slice(0_uz, dot)
         drop(name)
         Some(val=stem)
@@ -228,7 +228,7 @@ sup Path {
     let name = self.file_name()?
     defer drop(name)
     ret case Path::extension_dot(&name) of {
-      is Some[USize](val as dot) { Some(val=name.slice(dot + 1_uz, name.len())) }
+      is Some(val as dot) { Some(val=name.slice(dot + 1_uz, name.len())) }
       else { None }
     }
   }
@@ -453,7 +453,7 @@ sup Path {
     # @ret: The terminated copy, or the error.
 
     ret case self.inner.to_c_str() of {
-      is Some[OsStr](val as z) { Pass(val=z) }
+      is Some(val as z) { Pass(val=z) }
       else { Fail(err=PathNulErr) }
     }
   }
@@ -468,7 +468,7 @@ sup Path {
 
     let mut exists = 0
     let path_z = case self.inner.to_c_str() of {
-      is Some[OsStr](val as z) { z }
+      is Some(val as z) { z }
       else { ret false }
     }
     let err = sppc::access(path_z.ptr().as_c_ref(), sppc::f_ok, &mut exists)
@@ -504,7 +504,7 @@ sup Path {
     defer drop(info)
 
     let path_z = case self.inner.to_c_str() of {
-      is Some[OsStr](val as z) { z }
+      is Some(val as z) { z }
       else { ret false }
     }
     let err = sppc::stat(path_z.ptr().as_c_ref(), &mut info)
@@ -524,7 +524,7 @@ sup Path {
     defer drop(info)
 
     let path_z = case self.inner.to_c_str() of {
-      is Some[OsStr](val as z) { z }
+      is Some(val as z) { z }
       else { ret false }
     }
     let err = sppc::stat(path_z.ptr().as_c_ref(), &mut info)
@@ -544,7 +544,7 @@ sup Path {
     defer drop(info)
 
     let path_z = case self.inner.to_c_str() of {
-      is Some[OsStr](val as z) { z }
+      is Some(val as z) { z }
       else { ret false }
     }
     let err = sppc::lstat(path_z.ptr().as_c_ref(), &mut info)
@@ -721,7 +721,7 @@ sup Path {
       case out_size == 0_sz { exit }
       copied += USize::from(out_size)
     }
-    ret Pass[USize](val=copied)
+    ret Pass(val=copied)
   }
 
   !public

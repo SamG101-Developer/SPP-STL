@@ -51,7 +51,7 @@ fun expect_end(reader: &mut std::io::BufRead[IoLineSource], msg: &StrView) -> Vo
 
 !test(group="std/io")
 fun test_read_line_reads_each_line_from_new() -> Void {
-  let mut reader = std::io::BufRead[IoLineSource]::new(io_two_lines())
+  let mut reader = std::io::BufRead::new(io_two_lines())
   expect_line(&mut reader, "ab", "the first line, its CR LF stripped")
   expect_line(&mut reader, "cd", "the second line, its LF stripped")
   expect_end(&mut reader, "then the end")

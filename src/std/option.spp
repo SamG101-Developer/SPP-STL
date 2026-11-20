@@ -44,7 +44,7 @@ sup [T] Opt[T] {
     # @ret: Returns `true` if the optional is `Some`, and `false` if it is `None`.
 
     # Simple pattern match.
-    ret self is Some[T](..)
+    ret self is Some(..)
   }
 
   !public
@@ -83,7 +83,7 @@ sup [T] Opt[T] {
 
     # Pattern match and test against the predicate.
     ret case self of {
-      is Some[T](val) { pred(val) }
+      is Some(val) { pred(val) }
       else {
         drop(pred)
         false
@@ -117,7 +117,7 @@ sup [T] Opt[T] {
 
     # Pattern match and test against the predicate.
     ret case self of {
-      is Some[T](val) { pred(val) }
+      is Some(val) { pred(val) }
       else {
         drop(pred)
         true
@@ -141,7 +141,7 @@ sup [T] Opt[T] {
     # Pattern match and return the other optional if this is
     # `Some`, otherwise return `None`.
     ret case self of {
-      is Some[T](val) {
+      is Some(val) {
         drop(val)
         that
       }
@@ -171,7 +171,7 @@ sup [T] Opt[T] {
     # Pattern match and apply the predicate to the value if
     # this is `Some`, otherwise return `None`.
     ret case self of {
-      is Some[T](val) { pred(val) }
+      is Some(val) { pred(val) }
       else {
         drop(pred)
         None
@@ -193,7 +193,7 @@ sup [T] Opt[T] {
     # Pattern match and return this optional if it is `Some`,
     # otherwise return the other optional.
     ret case self of {
-      is Some[T](..) {
+      is Some(..) {
         drop(that)
         self
       }
@@ -219,7 +219,7 @@ sup [T] Opt[T] {
     # Pattern match and return this optional if it is `Some`,
     # otherwise return the result of invoking the provided function.
     ret case self of {
-      is Some[T](..) {
+      is Some(..) {
         drop(that)
         self
       }
@@ -248,9 +248,9 @@ sup [T] Opt[T] {
     # the `Some` if exactly one is `Some`, otherwise return `None`.
     # When both are `Some`, both values are dropped rather than lost.
     case self of {
-      is Some[T](val) {
+      is Some(val) {
         case that of {
-          is Some[T](val as other) {
+          is Some(val as other) {
             drop(val)
             drop(other)
           }
@@ -283,7 +283,7 @@ sup [T] Opt[T] {
     # Pattern match and apply the predicate to a borrow of
     # the value if this is `Some`.
     case self of {
-      is Some[T](&val) {
+      is Some(&val) {
         case pred(val) { ret self }
         else { drop(self) }
       }
@@ -315,7 +315,7 @@ sup [T] Opt[T] {
     # Pattern match and apply the predicate to the value
     # if this is `Some`, otherwise return `None`.
     ret case self of {
-      is Some[T](val) { Some(val=func(val)) }
+      is Some(val) { Some(val=func(val)) }
       else {
         drop(func)
         None
@@ -344,7 +344,7 @@ sup [T] Opt[T] {
     # Pattern match and apply the function to the value if
     # this is `Some`, otherwise return the default value.
     ret case self of {
-      is Some[T](val) {
+      is Some(val) {
         drop(default)
         f(val)
       }
@@ -383,7 +383,7 @@ sup [T] Opt[T] {
     # `Some`, otherwise return the result of invoking the default
     # function.
     ret case self of {
-      is Some[T](val) {
+      is Some(val) {
         drop(default)
         f(val)
       }
@@ -411,7 +411,7 @@ sup [T] Opt[T] {
     # this is `Some`, otherwise return the error value wrapped
     # in `Fail`.
     ret case self of {
-      is Some[T](val) {
+      is Some(val) {
         drop(err)
         Pass(val)
       }
@@ -439,7 +439,7 @@ sup [T] Opt[T] {
     # this is `Some`, otherwise return the result of invoking the
     # provided error function wrapped in `Fail`.
     ret case self of {
-      is Some[T](val) {
+      is Some(val) {
         drop(err)
         Pass(val)
       }
@@ -477,7 +477,7 @@ sup [T] Opt[T] {
     # Pattern match and return the value if this is `Some`,
     # otherwise return the default value.
     ret case self of {
-      is Some[T](val) {
+      is Some(val) {
         drop(default)
         val
       }
@@ -498,7 +498,7 @@ sup [T] Opt[T] {
     # Pattern match and return the value if this is `Some`,
     # otherwise return the default value for the type `T`.
     ret case self of {
-      is Some[T](val) { val }
+      is Some(val) { val }
       else { T() }
     }
   }
@@ -520,7 +520,7 @@ sup [T] Opt[T] {
     # Pattern match and return the value if this is `Some`, otherwise
     # return the result of invoking the provided default function.
     ret case self of {
-      is Some[T](val) {
+      is Some(val) {
         drop(default)
         val
       }
@@ -544,7 +544,7 @@ sup [T] Opt[T] {
     # Pattern match and return the value if this is `Some`,
     # otherwise abort the program with the provided message.
     ret case self of {
-      is Some[T](val) { val }
+      is Some(val) { val }
       else { std::abort::abort(msg) }
     }
   }
@@ -590,7 +590,7 @@ sup [T] Opt[T] {
     # Pattern match and take the value if this is `Some` and
     # the predicate returns true, otherwise return `None`.
     let matches = case self of {
-      is Some[T](&val) { pred(val) }
+      is Some(&val) { pred(val) }
       else {
         drop(pred)
         false
@@ -621,9 +621,9 @@ sup [T] Opt[T] {
     # otherwise return `None`. A value whose partner is missing
     # is still owned here, so it is dropped rather than lost.
     case self of {
-      is Some[T](val as val1) {
+      is Some(val as val1) {
         case that of {
-          is Some[U](val as val2) { ret Some(val=(val1, val2)) }
+          is Some(val as val2) { ret Some(val=(val1, val2)) }
           else { drop(val1) }
         }
       }
@@ -649,7 +649,7 @@ sup [T] Opt[Opt[T]] {
     # The inner optional is the flattened value: a `Some` holding a `Some` is that `Some`, and a `Some` holding a
     # `None` is that `None`. An outer `None` holds nothing, so it is `None` too.
     ret case self of {
-      is Some[Opt[T]](val) { val }
+      is Some(val) { val }
       else { None }
     }
   }
@@ -677,7 +677,7 @@ sup [T] Opt[T] ext Try[Some[T], None, T] {
 
     # Pattern match and return `true` if this is `Some`, otherwise
     # return `false`.
-    ret self is Some[T](..)
+    ret self is Some(..)
   }
 
   !versioned(base="1.0.0", new="1.0.0")
@@ -723,7 +723,7 @@ sup [T, U] Opt[(T, U)] {
     # Pattern match and return a tuple of two optionals, taking
     # each value from the tuple inside the optional.
     ret case self of {
-      is Some[(T, U)](val=(val1, val2)) { (Some(val=val1), Some(val=val2)) }
+      is Some(val=(val1, val2)) { (Some(val=val1), Some(val=val2)) }
       else { (None, None) }
     }
   }
@@ -746,9 +746,9 @@ sup [T: Eq] Opt[T] ext Eq {
     # Matched one at a time rather than as a tuple of both: a borrow cannot be a tuple element, and dereferencing to
     # build one would copy the whole variant - which an "Opt" over an unconstrained generic cannot do.
     ret case self of {
-      is Some[T](&val as a) {
+      is Some(&val as a) {
         case that of {
-          is Some[T](&val as b) { a == b }
+          is Some(&val as b) { a == b }
           else { false }
         }
       }
@@ -774,9 +774,9 @@ sup [T: Eq] Opt[T] ext Eq {
     # Matched one at a time rather than as a tuple of both: a borrow cannot be a tuple element, and dereferencing to
     # build one would copy the whole variant - which an "Opt" over an unconstrained generic cannot do.
     ret case self of {
-      is Some[T](&val as a) {
+      is Some(&val as a) {
         case that of {
-          is Some[T](&val as b) { a != b }
+          is Some(&val as b) { a != b }
           else { true }
         }
       }
@@ -797,7 +797,7 @@ sup [T: Drop] Opt[T] ext Drop {
   !versioned(base="1.0.0", new="1.0.0")
   fun drop(self) -> Void {
     case self of {
-      is Some[T](val) { drop(val) }
+      is Some(val) { drop(val) }
       else { }
     }
   }
@@ -810,7 +810,7 @@ sup [T: Format] Opt[T] ext Format {
     # `Some(val=7)` is `Some(  7)`; `None` is written as it is.
 
     case self of {
-      is Some[T](&val as value) {
+      is Some(&val as value) {
         formatter.write_str("Some(")
         let result = value.fmt(&mut formatter)
         formatter.write_str(")")

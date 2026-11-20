@@ -323,7 +323,7 @@ sup [T] Iterator[T] {
   }
 
   !public
-  fun fold[U, F: FunRef[(U, T), U]](self, initial: U, reducer: F) -> U {
+  fun fold[U, F: FunMut[(U, T), U]](self, initial: U, mut reducer: F) -> U {
     # The `fold` method is a function that takes an iterator, an initial value,
     # and a reducer function, and returns a single value that is the result of
     # applying the reducer function cumulatively to the items produced by the
@@ -336,9 +336,9 @@ sup [T] Iterator[T] {
     #   output of the reducer function.
     # @type F: A function type that represents the reducer function used for
     #   folding the items. This is a generic type parameter that must implement
-    #   the `FunRef[(U, &T), U]` interface, meaning it must be a function that
-    #   takes the current accumulated value of type `U` and an immutable borrow
-    #   of an item of type `T`, and returns a new accumulated value of type `U`.
+    #   the `FunMut[(U, T), U]` interface, meaning it must be a function that
+    #   takes the current accumulated value of type `U` and an item of type `T`,
+    #   and returns a new accumulated value of type `U`; it may mutate its state.
     # @let initial: The initial value for the fold operation. This is the
     #   starting point for the accumulation, and the reducer function will be
     #   applied to this initial value and the first item produced by the
@@ -355,6 +355,7 @@ sup [T] Iterator[T] {
     # Fold the items by iterating through the entire iterator and
     # applying the reducer function to the accumulated value and
     # each item.
+    defer drop(reducer)
     let mut acc = initial
     loop item in self { acc = reducer(acc, item) }
     ret acc
@@ -362,7 +363,7 @@ sup [T] Iterator[T] {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun fold_first[F: FunRef[(T, T), T]](self, reducer: F) -> Opt[T] {
+  fun fold_first[F: FunMut[(T, T), T]](self, mut reducer: F) -> Opt[T] {
     # The `fold_first` method folds the iterator like `fold`, but takes its
     # initial value from the iterator itself: the first item is the starting
     # accumulator, and the reducer is applied to it and each item after. This is
@@ -370,7 +371,7 @@ sup [T] Iterator[T] {
     # accumulator is an item, the reducer both takes and returns a `T`, and an
     # empty iterator has no initial value, so the result is optional.
     # @type F: A function type that represents the reducer function used for
-    #   folding the items. It must implement the `FunRef[(T, T), T]` interface,
+    #   folding the items. It must implement the `FunMut[(T, T), T]` interface,
     #   taking the accumulated value and the next item, and returning the new
     #   accumulated value.
     # @let reducer: The reducer function that combines the accumulated value
@@ -381,11 +382,12 @@ sup [T] Iterator[T] {
 
     # The accumulator starts empty; the first item fills it, and
     # every item after is reduced into it.
+    defer drop(reducer)
     let mut acc: Opt[T] = None
     loop item in self {
       let prev = acc
       acc = case prev of {
-        is Some[T](val) { Some(val=reducer(val, item)) }
+        is Some(val) { Some(val=reducer(val, item)) }
         else { Some(val=item) }
       }
     }
@@ -500,7 +502,7 @@ sup [T] Iterator[T] {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun for_each[F: FunMut[(T,), Void] and Drop](self, mut func: F) -> Void {
+  fun for_each[F: FunMut[(T,), Void]](self, mut func: F) -> Void {
     # The `for_each` method is a function that takes an iterator and a function,
     # and applies the function to each item produced by the iterator. The method
     # uses a loop to iterate through the items of the original iterator, and
@@ -524,8 +526,8 @@ sup [T] Iterator[T] {
 
     # Apply the function to each item by iterating through the entire
     # iterator and calling the function for each item.
+    defer drop(func)
     loop item in self { func(item) }
-    drop(func)
   }
 
   !public

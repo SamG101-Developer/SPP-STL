@@ -224,7 +224,7 @@ sup [A: Alloc] Str[A] {
     # Reserve the whole encoding up front, then append the character's bytes
     # `len` times.
     let mut out = Str[A]::new_with_capacity_in(len * USize::from(element.len_utf8()), alloc)
-    loop i in Range[USize]::between(0_uz, len) {
+    loop i in Range::between(0_uz, len) {
       out.append(element)
     }
     ret out
@@ -284,7 +284,7 @@ sup [A: Alloc] Str[A] {
     #   sequence found.
 
     ret case first_utf8_err(bytes) of {
-      is Some[Utf8Err](val as err) { Fail(err=err) }
+      is Some(val as err) { Fail(err=err) }
       else { Pass(val=Self::from_utf8_unchecked(bytes)) }
     }
   }
@@ -307,7 +307,7 @@ sup [A: Alloc] Str[A] {
     loop at < bytes.len() {
       let rest = bytes[at to bytes.len()]
       case first_utf8_err(rest) of {
-        is Some[Utf8Err](val as err) {
+        is Some(val as err) {
           out.bytes.append_from_view(rest[0_uz to err.valid_up_to])
           out.append(Char::from(0xfffd_u32))
           at += err.valid_up_to + err.error_len.unwrap_or(rest.len() - err.valid_up_to)
@@ -695,7 +695,7 @@ sup [A: Alloc and Clone] Str[A] ext Mul[S32] {
     # first means the buffer grows at most once.
     let piece = result.clone()
     result.capacity_reserve(piece.len() * USize::from(that))
-    loop i in Range[S32]::between(1, that) { result.append_str(&piece) }
+    loop i in Range::between(1, that) { result.append_str(&piece) }
     drop(piece)
     ret result
   }
@@ -769,7 +769,7 @@ fun first_utf8_err(bytes: &View[U8]) -> Opt[Utf8Err] {
 
     # Any remaining continuation bytes (the 3rd and 4th, when present)
     # are only constrained to the plain continuation-byte range.
-    loop k in Range[USize]::between(2_uz, seq_len) {
+    loop k in Range::between(2_uz, seq_len) {
       let cont = bytes[idx + k]@
       case cont < 0x80_u8 or cont > 0xbf_u8 {
         ret Some(val=Utf8Err(valid_up_to=idx, error_len=Some(val=k)))

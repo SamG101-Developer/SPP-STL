@@ -116,7 +116,7 @@ fun returned_ptr_ref(ptr: CVoidPtr) -> Opt[CRefBytePtr] {
   # @ret: `Some` read-only byte pointer at the same address, or `None` if `ptr`
   #   is null.
 
-  ret NonNull[CUChar]::from_ptr(ptr)
+  ret NonNull::from_ptr(ptr)
     .pass_opt()
     .map(|p: NonNull[CUChar]| CRefBytePtr(inner=p))
 }
@@ -136,7 +136,7 @@ fun returned_ptr_mut(ptr: CVoidPtr) -> Opt[CMutBytePtr] {
   # @ret: `Some` writable byte pointer at the same address, or `None` if `ptr`
   #   is null.
 
-  ret NonNull[CUChar]::from_ptr(ptr)
+  ret NonNull::from_ptr(ptr)
     .pass_opt()
     .map(|p: NonNull[CUChar]| CMutBytePtr(inner=p))
 }
@@ -154,5 +154,5 @@ fun returned_ptr_alloc(ptr: CVoidPtr) -> Opt[NonNull[U8]] {
   # @let ptr: The pointer a c allocator returned.
   # @ret: `Some` pointer at the same address, or `None` if `ptr` is null.
 
-  ret NonNull[CUChar]::from_ptr(ptr).pass_opt()
+  ret NonNull::from_ptr(ptr).pass_opt()
 }

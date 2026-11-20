@@ -249,7 +249,7 @@ sup [T] Mutex[T] ext Drop {
     # Destroy the mutex and drop the value it guards. Use `take` to keep the
     # value.
 
-    let Mutex[T](handle, val) = self
+    let Mutex(handle, val) = self
     let err = sppc::pthread_mutex_destroy(&handle)
     std::abort::abort_if(err != 0, "Failed to destroy a mutex")
     drop(val)

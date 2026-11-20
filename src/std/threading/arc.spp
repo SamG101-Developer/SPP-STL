@@ -65,8 +65,8 @@ sup [T, A: Alloc] Arc[T, A] {
 
     let mut pointer = alloc.allocate[ControlBlock[T]]().expect("Allocation failed")
     pointer.write(ControlBlock(
-      strong_counter=Atom[USize]::new(1_uz),
-      weak_counter=Atom[USize]::new(1_uz),
+      strong_counter=Atom::new(1_uz),
+      weak_counter=Atom::new(1_uz),
       val))
     ret Arc(pointer, alloc)
   }

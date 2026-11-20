@@ -50,6 +50,6 @@ sup [cmp w: U32] Float8 ext From[SizedFloatingPoint[w]] {
     # @let that: The float value to store.
     # @ret: The nearest `Float8`, saturated to 448 when the value is past it (an
     #   infinity too).
-    ret intrinsics::fptrunc_f8[w](that)
+    ret intrinsics::fptrunc_f8(that)
   }
 }

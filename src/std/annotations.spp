@@ -108,7 +108,10 @@ cmp fun zero_type() -> Void { }
 !public
 !annotation(target=Annotation::all)
 !versioned(base="1.0.0", new="1.1.0")
-cmp fun cfg(mode: &StrView = "", family: &StrView = "", os: &StrView = "", arch: &StrView = "", env: &StrView = "", pointer_width: &StrView = "", endian: &StrView = "") -> Void {
+cmp fun cfg(
+  mode: &StrView = "", family: &StrView = "", os: &StrView = "",
+  arch: &StrView = "", env: &StrView = "", pointer_width: &StrView = "",
+  endian: &StrView = "") -> Void {
   # The `cfg` annotation compiles the annotated item only for the builds it
   # names: the item is dropped, before any scope is made, from a build its
   # condition does not match, as if it were never written. Two items of the same

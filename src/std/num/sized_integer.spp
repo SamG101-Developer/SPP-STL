@@ -360,21 +360,21 @@ sup [cmp w: U32, cmp signed: Bool] SizedInteger[w, signed] {
   !public
   !inline
   fun ilog(self, base: Self) -> U32 {
-    case self.ilog_checked(base) is Some[U32](val) { ret val }
+    case self.ilog_checked(base) is Some(val) { ret val }
     abort("ilog: base must be a positive integer")
   }
 
   !public
   !inline
   fun ilog2(self) -> U32 {
-    case self.ilog2_checked() is Some[U32](val) { ret val }
+    case self.ilog2_checked() is Some(val) { ret val }
     abort("ilog2: base must be a positive integer")
   }
 
   !public
   !inline
   fun ilog10(self) -> U32 {
-    case self.ilog10_checked() is Some[U32](val) { ret val }
+    case self.ilog10_checked() is Some(val) { ret val }
     abort("ilog10: base must be a positive integer")
   }
 

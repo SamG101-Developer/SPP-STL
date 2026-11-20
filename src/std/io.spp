@@ -204,7 +204,7 @@ sup Read {
 
       # Ignore interruption errors and conintue.
       let try = self.read(buf[mut filled to target])
-      case try is Fail[StreamErr](&err) and err is StreamInterruptedError() {
+      case try is Fail(&err) and err is StreamInterruptedError() {
         drop(try)
         skip
       }
@@ -250,7 +250,7 @@ sup Read {
 
       # Ignore interruption errors and continue.
       let try = self.read(&mut chunk)
-      case try is Fail[StreamErr](&err) and err is StreamInterruptedError() {
+      case try is Fail(&err) and err is StreamInterruptedError() {
         drop(try)
         skip
       }
@@ -316,7 +316,7 @@ sup Write {
       let try = self.write(buf[written to target])
       # Bound by borrow: a binary "is" matches on one path only, so binding the error by value would leave "try"
       # partially moved on that path and whole on the other, which is not a state it can be discarded from.
-      case try is Fail[StreamErr](&err) and err is StreamInterruptedError() {
+      case try is Fail(&err) and err is StreamInterruptedError() {
         drop(try)
         skip
       }
@@ -461,7 +461,7 @@ sup [R: Read] BufRead[R] {
     # created at its full length, not just with that capacity, because it is
     # read into as a view: an empty one asks the reader for zero bytes, which it
     # answers with zero - indistinguishable from EOF.
-    let buf = Vec[U8]::new_filled(capacity, 0_u8)
+    let buf = Vec::new_filled(capacity, 0_u8)
     ret Self(inner, buf)
   }
 
@@ -487,7 +487,7 @@ sup [R: Read] BufRead[R] {
 
     loop true {
       let try = self.inner.read(&mut self.buf)
-      case try is Fail[StreamErr](&err) and err is StreamInterruptedError() {
+      case try is Fail(&err) and err is StreamInterruptedError() {
         drop(try)
         skip
       }
@@ -561,8 +561,8 @@ sup [R: Read] BufRead[R] {
     defer drop(bytes)
     let result = self.read_until(b'\n', &mut bytes)
     case result of {
-      is Fail[StreamErr](err) { ret Fail(err) }
-      is Pass[USize](val=0_uz) { ret Pass(val=0_uz) }
+      is Fail(err) { ret Fail(err) }
+      is Pass(val=0_uz) { ret Pass(val=0_uz) }
     }
 
     # Strip the line ending, "\n" or "\r\n". The values of a comparison branch are separated by commas: "a | b" is
@@ -594,11 +594,11 @@ sup [R: Read] BufRead[R] {
       let mut out = Str()
       let result = self.read_line(&mut out)
       case result of {
-        is Pass[USize](val=0_uz) {
+        is Pass(val=0_uz) {
           drop(out)
           ret
         }
-        is Fail[StreamErr](err) {
+        is Fail(err) {
           drop(out)
           gen Fail(err)
           ret

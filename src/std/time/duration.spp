@@ -255,7 +255,7 @@ sup Duration {
     # Saturate the whole result, not the seconds alone: a later `rhs` in the
     # same second left the borrowed second in the nanoseconds (~1s for a result
     # that should be 0), so a deadline loop never reached zero.
-    case self.sub_checked(rhs) is Some[Duration](val) { ret val }
+    case self.sub_checked(rhs) is Some(val) { ret val }
     ret Duration(seconds=0_u64, nanoseconds=0_u64)
   }
 

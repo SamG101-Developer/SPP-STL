@@ -1,13 +1,13 @@
 !test(group="std/threading/atomic")
 fun test_a_new_atomic_holds_its_initial_value() -> Void {
-  let a = std::threading::atomic::Atom[S32]::new(7)
+  let a = std::threading::atomic::Atom::new(7)
   std::debug::assert(a.load() == 7, "the value it was built with")
   drop(a)
 }
 
 !test(group="std/threading/atomic")
 fun test_store_replaces_the_value() -> Void {
-  let a = std::threading::atomic::Atom[S32]::new(1)
+  let a = std::threading::atomic::Atom::new(1)
   a.store(2)
   std::debug::assert(a.load() == 2, "the stored value")
   drop(a)
@@ -22,7 +22,7 @@ fun test_a_zeroed_atomic_starts_at_zero() -> Void {
 
 !test(group="std/threading/atomic")
 fun test_exchange_returns_the_previous_value() -> Void {
-  let a = std::threading::atomic::Atom[S32]::new(3)
+  let a = std::threading::atomic::Atom::new(3)
   std::debug::assert(a.exchange(9) == 3, "exchange hands back what was there")
   std::debug::assert(a.load() == 9, "and leaves the new value behind")
   drop(a)
@@ -30,7 +30,7 @@ fun test_exchange_returns_the_previous_value() -> Void {
 
 !test(group="std/threading/atomic")
 fun test_compare_exchange_succeeds_when_the_expectation_holds() -> Void {
-  let a = std::threading::atomic::Atom[S32]::new(5)
+  let a = std::threading::atomic::Atom::new(5)
   let (previous, swapped) = a.compex(5, 6)
   std::debug::assert(swapped, "the value matched, so the swap happened")
   std::debug::assert(previous == 5, "and the value from before comes back")
@@ -40,7 +40,7 @@ fun test_compare_exchange_succeeds_when_the_expectation_holds() -> Void {
 
 !test(group="std/threading/atomic")
 fun test_compare_exchange_fails_when_the_expectation_does_not_hold() -> Void {
-  let a = std::threading::atomic::Atom[S32]::new(5)
+  let a = std::threading::atomic::Atom::new(5)
   let (previous, swapped) = a.compex(4, 6)
   std::debug::assert(swapped.not, "the value did not match, so nothing happened")
   std::debug::assert(previous == 5, "the value found is reported")
@@ -50,7 +50,7 @@ fun test_compare_exchange_fails_when_the_expectation_does_not_hold() -> Void {
 
 !test(group="std/threading/atomic")
 fun test_fetch_and_returns_the_value_from_before() -> Void {
-  let a = std::threading::atomic::Atom[S32]::new(6)
+  let a = std::threading::atomic::Atom::new(6)
   std::debug::assert(a.fetch_and(3) == 6, "fetch hands back the old value")
   std::debug::assert(a.load() == 2, "and stores the conjunction")
   drop(a)
@@ -58,7 +58,7 @@ fun test_fetch_and_returns_the_value_from_before() -> Void {
 
 !test(group="std/threading/atomic")
 fun test_fetch_or_returns_the_value_from_before() -> Void {
-  let a = std::threading::atomic::Atom[S32]::new(4)
+  let a = std::threading::atomic::Atom::new(4)
   std::debug::assert(a.fetch_or(1) == 4, "fetch hands back the old value")
   std::debug::assert(a.load() == 5, "and stores the disjunction")
   drop(a)
@@ -66,7 +66,7 @@ fun test_fetch_or_returns_the_value_from_before() -> Void {
 
 !test(group="std/threading/atomic")
 fun test_fetch_xor_returns_the_value_from_before() -> Void {
-  let a = std::threading::atomic::Atom[S32]::new(6)
+  let a = std::threading::atomic::Atom::new(6)
   std::debug::assert(a.fetch_xor(3) == 6, "fetch hands back the old value")
   std::debug::assert(a.load() == 5, "and stores the exclusive or")
   drop(a)
@@ -74,7 +74,7 @@ fun test_fetch_xor_returns_the_value_from_before() -> Void {
 
 !test(group="std/threading/atomic")
 fun test_repeated_stores_keep_only_the_last() -> Void {
-  let a = std::threading::atomic::Atom[S32]::new(0)
+  let a = std::threading::atomic::Atom::new(0)
   a.store(1)
   a.store(2)
   a.store(3)
@@ -84,7 +84,7 @@ fun test_repeated_stores_keep_only_the_last() -> Void {
 
 !test(group="std/threading/atomic")
 fun test_an_atomic_of_a_narrower_width() -> Void {
-  let a = std::threading::atomic::Atom[U8]::new(200_u8)
+  let a = std::threading::atomic::Atom::new(200_u8)
   std::debug::assert(a.load() == 200_u8, "the value at U8")
   std::debug::assert(a.exchange(1_u8) == 200_u8, "exchange at U8")
   std::debug::assert(a.load() == 1_u8, "and the new value")

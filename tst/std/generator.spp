@@ -27,17 +27,17 @@ cor stops_with_ret_holding_a_buffer(stop_after: std::number::USize) -> std::iter
 
 !test(group="std/generator")
 fun test_ret_in_a_coroutine_finishes_it_and_runs_its_defers() -> Void {
-  loop n in std::range::Range[std::number::USize]::between(0_uz, 2000_uz) {
+  loop n in std::range::Range::between(0_uz, 2000_uz) {
     std::debug::assert(stops_with_ret_holding_a_buffer(2_uz).count() == 2_uz, "yielded twice then stopped")
   }
 }
 
 !test(group="std/generator")
 fun test_a_hand_driven_generator_yields_all_then_gen_done_forever() -> Void {
-  let mut g = std::range::Range[std::number::S32]::between(0, 2)
+  let mut g = std::range::Range::between(0, 2)
   let mut yielded = 0_uz
   let mut exhausted = 0_uz
-  loop n in std::range::Range[std::number::USize]::between(0_uz, 6_uz) {
+  loop n in std::range::Range::between(0_uz, 6_uz) {
     case g.res() of {
       is std::generator::GenDone() { exhausted += 1_uz }
       else { yielded += 1_uz }
@@ -49,9 +49,9 @@ fun test_a_hand_driven_generator_yields_all_then_gen_done_forever() -> Void {
 }
 
 cor yields_optionals() -> std::iterator::Iterator[std::option::Opt[S32]] {
-  gen std::option::Some[S32](val=1)
+  gen std::option::Some(val=1)
   gen std::option::None
-  gen std::option::Some[S32](val=3)
+  gen std::option::Some(val=3)
 }
 
 !test(group="std/generator")
@@ -79,7 +79,7 @@ fun test_a_pattern_naming_a_narrower_variant_matches_only_its_members() -> Void 
   }
   std::debug::assert(matched == false, "a Bool is not an Opt[S32]")
 
-  let b: std::option::Opt[S32] or std::boolean::Bool = std::option::Some[S32](val=4)
+  let b: std::option::Opt[S32] or std::boolean::Bool = std::option::Some(val=4)
   let got = case b of {
     is std::option::Opt[S32](..) { b.unwrap_or(0) }
     else { 0 }

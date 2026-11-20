@@ -1333,7 +1333,7 @@ sup [cmp w: U32] SizedFloatingPoint[w] {
     let mut digits = body
     let mut exponent = 0_s32
     let exponent_at = body.find_if(|c: Char| c == 'e' or c == 'E')
-    case exponent_at is Some[USize](val) {
+    case exponent_at is Some(val) {
       exponent = S32::try_from(body[val + 1_uz to body.len()])?
       digits = body[0_uz to val]@
     }

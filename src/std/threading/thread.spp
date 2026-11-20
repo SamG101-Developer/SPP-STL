@@ -119,28 +119,28 @@ fun spawn[Out: ThreadSafe, F: FunMov[(), Out] and ThreadSafe](function: F) -> Re
   # the caller rather than by a thread with nowhere to
   # report it.
   let slot = case GlobalAlloc.allocate[Out]() of {
-    is Pass[NonNull[Out]](val as p) { p }
-    is Fail[AllocErr](err as e) {
+    is Pass(val as p) { p }
+    is Fail(err as e) {
       drop(function)
       drop(e)
       ret Fail(err=ThreadMemoryErr)
     }
   }
   let mut users = case GlobalAlloc.allocate[Atom[USize]]() of {
-    is Pass[NonNull[Atom[USize]]](val as p) { p }
-    is Fail[AllocErr](err as e) {
+    is Pass(val as p) { p }
+    is Fail(err as e) {
       drop(function)
       drop(e)
       GlobalAlloc.deallocate(slot)
       ret Fail(err=ThreadMemoryErr)
     }
   }
-  users.write(Atom[USize]::new(2_uz))
+  users.write(Atom::new(2_uz))
 
   # The body moves the function onto the new thread and
   # takes copies of the cell and its user count with it.
   let mut handle = 0_u64
-  let err = sppc::pthread_create(std::cffi::CClosure[(), Void]::from(|caps function, slot, users| -> Void {
+  let err = sppc::pthread_create(std::cffi::CClosure::from(|caps function, slot, users| -> Void {
     let mut into = slot
     into.write(function())
 
@@ -162,7 +162,7 @@ fun spawn[Out: ThreadSafe, F: FunMov[(), Out] and ThreadSafe](function: F) -> Re
     GlobalAlloc.deallocate(users)
     ret Fail(err=ThreadErr::from_errno(err))
   }
-  ret Pass(val=JoinHandle[Out](handle, result=slot, users))
+  ret Pass(val=JoinHandle(handle, result=slot, users))
 }
 
 !public
@@ -275,7 +275,7 @@ sup [R] JoinHandle[R] ext Drop {
   fun drop(self) -> Void {
     # A handle dropped without `join` or `detach` (both consume it) detaches the
     # thread, so its resources are released when it ends.
-    let JoinHandle[R](handle, result, users) = self
+    let JoinHandle(handle, result, users) = self
     let err = sppc::pthread_detach(&handle)
     std::abort::abort_if(err != 0, "Failed to detach a dropped thread handle")
     JoinHandle[R]::release_unjoined(result, users)

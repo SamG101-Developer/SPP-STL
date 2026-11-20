@@ -106,7 +106,7 @@ sup Rng {
   !versioned(base="1.0.0", new="1.0.0")
   fun next_bytes(&mut self, n: USize) -> Vec[U8] {
     let mut buffer = Vec[U8]::new_with_capacity(n)
-    loop i in Range[USize]::between(0_uz, n) {
+    loop i in Range::between(0_uz, n) {
       buffer.append(U8::from(self.next_u64() & 0xff_u64))
     }
     ret buffer
@@ -160,7 +160,7 @@ sup OsRng {
     # holding none of them.
     # @let n: The number of random bytes to generate.
 
-    let mut buffer = Vec[U8]::new_filled(n, 0_u8)
+    let mut buffer = Vec::new_filled(n, 0_u8)
     let err = sppc::getrandom(n, buffer.ptr().as_c_mut())
     ret case err != 0 {
       drop(buffer)

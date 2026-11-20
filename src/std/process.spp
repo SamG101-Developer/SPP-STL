@@ -39,7 +39,7 @@ fun get_env(key: &StrView) -> Opt[Str] {
 
   let value = std::os::env::get_env(key)
   ret case value of {
-    is Some[OsStr](val as os) {
+    is Some(val as os) {
       let text = os.to_str_lossy()
       drop(os)
       Some(val=text)

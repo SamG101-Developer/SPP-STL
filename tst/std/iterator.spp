@@ -2,7 +2,7 @@
 fun test_range_yields_the_half_open_interval() -> Void {
   let mut count = 0_uz
   let mut sum = 0
-  loop i in std::range::Range[S32]::between(0, 5) {
+  loop i in std::range::Range::between(0, 5) {
     count += 1_uz
     sum += i
   }
@@ -13,36 +13,36 @@ fun test_range_yields_the_half_open_interval() -> Void {
 !test(group="std/iterator")
 fun test_empty_range_yields_nothing() -> Void {
   let mut count = 0_uz
-  loop i in std::range::Range[S32]::between(3, 3) { count += 1_uz }
+  loop i in std::range::Range::between(3, 3) { count += 1_uz }
   std::debug::assert(count == 0_uz, "an empty interval yields nothing")
 }
 
 !test(group="std/iterator")
 fun test_count_consumes_and_counts() -> Void {
-  std::debug::assert(Vec[S32]::from(&[1, 2, 3, 4]).iter_mov().count() == 4_uz, "one per element")
+  std::debug::assert(Vec::from(&[1, 2, 3, 4]).iter_mov().count() == 4_uz, "one per element")
   std::debug::assert(Vec[S32]::new().iter_mov().count() == 0_uz, "an empty vector counts nothing")
 }
 
 !test(group="std/iterator")
 fun test_take_stops_early() -> Void {
-  std::debug::assert(Vec[S32]::from(&[1, 2, 3, 4, 5]).iter_mov().take(2_uz).count() == 2_uz, "only the first two")
-  std::debug::assert(Vec[S32]::from(&[1, 2, 3, 4, 5]).iter_mov().take(0_uz).count() == 0_uz, "taking none yields none")
+  std::debug::assert(Vec::from(&[1, 2, 3, 4, 5]).iter_mov().take(2_uz).count() == 2_uz, "only the first two")
+  std::debug::assert(Vec::from(&[1, 2, 3, 4, 5]).iter_mov().take(0_uz).count() == 0_uz, "taking none yields none")
   std::debug::assert(
-    Vec[S32]::from(&[1, 2, 3]).iter_mov().take(99_uz).count() == 3_uz, "taking more than there is stops at the end")
+    Vec::from(&[1, 2, 3]).iter_mov().take(99_uz).count() == 3_uz, "taking more than there is stops at the end")
 }
 
 !test(group="std/iterator")
 fun test_drop_skips_the_front() -> Void {
-  std::debug::assert(Vec[S32]::from(&[1, 2, 3, 4, 5]).iter_mov().drop(2_uz).count() == 3_uz, "the rest after two")
+  std::debug::assert(Vec::from(&[1, 2, 3, 4, 5]).iter_mov().drop(2_uz).count() == 3_uz, "the rest after two")
   std::debug::assert(
-    Vec[S32]::from(&[1, 2, 3, 4, 5]).iter_mov().drop(0_uz).count() == 5_uz, "skipping none keeps them all")
-  std::debug::assert(Vec[S32]::from(&[1, 2, 3]).iter_mov().drop(99_uz).count() == 0_uz, "skipping past the end")
+    Vec::from(&[1, 2, 3, 4, 5]).iter_mov().drop(0_uz).count() == 5_uz, "skipping none keeps them all")
+  std::debug::assert(Vec::from(&[1, 2, 3]).iter_mov().drop(99_uz).count() == 0_uz, "skipping past the end")
 }
 
 !test(group="std/iterator")
 fun test_step_by_skips_between_elements() -> Void {
   let mut count = 0_uz
-  loop i in std::range::Range[S32]::between(0, 10).step_by(2_uz) { count += 1_uz }
+  loop i in std::range::Range::between(0, 10).step_by(2_uz) { count += 1_uz }
   std::debug::assert(count == 5_uz, "every other element of ten")
 }
 
@@ -59,37 +59,37 @@ fun test_iteration_over_an_empty_vector_yields_nothing() -> Void {
 fun test_iterator_step_by_skips_between_elements() -> Void {
   # "Iterator::step_by" advanced its index by the step, so the index was always a multiple of it and every element
   # came through.
-  std::debug::assert(Vec[S32]::from(&[1, 2, 3, 4, 5]).iter_mov().step_by(2_uz).count() == 3_uz, "the 1st, 3rd, 5th")
-  std::debug::assert(Vec[S32]::from(&[1, 2, 3]).iter_mov().step_by(1_uz).count() == 3_uz, "a step of one keeps all")
+  std::debug::assert(Vec::from(&[1, 2, 3, 4, 5]).iter_mov().step_by(2_uz).count() == 3_uz, "the 1st, 3rd, 5th")
+  std::debug::assert(Vec::from(&[1, 2, 3]).iter_mov().step_by(1_uz).count() == 3_uz, "a step of one keeps all")
 }
 
 !test(group="std/iterator")
 fun test_step_by_over_borrowed_elements() -> Void {
   # The skipped elements are borrows here, which are discarded rather than destroyed.
-  let v = Vec[S32]::from(&[1, 2, 3, 4])
+  let v = Vec::from(&[1, 2, 3, 4])
   std::debug::assert(v.iter_ref().step_by(2_uz).count() == 2_uz, "the 1st and 3rd")
   drop(v)
 }
 
 !test(group="std/iterator")
 fun test_slice_yields_the_middle() -> Void {
-  std::debug::assert(Vec[S32]::from(&[1, 2, 3, 4, 5]).iter_mov().slice(1_uz, 3_uz).count() == 2_uz, "[1, 3)")
-  std::debug::assert(Vec[S32]::from(&[1, 2, 3]).iter_mov().slice(2_uz, 99_uz).count() == 1_uz, "stops at the end")
+  std::debug::assert(Vec::from(&[1, 2, 3, 4, 5]).iter_mov().slice(1_uz, 3_uz).count() == 2_uz, "[1, 3)")
+  std::debug::assert(Vec::from(&[1, 2, 3]).iter_mov().slice(2_uz, 99_uz).count() == 1_uz, "stops at the end")
 }
 
 !test(group="std/iterator")
 fun test_fold_first_starts_from_the_first_element() -> Void {
-  let sum = Vec[S32]::from(&[1, 2, 3, 4]).iter_mov().fold_first(|a: S32, b: S32| { ret a + b })
+  let sum = Vec::from(&[1, 2, 3, 4]).iter_mov().fold_first(|a: S32, b: S32| { ret a + b })
   let got = case sum of {
-    is Some[S32](val) { val }
+    is Some(val) { val }
     else { -1 }
   }
   std::debug::assert(got == 10, "1+2+3+4 with no external initial value")
 
   # Subtraction is not commutative, so this checks the first element is the left-hand accumulator.
-  let diff = Vec[S32]::from(&[10, 3, 2]).iter_mov().fold_first(|a: S32, b: S32| { ret a - b })
+  let diff = Vec::from(&[10, 3, 2]).iter_mov().fold_first(|a: S32, b: S32| { ret a - b })
   let got_diff = case diff of {
-    is Some[S32](val) { val }
+    is Some(val) { val }
     else { -1 }
   }
   std::debug::assert(got_diff == 5, "(10-3)-2")
@@ -97,9 +97,9 @@ fun test_fold_first_starts_from_the_first_element() -> Void {
 
 !test(group="std/iterator")
 fun test_fold_first_of_one_element_is_that_element() -> Void {
-  let one = Vec[S32]::from(&[7]).iter_mov().fold_first(|a: S32, b: S32| { ret a * b })
+  let one = Vec::from(&[7]).iter_mov().fold_first(|a: S32, b: S32| { ret a * b })
   let got = case one of {
-    is Some[S32](val) { val }
+    is Some(val) { val }
     else { -1 }
   }
   std::debug::assert(got == 7, "the reducer never runs for a single element")
@@ -109,7 +109,7 @@ fun test_fold_first_of_one_element_is_that_element() -> Void {
 fun test_fold_first_of_nothing_is_none() -> Void {
   let none = Vec[S32]::new().iter_mov().fold_first(|a: S32, b: S32| { ret a + b })
   let got = case none of {
-    is Some[S32](val) { val }
+    is Some(val) { val }
     else { -1 }
   }
   std::debug::assert(got == -1, "an empty iterator has no initial value")
@@ -117,16 +117,16 @@ fun test_fold_first_of_nothing_is_none() -> Void {
 
 !test(group="std/iterator")
 fun test_min_is_the_smallest_or_none() -> Void {
-  let m = Vec[S32]::from(&[4, 2, 9, 3]).iter_mov().min()
+  let m = Vec::from(&[4, 2, 9, 3]).iter_mov().min()
   let got = case m of {
-    is Some[S32](val) { val }
+    is Some(val) { val }
     else { -1 }
   }
   std::debug::assert(got == 2, "the smallest of four")
 
   let e = Vec[S32]::new().iter_mov().min()
   let got_e = case e of {
-    is Some[S32](val) { val }
+    is Some(val) { val }
     else { -1 }
   }
   std::debug::assert(got_e == -1, "an empty iterator has no minimum")
@@ -134,8 +134,8 @@ fun test_min_is_the_smallest_or_none() -> Void {
 
 !test(group="std/iterator")
 fun test_zip_pairs_items_in_lockstep() -> Void {
-  let x_vals = Vec[S32]::from(&[1, 2, 3])
-  let y_vals = Vec[S32]::from(&[4, 5, 6])
+  let x_vals = Vec::from(&[1, 2, 3])
+  let y_vals = Vec::from(&[4, 5, 6])
   let pairs = x_vals.iter_mov().zip(y_vals.iter_mov()).collect[Vec[(S32, S32)]]()
   std::debug::assert(pairs.len() == 3_uz, "one pair per element")
   std::debug::assert(pairs.index_ref(0_uz).0 == 1, "first pair starts with 1")
@@ -148,10 +148,10 @@ fun test_zip_pairs_items_in_lockstep() -> Void {
 !test(group="std/iterator")
 fun test_zip_stops_at_the_shorter_side() -> Void {
   std::debug::assert(
-    Vec[S32]::from(&[1, 2, 3, 4]).iter_mov().zip(Vec[S32]::from(&[5, 6]).iter_mov()).count() == 2_uz,
+    Vec::from(&[1, 2, 3, 4]).iter_mov().zip(Vec::from(&[5, 6]).iter_mov()).count() == 2_uz,
     "the right side runs out first")
   std::debug::assert(
-    Vec[S32]::from(&[1]).iter_mov().zip(Vec[S32]::from(&[5, 6, 7]).iter_mov()).count() == 1_uz,
+    Vec::from(&[1]).iter_mov().zip(Vec::from(&[5, 6, 7]).iter_mov()).count() == 1_uz,
     "the left side runs out first")
   std::debug::assert(
     Vec[S32]::new().iter_mov().zip(Vec[S32]::from(&[5, 6]).iter_mov()).count() == 0_uz, "an empty side yields nothing")
@@ -160,7 +160,7 @@ fun test_zip_stops_at_the_shorter_side() -> Void {
 !test(group="std/iterator")
 fun test_zip_pairs_different_types() -> Void {
   let mut total = 0_uz
-  loop pair in Vec[S32]::from(&[10, 20]).iter_mov().zip(std::range::Range[USize]::between(0_uz, 2_uz)) {
+  loop pair in Vec::from(&[10, 20]).iter_mov().zip(std::range::Range::between(0_uz, 2_uz)) {
     total += pair.1
   }
   std::debug::assert(total == 1_uz, "the second element comes from the range")
@@ -178,7 +178,7 @@ sup ZkKeyed ext std::ops::ord::Ord {
 
 fun zk_tag_of(m: Opt[ZkKeyed]) -> S32 {
   ret case m of {
-    is Some[ZkKeyed](val) {
+    is Some(val) {
       let ZkKeyed(key, tag) = val
       tag
     }
@@ -188,16 +188,16 @@ fun zk_tag_of(m: Opt[ZkKeyed]) -> S32 {
 
 !test(group="std/iterator")
 fun test_max_is_the_largest_or_none() -> Void {
-  let m = Vec[S32]::from(&[4, 2, 9, 3]).iter_mov().max()
+  let m = Vec::from(&[4, 2, 9, 3]).iter_mov().max()
   let got = case m of {
-    is Some[S32](val) { val }
+    is Some(val) { val }
     else { -1 }
   }
   std::debug::assert(got == 9, "the largest of four")
 
   let e = Vec[S32]::new().iter_mov().max()
   let got_e = case e of {
-    is Some[S32](val) { val }
+    is Some(val) { val }
     else { -1 }
   }
   std::debug::assert(got_e == -1, "an empty iterator has no maximum")
@@ -224,9 +224,9 @@ fun test_min_of_floats_uses_their_own_min() -> Void {
   # F64's min is IEEE 754's "minimum", which carries a NaN through. Ord's default, built on "<", never picks a NaN
   # (every comparison with one is false), so a NaN result shows the override was used.
   let nan = std::intrinsics::bit_cast[F64](0x7ff8000000000000_u64)
-  let m = Vec[F64]::from(&[1.0_f64, nan, 0.5_f64]).iter_mov().min()
+  let m = Vec::from(&[1.0_f64, nan, 0.5_f64]).iter_mov().min()
   let got_nan = case m of {
-    is Some[F64](val) { val != val }
+    is Some(val) { val != val }
     else { false }
   }
   std::debug::assert(got_nan, "a NaN carries through F64's min")
@@ -244,7 +244,7 @@ fun zl_sums(pairs: Vec[(S32, S32)]) -> (S32, S32) {
 
 !test(group="std/iterator")
 fun test_zip_longest_pads_a_shorter_other() -> Void {
-  let pairs = Vec[S32]::from(&[1, 2, 3]).iter_mov().zip_longest(Vec[S32]::from(&[4]).iter_mov(), 0, 9)
+  let pairs = Vec::from(&[1, 2, 3]).iter_mov().zip_longest(Vec::from(&[4]).iter_mov(), 0, 9)
     .collect[Vec[(S32, S32)]]()
   std::debug::assert(pairs.len() == 3_uz, "as long as the left side")
   std::debug::assert(pairs.index_ref(2_uz).1 == 9, "the right side padded with its default")
@@ -254,7 +254,7 @@ fun test_zip_longest_pads_a_shorter_other() -> Void {
 
 !test(group="std/iterator")
 fun test_zip_longest_pads_a_shorter_self() -> Void {
-  let pairs = Vec[S32]::from(&[4]).iter_mov().zip_longest(Vec[S32]::from(&[1, 2, 3]).iter_mov(), 9, 0)
+  let pairs = Vec::from(&[4]).iter_mov().zip_longest(Vec::from(&[1, 2, 3]).iter_mov(), 9, 0)
     .collect[Vec[(S32, S32)]]()
   std::debug::assert(pairs.len() == 3_uz, "as long as the right side")
   std::debug::assert(pairs.index_ref(2_uz).0 == 9, "the left side padded with its default")
@@ -265,7 +265,7 @@ fun test_zip_longest_pads_a_shorter_self() -> Void {
 !test(group="std/iterator")
 fun test_zip_longest_of_equal_or_empty_sides() -> Void {
   std::debug::assert(
-    Vec[S32]::from(&[1, 2]).iter_mov().zip_longest(Vec[S32]::from(&[3, 4]).iter_mov(), 0, 0).count() == 2_uz,
+    Vec::from(&[1, 2]).iter_mov().zip_longest(Vec::from(&[3, 4]).iter_mov(), 0, 0).count() == 2_uz,
     "equal lengths need no padding")
   std::debug::assert(
     Vec[S32]::new().iter_mov().zip_longest(Vec[S32]::new().iter_mov(), 0, 0).count() == 0_uz, "two empty sides")

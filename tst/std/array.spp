@@ -166,7 +166,7 @@ fun test_equality_over_elements_that_own_storage() -> Void {
 fun test_swap_of_pointer_owning_elements() -> Void {
   # Swapping went through `take`, which left an `Rc()` with a null control
   # block in the slot and then dropped it.
-  let mut a = [std::rc::rc::Rc[Str]::new(Str::from("a")), std::rc::rc::Rc[Str]::new(Str::from("bc"))]
+  let mut a = [std::rc::rc::Rc::new(Str::from("a")), std::rc::rc::Rc::new(Str::from("bc"))]
   a.swap(0_uz, 1_uz)
   std::debug::assert(a[0_uz].len() == 2_uz, "the second element moved to the front")
   std::debug::assert(a[1_uz].strong_count() == 1_uz, "no count was gained or lost")

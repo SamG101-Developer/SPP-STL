@@ -31,7 +31,7 @@ fun test_appending_text_characters_and_others() -> Void {
 !test(group="std/os/os_string")
 fun test_bytes_that_are_not_utf8_are_not_text() -> Void {
   # Built from bytes directly, as only std can: what Unix may hand back.
-  let os = std::os::os_string::OsStr(bytes=Vec[U8]::from(&[0x61_u8, 0xff_u8, 0x62_u8]))
+  let os = std::os::os_string::OsStr(bytes=Vec::from(&[0x61_u8, 0xff_u8, 0x62_u8]))
   let text = os.to_str()
   std::debug::assert(text.is_none(), "a stray 0xff is not text")
   drop(text)
@@ -45,7 +45,7 @@ fun test_bytes_that_are_not_utf8_are_not_text() -> Void {
 fun test_a_lone_surrogate_is_not_text() -> Void {
   # The WTF-8 of a lone surrogate (U+D800), which Windows hands back for such a
   # name: valid in an `OsStr` there, but not UTF-8, and so not text.
-  let os = std::os::os_string::OsStr(bytes=Vec[U8]::from(&[0x78_u8, 0xed_u8, 0xa0_u8, 0x80_u8]))
+  let os = std::os::os_string::OsStr(bytes=Vec::from(&[0x78_u8, 0xed_u8, 0xa0_u8, 0x80_u8]))
   let text = os.to_str()
   std::debug::assert(text.is_none(), "a lone surrogate is not text")
   drop(text)
@@ -58,7 +58,7 @@ fun test_a_lone_surrogate_is_not_text() -> Void {
 !test(group="std/os/os_string")
 fun test_to_c_str_refuses_a_nul_inside() -> Void {
   # C would stop at the nul and act on the shorter name "a".
-  let os = std::os::os_string::OsStr(bytes=Vec[U8]::from(&[0x61_u8, 0x00_u8, 0x62_u8]))
+  let os = std::os::os_string::OsStr(bytes=Vec::from(&[0x61_u8, 0x00_u8, 0x62_u8]))
   std::debug::assert(os.has_nul(), "the nul is found")
   let z = os.to_c_str()
   std::debug::assert(z.is_none(), "and there is no c string of it")

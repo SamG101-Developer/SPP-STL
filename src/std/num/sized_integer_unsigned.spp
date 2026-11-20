@@ -263,7 +263,7 @@ sup [cmp w: U32] SizedIntegerUnsigned[w] {
   !inline
   fun mul_saturating(self, that: Self) -> Self {
     ret case self.mul_checked(that) of {
-      is Some[Self](val) { val }
+      is Some(val) { val }
       else { intrinsics::max_val[Self]() }
     }
   }
@@ -406,7 +406,7 @@ sup [cmp w: U32] SizedIntegerUnsigned[w] {
   !inline
   fun pow_saturating(self, that: U32) -> Self {
     ret case self.pow_checked(that) of {
-      is Some[Self](val) { val }
+      is Some(val) { val }
       else { intrinsics::max_val[Self]() }
     }
   }

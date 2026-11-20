@@ -229,7 +229,7 @@ fun test_a_file_whose_name_is_not_utf8() -> Void {
   # name read back exactly, where it used to become a `Str` that was not UTF-8.
   # Not on macOS, whose file systems (APFS, HFS+) refuse a name that is not
   # UTF-8 ("open" fails with EILSEQ), so the file cannot be made there.
-  let name = std::os::os_string::OsStr(bytes=Vec[U8]::from(&[0x78_u8, 0xff_u8]))
+  let name = std::os::os_string::OsStr(bytes=Vec::from(&[0x78_u8, 0xff_u8]))
   let path = std::fs::path::Path::new(&name)
   let file = std::fs::file::File::open(&path, std::fs::file::FileMode().write().create().truncate()).unwrap()
   let closed = file.close()
@@ -255,7 +255,7 @@ fun test_a_file_whose_name_is_not_utf8() -> Void {
 !test(group="std/fs/path")
 fun test_a_path_with_a_nul_inside_is_refused() -> Void {
   # The system would stop at the nul and act on "spp_std_test_nul" instead.
-  let path = std::fs::path::Path(inner=std::os::os_string::OsStr(bytes=Vec[U8]::from(
+  let path = std::fs::path::Path(inner=std::os::os_string::OsStr(bytes=Vec::from(
     &[0x73_u8, 0x70_u8, 0x70_u8, 0x5f_u8, 0x6e_u8, 0x00_u8, 0x78_u8])))
   std::debug::assert(path.exists().not, "it does not exist")
   std::debug::assert(path.is_dir().not, "nor is a directory")

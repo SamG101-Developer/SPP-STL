@@ -10,7 +10,7 @@ fun test_a_one_thread_barrier_passes() -> Void {
 
 !test(group="std/threading/barrier")
 fun test_every_waiter_of_a_round_passes() -> Void {
-  let b = std::threading::arc::Arc[std::threading::barrier::Barrier]::new(
+  let b = std::threading::arc::Arc::new(
     std::threading::barrier::Barrier::new(2_u64).expect("barrier"))
   let other = b.clone()
   let h = std::threading::thread::spawn(|caps other| -> Bool {

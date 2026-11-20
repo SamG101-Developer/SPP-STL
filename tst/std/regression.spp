@@ -335,7 +335,7 @@ fun zz_guarded_divide(n: USize, d: USize) -> Bool {
 
 !test(group="std/regression")
 fun test_logical_operators_short_circuit() -> Void {
-  let v = std::vector::Vec[S32]::from(&[1, 2, 3])
+  let v = std::vector::Vec::from(&[1, 2, 3])
   std::debug::assert(zz_guarded_index(&v, 0_uz).not, "the index is not reached when the guard is false")
   std::debug::assert(zz_guarded_index(&v, 1_uz).not, "and is reached when it is true")
   std::mem::ops::drop(v)
@@ -406,7 +406,7 @@ sup [T] ZzOrdered[T] {
 
 !test(group="std/regression")
 fun test_a_comp_default_naming_a_constant_on_self() -> Void {
-  let o = ZzOrdered[S32](val=1)
+  let o = ZzOrdered(val=1)
   std::debug::assert(o.pick() == 9_u8, "the default reads the owner's constant")
   std::debug::assert(o.pick[choice=3_u8]() == 3_u8, "and is overridden when given")
   std::mem::ops::drop(o)
@@ -447,7 +447,7 @@ fun test_dropping_a_reordered_struct_field_by_field() -> Void {
   let mut v = Vec[S32]::new()
   v.append(6)
 
-  let p = ZzReorderedPair[S32, Vec[S32]](key=1, val=v)
+  let p = ZzReorderedPair(key=1, val=v)
   std::debug::assert(p.key == 1, "the key reads back from its physical slot")
   std::debug::assert(p.val.len() == 1_uz, "and the vector came along whole")
   std::mem::ops::drop(p)
@@ -835,10 +835,10 @@ fun test_a_shadowed_binding_reads_the_one_before_it_and_then_holds_its_own() -> 
   let x = x == 6
   std::debug::assert(x, "a third, of another type, read the second")
 
-  let v = std::vector::Vec[S32]::from(&[1, 2, 3])
+  let v = std::vector::Vec::from(&[1, 2, 3])
   let n = v.len()
   std::mem::ops::drop(v)
-  let v = std::vector::Vec[Bool]::from(&[true])
+  let v = std::vector::Vec::from(&[true])
   std::debug::assert(n == 3_uz and v.len() == 1_uz, "each vector binding kept its own storage")
   std::mem::ops::drop(v)
 }

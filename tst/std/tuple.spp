@@ -49,7 +49,7 @@ fun test_a_tuple_destructures_into_its_elements() -> Void {
 !test(group="std/tuple")
 fun test_a_pair_holds_a_key_and_a_value() -> Void {
   # "Pair" is a plain class with no "Copy" superimposition, so it is linear even over copyable fields.
-  let p = std::tuple::Pair[S32, Bool](key=1, val=true)
+  let p = std::tuple::Pair(key=1, val=true)
   std::debug::assert(p.key == 1, "the key")
   std::debug::assert(p.val, "the value")
   drop(p)
@@ -60,7 +60,7 @@ fun test_a_pair_can_hold_a_non_copyable_value() -> Void {
   let mut v = Vec[S32]::new()
   v.append(6)
 
-  let p = std::tuple::Pair[S32, Vec[S32]](key=1, val=v)
+  let p = std::tuple::Pair(key=1, val=v)
   std::debug::assert(p.key == 1, "the key is still readable")
   std::debug::assert(p.val.len() == 1_uz, "and the vector came along whole")
   drop(p)

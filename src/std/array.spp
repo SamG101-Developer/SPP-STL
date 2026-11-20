@@ -37,10 +37,17 @@ cls Arr[T, cmp n: USize] {
   #   cannot be changed after the array is created.
 }
 
+!private
+!conv("C")
+cls ArrParts[T, cmp k: USize, cmp m: USize] {
+  !package head: Arr[T, k]
+  !package tail: Arr[T, m]
+}
+
 sup [T: Zero, cmp n: USize] Arr[T, n] ext Zero {
   fun zero() -> Self {
     let arr = Self()
-    loop i in Range[USize]::between(0_uz, n) { arr[mut i]@ = T::zero() }
+    loop i in Range::between(0_uz, n) { arr[mut i]@ = T::zero() }
     ret arr
   }
 
@@ -64,7 +71,7 @@ sup [T: Copy, cmp n: USize] Arr[T, n] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun fill(&mut self, val: T) -> Void {
-    loop i in Range[USize]::between(0_uz, n) { self[mut i]@ = val }
+    loop i in Range::between(0_uz, n) { self[mut i]@ = val }
   }
 
   !public
@@ -102,7 +109,7 @@ sup [T: Eq, cmp n: USize] Arr[T, n] ext Eq {
     #   another instance of the same array type.
     # @ret: A boolean value indicating whether the two arrays are equal.
 
-    loop i in Range[USize]::between(0_uz, n) {
+    loop i in Range::between(0_uz, n) {
       case self[i] != that[i] { ret false }
     }
     ret true
@@ -114,7 +121,7 @@ sup [T: Eq, cmp n: USize] Arr[T, n] ext Eq {
     #   another instance of the same array type.
     # @ret: A boolean value indicating whether the two arrays are not equal.
 
-    loop i in Range[USize]::between(0_uz, n) {
+    loop i in Range::between(0_uz, n) {
       case self[i] != that[i] { ret true }
     }
     ret false
@@ -141,7 +148,27 @@ sup [T: Format, cmp n: USize] Arr[T, n] ext Format {
     # Format an array as `[a, b, c]`, the placeholder's spec applying to each
     # element.
 
-    ret format::format_elements[T](formatter, self)
+    ret format::format_elements(formatter, self)
+  }
+}
+
+sup [T, cmp n: USize] Arr[T, n] {
+  !public
+  fun pop_front(self) -> (T, Arr[T, n - 1_uz]) {
+    let ArrParts(head, tail) = std::mem::ops::transmute[B=ArrParts[T, 1_uz, n - 1_uz]](self)
+    ret (std::mem::ops::transmute[B=T](head), tail)
+  }
+
+  !public
+  fun pop_back(self)  -> (Arr[T, n - 1_uz], T) {
+    let ArrParts(head, tail) = std::mem::ops::transmute[B=ArrParts[T, n - 1_uz, 1_uz]](self)
+    ret (head, std::mem::ops::transmute[B=T](tail))
+  }
+
+  !public
+  fun split_at[cmp k: USize](self) -> (Arr[T, k], Arr[T, n - k]) {
+    let ArrParts(head, tail) = std::mem::ops::transmute[B=ArrParts[T, k, n - k]](self)
+    ret (head, tail)
   }
 }
 

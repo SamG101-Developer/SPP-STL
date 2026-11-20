@@ -96,9 +96,9 @@ sup [T] Vec[T] {
     # @let f:
     # @ret:
 
+    defer drop(f)
     let mut vec = Self::new_with_capacity_in(len, GlobalAlloc)
-    loop i in Range[USize]::between(0_uz, len) { vec.append_unchecked(f(i)) }
-    drop(f)
+    loop i in Range::between(0_uz, len) { vec.append_unchecked(f(i)) }
 
     vec.length = len
     ret vec
@@ -473,7 +473,7 @@ sup [T, A: Alloc] Vec[T, A] {
     # in the other vector.
     # @ret:
 
-    let Vec[T, A](buffer, length) = self
+    let Vec(buffer, length) = self
     drop(buffer)
   }
 
@@ -527,7 +527,7 @@ sup [T: Clone, A: Alloc] Vec[T, A] {
 
     let additional = new_len - self.len()
     self.capacity_reserve(additional)
-    loop i in Range[USize]::between(1_uz, additional) {
+    loop i in Range::between(1_uz, additional) {
       self.append_unchecked(element.clone())
     }
     self.append_unchecked(element)
@@ -598,7 +598,7 @@ sup [T, A: Alloc] Vec[T, A] ext IterMov[T] {
     # the remainder itself.
     # @ret: An iterator that moves the vector's elements out in order.
 
-    let Vec[T, A](mut buffer, length) = self
+    let Vec(mut buffer, length) = self
     let mut i = 0_uz
     defer drop(buffer)
     defer buffer.clear_range(i, length - i)
@@ -677,7 +677,7 @@ sup [T: Eq, A: Alloc] Vec[T, A] ext Eq {
     # @ret: If the vectors are equal, per element.
 
     case self.len() != that.len() { ret false }
-    loop i in Range[USize]::between(0_uz, self.len()) {
+    loop i in Range::between(0_uz, self.len()) {
       case self[i] != that[i] { ret false }
     }
     ret true
@@ -690,7 +690,7 @@ sup [T: Eq, A: Alloc] Vec[T, A] ext Eq {
     # @ret: If the vectors are unequal, per element.
 
     case self.len() != that.len() { ret true }
-    loop i in Range[USize]::between(0_uz, self.len()) {
+    loop i in Range::between(0_uz, self.len()) {
       case self[i] != that[i] { ret true }
     }
     ret false
@@ -747,7 +747,7 @@ sup [T, A: Alloc] Vec[T, A] ext Drop {
     # @ret: Nothing; this is invoked for its cleanup side effect when a `Vec` is
     #   destroyed.
 
-    let Vec[T, A](mut buffer, length) = self
+    let Vec(mut buffer, length) = self
     buffer.clear_range(0_uz, length)
     drop(buffer)
   }
@@ -759,6 +759,6 @@ sup [T: Format, A: Alloc] Vec[T, A] ext Format {
     # Format a vector as `[a, b, c]`, the placeholder's spec applying to each
     # element.
 
-    ret format::format_elements[T](formatter, self)
+    ret format::format_elements(formatter, self)
   }
 }

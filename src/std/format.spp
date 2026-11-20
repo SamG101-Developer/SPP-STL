@@ -530,7 +530,7 @@ fun try_format[..Args: Format](fmt: &StrView, ..args: Args) -> Res[Str, StreamEr
   let mut f = Formatter::new(fmt)
   let result = format_args(&mut f, ..args)
   let text = f.into_str()
-  case result is Fail[StreamErr](err) {
+  case result is Fail(err) {
     drop(text)
     ret Fail(err)
   }
@@ -581,7 +581,7 @@ fun format_args[H: Format, ..Ts: Format](f: &mut Formatter, head: H, ..tail: Ts)
   let result = f.arg(&head)
   drop(head)
   case result of {
-    is Fail[StreamErr](err) {
+    is Fail(err) {
       drop(..tail)
       ret Fail(err)
     }

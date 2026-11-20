@@ -194,7 +194,7 @@ sup TcpStream {
     # Build the CLinger struct from the optional timeout
     # provided to this function.
     let lg = case timeout of {
-      is Some[Duration](val) { sppc::CLinger(onoff=1, linger=S32::from(val.as_secs())) }
+      is Some(val) { sppc::CLinger(onoff=1, linger=S32::from(val.as_secs())) }
       else { sppc::CLinger(onoff=0, linger=0) }
     }
 

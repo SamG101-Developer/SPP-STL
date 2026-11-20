@@ -116,7 +116,7 @@ fun test_mut_param_passed_down_recursively() -> Void {
 
 !test(group="std/noalias")
 fun test_index_borrows_one_after_another() -> Void {
-  let mut v = std::vector::Vec[S32]::from(&[1, 2, 3])
+  let mut v = std::vector::Vec::from(&[1, 2, 3])
   {
     let a = v[mut 0_uz]
     a@ = 5
@@ -133,7 +133,7 @@ fun test_index_borrows_one_after_another() -> Void {
 
 !test(group="std/noalias")
 fun test_vec_swap_of_two_elements_and_of_one() -> Void {
-  let mut v = std::vector::Vec[S32]::from(&[1, 2, 3])
+  let mut v = std::vector::Vec::from(&[1, 2, 3])
   v.swap(0_uz, 2_uz)
   v.swap(1_uz, 1_uz)
   let a = v[0_uz]@
@@ -159,7 +159,7 @@ fun test_mem_swap_and_replace_of_owned_values() -> Void {
 
 !test(group="std/noalias")
 fun test_iter_mut_then_read() -> Void {
-  let mut v = std::vector::Vec[S32]::from(&[1, 2, 3])
+  let mut v = std::vector::Vec::from(&[1, 2, 3])
   loop e in v.iter_mut() { e@ = e@ * 10 }
   let mut sum = 0
   loop e in v.iter_ref() { sum = sum + e@ }

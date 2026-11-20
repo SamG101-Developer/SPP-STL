@@ -21,7 +21,7 @@ fun test_raw_buf_is_package_visible_from_tests() -> Void {
 !test(group="std/vector")
 fun test_vector_from_view_copies_every_element() -> Void {
   let arr = [0, 1, 2, 3, 4, 5, 6, 7]
-  let vec = Vec[S32]::from(&arr)
+  let vec = Vec::from(&arr)
   std::debug::assert(vec.len() == 8_uz, "length")
   std::debug::assert(vec[0_uz]@ == 0, "first")
   std::debug::assert(vec[3_uz]@ == 3, "middle")
@@ -31,8 +31,8 @@ fun test_vector_from_view_copies_every_element() -> Void {
 
 !test(group="std/vector")
 fun test_vector_append_many_appends_rather_than_overwrites() -> Void {
-  let a = Vec[S32]::from(&[1, 2, 3])
-  let b = Vec[S32]::from(&[4, 5])
+  let a = Vec::from(&[1, 2, 3])
+  let b = Vec::from(&[4, 5])
   let mut m = a.clone()
   m.append_many(b.clone())
   std::debug::assert(m.len() == 5_uz, "length")
@@ -46,8 +46,8 @@ fun test_vector_append_many_appends_rather_than_overwrites() -> Void {
 
 !test(group="std/vector")
 fun test_vector_insert_many_at_shifts_the_tail() -> Void {
-  let mut v = Vec[S32]::from(&[1, 2, 3])
-  v.insert_many_at(1_uz, Vec[S32]::from(&[4, 5]))
+  let mut v = Vec::from(&[1, 2, 3])
+  v.insert_many_at(1_uz, Vec::from(&[4, 5]))
   std::debug::assert(v.len() == 5_uz, "length")
   std::debug::assert(v[0_uz]@ == 1, "head")
   std::debug::assert(v[1_uz]@ == 4, "inserted")
@@ -59,7 +59,7 @@ fun test_vector_insert_many_at_shifts_the_tail() -> Void {
 
 !test(group="std/vector")
 fun test_vector_clone_is_independent() -> Void {
-  let v = Vec[S32]::from(&[1, 2, 3])
+  let v = Vec::from(&[1, 2, 3])
   let mut c = v.clone()
   c.append(4)
   std::debug::assert(v.len() == 3_uz, "original is untouched")
@@ -74,8 +74,8 @@ fun test_vector_clone_of_heap_elements_is_deep() -> Void {
   # Element-owned heap memory (the inner buffers) must be cloned, not shared:
   # a bytewise clone made the two vectors free each inner buffer twice.
   let mut v = Vec[Vec[S32]]::new()
-  v.append(Vec[S32]::from(&[1, 2]))
-  v.append(Vec[S32]::from(&[3]))
+  v.append(Vec::from(&[1, 2]))
+  v.append(Vec::from(&[3]))
   let c1 = v.clone()
   let mut c2 = v.clone()
   c2[mut 0_uz].append(9)
@@ -90,8 +90,8 @@ fun test_vector_clone_of_heap_elements_is_deep() -> Void {
 
 !test(group="std/vector")
 fun test_vector_from_view_of_heap_elements_clones_them() -> Void {
-  let arr = [Vec[S32]::from(&[5, 6]), Vec[S32]::from(&[7])]
-  let mut v = Vec[Vec[S32]]::from(&arr)
+  let arr = [Vec::from(&[5, 6]), Vec::from(&[7])]
+  let mut v = Vec::from(&arr)
   v[mut 0_uz].append(8)
   std::debug::assert(arr[0_uz].len() == 2_uz, "the view's element is untouched")
   std::debug::assert(v[0_uz].len() == 3_uz, "the vector's element is its own")
@@ -104,9 +104,9 @@ fun test_vector_append_many_of_heap_elements_keeps_them_alive() -> Void {
   # The moved-from vector's buffer is freed without destroying the elements
   # that moved out of it; dropping it whole freed their inner buffers.
   let mut a = Vec[Vec[S32]]::new()
-  a.append(Vec[S32]::from(&[1]))
+  a.append(Vec::from(&[1]))
   let mut b = Vec[Vec[S32]]::new()
-  b.append(Vec[S32]::from(&[2, 3]))
+  b.append(Vec::from(&[2, 3]))
   a.append_many(b)
   std::debug::assert(a.len() == 2_uz, "length")
   std::debug::assert(a[1_uz].len() == 2_uz, "moved element kept its length")
@@ -117,10 +117,10 @@ fun test_vector_append_many_of_heap_elements_keeps_them_alive() -> Void {
 !test(group="std/vector")
 fun test_vector_insert_many_at_of_heap_elements_keeps_them_alive() -> Void {
   let mut a = Vec[Vec[S32]]::new()
-  a.append(Vec[S32]::from(&[1]))
-  a.append(Vec[S32]::from(&[4]))
+  a.append(Vec::from(&[1]))
+  a.append(Vec::from(&[4]))
   let mut b = Vec[Vec[S32]]::new()
-  b.append(Vec[S32]::from(&[2, 3]))
+  b.append(Vec::from(&[2, 3]))
   a.insert_many_at(1_uz, b)
   std::debug::assert(a.len() == 3_uz, "length")
   std::debug::assert(a[1_uz][1_uz]@ == 3, "inserted element kept its contents")
@@ -133,8 +133,8 @@ fun test_vector_swap_of_pointer_owning_elements() -> Void {
   # Swapping went through `take`, which left an `Rc()` with a null control
   # block in the slot and then dropped it.
   let mut v = Vec[std::rc::rc::Rc[Str]]::new()
-  v.append(std::rc::rc::Rc[Str]::new(Str::from("a")))
-  v.append(std::rc::rc::Rc[Str]::new(Str::from("bc")))
+  v.append(std::rc::rc::Rc::new(Str::from("a")))
+  v.append(std::rc::rc::Rc::new(Str::from("bc")))
   v.swap(0_uz, 1_uz)
   v.swap(1_uz, 1_uz)
   std::debug::assert(v[0_uz].len() == 2_uz, "the second element moved to the front")
@@ -146,9 +146,9 @@ fun test_vector_swap_of_pointer_owning_elements() -> Void {
 !test(group="std/vector")
 fun test_vector_make_reverse_of_pointer_owning_elements() -> Void {
   let mut v = Vec[Single[Str]]::new()
-  v.append(Single[Str]::new(Str::from("a")))
-  v.append(Single[Str]::new(Str::from("bc")))
-  v.append(Single[Str]::new(Str::from("def")))
+  v.append(Single::new(Str::from("a")))
+  v.append(Single::new(Str::from("bc")))
+  v.append(Single::new(Str::from("def")))
   v.make_reverse()
   std::debug::assert(v[0_uz].len() == 3_uz, "last is first")
   std::debug::assert(v[1_uz].len() == 2_uz, "middle stays")
@@ -162,7 +162,7 @@ fun test_vector_make_reverse_of_empty_and_single() -> Void {
   let mut e = Vec[Str]::new()
   e.make_reverse()
   std::debug::assert(e.len() == 0_uz, "empty stays empty")
-  let mut s = Vec[S32]::from(&[7])
+  let mut s = Vec::from(&[7])
   s.make_reverse()
   std::debug::assert(s[0_uz]@ == 7, "one element stays")
   drop(e)
@@ -188,7 +188,7 @@ fun test_vector_shrink_never_drops_below_length() -> Void {
 
 !test(group="std/vector")
 fun test_vector_iteration_visits_every_element_in_order() -> Void {
-  let v = Vec[S32]::from(&[1, 2, 3, 4])
+  let v = Vec::from(&[1, 2, 3, 4])
   let mut sum = 0
   let mut count = 0_uz
   loop e in v.iter_ref() {
@@ -228,7 +228,7 @@ fun test_take_last_on_an_empty_vector_yields_none() -> Void {
 
 !test(group="std/vector")
 fun test_contains_and_find_locate_an_element() -> Void {
-  let v = Vec[S32]::from(&[10, 20, 30])
+  let v = Vec::from(&[10, 20, 30])
   std::debug::assert(v.contains(&20), "an element that is there")
   std::debug::assert(v.contains(&99).not, "one that is not")
   std::debug::assert(v.find(&30).unwrap() == 2_uz, "find gives the index")
@@ -250,7 +250,7 @@ fun test_reserving_past_the_capacity_at_least_doubles_it() -> Void {
   # Growth is amortised: one more element than fits doubles the capacity, so appending one at a time (as `Str.append`
   # does) reallocates a logarithmic number of times, not once per append.
   let mut v = Vec[S32]::new_with_capacity(8_uz)
-  loop i in std::range::Range[S32]::between(0, 8) { v.append(i) }
+  loop i in std::range::Range::between(0, 8) { v.append(i) }
   v.capacity_reserve(1_uz)
   std::debug::assert(v.cap() >= 16_uz, "one more than fits doubles the capacity")
   v.capacity_reserve(100_uz)
@@ -269,7 +269,7 @@ fun test_reserving_what_fits_keeps_the_capacity() -> Void {
 
 !test(group="std/vector")
 fun test_clear_empties_without_dropping_the_buffer() -> Void {
-  let mut v = Vec[S32]::from(&[1, 2, 3])
+  let mut v = Vec::from(&[1, 2, 3])
   v.clear()
   std::debug::assert(v.len() == 0_uz, "no elements left")
   std::debug::assert(v.is_empty(), "and it is empty")
@@ -296,7 +296,7 @@ fun test_clear_empties_without_dropping_the_buffer() -> Void {
 
 !test(group="std/vector")
 fun test_mutable_iteration_writes_through() -> Void {
-  let mut v = Vec[S32]::from(&[1, 2, 3])
+  let mut v = Vec::from(&[1, 2, 3])
   loop e in v.iter_mut() { e@ = e@ * 10 }
   std::debug::assert(v[0_uz]@ == 10, "first")
   std::debug::assert(v[2_uz]@ == 30, "last")
@@ -305,7 +305,7 @@ fun test_mutable_iteration_writes_through() -> Void {
 
 !test(group="std/vector")
 fun test_dropping_a_vector_releases_its_buffer() -> Void {
-  loop i in std::range::Range[std::number::USize]::between(0_uz, 2000_uz) {
+  loop i in std::range::Range::between(0_uz, 2000_uz) {
     let v = std::vector::Vec[std::number::S32]::new_with_capacity(1000000_uz)
     std::mem::ops::drop(v)
   }
@@ -313,7 +313,7 @@ fun test_dropping_a_vector_releases_its_buffer() -> Void {
 
 !test(group="std/vector")
 fun test_dropping_a_string_releases_its_buffer() -> Void {
-  loop i in std::range::Range[std::number::USize]::between(0_uz, 2000_uz) {
+  loop i in std::range::Range::between(0_uz, 2000_uz) {
     let s = std::string::Str::new_with_capacity(1000000_uz)
     std::mem::ops::drop(s)
   }
@@ -321,7 +321,7 @@ fun test_dropping_a_string_releases_its_buffer() -> Void {
 
 !test(group="std/vector")
 fun test_dropping_a_struct_releases_the_buffer_it_holds() -> Void {
-  loop i in std::range::Range[std::number::USize]::between(0_uz, 2000_uz) {
+  loop i in std::range::Range::between(0_uz, 2000_uz) {
     let s = std::option::Some(val=std::vector::Vec[std::number::S32]::new_with_capacity(1000000_uz))
     std::mem::ops::drop(s)
   }
@@ -329,7 +329,7 @@ fun test_dropping_a_struct_releases_the_buffer_it_holds() -> Void {
 
 !test(group="std/vector")
 fun test_dropping_a_variant_releases_the_buffer_it_holds() -> Void {
-  loop i in std::range::Range[std::number::USize]::between(0_uz, 2000_uz) {
+  loop i in std::range::Range::between(0_uz, 2000_uz) {
     let v: std::option::Opt[std::vector::Vec[std::number::S32]] = std::option::Some(
       val=std::vector::Vec[std::number::S32]::new_with_capacity(1000000_uz))
     std::mem::ops::drop(v)
@@ -339,8 +339,8 @@ fun test_dropping_a_variant_releases_the_buffer_it_holds() -> Void {
 !test(group="std/vector")
 fun test_abandoning_a_move_iteration_drops_only_the_remainder() -> Void {
   let mut v = std::vector::Vec[std::single::Single[std::number::S32]]::new()
-  v.append(std::single::Single[std::number::S32]::new(1))
-  v.append(std::single::Single[std::number::S32]::new(2))
+  v.append(std::single::Single::new(1))
+  v.append(std::single::Single::new(2))
   std::debug::assert(v.iter_mov().take(1_uz).count() == 1_uz, "consumed one of two")
 }
 
@@ -372,8 +372,8 @@ fun test_move_iteration_over_elements_that_own_memory() -> Void {
 !test(group="std/vector")
 fun test_move_iteration_over_nested_vectors() -> Void {
   let mut v = std::vector::Vec[std::vector::Vec[std::number::S32]]::new()
-  v.append(std::vector::Vec[std::number::S32]::from(&[1, 2]))
-  v.append(std::vector::Vec[std::number::S32]::from(&[3, 4]))
+  v.append(std::vector::Vec::from(&[1, 2]))
+  v.append(std::vector::Vec::from(&[3, 4]))
   let mut n = 0_uz
   loop e in v.iter_mov() {
     n += e.len()
@@ -387,7 +387,7 @@ fun test_move_iteration_over_nested_vectors() -> Void {
 # suspend. Both ends of that are fixed now, but the conditional loop it was rewritten to is the clearer shape anyway.
 !test(group="std/vector")
 fun test_reverse_move_iteration_visits_back_to_front() -> Void {
-  let mut v = std::vector::Vec[std::number::S32]::from(&[1, 2, 3])
+  let mut v = std::vector::Vec::from(&[1, 2, 3])
   let mut first = 0
   let mut n = 0_uz
   loop e in v.reverse_iter_mov() {
@@ -402,9 +402,9 @@ fun test_reverse_move_iteration_visits_back_to_front() -> Void {
 # allocation happened to hold ("v[1]" read 232 for a vector filled with 10).
 !test(group="std/vector")
 fun test_new_filled_holds_the_value_in_every_slot() -> Void {
-  let v = Vec[U8]::new_filled(5_uz, 10_u8)
+  let v = Vec::new_filled(5_uz, 10_u8)
   std::debug::assert(v.len() == 5_uz, "five elements")
-  loop i in std::range::Range[USize]::between(0_uz, 5_uz) {
+  loop i in std::range::Range::between(0_uz, 5_uz) {
     std::debug::assert(v[i]@ == 10_u8, "every element is the fill value")
   }
   drop(v)
@@ -412,7 +412,7 @@ fun test_new_filled_holds_the_value_in_every_slot() -> Void {
 
 !test(group="std/vector")
 fun test_new_filled_with_no_elements_is_empty() -> Void {
-  let v = Vec[U8]::new_filled(0_uz, 10_u8)
+  let v = Vec::new_filled(0_uz, 10_u8)
   std::debug::assert(v.len() == 0_uz, "empty")
   drop(v)
 }
@@ -434,9 +434,9 @@ fun test_vector_append_within_capacity_fills_then_refuses() -> Void {
 !test(group="std/vector")
 fun test_vector_insert_at_the_length_appends() -> Void {
   # The bounds check allows the length itself (an append) and only refuses past it.
-  let mut v = Vec[S32]::from(&[1, 2])
+  let mut v = Vec::from(&[1, 2])
   v.insert_at(2_uz, 3)
-  v.insert_many_at(3_uz, Vec[S32]::from(&[4]))
+  v.insert_many_at(3_uz, Vec::from(&[4]))
   std::debug::assert(v.len() == 4_uz, "both inserts landed")
   std::debug::assert(v[2_uz]@ == 3 and v[3_uz]@ == 4, "appended at the end, in order")
   drop(v)

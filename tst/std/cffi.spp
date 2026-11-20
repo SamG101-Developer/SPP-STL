@@ -52,7 +52,7 @@ fun test_returned_ptr_mut_round_trips_malloc_to_free() -> Void {
   let raw = sppc::malloc(16_uz)
   let p = std::cffi::returned_ptr_mut(raw)
   case p of {
-    is Some[std::cffi::CMutBytePtr](val) { sppc::free(val) }
+    is Some(val) { sppc::free(val) }
     is None() { std::debug::assert(false, "malloc returned a non-null pointer") }
   }
 }
@@ -88,7 +88,7 @@ fun test_returned_ptr_alloc_round_trips_malloc_to_free() -> Void {
   let raw = sppc::malloc(4_uz)
   let ptr = std::cffi::returned_ptr_alloc(raw)
   case ptr of {
-    is Some[std::mem::pointer::NonNull[U8]](val) {
+    is Some(val) {
       let mut p = val
       p.write(42_u8)
       std::debug::assert(p.read() == 42_u8, "the pointer can be written and read through")
@@ -109,7 +109,7 @@ fun test_returned_ptr_alloc_of_null_is_none() -> Void {
 fun test_from_c_str_of_bytes_that_are_not_utf8_fails() -> Void {
   # A c library promises nothing about the encoding: a stray 0xff used to become
   # a `Str` that was not valid UTF-8.
-  let bytes = Vec[U8]::from(&[0x61_u8, 0xff_u8, 0x62_u8, 0x00_u8])
+  let bytes = Vec::from(&[0x61_u8, 0xff_u8, 0x62_u8, 0x00_u8])
   let (p, n) = std::cffi::view_ptr_ref(&bytes)
   let s = Str::from_c_str(&p)
   std::debug::assert(s.is_fail(), "bytes that are not UTF-8 are refused")

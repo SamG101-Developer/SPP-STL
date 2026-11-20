@@ -221,7 +221,7 @@ sup [T] RwLock[T] ext Drop {
     # Destroy the rwlock and drop the value it guards. Use `take` to keep the
     # value.
 
-    let RwLock[T](handle, val) = self
+    let RwLock(handle, val) = self
     let err = sppc::pthread_rwlock_destroy(&handle)
     std::abort::abort_if(err != 0, "Failed to destroy an rwlock")
     drop(val)

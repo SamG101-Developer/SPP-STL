@@ -65,7 +65,7 @@ sup [T, A: Alloc] Weak[T, A] ext Drop {
     # whoever takes the weak count to zero, which is either the last `Weak` or the last `Arc` releasing the count the
     # strong handles held collectively - and by then the value has already been destroyed.
 
-    let Weak[T, A](pointer, alloc) = self
+    let Weak(pointer, alloc) = self
     defer drop(alloc)
 
     case pointer.weak_counter.fetch_sub(1_uz) == 1_uz {
