@@ -156,3 +156,13 @@ fun returned_ptr_alloc(ptr: CVoidPtr) -> Opt[NonNull[U8]] {
 
   ret NonNull::from_ptr(ptr).pass_opt()
 }
+
+!public
+!versioned(base="1.0.0", new="1.0.0")
+fun null_ptr() -> CVoidPtr {
+  # A null pointer, for c parameters that take "no value": an out-param that c
+  # only fills when it starts null (EVP_PKEY_keygen's **ppkey), or an optional
+  # handle. S++ code cannot read through a CVoidPtr, and every std conversion
+  # from one (returned_ptr_*) already checks for null, so it adds no unsafety.
+  ret Ptr[CUChar]::null()
+}
