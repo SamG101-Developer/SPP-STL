@@ -26,13 +26,11 @@ fun test_view_ptr_mut_writes_land_in_the_vector() -> Void {
   std::debug::assert(n == 2_uz, "the length is the vector's")
   inner.write(9_u8)
   std::debug::assert(v[0_uz]@ == 9_u8, "a write through the pointer is seen by the vector")
-  drop(v)
 }
 
 !test(group="std/cffi")
 fun test_an_unused_pointer_can_be_dropped() -> Void {
   let (p, n) = std::cffi::view_ptr_ref("abc".view_ref())
-  drop(p)
   std::debug::assert(n == 3_uz, "the length outlives the dropped pointer")
 }
 
@@ -44,7 +42,6 @@ fun test_view_ptr_ref_of_a_byte_vector() -> Void {
   let std::cffi::CRefBytePtr(inner) = p
   std::debug::assert(n == 1_uz, "the length is the vector's")
   std::debug::assert(inner.read() == 7_u8, "the pointer is at the first byte")
-  drop(v)
 }
 
 !test(group="std/cffi")
@@ -61,14 +58,12 @@ fun test_returned_ptr_mut_round_trips_malloc_to_free() -> Void {
 fun test_returned_ptr_ref_of_null_is_none() -> Void {
   let p = std::cffi::returned_ptr_ref(std::mem::pointer::Ptr[U8]::null())
   std::debug::assert(p.is_none(), "a null returned pointer has no byte pointer")
-  drop(p)
 }
 
 !test(group="std/cffi")
 fun test_returned_ptr_mut_of_null_is_none() -> Void {
   let p = std::cffi::returned_ptr_mut(std::mem::pointer::Ptr[U8]::null())
   std::debug::assert(p.is_none(), "a null returned pointer has no byte pointer")
-  drop(p)
 }
 
 !test(group="std/cffi")
@@ -78,9 +73,6 @@ fun test_from_c_str_reads_up_to_the_terminator() -> Void {
   let s = Str::from_c_str(&p).unwrap()
   std::debug::assert(s == "hello", "the bytes before the nul are copied")
   std::debug::assert(n == 5_uz, "the view's length does not count the nul")
-  drop(p)
-  drop(s)
-  drop(c)
 }
 
 !test(group="std/cffi")
@@ -102,7 +94,6 @@ fun test_returned_ptr_alloc_round_trips_malloc_to_free() -> Void {
 fun test_returned_ptr_alloc_of_null_is_none() -> Void {
   let ptr = std::cffi::returned_ptr_alloc(std::mem::pointer::Ptr[U8]::null())
   std::debug::assert(ptr.is_none(), "a null returned pointer has no NonNull")
-  drop(ptr)
 }
 
 !test(group="std/cffi")
@@ -113,10 +104,6 @@ fun test_from_c_str_of_bytes_that_are_not_utf8_fails() -> Void {
   let (p, n) = std::cffi::view_ptr_ref(&bytes)
   let s = Str::from_c_str(&p)
   std::debug::assert(s.is_fail(), "bytes that are not UTF-8 are refused")
-  drop(s)
   let lossy = Str::from_c_str_lossy(&p)
   std::debug::assert(lossy == "a�b", "or replaced, taken lossily")
-  drop(lossy)
-  drop(p)
-  drop(bytes)
 }

@@ -128,7 +128,6 @@ fun test_index_borrows_one_after_another() -> Void {
   let first = v[0_uz]@
   let second = v[1_uz]@
   std::debug::assert(first == 5 and second == 6, "each element written through its own borrow")
-  std::mem::ops::drop(v)
 }
 
 !test(group="std/noalias")
@@ -140,7 +139,6 @@ fun test_vec_swap_of_two_elements_and_of_one() -> Void {
   let b = v[1_uz]@
   let c = v[2_uz]@
   std::debug::assert(a == 3 and b == 2 and c == 1, "two elements swapped, one left alone")
-  std::mem::ops::drop(v)
 }
 
 !test(group="std/noalias")
@@ -152,9 +150,6 @@ fun test_mem_swap_and_replace_of_owned_values() -> Void {
   std::debug::assert(old.starts_with("right") and old.len() == 5_uz, "swap moved b into a")
   std::debug::assert(b.starts_with("left") and b.len() == 4_uz, "and a into b")
   std::debug::assert(a.starts_with("new") and a.len() == 3_uz, "replace wrote the new value")
-  std::mem::ops::drop(a)
-  std::mem::ops::drop(b)
-  std::mem::ops::drop(old)
 }
 
 !test(group="std/noalias")
@@ -164,7 +159,6 @@ fun test_iter_mut_then_read() -> Void {
   let mut sum = 0
   loop e in v.iter_ref() { sum = sum + e@ }
   std::debug::assert(sum == 60, "every element written through the iterator")
-  std::mem::ops::drop(v)
 }
 
 !test(group="std/noalias")
@@ -173,7 +167,6 @@ fun test_closure_holding_mut_then_value_read() -> Void {
   {
     let mut c = |caps &mut x| { x@ = x@ + 41 }
     c()
-    std::mem::ops::drop(c)
   }
   std::debug::assert(x == 42, "the closure's write seen after it")
 }
@@ -185,7 +178,6 @@ fun test_generator_holding_mut_across_resumes() -> Void {
     let mut g = na_counter(&mut n)
     let a = g.res()
     let b = g.res()
-    std::mem::ops::drop(g)
   }
   std::debug::assert(n == 2, "each resume wrote through the held borrow")
 }

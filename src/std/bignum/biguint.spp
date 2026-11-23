@@ -216,7 +216,6 @@ sup BigUInt ext std::ops::bit_and::BitAndAssign {
       self.data[mut i] &= that.data[i]@
     }
     self.trim()
-    drop(that) # "that" is taken by move, so this is where it goes.
   }
 }
 
@@ -230,7 +229,6 @@ sup BigUInt ext std::ops::bit_ior::BitIorAssign {
       self.data[mut i]@ = a | b
     }
     self.trim()
-    drop(that) # "that" is taken by move, so this is where it goes.
   }
 }
 
@@ -244,7 +242,6 @@ sup BigUInt ext std::ops::bit_xor::BitXorAssign {
       self.data[mut i]@ = a ^ b
     }
     self.trim()
-    drop(that) # "that" is taken by move, so this is where it goes.
   }
 }
 
@@ -255,7 +252,6 @@ sup BigUInt ext std::ops::bit_shl::BitShlAssign {
     # sits rather than what the value is, so every shift went by about the logarithm of the distance asked for.
     let that_is_zero = that.is_zero()
     let distance = that.to_usize()
-    drop(that)
 
     case that_is_zero { ret }
     let word_shift = distance / 32_uz
@@ -270,7 +266,7 @@ sup BigUInt ext std::ops::bit_shl::BitShlAssign {
       val.data[mut i + USize::from(word_shift) + 1_uz]@ |= U32::from(shifted >> 32_u32)
     }
 
-    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, val.data))
+    self.data = val.data
     self.trim()
   }
 }
@@ -281,7 +277,6 @@ sup BigUInt ext std::ops::bit_shr::BitShrAssign {
     # shift, the distance is the number "that" holds rather than the position of its top bit.
     let that_is_zero = that.is_zero()
     let distance = that.to_usize()
-    drop(that)
 
     case that_is_zero { ret }
     let word_shift = distance / 32_uz
@@ -307,7 +302,7 @@ sup BigUInt ext std::ops::bit_shr::BitShrAssign {
     # above that still hold the pre-shift digits. Dropping them is not something `trim` can do - they are not zero.
     val.data.resize(self.data.len() - USize::from(word_shift), 0_u32)
 
-    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, val.data))
+    self.data = val.data
     self.trim()
   }
 }
@@ -327,7 +322,6 @@ sup BigUInt ext std::ops::add::AddAssign {
     }
 
     case carry != 0_u64 { self.data.append(U32::from(carry)) }
-    drop(that) # "that" is taken by move, so this is where it goes.
   }
 }
 
@@ -347,7 +341,6 @@ sup BigUInt ext std::ops::sub::SubAssign {
     }
 
     self.trim()
-    drop(that) # "that" is taken by move, so this is where it goes.
   }
 }
 
@@ -357,12 +350,11 @@ sup BigUInt ext std::ops::mul::MulAssign {
     case self.is_zero() or that.is_zero() {
       self.data.clear()
       self.data.append(0_u32)
-      drop(that)
       ret
     }
 
     case self.is_one() {
-      std::mem::ops::drop(std::mem::ops::replace(&mut self.data, that.data))
+      self.data = that.data
       ret
     }
 
@@ -388,8 +380,7 @@ sup BigUInt ext std::ops::mul::MulAssign {
       }
     }
 
-    drop(that)
-    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, val.data))
+    self.data = val.data
     self.trim()
   }
 }
@@ -399,13 +390,11 @@ sup BigUInt ext std::ops::div::DivAssign {
     # Skip for known answers.
     case that.is_zero() { std::abort::abort("BigUInt::div: division by zero") }
     case that.is_one() {
-      drop(that)
       ret
     }
     case self < that {
       self.data.clear()
       self.data.append(0_u32)
-      drop(that)
       ret
     }
 
@@ -437,11 +426,8 @@ sup BigUInt ext std::ops::div::DivAssign {
 
     # "quotient" is taken apart by the assignment below - its only attribute moves out of it - but the working
     # values are still whole and have to go somewhere.
-    drop(dividend)
-    drop(divisor)
-    drop(window)
 
-    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, quotient.data))
+    self.data = quotient.data
     self.trim()
   }
 }
@@ -467,10 +453,8 @@ sup BigUInt ext std::ops::pow::PowAssign {
     }
 
     # "val" is taken apart by the assignment below; the working values are still whole.
-    drop(base)
-    drop(exponent)
 
-    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, val.data))
+    self.data = val.data
   }
 }
 

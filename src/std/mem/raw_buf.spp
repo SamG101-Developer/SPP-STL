@@ -315,7 +315,6 @@ sup [T, A: Alloc] RawBuf[T, A] ext Drop {
     #   is destroyed.
 
     let Self(pointer, capacity, alloc) = self
-    defer drop(alloc)
     case Self::is_storage_free(capacity) { ret }
     alloc.deallocate(pointer, capacity)
   }

@@ -124,18 +124,13 @@ sup [T] Iterator[T] {
       let next = other.res()
       case next of {
         is U(..) {
-          # Bound first: "gen (item, next)" written inline is not seen as
-          # moving "item", and fails E94 at the end of the loop body.
-          let pair = (item, next)
-          gen pair
+          gen (item, next)
         }
         is std::generator::GenDone() {
-          drop(item)
           exit
         }
       }
     }
-    drop(other)
   }
 
   !public
@@ -157,7 +152,6 @@ sup [T] Iterator[T] {
     let mut index = 0_uz
     loop item in self {
       case index >= count { gen item }
-      else { drop(item) }
       index += 1_uz
     }
   }
@@ -182,7 +176,6 @@ sup [T] Iterator[T] {
     loop item in self {
       case index < count { gen item }
       else {
-        drop(item)
         exit
       }
       index += 1_uz
@@ -210,10 +203,8 @@ sup [T] Iterator[T] {
     #   from the original iterator that satisfy the predicate.
 
     # Only yield items that satisfy the predicate.
-    defer drop(predicate)
     loop item in self {
       case predicate(&item) { gen item }
-      else { drop(item) }
     }
   }
 
@@ -239,7 +230,6 @@ sup [T] Iterator[T] {
 
     # Yield the results of applying the mapping function to
     # each item.
-    defer drop(f)
     loop item in self { gen f(item) }
   }
 
@@ -268,11 +258,9 @@ sup [T] Iterator[T] {
     let mut index = 0_uz
     loop item in self {
       case index >= end {
-        drop(item)
         exit
       }
       case index >= start { gen item }
-      else { drop(item) }
       index += 1_uz
     }
   }
@@ -298,7 +286,6 @@ sup [T] Iterator[T] {
     let mut index = 0_uz
     loop item in self {
       case index % step == 0_uz { gen item }
-      else { drop(item) }
       index += 1_uz
     }
   }
@@ -316,7 +303,6 @@ sup [T] Iterator[T] {
     # iterator and incrementing a counter for each item.
     let mut count = 0_uz
     loop item in self {
-      defer drop(item)
       count += 1_uz
     }
     ret count
@@ -355,7 +341,6 @@ sup [T] Iterator[T] {
     # Fold the items by iterating through the entire iterator and
     # applying the reducer function to the accumulated value and
     # each item.
-    defer drop(reducer)
     let mut acc = initial
     loop item in self { acc = reducer(acc, item) }
     ret acc
@@ -382,7 +367,6 @@ sup [T] Iterator[T] {
 
     # The accumulator starts empty; the first item fills it, and
     # every item after is reduced into it.
-    defer drop(reducer)
     let mut acc: Opt[T] = None
     loop item in self {
       let prev = acc
@@ -417,7 +401,6 @@ sup [T] Iterator[T] {
     #   returns `true` for all items produced by the iterator. The cumulative
     #   result of applying the predicate to all items.
 
-    defer drop(f)
 
     # Check if the predicate returns true for all items by iterating
     # through the entire iterator and applying the predicate to each
@@ -449,7 +432,6 @@ sup [T] Iterator[T] {
     #   returns `true` for at least one item produced by the iterator. The
     #   cumulative result of applying the predicate to all items.
 
-    defer drop(f)
 
     # Check if the predicate returns true for any item by iterating
     # through the entire iterator and applying the predicate to each
@@ -486,14 +468,12 @@ sup [T] Iterator[T] {
     #   `index` is the zero-based index of the item in the sequence produced by
     #   the iterator. If no such item is found, the method returns `None`.
 
-    defer drop(predicate)
 
     # Find the index of the first item that satisfies the predicate by
     # iterating through the entire iterator and applying the predicate
     # to each item, returning the index when a match is found.
     let mut index = 0_uz
     loop item in self {
-      defer drop(item)
       case predicate(&item) { ret Some(val=index) }
       index += 1_uz
     }
@@ -526,7 +506,6 @@ sup [T] Iterator[T] {
 
     # Apply the function to each item by iterating through the entire
     # iterator and calling the function for each item.
-    defer drop(func)
     loop item in self { func(item) }
   }
 
@@ -560,7 +539,6 @@ sup [T] Iterator[T] {
       # Discarded at the end of the iteration rather than deferred: the matching iteration returns "item", and a
       # deferred discard would free the value being handed back.
       case index == n { ret Some(val=item) }
-      drop(item)
       index += 1_uz
     }
     ret None
@@ -613,12 +591,10 @@ sup [T: Clone] Iterator[T] {
       let next = other.res()
       case next of {
         is U(..) {
-          let pair = (item, next)
-          gen pair
+          gen (item, next)
         }
         is std::generator::GenDone() {
-          let pair = (item, other_default.clone())
-          gen pair
+          gen (item, other_default.clone())
         }
       }
     }
@@ -627,11 +603,8 @@ sup [T: Clone] Iterator[T] {
     # the default. An "other" that ran out first yields nothing here,
     # as a finished generator answers "GenDone" every time.
     loop next in other {
-      let pair = (self_default.clone(), next)
-      gen pair
+      gen (self_default.clone(), next)
     }
-    drop(self_default)
-    drop(other_default)
   }
 
   !public
@@ -649,7 +622,6 @@ sup [T: Clone] Iterator[T] {
     # a "buffer-and-clone" approach, as the generator will be
     # exhausted after the first iteration.
     let mut buffer = self.collect[Vec[T]]()
-    defer drop(buffer)
     loop true { gen with buffer.clone().iter_mov() }
   }
 }

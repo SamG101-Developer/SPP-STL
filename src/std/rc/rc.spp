@@ -147,7 +147,6 @@ sup [T, A: Alloc] Rc[T, A] ext Drop {
     # the destroyed `val` slot is never observed.
 
     let Self(mut pointer, alloc) = self
-    defer drop(alloc)
     pointer.strong_counter -= 1_uz
 
     case pointer.strong_counter == 0_uz {

@@ -2,7 +2,6 @@
 fun test_new_stores_the_value_on_the_heap() -> Void {
   let s = std::single::Single::new(7)
   std::debug::assert(s.get_ref()@ == 7, "the boxed value reads back")
-  drop(s)
 }
 
 !test(group="std/single")
@@ -28,7 +27,6 @@ fun test_a_box_can_hold_a_non_copyable_value() -> Void {
   let s = std::single::Single::new(v)
   std::debug::assert(s.get_ref().len() == 2_uz, "the vector survived the move onto the heap")
   std::debug::assert(s.get_ref()[1_uz]@ == 5, "and its elements are intact")
-  drop(s)
 }
 
 !test(group="std/single")
@@ -40,7 +38,6 @@ fun test_reading_back_a_non_copyable_value_keeps_it_usable() -> Void {
   let back = s.read()
   std::debug::assert(back.len() == 1_uz, "the vector came back out of the box")
   std::debug::assert(back[0_uz]@ == 9, "with its element")
-  drop(back)
 }
 
 !test(group="std/single")
@@ -58,8 +55,6 @@ fun test_each_box_owns_a_separate_value() -> Void {
   let b = std::single::Single::new(2)
   a.get_mut()@ = 100
   std::debug::assert(b.get_ref()@ == 2, "writing one box leaves the other alone")
-  drop(a)
-  drop(b)
 }
 !test(group="std/single")
 fun test_dropping_a_single_drops_its_value() -> Void {
@@ -69,7 +64,6 @@ fun test_dropping_a_single_drops_its_value() -> Void {
   let mut v = Vec[S32]::new()
   v.append(1)
   let s = std::single::Single::new(v)
-  drop(s)
 }
 
 !test(group="std/single")
@@ -81,5 +75,4 @@ fun test_reading_a_single_does_not_drop_the_value_it_returns() -> Void {
   let s = std::single::Single::new(v)
   let back = s.read()
   std::debug::assert(back.len() == 1_uz, "the vector came back whole")
-  drop(back)
 }

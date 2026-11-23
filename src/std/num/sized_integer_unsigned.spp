@@ -575,7 +575,6 @@ sup [cmp w: U32] SizedIntegerUnsigned[w] ext Format {
 
     let digits = Str::from_utf8_unchecked(&buf[pos to buf.len()])
     formatter.pad_integral(true, &digits)
-    drop(digits)
     ret Pass[Void]()
   }
 }

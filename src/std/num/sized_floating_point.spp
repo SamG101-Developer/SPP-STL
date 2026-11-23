@@ -1287,8 +1287,6 @@ sup [cmp w: U32] SizedFloatingPoint[w] ext Format {
     }
 
     formatter.pad_integral(value.is_negative().not, &digits)
-    drop(digits)
-    drop(fraction)
     ret Pass[Void]()
   }
 }

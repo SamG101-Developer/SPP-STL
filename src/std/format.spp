@@ -132,7 +132,6 @@ sup Formatter {
     # formatter.
     # @ret: The formatted text.
 
-    drop(self.fmt)
     ret self.out
   }
 
@@ -193,7 +192,6 @@ sup Formatter {
     # Append the newly formatting string into the current string, and drop
     # the formatted string. Return the overal formatted result.
     self.out.append_str(&text)
-    drop(text)
     ret result
   }
 
@@ -266,7 +264,6 @@ sup Formatter {
       head.append_str(digits)
       self.pad_aligned(&head, b'>')
     }
-    drop(head)
   }
 
   !package
@@ -531,7 +528,6 @@ fun try_format[..Args: Format](fmt: &StrView, ..args: Args) -> Res[Str, StreamEr
   let result = format_args(&mut f, ..args)
   let text = f.into_str()
   case result is Fail(err) {
-    drop(text)
     ret Fail(err)
   }
   ret Pass(val=text)
@@ -551,7 +547,6 @@ fun write_format[W: Write, ..Args: Format](w: &mut W, fmt: &StrView, ..args: Arg
 
   let text = try_format(fmt, ..args)?
   let written = w.write_all(text.view_ref())
-  drop(text)
   let n = written?
   ret Pass[Void]()
 }
@@ -579,10 +574,8 @@ fun format_args[H: Format, ..Ts: Format](f: &mut Formatter, head: H, ..tail: Ts)
   # @ret: An empty success value, or the first error.
 
   let result = f.arg(&head)
-  drop(head)
   case result of {
     is Fail(err) {
-      drop(..tail)
       ret Fail(err)
     }
   }

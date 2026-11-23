@@ -5,7 +5,6 @@ fun test_take_gives_back_the_guarded_value() -> Void {
   let m = std::threading::mutex::Mutex::new(v).expect("mutex")
   let back = m.take()
   std::debug::assert(back.len() == 1_uz, "the vector came back out")
-  drop(back)
 }
 
 !test(group="std/threading/mutex")
@@ -20,7 +19,6 @@ fun test_with_lock_returns_the_closure_result() -> Void {
   let m = std::threading::mutex::Mutex::new(4).expect("mutex")
   let doubled = m.with_lock(|v: &mut S32| { ret v@ * 2 }).expect("lock")
   std::debug::assert(doubled == 8, "the closure's result comes back")
-  drop(m)
 }
 
 !test(group="std/threading/mutex")
@@ -32,14 +30,11 @@ fun test_the_lock_is_held_only_while_the_closure_runs() -> Void {
   let busy_inside = m.with_lock(|v: &mut S32 caps &m| {
     let inner = m.try_with_lock(|w: &mut S32| { ret 0 })
     let busy = inner.is_fail()
-    drop(inner)
     ret busy
   }).expect("lock")
   std::debug::assert(busy_inside, "the mutex is busy inside the closure")
   let after = m.try_with_lock(|v: &mut S32| { ret 1 })
   std::debug::assert(after.is_pass(), "the lock is free once the closure returns")
-  drop(after)
-  drop(m)
 }
 
 !test(group="std/threading/mutex")
@@ -52,14 +47,10 @@ fun test_with_lock_when_waits_for_the_signal() -> Void {
   let h = std::threading::thread::spawn(|caps m2, c2| -> std::void::Void {
     m2.with_lock(|v: &mut S32| { v@ = 7 }).expect("lock")
     c2.signal_all().expect("signal")
-    drop(m2)
-    drop(c2)
   }).expect("spawn failed")
   let seen = m.with_lock_when(&c, |v: &mut S32| { ret v@ == 7 }, |v: &mut S32| { ret v@ }).expect("lock")
   h.join().expect("join failed")
   std::debug::assert(seen == 7, "the closure ran once the predicate held")
-  drop(m)
-  drop(c)
 }
 
 !test(group="std/threading/mutex")
@@ -69,12 +60,8 @@ fun test_with_lock_when_timeout_gives_up() -> Void {
   let r = m.with_lock_when_timeout(
     &c, std::time::duration::Duration::from_millis(20_u64), |v: &mut S32| { ret false }, |v: &mut S32| { ret 1 })
   std::debug::assert(r.is_fail(), "the predicate never held, so the wait timed out")
-  drop(r)
   let after = m.try_with_lock(|v: &mut S32| { ret 1 })
   std::debug::assert(after.is_pass(), "the timeout released the lock")
-  drop(after)
-  drop(m)
-  drop(c)
 }
 
 !test(group="std/threading/mutex")
@@ -84,5 +71,4 @@ fun test_dropping_a_mutex_drops_its_value() -> Void {
   let mut v = Vec[S32]::new()
   v.append(3)
   let m = std::threading::mutex::Mutex::new(v).expect("mutex")
-  drop(m)
 }

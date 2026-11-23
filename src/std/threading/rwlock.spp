@@ -36,7 +36,6 @@ sup [T] RwLock[T] {
     let mut handle = 0_u64
     let err = sppc::pthread_rwlock_init(&mut handle)
     case err != 0 {
-      drop(val)
       ret Fail(err=ThreadErr::from_errno(err))
     }
     ret Pass(val=RwLock(handle, val=Single[T]::new(val)))
@@ -55,7 +54,6 @@ sup [T] RwLock[T] {
 
     let err = sppc::pthread_rwlock_rdlock(&self.handle)
     case err != 0 {
-      drop(f)
       ret Fail(err=ThreadErr::from_errno(err))
     }
     ret Pass(val=self.read_and_release[R, F](f))
@@ -74,7 +72,6 @@ sup [T] RwLock[T] {
 
     let err = sppc::pthread_rwlock_wrlock(&self.handle)
     case err != 0 {
-      drop(f)
       ret Fail(err=ThreadErr::from_errno(err))
     }
     ret Pass(val=self.write_and_release[R, F](f))
@@ -94,10 +91,8 @@ sup [T] RwLock[T] {
 
     let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
     let err = sppc::pthread_rwlock_clockrdlock(&self.handle, S32::from(clock), &timespec)
-    drop(timespec)
 
     case err != 0 {
-      drop(f)
       case err == sppc::etimedout { ret Fail(err=TimedOut) }
       ret Fail(err=ThreadErr::from_errno(err))
     }
@@ -118,10 +113,8 @@ sup [T] RwLock[T] {
 
     let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
     let err = sppc::pthread_rwlock_clockwrlock(&self.handle, S32::from(clock), &timespec)
-    drop(timespec)
 
     case err != 0 {
-      drop(f)
       case err == sppc::etimedout { ret Fail(err=TimedOut) }
       ret Fail(err=ThreadErr::from_errno(err))
     }
@@ -140,7 +133,6 @@ sup [T] RwLock[T] {
 
     let code = sppc::pthread_rwlock_tryrdlock(&self.handle)
     case code != 0 {
-      drop(f)
       case code == sppc::ebusy { ret Fail(err=WouldBlock) }
       ret Fail(err=ThreadErr::from_errno(code))
     }
@@ -159,7 +151,6 @@ sup [T] RwLock[T] {
 
     let code = sppc::pthread_rwlock_trywrlock(&self.handle)
     case code != 0 {
-      drop(f)
       case code == sppc::ebusy { ret Fail(err=WouldBlock) }
       ret Fail(err=ThreadErr::from_errno(code))
     }
@@ -224,6 +215,5 @@ sup [T] RwLock[T] ext Drop {
     let RwLock(handle, val) = self
     let err = sppc::pthread_rwlock_destroy(&handle)
     std::abort::abort_if(err != 0, "Failed to destroy an rwlock")
-    drop(val)
   }
 }

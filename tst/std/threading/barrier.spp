@@ -4,8 +4,6 @@ fun test_a_one_thread_barrier_passes() -> Void {
   let b = std::threading::barrier::Barrier::new(1_u64).expect("barrier")
   let r = b.wait()
   std::debug::assert(r.is_pass(), "the serial thread's wait succeeds")
-  drop(r)
-  drop(b)
 }
 
 !test(group="std/threading/barrier")
@@ -16,14 +14,10 @@ fun test_every_waiter_of_a_round_passes() -> Void {
   let h = std::threading::thread::spawn(|caps other| -> Bool {
     let r = other.wait()
     let ok = r.is_pass()
-    drop(r)
-    drop(other)
     ret ok
   }).expect("spawn failed")
   let r = b.wait()
   let here = r.is_pass()
-  drop(r)
   let there = h.join().expect("join failed")
   std::debug::assert(here and there, "both waiters of the round succeed")
-  drop(b)
 }

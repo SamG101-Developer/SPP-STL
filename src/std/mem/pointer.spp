@@ -92,7 +92,6 @@ sup [T] NonNull[T] {
     # Check if the ptr is null. If it is, return the `Fail` state,
     # otherwise call the inner function.
     case ptr.is_null() {
-      drop(ptr)
       ret Fail(err=NullptrErr)
     }
     ret Pass(val=Self::from_ptr_inner(ptr))

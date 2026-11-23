@@ -27,7 +27,6 @@ fun test_a_non_copy_result_survives() -> Void {
   let f = std::future::Fut::spawn(|| -> Str { ret Str::from("hello") })
   let s = f.await
   std::debug::assert(s.len() == 5_uz, "the string came back whole")
-  drop(s)
 }
 
 !test(group="std/future")
@@ -40,7 +39,6 @@ fun test_await_all_collects_in_order() -> Void {
   let vals = std::future::Fut::await_all(futs)
   std::debug::assert(vals.len() == 3_uz, "one value per future")
   std::debug::assert(vals[0_uz]@ == 10 and vals[1_uz]@ == 20 and vals[2_uz]@ == 30, "in the order given")
-  drop(vals)
 }
 
 !test(group="std/future")
@@ -48,7 +46,6 @@ fun test_a_future_that_is_never_awaited_can_be_dropped() -> Void {
   # Dropping gives up the right to the value: the task is detached, so the runtime hands its slot back when it finishes
   # rather than keeping it for a result nobody will collect.
   let f = std::future::Fut::spawn(|| -> S32 { ret 9 })
-  drop(f)
 }
 
 !test(group="std/future")

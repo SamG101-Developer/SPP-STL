@@ -60,8 +60,6 @@ fun test_clone_makes_an_independent_copy() -> Void {
   copy.append(2)
   std::debug::assert(original.len() == 1_uz, "the source is untouched by the clone")
   std::debug::assert(copy.len() == 2_uz, "and the clone grew on its own")
-  drop(original)
-  drop(copy)
 }
 
 !test(group="std/cast")
@@ -72,9 +70,6 @@ fun test_a_clone_of_a_clone() -> Void {
   std::debug::assert(a.len() == 3_uz, "the source")
   std::debug::assert(b.len() == 3_uz, "the clone")
   std::debug::assert(c.len() == 3_uz, "and the clone of the clone")
-  drop(a)
-  drop(b)
-  drop(c)
 }
 
 !test(group="std/cast")

@@ -85,7 +85,6 @@ sup [T] Opt[T] {
     ret case self of {
       is Some(val) { pred(val) }
       else {
-        drop(pred)
         false
       }
     }
@@ -119,7 +118,6 @@ sup [T] Opt[T] {
     ret case self of {
       is Some(val) { pred(val) }
       else {
-        drop(pred)
         true
       }
     }
@@ -142,11 +140,9 @@ sup [T] Opt[T] {
     # `Some`, otherwise return `None`.
     ret case self of {
       is Some(val) {
-        drop(val)
         that
       }
       else {
-        drop(that)
         None
       }
     }
@@ -173,7 +169,6 @@ sup [T] Opt[T] {
     ret case self of {
       is Some(val) { pred(val) }
       else {
-        drop(pred)
         None
       }
     }
@@ -194,11 +189,9 @@ sup [T] Opt[T] {
     # otherwise return the other optional.
     ret case self of {
       is Some(..) {
-        drop(that)
         self
       }
       else {
-        drop(self)
         that
       }
     }
@@ -220,11 +213,9 @@ sup [T] Opt[T] {
     # otherwise return the result of invoking the provided function.
     ret case self of {
       is Some(..) {
-        drop(that)
         self
       }
       else {
-        drop(self)
         that()
       }
     }
@@ -251,8 +242,6 @@ sup [T] Opt[T] {
       is Some(val) {
         case that of {
           is Some(val as other) {
-            drop(val)
-            drop(other)
           }
           else { ret Some(val=val) }
         }
@@ -285,10 +274,8 @@ sup [T] Opt[T] {
     case self of {
       is Some(&val) {
         case pred(val) { ret self }
-        else { drop(self) }
       }
       else {
-        drop(pred)
         ret self
       }
     }
@@ -317,7 +304,6 @@ sup [T] Opt[T] {
     ret case self of {
       is Some(val) { Some(val=func(val)) }
       else {
-        drop(func)
         None
       }
     }
@@ -345,11 +331,9 @@ sup [T] Opt[T] {
     # this is `Some`, otherwise return the default value.
     ret case self of {
       is Some(val) {
-        drop(default)
         f(val)
       }
       else {
-        drop(f)
         default
       }
     }
@@ -384,11 +368,9 @@ sup [T] Opt[T] {
     # function.
     ret case self of {
       is Some(val) {
-        drop(default)
         f(val)
       }
       else {
-        drop(f)
         default()
       }
     }
@@ -412,7 +394,6 @@ sup [T] Opt[T] {
     # in `Fail`.
     ret case self of {
       is Some(val) {
-        drop(err)
         Pass(val)
       }
       else { Fail(err) }
@@ -440,7 +421,6 @@ sup [T] Opt[T] {
     # provided error function wrapped in `Fail`.
     ret case self of {
       is Some(val) {
-        drop(err)
         Pass(val)
       }
       else { Fail(err=err()) }
@@ -478,7 +458,6 @@ sup [T] Opt[T] {
     # otherwise return the default value.
     ret case self of {
       is Some(val) {
-        drop(default)
         val
       }
       else { default }
@@ -521,7 +500,6 @@ sup [T] Opt[T] {
     # return the result of invoking the provided default function.
     ret case self of {
       is Some(val) {
-        drop(default)
         val
       }
       else { default() }
@@ -592,7 +570,6 @@ sup [T] Opt[T] {
     let matches = case self of {
       is Some(&val) { pred(val) }
       else {
-        drop(pred)
         false
       }
     }
@@ -624,10 +601,8 @@ sup [T] Opt[T] {
       is Some(val as val1) {
         case that of {
           is Some(val as val2) { ret Some(val=(val1, val2)) }
-          else { drop(val1) }
         }
       }
-      else { drop(that) }
     }
     ret None
   }
@@ -689,7 +664,6 @@ sup [T] Opt[T] ext Try[Some[T], None, T] {
     # @ret: Returns `None`, the residual of an optional.
 
     # There is no state to carry over, so build a fresh `None`.
-    drop(self)
     ret None
   }
 
@@ -789,20 +763,6 @@ sup [T: Eq] Opt[T] ext Eq {
     }
   }
 }
-
-sup [T: Drop] Opt[T] ext Drop {
-  # An optional is discarded by discarding the value it holds, if it holds one. That needs `T` to be discardable in
-  # turn, which is what `T: Drop` says; an `Opt[T]` for a `T` with no way to discard it has to be unwrapped instead.
-
-  !versioned(base="1.0.0", new="1.0.0")
-  fun drop(self) -> Void {
-    case self of {
-      is Some(val) { drop(val) }
-      else { }
-    }
-  }
-}
-
 sup [T: Format] Opt[T] ext Format {
   !versioned(base="1.0.0", new="1.0.0")
   fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {

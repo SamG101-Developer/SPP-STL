@@ -128,8 +128,6 @@ sup [T, A: Alloc] Single[T, A] {
     let mut pointer = case alloc.allocate[T]() of {
       is Pass(val as p) { p }
       is Fail(err as e) {
-        drop(val)
-        drop(alloc)
         ret Fail(err=e)
       }
     }
@@ -182,7 +180,6 @@ sup [T, A: Alloc] Single[T, A] {
     let Self(pointer, alloc) = self
     let val = pointer.read()
     alloc.deallocate(pointer)
-    drop(alloc)
     ret val
   }
 }

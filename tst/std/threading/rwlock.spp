@@ -4,7 +4,6 @@ fun test_a_write_is_seen_by_a_later_read() -> Void {
   l.with_write(|v: &mut S32| { v@ = 5 }).expect("write")
   let seen = l.with_read(|v: &S32| { ret v@ }).expect("read")
   std::debug::assert(seen == 5, "the read sees the write")
-  drop(l)
 }
 
 !test(group="std/threading/rwlock")
@@ -14,16 +13,12 @@ fun test_readers_share_and_exclude_a_writer() -> Void {
     let r = l.try_with_read(|w: &S32| { ret w@ })
     let w = l.try_with_write(|w: &mut S32| { ret 0 })
     let seen = (r.is_pass(), w.is_fail())
-    drop(r)
-    drop(w)
     ret seen
   }).expect("read")
   std::debug::assert(reader_shared, "a second reader shares the hold")
   std::debug::assert(writer_shut_out, "a writer is shut out while a reader holds it")
   let after = l.try_with_write(|v: &mut S32| { ret 0 })
   std::debug::assert(after.is_pass(), "the write hold is free once the readers are done")
-  drop(after)
-  drop(l)
 }
 
 !test(group="std/threading/rwlock")
@@ -38,5 +33,4 @@ fun test_dropping_an_rwlock_drops_its_value() -> Void {
   let mut v = Vec[S32]::new()
   v.append(3)
   let l = std::threading::rwlock::RwLock::new(v).expect("rwlock")
-  drop(l)
 }

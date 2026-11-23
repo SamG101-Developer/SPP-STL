@@ -31,7 +31,6 @@ sup TimePoint {
     case err != 0 { std::abort::abort("Failed to get current time") }
     let duration = Duration(seconds=time_now.sec, nanoseconds=time_now.nsec)
 
-    drop(time_now)
     ret TimePoint(duration)
   }
 

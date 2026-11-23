@@ -229,7 +229,6 @@ sup OsStr ext Format {
 
     let text = self.to_str_lossy()
     formatter.pad(&text)
-    drop(text)
     ret Pass[Void]()
   }
 }

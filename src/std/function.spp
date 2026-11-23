@@ -94,7 +94,6 @@ sup [Args: TupLike, Out] FunMut[Args, Out] ext FunMov[Args, Out] {
     # @ret: The result of calling the function, which is of the type specified
     #   in the `Out` type parameter.
 
-    defer drop(self)
     ret self.call_mut(args)
   }
 }

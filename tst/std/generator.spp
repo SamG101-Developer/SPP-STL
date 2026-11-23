@@ -11,12 +11,10 @@ fun test_a_generator_receives_what_was_sent_to_it() -> Void {
   let mut g = checks_what_it_is_sent()
   let a = g.res([10, 20, 30, 40, 50, 60, 70, 80])
   let b = g.res([10, 20, 30, 40, 50, 60, 70, 80])
-  std::mem::ops::drop(g)
 }
 
 cor stops_with_ret_holding_a_buffer(stop_after: std::number::USize) -> std::iterator::Iterator[std::number::USize] {
   let v = std::vector::Vec[std::number::S32]::new_with_capacity(1000000_uz)
-  defer std::mem::ops::drop(v)
   let mut i = 0_uz
   loop true {
     case i == stop_after { ret }
@@ -45,7 +43,6 @@ fun test_a_hand_driven_generator_yields_all_then_gen_done_forever() -> Void {
   }
   std::debug::assert(yielded == 2_uz, "both elements came out")
   std::debug::assert(exhausted == 4_uz, "and every later resumption answered GenDone")
-  std::mem::ops::drop(g)
 }
 
 cor yields_optionals() -> std::iterator::Iterator[std::option::Opt[S32]] {
@@ -62,9 +59,7 @@ fun test_a_generator_can_yield_none_without_finishing() -> Void {
     count += 1_uz
     case o of {
       is std::option::None() { nones += 1_uz }
-      else { }
     }
-    drop(o)
   }
   std::debug::assert(count == 3_uz, "the yielded None did not end the loop")
   std::debug::assert(nones == 1_uz, "and it came out as a None")

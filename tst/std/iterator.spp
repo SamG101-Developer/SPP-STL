@@ -52,7 +52,6 @@ fun test_iteration_over_an_empty_vector_yields_nothing() -> Void {
   let mut count = 0_uz
   loop e in v.iter_ref() { count += 1_uz }
   std::debug::assert(count == 0_uz, "nothing to visit")
-  drop(v)
 }
 
 !test(group="std/iterator")
@@ -68,7 +67,6 @@ fun test_step_by_over_borrowed_elements() -> Void {
   # The skipped elements are borrows here, which are discarded rather than destroyed.
   let v = Vec::from(&[1, 2, 3, 4])
   std::debug::assert(v.iter_ref().step_by(2_uz).count() == 2_uz, "the 1st and 3rd")
-  drop(v)
 }
 
 !test(group="std/iterator")
@@ -142,7 +140,6 @@ fun test_zip_pairs_items_in_lockstep() -> Void {
   std::debug::assert(pairs.index_ref(0_uz).1 == 4, "and ends with 4")
   std::debug::assert(pairs.index_ref(2_uz).0 == 3, "last pair starts with 3")
   std::debug::assert(pairs.index_ref(2_uz).1 == 6, "and ends with 6")
-  drop(pairs)
 }
 
 !test(group="std/iterator")

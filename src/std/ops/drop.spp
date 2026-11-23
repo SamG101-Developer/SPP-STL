@@ -1,18 +1,19 @@
 !public
 cls Drop {
-  # The `Drop` class marks a type as having a way to discard a value of it without saying anything about what the value
-  # was for. Ownership is linear, so a value must be used exactly once; generic code holding a `T` it has to get rid of
-  # has no method of its own to call, and `Drop` is what gives it one. Concrete resource types should also offer a
-  # named, fallible consumer -- `close`, `destroy`, `free` -- and keep `drop` as the "discard it, I am not checking"
-  # path. It takes no type parameters, as the behaviour operates solely on the instance.
+  # The `Drop` class gives a type a destructor: code run when a value of it is dropped, before its attributes are.
+  # Ownership is affine, so a value nobody moved on is dropped where its owner ends, and any value can be; `Drop` is
+  # only needed for a type that releases something its attributes do not (a descriptor, a heap allocation). Concrete
+  # resource types should also offer a named, fallible consumer -- `close`, `destroy`, `free` -- that takes the value
+  # apart (`let Self(..) = self`, which drops nothing), and keep `drop` as the "discard it, I am not checking" path. It
+  # takes no type parameters, as the behaviour operates solely on the instance.
 }
 
 sup Drop {
   !protected
   !abstract_method
   fun drop(self) -> Void {
-    # The `drop` method discards a value, releasing whatever it holds. It takes `self` **by move**, not by borrow: that
-    # is the point of it, because consuming the value is what discharges its linear obligation. Any failure the release
-    # runs into is swallowed; a caller that needs to know should call the type's named consumer instead.
+    # The `drop` method releases what a value holds as it is dropped. It takes `self` by move; whatever of `self` it
+    # does not take apart is dropped attribute by attribute as it ends, without running `drop` again. Any failure the
+    # release runs into is swallowed; a caller that needs to know should call the type's named consumer instead.
   }
 }

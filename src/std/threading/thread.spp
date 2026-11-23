@@ -142,16 +142,12 @@ fun spawn[Out: ThreadSafe, F: FunMov[(), Out] and ThreadSafe](function: F) -> Re
   let slot = case GlobalAlloc.allocate[Out]() of {
     is Pass(val as p) { p }
     is Fail(err as e) {
-      drop(function)
-      drop(e)
       ret Fail(err=ThreadMemoryErr)
     }
   }
   let mut users = case GlobalAlloc.allocate[Atom[USize]]() of {
     is Pass(val as p) { p }
     is Fail(err as e) {
-      drop(function)
-      drop(e)
       GlobalAlloc.deallocate(slot)
       ret Fail(err=ThreadMemoryErr)
     }

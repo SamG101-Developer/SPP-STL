@@ -8,6 +8,7 @@ use std::mem::pointer::NonNull
 use std::ops::drop::Drop
 
 !public
+!must_use
 !versioned(base="1.0.0", new="1.0.0")
 cls Fut[T] {
   # The `Fut[T]` future type wraps any type, when a function is called as
@@ -45,7 +46,6 @@ sup [T] Fut[T] {
     let slot = case GlobalAlloc.allocate[T]() of {
       is Pass(val as p) { p }
       is Fail(err as e) {
-        drop(e)
         std::abort::abort("async: out of memory allocating the result cell")
       }
     }

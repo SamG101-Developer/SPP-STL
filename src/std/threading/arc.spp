@@ -135,7 +135,6 @@ sup [T, A: Alloc] Arc[T, A] ext Drop {
     # destroyed value because `upgrade` refuses once the strong count is zero.
 
     let Self(mut pointer, alloc) = self
-    defer drop(alloc)
 
     case pointer.strong_counter.fetch_sub(1_uz) == 1_uz {
       drop(NonNull[T]::from_mut(&mut pointer.val).read())

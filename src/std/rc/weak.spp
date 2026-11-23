@@ -86,7 +86,6 @@ sup [T, A: Alloc] Weak[T, A] ext Drop {
     #   is destroyed.
 
     let Weak(mut pointer, alloc) = self
-    defer drop(alloc)
     pointer.weak_counter -= 1_uz
 
     case pointer.strong_counter == 0_uz and pointer.weak_counter == 0_uz {

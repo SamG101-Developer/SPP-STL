@@ -6,7 +6,6 @@ fun test_length_and_emptiness_follow_the_backing_store() -> Void {
   v.append(2)
   std::debug::assert(v.len() == 2_uz, "the view is as long as what backs it")
   std::debug::assert(v.is_empty().not, "and is no longer empty")
-  drop(v)
 }
 
 !test(group="std/view")
@@ -17,7 +16,6 @@ fun test_contains_reports_membership() -> Void {
   v.append(30)
   std::debug::assert(v.contains(&20), "an element that is there")
   std::debug::assert(v.contains(&99).not, "one that is not")
-  drop(v)
 }
 
 !test(group="std/view")
@@ -29,7 +27,6 @@ fun test_find_gives_the_first_matching_index() -> Void {
   std::debug::assert(v.find(&7).unwrap() == 0_uz, "the first of a repeat")
   std::debug::assert(v.find(&8).unwrap() == 1_uz, "a later element")
   std::debug::assert(v.find(&99).is_none(), "an absent element has no index")
-  drop(v)
 }
 
 !test(group="std/view")
@@ -37,7 +34,6 @@ fun test_find_and_contains_over_an_empty_view() -> Void {
   let v = Vec[S32]::new()
   std::debug::assert(v.contains(&1).not, "nothing is in an empty view")
   std::debug::assert(v.find(&1).is_none(), "and nothing has an index")
-  drop(v)
 }
 
 !test(group="std/view")
@@ -49,7 +45,6 @@ fun test_indexing_reaches_each_element() -> Void {
   std::debug::assert(v[0_uz]@ == 4, "first")
   std::debug::assert(v[1_uz]@ == 5, "middle")
   std::debug::assert(v[2_uz]@ == 6, "last")
-  drop(v)
 }
 
 !test(group="std/view")
@@ -58,7 +53,6 @@ fun test_indexing_mutably_writes_through() -> Void {
   v.append(1)
   v[mut 0_uz]@ = 9
   std::debug::assert(v[0_uz]@ == 9, "the write landed in the backing store")
-  drop(v)
 }
 
 !test(group="std/view")
@@ -76,7 +70,6 @@ fun test_iteration_visits_every_element_in_order() -> Void {
   }
   std::debug::assert(count == 3_uz, "every element was visited")
   std::debug::assert(seen == 123, "and in order")
-  drop(v)
 }
 
 !test(group="std/view")
@@ -89,7 +82,6 @@ fun test_reverse_iteration_visits_them_backwards() -> Void {
   let mut seen = 0
   loop e in v.reverse_iter_ref() { seen = seen * 10 + e@ }
   std::debug::assert(seen == 321, "the order is reversed")
-  drop(v)
 }
 
 !test(group="std/view")
@@ -101,7 +93,6 @@ fun test_mutable_iteration_writes_through() -> Void {
   loop e in v.iter_mut() { e@ += 10 }
   std::debug::assert(v[0_uz]@ == 11, "the first was written")
   std::debug::assert(v[1_uz]@ == 12, "and the second")
-  drop(v)
 }
 
 !test(group="std/view")
@@ -110,7 +101,6 @@ fun test_iterating_an_empty_view_yields_nothing() -> Void {
   let mut count = 0_uz
   loop e in v.iter_ref() { count += 1_uz }
   std::debug::assert(count == 0_uz, "there is nothing to visit")
-  drop(v)
 }
 
 !test(group="std/view")
@@ -136,7 +126,4 @@ fun test_find_and_contains_over_elements_that_are_not_copy() -> Void {
   std::debug::assert(outer.contains(&probe), "an equal vector is found by value, not address")
   std::debug::assert(outer.contains(&miss).not, "an unequal one is not")
   std::debug::assert(outer.find(&probe).unwrap() == 0_uz, "and has an index")
-  drop(outer)
-  drop(probe)
-  drop(miss)
 }

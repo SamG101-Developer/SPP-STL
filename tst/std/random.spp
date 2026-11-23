@@ -6,7 +6,6 @@ fun test_a_seed_gives_the_reference_xoshiro256ss_stream() -> Void {
   std::debug::assert(r.next_u64() == 7631449856891427754_u64, "first draw")
   std::debug::assert(r.next_u64() == 12559587170922671360_u64, "second draw")
   std::debug::assert(r.next_u64() == 18389334169461023688_u64, "third draw")
-  drop(r)
 }
 
 !test(group="std/random")
@@ -16,8 +15,6 @@ fun test_the_same_seed_gives_the_same_sequence() -> Void {
   std::debug::assert(a.next_u64() == b.next_u64(), "first draw")
   std::debug::assert(a.next_u64() == b.next_u64(), "second draw")
   std::debug::assert(a.next_u64() == b.next_u64(), "third draw")
-  drop(a)
-  drop(b)
 }
 
 !test(group="std/random")
@@ -30,8 +27,6 @@ fun test_different_seeds_diverge() -> Void {
     differed = differed or a.next_u64() != b.next_u64()
   }
   std::debug::assert(differed, "two seeds do not produce one stream")
-  drop(a)
-  drop(b)
 }
 
 !test(group="std/random")
@@ -43,7 +38,6 @@ fun test_a_stream_does_not_repeat_immediately() -> Void {
     moved = moved or r.next_u64() != first
   }
   std::debug::assert(moved, "the generator advances rather than repeating one value")
-  drop(r)
 }
 
 !test(group="std/random")
@@ -55,7 +49,6 @@ fun test_between_stays_within_its_bounds() -> Void {
     all_inside = all_inside and n >= 10_u64 and n < 20_u64
   }
   std::debug::assert(all_inside, "every draw sat inside the requested range")
-  drop(r)
 }
 
 !test(group="std/random")
@@ -66,7 +59,6 @@ fun test_a_single_value_range_is_that_value() -> Void {
     all_equal = all_equal and r.between(4_u64, 5_u64) == 4_u64
   }
   std::debug::assert(all_equal, "a range of one has only one answer")
-  drop(r)
 }
 
 !test(group="std/random")
@@ -77,7 +69,6 @@ fun test_next_u32_stays_within_a_word() -> Void {
     all_inside = all_inside and U64::from(r.next_u32()) <= U64::from(std::limits::Limits[U32]::max)
   }
   std::debug::assert(all_inside, "a 32-bit draw fits in 32 bits")
-  drop(r)
 }
 
 !test(group="std/random")
@@ -89,7 +80,6 @@ fun test_next_double_lies_in_the_unit_interval() -> Void {
     all_inside = all_inside and d >= 0.0_f64 and d < 1.0_f64
   }
   std::debug::assert(all_inside, "every double sat in [0, 1)")
-  drop(r)
 }
 
 !test(group="std/random")
@@ -97,8 +87,6 @@ fun test_next_bytes_returns_the_number_asked_for() -> Void {
   let mut r = std::random::Rng::from_seed(17_u64)
   let bytes = r.next_bytes(16_uz)
   std::debug::assert(bytes.len() == 16_uz, "sixteen bytes were asked for")
-  drop(bytes)
-  drop(r)
 }
 
 !test(group="std/random")
@@ -106,15 +94,12 @@ fun test_asking_for_no_bytes_gives_none() -> Void {
   let mut r = std::random::Rng::from_seed(19_u64)
   let bytes = r.next_bytes(0_uz)
   std::debug::assert(bytes.is_empty(), "no bytes were asked for")
-  drop(bytes)
-  drop(r)
 }
 
 !test(group="std/random")
 fun test_os_next_bytes_returns_the_number_asked_for() -> Void {
   let bytes = std::random::OsRng::next_bytes(32_uz).expect("the OS generator is available")
   std::debug::assert(bytes.len() == 32_uz, "thirty-two bytes were asked for")
-  drop(bytes)
 }
 
 !test(group="std/random")
@@ -126,5 +111,4 @@ fun test_os_next_bytes_are_not_all_zero() -> Void {
     seen = seen | b@
   }
   std::debug::assert(seen != 0_u8, "the generator wrote the bytes")
-  drop(bytes)
 }

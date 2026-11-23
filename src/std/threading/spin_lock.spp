@@ -46,7 +46,6 @@ sup SpinLock {
 
     let err = sppc::pthread_spin_lock(&self.handle)
     case err != 0 {
-      drop(f)
       ret Fail(err=ThreadErr::from_errno(err))
     }
     ret Pass(val=self.run_and_release[R, F](f))
@@ -64,7 +63,6 @@ sup SpinLock {
 
     let err = sppc::pthread_spin_trylock(&self.handle)
     case err != 0 {
-      drop(f)
       case err == sppc::ebusy { ret Fail(err=WouldBlock) }
       ret Fail(err=ThreadErr::from_errno(err))
     }

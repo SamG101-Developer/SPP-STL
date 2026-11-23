@@ -275,7 +275,6 @@ sup Path {
     ret case Path::extension_dot(&name) of {
       is Some(val as dot) {
         let stem = name.slice(0_uz, dot)
-        drop(name)
         Some(val=stem)
       }
       else { Some(val=name) }
@@ -292,7 +291,6 @@ sup Path {
     #   extension.
 
     let name = self.file_name()?
-    defer drop(name)
     ret case Path::extension_dot(&name) of {
       is Some(val as dot) { Some(val=name.slice(dot + 1_uz, name.len())) }
       else { None }
@@ -490,7 +488,6 @@ sup Path {
     let parent = self.parent()
     let other = Path(inner=file_name.clone())
     let joined = parent.join(&other)
-    drop(other)
     ret joined
   }
 
@@ -503,7 +500,6 @@ sup Path {
     # @ret: The new path.
 
     let mut new_file_name = self.file_stem().unwrap_or(OsStr::new())
-    defer drop(new_file_name)
     case extension.is_empty().not {
       new_file_name.append('.')
       new_file_name.append_os_str(extension)
@@ -538,7 +534,6 @@ sup Path {
       else { ret false }
     }
     let err = sppc::access(path_z.ptr().as_c_ref(), sppc::f_ok, &mut exists)
-    drop(path_z)
     ret err == 0 and exists == 0
   }
 
@@ -554,7 +549,6 @@ sup Path {
     let mut exists = 0
     let path_z = self.c_path()?
     let err = sppc::access(path_z.ptr().as_c_ref(), sppc::f_ok, &mut exists)
-    drop(path_z)
     ret case err != 0 { Fail(err=PathErr::from_errno(err)) } else { Pass(val=exists != 0) }
   }
 
@@ -567,14 +561,12 @@ sup Path {
     # @ret: `true` if the path is a regular file, `false` otherwise.
 
     let mut info = sppc::CStat()
-    defer drop(info)
 
     let path_z = case self.inner.to_c_str() of {
       is Some(val as z) { z }
       else { ret false }
     }
     let err = sppc::stat(path_z.ptr().as_c_ref(), &mut info)
-    drop(path_z)
     ret case err != 0 { false } else { (S32::from(info.mode) & sppc::s_ifmt) == sppc::s_ifreg }
   }
 
@@ -587,14 +579,12 @@ sup Path {
     # @ret: `true` if the path is a directory, `false` otherwise.
 
     let mut info = sppc::CStat()
-    defer drop(info)
 
     let path_z = case self.inner.to_c_str() of {
       is Some(val as z) { z }
       else { ret false }
     }
     let err = sppc::stat(path_z.ptr().as_c_ref(), &mut info)
-    drop(path_z)
     ret case err != 0 { false } else { (S32::from(info.mode) & sppc::s_ifmt) == sppc::s_ifdir }
   }
 
@@ -607,14 +597,12 @@ sup Path {
     # @ret: `true` if the path is a symbolic link, `false` otherwise.
 
     let mut info = sppc::CStat()
-    defer drop(info)
 
     let path_z = case self.inner.to_c_str() of {
       is Some(val as z) { z }
       else { ret false }
     }
     let err = sppc::lstat(path_z.ptr().as_c_ref(), &mut info)
-    drop(path_z)
     ret case err != 0 { false } else { (S32::from(info.mode) & sppc::s_ifmt) == sppc::s_iflnk }
   }
 
@@ -630,10 +618,8 @@ sup Path {
     # realpath writes a terminated string into the room it is given; the path
     # is what comes before the terminator.
     let mut buffer = OsStr::new_with_capacity(path_max)
-    defer drop(buffer)
     let path_z = self.c_path()?
     let err = sppc::realpath(path_z.ptr().as_c_ref(), buffer.ptr().as_c_mut())
-    drop(path_z)
     ret case err == 0 { Pass(val=Path(inner=OsStr::from_c_str(buffer.ptr()))) } else {
       Fail(err=PathErr::from_errno(err))
     }
@@ -651,7 +637,6 @@ sup Path {
     # rwxrwxrwx, with the process umask applied on top of it.
     let path_z = self.c_path()?
     let err = sppc::mkdir(path_z.ptr().as_c_ref(), 0o777_u32)
-    drop(path_z)
     ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
   }
 
@@ -666,14 +651,12 @@ sup Path {
 
     let components = self.components()
     let mut current_path = Path()
-    defer drop(current_path)
     let sep = self.sep()
 
     loop component in components.iter_mov() {
       # An empty component is a separator with nothing before it: the root of an
       # absolute path, or a doubled separator. Neither is a directory to make.
       case component.is_empty() {
-        drop(component)
         current_path.inner.append(sep)
         skip
       }
@@ -681,7 +664,6 @@ sup Path {
       case current_path.exists() { skip }
       let current_path_z = current_path.c_path()?
       let err = sppc::mkdir(current_path_z.ptr().as_c_ref(), 0o777_u32)
-      drop(current_path_z)
       case err == 0 { skip } else { ret Fail(err=PathErr::from_errno(err)) }
     }
     ret Pass[Void]()
@@ -698,7 +680,6 @@ sup Path {
 
     let path_z = self.c_path()?
     let err = sppc::unlink(path_z.ptr().as_c_ref())
-    drop(path_z)
     ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
   }
 
@@ -718,7 +699,6 @@ sup Path {
 
     let path_z = self.c_path()?
     let err = sppc::rmdir(path_z.ptr().as_c_ref())
-    drop(path_z)
     ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
   }
 
@@ -734,9 +714,7 @@ sup Path {
     #   error message if the operation fails.
 
     let path_z = self.c_path()?
-    defer drop(path_z)
     let new_path_z = new_path.c_path()?
-    defer drop(new_path_z)
     let err = sppc::rename(path_z.ptr().as_c_ref(), new_path_z.ptr().as_c_ref())
     ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
   }
@@ -755,14 +733,12 @@ sup Path {
     # as it won't be returned; it's strictly to go to C to get its
     # attributes set from the sppc library.
     let mut info = sppc::CStat()
-    defer drop(info)
 
     # Call the C function to fill the stat's attributes. Consider
     # the error where this function fails, and return the failure.
     # The info get dropped via the defer statement in this case.
     let path_z = self.c_path()?
     let err = sppc::stat(path_z.ptr().as_c_ref(), &mut info)
-    drop(path_z)
     case err != 0 { ret Fail(err=PathErr::from_errno(err)) }
     let file_length = info.size
 
@@ -771,9 +747,7 @@ sup Path {
     # file is where the contents are going to, created, and refused
     # if it already exists. Defer their closing.
     let file_in = File::open(&self, FileMode().read())?
-    defer drop(file_in)
     let file_out = File::open(new_path, FileMode().write().create_new())?
-    defer drop(file_out)
 
     # Copy until the whole file is across: "copyfile" may copy less than asked (a large file, or a signal arriving),
     # and reports how much it did. Each call carries on from both files' positions. One that copies nothing means the
@@ -802,9 +776,7 @@ sup Path {
     #   created, or an error message if the operation fails.
 
     let path_z = self.c_path()?
-    defer drop(path_z)
     let new_path_z = new_path.c_path()?
-    defer drop(new_path_z)
     let err = sppc::link(path_z.ptr().as_c_ref(), new_path_z.ptr().as_c_ref())
     ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
   }
@@ -821,9 +793,7 @@ sup Path {
     #   successfully created, or an error message if the operation fails.
 
     let path_z = self.c_path()?
-    defer drop(path_z)
     let new_path_z = new_path.c_path()?
-    defer drop(new_path_z)
     let err = sppc::symlink(path_z.ptr().as_c_ref(), new_path_z.ptr().as_c_ref())
     ret case err == 0 { Pass[Void]() } else { Fail(err=PathErr::from_errno(err)) }
   }
@@ -850,7 +820,6 @@ sup Path ext Div {
     # @let that: The right-hand side path to join with the left-hand side path.
     # @ret: A new `Path` object representing the joined path.
 
-    defer drop(that)
     ret self.join(&that)
   }
 }
@@ -865,9 +834,8 @@ sup Path ext DivAssign {
     # @let that: The right-hand side path to join with the left-hand side path.
     # @ret: The original `Path` object is modified to represent the joined path.
 
-    defer drop(that)
     let joined = self.clone().join(&that)
-    std::mem::ops::drop(std::mem::ops::replace(self, joined))
+    self@ = joined
   }
 }
 

@@ -151,73 +151,13 @@ fun replace[T](dest: &mut T, src: T) -> T {
 !intrinsic(name="std.mem.ops.drop")
 !versioned(base="1.0.0", new="1.0.0")
 fun drop[T](val: T) -> Void {
-  # Safely disposes of a value, running its destructor. This is safe as it takes
-  # ownership, so an uninitialized value cannot be left behind in the caller's
-  # context (at runtime). It destroys structurally - a type's own `drop` first,
-  # then its attributes. This does not bypass the type's own `drop`; it calls
-  # it. Code generation looks for a `Drop` implementation first and only
-  # destroys attribute-by-attribute when there is none, so
-  # `std::mem::ops::drop(x)` and `std::mem::ops::drop(x)` do the same thing for
-  # a type that has a destructor. There is no `T: Drop` overload vs a
-  # non-constrained overload, because we want this to work for amy type coming
-  # in, including an underconstrained generic `T`.
+  # Drops a value now rather than where its owner ends: a lock guard released
+  # before a long computation, or a large buffer freed before a loop. What it
+  # borrows ends with it, so the code after can use what it held borrowed. It
+  # destroys through the type's own "drop" if it has one, then its attributes.
   # @type T: The type of the value to drop.
   # @let val: The value to drop.
-  # @ret: An empty value, as the function is only used for its side effect of
-  #   dropping the value.
-}
-
-!public
-!versioned(base="1.0.0", new="1.0.0")
-fun drop[T](val: &T) -> Void {
-  # Discards a borrow. A borrow owns nothing, so there is nothing to destroy -
-  # this exists so that generic code over a `T` that is sometimes a borrow (an
-  # adaptor over `iter_ref`, say) can discard an item it skips the same way
-  # either way. A generic parameter cannot stand for a borrow, so the owned
-  # overload never matches one.
-  # @type T: The type behind the borrow.
-  # @let val: The borrow to discard.
   # @ret: An empty value.
-}
-
-!public
-!versioned(base="1.0.0", new="1.0.0")
-fun drop() -> Void {
-  # Drops nothing: the end of a variadic drop, so `drop(..xs)` of an empty pack
-  # is a call. A pack is not a value, so there is no `drop(xs)`; spreading it
-  # here drops each of its elements, in order.
-  # @ret: An empty value.
-}
-
-!public
-!versioned(base="1.0.0", new="1.0.0")
-fun drop[H, ..Ts](head: H, ..tail: Ts) -> Void {
-  # Drops each value given, in order: `drop(a, b)`, or `drop(..xs)` to consume a
-  # pack, which is not a value and so cannot be given to `drop[T]` whole. A
-  # single value goes to `drop[T]` instead, as a call of fixed arity is
-  # preferred.
-  # @type H: The type of the first value.
-  # @type Ts: The types of the rest.
-  # @let head: The first value to drop.
-  # @let tail: The rest, dropped after it.
-  # @ret: An empty value.
-  drop(head)
-  drop(..tail)
-}
-
-!public
-!versioned(base="1.0.0", new="1.0.0")
-fun drop[H, ..Ts](head: &H, ..tail: &Ts) -> Void {
-  # Discards each borrow given, the borrowed counterpart of the owned variadic
-  # `drop`, so `drop(..xs)` works the same over a borrowed pack. A pack is all
-  # owned or all borrowed, never mixed, so each overload covers its own case.
-  # @type H: The type behind the first borrow.
-  # @type Ts: The types behind the rest.
-  # @let head: The first borrow to discard.
-  # @let tail: The rest, discarded after it.
-  # @ret: An empty value.
-  drop(head)
-  drop(..tail)
 }
 
 !public

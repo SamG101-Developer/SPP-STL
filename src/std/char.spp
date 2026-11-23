@@ -176,7 +176,6 @@ sup Char ext Format {
 
     let text = Str::from(self@)
     formatter.pad(&text)
-    drop(text)
     ret Pass[Void]()
   }
 }

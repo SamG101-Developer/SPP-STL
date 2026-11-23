@@ -642,7 +642,6 @@ sup [cmp w: U32] Str ext From[SizedFloatingPoint[w]] {
     let mut out = case negative { Str::from("-") } else { Str::from("") }
     let whole_str = Str::from(U64::from(whole))
     out.append_str(&whole_str)
-    drop(whole_str)
 
     # Then a fixed number of fractional digits, taken
     # one at a time off the remaining fraction.
@@ -696,7 +695,6 @@ sup [A: Alloc and Clone] Str[A] ext Mul[S32] {
     let piece = result.clone()
     result.capacity_reserve(piece.len() * USize::from(that))
     loop i in Range::between(1, that) { result.append_str(&piece) }
-    drop(piece)
     ret result
   }
 }

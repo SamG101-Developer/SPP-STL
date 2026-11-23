@@ -44,13 +44,11 @@ sup TcpListener {
     let yes = 1
     let err = sppc::setsockopt(listener.fd, sppc::sol_socket, sppc::so_reuseaddr, &yes)
     case err != 0 {
-      drop(listener)
       ret Fail(err=SockErr::from_errno(err))
     }
 
     let err = sppc::bind(listener.fd, &addr.storage())
     case err != 0 {
-      drop(listener)
       ret Fail(err=SockErr::from_errno(err))
     }
     ret Pass(val=listener)
@@ -88,7 +86,6 @@ sup TcpListener {
     let mut storage = sppc::CSockaddrStorage()
     let err = sppc::accept(self.fd, &mut storage, &mut new_fd)
     case err != 0 {
-      drop(storage)
       ret Fail(err=SockErr::from_errno(err))
     }
 
@@ -96,7 +93,6 @@ sup TcpListener {
     # file descriptor.
     let stream = TcpStream(fd=new_fd)
     let addr = SockAddr::from_storage(&storage)
-    drop(storage)
     ret Pass(val=(stream, addr))
   }
 }
@@ -123,7 +119,6 @@ sup TcpStream {
     let stream = TcpStream(fd)
     let err = sppc::connect(stream.fd, &addr.storage())
     case err != 0 {
-      drop(stream)
       ret Fail(err=SockErr::from_errno(err))
     }
     ret Pass(val=stream)
@@ -201,7 +196,6 @@ sup TcpStream {
     # Call the `setsockopt` function to set the linger
     # for the socket.
     let err = sppc::setsockopt_linger(self.fd, sppc::sol_socket, sppc::so_linger, &lg)
-    drop(lg)
 
     # Handle the error and return the error mapped or
     # an empty pass.
@@ -225,7 +219,6 @@ sup TcpStream {
     let err = sppc::getsockopt_linger(self.fd, sppc::sol_socket, sppc::so_linger, &mut lg)
     let on = lg.onoff
     let seconds = lg.linger
-    drop(lg)
 
     # Standard error checking, followed by a test of the
     # "on" flag, allowing the seconds to be interpreted
@@ -297,7 +290,6 @@ sup TcpStream {
     # for the socket.
     let err = sppc::setsockopt_timeval(
       self.fd, sppc::sol_socket, sppc::so_rcvtimeo, &tv)
-    drop(tv)
 
     # Handle the error and return the error mapped or
     # an empty pass.
@@ -321,7 +313,6 @@ sup TcpStream {
       self.fd, sppc::sol_socket, sppc::so_rcvtimeo, &mut tv)
 
     let millis = tv.sec * 1000_u64 + tv.usec / 1000_u64
-    drop(tv)
 
     # Handle the error and return the error mapped or
     # an empty pass.
@@ -354,7 +345,6 @@ sup TcpStream {
     # socket.
     let err = sppc::setsockopt_timeval(
       self.fd, sppc::sol_socket, sppc::so_sndtimeo, &tv)
-    drop(tv)
 
     # Handle the error and return the error mapped or
     # an empty pass.
@@ -377,7 +367,6 @@ sup TcpStream {
       self.fd, sppc::sol_socket, sppc::so_sndtimeo, &mut tv)
 
     let millis = tv.sec * 1000_u64 + tv.usec / 1000_u64
-    drop(tv)
 
     # Handle the error and return the error mapped or the
     # duration, wrapped in a pass.
@@ -395,12 +384,10 @@ sup TcpStream {
     let mut storage = sppc::CSockaddrStorage()
     let err = sppc::getpeername(self.fd, &mut storage)
     case err != 0 {
-      drop(storage)
       ret Fail(err=SockErr::from_errno(err))
     }
 
     let addr = SockAddr::from_storage(&storage)
-    drop(storage)
     ret Pass(val=addr)
   }
 

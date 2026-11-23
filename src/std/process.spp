@@ -41,7 +41,6 @@ fun get_env(key: &StrView) -> Opt[Str] {
   ret case value of {
     is Some(val as os) {
       let text = os.to_str_lossy()
-      drop(os)
       Some(val=text)
     }
     else { None }

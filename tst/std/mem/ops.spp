@@ -65,8 +65,6 @@ fun test_replace_on_a_linear_value_hands_back_the_old_one() -> Void {
   let old = std::mem::ops::replace(&mut s, Str::from("second"))
   std::debug::assert(old.len() == 5_uz, "the old value came back intact")
   std::debug::assert(s.len() == 6_uz, "and the new one is in place")
-  drop(old)
-  drop(s)
 }
 
 !test(group="std/mem/ops")
@@ -76,26 +74,10 @@ fun test_swap_on_linear_values_moves_neither_out() -> Void {
   std::mem::ops::swap(&mut a, &mut b)
   std::debug::assert(a.len() == 4_uz, "a took b's value")
   std::debug::assert(b.len() == 3_uz, "b took a's value")
-  drop(a)
-  drop(b)
 }
 
 !test(group="std/mem/ops")
 fun test_a_layout_for_a_zero_sized_element() -> Void {
   let layout = std::allocator::Layout::array[std::option::None](4_uz)
   std::debug::assert(layout.size == 0_uz, "no bytes are needed for four of nothing")
-}
-
-!test(group="std/mem/ops")
-fun test_drop_of_several_owned_values() -> Void {
-  drop(Str::from("a"), Str::from("b"), 3)
-}
-
-!test(group="std/mem/ops")
-fun test_drop_of_several_borrows_keeps_the_values() -> Void {
-  let a = Str::from("a")
-  let b = 2
-  drop(&a, &b)
-  std::debug::assert(b == 2, "a borrow drop leaves the value alive")
-  drop(a)
 }

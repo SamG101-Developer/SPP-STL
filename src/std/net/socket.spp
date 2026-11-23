@@ -229,12 +229,10 @@ sup Socket {
     let mut storage = sppc::CSockaddrStorage()
     let err = sppc::getsockname(self.fd, &mut storage)
     case err != 0 {
-      drop(storage)
       ret Fail(err=SockErr::from_errno(err))
     }
 
     let addr = SockAddr::from_storage(&storage)
-    drop(storage)
     ret Pass(val=addr)
   }
 }

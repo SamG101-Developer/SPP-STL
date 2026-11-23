@@ -7,7 +7,6 @@ fun test_vector_grows_across_reallocation() -> Void {
   std::debug::assert(vec.len() == 3_uz, "length after growth")
   std::debug::assert(vec[0_uz]@ == 7, "first survived realloc")
   std::debug::assert(vec[2_uz]@ == 11, "last after growth")
-  drop(vec)
 }
 
 !test(group="std/vector")
@@ -15,7 +14,6 @@ fun test_raw_buf_is_package_visible_from_tests() -> Void {
   # Reaches a "!package" member, which only works because a library's tests sit in its own package.
   let buf = std::mem::raw_buf::RawBuf[S32]::new_with_capacity(4_uz)
   std::debug::assert(buf.cap() == 4_uz, "capacity")
-  drop(buf)
 }
 
 !test(group="std/vector")
@@ -26,7 +24,6 @@ fun test_vector_from_view_copies_every_element() -> Void {
   std::debug::assert(vec[0_uz]@ == 0, "first")
   std::debug::assert(vec[3_uz]@ == 3, "middle")
   std::debug::assert(vec[7_uz]@ == 7, "last")
-  drop(vec)
 }
 
 !test(group="std/vector")
@@ -39,9 +36,6 @@ fun test_vector_append_many_appends_rather_than_overwrites() -> Void {
   std::debug::assert(m[0_uz]@ == 1, "kept its own first element")
   std::debug::assert(m[3_uz]@ == 4, "appended after its own, not over them")
   std::debug::assert(m[4_uz]@ == 5, "last")
-  drop(a)
-  drop(b)
-  drop(m)
 }
 
 !test(group="std/vector")
@@ -54,7 +48,6 @@ fun test_vector_insert_many_at_shifts_the_tail() -> Void {
   std::debug::assert(v[2_uz]@ == 5, "inserted")
   std::debug::assert(v[3_uz]@ == 2, "shifted tail")
   std::debug::assert(v[4_uz]@ == 3, "shifted tail")
-  drop(v)
 }
 
 !test(group="std/vector")
@@ -65,8 +58,6 @@ fun test_vector_clone_is_independent() -> Void {
   std::debug::assert(v.len() == 3_uz, "original is untouched")
   std::debug::assert(c.len() == 4_uz, "clone grew")
   std::debug::assert(c[0_uz]@ == 1, "clone kept the contents")
-  drop(v)
-  drop(c)
 }
 
 !test(group="std/vector")
@@ -83,9 +74,6 @@ fun test_vector_clone_of_heap_elements_is_deep() -> Void {
   std::debug::assert(c1[0_uz].len() == 2_uz, "other clone's inner is untouched")
   std::debug::assert(c2[0_uz].len() == 3_uz, "the changed clone's inner grew")
   std::debug::assert(c1[1_uz][0_uz]@ == 3, "clone kept the contents")
-  drop(c1)
-  drop(c2)
-  drop(v)
 }
 
 !test(group="std/vector")
@@ -95,8 +83,6 @@ fun test_vector_from_view_of_heap_elements_clones_them() -> Void {
   v[mut 0_uz].append(8)
   std::debug::assert(arr[0_uz].len() == 2_uz, "the view's element is untouched")
   std::debug::assert(v[0_uz].len() == 3_uz, "the vector's element is its own")
-  drop(v)
-  drop(arr)
 }
 
 !test(group="std/vector")
@@ -111,7 +97,6 @@ fun test_vector_append_many_of_heap_elements_keeps_them_alive() -> Void {
   std::debug::assert(a.len() == 2_uz, "length")
   std::debug::assert(a[1_uz].len() == 2_uz, "moved element kept its length")
   std::debug::assert(a[1_uz][1_uz]@ == 3, "moved element kept its contents")
-  drop(a)
 }
 
 !test(group="std/vector")
@@ -125,7 +110,6 @@ fun test_vector_insert_many_at_of_heap_elements_keeps_them_alive() -> Void {
   std::debug::assert(a.len() == 3_uz, "length")
   std::debug::assert(a[1_uz][1_uz]@ == 3, "inserted element kept its contents")
   std::debug::assert(a[2_uz][0_uz]@ == 4, "shifted tail")
-  drop(a)
 }
 
 !test(group="std/vector")
@@ -140,7 +124,6 @@ fun test_vector_swap_of_pointer_owning_elements() -> Void {
   std::debug::assert(v[0_uz].len() == 2_uz, "the second element moved to the front")
   std::debug::assert(v[1_uz].len() == 1_uz, "the first element moved to the back")
   std::debug::assert(v[0_uz].strong_count() == 1_uz, "no count was gained or lost")
-  drop(v)
 }
 
 !test(group="std/vector")
@@ -153,7 +136,6 @@ fun test_vector_make_reverse_of_pointer_owning_elements() -> Void {
   std::debug::assert(v[0_uz].len() == 3_uz, "last is first")
   std::debug::assert(v[1_uz].len() == 2_uz, "middle stays")
   std::debug::assert(v[2_uz].len() == 1_uz, "first is last")
-  drop(v)
 }
 
 !test(group="std/vector")
@@ -165,8 +147,6 @@ fun test_vector_make_reverse_of_empty_and_single() -> Void {
   let mut s = Vec::from(&[7])
   s.make_reverse()
   std::debug::assert(s[0_uz]@ == 7, "one element stays")
-  drop(e)
-  drop(s)
 }
 
 !test(group="std/vector")
@@ -182,8 +162,6 @@ fun test_vector_shrink_never_drops_below_length() -> Void {
   let r = v.try_capacity_shrink_to(0_uz)
   std::debug::assert(r.is_pass(), "the clamped shrink succeeds")
   std::debug::assert(v.len() == 3_uz, "the length is untouched")
-  drop(r)
-  drop(v)
 }
 
 !test(group="std/vector")
@@ -197,7 +175,6 @@ fun test_vector_iteration_visits_every_element_in_order() -> Void {
   }
   std::debug::assert(count == 4_uz, "visited every element")
   std::debug::assert(sum == 10, "in-order sum")
-  drop(v)
 }
 
 !test(group="std/vector")
@@ -205,7 +182,6 @@ fun test_a_new_vector_is_empty() -> Void {
   let v = Vec[S32]::new()
   std::debug::assert(v.len() == 0_uz, "no elements")
   std::debug::assert(v.is_empty(), "and it says so")
-  drop(v)
 }
 
 !test(group="std/vector")
@@ -216,14 +192,12 @@ fun test_append_then_take_last_round_trips() -> Void {
   std::debug::assert(v.len() == 2_uz, "two appended")
   std::debug::assert(v.take_last().unwrap() == 2, "the last one comes back")
   std::debug::assert(v.len() == 1_uz, "and the vector shrank")
-  drop(v)
 }
 
 !test(group="std/vector")
 fun test_take_last_on_an_empty_vector_yields_none() -> Void {
   let mut v = Vec[S32]::new()
   std::debug::assert(v.take_last().is_none(), "nothing to take")
-  drop(v)
 }
 
 !test(group="std/vector")
@@ -233,7 +207,6 @@ fun test_contains_and_find_locate_an_element() -> Void {
   std::debug::assert(v.contains(&99).not, "one that is not")
   std::debug::assert(v.find(&30).unwrap() == 2_uz, "find gives the index")
   std::debug::assert(v.find(&99).is_none(), "and none when absent")
-  drop(v)
 }
 
 !test(group="std/vector")
@@ -242,7 +215,6 @@ fun test_capacity_is_at_least_the_length() -> Void {
   v.append(1)
   std::debug::assert(v.cap() >= v.len(), "capacity covers the length")
   std::debug::assert(v.cap() >= 4_uz, "and keeps what was reserved")
-  drop(v)
 }
 
 !test(group="std/vector")
@@ -255,7 +227,6 @@ fun test_reserving_past_the_capacity_at_least_doubles_it() -> Void {
   std::debug::assert(v.cap() >= 16_uz, "one more than fits doubles the capacity")
   v.capacity_reserve(100_uz)
   std::debug::assert(v.cap() >= 108_uz, "more than double grows to what is needed")
-  drop(v)
 }
 
 !test(group="std/vector")
@@ -264,7 +235,6 @@ fun test_reserving_what_fits_keeps_the_capacity() -> Void {
   v.append(1)
   v.capacity_reserve(7_uz)
   std::debug::assert(v.cap() == 8_uz, "seven more fit in eight with one used")
-  drop(v)
 }
 
 !test(group="std/vector")
@@ -273,7 +243,6 @@ fun test_clear_empties_without_dropping_the_buffer() -> Void {
   v.clear()
   std::debug::assert(v.len() == 0_uz, "no elements left")
   std::debug::assert(v.is_empty(), "and it is empty")
-  drop(v)
 }
 
 # Todo: blocked on the same link failure as the array version - "reverse_iter_ref" emits
@@ -300,14 +269,12 @@ fun test_mutable_iteration_writes_through() -> Void {
   loop e in v.iter_mut() { e@ = e@ * 10 }
   std::debug::assert(v[0_uz]@ == 10, "first")
   std::debug::assert(v[2_uz]@ == 30, "last")
-  drop(v)
 }
 
 !test(group="std/vector")
 fun test_dropping_a_vector_releases_its_buffer() -> Void {
   loop i in std::range::Range::between(0_uz, 2000_uz) {
     let v = std::vector::Vec[std::number::S32]::new_with_capacity(1000000_uz)
-    std::mem::ops::drop(v)
   }
 }
 
@@ -315,7 +282,6 @@ fun test_dropping_a_vector_releases_its_buffer() -> Void {
 fun test_dropping_a_string_releases_its_buffer() -> Void {
   loop i in std::range::Range::between(0_uz, 2000_uz) {
     let s = std::string::Str::new_with_capacity(1000000_uz)
-    std::mem::ops::drop(s)
   }
 }
 
@@ -323,7 +289,6 @@ fun test_dropping_a_string_releases_its_buffer() -> Void {
 fun test_dropping_a_struct_releases_the_buffer_it_holds() -> Void {
   loop i in std::range::Range::between(0_uz, 2000_uz) {
     let s = std::option::Some(val=std::vector::Vec[std::number::S32]::new_with_capacity(1000000_uz))
-    std::mem::ops::drop(s)
   }
 }
 
@@ -332,7 +297,6 @@ fun test_dropping_a_variant_releases_the_buffer_it_holds() -> Void {
   loop i in std::range::Range::between(0_uz, 2000_uz) {
     let v: std::option::Opt[std::vector::Vec[std::number::S32]] = std::option::Some(
       val=std::vector::Vec[std::number::S32]::new_with_capacity(1000000_uz))
-    std::mem::ops::drop(v)
   }
 }
 
@@ -364,7 +328,6 @@ fun test_move_iteration_over_elements_that_own_memory() -> Void {
   let mut n = 0_uz
   loop e in v.iter_mov() {
     n += 1_uz
-    std::mem::ops::drop(e)
   }
   std::debug::assert(n == 2_uz, "both strings came back")
 }
@@ -377,7 +340,6 @@ fun test_move_iteration_over_nested_vectors() -> Void {
   let mut n = 0_uz
   loop e in v.iter_mov() {
     n += e.len()
-    std::mem::ops::drop(e)
   }
   std::debug::assert(n == 4_uz, "four elements across two inner vectors")
 }
@@ -407,14 +369,12 @@ fun test_new_filled_holds_the_value_in_every_slot() -> Void {
   loop i in std::range::Range::between(0_uz, 5_uz) {
     std::debug::assert(v[i]@ == 10_u8, "every element is the fill value")
   }
-  drop(v)
 }
 
 !test(group="std/vector")
 fun test_new_filled_with_no_elements_is_empty() -> Void {
   let v = Vec::new_filled(0_uz, 10_u8)
   std::debug::assert(v.len() == 0_uz, "empty")
-  drop(v)
 }
 
 !test(group="std/vector")
@@ -423,12 +383,9 @@ fun test_vector_append_within_capacity_fills_then_refuses() -> Void {
   let mut v = Vec[Str]::new_with_capacity(1_uz)
   let first = v.append_within_capacity(Str::from("a"))
   std::debug::assert(first.is_pass(), "there was room for the first")
-  drop(first)
   let second = v.append_within_capacity(Str::from("b"))
   std::debug::assert(second.is_fail(), "a full vector refuses without growing")
-  drop(second)
   std::debug::assert(v.len() == 1_uz and v.cap() == 1_uz, "the vector is unchanged by the refusal")
-  drop(v)
 }
 
 !test(group="std/vector")
@@ -439,5 +396,4 @@ fun test_vector_insert_at_the_length_appends() -> Void {
   v.insert_many_at(3_uz, Vec::from(&[4]))
   std::debug::assert(v.len() == 4_uz, "both inserts landed")
   std::debug::assert(v[2_uz]@ == 3 and v[3_uz]@ == 4, "appended at the end, in order")
-  drop(v)
 }

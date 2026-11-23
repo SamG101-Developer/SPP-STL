@@ -65,7 +65,6 @@ fun expect[T, F: FunMov[(&T,), Bool]](what: T, test: F) -> Res[T, AssertErr] {
   ret case test(&what) of {
     == true { Pass(val=what) }
     else {
-      drop(what)
       Fail(err=AssertErr) }
   }
 }

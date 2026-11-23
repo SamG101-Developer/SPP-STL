@@ -68,7 +68,6 @@ fun test_a_variant_can_hold_a_non_copyable_alternative() -> Void {
     else { 0_uz }
   }
   std::debug::assert(len == 1_uz, "the vector came through the variant whole")
-  drop(v)
 }
 
 !test(group="std/variant")

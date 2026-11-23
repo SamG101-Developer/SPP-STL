@@ -24,6 +24,7 @@ cls Pass[T] {
 }
 
 !public
+!must_use
 !versioned(base="1.0.0", new="1.0.0")
 cls Fail[E] {
   # The `Fail` class represents a failed result value. It is a generic class
@@ -107,8 +108,6 @@ sup [T, E] Res[T, E] {
     ret case self of {
       is Pass(val) { pred(val) }
       else {
-        drop(self)
-        drop(pred)
         false
       }
     }
@@ -145,8 +144,6 @@ sup [T, E] Res[T, E] {
     ret case self of {
       is Fail(err) { pred(err) }
       else {
-        drop(self)
-        drop(pred)
         false
       }
     }
@@ -185,8 +182,6 @@ sup [T, E] Res[T, E] {
     ret case self of {
       is Pass(val) { pred(val) }
       else {
-        drop(self)
-        drop(pred)
         true
       }
     }
@@ -213,11 +208,9 @@ sup [T, E] Res[T, E] {
     # `Pass`, otherwise return `Fail` with the same error.
     ret case self of {
       is Fail(err) {
-        drop(that)
         Fail(err)
       }
       else {
-        drop(self)
         that
       }
     }
@@ -253,7 +246,6 @@ sup [T, E] Res[T, E] {
         pred(val)
       }
       is Fail(err) {
-        drop(pred)
         Fail(err)
       }
     }
@@ -279,11 +271,9 @@ sup [T, E] Res[T, E] {
     # is `Pass`, otherwise return the other result.
     ret case self of {
       is Pass(val) {
-        drop(that)
         Pass(val)
       }
       else {
-        drop(self)
         that
       }
     }
@@ -313,7 +303,6 @@ sup [T, E] Res[T, E] {
     # provided predicate on the error.
     ret case self of {
       is Pass(val) {
-        drop(pred)
         Pass(val)
       }
       is Fail(err) { pred(err) }
@@ -345,7 +334,6 @@ sup [T, E] Res[T, E] {
     ret case self of {
       is Pass(val) { Pass(val=pred(val)) }
       is Fail(err) {
-        drop(pred)
         Fail(err)
       }
     }
@@ -376,7 +364,6 @@ sup [T, E] Res[T, E] {
     # wrapped in `Fail`.
     ret case self of {
       is Pass(val) {
-        drop(pred)
         Pass(val)
       }
       is Fail(err) { Fail(err=pred(err)) }
@@ -410,12 +397,9 @@ sup [T, E] Res[T, E] {
     # this is `Pass`, otherwise return the default value.
     ret case self of {
       is Pass(val) {
-        drop(default)
         f(val)
       }
       else {
-        drop(self)
-        drop(f)
         default
       }
     }
@@ -453,11 +437,9 @@ sup [T, E] Res[T, E] {
     # function on the error.
     ret case self of {
       is Pass(val) {
-        drop(default)
         f(val)
       }
       is Fail(err) {
-        drop(f)
         default(err)
       }
     }
@@ -479,7 +461,6 @@ sup [T, E] Res[T, E] {
     ret case self of {
       is Pass(val) { Some(val) }
       is Fail(err) {
-        drop(err)
         None
       }
     }
@@ -501,7 +482,6 @@ sup [T, E] Res[T, E] {
     ret case self of {
       is Fail(err) { Some(val=err) }
       is Pass(val) {
-        drop(val)
         None
       }
     }
@@ -544,11 +524,9 @@ sup [T, E] Res[T, E] {
     # otherwise return the default value.
     ret case self of {
       is Pass(val) {
-        drop(default)
         val
       }
       else {
-        drop(self)
         default
       }
     }
@@ -575,7 +553,6 @@ sup [T, E] Res[T, E] {
     # the error.
     ret case self of {
       is Pass(val) {
-        drop(default)
         val
       }
       is Fail(err) { default(err) }
@@ -674,13 +651,11 @@ sup [T, E] Res[T, E] {
         case that of {
           is Pass(val as val2) { ret Pass(val=(val1, val2)) }
           is Fail(err) {
-            drop(val1)
             ret Fail(err)
           }
         }
       }
       is Fail(err) {
-        drop(that)
         Fail(err)
       }
     }
@@ -819,22 +794,6 @@ sup [T: Eq, E: Eq] Res[T, E] ext Eq {
     }
   }
 }
-
-sup [T: Drop, E: Drop] Res[T, E] ext Drop {
-  # A result is discarded by discarding whichever of the two values it holds.
-  # Both sides need to be discardable in turn, which is what the constraints
-  # say. Discarding a result throws away whether the operation succeeded, so a
-  # caller that cares should match on it or unwrap it rather than dropping it.
-
-  !versioned(base="1.0.0", new="1.0.0")
-  fun drop(self) -> Void {
-    case self of {
-      is Pass(val) { drop(val) }
-      is Fail(err) { drop(err) }
-    }
-  }
-}
-
 sup [T: Format, E: Format] Res[T, E] ext Format {
   !versioned(base="1.0.0", new="1.0.0")
   fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {

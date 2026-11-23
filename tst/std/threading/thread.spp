@@ -108,7 +108,6 @@ fun test_an_rwlock_can_cross_onto_a_spawned_thread() -> Void {
   let l = std::threading::rwlock::RwLock::new(7).expect("rwlock")
   let h = std::threading::thread::spawn(|caps l| -> std::number::S32 {
     let seen = l.with_read(|v: &std::number::S32| { ret v@ }).expect("read failed")
-    std::mem::ops::drop(l)
     ret seen * 3
   }).expect("spawn failed")
   std::debug::assert(h.join().expect("join failed") == 21, "the guarded value was read on the thread")
@@ -126,11 +125,9 @@ fun test_two_threads_share_one_mutex() -> Void {
 
   let ha = std::threading::thread::spawn(|caps a| -> std::void::Void {
     a.with_lock(|v: &mut std::number::S32| { v@ = v@ + 1 }).expect("lock failed")
-    std::mem::ops::drop(a)
   }).expect("spawn failed")
   let hb = std::threading::thread::spawn(|caps b| -> std::void::Void {
     b.with_lock(|v: &mut std::number::S32| { v@ = v@ + 1 }).expect("lock failed")
-    std::mem::ops::drop(b)
   }).expect("spawn failed")
 
   ha.join().expect("join failed")
@@ -139,7 +136,6 @@ fun test_two_threads_share_one_mutex() -> Void {
 
   let total = m.with_lock(|v: &mut std::number::S32| { ret v@ }).expect("lock failed")
   std::debug::assert(total == 2, "both increments landed on the one guarded value")
-  std::mem::ops::drop(m)
 }
 
 !test(group="std/threading/thread")
@@ -149,7 +145,6 @@ fun test_a_thread_carries_an_owned_value() -> Void {
   let mut v = std::vector::Vec[std::number::S32]::new()
   v.append(5)
   let h = std::threading::thread::spawn(|caps v| -> std::number::S32 {
-    std::mem::ops::drop(v)
     ret 3
   }).expect("spawn failed")
   std::debug::assert(h.join().expect("join failed") == 3, "the owned value crossed and was released")
@@ -201,7 +196,6 @@ fun test_dropping_an_unjoined_handle_leaves_the_thread_its_result_cell() -> Void
     v.append(1)
     ret v
   }).expect("spawn failed")
-  drop(h)
   std::time::time::sleep(std::time::duration::Duration::from_millis(300_u64))
 }
 
@@ -214,5 +208,4 @@ fun test_joining_returns_an_owned_result_without_freeing_it() -> Void {
   }).expect("spawn failed")
   let v = h.join().expect("join failed")
   std::debug::assert(v[0_uz]@ == 4, "the joined vector is intact")
-  drop(v)
 }

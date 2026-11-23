@@ -52,7 +52,6 @@ fun test_a_pair_holds_a_key_and_a_value() -> Void {
   let p = std::tuple::Pair(key=1, val=true)
   std::debug::assert(p.key == 1, "the key")
   std::debug::assert(p.val, "the value")
-  drop(p)
 }
 
 !test(group="std/tuple")
@@ -63,5 +62,4 @@ fun test_a_pair_can_hold_a_non_copyable_value() -> Void {
   let p = std::tuple::Pair(key=1, val=v)
   std::debug::assert(p.key == 1, "the key is still readable")
   std::debug::assert(p.val.len() == 1_uz, "and the vector came along whole")
-  drop(p)
 }

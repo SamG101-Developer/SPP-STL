@@ -96,7 +96,6 @@ sup [T] Vec[T] {
     # @let f:
     # @ret:
 
-    defer drop(f)
     let mut vec = Self::new_with_capacity_in(len, GlobalAlloc)
     loop i in Range::between(0_uz, len) { vec.append_unchecked(f(i)) }
 
@@ -265,7 +264,6 @@ sup [T, A: Alloc] Vec[T, A] {
       self.append_unchecked(element)
       ret Pass[Void]()
     }
-    drop(element)
     ret Fail(err=AllocOverflowErr)
   }
 
@@ -356,7 +354,6 @@ sup [T, A: Alloc] Vec[T, A] {
     # Discharged on the early path rather than deferred: past the emptiness check "f" is consumed by being called, so
     # a deferred discard would consume it a second time on every path that got that far.
     case self.is_empty() {
-      drop(f)
       ret None
     }
     let last_index = self.len() - 1_uz
@@ -474,7 +471,6 @@ sup [T, A: Alloc] Vec[T, A] {
     # @ret:
 
     let Vec(buffer, length) = self
-    drop(buffer)
   }
 
   !cold
@@ -521,7 +517,6 @@ sup [T: Clone, A: Alloc] Vec[T, A] {
 
     case new_len <= self.len() {
       self.truncate(new_len)
-      drop(element)
       ret
     }
 
@@ -598,16 +593,36 @@ sup [T, A: Alloc] Vec[T, A] ext IterMov[T] {
     # the remainder itself.
     # @ret: An iterator that moves the vector's elements out in order.
 
-    let Vec(mut buffer, length) = self
-    let mut i = 0_uz
-    defer drop(buffer)
-    defer buffer.clear_range(i, length - i)
-
-    loop i < length {
-      let element = buffer.take_at(i).unwrap()
-      i += 1_uz
+    let Vec(buffer, length) = self
+    let mut rest = IterMovRest(buffer=buffer, from=0_uz, end=length)
+    loop rest.from < rest.end {
+      let element = rest.buffer.take_at(rest.from).unwrap()
+      rest.from += 1_uz
       gen element
     }
+  }
+}
+
+cls IterMovRest[T, A: Alloc] {
+  # The elements an `iter_mov` has not yielded yet: `[from, end)` of `buffer`.
+  # Dropped with the generator, whether it finishes or is abandoned, it
+  # destroys those, then frees the buffer.
+  # @type T: The type of the elements.
+  # @type A: The buffer's allocator.
+  # @let buffer: The vector's buffer, its yielded elements already moved out.
+  # @let from: The first element not yielded yet.
+  # @let end: One past the last element.
+  !package buffer: RawBuf[T, A]
+  !package from: USize
+  !package end: USize
+}
+
+sup [T, A: Alloc] IterMovRest[T, A] ext Drop {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun drop(self) -> Void {
+    # Destroys the elements not yielded; the buffer then frees its memory.
+    let IterMovRest(mut buffer, from, end) = self
+    buffer.clear_range(from, end - from)
   }
 }
 
@@ -621,7 +636,6 @@ sup [T, A: Alloc] Vec[T, A] ext RevIterMov[T] {
     # were never yielded, with no double drop and no leak.
     # @ret: An iterator that moves the vector's elements out in reverse order.
 
-    defer drop(self)
     loop self.length > 0_uz {
       self.length -= 1_uz
       gen self.buffer.take_at(self.length).unwrap()
@@ -749,7 +763,6 @@ sup [T, A: Alloc] Vec[T, A] ext Drop {
 
     let Vec(mut buffer, length) = self
     buffer.clear_range(0_uz, length)
-    drop(buffer)
   }
 }
 

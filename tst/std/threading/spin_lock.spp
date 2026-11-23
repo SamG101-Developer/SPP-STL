@@ -3,7 +3,6 @@ fun test_with_lock_runs_and_returns() -> Void {
   let s = std::threading::spin_lock::SpinLock::new().expect("spin lock")
   let r = s.with_lock(|| { ret 5 }).expect("lock")
   std::debug::assert(r == 5, "the closure's result comes back")
-  drop(s)
 }
 
 !test(group="std/threading/spin_lock")
@@ -12,12 +11,9 @@ fun test_the_lock_is_held_only_while_the_closure_runs() -> Void {
   let busy_inside = s.with_lock(|caps &s| {
     let inner = s.try_with_lock(|| { ret 0 })
     let busy = inner.is_fail()
-    drop(inner)
     ret busy
   }).expect("lock")
   std::debug::assert(busy_inside, "the spin lock is busy inside the closure")
   let after = s.try_with_lock(|| { ret 1 })
   std::debug::assert(after.is_pass(), "the lock is free once the closure returns")
-  drop(after)
-  drop(s)
 }

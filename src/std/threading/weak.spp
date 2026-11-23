@@ -66,7 +66,6 @@ sup [T, A: Alloc] Weak[T, A] ext Drop {
     # strong handles held collectively - and by then the value has already been destroyed.
 
     let Weak(pointer, alloc) = self
-    defer drop(alloc)
 
     case pointer.weak_counter.fetch_sub(1_uz) == 1_uz {
       alloc.deallocate(pointer)
