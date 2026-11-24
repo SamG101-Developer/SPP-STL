@@ -42,7 +42,7 @@ fun test_drop_skips_the_front() -> Void {
 !test(group="std/iterator")
 fun test_step_by_skips_between_elements() -> Void {
   let mut count = 0_uz
-  loop i in std::range::Range::between(0, 10).step_by(2_uz) { count += 1_uz }
+  loop i in std::range::Range::between(0, 10, 2) { count += 1_uz }
   std::debug::assert(count == 5_uz, "every other element of ten")
 }
 
