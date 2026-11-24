@@ -814,7 +814,7 @@ sup [E: Format] Res[Void, E] ext Format {
       }
     }
 
-    formatter.write_str("Pass()")
+    formatter.write_str("Pass(())")
     ret Pass[Void]()
   }
 }
@@ -834,7 +834,7 @@ sup [T: Format] Res[T, Void] ext Format {
       }
     }
 
-    formatter.write_str("Fail()")
+    formatter.write_str("Fail(())")
     ret Pass[Void]()
   }
 }
@@ -846,11 +846,11 @@ sup Res[Void, Void] ext Format {
     # A stopgap: see `Res[Void, E]` above.
 
     case self.is_pass() {
-      formatter.write_str("Pass()")
+      formatter.write_str("Pass(())")
       ret Pass[Void]()
     }
 
-    formatter.write_str("Fail()")
+    formatter.write_str("Fail(())")
     ret Pass[Void]()
   }
 }
