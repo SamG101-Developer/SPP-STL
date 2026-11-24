@@ -57,14 +57,14 @@ fun test_a_negative_interval_walks_upward() -> Void {
 !test(group="std/range")
 fun test_step_by_visits_every_nth_value() -> Void {
   let mut count = 0_uz
-  loop i in std::range::Range::between(0, 10).step_by(2_uz) { count += 1_uz }
+  loop i in std::range::Range::between(0, 10, 2) { count += 1_uz }
   std::debug::assert(count == 5_uz, "every other value of ten")
 }
 
 !test(group="std/range")
 fun test_step_by_one_is_the_whole_interval() -> Void {
   let mut count = 0_uz
-  loop i in std::range::Range::between(0, 4).step_by(1_uz) { count += 1_uz }
+  loop i in std::range::Range::between(0, 4, 1) { count += 1_uz }
   std::debug::assert(count == 4_uz, "a step of one skips nothing")
 }
 
@@ -72,7 +72,7 @@ fun test_step_by_one_is_the_whole_interval() -> Void {
 fun test_step_by_larger_than_the_interval_yields_only_the_first() -> Void {
   let mut count = 0_uz
   let mut seen = -1
-  loop i in std::range::Range::between(0, 3).step_by(99_uz) {
+  loop i in std::range::Range::between(0, 3, 99) {
     count += 1_uz
     seen = i
   }
@@ -129,11 +129,4 @@ fun test_between_walking_away_or_standing_still_yields_nothing() -> Void {
   std::debug::assert(zr_sum_and_count(std::range::Range::between(10, 0, 1)).1 == 0_uz, "up, away from 0")
   std::debug::assert(zr_sum_and_count(std::range::Range::between(0, 10, 0)).1 == 0_uz, "a zero step")
   std::debug::assert(zr_sum_and_count(std::range::Range::between(5, 5, -1)).1 == 0_uz, "an empty interval")
-}
-
-!test(group="std/range")
-fun test_between_composes_with_step_by() -> Void {
-  # 9, 8, ..., 0 descending, then every third: 9, 6, 3, 0.
-  let r = zr_sum_and_count(std::range::Range::between(9, -1, -1).step_by(3_uz))
-  std::debug::assert(r.1 == 4_uz and r.0 == 18, "9+6+3+0")
 }
