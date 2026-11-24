@@ -951,7 +951,7 @@ fun test_closure_reads_an_immutably_borrowed_capture() -> Void {
 }
 
 # The iterator behind "loop ... in" is consumed on every way out of the loop: dropped after it when it ends, or an
-# "exit" leaves it, and by a "defer" when a "ret" or an "exit exit" leaves the enclosing scope as well. Each frame is
+# "exit" leaves it, and on the way out when a "ret" or an "exit exit" leaves the enclosing scope as well. Each frame is
 # destroyed once (checked under valgrind when this was written; before it, every frame leaked).
 cor regression_count(n: U32) -> std::generator::Gen[U32] {
   let mut i = 0_u32

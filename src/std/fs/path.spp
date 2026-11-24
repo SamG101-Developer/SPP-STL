@@ -729,14 +729,14 @@ sup Path {
     # @ret: A `Res` type containing the number of bytes copied if the copy is
     #   successful, or an error message if the operation fails.
 
-    # Create the info-carrying stat struct, and defer its deletion
-    # as it won't be returned; it's strictly to go to C to get its
-    # attributes set from the sppc library.
+    # Create the info-carrying stat struct, dropped at the end of
+    # this function as it won't be returned; it's strictly to go to
+    # C to get its attributes set from the sppc library.
     let mut info = sppc::CStat()
 
     # Call the C function to fill the stat's attributes. Consider
     # the error where this function fails, and return the failure.
-    # The info get dropped via the defer statement in this case.
+    # The info is dropped on that return too.
     let path_z = self.c_path()?
     let err = sppc::stat(path_z.ptr().as_c_ref(), &mut info)
     case err != 0 { ret Fail(err=PathErr::from_errno(err)) }
@@ -745,7 +745,7 @@ sup Path {
     # Create the two file object for the "in" and "out" file. The
     # "in" file is where the contents are coming from, and the "out"
     # file is where the contents are going to, created, and refused
-    # if it already exists. Defer their closing.
+    # if it already exists. Each is closed when it is dropped.
     let file_in = File::open(&self, FileMode().read())?
     let file_out = File::open(new_path, FileMode().write().create_new())?
 
