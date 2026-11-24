@@ -9,13 +9,16 @@ use std::ops::try::Try
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls Some[T] {
-  # The `Some` class represents an optional value that is present. It is a generic class that can hold a value of any
-  # type `T`. The `Some` class is used in conjunction with the `None` class to represent optional values, where `Some`
-  # indicates that a value is present, and `None` indicates that no value is present.
-  # @type T: The type of the value contained in the `Some` instance. This can be any type, and is specified when
-  # creating a `Some` instance.
-  # @let val: The value contained in the `Some` instance. This is the actual value that is present, and can be accessed
-  # using the `unwrap` method. The value is of type `T`, and is specified when creating a `Some` instance.
+  # The `Some` class represents an optional value that is present. It is a
+  # generic class that can hold a value of any type `T`. The `Some` class is
+  # used in conjunction with the `None` class to represent optional values,
+  # where `Some` indicates that a value is present, and `None` indicates that no
+  # value is present.
+  # @type T: The type of the value contained in the `Some` instance. This can be
+  #   any type, and is specified when creating a `Some` instance.
+  # @let val: The value contained in the `Some` instance. This is the actual
+  #   value that is present, and can be accessed using the `unwrap` method. The
+  #   value is of type `T`, and is specified when creating a `Some` instance.
 
   !public val: T
 }
@@ -23,25 +26,29 @@ cls Some[T] {
 !public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
 cls None {
-  # The `None` class represents an optional value that is not present. It is a zero-sized type that does not hold any
-  # value, allowing ti to be specified as the sineton `None` rather than needing `None()` everywhere.
+  # The `None` class represents an optional value that is not present. It is a
+  # zero-sized type that does not hold any value, allowing ti to be specified as
+  # the sineton `None` rather than needing `None()` everywhere.
 }
 
 !public
 type Opt[T] = Some[T] or None
 
 sup [T] Opt[T] {
-  # Multiple methods are provided for the `Opt` type to allow for convenient manipulation and querying of optional
-  # values. These methods include checking if the optional is `Some` or `None`, applying predicates to the value inside,
-  # chaining together multiple optional computations, filtering the value based on a condition, and transforming the
-  # value inside the optional.
+  # Multiple methods are provided for the `Opt` type to allow for convenient
+  # manipulation and querying of optional values. These methods include checking
+  # if the optional is `Some` or `None`, applying predicates to the value
+  # inside, chaining together multiple optional computations, filtering the
+  # value based on a condition, and transforming the value inside the optional.
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun is_some(&self) -> Bool {
-    # The `is_some` method checks if the optional is in the `Some` state. It returns `true` if the optional is `Some`,
-    # and `false` if it is `None`. This is a wrapper around pattern matching.
-    # @ret: Returns `true` if the optional is `Some`, and `false` if it is `None`.
+    # The `is_some` method checks if the optional is in the `Some` state. It
+    # returns `true` if the optional is `Some`, and `false` if it is `None`.
+    # This is a wrapper around pattern matching.
+    # @ret: Returns `true` if the optional is `Some`, and `false` if it is
+    #   `None`.
 
     # Simple pattern match.
     ret self is Some(..)
@@ -50,9 +57,11 @@ sup [T] Opt[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun is_none(&self) -> Bool {
-    # The `is_none` method checks if the optional is in the `None` state. It returns `true` if the optional is `None`,
-    # and `false` if it is `Some`. This is a wrapper around pattern matching.
-    # @ret: Returns `true` if the optional is `None`, and `false` if it is `Some`.
+    # The `is_none` method checks if the optional is in the `None` state. It
+    # returns `true` if the optional is `None`, and `false` if it is `Some`.
+    # This is a wrapper around pattern matching.
+    # @ret: Returns `true` if the optional is `None`, and `false` if it is
+    #   `Some`.
 
     # Simple pattern match.
     ret self is None()
@@ -61,11 +70,14 @@ sup [T] Opt[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun is_some_and[P: FunMov[(T,), Bool]](self, mut pred: P) -> Bool {
-    # The `is_some_and` method checks if the optional contains a value, and if so, applies the predicate to that value.
-    # If the optional is `None`, or if the predicate returns false, then `is_some_and` returns `false`. If the optional
-    # contains a value and the predicate returns true, then `is_some_and` returns `true`. This is a convenient method
-    # for checking if an optional contains a value that satisfies a certain condition, without having to first check if
-    # the optional is Some and then apply the predicate separately.
+    # The `is_some_and` method checks if the optional contains a value, and if
+    # so, applies the predicate to that value. If the optional is `None`, or if
+    # the predicate returns false, then `is_some_and` returns `false`. If the
+    # optional contains a value and the predicate returns true, then
+    # `is_some_and` returns `true`. This is a convenient method for checking if
+    # an optional contains a value that satisfies a certain condition, without
+    # having to first check if the optional is Some and then apply the predicate
+    # separately.
     #
     # Example usage:
     # ```
@@ -73,32 +85,35 @@ sup [T] Opt[T] {
     # let is_even = opt.is_some_and(|x| x % 2 == 0)
     # ```
     #
-    # @type P: The type of the predicate function. This must be a function that takes a single argument of type `T` and
-    # returns a `Bool`.
-    # @let pred: The predicate function that is applied to the value inside the optional if it is `Some`. This function
-    # is called with the value of type `T` if the optional is `Some`, and should return `true` if the value satisfies
-    # the condition, or `false` otherwise.
-    # @ret: Returns `true` if the optional is `Some` and the predicate returns `true` for the value inside, otherwise
-    # returns `false`.
+    # @type P: The type of the predicate function. This must be a function that
+    #   takes a single argument of type `T` and returns a `Bool`.
+    # @let pred: The predicate function that is applied to the value inside the
+    #   optional if it is `Some`. This function is called with the value of type
+    #   `T` if the optional is `Some`, and should return `true` if the value
+    #   satisfies the condition, or `false` otherwise.
+    # @ret: Returns `true` if the optional is `Some` and the predicate returns
+    #   `true` for the value inside, otherwise returns `false`.
 
     # Pattern match and test against the predicate.
     ret case self of {
       is Some(val) { pred(val) }
-      else {
-        false
-      }
+      else { false }
     }
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun is_none_or[P: FunMov[(T,), Bool]](self, mut pred: P) -> Bool {
-    # The `is_none_or` method checks if the optional is `None`, or if it is `Some` and the predicate returns true for
-    # the value inside. If the optional is `None`, then `is_none_or` returns `true`. If the optional is `Some` and the
-    # predicate returns true for the value inside, then `is_none_or` returns `true`. If the optional is `Some` and the
-    # predicate returns false for the value inside, then `is_none_or` returns `false`. This is a convenient method for
-    # checking if an optional is either `None` or contains a value that satisfies a certain condition, without having to
-    # first check if the optional is `None` and then apply the predicate separately.
+    # The `is_none_or` method checks if the optional is `None`, or if it is
+    # `Some` and the predicate returns true for the value inside. If the
+    # optional is `None`, then `is_none_or` returns `true`. If the optional is
+    # `Some` and the predicate returns true for the value inside, then
+    # `is_none_or` returns `true`. If the optional is `Some` and the predicate
+    # returns false for the value inside, then `is_none_or` returns `false`.
+    # This is a convenient method for checking if an optional is either `None`
+    # or contains a value that satisfies a certain condition, without having to
+    # first check if the optional is `None` and then apply the predicate
+    # separately.
     #
     # Example usage:
     # ```
@@ -106,134 +121,140 @@ sup [T] Opt[T] {
     # let is_none_or_even = opt.is_none_or(|x| x % 2 == 0)
     # ```
     #
-    # @type P: The type of the predicate function. This must be a function that takes a single argument of type `T` and
-    # returns a `Bool`.
-    # @let pred: The predicate function that is applied to the value inside the optional if it is `Some`. This function
-    # is called with the value of type `T` if the optional is `Some`, and should return `true` if the value satisfies
-    # the condition, or `false` otherwise.
-    # @ret: Returns `true` if the optional is `None`, or if it is `Some` and the predicate returns `true` for the value
-    # inside, otherwise returns `false`.
+    # @type P: The type of the predicate function. This must be a function that
+    #   takes a single argument of type `T` and returns a `Bool`.
+    # @let pred: The predicate function that is applied to the value inside the
+    #   optional if it is `Some`. This function is called with the value of type
+    #   `T` if the optional is `Some`, and should return `true` if the value
+    #   satisfies the condition, or `false` otherwise.
+    # @ret: Returns `true` if the optional is `None`, or if it is `Some` and the
+    #   predicate returns `true` for the value inside, otherwise returns
+    #   `false`.
 
     # Pattern match and test against the predicate.
     ret case self of {
       is Some(val) { pred(val) }
-      else {
-        true
-      }
+      else { true }
     }
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun and_[U](self, that: Opt[U]) -> Opt[U] {
-    # The `and_` method checks if this optional contains a value, and if so, returns the other optional. If this
-    # optional is `None`, then `and_` returns `None`. This is a convenient method for chaining together multiple
-    # optional computations, where you want to return `None` if any of the computations return `None`, but otherwise
-    # return the result of the last computation.
-    # @type U: The type of the value contained in the other optional. This can be different from the type of the value
-    # in this optional.
-    # @let that: The other optional that is returned if this optional is `Some`. If this optional is `None`, then `that`
-    # is not evaluated, and `None` is returned instead.
+    # The `and_` method checks if this optional contains a value, and if so,
+    # returns the other optional. If this optional is `None`, then `and_`
+    # returns `None`. This is a convenient method for chaining together multiple
+    # optional computations, where you want to return `None` if any of the
+    # computations return `None`, but otherwise return the result of the last
+    # computation.
+    # @type U: The type of the value contained in the other optional. This can
+    #   be different from the type of the value in this optional.
+    # @let that: The other optional that is returned if this optional is `Some`.
+    #   If this optional is `None`, then `that` is not evaluated, and `None` is
+    #   returned instead.
     # @ret: Returns `that` if this optional is `Some`, otherwise returns `None`.
 
     # Pattern match and return the other optional if this is
     # `Some`, otherwise return `None`.
     ret case self of {
-      is Some(val) {
-        that
-      }
-      else {
-        None
-      }
+      is Some(val) { that }
+      else { None }
     }
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun and_then[U, P: FunMov[(T,), Opt[U]]](self, mut pred: P) -> Opt[U] {
-    # The `and_then` method checks if this optional contains a value, and if so, applies the predicate to that value and
-    # returns the result. If this optional is `None`, then `and_then` returns `None`. This is a convenient method for
-    # chaining together multiple optional computations, where you want to return `None` if any of the computations
-    # return `None`, but otherwise return the result of the last computation.
-    # @type U: The type of the value contained in the optional returned by the predicate. This can be different from the
-    # type of the value in this optional.
-    # @type P: The type of the predicate function. This must be a function that takes a single argument of type `T` and
-    # returns an `Opt[U]`.
-    # @let pred: The predicate function that is applied to the value inside the optional if it is `Some`. This function
-    # is called with the value of type `T` if the optional is `Some`, and should return an `Opt[U]` that is the result
-    # of the computation. If the optional is `None`, then `pred` is not evaluated, and `None` is returned instead.
-    # @ret: Returns the result of `pred` if this optional is `Some`, otherwise returns `None`.
+    # The `and_then` method checks if this optional contains a value, and if so,
+    # applies the predicate to that value and returns the result. If this
+    # optional is `None`, then `and_then` returns `None`. This is a convenient
+    # method for chaining together multiple optional computations, where you
+    # want to return `None` if any of the computations return `None`, but
+    # otherwise return the result of the last computation.
+    # @type U: The type of the value contained in the optional returned by the
+    #   predicate. This can be different from the type of the value in this
+    #   optional.
+    # @type P: The type of the predicate function. This must be a function that
+    #   takes a single argument of type `T` and returns an `Opt[U]`.
+    # @let pred: The predicate function that is applied to the value inside the
+    #   optional if it is `Some`. This function is called with the value of type
+    #   `T` if the optional is `Some`, and should return an `Opt[U]` that is the
+    #   result of the computation. If the optional is `None`, then `pred` is not
+    #   evaluated, and `None` is returned instead.
+    # @ret: Returns the result of `pred` if this optional is `Some`, otherwise
+    #   returns `None`.
 
     # Pattern match and apply the predicate to the value if
     # this is `Some`, otherwise return `None`.
     ret case self of {
       is Some(val) { pred(val) }
-      else {
-        None
-      }
+      else { None }
     }
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun ior_(self, that: Opt[T]) -> Opt[T] {
-    # The `ior_` method checks if this optional contains a value, and if so, returns this optional. If this optional is
-    # `None`, then `ior_` returns the other optional. This is a convenient method for chaining together multiple
-    # optional computations, where you want to return the first `Some` value if there is one, but otherwise return
-    # `None` if all computations return `None`.
-    # @let that: The other optional that is returned if this optional is `None`. If this optional is `Some`, then `that`
-    # is not evaluated, and this optional is returned instead.
+    # The `ior_` method checks if this optional contains a value, and if so,
+    # returns this optional. If this optional is `None`, then `ior_` returns the
+    # other optional. This is a convenient method for chaining together multiple
+    # optional computations, where you want to return the first `Some` value if
+    # there is one, but otherwise return `None` if all computations return
+    # `None`.
+    # @let that: The other optional that is returned if this optional is `None`.
+    #   If this optional is `Some`, then `that` is not evaluated, and this
+    #   optional is returned instead.
     # @ret: Returns this optional if it is `Some`, otherwise returns `that`.
 
     # Pattern match and return this optional if it is `Some`,
     # otherwise return the other optional.
     ret case self of {
-      is Some(..) {
-        self
-      }
-      else {
-        that
-      }
+      is Some(..) { self }
+      else { that }
     }
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun ior_else[F: FunMov[(), Opt[T]]](self, mut that: F) -> Opt[T] {
-    # The `ior_else` method checks if this optional contains a value, and if so, returns this optional. If this optional
-    # is `None`, then `ior_else` returns the result of invoking the provided function to get the other optional. This is
-    # a convenient method for chaining together multiple optional computations, where you want to return the first
-    # `Some` value if there is one, but otherwise return the result of a computation that produces an optional if all
-    # computations return `None`.
-    # @let that: A function that is invoked to get the other optional if this optional is `None`. If this optional is
-    # `Some`, then `that` is not evaluated, and this optional is returned instead.
-    # @ret: Returns this optional if it is `Some`, otherwise returns the result of invoking `that()`.
+    # The `ior_else` method checks if this optional contains a value, and if so,
+    # returns this optional. If this optional is `None`, then `ior_else` returns
+    # the result of invoking the provided function to get the other optional.
+    # This is a convenient method for chaining together multiple optional
+    # computations, where you want to return the first `Some` value if there is
+    # one, but otherwise return the result of a computation that produces an
+    # optional if all computations return `None`.
+    # @let that: A function that is invoked to get the other optional if this
+    #   optional is `None`. If this optional is `Some`, then `that` is not
+    #   evaluated, and this optional is returned instead.
+    # @ret: Returns this optional if it is `Some`, otherwise returns the result
+    #   of invoking `that()`.
 
     # Pattern match and return this optional if it is `Some`,
     # otherwise return the result of invoking the provided function.
     ret case self of {
-      is Some(..) {
-        self
-      }
-      else {
-        that()
-      }
+      is Some(..) { self }
+      else { that() }
     }
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun xor(self, that: Opt[T]) -> Opt[T] {
-    # The `xor` method checks if exactly one of this optional and the other optional contains a value, and if so,
-    # returns that value wrapped in `Some`. If both optionals are `None`, or if both optionals are `Some`, then `xor`
-    # returns `None`. This is a convenient method for chaining together multiple optional computations, where you want
-    # to return the value of the first `Some` if there is exactly one `Some`, but otherwise return `None` if there are
-    # zero or more than one `Some` values.
-    # @let that: The other optional that is compared with this optional. If exactly one of this optional and `that` is
-    # `Some`, then the value of that `Some` is returned wrapped in `Some`. If both optionals are `None`, or if both
-    # optionals are `Some`, then `None` is returned.
-    # @ret: Returns the value of the `Some` optional wrapped in `Some` if exactly one of this optional and `that` is
-    # `Some`, otherwise returns `None`.
+    # The `xor` method checks if exactly one of this optional and the other
+    # optional contains a value, and if so, returns that value wrapped in
+    # `Some`. If both optionals are `None`, or if both optionals are `Some`,
+    # then `xor` returns `None`. This is a convenient method for chaining
+    # together multiple optional computations, where you want to return the
+    # value of the first `Some` if there is exactly one `Some`, but otherwise
+    # return `None` if there are zero or more than one `Some` values.
+    # @let that: The other optional that is compared with this optional. If
+    #   exactly one of this optional and `that` is `Some`, then the value of
+    #   that `Some` is returned wrapped in `Some`. If both optionals are `None`,
+    #   or if both optionals are `Some`, then `None` is returned.
+    # @ret: Returns the value of the `Some` optional wrapped in `Some` if
+    #   exactly one of this optional and `that` is `Some`, otherwise returns
+    #   `None`.
 
     # Pattern match on both optionals and return the value of
     # the `Some` if exactly one is `Some`, otherwise return `None`.
@@ -241,8 +262,7 @@ sup [T] Opt[T] {
     case self of {
       is Some(val) {
         case that of {
-          is Some(val as other) {
-          }
+          is Some(val as other) { }
           else { ret Some(val=val) }
         }
       }
@@ -254,30 +274,31 @@ sup [T] Opt[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun filter[P: FunMov[(&T,), Bool]](self, mut pred: P) -> Opt[T] {
-    # The `filter` method checks if this optional contains a value, and if so, applies the predicate to that value. If
-    # this optional is `None`, then `filter` returns `None`. If this optional is `Some` and the predicate returns true
-    # for the value inside, then `filter` returns this optional. If this optional is `Some` and the predicate returns
-    # false for the value inside, then `filter` returns `None`. This is a convenient method for filtering the value
-    # inside an optional based on a certain condition, without having to first check if the optional is `Some` and then
-    # apply the predicate separately.
-    # @type P: The type of the predicate function. This must be a function that takes a single argument of type `&T` (a
-    # borrow to the value inside the optional) and returns a `Bool`.
-    # @let pred: The predicate function that is applied to the value inside the optional if it is `Some`. This function
-    # is called with a borrow of the value of type `T` if the optional is `Some`, and should return `true` if the value
-    # satisfies the condition, or `false` otherwise. If the optional is `None`, then `pred` is not evaluated, and `None`
-    # is returned instead.
-    # @ret: Returns this optional if it is `Some` and the predicate returns `true` for the value inside, otherwise
-    # returns `None`.
+    # The `filter` method checks if this optional contains a value, and if so,
+    # applies the predicate to that value. If this optional is `None`, then
+    # `filter` returns `None`. If this optional is `Some` and the predicate
+    # returns true for the value inside, then `filter` returns this optional. If
+    # this optional is `Some` and the predicate returns false for the value
+    # inside, then `filter` returns `None`. This is a convenient method for
+    # filtering the value inside an optional based on a certain condition,
+    # without having to first check if the optional is `Some` and then apply the
+    # predicate separately.
+    # @type P: The type of the predicate function. This must be a function that
+    #   takes a single argument of type `&T` (a borrow to the value inside the
+    #   optional) and returns a `Bool`.
+    # @let pred: The predicate function that is applied to the value inside the
+    #   optional if it is `Some`. This function is called with a borrow of the
+    #   value of type `T` if the optional is `Some`, and should return `true` if
+    #   the value satisfies the condition, or `false` otherwise. If the optional
+    #   is `None`, then `pred` is not evaluated, and `None` is returned instead.
+    # @ret: Returns this optional if it is `Some` and the predicate returns
+    #   `true` for the value inside, otherwise returns `None`.
 
     # Pattern match and apply the predicate to a borrow of
     # the value if this is `Some`.
     case self of {
-      is Some(&val) {
-        case pred(val) { ret self }
-      }
-      else {
-        ret self
-      }
+      is Some(&val) and pred(val) { ret self }
+      else { ret self }
     }
     ret None
   }
@@ -285,117 +306,126 @@ sup [T] Opt[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun map[U, F: FunMov[(T,), U]](self, mut func: F) -> Opt[U] {
-    # The `map` method checks if this optional contains a value, and if so, applies the predicate to that value and
-    # returns the result wrapped in `Some`. If this optional is `None`, then `map` returns `None`. This is a convenient
-    # method for transforming the value inside an optional based on a certain function, without having to first check if
-    # the optional is `Some` and then apply the function separately.
-    # @type U: The type of the value contained in the optional returned by the predicate. This can be different from the
-    # type of the value in this optional.
-    # @type F: The type of the predicate function. This must be a function that takes a single argument of type `T` and
-    # returns a value of type `U`.
-    # @let func: The predicate function that is applied to the value inside the optional if it is `Some`. This function
-    # is called with the value of type `T` if the optional is `Some`, and should return a value of type `U` that is the
-    # result of the transformation. If the optional is `None`, then `pred` is not evaluated, and `None` is returned
-    # instead.
-    # @ret: Returns the result of `pred` wrapped in `Some` if this optional is `Some`, otherwise returns `None`.
+    # The `map` method checks if this optional contains a value, and if so,
+    # applies the predicate to that value and returns the result wrapped in
+    # `Some`. If this optional is `None`, then `map` returns `None`. This is a
+    # convenient method for transforming the value inside an optional based on a
+    # certain function, without having to first check if the optional is `Some`
+    # and then apply the function separately.
+    # @type U: The type of the value contained in the optional returned by the
+    #   predicate. This can be different from the type of the value in this
+    #   optional.
+    # @type F: The type of the predicate function. This must be a function that
+    #   takes a single argument of type `T` and returns a value of type `U`.
+    # @let func: The predicate function that is applied to the value inside the
+    #   optional if it is `Some`. This function is called with the value of type
+    #   `T` if the optional is `Some`, and should return a value of type `U`
+    #   that is the result of the transformation. If the optional is `None`,
+    #   then `pred` is not evaluated, and `None` is returned instead.
+    # @ret: Returns the result of `pred` wrapped in `Some` if this optional is
+    #   `Some`, otherwise returns `None`.
 
     # Pattern match and apply the predicate to the value
     # if this is `Some`, otherwise return `None`.
     ret case self of {
       is Some(val) { Some(val=func(val)) }
-      else {
-        None
-      }
+      else { None }
     }
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun map_or[U, F: FunMov[(T,), U]](self, default: U, mut f: F) -> U {
-    # The `map_or` method checks if this optional contains a value, and if so, applies the function to that value and
-    # returns the result. If this optional is `None`, then `map_or` returns the provided default value. This is a
-    # convenient method for transforming the value inside an optional based on a certain function, and providing a
-    # default value if the optional is `None`, without having to first check if the optional is `Some` and then apply
-    # the function separately.
-    # @type U: The type of the value returned by the function and the default. This can be different from the type of
-    # the value in this optional.
-    # @let default: The default value that is returned if this optional is `None`. If this optional is `Some`, then
-    # `default` is not evaluated, and the result of applying `f` to the value inside is returned instead.
-    # @let f: The function that is applied to the value inside the optional if it is `Some`. This function is called
-    # with the value of type `T` if the optional is `Some`, and should return a value of type `U` that is the result of
-    # the transformation. If the optional is `None`, then `f` is not evaluated, and `default` is returned instead.
-    # @ret: Returns the result of applying `f` to the value inside the optional if this optional is `Some`, otherwise
-    # returns `default`.
+    # The `map_or` method checks if this optional contains a value, and if so,
+    # applies the function to that value and returns the result. If this
+    # optional is `None`, then `map_or` returns the provided default value. This
+    # is a convenient method for transforming the value inside an optional based
+    # on a certain function, and providing a default value if the optional is
+    # `None`, without having to first check if the optional is `Some` and then
+    # apply the function separately.
+    # @type U: The type of the value returned by the function and the default.
+    #   This can be different from the type of the value in this optional.
+    # @let default: The default value that is returned if this optional is
+    #   `None`. If this optional is `Some`, then `default` is not evaluated, and
+    #   the result of applying `f` to the value inside is returned instead.
+    # @let f: The function that is applied to the value inside the optional if
+    #   it is `Some`. This function is called with the value of type `T` if the
+    #   optional is `Some`, and should return a value of type `U` that is the
+    #   result of the transformation. If the optional is `None`, then `f` is not
+    #   evaluated, and `default` is returned instead.
+    # @ret: Returns the result of applying `f` to the value inside the optional
+    #   if this optional is `Some`, otherwise returns `default`.
 
     # Pattern match and apply the function to the value if
     # this is `Some`, otherwise return the default value.
     ret case self of {
-      is Some(val) {
-        f(val)
-      }
-      else {
-        default
-      }
+      is Some(val) { f(val) }
+      else { default }
     }
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun map_or_else[U, D: FunMov[(), U], F: FunMov[(T,), U]](self, mut default: D, mut f: F) -> U {
-    # The `map_or_else` method checks if this optional contains a value, and if so, applies the function to that value
-    # and returns the result. If this optional is `None`, then `map_or_else` returns the result of invoking the provided
-    # default function to get the default value. This is a convenient method for transforming the value inside an
-    # optional based on a certain function, and providing a default value if the optional is `None`, without having to
-    # first check if the optional is `Some` and then apply the function separately.
-    # @type U: The type of the value returned by the function and the default. This can be different from the type of
-    # the value in this optional.
-    # @type D: The type of the default function. This must be a function that takes no arguments and returns a value of
-    # type `U`.
-    # @type F: The type of the function. This must be a function that takes a single argument of type `T` and returns a
-    # value of type `U`.
-    # @let default: A function that is invoked to get the default value if this optional is `None`. If this optional is
-    # `Some`, then `default` is not evaluated, and the result of applying `func` to the value inside is returned
-    # instead.
-    # @let f: The function that is applied to the value inside the optional if it is `Some`. This function is called
-    # with the value of type `T` if the optional is `Some`, and should return a value of type `U` that is the result of
-    # the transformation. If the optional is `None`, then `func` is not evaluated, and the result of invoking
-    # `default()` is returned instead.
-    # @ret: Returns the result of applying `func` to the value inside the optional if this optional is `Some`, otherwise
-    # returns the result of invoking `default()`.
+    # The `map_or_else` method checks if this optional contains a value, and if
+    # so, applies the function to that value and returns the result. If this
+    # optional is `None`, then `map_or_else` returns the result of invoking the
+    # provided default function to get the default value. This is a convenient
+    # method for transforming the value inside an optional based on a certain
+    # function, and providing a default value if the optional is `None`, without
+    # having to first check if the optional is `Some` and then apply the
+    # function separately.
+    # @type U: The type of the value returned by the function and the default.
+    #   This can be different from the type of the value in this optional.
+    # @type D: The type of the default function. This must be a function that
+    #   takes no arguments and returns a value of type `U`.
+    # @type F: The type of the function. This must be a function that takes a
+    #   single argument of type `T` and returns a value of type `U`.
+    # @let default: A function that is invoked to get the default value if this
+    #   optional is `None`. If this optional is `Some`, then `default` is not
+    #   evaluated, and the result of applying `func` to the value inside is
+    #   returned instead.
+    # @let f: The function that is applied to the value inside the optional if
+    #   it is `Some`. This function is called with the value of type `T` if the
+    #   optional is `Some`, and should return a value of type `U` that is the
+    #   result of the transformation. If the optional is `None`, then `func` is
+    #   not evaluated, and the result of invoking `default()` is returned
+    #   instead.
+    # @ret: Returns the result of applying `func` to the value inside the
+    #   optional if this optional is `Some`, otherwise returns the result of
+    #   invoking `default()`.
 
     # Pattern match and apply the function to the value if this is
     # `Some`, otherwise return the result of invoking the default
     # function.
     ret case self of {
-      is Some(val) {
-        f(val)
-      }
-      else {
-        default()
-      }
+      is Some(val) { f(val) }
+      else { default() }
     }
   }
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun pass_or[E](self, err: E) -> Res[T, E] {
-    # The `pass_or` method checks if this optional contains a value, and if so, returns the value wrapped in `Pass`. If
-    # this optional is `None`, then `pass_or` returns the provided error value wrapped in `Fail`. This is a convenient
-    # method for converting an optional into a result, where `Some` is mapped to `Pass` and `None` is mapped to `Fail`.
-    # @type E: The type of the error value that is returned if this optional is `None`. This can be different from the
-    # type of the value in this optional.
-    # @let err: The error value that is returned if this optional is `None`. If this optional is `Some`, then `err` is
-    # not evaluated, and the value inside is returned wrapped in `Pass` instead.
-    # @ret: Returns the value inside the optional wrapped in `Pass` if this optional is `Some`, otherwise returns `err`
-    # wrapped in `Fail`.
+    # The `pass_or` method checks if this optional contains a value, and if so,
+    # returns the value wrapped in `Pass`. If this optional is `None`, then
+    # `pass_or` returns the provided error value wrapped in `Fail`. This is a
+    # convenient method for converting an optional into a result, where `Some`
+    # is mapped to `Pass` and `None` is mapped to `Fail`.
+    # @type E: The type of the error value that is returned if this optional is
+    #   `None`. This can be different from the type of the value in this
+    #   optional.
+    # @let err: The error value that is returned if this optional is `None`. If
+    #   this optional is `Some`, then `err` is not evaluated, and the value
+    #   inside is returned wrapped in `Pass` instead.
+    # @ret: Returns the value inside the optional wrapped in `Pass` if this
+    #   optional is `Some`, otherwise returns `err` wrapped in `Fail`.
 
     # Pattern match and return the value wrapped in `Pass` if
     # this is `Some`, otherwise return the error value wrapped
     # in `Fail`.
     ret case self of {
-      is Some(val) {
-        Pass(val)
-      }
+      is Some(val) { Pass(val) }
       else { Fail(err) }
     }
   }
@@ -403,26 +433,29 @@ sup [T] Opt[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun pass_or_else[E, F: FunMov[(), E]](self, mut err: F) -> Res[T, E] {
-    # The `pass_or_else` method checks if this optional contains a value, and if so, returns the value wrapped in
-    # `Pass`. If this optional is `None`, then `pass_or_else` returns the result of invoking the provided error function
-    # wrapped in `Fail`. This is a convenient method for converting an optional into a result, where `Some` is mapped to
-    # `Pass` and `None` is mapped to `Fail`, and the error value is computed lazily.
-    # @type E: The type of the error value that is returned if this optional is `None`. This can be different from the
-    # type of the value in this optional.
-    # @type F: The type of the error function. This must be a function that takes no arguments and returns a value of
-    # type `E`.
-    # @let err: A function that is invoked to get the error value if this optional is `None`. If this optional is
-    # `Some`, then `err` is not evaluated, and the value inside is returned wrapped in `Pass` instead.
-    # @ret: Returns the value inside the optional wrapped in `Pass` if this optional is `Some`, otherwise returns the
-    # result of invoking `err()` wrapped in `Fail`.
+    # The `pass_or_else` method checks if this optional contains a value, and if
+    # so, returns the value wrapped in `Pass`. If this optional is `None`, then
+    # `pass_or_else` returns the result of invoking the provided error function
+    # wrapped in `Fail`. This is a convenient method for converting an optional
+    # into a result, where `Some` is mapped to `Pass` and `None` is mapped to
+    # `Fail`, and the error value is computed lazily.
+    # @type E: The type of the error value that is returned if this optional is
+    #   `None`. This can be different from the type of the value in this
+    #   optional.
+    # @type F: The type of the error function. This must be a function that
+    #   takes no arguments and returns a value of type `E`.
+    # @let err: A function that is invoked to get the error value if this
+    #   optional is `None`. If this optional is `Some`, then `err` is not
+    #   evaluated, and the value inside is returned wrapped in `Pass` instead.
+    # @ret: Returns the value inside the optional wrapped in `Pass` if this
+    #   optional is `Some`, otherwise returns the result of invoking `err()`
+    #   wrapped in `Fail`.
 
     # Pattern match and return the value wrapped in `Pass` if
     # this is `Some`, otherwise return the result of invoking the
     # provided error function wrapped in `Fail`.
     ret case self of {
-      is Some(val) {
-        Pass(val)
-      }
+      is Some(val) { Pass(val) }
       else { Fail(err=err()) }
     }
   }
@@ -430,14 +463,17 @@ sup [T] Opt[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun unwrap(self) -> T {
-    # The `unwrap` method checks if this optional contains a value, and if so, returns the value. If this optional is
-    # `None`, then `unwrap` aborts the program with a message indicating that `unwrap` was called on a `None` value.
-    # This is a convenient method for extracting the value inside an optional, but it should be used with caution, as it
-    # can lead to runtime errors if the optional is `None`. It is generally recommended to use `unwrap` only when you
-    # are certain that the optional is `Some`, or to use other methods like `unwrap_or` or `unwrap_or_else` to provide a
-    # default value in case the optional is `None`.
-    # @ret: Returns the value inside the optional if this optional is `Some`, otherwise aborts the program with an error
-    # message.
+    # The `unwrap` method checks if this optional contains a value, and if so,
+    # returns the value. If this optional is `None`, then `unwrap` aborts the
+    # program with a message indicating that `unwrap` was called on a `None`
+    # value. This is a convenient method for extracting the value inside an
+    # optional, but it should be used with caution, as it can lead to runtime
+    # errors if the optional is `None`. It is generally recommended to use
+    # `unwrap` only when you are certain that the optional is `Some`, or to use
+    # other methods like `unwrap_or` or `unwrap_or_else` to provide a default
+    # value in case the optional is `None`.
+    # @ret: Returns the value inside the optional if this optional is `Some`,
+    #   otherwise aborts the program with an error message.
 
     # Pattern match and return the value if this is `Some`,
     # otherwise abort the program with an error message.
@@ -447,19 +483,21 @@ sup [T] Opt[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun unwrap_or(self, default: T) -> T {
-    # The `unwrap_or` method checks if this optional contains a value, and if so, returns the value. If this optional is
-    # `None`, then `unwrap_or` returns the provided default value. This is a convenient method for extracting the value
-    # inside an optional, while providing a fallback value in case the optional is `None`.
-    # @let default: The default value that is returned if this optional is `None`. If this optional is `Some`, then
-    # `default` is not evaluated, and the value inside is returned instead.
-    # @ret: Returns the value inside the optional if this optional is `Some`, otherwise returns `default`.
+    # The `unwrap_or` method checks if this optional contains a value, and if
+    # so, returns the value. If this optional is `None`, then `unwrap_or`
+    # returns the provided default value. This is a convenient method for
+    # extracting the value inside an optional, while providing a fallback value
+    # in case the optional is `None`.
+    # @let default: The default value that is returned if this optional is
+    #   `None`. If this optional is `Some`, then `default` is not evaluated, and
+    #   the value inside is returned instead.
+    # @ret: Returns the value inside the optional if this optional is `Some`,
+    #   otherwise returns `default`.
 
     # Pattern match and return the value if this is `Some`,
     # otherwise return the default value.
     ret case self of {
-      is Some(val) {
-        val
-      }
+      is Some(val) { val }
       else { default }
     }
   }
@@ -467,12 +505,14 @@ sup [T] Opt[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun unwrap_or_default(self) -> T {
-    # The `unwrap_or_default` method checks if this optional contains a value, and if so, returns the value. If this
-    # optional is `None`, then `unwrap_or_default` returns the default value for the type `T`. This is a convenient
-    # method for extracting the value inside an optional, while providing a fallback value in case the optional is
-    # `None`, and computing that fallback value using the default constructor for the type `T`.
-    # @ret: Returns the value inside the optional if this optional is `Some`, otherwise returns the default value for
-    # the type `T`.
+    # The `unwrap_or_default` method checks if this optional contains a value,
+    # and if so, returns the value. If this optional is `None`, then
+    # `unwrap_or_default` returns the default value for the type `T`. This is a
+    # convenient method for extracting the value inside an optional, while
+    # providing a fallback value in case the optional is `None`, and computing
+    # that fallback value using the default constructor for the type `T`.
+    # @ret: Returns the value inside the optional if this optional is `Some`,
+    #   otherwise returns the default value for the type `T`.
 
     # Pattern match and return the value if this is `Some`,
     # otherwise return the default value for the type `T`.
@@ -485,23 +525,24 @@ sup [T] Opt[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun unwrap_or_else[F: FunMov[(), T]](self, mut default: F) -> T {
-    # The `unwrap_or_else` method checks if this optional contains a value, and if so, returns the value. If this
-    # optional is `None`, then `unwrap_or_else` returns the result of invoking the provided default function. This is a
-    # convenient method for extracting the value inside an optional, while providing a fallback value in case the
-    # optional is `None`, and computing that fallback value lazily.
-    # @type F: The type of the default function. This must be a function that takes no arguments and returns a value of
-    # type `T`.
-    # @let default: A function that is invoked to get the default value if this optional is `None`. If this optional is
-    # `Some`, then `default` is not evaluated, and the value inside is returned instead.
-    # @ret: Returns the value inside the optional if this optional is `Some`, otherwise returns the result of invoking
-    # `default()`.
+    # The `unwrap_or_else` method checks if this optional contains a value, and
+    # if so, returns the value. If this optional is `None`, then
+    # `unwrap_or_else` returns the result of invoking the provided default
+    # function. This is a convenient method for extracting the value inside an
+    # optional, while providing a fallback value in case the optional is `None`,
+    # and computing that fallback value lazily.
+    # @type F: The type of the default function. This must be a function that
+    #   takes no arguments and returns a value of type `T`.
+    # @let default: A function that is invoked to get the default value if this
+    #   optional is `None`. If this optional is `Some`, then `default` is not
+    #   evaluated, and the value inside is returned instead.
+    # @ret: Returns the value inside the optional if this optional is `Some`,
+    #   otherwise returns the result of invoking `default()`.
 
     # Pattern match and return the value if this is `Some`, otherwise
     # return the result of invoking the provided default function.
     ret case self of {
-      is Some(val) {
-        val
-      }
+      is Some(val) { val }
       else { default() }
     }
   }
@@ -509,15 +550,20 @@ sup [T] Opt[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun expect(self, msg: &StrView) -> T {
-    # The `expect` method checks if this optional contains a value, and if so, returns the value. If this optional is
-    # `None`, then `expect` aborts the program with the provided message. This is a convenient method for extracting the
-    # value inside an optional, but it should be used with caution, as it can lead to runtime errors if the optional is
-    # `None`. It is generally recommended to use `expect` only when you are certain that the optional is `Some`, or to
-    # use other methods like `unwrap_or` or `unwrap_or_else` to provide a default value in case the optional is `None`.
-    # @let msg: The message that is printed to the console if this optional is `None`. If this optional is `Some`, then
-    # `msg` is not evaluated, and the value inside is returned instead.
-    # @ret: Returns the value inside the optional if this optional is `Some`, otherwise aborts the program with the
-    # provided message.
+    # The `expect` method checks if this optional contains a value, and if so,
+    # returns the value. If this optional is `None`, then `expect` aborts the
+    # program with the provided message. This is a convenient method for
+    # extracting the value inside an optional, but it should be used with
+    # caution, as it can lead to runtime errors if the optional is `None`. It is
+    # generally recommended to use `expect` only when you are certain that the
+    # optional is `Some`, or to use other methods like `unwrap_or` or
+    # `unwrap_or_else` to provide a default value in case the optional is
+    # `None`.
+    # @let msg: The message that is printed to the console if this optional is
+    #   `None`. If this optional is `Some`, then `msg` is not evaluated, and the
+    #   value inside is returned instead.
+    # @ret: Returns the value inside the optional if this optional is `Some`,
+    #   otherwise aborts the program with the provided message.
 
     # Pattern match and return the value if this is `Some`,
     # otherwise abort the program with the provided message.
@@ -530,13 +576,16 @@ sup [T] Opt[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun replace(&mut self, mut val: T) -> Opt[T] {
-    # The `replace` method replaces the value inside this optional with the provided value, and returns the old value
-    # wrapped in `Some`. If this optional is `None`, then `replace` simply sets the value to `Some(val)` and returns
-    # `None`. This is a convenient method for updating the value inside an optional, while also retrieving the old value
-    # if there was one.
-    # @let val: The new value that is set inside the optional. If this optional is `Some`, then the old value is
-    # returned wrapped in `Some`, otherwise `None` is returned.
-    # @ret: Returns the old value wrapped in `Some` if this optional was `Some`, otherwise returns `None`.
+    # The `replace` method replaces the value inside this optional with the
+    # provided value, and returns the old value wrapped in `Some`. If this
+    # optional is `None`, then `replace` simply sets the value to `Some(val)`
+    # and returns `None`. This is a convenient method for updating the value
+    # inside an optional, while also retrieving the old value if there was one.
+    # @let val: The new value that is set inside the optional. If this optional
+    #   is `Some`, then the old value is returned wrapped in `Some`, otherwise
+    #   `None` is returned.
+    # @ret: Returns the old value wrapped in `Some` if this optional was `Some`,
+    #   otherwise returns `None`.
 
     let new_val: Opt[T] = Some(val=val)
     ret std::mem::ops::replace(self, new_val)
@@ -545,10 +594,11 @@ sup [T] Opt[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun take(&mut self) -> Opt[T] {
-    # The `take` method takes the value out of this optional, leaving a `None` in its place. If this optional is `Some`,
-    # then `take` returns the value wrapped in `Some`, and sets this optional to `None`.
-    # @ret: Returns the value inside the optional wrapped in `Some` if this optional is `Some`, otherwise returns
-    # `None`.
+    # The `take` method takes the value out of this optional, leaving a `None`
+    # in its place. If this optional is `Some`, then `take` returns the value
+    # wrapped in `Some`, and sets this optional to `None`.
+    # @ret: Returns the value inside the optional wrapped in `Some` if this
+    #   optional is `Some`, otherwise returns `None`.
 
     let empty: Opt[T] = None
     ret std::mem::ops::replace(self, empty)
@@ -557,21 +607,23 @@ sup [T] Opt[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun take_if[P: FunMov[(&T,), Bool]](&mut self, mut pred: P) -> Opt[T] {
-    # The `take_if` method takes the value out of this optional if it satisfies the provided predicate, leaving a `None`
-    # in its place. If this optional is `Some` and the predicate returns true for the value inside, then `take_if`
-    # returns the value wrapped in `Some`, and sets this optional to `None`. If this optional is `None`, or if the
-    # predicate returns false for the value inside, then `take_if` returns `None`.
-    # @let pred: The predicate function that determines whether the value inside the optional should be taken.
-    # @ret: Returns the value inside the optional wrapped in `Some` if this optional is `Some` and the predicate returns
-    # true, otherwise returns `None`.
+    # The `take_if` method takes the value out of this optional if it satisfies
+    # the provided predicate, leaving a `None` in its place. If this optional is
+    # `Some` and the predicate returns true for the value inside, then `take_if`
+    # returns the value wrapped in `Some`, and sets this optional to `None`. If
+    # this optional is `None`, or if the predicate returns false for the value
+    # inside, then `take_if` returns `None`.
+    # @let pred: The predicate function that determines whether the value inside
+    #   the optional should be taken.
+    # @ret: Returns the value inside the optional wrapped in `Some` if this
+    #   optional is `Some` and the predicate returns true, otherwise returns
+    #   `None`.
 
     # Pattern match and take the value if this is `Some` and
     # the predicate returns true, otherwise return `None`.
     let matches = case self of {
       is Some(&val) { pred(val) }
-      else {
-        false
-      }
+      else { false }
     }
 
     case matches { ret self.take() }
@@ -581,17 +633,20 @@ sup [T] Opt[T] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun zip[U](self, that: Opt[U]) -> Opt[(T, U)] {
-    # The `zip` method combines this optional with another optional, returning a new optional that contains a tuple of
-    # the values inside both optionals if they are both `Some`. If either optional is `None`, then `zip` returns `None`.
-    # This is a convenient method for combining two optional values into a single optional value, where the result is
-    # `Some` only if both inputs are `Some`.
-    # @type U: The type of the value contained in the other optional. This can be different from the type of the value
-    # in this optional.
-    # @let that: The other optional that is combined with this optional. If both optionals are `Some`, then the result
-    # is a new optional containing a tuple of the values inside both optionals. If either optional is `None`, then the
-    # result is `None`.
-    # @ret: Returns a new optional containing a tuple of the values inside both optionals if they are both `Some`,
-    # otherwise returns `None`.
+    # The `zip` method combines this optional with another optional, returning a
+    # new optional that contains a tuple of the values inside both optionals if
+    # they are both `Some`. If either optional is `None`, then `zip` returns
+    # `None`. This is a convenient method for combining two optional values into
+    # a single optional value, where the result is `Some` only if both inputs
+    # are `Some`.
+    # @type U: The type of the value contained in the other optional. This can
+    #   be different from the type of the value in this optional.
+    # @let that: The other optional that is combined with this optional. If both
+    #   optionals are `Some`, then the result is a new optional containing a
+    #   tuple of the values inside both optionals. If either optional is `None`,
+    #   then the result is `None`.
+    # @ret: Returns a new optional containing a tuple of the values inside both
+    #   optionals if they are both `Some`, otherwise returns `None`.
 
     # Pattern match on both optionals and return a new optional
     # containing a tuple of the values if they are both `Some`,
@@ -614,15 +669,18 @@ sup [T] Opt[Opt[T]] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun flatten(self) -> Opt[T] {
-    # The `flatten` method takes an optional that contains another optional, and returns a new optional that contains
-    # the value inside the inner optional if it is `Some`. If the outer optional is `None`, or if the inner optional is
-    # `None`, then `flatten` returns `None`. This method only collapses one level of nested optionals, so if the inner
-    # optional is itself an optional that contains another optional, `faltten` will need to be chained.
-    # @ret: Returns a new optional containing the value inside the inner optional if it is `Some`, otherwise returns
-    # `None`.
+    # The `flatten` method takes an optional that contains another optional, and
+    # returns a new optional that contains the value inside the inner optional
+    # if it is `Some`. If the outer optional is `None`, or if the inner optional
+    # is `None`, then `flatten` returns `None`. This method only collapses one
+    # level of nested optionals, so if the inner optional is itself an optional
+    # that contains another optional, `faltten` will need to be chained.
+    # @ret: Returns a new optional containing the value inside the inner
+    #   optional if it is `Some`, otherwise returns `None`.
 
-    # The inner optional is the flattened value: a `Some` holding a `Some` is that `Some`, and a `Some` holding a
-    # `None` is that `None`. An outer `None` holds nothing, so it is `None` too.
+    # The inner optional is the flattened value: a `Some` holding a `Some` is
+    # that `Some`, and a `Some` holding a `None` is that `None`. An outer `None`
+    # holds nothing, so it is `None` too.
     ret case self of {
       is Some(val) { val }
       else { None }
@@ -631,36 +689,43 @@ sup [T] Opt[Opt[T]] {
 }
 
 sup [T: Copy] Some[T] ext Copy {
-  # A "Some" is copyable when what it holds is: it owns nothing beyond the value, so copying it duplicates a handle to
-  # nothing rather than an owner. This is what makes "Opt[T]" copyable for a copyable "T", a variant being copyable
-  # exactly when its alternatives are.
+  # A "Some" is copyable when what it holds is: it owns nothing beyond the
+  # value, so copying it duplicates a handle to nothing rather than an owner.
+  # This is what makes "Opt[T]" copyable for a copyable "T", a variant being
+  # copyable exactly when its alternatives are.
 }
 
 sup None ext Copy {
-  # A "None" holds nothing at all, so there is nothing for copying it to duplicate.
+  # A "None" holds nothing at all, so there is nothing for copying it to
+  # duplicate.
 }
 
 sup [T] Opt[T] ext Try[Some[T], None, T] {
-  # In order to make the Opt type compatible with the "?" operator, we need to tell the compiler how to check if an
-  # optional type is in the value state or not, so it knows whether to propagate the error state or not.
+  # In order to make the Opt type compatible with the "?" operator, we need to
+  # tell the compiler how to check if an optional type is in the value state or
+  # not, so it knows whether to propagate the error state or not.
 
   !versioned(base="1.0.0", new="1.0.0")
   fun op_is_value(&self) -> Bool {
-    # The `op_is_value` method checks if this optional is in the value state, which means it contains a value wrapped in
-    # `Some`, so we pattern match on the optional and return `true` if it is `Some`, otherwise return `false`.
-    # @ret: Returns `true` if this optional is in the value state (i.e., it is `Some`), otherwise returns `false`.
+    # The `op_is_value` method checks if this optional is in the value state,
+    # which means it contains a value wrapped in `Some`, so we pattern match on
+    # the optional and return `true` if it is `Some`, otherwise return `false`.
+    # @ret: Returns `true` if this optional is in the value state (i.e., it is
+    #   `Some`), otherwise returns `false`.
 
-    # Pattern match and return `true` if this is `Some`, otherwise
-    # return `false`.
+    # Pattern match and return `true` if this is `Some`, otherwise return
+    # `false`.
     ret self is Some(..)
   }
 
   !versioned(base="1.0.0", new="1.0.0")
   fun op_as_residual(self) -> None {
-    # The `op_as_residual` method produces the value to propagate when this optional is in the empty state. There is
-    # nothing to extract, because `None` carries no data, so this simply produces one. Dropping the value type is what
-    # lets the "?" operator propagate this out of a function whose own success type differs from this optional's,
-    # because a `None` is accepted by any `Opt[U]`.
+    # The `op_as_residual` method produces the value to propagate when this
+    # optional is in the empty state. There is nothing to extract, because
+    # `None` carries no data, so this simply produces one. Dropping the value
+    # type is what lets the "?" operator propagate this out of a function whose
+    # own success type differs from this optional's, because a `None` is
+    # accepted by any `Opt[U]`.
     # @ret: Returns `None`, the residual of an optional.
 
     # There is no state to carry over, so build a fresh `None`.
@@ -669,14 +734,18 @@ sup [T] Opt[T] ext Try[Some[T], None, T] {
 
   !versioned(base="1.0.0", new="1.0.0")
   fun op_as_value(self) -> T {
-    # The `op_as_value` method extracts the value from this optional if it is in the value state. This method is used by
-    # the "?" operator to extract the value from an optional when it is in the value state, and to propagate the error
-    # state if it is not. This will never fail, because the `?` operator checks the state with `op_is_value` before
-    # calling this method, so it is guaranteed that this method is only called when the optional is in the value state.
-    # @ret: Returns the value inside the optional if it is in the value state (i.e., it is `Some`).
+    # The `op_as_value` method extracts the value from this optional if it is in
+    # the value state. This method is used by the "?" operator to extract the
+    # value from an optional when it is in the value state, and to propagate the
+    # error state if it is not. This will never fail, because the `?` operator
+    # checks the state with `op_is_value` before calling this method, so it is
+    # guaranteed that this method is only called when the optional is in the
+    # value state.
+    # @ret: Returns the value inside the optional if it is in the value state
+    #   (i.e., it is `Some`).
 
-    # Unwrap the value from the optional, which is guaranteed to be
-    # in the value state
+    # Unwrap the value from the optional, which is guaranteed to be in the value
+    # state
     ret self.unwrap()
   }
 }
@@ -687,15 +756,17 @@ sup [T, U] Opt[(T, U)] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun unzip(self) -> (Opt[T], Opt[U]) {
-    # The `unzip` method takes an optional that contains a tuple of two values, and returns a tuple of two optionals,
-    # where the first optional contains the first value of the tuple if it is `Some`, and the second optional contains
-    # the second value of the tuple if it is `Some`. If the outer optional is `None`, then both optionals in the
-    # returned tuple are `None`.
-    # @ret: Returns a tuple of two optionals, taking each value from the tuple inside the optional if it is `Some`,
-    # otherwise returns a tuple of two `None` optionals.
+    # The `unzip` method takes an optional that contains a tuple of two values,
+    # and returns a tuple of two optionals, where the first optional contains
+    # the first value of the tuple if it is `Some`, and the second optional
+    # contains the second value of the tuple if it is `Some`. If the outer
+    # optional is `None`, then both optionals in the returned tuple are `None`.
+    # @ret: Returns a tuple of two optionals, taking each value from the tuple
+    #   inside the optional if it is `Some`, otherwise returns a tuple of two
+    #   `None` optionals.
 
-    # Pattern match and return a tuple of two optionals, taking
-    # each value from the tuple inside the optional.
+    # Pattern match and return a tuple of two optionals, taking each value from
+    # the tuple inside the optional.
     ret case self of {
       is Some(val=(val1, val2)) { (Some(val=val1), Some(val=val2)) }
       else { (None, None) }
@@ -704,21 +775,21 @@ sup [T, U] Opt[(T, U)] {
 }
 
 sup [T: Eq] Opt[T] ext Eq {
-  # Additional methods for optional types that contain values that implement the `Eq` trait, which allows for equality
-  # comparisons between optionals.
+  # Additional methods for optional types that contain values that implement the
+  # `Eq` trait, which allows for equality comparisons between optionals.
 
   !versioned(base="1.0.0", new="1.0.0")
   fun eq(&self, that: &Self) -> Bool {
-    # The `eq` method checks if this optional is equal to another optional. Two optionals are considered equal if they
-    # are both `None`, or if they are both `Some` and the values inside are equal.
+    # The `eq` method checks if this optional is equal to another optional. Two
+    # optionals are considered equal if they are both `None`, or if they are
+    # both `Some` and the values inside are equal.
     # @let that: The other optional that is compared with this optional.
-    # @ret: Returns `true` if this optional is equal to `that`, otherwise returns `false`.
+    # @ret: Returns `true` if this optional is equal to `that`, otherwise
+    #   returns `false`.
 
     # Pattern match on both optionals and return `true` if they are
     # both `None`, or if they are both `Some` and the values inside
     # are equal.
-    # Matched one at a time rather than as a tuple of both: a borrow cannot be a tuple element, and dereferencing to
-    # build one would copy the whole variant - which an "Opt" over an unconstrained generic cannot do.
     ret case self of {
       is Some(&val as a) {
         case that of {
@@ -737,16 +808,16 @@ sup [T: Eq] Opt[T] ext Eq {
 
   !versioned(base="1.0.0", new="1.0.0")
   fun ne(&self, that: &Self) -> Bool {
-    # The `ne` method checks if this optional is not equal to another optional. Two optionals are considered not equal
-    # if they are not both `None`, or if they are both `Some` and the values inside are not equal.
+    # The `ne` method checks if this optional is not equal to another optional.
+    # Two optionals are considered not equal if they are not both `None`, or if
+    # they are both `Some` and the values inside are not equal.
     # @let that: The other optional that is compared with this optional.
-    # @ret: Returns `true` if this optional is not equal to `that`, otherwise returns `false`.
+    # @ret: Returns `true` if this optional is not equal to `that`, otherwise
+    #   returns `false`.
 
     # Pattern match on both optionals and return `true` if they are
     # not both `None`, or if they are both `Some` and the values inside
     # are not equal.
-    # Matched one at a time rather than as a tuple of both: a borrow cannot be a tuple element, and dereferencing to
-    # build one would copy the whole variant - which an "Opt" over an unconstrained generic cannot do.
     ret case self of {
       is Some(&val as a) {
         case that of {
@@ -763,11 +834,13 @@ sup [T: Eq] Opt[T] ext Eq {
     }
   }
 }
+
 sup [T: Format] Opt[T] ext Format {
   !versioned(base="1.0.0", new="1.0.0")
   fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
-    # Format an optional as `Some(value)` or `None`. The placeholder's spec applies to the value inside, so `{:>3}` of
-    # `Some(val=7)` is `Some(  7)`; `None` is written as it is.
+    # Format an optional as `Some(value)` or `None`. The placeholder's spec
+    # applies to the value inside, so `{:>3}` of `Some(val=7)` is `Some(  7)`;
+    # `None` is written as it is.
 
     case self of {
       is Some(&val as value) {
@@ -786,12 +859,14 @@ sup [T: Format] Opt[T] ext Format {
 sup Opt[Void] ext Format {
   !versioned(base="1.0.0", new="1.0.0")
   fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
-    # Format an optional over `Void` as `Some(())` or `None`. `Void` has no `Format` impl, so this does not overlap
-    # the impl for `T: Format`.
+    # Format an optional over `Void` as `Some(())` or `None`. `Void` has no
+    # `Format` impl, so this does not overlap the impl for `T: Format`.
     #
-    # Todo: a stopgap. `Void` cannot implement `Format` yet: a `&Void` parameter, `&self` included, is erased from the
-    #  definition but not from the call (`void-borrow-params-erased` in the project notes). Once `sup Void ext Format`
-    #  works, the generic impl covers this and it should be removed.
+    # Todo: a stopgap. `Void` cannot implement `Format` yet: a `&Void`
+    # parameter, `&self` included, is erased from the definition but not from
+    # the call (`void-borrow-params-erased` in the project notes). Once `sup
+    # Void ext Format` works, the generic impl covers this and it should be
+    # removed.
 
     case self of {
       is None() {
@@ -800,7 +875,7 @@ sup Opt[Void] ext Format {
       }
     }
 
-    formatter.write_str("Some(())")
+    formatter.write_str("Some()")
     ret Pass[Void]()
   }
 }

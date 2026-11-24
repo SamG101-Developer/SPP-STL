@@ -778,6 +778,7 @@ sup StrView ext Copy {
   # same shape as `View[U8]`, with the added invariant that the bytes are valid
   # UTF-8. Copying one duplicates a handle rather than an owner, which is what
   # lets slicing keep yielding views by value without each one owing a discard.
+  # Todo: Is this needed? We always use &StrView/&mut StrView and @ for assign.
 }
 
 sup StrView ext Eq {

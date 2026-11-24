@@ -7,9 +7,10 @@ use std::time::time::TimeErr
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls TimePoint {
-  # The `TimePoint` class represents a specific point in time, measured as seconds and nanoseconds since the Unix epoch
-  # (January 1, 1970).
-  # @let duration: The duration of time represented by this `TimePoint`, measured in seconds and nanoseconds.
+  # The `TimePoint` class represents a specific point in time, measured as
+  # seconds and nanoseconds since the Unix epoch (January 1, 1970).
+  # @let duration: The duration of time represented by this `TimePoint`,
+  #   measured in seconds and nanoseconds.
 
   !package duration: Duration
 }
@@ -37,12 +38,16 @@ sup TimePoint {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun duration_since(&self, earlier: TimePoint) -> Duration {
-    # The `duration_since` method calculates the duration between this `TimePoint` and an earlier `TimePoint`. It
-    # returns a `Duration` representing the amount of time that has elapsed between the two points in time. If the
-    # earlier `TimePoint` is actually later than this `TimePoint`, the method will return a `Duration` representing the
-    # absolute value of the negative duration, effectively treating the two `TimePoint`s as if they were swapped.
+    # The `duration_since` method calculates the duration between this
+    # `TimePoint` and an earlier `TimePoint`. It returns a `Duration`
+    # representing the amount of time that has elapsed between the two points in
+    # time. If the earlier `TimePoint` is actually later than this `TimePoint`,
+    # the method will return a `Duration` representing the absolute value of the
+    # negative duration, effectively treating the two `TimePoint`s as if they
+    # were swapped.
     # @let earlier: The earlier `TimePoint` to compare against.
-    # @ret: A `Duration` representing the time elapsed between this `TimePoint` and the earlier `TimePoint`.
+    # @ret: A `Duration` representing the time elapsed between this `TimePoint`
+    #   and the earlier `TimePoint`.
     # @todo: Tidy this
 
     case self.duration.sub_checked(earlier.duration) is Some(val) { ret val }
@@ -52,13 +57,16 @@ sup TimePoint {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun duration_since_saturating(&self, earlier: TimePoint) -> Duration {
-    # The `duration_since_saturating` method calculates the duration between this `TimePoint` and an earlier
-    # `TimePoint`, returning a `Duration` that represents the amount of time that has elapsed between the two points in
-    # time. If the earlier `TimePoint` is actually later than this `TimePoint`, the method will return a `Duration` of
-    # zero, effectively saturating the result at zero instead of returning a negative duration.
+    # The `duration_since_saturating` method calculates the duration between
+    # this `TimePoint` and an earlier `TimePoint`, returning a `Duration` that
+    # represents the amount of time that has elapsed between the two points in
+    # time. If the earlier `TimePoint` is actually later than this `TimePoint`,
+    # the method will return a `Duration` of zero, effectively saturating the
+    # result at zero instead of returning a negative duration.
     # @let earlier: The earlier `TimePoint` to compare against.
-    # @ret: A `Duration` representing the time elapsed between this `TimePoint` and the earlier `TimePoint`, or zero if
-    # the earlier `TimePoint` is later than this one.
+    # @ret: A `Duration` representing the time elapsed between this `TimePoint`
+    #   and the earlier `TimePoint`, or zero if the earlier `TimePoint` is later
+    #   than this one.
 
     ret self.duration.sub_saturating(earlier.duration)
   }
@@ -66,8 +74,9 @@ sup TimePoint {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun elapsed(&self) -> Duration {
-    # The `elapsed` method calculates the duration that has elapsed since this `TimePoint`. It returns a `Duration`
-    # representing the amount of time that has passed from this `TimePoint` to the current time.
+    # The `elapsed` method calculates the duration that has elapsed since this
+    # `TimePoint`. It returns a `Duration` representing the amount of time that
+    # has passed from this `TimePoint` to the current time.
     # @ret: A `Duration` representing the time elapsed since this `TimePoint`.
 
     let now = TimePoint::now()
@@ -77,12 +86,15 @@ sup TimePoint {
 
 sup TimePoint ext Add[Duration] {
   fun add(self, that: Duration) -> Self {
-    # The `add` method adds a `Duration` to this `TimePoint`, resulting in a new `TimePoint` that represents the point
-    # in time that is the specified duration after this `TimePoint`. The method performs checked addition to ensure that
-    # the resulting `TimePoint` does not overflow. If the addition would overflow, it will panic with an error message
-    # indicating that the addition overflowed.
+    # The `add` method adds a `Duration` to this `TimePoint`, resulting in a new
+    # `TimePoint` that represents the point in time that is the specified
+    # duration after this `TimePoint`. The method performs checked addition to
+    # ensure that the resulting `TimePoint` does not overflow. If the addition
+    # would overflow, it will panic with an error message indicating that the
+    # addition overflowed.
     # @let that: The `Duration` to add to this `TimePoint`.
-    # @ret: A new `TimePoint` that represents the point in time that is the specified duration after this `TimePoint`.
+    # @ret: A new `TimePoint` that represents the point in time that is the
+    #   specified duration after this `TimePoint`.
 
     let new_duration = self.duration
       .add_checked(that)
@@ -93,12 +105,15 @@ sup TimePoint ext Add[Duration] {
 
 sup TimePoint ext Sub[Duration] {
   fun sub(self, that: Duration) -> Self {
-    # The `sub` method subtracts a `Duration` from this `TimePoint`, resulting in a new `TimePoint` that represents the
-    # point in time that is the specified duration before this `TimePoint`. The method performs checked subtraction to
-    # ensure that the resulting `TimePoint` does not underflow. If the subtraction would underflow, it will panic with
-    # an error message indicating that the subtraction underflowed.
+    # The `sub` method subtracts a `Duration` from this `TimePoint`, resulting
+    # in a new `TimePoint` that represents the point in time that is the
+    # specified duration before this `TimePoint`. The method performs checked
+    # subtraction to ensure that the resulting `TimePoint` does not underflow.
+    # If the subtraction would underflow, it will panic with an error message
+    # indicating that the subtraction underflowed.
     # @let that: The `Duration` to subtract from this `TimePoint`.
-    # @ret: A new `TimePoint` that represents the point in time that is the specified duration before this `TimePoint`.
+    # @ret: A new `TimePoint` that represents the point in time that is the
+    #   specified duration before this `TimePoint`.
 
     let new_duration = self.duration
       .sub_checked(that)

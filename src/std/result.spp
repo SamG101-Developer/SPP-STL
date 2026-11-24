@@ -363,9 +363,7 @@ sup [T, E] Res[T, E] {
     # otherwise apply the predicate to the error and return it
     # wrapped in `Fail`.
     ret case self of {
-      is Pass(val) {
-        Pass(val)
-      }
+      is Pass(val) { Pass(val) }
       is Fail(err) { Fail(err=pred(err)) }
     }
   }
@@ -396,12 +394,8 @@ sup [T, E] Res[T, E] {
     # Pattern match and apply the function to the value if
     # this is `Pass`, otherwise return the default value.
     ret case self of {
-      is Pass(val) {
-        f(val)
-      }
-      else {
-        default
-      }
+      is Pass(val) { f(val) }
+      else { default }
     }
   }
 
@@ -436,12 +430,8 @@ sup [T, E] Res[T, E] {
     # `Pass`, otherwise return the result of invoking the default
     # function on the error.
     ret case self of {
-      is Pass(val) {
-        f(val)
-      }
-      is Fail(err) {
-        default(err)
-      }
+      is Pass(val) { f(val) }
+      is Fail(err) { default(err) }
     }
   }
 
@@ -460,9 +450,7 @@ sup [T, E] Res[T, E] {
     # this is `Pass`, otherwise return `None`.
     ret case self of {
       is Pass(val) { Some(val) }
-      is Fail(err) {
-        None
-      }
+      is Fail(err) { None }
     }
   }
 
@@ -481,9 +469,7 @@ sup [T, E] Res[T, E] {
     # this is `Fail`, otherwise return `None`.
     ret case self of {
       is Fail(err) { Some(val=err) }
-      is Pass(val) {
-        None
-      }
+      is Pass(val) { None }
     }
   }
 
@@ -523,12 +509,8 @@ sup [T, E] Res[T, E] {
     # Pattern match and return the value if this is `Pass`,
     # otherwise return the default value.
     ret case self of {
-      is Pass(val) {
-        val
-      }
-      else {
-        default
-      }
+      is Pass(val) { val }
+      else { default }
     }
   }
 
@@ -552,9 +534,7 @@ sup [T, E] Res[T, E] {
     # return the result of invoking the provided default function on
     # the error.
     ret case self of {
-      is Pass(val) {
-        val
-      }
+      is Pass(val) { val }
       is Fail(err) { default(err) }
     }
   }
@@ -650,14 +630,10 @@ sup [T, E] Res[T, E] {
       is Pass(val as val1) {
         case that of {
           is Pass(val as val2) { ret Pass(val=(val1, val2)) }
-          is Fail(err) {
-            ret Fail(err)
-          }
+          is Fail(err) { ret Fail(err) }
         }
       }
-      is Fail(err) {
-        Fail(err)
-      }
+      is Fail(err) { Fail(err) }
     }
   }
 }
@@ -685,8 +661,8 @@ sup [T, E] Res[T, E] ext Try[Pass[T], Fail[E], T] {
     # @ret: Returns `true` if this result is in the value state (i.e., it is
     #   `Pass`), otherwise returns `false`.
 
-    # Pattern match and return `true` if this is `Pass`, otherwise
-    # return `false`.
+    # Pattern match and return `true` if this is `Pass`, otherwise return
+    # `false`.
     ret self is Pass(..)
   }
 
@@ -702,8 +678,8 @@ sup [T, E] Res[T, E] ext Try[Pass[T], Fail[E], T] {
     # @ret: Returns the `Fail[E]` inside this result if it is in the error state
     #   (i.e., it is `Fail`).
 
-    # Pattern match and return the error if this is `Fail`,
-    # otherwise abort the program with an error message.
+    # Pattern match and return the error if this is `Fail`, otherwise abort the
+    # program with an error message.
     ret case self of {
       is Fail(err) { Fail(err=err) }
       else { std::abort::abort("called `op_as_residual` on a `Pass` value") }
@@ -721,8 +697,8 @@ sup [T, E] Res[T, E] ext Try[Pass[T], Fail[E], T] {
     # @ret: Returns the value inside the result if it is in the value state
     #   (i.e., it is `Pass`).
 
-    # Pattern match and return the value if this is `Pass`,
-    # otherwise abort the program with an error message.
+    # Pattern match and return the value if this is `Pass`, otherwise abort the
+    # program with an error message.
     ret case self of {
       is Pass(val) { val }
       else { std::abort::abort("called `op_as_value` on a `Fail` value") }
@@ -747,8 +723,6 @@ sup [T: Eq, E: Eq] Res[T, E] ext Eq {
     # Pattern match on both results and return `true` if they are
     # both `Pass` with equal values, or both `Fail` with equal
     # errors.
-    # Matched one at a time rather than as a tuple of both: a borrow cannot be a tuple element, and dereferencing to
-    # build one would copy the whole variant - which a "Res" over unconstrained generics cannot do.
     ret case self of {
       is Pass(&val as a) {
         case that of {
@@ -777,7 +751,6 @@ sup [T: Eq, E: Eq] Res[T, E] ext Eq {
     # Pattern match on both results and return `true` if they are
     # not both `Pass` with equal values, or not both `Fail` with
     # equal errors.
-    # Matched one at a time, for the same reason as "eq" above.
     ret case self of {
       is Pass(&val as a) {
         case that of {
@@ -794,6 +767,7 @@ sup [T: Eq, E: Eq] Res[T, E] ext Eq {
     }
   }
 }
+
 sup [T: Format, E: Format] Res[T, E] ext Format {
   !versioned(base="1.0.0", new="1.0.0")
   fun fmt(&self, formatter: &mut Formatter) -> Res[Void, StreamErr] {
@@ -840,7 +814,7 @@ sup [E: Format] Res[Void, E] ext Format {
       }
     }
 
-    formatter.write_str("Pass(())")
+    formatter.write_str("Pass()")
     ret Pass[Void]()
   }
 }
@@ -860,7 +834,7 @@ sup [T: Format] Res[T, Void] ext Format {
       }
     }
 
-    formatter.write_str("Fail(())")
+    formatter.write_str("Fail()")
     ret Pass[Void]()
   }
 }
@@ -872,11 +846,11 @@ sup Res[Void, Void] ext Format {
     # A stopgap: see `Res[Void, E]` above.
 
     case self.is_pass() {
-      formatter.write_str("Pass(())")
+      formatter.write_str("Pass()")
       ret Pass[Void]()
     }
 
-    formatter.write_str("Fail(())")
+    formatter.write_str("Fail()")
     ret Pass[Void]()
   }
 }

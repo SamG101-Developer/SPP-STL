@@ -7,10 +7,7 @@ cls Sortable[T: Ord] {
   # The `Sortable` class is an abstract class that defines the interface for
   # sorting collections of type `T`. It provides two methods: `sort`, which
   # sorts the collection using a default ordering, and `sort_by`, which sorts
-  # the collection using a custom comparison function. The `T` type parameter
-  # represents the type of elements in the collection that can be sorted. The
-  # actual implementation of these methods will depend on the specific
-  # collection type that implements the `Sortable` interface.
+  # the collection using a custom comparison function.
   # @type T: An orderable type that represents the elements in the collection
   #   that can be sorted.
 }

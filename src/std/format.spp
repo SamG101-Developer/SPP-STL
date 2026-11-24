@@ -180,8 +180,8 @@ sup Formatter {
     # @type Args: The format-constrained variadic generic types.
     # @let fmt: The nested format string.
     # @let args: The arguments for the nested format string's placeholders.
-    # @ret: An empty success value, or an error if the nested format string
-    #   does not match its arguments.
+    # @ret: An empty success value, or an error if the nested format string does
+    #   not match its arguments.
 
     # Create a new formatter for the "fmt" string, and format the args into
     # it. This creates a filled string to add to the current one.
@@ -324,7 +324,7 @@ sup Formatter {
     # @type T: The type of the argument (and formattable type).
     # @let value: The argument for the next placeholder.
     # @ret: An empty success value, or an error if there is no placeholder left
-    #    for it, the placeholder is malformed, or the value fails to format.
+    #   for it, the placeholder is malformed, or the value fails to format.
 
     # Get the next placeholder in the format string (as in the next left brace
     # character), and handle any errors with parsing the spec. If there was no
@@ -340,7 +340,7 @@ sup Formatter {
     # The `finish` method writes the literal text after the last argument,
     # checking no placeholder is left unfilled.
     # @ret: An empty success value, or an error if a placeholder is left or the
-    #    rest of the string is malformed.
+    #   rest of the string is malformed.
 
     # An inversion of "arg" - ensure that the spec parses correctly, but that
     # there were no "{}" sections left; nothing more to fill.
