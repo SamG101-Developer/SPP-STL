@@ -874,7 +874,7 @@ sup Opt[Void] ext Format {
       }
     }
 
-    formatter.write_str("Some()")
+    formatter.write_str("Some(())")
     ret Pass[Void]()
   }
 }

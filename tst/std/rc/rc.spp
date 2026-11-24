@@ -27,6 +27,7 @@ fun test_cloning_adds_a_strong_handle() -> Void {
 fun test_dropping_a_clone_lowers_the_strong_count() -> Void {
   let rc = std::rc::rc::Rc::new(1)
   let other = rc.clone()
+  std::mem::ops::drop(other)
   std::debug::assert(rc.strong_count() == 1_uz, "the count fell back after the clone went")
 }
 
