@@ -203,7 +203,7 @@ sup [T: Eq] View[T] {
 
     # Iterate over the elements in the view and check for
     # equality with the specified item. If found, return the index.
-    loop index in Range[USize]::between(0_uz, self.len()) {
+    loop index in Range::between(0_uz, self.len()) {
       case self[index] == item { ret Some(val=index) }
     }
     ret None

@@ -46,8 +46,7 @@ sup [T] Single[T, GlobalAlloc] {
     #   `Single` instance.
     # @ret: A `Single` instance that owns the allocated value on the heap.
 
-    # Map to the `new_in` function with `GlobalAlloc` as
-    # the allocator.
+    # Map to the `new_in` function with `GlobalAlloc` as the allocator.
     ret Self::new_in(val, GlobalAlloc)
   }
 
@@ -66,8 +65,7 @@ sup [T] Single[T, GlobalAlloc] {
     #   not. If successful, it returns a `Pass` state with the `Single`
     #   instance. If unsuccessful, it returns a `Fail` state with an `AllocErr`.
 
-    # Map to the `try_new_in` function with `GlobalAlloc` as
-    # the allocator.
+    # Map to the `try_new_in` function with `GlobalAlloc` as the allocator.
     ret Self::try_new_in(val, GlobalAlloc)
   }
 }
@@ -99,8 +97,8 @@ sup [T, A: Alloc] Single[T, A] {
     #   heap.
     # @ret: A `Single` instance that owns the allocated value on the heap.
 
-    # Allocate the non-null pointer an ambed the value into
-    # it. Wrap in the `Single` type and return.
+    # Allocate the non-null pointer an ambed the value into it. Wrap in the
+    # `Single` type and return.
     let mut pointer = alloc.allocate[T]().expect("Allocation failed")
     pointer.write(val)
     ret Single(pointer, alloc)
@@ -123,13 +121,11 @@ sup [T, A: Alloc] Single[T, A] {
     #   not. If successful, it returns a `Pass` state with the `Single`
     #   instance. If unsuccessful, it returns a `Fail` state with an `AllocErr`.
 
-    # Allocate the non-null pointer and embed the value into
-    # it. Wrap in the `Single` type and return.
+    # Allocate the non-null pointer and embed the value into it. Wrap in the
+    # `Single` type and return.
     let mut pointer = case alloc.allocate[T]() of {
-      is Pass[NonNull[T]](val as p) { p }
-      is Fail[AllocErr](err as e) {
-        drop(val)
-        drop(alloc)
+      is Pass(val as p) { p }
+      is Fail(err as e) {
         ret Fail(err=e)
       }
     }
@@ -148,8 +144,7 @@ sup [T, A: Alloc] Single[T, A] {
     # @ret: A generator that yields a mutable reference to the value owned by
     #   the `Single` instance.
 
-    # Hook into forwarded mutable borrow coercion, and yield
-    # self.
+    # Hook into forwarded mutable borrow coercion, and yield self.
     gen self
   }
 
@@ -164,8 +159,7 @@ sup [T, A: Alloc] Single[T, A] {
     # @ret: A generator that yields a reference to the value owned by the
     #   `Single` instance.
 
-    # Hook into forwarded immutable borrow coercion, and
-    # yield self.
+    # Hook into forwarded immutable borrow coercion, and yield self.
     gen self
   }
 
@@ -182,7 +176,6 @@ sup [T, A: Alloc] Single[T, A] {
     let Self(pointer, alloc) = self
     let val = pointer.read()
     alloc.deallocate(pointer)
-    drop(alloc)
     ret val
   }
 }

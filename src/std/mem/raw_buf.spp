@@ -138,7 +138,7 @@ sup [T, A: Alloc] RawBuf[T, A] {
 
     # Otherwise grow the existing allocation in place, and propagate
     # allocation errors.
-    self.alloc.reallocate[T](&mut self.pointer, self.capacity, new_cap)?
+    self.alloc.reallocate(&mut self.pointer, self.capacity, new_cap)?
     self.capacity = new_cap
     ret Pass[Void]()
   }
@@ -160,7 +160,7 @@ sup [T, A: Alloc] RawBuf[T, A] {
     # sentinel. This is infallible, so it returns directly.
     case Self::is_storage_free(new_cap) {
       case Self::is_storage_free(self.capacity).not {
-        self.alloc.deallocate[T](self.pointer, self.capacity)
+        self.alloc.deallocate(self.pointer, self.capacity)
       }
 
       self.pointer = NonNull[T]::dangling()
@@ -170,7 +170,7 @@ sup [T, A: Alloc] RawBuf[T, A] {
 
     # Otherwise shrink the existing allocation in place, and propagate
     # allocation errors.
-    self.alloc.reallocate[T](&mut self.pointer, self.capacity, new_cap)?
+    self.alloc.reallocate(&mut self.pointer, self.capacity, new_cap)?
 
     # Update the capacity if successful, returning the pass
     # state.
@@ -315,7 +315,6 @@ sup [T, A: Alloc] RawBuf[T, A] ext Drop {
     #   is destroyed.
 
     let Self(pointer, capacity, alloc) = self
-    defer drop(alloc)
     case Self::is_storage_free(capacity) { ret }
     alloc.deallocate(pointer, capacity)
   }

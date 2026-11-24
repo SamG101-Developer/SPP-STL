@@ -124,18 +124,13 @@ sup [T] Iterator[T] {
       let next = other.res()
       case next of {
         is U(..) {
-          # Bound first: "gen (item, next)" written inline is not seen as
-          # moving "item", and fails E94 at the end of the loop body.
-          let pair = (item, next)
-          gen pair
+          gen (item, next)
         }
         is std::generator::GenDone() {
-          drop(item)
           exit
         }
       }
     }
-    drop(other)
   }
 
   !public
@@ -157,7 +152,6 @@ sup [T] Iterator[T] {
     let mut index = 0_uz
     loop item in self {
       case index >= count { gen item }
-      else { drop(item) }
       index += 1_uz
     }
   }
@@ -182,7 +176,6 @@ sup [T] Iterator[T] {
     loop item in self {
       case index < count { gen item }
       else {
-        drop(item)
         exit
       }
       index += 1_uz
@@ -210,10 +203,8 @@ sup [T] Iterator[T] {
     #   from the original iterator that satisfy the predicate.
 
     # Only yield items that satisfy the predicate.
-    defer drop(predicate)
     loop item in self {
       case predicate(&item) { gen item }
-      else { drop(item) }
     }
   }
 
@@ -239,7 +230,6 @@ sup [T] Iterator[T] {
 
     # Yield the results of applying the mapping function to
     # each item.
-    defer drop(f)
     loop item in self { gen f(item) }
   }
 
@@ -268,11 +258,9 @@ sup [T] Iterator[T] {
     let mut index = 0_uz
     loop item in self {
       case index >= end {
-        drop(item)
         exit
       }
       case index >= start { gen item }
-      else { drop(item) }
       index += 1_uz
     }
   }
@@ -298,7 +286,6 @@ sup [T] Iterator[T] {
     let mut index = 0_uz
     loop item in self {
       case index % step == 0_uz { gen item }
-      else { drop(item) }
       index += 1_uz
     }
   }
@@ -316,14 +303,13 @@ sup [T] Iterator[T] {
     # iterator and incrementing a counter for each item.
     let mut count = 0_uz
     loop item in self {
-      defer drop(item)
       count += 1_uz
     }
     ret count
   }
 
   !public
-  fun fold[U, F: FunRef[(U, T), U]](self, initial: U, reducer: F) -> U {
+  fun fold[U, F: FunMut[(U, T), U]](self, initial: U, mut reducer: F) -> U {
     # The `fold` method is a function that takes an iterator, an initial value,
     # and a reducer function, and returns a single value that is the result of
     # applying the reducer function cumulatively to the items produced by the
@@ -336,9 +322,10 @@ sup [T] Iterator[T] {
     #   output of the reducer function.
     # @type F: A function type that represents the reducer function used for
     #   folding the items. This is a generic type parameter that must implement
-    #   the `FunRef[(U, &T), U]` interface, meaning it must be a function that
-    #   takes the current accumulated value of type `U` and an immutable borrow
-    #   of an item of type `T`, and returns a new accumulated value of type `U`.
+    #   the `FunMut[(U, T), U]` interface, meaning it must be a function that
+    #   takes the current accumulated value of type `U` and an item of type `T`,
+    #   and returns a new accumulated value of type `U`; it may mutate its
+    #   state.
     # @let initial: The initial value for the fold operation. This is the
     #   starting point for the accumulation, and the reducer function will be
     #   applied to this initial value and the first item produced by the
@@ -362,7 +349,7 @@ sup [T] Iterator[T] {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun fold_first[F: FunRef[(T, T), T]](self, reducer: F) -> Opt[T] {
+  fun fold_first[F: FunMut[(T, T), T]](self, mut reducer: F) -> Opt[T] {
     # The `fold_first` method folds the iterator like `fold`, but takes its
     # initial value from the iterator itself: the first item is the starting
     # accumulator, and the reducer is applied to it and each item after. This is
@@ -370,7 +357,7 @@ sup [T] Iterator[T] {
     # accumulator is an item, the reducer both takes and returns a `T`, and an
     # empty iterator has no initial value, so the result is optional.
     # @type F: A function type that represents the reducer function used for
-    #   folding the items. It must implement the `FunRef[(T, T), T]` interface,
+    #   folding the items. It must implement the `FunMut[(T, T), T]` interface,
     #   taking the accumulated value and the next item, and returning the new
     #   accumulated value.
     # @let reducer: The reducer function that combines the accumulated value
@@ -385,7 +372,7 @@ sup [T] Iterator[T] {
     loop item in self {
       let prev = acc
       acc = case prev of {
-        is Some[T](val) { Some(val=reducer(val, item)) }
+        is Some(val) { Some(val=reducer(val, item)) }
         else { Some(val=item) }
       }
     }
@@ -414,8 +401,6 @@ sup [T] Iterator[T] {
     # @ret: A boolean value that indicates whether the predicate function
     #   returns `true` for all items produced by the iterator. The cumulative
     #   result of applying the predicate to all items.
-
-    defer drop(f)
 
     # Check if the predicate returns true for all items by iterating
     # through the entire iterator and applying the predicate to each
@@ -446,8 +431,6 @@ sup [T] Iterator[T] {
     # @ret: A boolean value that indicates whether the predicate function
     #   returns `true` for at least one item produced by the iterator. The
     #   cumulative result of applying the predicate to all items.
-
-    defer drop(f)
 
     # Check if the predicate returns true for any item by iterating
     # through the entire iterator and applying the predicate to each
@@ -484,14 +467,11 @@ sup [T] Iterator[T] {
     #   `index` is the zero-based index of the item in the sequence produced by
     #   the iterator. If no such item is found, the method returns `None`.
 
-    defer drop(predicate)
-
     # Find the index of the first item that satisfies the predicate by
     # iterating through the entire iterator and applying the predicate
     # to each item, returning the index when a match is found.
     let mut index = 0_uz
     loop item in self {
-      defer drop(item)
       case predicate(&item) { ret Some(val=index) }
       index += 1_uz
     }
@@ -500,7 +480,7 @@ sup [T] Iterator[T] {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun for_each[F: FunMut[(T,), Void] and Drop](self, mut func: F) -> Void {
+  fun for_each[F: FunMut[(T,), Void]](self, mut func: F) -> Void {
     # The `for_each` method is a function that takes an iterator and a function,
     # and applies the function to each item produced by the iterator. The method
     # uses a loop to iterate through the items of the original iterator, and
@@ -525,7 +505,6 @@ sup [T] Iterator[T] {
     # Apply the function to each item by iterating through the entire
     # iterator and calling the function for each item.
     loop item in self { func(item) }
-    drop(func)
   }
 
   !public
@@ -558,7 +537,6 @@ sup [T] Iterator[T] {
       # Discarded at the end of the iteration rather than deferred: the matching iteration returns "item", and a
       # deferred discard would free the value being handed back.
       case index == n { ret Some(val=item) }
-      drop(item)
       index += 1_uz
     }
     ret None
@@ -611,12 +589,10 @@ sup [T: Clone] Iterator[T] {
       let next = other.res()
       case next of {
         is U(..) {
-          let pair = (item, next)
-          gen pair
+          gen (item, next)
         }
         is std::generator::GenDone() {
-          let pair = (item, other_default.clone())
-          gen pair
+          gen (item, other_default.clone())
         }
       }
     }
@@ -625,11 +601,8 @@ sup [T: Clone] Iterator[T] {
     # the default. An "other" that ran out first yields nothing here,
     # as a finished generator answers "GenDone" every time.
     loop next in other {
-      let pair = (self_default.clone(), next)
-      gen pair
+      gen (self_default.clone(), next)
     }
-    drop(self_default)
-    drop(other_default)
   }
 
   !public
@@ -647,7 +620,6 @@ sup [T: Clone] Iterator[T] {
     # a "buffer-and-clone" approach, as the generator will be
     # exhausted after the first iteration.
     let mut buffer = self.collect[Vec[T]]()
-    defer drop(buffer)
     loop true { gen with buffer.clone().iter_mov() }
   }
 }

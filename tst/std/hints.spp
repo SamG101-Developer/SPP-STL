@@ -10,7 +10,6 @@ fun test_black_box_returns_a_copy_value_unchanged() -> Void {
 fun test_black_box_moves_a_linear_value_through() -> Void {
   let s = std::hints::black_box(Str::from("hello"))
   std::debug::assert(s.len() == 5_uz, "the moved value is intact")
-  drop(s)
 }
 
 !test(group="std/hints")
@@ -18,7 +17,6 @@ fun test_black_box_of_a_borrow_leaves_the_value_intact() -> Void {
   let s = Str::from("abc")
   std::hints::black_box(&s)
   std::debug::assert(s.len() == 3_uz, "the value behind the borrow is unchanged")
-  drop(s)
 }
 
 !test(group="std/hints")
@@ -32,7 +30,7 @@ fun test_black_box_of_a_mutable_borrow_coerces() -> Void {
 !test(group="std/hints")
 fun test_black_box_in_a_loop_keeps_every_iteration() -> Void {
   let mut total = 0_u64
-  loop i in std::range::Range[U64]::between(0_u64, 100_u64) {
+  loop i in std::range::Range::between(0_u64, 100_u64) {
     total += std::hints::black_box(i)
   }
   std::debug::assert(total == 4950_u64, "every value was added")
@@ -53,7 +51,7 @@ fun test_unlikely_returns_the_condition_unchanged() -> Void {
 !test(group="std/hints")
 fun test_likely_and_unlikely_choose_the_branch_the_condition_does() -> Void {
   let mut taken = 0_u32
-  loop i in std::range::Range[U32]::between(0_u32, 10_u32) {
+  loop i in std::range::Range::between(0_u32, 10_u32) {
     case std::hints::likely(i < 8_u32) { taken += 1_u32 }
     case std::hints::unlikely(i >= 8_u32) { taken += 10_u32 }
   }
@@ -76,7 +74,7 @@ fun test_likely_and_unlikely_pass_the_condition_through_at_compile_time() -> Voi
 !test(group="std/hints")
 fun test_cold_path_leaves_the_branch_taken_unchanged() -> Void {
   let mut taken = 0_u32
-  loop i in std::range::Range[U32]::between(0_u32, 10_u32) {
+  loop i in std::range::Range::between(0_u32, 10_u32) {
     case i >= 8_u32 {
       std::hints::cold_path()
       taken += 10_u32
@@ -91,10 +89,10 @@ fun test_cold_path_leaves_the_branch_taken_unchanged() -> Void {
 !test(group="std/hints")
 fun test_cold_path_in_a_case_of_arm() -> Void {
   let mut total = 0_u32
-  loop i in std::range::Range[U32]::between(0_u32, 4_u32) {
+  loop i in std::range::Range::between(0_u32, 4_u32) {
     let x: Opt[U32] = case i == 3_u32 { None } else { Some(val=i) }
     case x of {
-      is Some[U32](val) { total += val }
+      is Some(val) { total += val }
       else {
         std::hints::cold_path()
         total += 100_u32

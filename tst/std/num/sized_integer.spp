@@ -183,7 +183,6 @@ fun test_try_from_parses_decimal_text() -> Void {
   std::debug::assert(U64::try_from("007").unwrap() == 7_u64, "leading zeros")
   let text = Str::from("314")
   std::debug::assert(U16::try_from(&text).unwrap() == 314_u16, "an owned Str")
-  drop(text)
 }
 
 !test(group="std/num")

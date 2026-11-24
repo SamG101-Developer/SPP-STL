@@ -8,8 +8,6 @@ fun test_zero_and_one_report_themselves() -> Void {
   std::debug::assert(one.is_one(), "one is one")
   std::debug::assert(zero.is_one().not, "zero is not one")
   std::debug::assert(one.is_zero().not, "one is not zero")
-  drop(zero)
-  drop(one)
 }
 
 !test(group="std/bignum/biguint")
@@ -17,8 +15,6 @@ fun test_from_a_sized_integer_keeps_the_value() -> Void {
   let a = std::bignum::biguint::BigUInt::from(7_u32)
   let b = std::bignum::biguint::BigUInt::from(7_u32)
   std::debug::assert(a == b, "the same source gives equal values")
-  drop(a)
-  drop(b)
 }
 
 !test(group="std/bignum/biguint")
@@ -29,8 +25,6 @@ fun test_equality_and_ordering() -> Void {
   std::debug::assert(a.ord(&b) < 0_s32, "three orders before five")
   std::debug::assert(b.ord(&a) > 0_s32, "and five after three")
   std::debug::assert(a.ord(&a) == 0_s32, "a value orders equal to itself")
-  drop(a)
-  drop(b)
 }
 
 !test(group="std/bignum/biguint")
@@ -38,14 +32,10 @@ fun test_addition_and_subtraction() -> Void {
   let sum = std::bignum::biguint::BigUInt::from(3_u32).add(std::bignum::biguint::BigUInt::from(4_u32))
   let seven = std::bignum::biguint::BigUInt::from(7_u32)
   std::debug::assert(sum == seven, "3 + 4 == 7")
-  drop(sum)
-  drop(seven)
 
   let diff = std::bignum::biguint::BigUInt::from(9_u32).sub(std::bignum::biguint::BigUInt::from(4_u32))
   let five = std::bignum::biguint::BigUInt::from(5_u32)
   std::debug::assert(diff == five, "9 - 4 == 5")
-  drop(diff)
-  drop(five)
 }
 
 !test(group="std/bignum/biguint")
@@ -53,14 +43,10 @@ fun test_multiplication_and_division() -> Void {
   let prod = std::bignum::biguint::BigUInt::from(6_u32).mul(std::bignum::biguint::BigUInt::from(7_u32))
   let forty_two = std::bignum::biguint::BigUInt::from(42_u32)
   std::debug::assert(prod == forty_two, "6 * 7 == 42")
-  drop(prod)
-  drop(forty_two)
 
   let quot = std::bignum::biguint::BigUInt::from(42_u32).div(std::bignum::biguint::BigUInt::from(7_u32))
   let six = std::bignum::biguint::BigUInt::from(6_u32)
   std::debug::assert(quot == six, "42 / 7 == 6")
-  drop(quot)
-  drop(six)
 }
 
 !test(group="std/bignum/biguint")
@@ -68,14 +54,10 @@ fun test_division_truncates_and_remainder_is_the_leftover() -> Void {
   let quot = std::bignum::biguint::BigUInt::from(7_u32).div(std::bignum::biguint::BigUInt::from(2_u32))
   let three = std::bignum::biguint::BigUInt::from(3_u32)
   std::debug::assert(quot == three, "7 / 2 truncates to 3")
-  drop(quot)
-  drop(three)
 
   let rem = std::bignum::biguint::BigUInt::from(7_u32).rem(std::bignum::biguint::BigUInt::from(2_u32))
   let one = std::bignum::biguint::BigUInt::one()
   std::debug::assert(rem == one, "7 % 2 == 1")
-  drop(rem)
-  drop(one)
 }
 
 !test(group="std/bignum/biguint")
@@ -86,9 +68,6 @@ fun test_bit_length_counts_to_the_highest_set_bit() -> Void {
   std::debug::assert(zero.bit_length() == 0_uz, "zero has no bits")
   std::debug::assert(byte.bit_length() == 8_uz, "255 fills one byte")
   std::debug::assert(two_limbs.bit_length() == 33_uz, "2^32 starts the second limb")
-  drop(zero)
-  drop(byte)
-  drop(two_limbs)
 }
 
 # Todo: still quarantined behind the crash the multiplication fix has not been confirmed to clear for these paths.

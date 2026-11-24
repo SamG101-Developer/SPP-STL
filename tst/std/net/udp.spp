@@ -22,7 +22,6 @@ fun test_a_socket_binds_to_a_kernel_chosen_port() -> Void {
 
   let closed = sock.close()
   std::debug::assert(closed.is_pass(), "and it closes")
-  drop(closed)
 }
 
 !test(group="std/net/udp")
@@ -34,9 +33,7 @@ fun test_two_sockets_get_different_ports() -> Void {
   std::debug::assert(a_addr.port() != b_addr.port(), "two ephemeral ports are not the same port")
 
   let ca = a.close()
-  drop(ca)
   let cb = b.close()
-  drop(cb)
 }
 
 !test(group="std/net/udp")
@@ -62,9 +59,7 @@ fun test_a_datagram_arrives_with_its_sender_s_address() -> Void {
   std::debug::assert(from.port() == a_addr.port(), "the datagram names the socket that sent it")
 
   let ca = a.close()
-  drop(ca)
   let cb = b.close()
-  drop(cb)
 }
 
 !test(group="std/net/udp")
@@ -78,9 +73,7 @@ fun test_datagrams_keep_their_boundaries() -> Void {
   let first = [1_u8, 2_u8]
   let second = [3_u8, 4_u8, 5_u8]
   let s1 = a.send_to(&first, &b_addr)
-  drop(s1)
   let s2 = a.send_to(&second, &b_addr)
-  drop(s2)
 
   let mut buf = [0_u8; 16_uz]
   let r1 = b.recv_from(&mut buf)
@@ -96,9 +89,7 @@ fun test_datagrams_keep_their_boundaries() -> Void {
   std::debug::assert(buf[2_uz]@ == 5_u8, "through to its last byte")
 
   let ca = a.close()
-  drop(ca)
   let cb = b.close()
-  drop(cb)
 }
 
 !test(group="std/net/udp")
@@ -120,9 +111,7 @@ fun test_an_empty_datagram_is_still_a_datagram() -> Void {
   std::debug::assert(n == 0_uz, "as a datagram of no bytes")
 
   let ca = a.close()
-  drop(ca)
   let cb = b.close()
-  drop(cb)
 }
 
 !test(group="std/net/udp")
@@ -134,18 +123,15 @@ fun test_broadcast_reads_back_as_it_was_set() -> Void {
 
   let set_on = sock.set_broadcast(true)
   std::debug::assert(set_on.is_pass(), "setting it succeeds")
-  drop(set_on)
   let on = sock.broadcast()
   std::debug::assert(on.is_pass() and on.unwrap(), "and it reads back as set")
 
   let set_off = sock.set_broadcast(false)
   std::debug::assert(set_off.is_pass(), "clearing it succeeds")
-  drop(set_off)
   let back_off = sock.broadcast()
   std::debug::assert(back_off.is_pass() and back_off.unwrap().not, "and it reads back as cleared")
 
   let closed = sock.close()
-  drop(closed)
 }
 
 !test(group="std/net/udp")
@@ -156,18 +142,15 @@ fun test_a_udp_socket_carries_the_shared_socket_operations() -> Void {
 
   let set_ttl = sock.set_ttl(48_u32)
   std::debug::assert(set_ttl.is_pass(), "the inherited time-to-live setter is reachable")
-  drop(set_ttl)
   let ttl = sock.ttl()
   std::debug::assert(ttl.is_pass() and ttl.unwrap() == 48_u32, "and it took")
 
   let set_nb = sock.set_nonblocking(true)
   std::debug::assert(set_nb.is_pass(), "the inherited non-blocking setter is reachable")
-  drop(set_nb)
   let nb = sock.nonblocking()
   std::debug::assert(nb.is_pass() and nb.unwrap(), "and it took")
 
   let closed = sock.close()
-  drop(closed)
 }
 
 
@@ -179,7 +162,6 @@ fun test_a_read_timeout_reads_back_as_it_was_set() -> Void {
 
   let set = sock.set_read_timeout(std::option::Some(val=std::time::duration::Duration::from_millis(250_u64)))
   std::debug::assert(set.is_pass(), "setting a read timeout succeeds")
-  drop(set)
 
   let got = sock.read_timeout()
   std::debug::assert(got.is_pass(), "reading it back succeeds")
@@ -187,7 +169,6 @@ fun test_a_read_timeout_reads_back_as_it_was_set() -> Void {
   std::debug::assert(ms >= 250_u64 and ms <= 260_u64, "and it is the timeout that was set, to the tick the kernel rounds it to")
 
   let closed = sock.close()
-  drop(closed)
 }
 
 !test(group="std/net/udp")
@@ -196,7 +177,6 @@ fun test_a_write_timeout_reads_back_as_it_was_set() -> Void {
 
   let set = sock.set_write_timeout(std::option::Some(val=std::time::duration::Duration::from_millis(250_u64)))
   std::debug::assert(set.is_pass(), "setting a write timeout succeeds")
-  drop(set)
 
   let got = sock.write_timeout()
   std::debug::assert(got.is_pass(), "reading it back succeeds")
@@ -204,5 +184,4 @@ fun test_a_write_timeout_reads_back_as_it_was_set() -> Void {
   std::debug::assert(ms >= 250_u64 and ms <= 260_u64, "and it is the timeout that was set, to the tick the kernel rounds it to")
 
   let closed = sock.close()
-  drop(closed)
 }

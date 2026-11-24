@@ -3,12 +3,10 @@
 
 fun expect_text(actual: Str, expected: &StrView, msg: &StrView) -> Void {
   std::debug::assert(actual.starts_with(expected) and actual.len() == expected.len(), msg)
-  drop(actual)
 }
 
 fun expect_invalid(result: Res[Str, std::io::StreamErr], msg: &StrView) -> Void {
   std::debug::assert(result.is_fail(), msg)
-  drop(result)
 }
 
 # An in-memory stream, to see exactly what "write_format" writes.
@@ -316,11 +314,9 @@ fun test_write_format_writes_the_formatted_text() -> Void {
   let mut sink = FmtSink(bytes=Vec[U8]::new())
   let result = std::format::write_format(&mut sink, "a={} b={:x}", 1_s32, 255_u32)
   std::debug::assert(result.is_pass(), "the write succeeds")
-  drop(result)
 
   let text = Str::from_utf8(&sink.bytes).expect("the sink holds UTF-8")
   expect_text(text, "a=1 b=ff", "the stream got the formatted text")
-  drop(sink)
 }
 
 !test(group="std/format")
@@ -328,7 +324,5 @@ fun test_write_format_writes_nothing_for_a_bad_format_string() -> Void {
   let mut sink = FmtSink(bytes=Vec[U8]::new())
   let result = std::format::write_format(&mut sink, "{} {}", 1_s32)
   std::debug::assert(result.is_fail(), "the format string does not match")
-  drop(result)
   std::debug::assert(sink.bytes.len() == 0_uz, "and nothing was written")
-  drop(sink)
 }

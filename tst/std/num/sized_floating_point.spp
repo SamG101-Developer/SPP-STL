@@ -191,7 +191,6 @@ fun test_try_from_parses_decimal_text() -> Void {
   std::debug::assert(F16::try_from("0.5").unwrap() == 0.5_f16, "an f16")
   let text = Str::from("2.5")
   std::debug::assert(F64::try_from(&text).unwrap() == 2.5_f64, "an owned Str")
-  drop(text)
 }
 
 !test(group="std/num/sized_floating_point")

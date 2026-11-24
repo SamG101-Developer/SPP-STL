@@ -52,10 +52,12 @@ type AllocErr = AllocOomErr
   or AllocOtherErr
 
 sup AllocErr {
+  !package
   fun from_errno(errno: S32) -> Self {
-    #
-    # @let errno:
-    # @ret:
+    # Maps an sppc error code to the `AllocErr` variant for it.
+    # @let errno: The code an sppc call returned (never 0).
+    # @ret: The variant for the code, or `AllocOtherErr` for one with no
+    #   variant of its own.
 
     ret case errno of {
       == sppc::enomem { AllocOomErr }
@@ -284,7 +286,7 @@ sup GlobalAlloc ext Alloc {
     #   null.
 
     let raw_ptr = sppc::malloc(layout.size)
-    let ptr = NonNull[U8]::from_ptr(raw_ptr).map_err(|e: NullptrErr| AllocOomErr)?
+    let ptr = NonNull::from_ptr(raw_ptr).map_err(|e: NullptrErr| AllocOomErr)?
     ret Pass(val=ptr)
   }
 
@@ -308,7 +310,7 @@ sup GlobalAlloc ext Alloc {
     #   returned null.
 
     let raw_ptr = sppc::calloc(1_uz, layout.size)
-    let ptr = NonNull[U8]::from_ptr(raw_ptr).map_err(|e: NullptrErr| AllocOomErr)?
+    let ptr = NonNull::from_ptr(raw_ptr).map_err(|e: NullptrErr| AllocOomErr)?
     ret Pass(val=ptr)
   }
 
@@ -327,7 +329,7 @@ sup GlobalAlloc ext Alloc {
     #   returned null.
 
     let raw_ptr = sppc::realloc(ptr.as_c_mut(), new_layout.size)
-    let new_ptr = NonNull[U8]::from_ptr(raw_ptr).map_err(
+    let new_ptr = NonNull::from_ptr(raw_ptr).map_err(
       |e: NullptrErr| AllocOomErr)?
     ret Pass(val=new_ptr)
   }

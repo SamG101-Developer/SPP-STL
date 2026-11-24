@@ -43,7 +43,7 @@ fun test_one_step_inside_each_bound_stays_inside() -> Void {
 fun test_the_bounds_are_usable_as_ordinary_values() -> Void {
   # A "cmp" constant is a value like any other once read: it can be bound, compared and passed on.
   let mut widest = std::limits::Limits[S32]::min
-  loop i in std::range::Range[S32]::between(-3, 4) {
+  loop i in std::range::Range::between(-3, 4) {
     widest = case i > widest { i } else { widest }
   }
   std::debug::assert(widest == 3, "the running maximum started from the true minimum")

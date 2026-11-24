@@ -5,7 +5,6 @@ fun test_write_then_read_round_trips() -> Void {
   ptr.write(7)
   std::debug::assert(ptr.read() == 7, "write then read gives back the value")
   alloc.deallocate(ptr)
-  drop(alloc)
 }
 
 !test(group="std/mem/pointer")
@@ -15,7 +14,6 @@ fun test_write_then_read_through_a_shared_borrow() -> Void {
   ptr.write(11)
   std::debug::assert(ptr.fwd_ref()@ == 11, "the borrow sees what was written")
   alloc.deallocate(ptr)
-  drop(alloc)
 }
 
 !test(group="std/mem/pointer")
@@ -25,7 +23,6 @@ fun test_write_through_a_mutable_borrow_then_read() -> Void {
   ptr.fwd_mut()@ = 13
   std::debug::assert(ptr.read() == 13, "the write through the borrow landed")
   alloc.deallocate(ptr)
-  drop(alloc)
 }
 
 !test(group="std/mem/pointer")
@@ -37,7 +34,6 @@ fun test_the_last_write_is_the_one_read_back() -> Void {
   ptr.write(3)
   std::debug::assert(ptr.read() == 3, "only the last write survives")
   alloc.deallocate(ptr)
-  drop(alloc)
 }
 
 !test(group="std/mem/pointer")
@@ -51,7 +47,6 @@ fun test_two_allocations_are_independent() -> Void {
   std::debug::assert(b.read() == 2, "and the second holds its own value")
   alloc.deallocate(a)
   alloc.deallocate(b)
-  drop(alloc)
 }
 
 !test(group="std/mem/pointer")

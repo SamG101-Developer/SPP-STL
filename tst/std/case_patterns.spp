@@ -3,7 +3,7 @@ fun test_plain_binding_matches_and_binds() -> Void {
   # The control. This is the shape `Opt::map` uses, and `map` passes.
   let a: std::option::Opt[std::number::S32] = std::option::Some(val=1)
   let got = case a of {
-    is std::option::Some[std::number::S32](val) { val }
+    is std::option::Some(val) { val }
     else { 0_s32 }
   }
   std::debug::assert(got == 1_s32, "a plain binding yields the value")
@@ -17,9 +17,9 @@ fun test_borrow_binding_yields_the_value_not_the_address() -> Void {
   let b: std::option::Opt[std::number::S32] = std::option::Some(val=1)
 
   let same = case a of {
-    is std::option::Some[std::number::S32](&val as x) {
+    is std::option::Some(&val as x) {
       case b of {
-        is std::option::Some[std::number::S32](&val as y) { x == y }
+        is std::option::Some(&val as y) { x == y }
         else { false }
       }
     }
@@ -79,7 +79,7 @@ fun test_rest_pattern_matches() -> Void {
   # The shape `Opt::ior_else` uses: the alternative is named but its fields are not bound at all.
   let a: std::option::Opt[std::number::S32] = std::option::Some(val=1)
   let matched = case a of {
-    is std::option::Some[std::number::S32](..) { true }
+    is std::option::Some(..) { true }
     else { false }
   }
   std::debug::assert(matched, "a rest pattern matches")
@@ -90,7 +90,7 @@ fun test_borrow_binding_without_a_rename_matches() -> Void {
   # The shape `Opt::take_if` uses: a borrow binding that keeps the field's own name rather than aliasing it.
   let a: std::option::Opt[std::number::S32] = std::option::Some(val=1)
   let matched = case a of {
-    is std::option::Some[std::number::S32](&val) { val == 1_s32 }
+    is std::option::Some(&val) { val == 1_s32 }
     else { false }
   }
   std::debug::assert(matched, "a borrow binding without a rename matches")
@@ -99,7 +99,7 @@ fun test_borrow_binding_without_a_rename_matches() -> Void {
 fun peek_borrowed(o: &std::option::Opt[std::number::S32]) -> Bool {
   # Matching through a borrowed receiver, which is what every method taking "&self" does - `Opt::eq` above all.
   ret case o of {
-    is std::option::Some[std::number::S32](&val as x) { x == 1_s32 }
+    is std::option::Some(&val as x) { x == 1_s32 }
     else { false }
   }
 }
@@ -116,7 +116,7 @@ fun test_calling_a_closure_with_a_bound_value() -> Void {
   let a: std::option::Opt[std::number::S32] = std::option::Some(val=1)
   let inc = |x: std::number::S32| x + 1_s32
   let got = case a of {
-    is std::option::Some[std::number::S32](val) { inc(val) }
+    is std::option::Some(val) { inc(val) }
     else { 0_s32 }
   }
   std::debug::assert(got == 2_s32, "a closure receives the bound value")
@@ -130,7 +130,7 @@ fun test_tuple_of_patterns_matches_without_using_the_binding() -> Void {
   let b: std::option::Opt[std::number::S32] = std::option::None
 
   let matched = case (a, b) of {
-    is (std::option::Some[std::number::S32](val), std::option::None()) { true }
+    is (std::option::Some(val), std::option::None()) { true }
     else { false }
   }
   std::debug::assert(matched, "a tuple of patterns selects the right branch")
@@ -143,7 +143,7 @@ fun test_tuple_of_patterns_matches() -> Void {
   let b: std::option::Opt[std::number::S32] = std::option::None
 
   let got = case (a, b) of {
-    is (std::option::Some[std::number::S32](val), std::option::None()) { val }
+    is (std::option::Some(val), std::option::None()) { val }
     else { 0_s32 }
   }
   std::debug::assert(got == 1_s32, "a tuple of patterns matches and binds")
@@ -173,7 +173,7 @@ fun counted_nested(calls: &mut std::number::S32) -> (std::option::Some[std::numb
 fun test_an_object_pattern_evaluates_its_subject_once() -> Void {
   let mut calls = 0
   let got = case counted_opt(&mut calls) of {
-    is std::option::Some[std::number::S32](val) { val }
+    is std::option::Some(val) { val }
     else { 0 }
   }
   std::debug::assert(calls == 1, "the subject was evaluated once")
@@ -204,7 +204,7 @@ fun test_an_array_pattern_evaluates_its_subject_once() -> Void {
 fun test_a_nested_pattern_evaluates_its_subject_once() -> Void {
   let mut calls = 0
   let got = case counted_nested(&mut calls) of {
-    is (std::option::Some[std::number::S32](val), rest) { val + rest }
+    is (std::option::Some(val), rest) { val + rest }
   }
   std::debug::assert(calls == 1, "the subject was evaluated once")
   std::debug::assert(got == 11, "and both levels of binding came from it")

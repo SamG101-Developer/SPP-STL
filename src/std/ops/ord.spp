@@ -125,11 +125,9 @@ sup [Rhs] Ord[Rhs] {
     #   either returned or dropped.
     # @ret: The smaller of the two values, or this value if they are equal.
     ret case that < self {
-      drop(self)
       that
     }
     else {
-      drop(that)
       self
     }
   }
@@ -149,11 +147,9 @@ sup [Rhs] Ord[Rhs] {
     #   either returned or dropped.
     # @ret: The larger of the two values, or this value if they are equal.
     ret case that > self {
-      drop(self)
       that
     }
     else {
-      drop(that)
       self
     }
   }

@@ -8,6 +8,7 @@ use std::mem::pointer::NonNull
 use std::ops::drop::Drop
 
 !public
+!must_use
 !versioned(base="1.0.0", new="1.0.0")
 cls Fut[T] {
   # The `Fut[T]` future type wraps any type, when a function is called as
@@ -43,9 +44,8 @@ sup [T] Fut[T] {
     # Allocated here rather than on the task, so that a failure to allocate is
     # seen by the caller rather than by a task with nowhere to report it.
     let slot = case GlobalAlloc.allocate[T]() of {
-      is Pass[NonNull[T]](val as p) { p }
-      is Fail[AllocErr](err as e) {
-        drop(e)
+      is Pass(val as p) { p }
+      is Fail(err as e) {
         std::abort::abort("async: out of memory allocating the result cell")
       }
     }
@@ -54,7 +54,7 @@ sup [T] Fut[T] {
     # with it. Nothing comes back through the c boundary: the value is already
     # in the cell by the time the task is awaited.
     let mut handle = 0_s32
-    let err = sppc::async_(&mut handle, CClosure[(), CVoid]::from(|caps f, slot| -> Void {
+    let err = sppc::async_(&mut handle, CClosure::from(|caps f, slot| -> Void {
       let mut into = slot
       into.write(f())
     }))

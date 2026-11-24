@@ -47,7 +47,6 @@ sup [T] Mutex[T] {
     let mut handle = 0_u64
     let err = sppc::pthread_mutex_init(&mut handle)
     case err != 0 {
-      drop(val)
       ret Fail(err=ThreadErr::from_errno(err))
     }
     ret Pass(val=Mutex(handle, val=Single[T]::new(val)))
@@ -66,7 +65,6 @@ sup [T] Mutex[T] {
 
     let err = sppc::pthread_mutex_lock(&self.handle)
     case err != 0 {
-      drop(f)
       ret Fail(err=ThreadErr::from_errno(err))
     }
     ret Pass(val=self.run_and_release[R, F](f))
@@ -88,10 +86,8 @@ sup [T] Mutex[T] {
 
     let timespec = sppc::CTimespec(sec=timeout.seconds, nsec=timeout.nanoseconds)
     let err = sppc::pthread_mutex_clocklock(&self.handle, S32::from(clock), &timespec)
-    drop(timespec)
 
     case err != 0 {
-      drop(f)
       case err == sppc::etimedout { ret Fail(err=TimedOut) }
       ret Fail(err=ThreadErr::from_errno(err))
     }
@@ -110,7 +106,6 @@ sup [T] Mutex[T] {
 
     let code = sppc::pthread_mutex_trylock(&self.handle)
     case code != 0 {
-      drop(f)
       case code == sppc::ebusy { ret Fail(err=WouldBlock) }
       ret Fail(err=ThreadErr::from_errno(code))
     }
@@ -136,10 +131,8 @@ sup [T] Mutex[T] {
     # @let f: Called once with the guarded value, once `pred` holds.
     # @ret: What `f` returned, or the error the lock or wait reported.
 
-    defer drop(pred)
     let err = sppc::pthread_mutex_lock(&self.handle)
     case err != 0 {
-      drop(f)
       ret Fail(err=ThreadErr::from_errno(err))
     }
 
@@ -148,7 +141,6 @@ sup [T] Mutex[T] {
       let werr = sppc::pthread_cond_wait(&cond.handle, &self.handle)
       case werr != 0 {
         self.release()
-        drop(f)
         ret Fail(err=ThreadErr::from_errno(werr))
       }
     }
@@ -177,11 +169,9 @@ sup [T] Mutex[T] {
     # @ret: What `f` returned, `TimedOut`, or the error the lock or wait
     #   reported.
 
-    defer drop(pred)
     let deadline = TimePoint::now() + timeout
     let err = sppc::pthread_mutex_lock(&self.handle)
     case err != 0 {
-      drop(f)
       ret Fail(err=ThreadErr::from_errno(err))
     }
 
@@ -190,17 +180,14 @@ sup [T] Mutex[T] {
       let remaining = deadline.duration_since_saturating(TimePoint::now())
       case remaining.is_zero() {
         self.release()
-        drop(f)
         ret Fail(err=TimedOut)
       }
       let timespec = sppc::CTimespec(sec=remaining.seconds, nsec=remaining.nanoseconds)
       let werr = sppc::pthread_cond_clockwait(
         &cond.handle, &self.handle, S32::from(clock), &timespec)
-      drop(timespec)
 
       case werr != 0 and werr != sppc::etimedout {
         self.release()
-        drop(f)
         ret Fail(err=ThreadErr::from_errno(werr))
       }
     }
@@ -249,9 +236,8 @@ sup [T] Mutex[T] ext Drop {
     # Destroy the mutex and drop the value it guards. Use `take` to keep the
     # value.
 
-    let Mutex[T](handle, val) = self
+    let Mutex(handle, val) = self
     let err = sppc::pthread_mutex_destroy(&handle)
     std::abort::abort_if(err != 0, "Failed to destroy a mutex")
-    drop(val)
   }
 }

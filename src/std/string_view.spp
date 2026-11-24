@@ -233,7 +233,7 @@ sup StrView {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun find_if[F: FunRef[(Char,), Bool]](&self, predicate: F) -> Opt[USize] {
+  fun find_if[F: FunMut[(Char,), Bool]](&self, mut predicate: F) -> Opt[USize] {
     # The `find_if` method searches for the first character in this `StrView`
     # that satisfies the given predicate and returns the byte index of that
     # character if found, or `None` if not found.
@@ -306,14 +306,13 @@ sup StrView {
 
   !public
   !versioned(base="1.0.0", new="1.0.0")
-  fun rfind_if[F: FunRef[(Char,), Bool]](&self, predicate: F) -> Opt[USize] {
+  fun rfind_if[F: FunMut[(Char,), Bool]](&self, mut predicate: F) -> Opt[USize] {
     #
     # @type F:
     # @let predicate:
     # @ret:
 
     let reversed = self.to_reverse()
-    defer drop(reversed)
     let mut idx = self.length
     loop c in reversed.chars() {
       idx -= USize::from(c.len_utf8())
@@ -779,6 +778,7 @@ sup StrView ext Copy {
   # same shape as `View[U8]`, with the added invariant that the bytes are valid
   # UTF-8. Copying one duplicates a handle rather than an owner, which is what
   # lets slicing keep yielding views by value without each one owing a discard.
+  # Todo: Is this needed? We always use &StrView/&mut StrView and @ for assign.
 }
 
 sup StrView ext Eq {

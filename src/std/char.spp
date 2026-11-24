@@ -9,11 +9,14 @@ use std::ops::ord::Ord
 !public
 !versioned(base="1.0.0", new="1.0.0")
 cls Char {
-  # The `Char` type i a validated U32 equivalent to a Unicode scalar value. It represents a single Unicode character and
-  # is used to store and manipulate individual characters in strings. The `Char` type provides methods for encoding and
-  # decoding characters in different formats, such as UTF-8 and UTF-16, as well as methods for determining the
-  # properties of characters, such as their length in bytes when encoded in UTF-8. The `Char` type is an essential part
-  # of the standard library for working with text and strings in the programming language.
+  # The `Char` type i a validated U32 equivalent to a Unicode scalar value. It
+  # represents a single Unicode character and is used to store and manipulate
+  # individual characters in strings. The `Char` type provides methods for
+  # encoding and decoding characters in different formats, such as UTF-8 and
+  # UTF-16, as well as methods for determining the properties of characters,
+  # such as their length in bytes when encoded in UTF-8. The `Char` type is an
+  # essential part of the standard library for working with text and strings in
+  # the programming language.
 
   !private inner: U32
 }
@@ -34,8 +37,9 @@ sup Char {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun len_utf8(&self) -> U32 {
-    # Return the number of bytes that this character would take up in UTF-8 encoding. Fpr example, ASCII characters
-    # would return 1, while some Unicode characters might return 2, 3, or 4.
+    # Return the number of bytes that this character would take up in UTF-8
+    # encoding. Fpr example, ASCII characters would return 1, while some Unicode
+    # characters might return 2, 3, or 4.
     # @ret: The number of bytes in UTF-8 encoding for this character.
     # @todo: Make the comparison values constants.
 
@@ -52,9 +56,10 @@ sup Char {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun encode_utf8(&self, buffer: &mut View[U8]) -> U32 {
-    # Encode this character into `UTF-8` and write it into the provided buffer. The buffer should have space for at
-    # least 4 `U8` values.
-    # @let buffer: A mutable reference to an array of 4 `U8` values where the `UTF-8` encoding will be written.
+    # Encode this character into `UTF-8` and write it into the provided buffer.
+    # The buffer should have space for at least 4 `U8` values.
+    # @let buffer: A mutable reference to an array of 4 `U8` values where the
+    #   `UTF-8` encoding will be written.
     # @ret: The number of `U8` values written to the buffer (1, 2, 3, or 4).
 
     # Handle the 1-byte UTF-8 encoding case.
@@ -89,9 +94,10 @@ sup Char {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun encode_utf16(&self, buffer: &mut View[U16]) -> U32 {
-    # Encode this character into `UTF-16` and write it into the provided buffer. The buffer should have space for at
-    # least 2 `U16` values.
-    # @let buffer: A mutable reference to an array of 2 `U16` values where the `UTF-16` encoding will be written.
+    # Encode this character into `UTF-16` and write it into the provided buffer.
+    # The buffer should have space for at least 2 `U16` values.
+    # @let buffer: A mutable reference to an array of 2 `U16` values where the
+    #   `UTF-16` encoding will be written.
     # @ret: The number of `U16` values written to the buffer (1 or 2).
     # @todo: Make the comparison values constants.
 
@@ -114,7 +120,8 @@ sup Char {
   !versioned(base="1.0.0", new="1.0.0")
   fun is_whitespace(&self) -> Bool {
     # Check if this character is a whitespace character.
-    # @ret: `true` if the character is a whitespace character, `false` otherwise.
+    # @ret: `true` if the character is a whitespace character, `false`
+    #   otherwise.
 
     ret Self::whitespace.contains(&self.inner)
   }
@@ -145,10 +152,12 @@ sup Char ext Ord {
 sup Char ext TryFrom[U32] {
   !versioned(base="1.0.0", new="1.0.0")
   fun try_from(that: U32) -> Opt[Self] {
-    # Attempt to convert a `U32` value to a `Char`, if it represents a valid Unicode scalar value. If the value is not a
-    # valid Unicode scalar value, return `None`.
+    # Attempt to convert a `U32` value to a `Char`, if it represents a valid
+    # Unicode scalar value. If the value is not a valid Unicode scalar value,
+    # return `None`.
     # @let that: The `U32` value to convert to a `Char`.
-    # @ret: A `Opt[Char]` containing the corresponding `Char` if the value is valid, or `None` if it is not.
+    # @ret: A `Opt[Char]` containing the corresponding `Char` if the value is
+    #   valid, or `None` if it is not.
 
     # Check if the value is a valid Unicode scalar value.
     let valid = that <= 0xd7ff_u32 or (0xe000_u32 <= that <= 0x10ffff_u32)
@@ -159,10 +168,11 @@ sup Char ext TryFrom[U32] {
 sup Char ext From[U32] {
   !versioned(base="1.0.0", new="1.0.0")
   fun from(that: U32) -> Self {
-    # Convert a `U32` value to a `Char`, if it represents a valid Unicode scalar value. If the value is not a valid
-    # Unicode scalar value, error.
+    # Convert a `U32` value to a `Char`, if it represents a valid Unicode scalar
+    # value. If the value is not a valid Unicode scalar value, error.
     # @let that: The `U32` value to convert to a `Char`.
-    # @ret: The corresponding `Char` if the value is valid, or an error if it is not.
+    # @ret: The corresponding `Char` if the value is valid, or an error if it is
+    #   not.
 
     let opt = Char::try_from(that)
     ret opt.expect("Invalid Unicode scalar value for Char conversion")
@@ -176,7 +186,6 @@ sup Char ext Format {
 
     let text = Str::from(self@)
     formatter.pad(&text)
-    drop(text)
     ret Pass[Void]()
   }
 }

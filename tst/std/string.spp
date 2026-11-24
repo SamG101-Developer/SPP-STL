@@ -2,7 +2,6 @@
 fun test_string_from_view() -> Void {
   let s = Str::from("hello")
   std::debug::assert(s.len() == 5_uz, "length")
-  drop(s)
 }
 
 !test(group="std/string")
@@ -13,8 +12,6 @@ fun test_string_append_grows_and_preserves() -> Void {
   std::debug::assert(s.len() == 16_uz, "length after growth")
   std::debug::assert(s.starts_with("abc"), "head survived the reallocation")
   std::debug::assert(s.ends_with("mnop"), "tail after the reallocation")
-  drop(tail)
-  drop(s)
 }
 
 !test(group="std/string")
@@ -24,7 +21,6 @@ fun test_string_starts_and_ends_with() -> Void {
   std::debug::assert(s.starts_with("world").not, "not a prefix")
   std::debug::assert(s.ends_with("world"), "ends_with a suffix")
   std::debug::assert(s.ends_with("hello").not, "not a suffix")
-  drop(s)
 }
 
 !test(group="std/string")
@@ -41,7 +37,6 @@ fun test_an_empty_string_has_no_length() -> Void {
   let s = Str::from("")
   std::debug::assert(s.len() == 0_uz, "no bytes")
   std::debug::assert(s.is_empty(), "and it says so")
-  drop(s)
 }
 
 !test(group="std/string")
@@ -49,7 +44,6 @@ fun test_every_string_starts_and_ends_with_nothing() -> Void {
   let s = Str::from("abc")
   std::debug::assert(s.starts_with(""), "an empty prefix")
   std::debug::assert(s.ends_with(""), "an empty suffix")
-  drop(s)
 }
 
 !test(group="std/string")
@@ -58,7 +52,6 @@ fun test_a_string_starts_and_ends_with_itself() -> Void {
   std::debug::assert(s.starts_with("abc"), "the whole thing is a prefix")
   std::debug::assert(s.ends_with("abc"), "and a suffix")
   std::debug::assert(s.starts_with("abcd").not, "but a longer needle is neither")
-  drop(s)
 }
 
 !test(group="std/string")
@@ -68,8 +61,6 @@ fun test_appending_nothing_leaves_the_string_alone() -> Void {
   s.append_str(&empty)
   std::debug::assert(s.len() == 3_uz, "unchanged")
   std::debug::assert(s.starts_with("abc"), "and still itself")
-  drop(empty)
-  drop(s)
 }
 
 !test(group="std/string")
@@ -78,11 +69,8 @@ fun test_clone_is_independent_of_its_source() -> Void {
   let mut c = s.clone()
   let extra = Str::from("d")
   c.append_str(&extra)
-  drop(extra)
   std::debug::assert(s.len() == 3_uz, "the original is untouched")
   std::debug::assert(c.len() == 4_uz, "the clone grew")
-  drop(s)
-  drop(c)
 }
 
 !test(group="std/string")
@@ -90,17 +78,14 @@ fun test_from_an_unsigned_integer_renders_the_digits() -> Void {
   let zero = Str::from(0_u32)
   std::debug::assert(
     zero.starts_with("0") and zero.len() == 1_uz, "zero")
-  drop(zero)
 
   let one = Str::from(1_u32)
   std::debug::assert(
     one.starts_with("1") and one.len() == 1_uz, "a single digit")
-  drop(one)
 
   let many = Str::from(1234567890_u32)
   std::debug::assert(
     many.starts_with("1234567890") and many.len() == 10_uz, "many digits, in order and without leading zeros")
-  drop(many)
 }
 
 !test(group="std/string")
@@ -108,12 +93,10 @@ fun test_from_an_unsigned_integer_at_the_width_maximum() -> Void {
   let max8 = Str::from(255_u8)
   std::debug::assert(
     max8.starts_with("255") and max8.len() == 3_uz, "the largest byte")
-  drop(max8)
 
   let max64 = Str::from(std::limits::Limits[U64]::max)
   std::debug::assert(
     max64.starts_with("18446744073709551615") and max64.len() == 20_uz, "the largest 64-bit value")
-  drop(max64)
 }
 
 !test(group="std/string")
@@ -121,17 +104,14 @@ fun test_from_a_signed_integer_renders_the_sign() -> Void {
   let zero = Str::from(0_s32)
   std::debug::assert(
     zero.starts_with("0") and zero.len() == 1_uz, "zero has no sign")
-  drop(zero)
 
   let pos = Str::from(123_s32)
   std::debug::assert(
     pos.starts_with("123") and pos.len() == 3_uz, "a positive value has no sign")
-  drop(pos)
 
   let neg = Str::from(-123_s32)
   std::debug::assert(
     neg.starts_with("-123") and neg.len() == 4_uz, "a negative value is prefixed")
-  drop(neg)
 }
 
 !test(group="std/string")
@@ -142,32 +122,26 @@ fun test_from_a_signed_integer_at_the_width_extremes() -> Void {
   let min8 = Str::from(std::limits::Limits[S8]::min)
   std::debug::assert(
     min8.starts_with("-128") and min8.len() == 4_uz, "the most negative byte")
-  drop(min8)
 
   let max8 = Str::from(std::limits::Limits[S8]::max)
   std::debug::assert(
     max8.starts_with("127") and max8.len() == 3_uz, "the most positive byte")
-  drop(max8)
 
   let min64 = Str::from(std::limits::Limits[S64]::min)
   std::debug::assert(
     min64.starts_with("-9223372036854775808") and min64.len() == 20_uz, "the most negative 64-bit value")
-  drop(min64)
 }
 
 !test(group="std/string")
 fun test_from_a_float_renders_an_integer_part_and_a_fraction() -> Void {
   let half = Str::from(0.5_f64)
   std::debug::assert(half.starts_with("0.5"), "a half")
-  drop(half)
 
   let neg = Str::from(-2.25_f64)
   std::debug::assert(neg.starts_with("-2.25"), "a negative value is prefixed")
-  drop(neg)
 
   let whole = Str::from(7.0_f64)
   std::debug::assert(whole.starts_with("7."), "a whole value still has a point")
-  drop(whole)
 }
 
 !test(group="std/string")
@@ -177,8 +151,6 @@ fun test_two_equal_strings_compare_equal() -> Void {
   let a = Str::from("abc")
   let b = Str::from("abc")
   std::debug::assert(a == b, "two strings built from the same view are equal")
-  drop(a)
-  drop(b)
 }
 
 !test(group="std/string")
@@ -186,14 +158,10 @@ fun test_differing_strings_do_not_compare_equal() -> Void {
   let a = Str::from("abc")
   let b = Str::from("abd")
   std::debug::assert(a != b, "strings differing in one byte")
-  drop(a)
-  drop(b)
 
   let c = Str::from("abc")
   let d = Str::from("abcd")
   std::debug::assert(c != d, "strings of differing length")
-  drop(c)
-  drop(d)
 }
 
 !test(group="std/string")
@@ -201,11 +169,8 @@ fun test_an_appended_string_equals_the_whole() -> Void {
   let mut built = Str::from("ab")
   let tail = Str::from("cd")
   built.append_str(&tail)
-  drop(tail)
   let whole = Str::from("abcd")
   std::debug::assert(built == whole, "appending builds the same string as writing it out")
-  drop(built)
-  drop(whole)
 }
 
 !test(group="std/string")
@@ -214,27 +179,20 @@ fun test_mul_repeats_the_string() -> Void {
   std::debug::assert(s.len() == 6_uz, "three copies of two bytes")
   let expected = Str::from("ababab")
   std::debug::assert(s == expected, "ab ab ab")
-  drop(s)
-  drop(expected)
 
   let once = Str::from("xyz") * 1
   let original = Str::from("xyz")
   std::debug::assert(once == original, "a count of one is the string itself")
-  drop(once)
-  drop(original)
 }
 
 !test(group="std/string")
 fun test_mul_by_zero_or_less_is_empty() -> Void {
   let zero = Str::from("ab") * 0
   std::debug::assert(zero.len() == 0_uz, "zero copies")
-  drop(zero)
   let neg = Str::from("ab") * -2
   std::debug::assert(neg.len() == 0_uz, "a negative count is empty too")
-  drop(neg)
   let empty = Str::from("") * 5
   std::debug::assert(empty.len() == 0_uz, "repeating nothing is nothing")
-  drop(empty)
 }
 
 !test(group="std/string")
@@ -251,12 +209,9 @@ fun test_new_filled_repeats_a_character() -> Void {
   std::debug::assert(count == 3_uz, "three characters")
   let checked = Str::from_utf8(s.view_ref())
   std::debug::assert(checked.is_pass(), "valid UTF-8")
-  drop(checked)
-  drop(s)
 
   let empty = Str::new_filled(0_uz, 'x')
   std::debug::assert(empty.is_empty(), "no characters")
-  drop(empty)
 }
 
 !test(group="std/string")
@@ -271,10 +226,8 @@ fun test_take_last_removes_a_whole_character() -> Void {
   std::debug::assert(s.len() == 1_uz, "only the 'a' is left")
   let checked = Str::from_utf8(s.view_ref())
   std::debug::assert(checked.is_pass(), "still valid UTF-8")
-  drop(checked)
   std::debug::assert(s.take_last().unwrap() == 'a', "one-byte character")
   std::debug::assert(s.take_last().is_none(), "nothing left")
-  drop(s)
 }
 
 !test(group="std/string")
@@ -282,16 +235,13 @@ fun test_from_utf8_lossy_replaces_each_invalid_sequence() -> Void {
   # Valid text comes through as it is.
   let valid = Str::from_utf8_lossy(&[0x61_u8, 0xc3_u8, 0xa9_u8])
   std::debug::assert(valid == "aé", "nothing to replace")
-  drop(valid)
 
   # A stray byte, and a lone surrogate's three bytes (each its own
   # replacement, as Rust): one U+FFFD (three bytes) per invalid sequence.
   let stray = Str::from_utf8_lossy(&[0x61_u8, 0xff_u8, 0x62_u8])
   std::debug::assert(stray == "a�b", "the stray byte replaced")
-  drop(stray)
   let surrogate = Str::from_utf8_lossy(&[0xed_u8, 0xa0_u8, 0x80_u8])
   std::debug::assert(surrogate == "���", "three replacements")
-  drop(surrogate)
 
   # A sequence cut short at the end is one replacement, and the result is
   # valid UTF-8.
@@ -299,6 +249,4 @@ fun test_from_utf8_lossy_replaces_each_invalid_sequence() -> Void {
   std::debug::assert(cut == "a�", "one replacement for the cut sequence")
   let checked = Str::from_utf8(cut.view_ref())
   std::debug::assert(checked.is_pass(), "valid UTF-8")
-  drop(checked)
-  drop(cut)
 }

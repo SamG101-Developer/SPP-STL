@@ -142,13 +142,13 @@ fun print(str: &StrView) -> Void {
   # Create a new `StdoutStream` instance and write the
   # string to the standard output.
   let mut stdout = StdoutStream()
-  defer drop(stdout)
   let n = stdout.write_all(str.view_ref()).expect("Failed to print")
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-fun print[A: Format, ..Args: Format](fmt: &StrView, first: A, ..rest: Args) -> Void {
+fun print[A: Format, ..Args: Format](
+  fmt: &StrView, first: A, ..rest: Args) -> Void {
   # The formatted `print` fills a format string's placeholders with its
   # arguments (see `std::format` for the syntax) and writes the result to the
   # standard output, with one write. It takes at least one argument, so
@@ -160,7 +160,6 @@ fun print[A: Format, ..Args: Format](fmt: &StrView, first: A, ..rest: Args) -> V
 
   let text = format::format(fmt, first, ..rest)
   print(&text)
-  drop(text)
 }
 
 !public
@@ -178,19 +177,18 @@ fun println(str: &StrView) -> Void {
   # Create a new `StdoutStream` instance and write the
   # string followed by a newline to the standard output.
   let mut stdout = StdoutStream()
-  defer drop(stdout)
 
   # One write, not two: each takes the stream's lock on its
   # own, so a line written in two halves can have another
   # task's output land between the text and its newline.
   let line = Str::from(str) + "\n"
   let n = stdout.write_all(line.view_ref()).expect("Failed to print")
-  drop(line)
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-fun println[A: Format, ..Args: Format](fmt: &StrView, first: A, ..rest: Args) -> Void {
+fun println[A: Format, ..Args: Format](
+  fmt: &StrView, first: A, ..rest: Args) -> Void {
   # The formatted `println` fills a format string's placeholders with its
   # arguments (see `std::format` for the syntax) and writes the result to the
   # standard output, followed by a newline, with one write. It takes at least
@@ -205,7 +203,6 @@ fun println[A: Format, ..Args: Format](fmt: &StrView, first: A, ..rest: Args) ->
   let mut text = format::format(fmt, first, ..rest)
   text.append_str("\n")
   print(&text)
-  drop(text)
 }
 
 !public
@@ -221,13 +218,13 @@ fun eprint(str: &StrView) -> Void {
   # Create a new `StderrStream` instance and write the
   # string to the standard error.
   let mut stderr = StderrStream()
-  defer drop(stderr)
   let n = stderr.write_all(str.view_ref()).expect("Failed to print")
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-fun eprint[A: Format, ..Args: Format](fmt: &StrView, first: A, ..rest: Args) -> Void {
+fun eprint[A: Format, ..Args: Format](
+  fmt: &StrView, first: A, ..rest: Args) -> Void {
   # The formatted `eprint` fills a format string's placeholders with its
   # arguments (see `std::format` for the syntax) and writes the result to the
   # standard error, with one write. It takes at least one argument, so
@@ -239,7 +236,6 @@ fun eprint[A: Format, ..Args: Format](fmt: &StrView, first: A, ..rest: Args) -> 
 
   let text = format::format(fmt, first, ..rest)
   eprint(&text)
-  drop(text)
 }
 
 !public
@@ -257,19 +253,18 @@ fun eprintln(str: &StrView) -> Void {
   # Create a new `StderrStream` instance and write the
   # string followed by a newline to the standard error.
   let mut stderr = StderrStream()
-  defer drop(stderr)
 
   # One write, not two: each takes the stream's lock on its
   # own, so a line written in two halves can have another
   # task's output land between the text and its newline.
   let line = Str::from(str) + "\n"
   let n = stderr.write_all(line.view_ref()).expect("Failed to print")
-  drop(line)
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-fun eprintln[A: Format, ..Args: Format](fmt: &StrView, first: A, ..rest: Args) -> Void {
+fun eprintln[A: Format, ..Args: Format](
+  fmt: &StrView, first: A, ..rest: Args) -> Void {
   # The formatted `eprintln` fills a format string's placeholders with its
   # arguments (see `std::format` for the syntax) and writes the result to the
   # standard error, followed by a newline, with one write. It takes at least one
@@ -284,7 +279,6 @@ fun eprintln[A: Format, ..Args: Format](fmt: &StrView, first: A, ..rest: Args) -
   let mut text = format::format(fmt, first, ..rest)
   text.append_str("\n")
   eprint(&text)
-  drop(text)
 }
 
 !public
@@ -308,8 +302,7 @@ fun input(prompt: &StrView = "") -> Str {
 
   # Create a new `StdinStream` instance and read a line of
   # input from the standard input.
-  let mut stdin = BufRead[StdinStream]::new(StdinStream())
-  defer drop(stdin)
+  let mut stdin = BufRead::new(StdinStream())
   let mut out = Str::new()
 
   let n = stdin.read_line(&mut out).expect("Failed to read")

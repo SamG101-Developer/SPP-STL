@@ -1,7 +1,7 @@
 ---
 name: bytewise-element-copy-is-a-move
 description: "mem_copy of elements moves them: the source must not drop them after (free its buffer only), and copying out of a borrow must clone each element"
-updated: 2026-11-15
+updated: 2026-11-23
 ---
 
 `std::mem::ops::mem_copy` over a container's elements duplicates their bytes, so for an element that owns heap memory
@@ -13,7 +13,7 @@ does not make a function clone: until 2026-11-15, `Vec::clone` and `append_from_
 and `append_many`/`insert_many_at` dropped `that` after moving its elements, so every `Vec[Vec[T]]` clone, `from` or
 `append_many` double-freed.
 
-**Why:** the compiler's linear-type and borrow checks see no ownership in `mem_copy`; it is a trusted raw-memory
+**Why:** the compiler's ownership and borrow checks see no ownership in `mem_copy`; it is a trusted raw-memory
 intrinsic, so a second owner made through it goes unchecked. The `Vec` tests only used `S32`, which is `Copy`, so a
 bytewise copy equals a clone and no test failed.
 

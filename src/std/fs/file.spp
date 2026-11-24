@@ -164,9 +164,7 @@ sup File {
     let path_z = path.c_path()?
     let mut file = File()
     let err = sppc::open(path_z.ptr().as_c_ref(), mode.to_flags(), 0o666_u32, &mut file.fd)
-    drop(path_z)
     ret case err == 0 { Pass(val=file) } else {
-      drop(file)
       Fail(err=PathErr::from_errno(err))
     }
   }
@@ -241,7 +239,6 @@ sup File {
     # @ret: The size of the file in bytes as a `USize` value.
 
     let mut info = sppc::CStat()
-    defer drop(info)
 
     let err = sppc::fstat(self.fd, &mut info)
     ret case err == 0 { USize::from(info.size) } else { 0_uz }
@@ -261,7 +258,6 @@ sup File {
 
     let mut fl = sppc::CFlock(type_=sppc::f_wrlck, whence=sppc::seek_set, start=0_s64, len=0_s64)
     let err = sppc::fcntl_lock(self.fd, case non_blocking { sppc::f_setlk } else { sppc::f_setlkw }, &mut fl)
-    drop(fl)
 
     ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
   }
@@ -281,7 +277,6 @@ sup File {
 
     let mut fl = sppc::CFlock(type_=sppc::f_rdlck, whence=sppc::seek_set, start=0_s64, len=0_s64)
     let err = sppc::fcntl_lock(self.fd, case non_blocking { sppc::f_setlk } else { sppc::f_setlkw }, &mut fl)
-    drop(fl)
 
     ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
   }
@@ -297,7 +292,6 @@ sup File {
 
     let mut fl = sppc::CFlock(type_=sppc::f_unlck, whence=sppc::seek_set, start=0_s64, len=0_s64)
     let err = sppc::fcntl_lock(self.fd, sppc::f_setlk, &mut fl)
-    drop(fl)
 
     ret case err == 0 { Pass[Void]() } else { Fail(err=StreamErr::from_errno(err)) }
   }
@@ -354,7 +348,6 @@ sup File ext Seek {
     let err = sppc::fstat(self.fd, &mut info)
 
     let len = info.size
-    drop(info)
     ret case err == 0 { Pass(val=len) } else { Fail(err=StreamErr::from_errno(err)) }
   }
 

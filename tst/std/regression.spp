@@ -74,7 +74,6 @@ fun test_generic_inherited_method_reaches_override() -> Void {
   let d = SelfPinDerived()
   std::debug::assert(d.value() == 42, "direct call")
   std::debug::assert(d.value_via_generic[S32]() == 42, "through the inherited generic method")
-  std::mem::ops::drop(d)
 }
 
 cls FwdSelfPinBase { }
@@ -111,7 +110,6 @@ sup FwdSelfPinWrapper ext std::ops::fwd::FwdRef[FwdSelfPinDerived] {
 fun test_forwarded_inherited_method_reaches_override() -> Void {
   let w = FwdSelfPinWrapper(inner=FwdSelfPinDerived())
   std::debug::assert(w.value_via_default() == 42, "through forwarding")
-  std::mem::ops::drop(w)
 }
 
 cls AssocPinBase { }
@@ -183,7 +181,6 @@ fun test_case_on_yielded_borrow_in_loop() -> Void {
     case e@ == 9 { seen += 10 }
   }
   std::debug::assert(seen == 11, "both elements matched their own value")
-  std::mem::ops::drop(vec)
 }
 
 !test(group="std/regression")
@@ -195,7 +192,6 @@ fun test_assign_through_yielded_mut_borrow() -> Void {
   loop e in vec.iter_mut() { e@ = e@ * 10 }
   std::debug::assert(vec[0_uz]@ == 10, "first was written through the borrow")
   std::debug::assert(vec[1_uz]@ == 20, "second was written through the borrow")
-  std::mem::ops::drop(vec)
 }
 
 # "RawBuf::place_at" stepped off the address of the buffer record rather than off the pointer it holds, so element 0
@@ -214,7 +210,6 @@ fun test_vector_grows_across_reallocation() -> Void {
   std::debug::assert(vec[0_uz]@ == 7, "first survived both reallocations")
   std::debug::assert(vec[2_uz]@ == 11, "middle")
   std::debug::assert(vec[4_uz]@ == 15, "last")
-  std::mem::ops::drop(vec)
 }
 
 !test(group="std/regression")
@@ -222,12 +217,10 @@ fun test_string_grows_across_reallocation() -> Void {
   let mut s = Str::from("abc")
   let tail = Str::from("defghijklmnop")
   s.append_str(&tail)
-  std::mem::ops::drop(tail)
   std::debug::assert(s.len() == 16_uz, "length after growth")
   std::debug::assert(s.ends_with("mnop"), "tail after growth")
   std::debug::assert(s.starts_with("abcd"), "head after growth")
 
-  std::mem::ops::drop(s)
   # Todo: assert the whole contents once "Str == Str" works - see the Todo in "overload_utils::ValidateArgsMatchParams".
 }
 
@@ -280,7 +273,6 @@ fun test_compound_assignment_through_a_mut_borrow() -> Void {
   loop e in vec.iter_mut() { e@ += 10 }
   std::debug::assert(vec[0_uz]@ == 11, "first was incremented through the borrow")
   std::debug::assert(vec[1_uz]@ == 12, "second was incremented through the borrow")
-  std::mem::ops::drop(vec)
 }
 
 # A "case" statement inside another one's body, with a terminating inner branch - the shape the allocator's overflow
@@ -335,10 +327,9 @@ fun zz_guarded_divide(n: USize, d: USize) -> Bool {
 
 !test(group="std/regression")
 fun test_logical_operators_short_circuit() -> Void {
-  let v = std::vector::Vec[S32]::from(&[1, 2, 3])
+  let v = std::vector::Vec::from(&[1, 2, 3])
   std::debug::assert(zz_guarded_index(&v, 0_uz).not, "the index is not reached when the guard is false")
   std::debug::assert(zz_guarded_index(&v, 1_uz).not, "and is reached when it is true")
-  std::mem::ops::drop(v)
 
   std::debug::assert(zz_guarded_divide(4_uz, 0_uz), "the division is not reached when the guard is true")
   std::debug::assert(zz_guarded_divide(4_uz, 2_uz), "and is reached when it is false")
@@ -406,10 +397,9 @@ sup [T] ZzOrdered[T] {
 
 !test(group="std/regression")
 fun test_a_comp_default_naming_a_constant_on_self() -> Void {
-  let o = ZzOrdered[S32](val=1)
+  let o = ZzOrdered(val=1)
   std::debug::assert(o.pick() == 9_u8, "the default reads the owner's constant")
   std::debug::assert(o.pick[choice=3_u8]() == 3_u8, "and is overridden when given")
-  std::mem::ops::drop(o)
 }
 
 # A "Void" argument is allowed, because generic code instantiated at "T=Void" has no way to avoid writing one. The
@@ -447,10 +437,9 @@ fun test_dropping_a_reordered_struct_field_by_field() -> Void {
   let mut v = Vec[S32]::new()
   v.append(6)
 
-  let p = ZzReorderedPair[S32, Vec[S32]](key=1, val=v)
+  let p = ZzReorderedPair(key=1, val=v)
   std::debug::assert(p.key == 1, "the key reads back from its physical slot")
   std::debug::assert(p.val.len() == 1_uz, "and the vector came along whole")
-  std::mem::ops::drop(p)
 }
 
 # Flow narrowing used to reach a "case" subject only when it was written as a bare identifier. A subject written as a
@@ -835,12 +824,10 @@ fun test_a_shadowed_binding_reads_the_one_before_it_and_then_holds_its_own() -> 
   let x = x == 6
   std::debug::assert(x, "a third, of another type, read the second")
 
-  let v = std::vector::Vec[S32]::from(&[1, 2, 3])
+  let v = std::vector::Vec::from(&[1, 2, 3])
   let n = v.len()
-  std::mem::ops::drop(v)
-  let v = std::vector::Vec[Bool]::from(&[true])
+  let v = std::vector::Vec::from(&[true])
   std::debug::assert(n == 3_uz and v.len() == 1_uz, "each vector binding kept its own storage")
-  std::mem::ops::drop(v)
 }
 
 # The two tests below cover the gaps found while designing "dyn" (docs/dyn-dispatch-design.md), fixed 2026-10-09
@@ -875,7 +862,6 @@ sup ZzInheritDerived ext ZzInheritBase { }
 fun test_inherited_borrowed_self_method_reads_the_derived_layout() -> Void {
   let d = ZzInheritDerived(wide=1234_u64, small=7)
   std::debug::assert(d.small_value() == 7, "the inherited accessor read the derived class's field offset")
-  std::mem::ops::drop(d)
 }
 
 cls ZzVirtualBase { }
@@ -905,7 +891,6 @@ fun test_inherited_default_method_reaches_the_override() -> Void {
   let d = ZzVirtualDerived()
   std::debug::assert(d.kind() == 2, "the override answers a direct call")
   std::debug::assert(d.kind_via_default() == 2, "the inherited default method reached the override")
-  std::mem::ops::drop(d)
 }
 
 # A default method a type inherits rather than overrides ("Eq::ne" from "eq") was resolved and called, but never given
@@ -947,7 +932,6 @@ fun test_closure_called_through_a_borrowed_function_type() -> Void {
   let mut n = 1_u32
   let mut bump = |caps &mut n| { n@ = n@ + 1_u32 }
   call_twice_mut(&mut bump)
-  std::mem::ops::drop(bump)
   std::debug::assert(n == 3_u32, "a &mut FunMut call writes back to the capture")
 
   let base = 10_u32
@@ -967,7 +951,7 @@ fun test_closure_reads_an_immutably_borrowed_capture() -> Void {
 }
 
 # The iterator behind "loop ... in" is consumed on every way out of the loop: dropped after it when it ends, or an
-# "exit" leaves it, and by a "defer" when a "ret" or an "exit exit" leaves the enclosing scope as well. Each frame is
+# "exit" leaves it, and on the way out when a "ret" or an "exit exit" leaves the enclosing scope as well. Each frame is
 # destroyed once (checked under valgrind when this was written; before it, every frame leaked).
 cor regression_count(n: U32) -> std::generator::Gen[U32] {
   let mut i = 0_u32
@@ -1034,7 +1018,6 @@ fun test_a_consumed_closure_releases_its_environment() -> Void {
     i = i + 1_u32
   }
   std::debug::assert(total == 1225_u32, "fifty environments, each released by its call")
-  std::mem::ops::drop(s)
 }
 
 # A closure capturing only by "&" keeps its environment on the stack, and was freed as if it were on the heap once it
@@ -1045,7 +1028,6 @@ fun regression_run_mov(f: std::function::FunMov[(), S32]) -> S32 {
 }
 
 fun regression_drop_mut(f: std::function::FunMut[(), S32]) -> Void {
-  std::mem::ops::drop(f)
 }
 
 !test(group="std/regression")
@@ -1071,5 +1053,4 @@ fun test_iter_ref_over_variant_elements_yields_valid_borrows() -> Void {
     case x.is_some() { somes += 1_uz }
   }
   std::debug::assert(somes == 1_uz, "one element is Some")
-  drop(v)
 }

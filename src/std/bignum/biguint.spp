@@ -145,7 +145,7 @@ sup BigUInt ext std::ops::bit_xor::BitXor {
 
 sup BigUInt ext std::ops::bit_not::BitNot {
   fun bit_not(mut self) -> Self {
-    loop i in Range[USize]::between(0_uz, self.data.len()) {
+    loop i in Range::between(0_uz, self.data.len()) {
       self.data[mut i].bit_not_assign()
     }
     ret self
@@ -212,11 +212,10 @@ sup BigUInt ext std::ops::bit_and::BitAndAssign {
   fun bit_and_assign(&mut self, that: Self) -> Void {
     let len = self.data.len().min(that.data.len())
     self.data.resize(len, 0_u32)
-    loop i in Range[USize]::between(0_uz, len) {
+    loop i in Range::between(0_uz, len) {
       self.data[mut i] &= that.data[i]@
     }
     self.trim()
-    drop(that) # "that" is taken by move, so this is where it goes.
   }
 }
 
@@ -224,13 +223,12 @@ sup BigUInt ext std::ops::bit_ior::BitIorAssign {
   fun bit_ior_assign(&mut self, that: Self) -> Void {
     let len = self.data.len().max(that.data.len())
     self.data.resize(len, 0_u32)
-    loop i in Range[USize]::between(0_uz, len) {
+    loop i in Range::between(0_uz, len) {
       let a = self.data[i]@
       let b = case i < that.data.len() { that.data[i]@ } else { 0_u32 }
       self.data[mut i]@ = a | b
     }
     self.trim()
-    drop(that) # "that" is taken by move, so this is where it goes.
   }
 }
 
@@ -238,13 +236,12 @@ sup BigUInt ext std::ops::bit_xor::BitXorAssign {
   fun bit_xor_assign(&mut self, that: Self) -> Void {
     let len = self.data.len().max(that.data.len())
     self.data.resize(len, 0_u32)
-    loop i in Range[USize]::between(0_uz, len) {
+    loop i in Range::between(0_uz, len) {
       let a = self.data[i]@
       let b = case i < that.data.len() { that.data[i]@ } else { 0_u32 }
       self.data[mut i]@ = a ^ b
     }
     self.trim()
-    drop(that) # "that" is taken by move, so this is where it goes.
   }
 }
 
@@ -255,7 +252,6 @@ sup BigUInt ext std::ops::bit_shl::BitShlAssign {
     # sits rather than what the value is, so every shift went by about the logarithm of the distance asked for.
     let that_is_zero = that.is_zero()
     let distance = that.to_usize()
-    drop(that)
 
     case that_is_zero { ret }
     let word_shift = distance / 32_uz
@@ -264,13 +260,13 @@ sup BigUInt ext std::ops::bit_shl::BitShlAssign {
     let mut val = BigUInt::zero()
     val.data.resize(self.data.len() + USize::from(word_shift) + 1_uz, 0_u32)
 
-    loop i in Range[USize]::between(0_uz, self.data.len()) {
+    loop i in Range::between(0_uz, self.data.len()) {
       let shifted = U64::from(self.data[i]@) << U32::from(bit_shift)
       val.data[mut i + USize::from(word_shift) + 0_uz]@ |= U32::from(shifted & 0xffffffff_u64)
       val.data[mut i + USize::from(word_shift) + 1_uz]@ |= U32::from(shifted >> 32_u32)
     }
 
-    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, val.data))
+    self.data = val.data
     self.trim()
   }
 }
@@ -281,7 +277,6 @@ sup BigUInt ext std::ops::bit_shr::BitShrAssign {
     # shift, the distance is the number "that" holds rather than the position of its top bit.
     let that_is_zero = that.is_zero()
     let distance = that.to_usize()
-    drop(that)
 
     case that_is_zero { ret }
     let word_shift = distance / 32_uz
@@ -296,7 +291,7 @@ sup BigUInt ext std::ops::bit_shr::BitShrAssign {
     }
 
     let mut val = self.clone()
-    loop i in Range[USize]::between(word_shift, self.data.len()) {
+    loop i in Range::between(word_shift, self.data.len()) {
       let mut shifted = U64::from(self.data[i]@)
       case i + 1_uz < self.data.len() { shifted |= U64::from(self.data[i + 1_uz]@) << 32_u32 }
       shifted >>= U32::from(bit_shift)
@@ -307,7 +302,7 @@ sup BigUInt ext std::ops::bit_shr::BitShrAssign {
     # above that still hold the pre-shift digits. Dropping them is not something `trim` can do - they are not zero.
     val.data.resize(self.data.len() - USize::from(word_shift), 0_u32)
 
-    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, val.data))
+    self.data = val.data
     self.trim()
   }
 }
@@ -318,7 +313,7 @@ sup BigUInt ext std::ops::add::AddAssign {
     self.data.resize(len, 0_u32)
     let mut carry = 0_u64
 
-    loop i in Range[USize]::between(0_uz, len) {
+    loop i in Range::between(0_uz, len) {
       let a = self.data[i]@
       let b = case i < that.data.len() { that.data[i]@ } else { 0_u32 }
       let sum = U64::from(a) + U64::from(b) + carry
@@ -327,7 +322,6 @@ sup BigUInt ext std::ops::add::AddAssign {
     }
 
     case carry != 0_u64 { self.data.append(U32::from(carry)) }
-    drop(that) # "that" is taken by move, so this is where it goes.
   }
 }
 
@@ -338,7 +332,7 @@ sup BigUInt ext std::ops::sub::SubAssign {
 
     # Each difference replaces the limb it came from. This was appending instead, which left the operand limbs in
     # place and put the answer after them - a result of twice the width, holding the wrong number.
-    loop i in Range[USize]::between(0_uz, self.data.len()) {
+    loop i in Range::between(0_uz, self.data.len()) {
       let a = U64::from(self.data[i]@)
       let b = case i < that.data.len() { U64::from(that.data[i]@) } else { 0_u64 }
       let sub = a.sub_wrapping(b).sub_wrapping(borrow)
@@ -347,7 +341,6 @@ sup BigUInt ext std::ops::sub::SubAssign {
     }
 
     self.trim()
-    drop(that) # "that" is taken by move, so this is where it goes.
   }
 }
 
@@ -357,12 +350,11 @@ sup BigUInt ext std::ops::mul::MulAssign {
     case self.is_zero() or that.is_zero() {
       self.data.clear()
       self.data.append(0_u32)
-      drop(that)
       ret
     }
 
     case self.is_one() {
-      std::mem::ops::drop(std::mem::ops::replace(&mut self.data, that.data))
+      self.data = that.data
       ret
     }
 
@@ -373,9 +365,9 @@ sup BigUInt ext std::ops::mul::MulAssign {
     let mut val = BigUInt()
     val.data.resize(self.data.len() + that.data.len(), 0_u32)
 
-    loop i in Range[USize]::between(0_uz, self.data.len()) {
+    loop i in Range::between(0_uz, self.data.len()) {
       let mut carry = 0_u64
-      loop j in Range[USize]::between(0_uz, that.data.len()) {
+      loop j in Range::between(0_uz, that.data.len()) {
         let a = U64::from(self.data[i]@)
         let b = U64::from(that.data[j]@)
         let existing = U64::from(val.data[i + j]@)
@@ -388,8 +380,7 @@ sup BigUInt ext std::ops::mul::MulAssign {
       }
     }
 
-    drop(that)
-    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, val.data))
+    self.data = val.data
     self.trim()
   }
 }
@@ -399,13 +390,11 @@ sup BigUInt ext std::ops::div::DivAssign {
     # Skip for known answers.
     case that.is_zero() { std::abort::abort("BigUInt::div: division by zero") }
     case that.is_one() {
-      drop(that)
       ret
     }
     case self < that {
       self.data.clear()
       self.data.append(0_u32)
-      drop(that)
       ret
     }
 
@@ -437,11 +426,8 @@ sup BigUInt ext std::ops::div::DivAssign {
 
     # "quotient" is taken apart by the assignment below - its only attribute moves out of it - but the working
     # values are still whole and have to go somewhere.
-    drop(dividend)
-    drop(divisor)
-    drop(window)
 
-    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, quotient.data))
+    self.data = quotient.data
     self.trim()
   }
 }
@@ -467,10 +453,8 @@ sup BigUInt ext std::ops::pow::PowAssign {
     }
 
     # "val" is taken apart by the assignment below; the working values are still whole.
-    drop(base)
-    drop(exponent)
 
-    std::mem::ops::drop(std::mem::ops::replace(&mut self.data, val.data))
+    self.data = val.data
   }
 }
 

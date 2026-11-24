@@ -97,8 +97,7 @@ sup [T] Vec[T] {
     # @ret:
 
     let mut vec = Self::new_with_capacity_in(len, GlobalAlloc)
-    loop i in Range[USize]::between(0_uz, len) { vec.append_unchecked(f(i)) }
-    drop(f)
+    loop i in Range::between(0_uz, len) { vec.append_unchecked(f(i)) }
 
     vec.length = len
     ret vec
@@ -156,7 +155,9 @@ sup [T, A: Alloc] Vec[T, A] {
     # @let additional:
     # @ret:
 
-    self.try_capacity_reserve(additional).expect("Failed to reserve capacity for Vec")
+    self
+      .try_capacity_reserve(additional)
+      .expect("Failed to reserve capacity for Vec")
   }
 
   !public
@@ -166,7 +167,8 @@ sup [T, A: Alloc] Vec[T, A] {
     # @let additional:
     # @ret:
 
-    ret self.buffer.try_capacity_reserve(self.len(), additional)
+    ret self.buffer
+      .try_capacity_reserve(self.len(), additional)
   }
 
   !public
@@ -176,7 +178,9 @@ sup [T, A: Alloc] Vec[T, A] {
     # @let required_cap:
     # @ret:
 
-    self.try_capacity_reserve_exact(required_cap).expect("Failed to reserve exact capacity for Vec")
+    self
+      .try_capacity_reserve_exact(required_cap)
+      .expect("Failed to reserve exact capacity for Vec")
   }
 
   !public
@@ -185,7 +189,8 @@ sup [T, A: Alloc] Vec[T, A] {
     # @let required_cap:
     # @ret:
 
-    ret self.buffer.try_capacity_reserve_exact(self.len(), required_cap)
+    ret self.buffer
+      .try_capacity_reserve_exact(self.len(), required_cap)
   }
 
   !public
@@ -195,7 +200,9 @@ sup [T, A: Alloc] Vec[T, A] {
     # @let min_capacity:
     # @ret:
 
-    self.try_capacity_shrink_to(min_capacity).expect("Failed to shrink capacity for Vec")
+    self
+      .try_capacity_shrink_to(min_capacity)
+      .expect("Failed to shrink capacity for Vec")
   }
 
   !public
@@ -203,10 +210,12 @@ sup [T, A: Alloc] Vec[T, A] {
   fun try_capacity_shrink_to(&mut self, min_capacity: USize) -> Res[Void, AllocErr] {
     # Shrinks the capacity towards `min_capacity`, but never below the length:
     # the buffer must keep holding every live element.
-    # @let min_capacity: The capacity to shrink to, raised to the length if lower.
+    # @let min_capacity: The capacity to shrink to, raised to the length if
+    #   lower.
     # @ret: The allocator's error if the shrink fails.
 
-    ret self.buffer.try_capacity_shrink_to(self.len().max(min_capacity))
+    ret self.buffer
+      .try_capacity_shrink_to(self.len().max(min_capacity))
   }
 
   !public
@@ -215,7 +224,9 @@ sup [T, A: Alloc] Vec[T, A] {
     #
     # @ret:
 
-    self.try_capacity_shrink().expect("Failed to shrink capacity for Vec")
+    self
+      .try_capacity_shrink()
+      .expect("Failed to shrink capacity for Vec")
   }
 
   !public
@@ -224,7 +235,8 @@ sup [T, A: Alloc] Vec[T, A] {
     #
     # @ret:
 
-    ret self.buffer.try_capacity_shrink_to(self.len())
+    ret self.buffer
+      .try_capacity_shrink_to(self.len())
   }
 
   !public
@@ -265,7 +277,6 @@ sup [T, A: Alloc] Vec[T, A] {
       self.append_unchecked(element)
       ret Pass[Void]()
     }
-    drop(element)
     ret Fail(err=AllocOverflowErr)
   }
 
@@ -282,8 +293,7 @@ sup [T, A: Alloc] Vec[T, A] {
       ret
     }
 
-    # Reserve enough capacity to hold the new elements,
-    # then append them.
+    # Reserve enough capacity to hold the new elements, then append them.
     self.capacity_reserve(that.len())
     self.append_many_unchecked(that)
   }
@@ -304,8 +314,7 @@ sup [T, A: Alloc] Vec[T, A] {
       ret
     }
 
-    # Reserve enough capacity to hold the new element,
-    # then insert it.
+    # Reserve enough capacity to hold the new element, then insert it.
     self.grow_one()
     self.insert_at_unchecked(index, element)
   }
@@ -313,9 +322,9 @@ sup [T, A: Alloc] Vec[T, A] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun insert_many_at(&mut self, index: USize, that: Vec[T, A]) -> Void {
-    # Insert every element of `that` at `index`, in order, shifting the
-    # elements from `index` on back. `index` may be the length (appending), but
-    # not past it.
+    # Insert every element of `that` at `index`, in order, shifting the elements
+    # from `index` on back. `index` may be the length (appending), but not past
+    # it.
     # @let index: Where the elements go; aborts if past the length.
     # @let that: The elements to insert, moved in.
     # @ret:
@@ -328,8 +337,7 @@ sup [T, A: Alloc] Vec[T, A] {
       ret
     }
 
-    # Reserve enough capacity to hold the new elements,
-    # then insert them.
+    # Reserve enough capacity to hold the new elements, then insert them.
     self.capacity_reserve(that.len())
     self.insert_vec_at_unchecked(index, that)
   }
@@ -353,12 +361,10 @@ sup [T, A: Alloc] Vec[T, A] {
     # @let f:
     # @ret:
 
-    # Discharged on the early path rather than deferred: past the emptiness check "f" is consumed by being called, so
-    # a deferred discard would consume it a second time on every path that got that far.
-    case self.is_empty() {
-      drop(f)
-      ret None
-    }
+    # Discharged on the early path rather than deferred: past the emptiness
+    # check "f" is consumed by being called, so a deferred discard would consume
+    # it a second time on every path that got that far.
+    case self.is_empty() { ret None }
     let last_index = self.len() - 1_uz
 
     case f(self[mut last_index]).not { ret None }
@@ -394,9 +400,9 @@ sup [T, A: Alloc] Vec[T, A] {
   !public
   !versioned(base="1.0.0", new="1.0.0")
   fun make_reverse(&mut self) -> Void {
-    # Reverses the elements in place, swapping from both ends inwards. Fewer than
-    # two elements is already reversed, and returns before `len() - 1` could
-    # underflow on an empty vector.
+    # Reverses the elements in place, swapping from both ends inwards. Fewer
+    # than two elements is already reversed, and returns before `len() - 1`
+    # could underflow on an empty vector.
     # @ret:
 
     case self.len() < 2_uz { ret }
@@ -449,7 +455,8 @@ sup [T, A: Alloc] Vec[T, A] {
 
   !private
   !versioned(base="1.0.0", new="1.0.0")
-  fun insert_vec_at_unchecked(&mut self, index: USize, that: Vec[T, A]) -> Void {
+  fun insert_vec_at_unchecked(
+    &mut self, index: USize, that: Vec[T, A]) -> Void {
     #
     # @let index:
     # @let that:
@@ -473,8 +480,7 @@ sup [T, A: Alloc] Vec[T, A] {
     # in the other vector.
     # @ret:
 
-    let Vec[T, A](buffer, length) = self
-    drop(buffer)
+    let Vec(buffer, length) = self
   }
 
   !cold
@@ -486,7 +492,9 @@ sup [T, A: Alloc] Vec[T, A] {
     # store, and inlines into the loop that calls it.
     # @ret:
 
-    self.buffer.try_capacity_grow_amortised(self.len(), 1_uz).expect("Failed to grow capacity for Vec")
+    self.buffer
+      .try_capacity_grow_amortised(self.len(), 1_uz)
+      .expect("Failed to grow capacity for Vec")
   }
 }
 
@@ -521,13 +529,12 @@ sup [T: Clone, A: Alloc] Vec[T, A] {
 
     case new_len <= self.len() {
       self.truncate(new_len)
-      drop(element)
       ret
     }
 
     let additional = new_len - self.len()
     self.capacity_reserve(additional)
-    loop i in Range[USize]::between(1_uz, additional) {
+    loop i in Range::between(1_uz, additional) {
       self.append_unchecked(element.clone())
     }
     self.append_unchecked(element)
@@ -582,8 +589,8 @@ sup [T: Clone] Vec[T] {
     # @let that: The view to create the vector from.
     # @ret: A new vector containing the elements from the view.
 
-    # Forward to the more general `from_in` function,
-    # specifying `GlobalAlloc` as the allocator.
+    # Forward to the more general `from_in` function, specifying `GlobalAlloc`
+    # as the allocator.
     ret Self::from_in(that, GlobalAlloc)
   }
 }
@@ -598,16 +605,37 @@ sup [T, A: Alloc] Vec[T, A] ext IterMov[T] {
     # the remainder itself.
     # @ret: An iterator that moves the vector's elements out in order.
 
-    let Vec[T, A](mut buffer, length) = self
-    let mut i = 0_uz
-    defer drop(buffer)
-    defer buffer.clear_range(i, length - i)
-
-    loop i < length {
-      let element = buffer.take_at(i).unwrap()
-      i += 1_uz
+    let Vec(buffer, length) = self
+    let mut rest = IterMovRest(buffer=buffer, from=0_uz, end=length)
+    loop rest.from < rest.end {
+      let element = rest.buffer.take_at(rest.from).unwrap()
+      rest.from += 1_uz
       gen element
     }
+  }
+}
+
+cls IterMovRest[T, A: Alloc] {
+  # The elements an `iter_mov` has not yielded yet: `[from, end)` of `buffer`.
+  # Dropped with the generator, whether it finishes or is abandoned, it destroys
+  # those, then frees the buffer.
+  # @type T: The type of the elements.
+  # @type A: The buffer's allocator.
+  # @let buffer: The vector's buffer, its yielded elements already moved out.
+  # @let from: The first element not yielded yet.
+  # @let end: One past the last element.
+
+  !package buffer: RawBuf[T, A]
+  !package from: USize
+  !package end: USize
+}
+
+sup [T, A: Alloc] IterMovRest[T, A] ext Drop {
+  !versioned(base="1.0.0", new="1.0.0")
+  fun drop(self) -> Void {
+    # Destroys the elements not yielded; the buffer then frees its memory.
+    let IterMovRest(mut buffer, from, end) = self
+    buffer.clear_range(from, end - from)
   }
 }
 
@@ -621,7 +649,6 @@ sup [T, A: Alloc] Vec[T, A] ext RevIterMov[T] {
     # were never yielded, with no double drop and no leak.
     # @ret: An iterator that moves the vector's elements out in reverse order.
 
-    defer drop(self)
     loop self.length > 0_uz {
       self.length -= 1_uz
       gen self.buffer.take_at(self.length).unwrap()
@@ -677,7 +704,7 @@ sup [T: Eq, A: Alloc] Vec[T, A] ext Eq {
     # @ret: If the vectors are equal, per element.
 
     case self.len() != that.len() { ret false }
-    loop i in Range[USize]::between(0_uz, self.len()) {
+    loop i in Range::between(0_uz, self.len()) {
       case self[i] != that[i] { ret false }
     }
     ret true
@@ -690,7 +717,7 @@ sup [T: Eq, A: Alloc] Vec[T, A] ext Eq {
     # @ret: If the vectors are unequal, per element.
 
     case self.len() != that.len() { ret true }
-    loop i in Range[USize]::between(0_uz, self.len()) {
+    loop i in Range::between(0_uz, self.len()) {
       case self[i] != that[i] { ret true }
     }
     ret false
@@ -747,9 +774,8 @@ sup [T, A: Alloc] Vec[T, A] ext Drop {
     # @ret: Nothing; this is invoked for its cleanup side effect when a `Vec` is
     #   destroyed.
 
-    let Vec[T, A](mut buffer, length) = self
+    let Vec(mut buffer, length) = self
     buffer.clear_range(0_uz, length)
-    drop(buffer)
   }
 }
 
@@ -759,6 +785,6 @@ sup [T: Format, A: Alloc] Vec[T, A] ext Format {
     # Format a vector as `[a, b, c]`, the placeholder's spec applying to each
     # element.
 
-    ret format::format_elements[T](formatter, self)
+    ret format::format_elements(formatter, self)
   }
 }

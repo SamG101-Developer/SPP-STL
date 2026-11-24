@@ -35,13 +35,12 @@ sup UdpSocket {
     # Create the file descriptor from the address.
     let mut fd = 0
     let err = sppc::socket(addr.ip().family(), sppc::sock_dgram, sppc::ipproto_udp, &mut fd)
-    case fd < 0 or err < 0 { ret Fail(err=SockErr::from_errno(fd)) }
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
 
     # Create the `UdpSocket` object with the file descriptor.
     let listener = UdpSocket(fd)
     let err = sppc::bind(listener.fd, &addr.storage())
     case err != 0 {
-      drop(listener)
       ret Fail(err=SockErr::from_errno(err)) }
     ret Pass(val=listener)
   }
@@ -76,11 +75,9 @@ sup UdpSocket {
     let mut storage = sppc::CSockaddrStorage()
     let err = sppc::recvfrom(self.fd, buf.ptr().as_c_mut(), buf.len(), &mut storage, &mut bytes_received)
     case err != 0 {
-      drop(storage)
       ret Fail(err=SockErr::from_errno(err))
     }
     let addr = SockAddr::from_storage(&storage)
-    drop(storage)
     ret Pass(val=(USize::from(bytes_received), addr))
   }
 
@@ -117,7 +114,7 @@ sup UdpSocket {
     # state of the broadcast option for the socket.
     let mut yes = 0
     let err = sppc::getsockopt(self.fd, sppc::sol_socket, sppc::so_broadcast, &mut yes)
-    case err < 0 { ret Fail(err=SockErr::from_errno(err)) }
+    case err != 0 { ret Fail(err=SockErr::from_errno(err)) }
     ret Pass(val=yes != 0)
   }
 
@@ -140,7 +137,6 @@ sup UdpSocket {
     # for the socket.
     let err = sppc::setsockopt_timeval(
       self.fd, sppc::sol_socket, sppc::so_rcvtimeo, &tv)
-    drop(tv)
 
     # Handle the error and return the error mapped or
     # an empty pass.
@@ -164,7 +160,6 @@ sup UdpSocket {
       self.fd, sppc::sol_socket, sppc::so_rcvtimeo, &mut tv)
 
     let millis = tv.sec * 1000_u64 + tv.usec / 1000_u64
-    drop(tv)
 
     # Handle the error and return the error mapped or
     # an empty pass.
@@ -197,7 +192,6 @@ sup UdpSocket {
     # socket.
     let err = sppc::setsockopt_timeval(
       self.fd, sppc::sol_socket, sppc::so_sndtimeo, &tv)
-    drop(tv)
 
     # Handle the error and return the error mapped or
     # an empty pass.
@@ -220,7 +214,6 @@ sup UdpSocket {
       self.fd, sppc::sol_socket, sppc::so_sndtimeo, &mut tv)
 
     let millis = tv.sec * 1000_u64 + tv.usec / 1000_u64
-    drop(tv)
 
     # Handle the error and return the error mapped or the
     # duration, wrapped in a pass.

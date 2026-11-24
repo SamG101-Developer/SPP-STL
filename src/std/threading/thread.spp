@@ -28,30 +28,51 @@ cls ThreadPermissionErr {
 
 !public !zero_type
 !versioned(base="1.0.0", new="1.0.0")
-cls ThreadUnknownErr {
-  # Indicates an unknown error related to thread operations. This error type can
-  # be used to represent various unexpected issues that may arise during thread
-  # operations. Mapped from the `EAGAIN` error code in `C`, which typically
-  # indicates that a resource is temporarily unavailable or that the system is
-  # unable to create a new thread due to resource constraints.
+cls ThreadResourceErr {
+  # Indicates that the system has run out of something other than memory that
+  # the call needs: no more threads may be created, or a lock has been taken as
+  # many times as it can count. Mapped from the `EAGAIN` error code in `C`.
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls ThreadDeadlockErr {
+  # Indicates that the call would never return: the calling thread is waiting on
+  # itself, such as by joining itself or taking a lock it already holds. Mapped
+  # from the `EDEADLK` error code in `C`.
+}
+
+!public !zero_type
+!versioned(base="1.0.0", new="1.0.0")
+cls ThreadOtherErr {
+  # Indicates any other error a thread operation reported, one with no error
+  # type of its own.
 }
 
 !public
 !versioned(base="1.0.0", new="1.0.0")
-type ThreadErr = ThreadMemoryErr or ThreadPermissionErr or ThreadUnknownErr
+type ThreadErr = ThreadMemoryErr
+  or ThreadPermissionErr
+  or ThreadResourceErr
+  or ThreadDeadlockErr
+  or ThreadOtherErr
 
 sup ThreadErr {
-  !public
-  !versioned(base="1.0.0", new="1.0.0")
+  !package
   fun from_errno(errno: S32) -> Self {
-    #
-    # @let errno:
-    # @ret:
+    # Maps an sppc error code to the `ThreadErr` variant for it. `EBUSY` and
+    # `ETIMEDOUT` are answered by the lock calls themselves, as `WouldBlock`
+    # and a timeout, so never reach here.
+    # @let errno: The code an sppc call returned (never 0).
+    # @ret: The variant for the code, or `ThreadOtherErr` for one with no
+    #   variant of its own.
 
     ret case errno of {
       == sppc::enomem { ThreadMemoryErr }
       == sppc::eperm { ThreadPermissionErr }
-      else { ThreadUnknownErr }
+      == sppc::eagain { ThreadResourceErr }
+      == sppc::edeadlk { ThreadDeadlockErr }
+      else { ThreadOtherErr }
     }
   }
 }
@@ -119,28 +140,24 @@ fun spawn[Out: ThreadSafe, F: FunMov[(), Out] and ThreadSafe](function: F) -> Re
   # the caller rather than by a thread with nowhere to
   # report it.
   let slot = case GlobalAlloc.allocate[Out]() of {
-    is Pass[NonNull[Out]](val as p) { p }
-    is Fail[AllocErr](err as e) {
-      drop(function)
-      drop(e)
+    is Pass(val as p) { p }
+    is Fail(err as e) {
       ret Fail(err=ThreadMemoryErr)
     }
   }
   let mut users = case GlobalAlloc.allocate[Atom[USize]]() of {
-    is Pass[NonNull[Atom[USize]]](val as p) { p }
-    is Fail[AllocErr](err as e) {
-      drop(function)
-      drop(e)
+    is Pass(val as p) { p }
+    is Fail(err as e) {
       GlobalAlloc.deallocate(slot)
       ret Fail(err=ThreadMemoryErr)
     }
   }
-  users.write(Atom[USize]::new(2_uz))
+  users.write(Atom::new(2_uz))
 
   # The body moves the function onto the new thread and
   # takes copies of the cell and its user count with it.
   let mut handle = 0_u64
-  let err = sppc::pthread_create(std::cffi::CClosure[(), Void]::from(|caps function, slot, users| -> Void {
+  let err = sppc::pthread_create(std::cffi::CClosure::from(|caps function, slot, users| -> Void {
     let mut into = slot
     into.write(function())
 
@@ -162,7 +179,7 @@ fun spawn[Out: ThreadSafe, F: FunMov[(), Out] and ThreadSafe](function: F) -> Re
     GlobalAlloc.deallocate(users)
     ret Fail(err=ThreadErr::from_errno(err))
   }
-  ret Pass(val=JoinHandle[Out](handle, result=slot, users))
+  ret Pass(val=JoinHandle(handle, result=slot, users))
 }
 
 !public
@@ -275,7 +292,7 @@ sup [R] JoinHandle[R] ext Drop {
   fun drop(self) -> Void {
     # A handle dropped without `join` or `detach` (both consume it) detaches the
     # thread, so its resources are released when it ends.
-    let JoinHandle[R](handle, result, users) = self
+    let JoinHandle(handle, result, users) = self
     let err = sppc::pthread_detach(&handle)
     std::abort::abort_if(err != 0, "Failed to detach a dropped thread handle")
     JoinHandle[R]::release_unjoined(result, users)

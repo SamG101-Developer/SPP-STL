@@ -70,7 +70,6 @@ fun test_a_v4_address_survives_the_round_trip_through_the_c_layout() -> Void {
   let a = loopback_v4(8080_u16)
   let storage = a.storage()
   let b = std::net::socket::SockAddr::from_storage(&storage)
-  drop(storage)
 
   std::debug::assert(b.port() == 8080_u16, "the port came back")
   let ip = b.ip()
@@ -86,7 +85,6 @@ fun test_a_v6_address_survives_the_round_trip_through_the_c_layout() -> Void {
   let a = loopback_v6(9090_u16)
   let storage = a.storage()
   let b = std::net::socket::SockAddr::from_storage(&storage)
-  drop(storage)
 
   std::debug::assert(b.port() == 9090_u16, "the port came back")
   let ip = b.ip()
@@ -104,7 +102,6 @@ fun test_the_round_trip_keeps_every_octet_not_just_the_family() -> Void {
   let a: std::net::socket::SockAddr = v4_at(203_u8, 0_u8, 113_u8, 42_u8, 5353_u16)
   let storage = a.storage()
   let b = std::net::socket::SockAddr::from_storage(&storage)
-  drop(storage)
 
   let ip = b.ip()
   let ok = case ip of {
@@ -124,7 +121,6 @@ fun test_closing_a_socket_that_never_opened_one_is_not_an_error() -> Void {
   let s = std::net::socket::Socket()
   let closed = s.close()
   std::debug::assert(closed.is_pass(), "closing an unopened socket succeeds")
-  drop(closed)
 }
 
 !test(group="std/net/socket")
@@ -149,7 +145,6 @@ fun test_a_bound_socket_reports_the_address_it_was_given() -> Void {
 
   let closed = sock.close()
   std::debug::assert(closed.is_pass(), "and it closes")
-  drop(closed)
 }
 
 !test(group="std/net/socket")
@@ -161,19 +156,16 @@ fun test_non_blocking_mode_reads_back_as_it_was_set() -> Void {
 
   let set_on = sock.set_nonblocking(true)
   std::debug::assert(set_on.is_pass(), "setting it succeeds")
-  drop(set_on)
   let now_on = sock.nonblocking()
   std::debug::assert(now_on.is_pass() and now_on.unwrap(), "and it reads back as non-blocking")
 
   let set_off = sock.set_nonblocking(false)
   std::debug::assert(set_off.is_pass(), "clearing it succeeds")
-  drop(set_off)
   let now_off = sock.nonblocking()
   std::debug::assert(now_off.is_pass() and now_off.unwrap().not, "and it reads back as blocking again")
 
 
   let closed = sock.close()
-  drop(closed)
 }
 
 !test(group="std/net/socket")
@@ -182,17 +174,14 @@ fun test_the_time_to_live_reads_back_as_it_was_set() -> Void {
 
   let set_64 = sock.set_ttl(64_u32)
   std::debug::assert(set_64.is_pass(), "setting a time-to-live succeeds")
-  drop(set_64)
 
   let read_64 = sock.ttl()
   std::debug::assert(read_64.is_pass(), "reading it back succeeds")
   std::debug::assert(read_64.unwrap() == 64_u32, "and it is the value that was set")
 
   let set_32 = sock.set_ttl(32_u32)
-  drop(set_32)
   let read_32 = sock.ttl()
   std::debug::assert(read_32.unwrap() == 32_u32, "a second setting takes as well")
 
   let closed = sock.close()
-  drop(closed)
 }
