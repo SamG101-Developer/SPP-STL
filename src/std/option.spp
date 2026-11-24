@@ -296,11 +296,10 @@ sup [T] Opt[T] {
 
     # Pattern match and apply the predicate to a borrow of
     # the value if this is `Some`.
-    case self of {
-      is Some(&val) and pred(val) { ret self }
-      else { ret self }
+    ret case self of {
+      is Some(&val) and pred(val) { self }
+      else { None }
     }
-    ret None
   }
 
   !public
