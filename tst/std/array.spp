@@ -218,3 +218,20 @@ fun test_move_iteration_left_part_way() -> Void {
     exit
   }
 }
+
+!test(group="std/array")
+fun test_pop_front_pop_back_and_split_at_take_the_array_apart() -> Void {
+  # "pop_front", "pop_back" and "split_at" reinterpret the array's bytes ("std::mem::ops::transmute").
+  let (head, rest) = [1, 2, 3, 4].pop_front()
+  std::debug::assert(head == 1 and rest.len() == 3_uz and rest[0_uz]@ == 2 and rest[2_uz]@ == 4, "pop_front")
+  let (init, last) = [1, 2, 3, 4].pop_back()
+  std::debug::assert(last == 4 and init.len() == 3_uz and init[2_uz]@ == 3, "pop_back")
+  let (l, r) = [1, 2, 3, 4, 5].split_at[2_uz]()
+  std::debug::assert(l.len() == 2_uz and r.len() == 3_uz and l[1_uz]@ == 2 and r[0_uz]@ == 3, "split_at")
+}
+
+!test(group="std/array")
+fun test_taking_an_array_of_owned_elements_apart_moves_each_once() -> Void {
+  let (first, rest) = [Str::from("a"), Str::from("bc")].pop_front()
+  std::debug::assert(first.len() == 1_uz and rest[0_uz].len() == 2_uz, "each element moved once")
+}
